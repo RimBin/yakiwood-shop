@@ -68,6 +68,29 @@ const { data: products } = await supabase
 - [ ] Configure webhook endpoints
 - [ ] Implement checkout session
 - [ ] Handle payment confirmations
+Scaffold implementuotas.
+
+```bash
+npm install stripe @stripe/stripe-js zustand --legacy-peer-deps
+```
+
+`app/api/checkout/route.ts` sukuria Stripe Checkout sesiją iš krepšelio.
+
+Environment kintamieji:
+```env
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_xxx
+STRIPE_SECRET_KEY=sk_live_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+NEXT_PUBLIC_SITE_URL=https://jusu-domenas.lt
+```
+
+Norint realių kainų:
+1. Sukurti Price objektus Stripe dashboard'e
+2. DB lentelėje `products` pridėti stulpelį `stripe_price_id`
+3. API route'e naudoti `line_items: [{price: product.stripe_price_id, quantity: ...}]`
+
+Webhook'ai:
+`/api/stripe/webhook` (sukursime vėliau) – apdoros `checkout.session.completed` ir įrašys užsakymą į DB.
 
 ## Development
 

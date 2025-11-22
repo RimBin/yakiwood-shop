@@ -4,6 +4,7 @@ import React, { Suspense, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { useTranslations } from 'next-intl';
+import { useCartStore } from '@/lib/cart/store';
 
 function PlaceholderModel() {
   // Simple box until real GLTF is loaded
@@ -23,6 +24,7 @@ export default function Konfiguratorius3D({ productId }: Konfiguratorius3DProps)
   const t = useTranslations('configurator');
   const [color, setColor] = useState('#444444');
   const [finish, setFinish] = useState('natural');
+  const addItem = useCartStore(s => s.addItem);
 
   return (
     <div className="w-full flex flex-col md:flex-row gap-8 mt-10">
@@ -69,7 +71,17 @@ export default function Konfiguratorius3D({ productId }: Konfiguratorius3DProps)
           </div>
           <button
             className="mt-2 h-12 rounded-full bg-[#161616] text-white font-['Outfit'] text-xs tracking-[0.6px] uppercase hover:opacity-80"
-            onClick={() => console.log('Add to cart', { productId, color, finish })}
+            onClick={() => {
+              if (!productId) return;
+              addItem({
+                id: productId,
+                name: 'Konfigūruotas produktas',
+                slug: 'custom',
+                basePrice: 0, // bus pakeista realia kaina iš DB
+                color,
+                finish,
+              });
+            }}
           >
             {t('addToCart')}
           </button>
