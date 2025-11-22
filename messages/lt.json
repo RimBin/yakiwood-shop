@@ -1,0 +1,18 @@
+{
+  "nav.produktai": "Produktai",
+  "nav.sprendimai": "Sprendimai",
+  "nav.projektai": "Projektai",
+  "nav.apie": "Apie",
+  "nav.kontaktai": "Kontaktai",
+  "nav.krepselis": "Krepšelis",
+  "hero.title": "Pasirinkite idealų medienos apdailos sprendimą",
+  "hero.subtitle": "Deginta mediena pagal japonišką Shou Sugi Ban tradiciją",
+  "products.sectionTitle": "Mūsų produktai",
+  "configurator.title": "3D Konfigūratorius",
+  "configurator.rotate": "Sukti",
+  "configurator.zoom": "Priartinti",
+  "configurator.finish": "Paviršiaus apdaila",
+  "configurator.color": "Spalva",
+  "configurator.addToCart": "Į krepšelį",
+  "configurator.loadingModel": "Kraunamas 3D modelis..."
+}

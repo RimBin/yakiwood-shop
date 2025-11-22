@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { DM_Sans, Outfit, Tiro_Tamil } from "next/font/google";
 import "./globals.css";
+import { NextIntlClientProvider } from 'next-intl';
+import ltMessages from '@/messages/lt.json';
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -26,17 +28,15 @@ export const metadata: Metadata = {
   description: "Discover the elegance and durability of burnt wood, crafted using the ancient Japanese Shou Sugi Ban technique.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Single-locale LT setup; can be extended later
+  const locale = 'lt';
   return (
-    <html lang="en">
-      <body
-        className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased`}
-      >
-        {children}
+    <html lang={locale}>
+      <body className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased`}>
+        <NextIntlClientProvider locale={locale} messages={ltMessages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );
