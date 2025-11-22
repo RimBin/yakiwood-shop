@@ -15,4 +15,19 @@
   "configurator.color": "Spalva",
   "configurator.addToCart": "Į krepšelį",
   "configurator.loadingModel": "Kraunamas 3D modelis..."
+  ,
+  "solutions.eyebrow": "sprendimai",
+  "solutions.heading": "Medienos panaudos kryptys",
+  "solutions.facades.title": "Fasadai",
+  "solutions.facades.description": "Išorės apdaila iš degintos medienos – ilgaamžiška, atspari ir išskirtinė.",
+  "solutions.facades.features": "Atspari orui|Maža priežiūra|Natūrali tekstūra",
+  "solutions.interior.title": "Interjeras",
+  "solutions.interior.description": "Sienų panelės, akcentai ir dekoro elementai iš degintos medienos.",
+  "solutions.interior.features": "Unikalūs raštai|Ekologiška|Paprasta montuoti",
+  "solutions.outdoor.title": "Lauko erdvės",
+  "solutions.outdoor.description": "Terasos, tvoros ir kiti lauko elementai su ilgaamže apsauga.",
+  "solutions.outdoor.features": "UV atspari|Apsauga nuo grybelio|25+ metų tarnavimas",
+  "solutions.commercial.title": "Komerciniai projektai",
+  "solutions.commercial.description": "Sprendimai viešbučiams, restoranams ir verslo pastatams.",
+  "solutions.commercial.features": "Individualūs matmenys|Greitas pateikimas|Profesionali konsultacija"
 }

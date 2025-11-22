@@ -1,53 +1,59 @@
-import React from 'react';
+"use client";
+import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
+
+interface SolutionItem {
+  key: string;
+  title: string;
+  description: string;
+  features: string[];
+}
 
 export default function Solutions() {
-  const solutions = [
-    { 
-      title: 'Facades', 
-      description: 'Transform building exteriors with durable, fire-resistant charred wood cladding.',
-      features: ['Weather resistant', 'Low maintenance', 'Natural aesthetics']
-    },
-    { 
-      title: 'Interior Design', 
-      description: 'Create stunning indoor spaces with unique textured wall panels and accents.',
-      features: ['Unique patterns', 'Eco-friendly', 'Easy installation']
-    },
-    { 
-      title: 'Outdoor Spaces', 
-      description: 'Enhance terraces, decks, and fences with long-lasting charred wood.',
-      features: ['UV resistant', 'Anti-fungal', '25+ year lifespan']
-    },
-    { 
-      title: 'Commercial Projects', 
-      description: 'Large-scale solutions for hotels, restaurants, and office buildings.',
-      features: ['Custom sizing', 'Fast delivery', 'Professional support']
-    },
+  const t = useTranslations('solutions');
+  const items: SolutionItem[] = [
+    { key: 'facades', title: t('facades.title'), description: t('facades.description'), features: t('facades.features').split('|') },
+    { key: 'interior', title: t('interior.title'), description: t('interior.description'), features: t('interior.features').split('|') },
+    { key: 'outdoor', title: t('outdoor.title'), description: t('outdoor.description'), features: t('outdoor.features').split('|') },
+    { key: 'commercial', title: t('commercial.title'), description: t('commercial.description'), features: t('commercial.features').split('|') },
   ];
 
+  const [openKey, setOpenKey] = useState<string | null>(items[0].key);
+
   return (
-    <section id="solutions" className="py-20 px-10 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="font-['DM_Sans'] text-5xl font-bold text-center mb-4">Solutions</h2>
-        <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-          Versatile applications for residential and commercial projects
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {solutions.map((solution, idx) => (
-            <div key={idx} className="bg-white rounded-lg p-8 shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="font-['DM_Sans'] text-2xl font-semibold mb-3">{solution.title}</h3>
-              <p className="text-gray-600 mb-4">{solution.description}</p>
-              <ul className="space-y-2">
-                {solution.features.map((feature, i) => (
-                  <li key={i} className="flex items-center text-sm text-gray-700">
-                    <span className="w-1.5 h-1.5 bg-gray-900 rounded-full mr-3"></span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
+    <section id="sprendimai" className="py-24 w-[1440px] mx-auto">
+      <div className="mb-12">
+        <p className="font-['Outfit'] text-xs uppercase tracking-[0.6px] mb-4">{t('eyebrow')}</p>
+        <h2 className="font-['DM_Sans'] text-5xl md:text-6xl font-light tracking-[-2px] leading-[1.1] max-w-3xl">{t('heading')}</h2>
+      </div>
+      <div className="divide-y divide-[#bbbbbb] border-y border-[#bbbbbb] bg-[#eaeaea] rounded-[12px] overflow-hidden">
+        {items.map(item => {
+          const isOpen = openKey === item.key;
+          return (
+            <div key={item.key}>
+              <button
+                onClick={() => setOpenKey(isOpen ? null : item.key)}
+                className="w-full flex items-center justify-between px-8 py-6 text-left hover:bg-white transition-colors"
+                aria-expanded={isOpen}
+              >
+                <span className="font-['DM_Sans'] text-2xl tracking-[-0.5px] font-medium">{item.title}</span>
+                <span className="text-sm font-['Outfit'] uppercase tracking-[0.6px]">{isOpen ? '−' : '+'}</span>
+              </button>
+              {isOpen && (
+                <div className="px-8 pb-8 animate-fadeIn">
+                  <p className="text-sm font-['Outfit'] leading-relaxed mb-4">{item.description}</p>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {item.features.map((f, i) => (
+                      <li key={i} className="flex items-center text-xs font-['Outfit'] tracking-[0.4px] text-[#161616]">
+                        <span className="w-1.5 h-1.5 bg-[#161616] rounded-full mr-3" />{f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
     </section>
   );
