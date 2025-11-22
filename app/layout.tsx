@@ -1,0 +1,43 @@
+import type { Metadata } from "next";
+import { DM_Sans, Outfit, Tiro_Tamil } from "next/font/google";
+import "./globals.css";
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+});
+
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+  weight: ["300", "400"],
+});
+
+const tiroTamil = Tiro_Tamil({
+  variable: "--font-tiro-tamil",
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["italic"],
+});
+
+export const metadata: Metadata = {
+  title: "Yakiwood - Burnt Wood Specialists",
+  description: "Discover the elegance and durability of burnt wood, crafted using the ancient Japanese Shou Sugi Ban technique.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body
+        className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased`}
+      >
+        {children}
+      </body>
+    </html>
+  );
+}
