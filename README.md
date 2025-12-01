@@ -20,6 +20,32 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Local Figma Assets
+
+Figma asset URLs expire roughly every 7 days. To keep images stable, download them locally.
+
+Manifest: `public/assets/figma-manifest.json` lists all remote asset keys and URLs.
+
+Download all assets:
+
+```bash
+node scripts/download-figma-assets.js
+```
+
+Assets are saved to `public/assets/<key>.jpg|png|webp` (extension chosen from response content-type).
+
+Use helper in components:
+
+```ts
+import { getAsset } from '@/lib/assets';
+const src = getAsset('imgProject1'); // returns local file if exists, else remote fallback
+```
+
+Add new asset:
+1. Append key + URL to `figma-manifest.json`
+2. Re-run the download script
+3. Reference with `getAsset(key)`
+
 ## Learn More
 
 ## Testing

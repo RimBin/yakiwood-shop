@@ -1,0 +1,12 @@
+{
+  "nav": {
+    "products": "Products",
+    "solutions": "Solutions",
+    "projects": "Projects",
+    "about": "About us",
+    "contact": "Contact"
+  },
+  "common": {
+    "cart": "Cart"
+  }
+}

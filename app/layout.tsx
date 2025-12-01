@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { DM_Sans, Outfit, Tiro_Tamil } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from 'next-intl';
-import ltMessages from '@/messages/lt.json';
+import enMessages from '@/messages/en.json';
+import { Header, Footer } from '@/components/shared';
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -29,13 +30,14 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // Single-locale LT setup; can be extended later
-  const locale = 'lt';
+  const locale = 'en';
   return (
     <html lang={locale}>
-      <body className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased`}>
-        <NextIntlClientProvider locale={locale} messages={ltMessages}>
+      <body className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased bg-[#e1e1e1]`}>
+        <NextIntlClientProvider locale={locale} messages={enMessages}>
+          <Header />
           {children}
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>

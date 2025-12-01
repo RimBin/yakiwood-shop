@@ -1,10 +1,10 @@
-export const metadata = { title: 'About - Yakiwood' };
+import About from '@/components/About';
+
+export const metadata = {
+  title: 'Apie mus | Yakiwood',
+  description: 'Yakiwood specializes in traditional Japanese Shou Sugi Ban burnt wood technique for facades, terraces, and interiors.',
+};
 
 export default function AboutPage() {
-  return (
-    <main className="min-h-screen p-10">
-      <h1 className="text-3xl font-bold">About</h1>
-      <p className="mt-4">Add company description and a short brand story. Use the `app/layout.tsx` fonts and styling for consistent look.</p>
-    </main>
-  );
+  return <About />;
 }
