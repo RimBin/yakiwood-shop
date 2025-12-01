@@ -1,133 +1,96 @@
 import React from 'react';
+import Image from 'next/image';
 
-// Image assets from Figma
-const imgImg = "https://www.figma.com/api/mcp/asset/6dc6e61b-d390-4272-a8cd-ad2480977005";
-const imgImg1 = "https://www.figma.com/api/mcp/asset/10fb48a7-c82d-4afb-a1cd-9df78b25fc3c";
-const imgImg2 = "https://www.figma.com/api/mcp/asset/4ef15750-f914-45e0-bbd8-5123f1a98790";
-const img1 = "https://www.figma.com/api/mcp/asset/8859abc7-d1d1-4d0b-b8f9-24bf46799b5c";
-const img2 = "https://www.figma.com/api/mcp/asset/7b40a060-187e-4709-b718-e688e8383484";
-const img3 = "https://www.figma.com/api/mcp/asset/30a49c1b-1faa-4cb8-8cdc-e49ab77cedcc";
-const img = "https://www.figma.com/api/mcp/asset/5180ed7f-63fa-4af4-8112-b4cae13f86e3";
+// Exact Figma assets from Product node 803:11944 - UPDATED
+const imgMask = "https://www.figma.com/api/mcp/asset/eaf3a351-7257-46f3-9a78-0b1093c989a1";
 
-// Color component with states
-type ColorProps = {
-  className?: string;
-  state?: "Default" | "Selected" | "Hover";
-  size?: "Big";
-};
+// Product images
+const imgSpruce = "https://www.figma.com/api/mcp/asset/e3f260c3-81ff-46b3-ace3-bfa23d0e3a3d";
+const imgLarch1 = "https://www.figma.com/api/mcp/asset/dc0c2a25-b620-43f9-8c39-c9794ce77229";
+const imgLarch2 = "https://www.figma.com/api/mcp/asset/bfc9b479-b9b7-4f7e-aa0c-d10d7fa676b9";
 
-function Color({ className, state = "Default", size = "Big" }: ColorProps) {
-  if (state === "Hover" && size === "Big") {
-    return (
-      <div className={className}>
-        <div className="relative shrink-0 size-[32px]">
-          <img alt="" className="block max-w-none size-full" height="32" src={imgImg} width="32" />
-        </div>
-      </div>
-    );
-  }
-  if (state === "Selected" && size === "Big") {
-    return (
-      <div className={className}>
-        <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid justify-items-start leading-[0] relative shrink-0">
-          <div className="col-[1] ml-[5px] mt-[5px] relative row-[1] size-[32px]">
-            <img alt="" className="block max-w-none size-full" height="32" src={imgImg1} width="32" />
-          </div>
-          <div className="col-[1] ml-0 mt-0 relative row-[1] size-[42px]">
-            <img alt="" className="block max-w-none size-full" height="42" src={imgImg2} width="42" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className={className}>
-      <div className="relative shrink-0 size-[32px]">
-        <img alt="" className="block max-w-none size-full" height="32" src={imgImg} width="32" />
-      </div>
-    </div>
-  );
-}
+// Color swatches
+const imgColor1 = "https://www.figma.com/api/mcp/asset/a298ba5d-f933-41be-a2ea-5be1b62db8f9";
+const imgColor2 = "https://www.figma.com/api/mcp/asset/46e65c51-e433-426a-82c5-a0cf68f1fa8d";
+const imgColor3 = "https://www.figma.com/api/mcp/asset/24716f27-b792-4b62-9c79-8984510d7535";
+const imgColor4 = "https://www.figma.com/api/mcp/asset/cbaa66d6-b9e2-4ee8-8179-459e2b69422b";
+const imgColor5 = "https://www.figma.com/api/mcp/asset/8d766674-e42c-483c-a5ed-3263b8d0d611";
+const imgColor6 = "https://www.figma.com/api/mcp/asset/1ac8b06b-7c06-457d-9710-f428601ce18e";
+const imgColor7 = "https://www.figma.com/api/mcp/asset/f0ca6bed-b017-4380-bf11-8a6ddbe4b150";
+const imgColor8 = "https://www.figma.com/api/mcp/asset/5222c26a-6f24-43f7-8427-0e340b2327c4";
 
-// Label component
-type LabelProps = {
-  className?: string;
-  text: string;
-};
-
-function Label({ className, text }: LabelProps) {
-  return (
-    <div className={className}>
-      <p className="font-['Outfit'] font-normal text-[10px] leading-[1.1] text-[#161616] tracking-[0.5px] uppercase">
-        {text}
-      </p>
-    </div>
-  );
-}
-
-// Product Card component
+// Product Card - exact Figma layout from node 803:11944
 type ProductCardProps = {
   image: string;
   title: string;
   price: string;
   description: string;
-  labels: string[];
+  solutions: string[];
 };
 
-function ProductCard({ image, title, price, description, labels }: ProductCardProps) {
+function ProductCard({ image, title, price, description, solutions }: ProductCardProps) {
   return (
-    <div className="bg-[#eaeaea] box-border flex flex-col gap-[24px] items-center pb-[40px] pt-[24px] px-[24px] relative rounded-[8px] shrink-0 w-[443px]">
-      {/* Mask group background */}
-      <div className="absolute h-[618px] left-0 top-0 w-[443px] pointer-events-none">
-        <img alt="" className="block max-w-none size-full" src={img} />
+    <div className="bg-[#eaeaea] rounded-[8px] pt-[24px] pb-[40px] px-[24px] w-[443px] flex flex-col gap-[24px] items-center relative shrink-0">
+      {/* Background mask overlay */}
+      <div className="absolute left-0 top-0 w-[443px] h-[618px] pointer-events-none">
+        <Image src={imgMask} alt="" fill className="object-cover" />
       </div>
       
-      {/* Product image */}
-      <div className="h-[311px] relative shrink-0 w-[395px] rounded-[8px] overflow-hidden">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={image} />
+      {/* Product image - 395x311px */}
+      <div className="relative w-[395px] h-[311px] shrink-0 z-10">
+        <Image 
+          src={image} 
+          alt={title} 
+          fill 
+          className="object-cover"
+        />
       </div>
       
-      {/* Content container */}
-      <div className="flex flex-col gap-[16px] items-start relative shrink-0 w-full">
-        {/* Chips */}
-        <div className="flex gap-[8px] items-center justify-center">
-          {labels.map((label, index) => (
-            <Label 
-              key={index}
-              className="bg-[rgba(255,255,255,0.4)] box-border flex gap-[10px] h-[24px] items-center justify-center px-[8px] py-[10px] relative rounded-[4px] shrink-0"
-              text={label}
-            />
+      {/* Content container - 383px width */}
+      <div className="w-[383px] flex flex-col gap-[16px] relative z-10">
+        {/* Solution chips */}
+        <div className="flex gap-[8px] items-center justify-center flex-wrap">
+          {solutions.map((sol, idx) => (
+            <div 
+              key={idx}
+              className="bg-white/40 px-[8px] py-[10px] h-[24px] rounded-[4px] flex items-center justify-center gap-[10px]"
+            >
+              <p className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">
+                {sol}
+              </p>
+            </div>
           ))}
         </div>
         
-        {/* Text */}
-        <div className="flex flex-col gap-[8px] items-start w-full">
-          {/* Title and Price */}
-          <div className="flex font-['DM_Sans'] font-normal items-start justify-between leading-[1.1] text-[#161616] text-[32px] tracking-[-1.28px] w-full">
-            <p className="relative shrink-0">{title}</p>
-            <p className="relative shrink-0">{price}</p>
-          </div>
-          
-          {/* Description */}
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] text-[#535353] tracking-[0.14px] w-[354px] whitespace-pre-wrap">
-            {description}
+        {/* Title & Price - exact spacing */}
+        <div className="flex items-start justify-between w-full leading-[1.1] font-['DM_Sans'] font-normal text-[32px] tracking-[-1.28px] text-[#161616]">
+          <p className="shrink-0">
+            {title}
+          </p>
+          <p className="shrink-0">
+            {price}
           </p>
         </div>
         
-        {/* Colors */}
-        <div className="flex flex-col gap-[8px] items-start">
+        {/* Description - 354px width */}
+        <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-[354px] whitespace-pre-wrap">
+          {description}
+        </p>
+        
+        {/* Colors section */}
+        <div className="flex flex-col gap-[8px]">
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] text-[#161616]">
             Colors
           </p>
           <div className="flex gap-[8px] items-center overflow-clip">
-            <Color className="flex flex-col gap-[4px] items-center justify-center relative rounded-[4px] shrink-0 size-[32px]" />
-            <Color className="flex flex-col gap-[2px] items-center justify-center relative rounded-[4px] shrink-0" state="Selected" />
-            <Color className="flex flex-col gap-[4px] items-center justify-center relative rounded-[4px] shrink-0 size-[32px]" />
-            <Color className="flex flex-col gap-[4px] items-center justify-center opacity-70 relative rounded-[4px] shrink-0 size-[32px]" state="Hover" />
-            <Color className="flex flex-col gap-[4px] items-center justify-center relative rounded-[4px] shrink-0 size-[32px]" />
-            <Color className="flex flex-col gap-[4px] items-center justify-center relative rounded-[4px] shrink-0 size-[32px]" />
-            <Color className="flex flex-col gap-[4px] items-center justify-center relative rounded-[4px] shrink-0 size-[32px]" />
-            <Color className="flex flex-col gap-[4px] items-center justify-center relative rounded-[4px] shrink-0 size-[32px]" />
+            {[imgColor1, imgColor2, imgColor4, imgColor5, imgColor6, imgColor7, imgColor8].map((src, idx) => (
+              <div 
+                key={idx} 
+                className="flex flex-col gap-[4px] items-center justify-center rounded-[4px] w-[32px] h-[32px] relative"
+              >
+                <Image src={src} alt="" width={32} height={32} />
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -138,58 +101,53 @@ function ProductCard({ image, title, price, description, labels }: ProductCardPr
 export default function Products() {
   const products = [
     {
-      image: img1,
+      image: imgSpruce,
       title: 'Spruce wood',
       price: '89 €',
       description: 'Lightweight yet strong, spruce wood offers a smooth texture and a natural, clean finish. Its versatility and durability make it an excellent choice for both interior and exterior applications.',
-      labels: ['Facades', 'Facades', 'Terrace', 'Interior']
+      solutions: ['Facades', 'Fence', 'Terrace', 'Interior']
     },
     {
-      image: img2,
+      image: imgLarch1,
       title: 'Larch wood',
       price: '89 €',
       description: 'Lightweight yet strong, spruce wood offers a smooth texture and a natural, clean finish. Its versatility and durability make it an excellent choice for both interior and exterior applications.',
-      labels: ['Facades', 'Facades', 'Terrace', 'Interior']
+      solutions: ['Facades', 'Fence', 'Terrace', 'Interior']
     },
     {
-      image: img3,
+      image: imgLarch2,
       title: 'Larch wood',
       price: '89 €',
       description: 'Lightweight yet strong, spruce wood offers a smooth texture and a natural, clean finish. Its versatility and durability make it an excellent choice for both interior and exterior applications.',
-      labels: ['Facades', 'Facades', 'Interior']
+      solutions: ['Facades', 'Fence', 'Interior']
     }
   ];
 
   return (
-    <section className="relative w-full bg-white pt-[100px] pb-[100px]">
-      <div className="relative w-[1440px] mx-auto">
-        {/* Title Section - positioned as in Figma */}
-        <div className="relative mb-[100px] text-[#161616]">
-          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase mb-[23px] ml-[30px]">
+    <section className="w-full bg-[var(--Background-Grey,#E1E1E1)]">
+      <div className="max-w-[1440px] mx-auto px-[40px] py-[120px] flex flex-col gap-[56px] items-center">
+        <div className="flex flex-col gap-[16px] items-start lg:items-center">
+          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] whitespace-nowrap">
             products
           </p>
-          <p className="font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] max-w-[692px] whitespace-pre-wrap ml-[calc(25%+14px)]">
+          <p className="font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] text-left lg:text-center max-w-[860px]">
             <span>Choose your </span>
             <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">perfect</span>
-            <span> wood  finish</span>
+            <span> wood finish</span>
           </p>
         </div>
 
-        {/* Product Cards - centered with gap */}
-        <div className="flex gap-[16px] items-start justify-center px-[calc((1440px-443px*3-16px*2)/2)]">
-          {products.map((product, index) => (
-            <ProductCard key={index} {...product} />
+        <div className="flex flex-wrap justify-center gap-[16px]">
+          {products.map((product, idx) => (
+            <ProductCard key={idx} {...product} />
           ))}
         </div>
 
-        {/* View Catalog Button - centered */}
-        <div className="flex justify-center mt-[60px]">
-          <div className="bg-[#161616] box-border flex gap-[10px] h-[48px] items-center justify-center px-[40px] py-[10px] rounded-[100px] w-[296px]">
-            <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] text-white tracking-[0.6px] uppercase">
-              view catalog
-            </p>
-          </div>
-        </div>
+        <button className="bg-[#161616] px-[40px] py-[10px] h-[48px] rounded-[100px] w-[296px] flex items-center justify-center gap-[10px]">
+          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
+            view catalog
+          </p>
+        </button>
       </div>
     </section>
   );
