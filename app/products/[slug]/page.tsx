@@ -17,24 +17,24 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     name: 'Natural shou sugi ban plank',
     price: 89,
     description: 'Natural Shou Sugi Ban plank is a durable, eco-friendly wood product, charred using traditional Japanese techniques for enhanced weather resistance and a unique, textured finish.',
-    mainImage: 'https://www.figma.com/api/mcp/asset/f23c6ed9-4370-484f-af3a-f0c7e7f0a462',
+    mainImage: '/assets/imgSpruce.png',
     galleryImages: [
-      'https://www.figma.com/api/mcp/asset/f23c6ed9-4370-484f-af3a-f0c7e7f0a462',
-      'https://www.figma.com/api/mcp/asset/d294a76c-f2ce-4a3b-95c0-16e29ef7e999',
-      'https://www.figma.com/api/mcp/asset/68d7e67c-b955-4f7d-818c-8c7a39878aa0',
+      '/assets/imgSpruce.png',
+      '/assets/imgLarch1.png',
+      '/assets/imgLarch2.png',
     ],
   };
 
   const widths = ['95 mm', '120 mm', '145 mm'];
   const lengths = ['3000 mm', '3600 mm', '4000 mm'];
   const colors = [
-    { id: 'brown', image: 'https://www.figma.com/api/mcp/asset/f23c6ed9-4370-484f-af3a-f0c7e7f0a462' },
-    { id: 'carbon-light', image: 'https://www.figma.com/api/mcp/asset/d294a76c-f2ce-4a3b-95c0-16e29ef7e999', selected: true },
-    { id: 'natural', image: 'https://www.figma.com/api/mcp/asset/68d7e67c-b955-4f7d-818c-8c7a39878aa0' },
-    { id: 'dark', image: 'https://www.figma.com/api/mcp/asset/96c4c940-c49c-4bd3-8823-483555dc24ba' },
-    { id: 'graphite', image: 'https://www.figma.com/api/mcp/asset/b2f01ae8-4b24-4a8e-8e4a-dcc7e204799e' },
-    { id: 'latte', image: 'https://www.figma.com/api/mcp/asset/3213bf57-d148-4e08-bc04-31ee1e520d0e' },
-    { id: 'silver', image: 'https://www.figma.com/api/mcp/asset/726192c2-b363-4874-95df-da5b529c98d3' },
+    { id: 'brown', image: '/assets/imgColor1.png' },
+    { id: 'carbon-light', image: '/assets/imgColor2.png', selected: true },
+    { id: 'natural', image: '/assets/imgColor3.png' },
+    { id: 'dark', image: '/assets/imgColor4.png' },
+    { id: 'graphite', image: '/assets/imgColor5.png' },
+    { id: 'latte', image: '/assets/imgColor6.png' },
+    { id: 'silver', image: '/assets/imgColor7.png' },
   ];
 
   const profiles = ['half-taper', 'rhombus', 'rectangle'];

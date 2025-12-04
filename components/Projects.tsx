@@ -5,13 +5,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import ArrowRight from '@/components/icons/ArrowRight';
 
-// Mobile assets from Figma 759:7712
-const imgProject1 = "https://www.figma.com/api/mcp/asset/83f6f8ad-c66c-4ea1-ad3f-cabffc508990"; // Big image
-const imgProject2 = "https://www.figma.com/api/mcp/asset/357465f5-b586-438e-a1b5-1b09ca4f2682"; // Middle
-const imgProject3 = "https://www.figma.com/api/mcp/asset/51d3a8fb-7034-42b9-a018-8e10cc247fb3"; // Large
-const imgProject4 = "https://www.figma.com/api/mcp/asset/c3159542-a049-4e32-acad-c4b502255656"; // Small
-const imgProject5 = "https://www.figma.com/api/mcp/asset/d8315e8a-1134-4708-af25-9b89f34886a2"; // Large
-const imgProject6 = "https://www.figma.com/api/mcp/asset/b4036f05-a388-4eb5-b289-dc59a61dafb8"; // Middle right
+// Local assets
+const imgProject1 = "/assets/imgProject1.jpg";
+const imgProject2 = "/assets/imgProject2.jpg";
+const imgProject3 = "/assets/imgProject3.jpg";
+const imgProject4 = "/assets/imgProject4.jpg";
+const imgProject5 = "/assets/imgProject5.jpg";
+const imgProject6 = "/assets/imgProject6.jpg";
 
 export default function Projects() {
   return (

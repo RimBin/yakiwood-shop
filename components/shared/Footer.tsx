@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { certifications, payments } from '@/lib/assets/figma-assets';
 
 const navColumns = [
   {
@@ -31,52 +32,53 @@ const navColumns = [
   },
 ];
 
-// MCP-hosted assets pulled straight from the Figma design
+// Certificate logos with background colors
 const certificates = [
   {
-    src: 'https://www.figma.com/api/mcp/asset/0a0fd3de-1df1-4ccf-b448-65c419aba5cf',
+    src: certifications.epd,
     alt: 'EPD certification',
     bg: 'bg-white/10',
   },
   {
-    src: 'https://www.figma.com/api/mcp/asset/453b76f9-5700-4acd-a713-d9a498d46e5c',
+    src: certifications.fsc,
     alt: 'FSC certification',
     bg: 'bg-white/10',
   },
   {
-    src: 'https://www.figma.com/api/mcp/asset/4e0cb258-0b6b-4780-862f-4b782b6a14fd',
+    src: certifications.esParama,
     alt: 'European Union support',
     bg: 'bg-white',
   },
 ];
 
-const payments = [
+// Payment method logos with dimensions
+const paymentMethods = [
   {
-    src: 'https://www.figma.com/api/mcp/asset/e9fea262-02f4-4e24-accc-8ef97f1186e8',
+    src: payments.mastercard,
     alt: 'Mastercard',
     width: 36,
     height: 22,
   },
   {
-    src: 'https://www.figma.com/api/mcp/asset/b4125504-97a0-4e03-b129-fe739a9bff9e',
+    src: payments.visa,
     alt: 'Visa',
     width: 36,
     height: 12,
   },
   {
-    src: 'https://www.figma.com/api/mcp/asset/4c013541-0c2e-4f54-9c5f-f33906b58555',
+    src: payments.maestro,
     alt: 'Maestro',
     width: 40,
     height: 25,
   },
   {
-    src: 'https://www.figma.com/api/mcp/asset/c45a5013-275c-421d-add8-03996664eb8b',
+    src: payments.stripe,
     alt: 'Stripe',
     width: 53,
     height: 25,
   },
   {
-    src: 'https://www.figma.com/api/mcp/asset/6d2dccad-ca60-480f-9e95-6a91a61ab095',
+    src: payments.paypal,
     alt: 'PayPal',
     width: 57,
     height: 14,
@@ -151,9 +153,8 @@ export default function Footer() {
           <p className="font-['DM_Sans'] font-medium text-[14px] leading-[1.2] tracking-[-0.56px] text-[#E1E1E1]">
             @2025 YAKIWOOD, LLC. All rights reserved
           </p>
-
           <div className="flex flex-wrap items-center gap-[12px] opacity-40">
-            {payments.map((pay) => (
+            {paymentMethods.map((pay) => (
               <Image
                 key={pay.src}
                 src={pay.src}
@@ -237,7 +238,7 @@ export default function Footer() {
             </p>
 
             <div className="flex items-center gap-[16px] opacity-40">
-              {payments.map((pay) => (
+              {paymentMethods.map((pay) => (
                 <Image
                   key={pay.src}
                   src={pay.src}

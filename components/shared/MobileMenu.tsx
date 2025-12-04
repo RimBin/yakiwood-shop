@@ -55,55 +55,55 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           {/* Navigation Links */}
           <nav className="flex flex-col gap-[24px] mb-auto">
             <Link
-              href="/paskyra"
+              href="/account"
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
-              Paskyra
+              Account
             </Link>
             <Link
-              href="/produktai"
+              href="/products"
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
-              Produktai
+              Products
             </Link>
             <Link
-              href="/sprendimai"
+              href="/solutions"
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
-              Sprendimai
+              Solutions
             </Link>
             <Link
-              href="/projektai"
+              href="/projects"
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
-              Projektai
+              Projects
             </Link>
             <Link
-              href="/apie"
+              href="/about"
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
-              Apie mus
+              About us
             </Link>
             <Link
-              href="/kontaktai"
+              href="/contact"
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
-              Kontaktai
+              Contact
             </Link>
           </nav>
 
           {/* Bottom Section */}
           <div className="flex flex-col gap-[32px] pt-[32px] border-t border-white/20">
             {/* CTA Button - Figma: border only, not filled */}
-            <button className="w-[357px] mx-auto border border-[#535353] rounded-[100px] h-[48px] flex items-center justify-center hover:bg-white/10 transition-colors">
+            <button className="w-full max-w-[357px] mx-auto border border-[#535353] rounded-[100px] h-[48px] flex items-center justify-center hover:bg-white/10 transition-colors">
               <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                Susisiekti
+                Get in touch
               </span>
             </button>
 
@@ -139,7 +139,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             <div className="flex flex-wrap items-center justify-center gap-[16px] opacity-40">
               <div className="relative w-[36px] h-[22px]">
                 <Image
-                  src="https://www.figma.com/api/mcp/asset/e9fea262-02f4-4e24-accc-8ef97f1186e8"
+                  src="/assets/payments/mastercard.svg"
                   alt="Mastercard"
                   fill
                   className="object-contain grayscale"
@@ -147,7 +147,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               </div>
               <div className="relative w-[36px] h-[12px]">
                 <Image
-                  src="https://www.figma.com/api/mcp/asset/b4125504-97a0-4e03-b129-fe739a9bff9e"
+                  src="/assets/payments/visa.svg"
                   alt="Visa"
                   fill
                   className="object-contain grayscale"
@@ -155,7 +155,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               </div>
               <div className="relative w-[40px] h-[25px]">
                 <Image
-                  src="https://www.figma.com/api/mcp/asset/4c013541-0c2e-4f54-9c5f-f33906b58555"
+                  src="/assets/payments/maestro.svg"
                   alt="Maestro"
                   fill
                   className="object-contain grayscale"
@@ -163,7 +163,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               </div>
               <div className="relative w-[53px] h-[25px]">
                 <Image
-                  src="https://www.figma.com/api/mcp/asset/c45a5013-275c-421d-add8-03996664eb8b"
+                  src="/assets/payments/stripe.svg"
                   alt="Stripe"
                   fill
                   className="object-contain grayscale"
@@ -171,7 +171,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               </div>
               <div className="relative w-[57px] h-[14px]">
                 <Image
-                  src="https://www.figma.com/api/mcp/asset/6d2dccad-ca60-480f-9e95-6a91a61ab095"
+                  src="/assets/payments/paypal.svg"
                   alt="PayPal"
                   fill
                   className="object-contain grayscale"

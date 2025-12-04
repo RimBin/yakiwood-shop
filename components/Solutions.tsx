@@ -4,12 +4,12 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import ArrowRight from '@/components/icons/ArrowRight';
 
-// Exact Figma assets from Solution node 790:6817 / 759:7698 - FRESH URLs
-const imgVector33 = "https://www.figma.com/api/mcp/asset/f704b486-751e-4b94-87ef-a9a0d63f321b";
-const imgFence = "https://www.figma.com/api/mcp/asset/b6e4cfa1-751e-448f-8ae1-1795f139b1b1";
-const imgFacades = "https://www.figma.com/api/mcp/asset/9b9993b1-f22f-4b9e-a1fe-9999efad2629";
-const imgTerrace = "https://www.figma.com/api/mcp/asset/8afc2104-bd7b-40ad-ab14-2bd80b10f369";
-const imgInterior = "https://www.figma.com/api/mcp/asset/2b868059-775b-451f-8b32-27ae3248a381";
+// Local assets
+const imgVector33 = "/assets/imgVector33.jpg";
+const imgFence = "/assets/imgFence.jpg";
+const imgFacades = "/assets/imgFacades.jpg";
+const imgTerrace = "/assets/imgTerrace.jpg";
+const imgInterior = "/assets/imgInterior.jpg";
 
 type SolutionItem = {
   title: string;

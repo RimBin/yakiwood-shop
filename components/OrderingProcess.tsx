@@ -3,8 +3,8 @@
 import React from 'react';
 import Image from 'next/image';
 
-// Figma exact asset from Steps node 790:6590
-const imgVector37 = "https://www.figma.com/api/mcp/asset/7ea2da22-fb52-46ca-98b0-f2fd8b3b4f53";
+// Local asset
+const imgVector37 = "/assets/imgVector37.jpg";
 
 const steps = [
   {

@@ -8,11 +8,11 @@ import Button from '@/components/ui/Button';
 import { ColorSwatchGroup } from '@/components/ui/ColorSwatch';
 import ProductCard from '@/components/ui/ProductCard';
 
-// Asset URLs from Figma
-const imgProduct = 'https://www.figma.com/api/mcp/asset/9df6eb78-aa30-4225-be2f-ad9886cab2f2';
-const imgThumb1 = 'https://www.figma.com/api/mcp/asset/d9ce6516-919a-4434-a74b-af5493a49a5c';
-const imgThumb2 = 'https://www.figma.com/api/mcp/asset/d139ef18-204d-4314-8a14-1b4d645b466a';
-const imgThumb3 = 'https://www.figma.com/api/mcp/asset/c2598b6d-9b5c-4ae4-b9a3-be05900fc3c4';
+// Local assets
+const imgProduct = '/assets/imgSpruce.png';
+const imgThumb1 = '/assets/imgSpruce.png';
+const imgThumb2 = '/assets/imgLarch1.png';
+const imgThumb3 = '/assets/imgLarch2.png';
 
 // Profile icons SVG paths
 const profiles = [

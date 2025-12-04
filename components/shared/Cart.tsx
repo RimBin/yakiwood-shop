@@ -5,8 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
-// Product image placeholder
-const productPlaceholder = "https://www.figma.com/api/mcp/asset/1229dc22-0d7a-41de-8fc4-0a8c7d3bcb77";
+// Product image placeholder - local asset
+const productPlaceholder = "/assets/imgCart.jpg";
 
 // Close Icon
 const CloseIcon = () => (

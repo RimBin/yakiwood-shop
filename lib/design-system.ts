@@ -38,6 +38,20 @@ export const typography = {
     lineHeight: 0.95,
     letterSpacing: '-6.4px', // -5% of font size
   },
+  h2: {
+    fontFamily: 'DM Sans',
+    fontWeight: 400, // Regular
+    fontSize: '64px',
+    lineHeight: 1.1,
+    letterSpacing: '-2.56px', // -4% of font size
+  },
+  h3: {
+    fontFamily: 'DM Sans',
+    fontWeight: 300, // Light
+    fontSize: '40px',
+    lineHeight: 1.2,
+    letterSpacing: '-1.6px', // -4% of font size
+  },
   h4: {
     fontFamily: 'DM Sans',
     fontWeight: 400, // Regular

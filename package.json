@@ -8,7 +8,10 @@
     "test:watch": "jest --watch",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "assets:download": "python scripts/download-assets.py",
+    "assets:download:node": "node scripts/download-figma-assets.js",
+    "assets:generate": "node scripts/generate-asset-types.js"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

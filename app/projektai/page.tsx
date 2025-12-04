@@ -1,0 +1,198 @@
+'use client';
+
+import React, { useState } from 'react';
+import Image from 'next/image';
+
+// Project images from Figma
+const projects = [
+  {
+    id: 1,
+    image: "https://www.figma.com/api/mcp/asset/4d64af69-b66b-4b41-a016-30695bb49a71",
+    title: "Project title",
+    location: "Location",
+    size: "big" // 508px wide
+  },
+  {
+    id: 2,
+    image: "https://www.figma.com/api/mcp/asset/0ed89ce1-4dea-4b06-a032-fed9f16c09fb",
+    title: "Project title",
+    location: "Location",
+    size: "small" // 328px wide
+  },
+  {
+    id: 3,
+    image: "https://www.figma.com/api/mcp/asset/92e912f5-a18a-43c2-80f5-1249cf8e99f5",
+    title: "Leliju apartments",
+    location: "Vilnius, Lithuania",
+    size: "small"
+  },
+  {
+    id: 4,
+    image: "https://www.figma.com/api/mcp/asset/a7ae63e9-e612-41b5-a5c0-8242ba90f9cf",
+    title: "Project title",
+    location: "Location",
+    size: "small"
+  },
+  {
+    id: 5,
+    image: "https://www.figma.com/api/mcp/asset/c17de940-6b4e-4f68-ba50-7e81885fa037",
+    title: "Project title",
+    location: "Location",
+    size: "small"
+  },
+  {
+    id: 6,
+    image: "https://www.figma.com/api/mcp/asset/98c2bd55-1fc4-4834-8ac5-1d5005cb7073",
+    title: "Project title",
+    location: "Location",
+    size: "big"
+  },
+  {
+    id: 7,
+    image: "https://www.figma.com/api/mcp/asset/4d64af69-b66b-4b41-a016-30695bb49a71",
+    title: "Project title",
+    location: "Location",
+    size: "small"
+  },
+  {
+    id: 8,
+    image: "https://www.figma.com/api/mcp/asset/98c2bd55-1fc4-4834-8ac5-1d5005cb7073",
+    title: "Project title",
+    location: "Location",
+    size: "small"
+  },
+  {
+    id: 9,
+    image: "https://www.figma.com/api/mcp/asset/a7ae63e9-e612-41b5-a5c0-8242ba90f9cf",
+    title: "Project title",
+    location: "Location",
+    size: "small"
+  },
+  {
+    id: 10,
+    image: "https://www.figma.com/api/mcp/asset/0ed89ce1-4dea-4b06-a032-fed9f16c09fb",
+    title: "Project title",
+    location: "Location",
+    size: "big"
+  },
+  {
+    id: 11,
+    image: "https://www.figma.com/api/mcp/asset/c17de940-6b4e-4f68-ba50-7e81885fa037",
+    title: "Project title",
+    location: "Location",
+    size: "small"
+  },
+  {
+    id: 12,
+    image: "https://www.figma.com/api/mcp/asset/92e912f5-a18a-43c2-80f5-1249cf8e99f5",
+    title: "Project title",
+    location: "Location",
+    size: "small"
+  },
+];
+
+export default function ProjectsPage() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+  const totalPages = 4;
+
+  return (
+    <section className="w-full bg-[#E1E1E1] min-h-screen">
+      {/* Title Section */}
+      <div className="w-full border-b border-[#BBBBBB]">
+        <div className="max-w-[1360px] mx-auto px-[40px] pt-[32px] pb-[48px]">
+          <h1
+            className="font-['DM_Sans'] font-light text-[128px] leading-[0.95] text-[#161616] tracking-[-6.4px]"
+            style={{ fontVariationSettings: "'opsz' 14" }}
+          >
+            Our projects
+          </h1>
+        </div>
+      </div>
+
+      {/* Projects Grid */}
+      <div className="max-w-[1360px] mx-auto px-[40px] pt-[64px]">
+        <div className="grid grid-cols-12 gap-[16px] auto-rows-auto">
+          {projects.map((project, idx) => {
+            // Calculate positioning based on masonry layout
+            const isBig = project.size === "big";
+            const colSpan = isBig ? "col-span-6" : "col-span-4";
+            const height = isBig ? "h-[520px]" : "h-[330px]";
+
+            return (
+              <div key={project.id} className={`${colSpan} flex flex-col gap-[4px]`}>
+                <div className={`${height} w-full rounded-[8px] relative overflow-hidden`}>
+                  <Image 
+                    src={project.image} 
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="flex flex-col gap-[4px]">
+                  <p 
+                    className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]"
+                    style={{ fontVariationSettings: "'opsz' 14" }}
+                  >
+                    {project.title}
+                  </p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
+                    {project.location}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-center gap-[8px] mt-[80px]">
+          {/* Left Arrow */}
+          <button
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="w-[48px] h-[48px] flex items-center justify-center rounded-full disabled:opacity-30 hover:bg-black/5 transition-colors"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke={currentPage === 1 ? "#535353" : "#161616"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+
+          {/* Page Numbers */}
+          {[1, 2, 3, 4].map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`w-[48px] h-[48px] flex items-center justify-center rounded-full font-['DM_Sans'] font-medium text-[14px] tracking-[0.42px] uppercase transition-colors ${
+                currentPage === page 
+                  ? 'bg-[#161616] text-white' 
+                  : 'text-[#535353] hover:bg-black/5'
+              }`}
+              style={{ fontVariationSettings: "'opsz' 14" }}
+            >
+              {page}
+            </button>
+          ))}
+
+          {/* Right Arrow */}
+          <button
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+            className="w-[48px] h-[48px] flex items-center justify-center rounded-full disabled:opacity-30 hover:bg-black/5 transition-colors"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M9 18L15 12L9 6" stroke={currentPage === totalPages ? "#535353" : "#161616"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Load More Button */}
+        <div className="flex justify-center mt-[24px] pb-[120px]">
+          <button className="bg-[#161616] h-[48px] px-[40px] py-[10px] rounded-[100px] flex items-center justify-center font-['Outfit'] font-normal text-white text-[12px] tracking-[0.6px] uppercase hover:opacity-90 transition-opacity">
+            Load more
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}

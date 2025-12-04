@@ -8,5 +8,30 @@
   },
   "common": {
     "cart": "Cart"
+  },
+  "testimonials": {
+    "eyebrow": "testimonials",
+    "title": "What our clients say",
+    "testimonial1": {
+      "quote": "The burnt wood perfectly complemented our modern home design. It looks amazing!",
+      "author": "Jonas K.",
+      "role": "Homeowner"
+    },
+    "testimonial2": {
+      "quote": "Professional service and exceptional quality. Highly recommend!",
+      "author": "Mindaugas P.",
+      "role": "Architect"
+    },
+    "testimonial3": {
+      "quote": "Outstanding craftsmanship and attention to detail. Exceeded our expectations!",
+      "author": "Laura S.",
+      "role": "Interior Designer"
+    }
+  },
+  "configurator": {
+    "title": "3D Product Configurator",
+    "color": "Color",
+    "finish": "Finish",
+    "addToCart": "Add to Cart"
   }
 }

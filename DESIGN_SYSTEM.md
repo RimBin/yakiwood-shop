@@ -83,7 +83,9 @@ import { typography, getTypographyClasses } from '@/lib/design-system';
 
 | Name | Family | Weight | Size | Line Height | Letter Spacing | Use Case |
 |------|--------|--------|------|-------------|----------------|----------|
-| **H1** | DM Sans | 300 | 128px | 0.95 | -6.4px | Page titles |
+| **H1** | DM Sans | 300 | 128px | 0.95 | -6.4px | Hero page titles |
+| **H2** | DM Sans | 400 | 64px | 1.1 | -2.56px | Page titles |
+| **H3** | DM Sans | 300 | 40px | 1.2 | -1.6px | Section titles |
 | **H4** | DM Sans | 400 | 24px | 1.1 | -0.96px | Section headings |
 | **Big Text** | DM Sans | 300 | 52px | 1.0 | -2.08px | Subtitles |
 | **Copyright** | DM Sans | 500 | 16px | 1.1 | -0.64px | Footer text |

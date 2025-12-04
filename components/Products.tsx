@@ -4,23 +4,23 @@ import React, { useRef } from 'react';
 import Image from 'next/image';
 import { useCartStore } from '@/lib/cart/store';
 
-// Exact Figma assets from Product node 803:13029 (mobile) / 803:11944 (desktop)
-const imgMask = "https://www.figma.com/api/mcp/asset/eaf3a351-7257-46f3-9a78-0b1093c989a1";
+// Local assets from public/assets folder
+const imgMask = "/assets/imgMask.jpg";
 
 // Product images
-const imgSpruce = "https://www.figma.com/api/mcp/asset/e3f260c3-81ff-46b3-ace3-bfa23d0e3a3d";
-const imgLarch1 = "https://www.figma.com/api/mcp/asset/dc0c2a25-b620-43f9-8c39-c9794ce77229";
-const imgLarch2 = "https://www.figma.com/api/mcp/asset/bfc9b479-b9b7-4f7e-aa0c-d10d7fa676b9";
+const imgSpruce = "/assets/imgSpruce.png";
+const imgLarch1 = "/assets/imgLarch1.png";
+const imgLarch2 = "/assets/imgLarch2.png";
 
 // Color swatches
-const imgColor1 = "https://www.figma.com/api/mcp/asset/a298ba5d-f933-41be-a2ea-5be1b62db8f9";
-const imgColor2 = "https://www.figma.com/api/mcp/asset/46e65c51-e433-426a-82c5-a0cf68f1fa8d";
-const imgColor3 = "https://www.figma.com/api/mcp/asset/24716f27-b792-4b62-9c79-8984510d7535";
-const imgColor4 = "https://www.figma.com/api/mcp/asset/cbaa66d6-b9e2-4ee8-8179-459e2b69422b";
-const imgColor5 = "https://www.figma.com/api/mcp/asset/8d766674-e42c-483c-a5ed-3263b8d0d611";
-const imgColor6 = "https://www.figma.com/api/mcp/asset/1ac8b06b-7c06-457d-9710-f428601ce18e";
-const imgColor7 = "https://www.figma.com/api/mcp/asset/f0ca6bed-b017-4380-bf11-8a6ddbe4b150";
-const imgColor8 = "https://www.figma.com/api/mcp/asset/5222c26a-6f24-43f7-8427-0e340b2327c4";
+const imgColor1 = "/assets/imgColor1.png";
+const imgColor2 = "/assets/imgColor2.png";
+const imgColor3 = "/assets/imgColor3.png";
+const imgColor4 = "/assets/imgColor4.png";
+const imgColor5 = "/assets/imgColor5.png";
+const imgColor6 = "/assets/imgColor6.png";
+const imgColor7 = "/assets/imgColor7.png";
+const imgColor8 = "/assets/imgColor8.png";
 
 // Product type
 type ProductData = {
