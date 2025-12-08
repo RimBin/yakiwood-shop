@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { createClient } from '@/lib/supabase/client';
 import { getAsset } from '@/lib/assets';
 
 interface LoginModalProps {
@@ -19,16 +20,28 @@ export default function LoginModal({
   onForgotPassword 
 }: LoginModalProps) {
   const t = useTranslations();
+  const supabase = useMemo(() => createClient(), []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic
-    console.log('Login:', { email, password });
+    setLoading(true);
+    setError(null);
+
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    if (authError) {
+      setError(authError.message);
+    } else {
+      onClose();
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -45,6 +58,7 @@ export default function LoginModal({
           </svg>
         </button>
       </div>
+      {error && <p className="w-full text-center text-xs text-[#F63333] -mt-2">{error}</p>}
 
       {/* Logo */}
       <div className="w-[126px] h-12 relative">
@@ -110,10 +124,11 @@ export default function LoginModal({
         {/* Submit button */}
         <button
           type="submit"
-          className="w-full h-12 bg-[#161616] rounded-[100px] flex items-center justify-center hover:bg-[#2a2a2a] transition-colors"
+          disabled={loading}
+          className="w-full h-12 bg-[#161616] rounded-[100px] flex items-center justify-center hover:bg-[#2a2a2a] transition-colors disabled:opacity-60"
         >
           <span className="font-['Outfit'] font-normal text-xs text-white uppercase tracking-[0.6px]">
-            Log in
+            {loading ? 'Logging in...' : 'Log in'}
           </span>
         </button>
 

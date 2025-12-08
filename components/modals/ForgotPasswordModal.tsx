@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
+import { createClient } from '@/lib/supabase/client';
 import { getAsset } from '@/lib/assets';
 
 interface ForgotPasswordModalProps {
@@ -15,6 +16,7 @@ export default function ForgotPasswordModal({
   onClose,
   onSuccess 
 }: ForgotPasswordModalProps) {
+  const supabase = useMemo(() => createClient(), []);
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -27,19 +29,21 @@ export default function ForgotPasswordModal({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+      const redirectUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/reset-password`
+        : undefined;
+
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
       });
 
-      if (response.ok) {
-        onSuccess();
+      if (resetError) {
+        setError(resetError.message);
       } else {
-        setError('Email not found. Please try again.');
+        onSuccess();
       }
-    } catch (err) {
-      setError('Something went wrong. Please try again.');
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

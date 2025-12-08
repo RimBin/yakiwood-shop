@@ -1,10 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 import { Checkbox } from '@/components/ui/Checkbox';
 
 export default function RegisterPage() {
+  const supabase = useMemo(() => createClient(), []);
+  const router = useRouter();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -13,18 +17,41 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [receiveNews, setReceiveNews] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setStatus(null);
+
     if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+      setError('Passwords do not match');
       return;
     }
     if (!agreeTerms) {
-      alert('Please agree to Terms & Conditions');
+      setError('Please agree to Terms & Conditions');
       return;
     }
-    console.log('Register with:', { firstName, lastName, email, phone, password, receiveNews });
+
+    setLoading(true);
+    const { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { firstName, lastName, phone, receiveNews },
+      },
+    });
+
+    if (signUpError) {
+      setError(signUpError.message);
+    } else {
+      setStatus('Account created. Check your email to confirm.');
+      router.push('/admin');
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -38,6 +65,8 @@ export default function RegisterPage() {
           <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#535353]">
             Join us to explore premium burnt wood products
           </p>
+          {error && <p className="text-[12px] text-red-600 mt-2">{error}</p>}
+          {status && <p className="text-[12px] text-green-700 mt-2">{status}</p>}
         </div>
 
         {/* Register Form */}
@@ -169,9 +198,10 @@ export default function RegisterPage() {
           {/* Create Account Button */}
           <button
             type="submit"
-            className="w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors mb-[24px]"
+            disabled={loading}
+            className="w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors mb-[24px] disabled:opacity-60"
           >
-            Create Account
+            {loading ? 'Creating...' : 'Create Account'}
           </button>
 
           {/* Divider */}

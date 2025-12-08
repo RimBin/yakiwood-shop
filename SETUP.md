@@ -15,6 +15,11 @@ cp .env.example .env.local
 # Fill in your Supabase credentials from the dashboard:
 # Settings > API > Project URL
 # Settings > API > Project API keys > anon public
+# Add service role + admin emails for CMS:
+# SUPABASE_SERVICE_ROLE_KEY=service-role-key
+# ADMIN_EMAILS=admin@example.com (comma separated list)
+# SUPABASE_STORAGE_BUCKET=product-images
+# RESEND_API_KEY=... (for emails)
 ```
 
 ### 3. Run Database Migrations

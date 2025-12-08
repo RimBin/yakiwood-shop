@@ -1,10 +1,18 @@
 import { type NextRequest, NextResponse } from 'next/server'
-// import { updateSession } from '@/lib/supabase/middleware'
+import { updateSession } from '@/lib/supabase/middleware'
+
+// Enable Supabase session syncing only when credentials are present, so local
+// development without keys keeps working.
+const hasSupabaseEnv =
+  Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+  Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 export async function middleware(request: NextRequest) {
-  // Temporarily disabled Supabase middleware until credentials are configured
-  // return await updateSession(request)
-  return NextResponse.next()
+  if (!hasSupabaseEnv) {
+    return NextResponse.next()
+  }
+
+  return await updateSession(request)
 }
 
 export const config = {

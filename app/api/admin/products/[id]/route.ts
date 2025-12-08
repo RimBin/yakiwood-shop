@@ -1,0 +1,126 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { randomUUID } from 'crypto'
+import { AdminAuthError, requireAdmin } from '@/lib/supabase/admin'
+
+interface VariantInput {
+  id?: string
+  name: string
+  variantType: string
+  hexColor?: string
+  priceAdjustment?: number
+  textureUrl?: string
+  stockQuantity?: number
+  sku?: string
+  isAvailable?: boolean
+}
+
+function slugify(value: string) {
+  return value
+    .normalize('NFKD')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { supabase } = await requireAdmin(request)
+    const body = await request.json()
+    const { id } = params
+
+    const updates: Record<string, unknown> = {}
+    if (body.name !== undefined) updates.name = body.name
+    if (body.slug !== undefined) updates.slug = slugify(body.slug || body.name || '')
+    if (body.description !== undefined) updates.description = body.description
+    if (body.basePrice !== undefined) updates.base_price = body.basePrice
+    if (body.woodType !== undefined) updates.wood_type = body.woodType
+    if (body.category !== undefined) updates.category = body.category
+    if (body.imageUrl !== undefined) updates.image_url = body.imageUrl
+    if (body.model3dUrl !== undefined) updates.model_3d_url = body.model3dUrl
+    if (body.isActive !== undefined) updates.is_active = body.isActive
+
+    if (Object.keys(updates).length > 0) {
+      const { error: productError } = await supabase.from('products').update(updates).eq('id', id)
+      if (productError) {
+        return NextResponse.json({ error: productError.message }, { status: 500 })
+      }
+    }
+
+    if (Array.isArray(body.variants)) {
+      const prepared: VariantInput[] = body.variants
+      const mapped = prepared.map((variant) => ({
+        id: variant.id || randomUUID(),
+        product_id: id,
+        name: variant.name,
+        variant_type: variant.variantType,
+        hex_color: variant.hexColor || null,
+        price_adjustment: variant.priceAdjustment ?? 0,
+        texture_url: variant.textureUrl || null,
+        stock_quantity: variant.stockQuantity ?? 0,
+        sku: variant.sku || null,
+        is_available: variant.isAvailable ?? true,
+      }))
+
+      const { error: variantError } = await supabase.from('product_variants').upsert(mapped)
+      if (variantError) {
+        return NextResponse.json({ error: variantError.message }, { status: 500 })
+      }
+    }
+
+    const { data: refreshed, error: fetchError } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !refreshed) {
+      return NextResponse.json({ error: fetchError?.message || 'Updated product not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({
+      product: {
+        ...refreshed,
+        basePrice: refreshed.base_price,
+        woodType: refreshed.wood_type,
+        model3dUrl: refreshed.model_3d_url,
+        imageUrl: refreshed.image_url,
+      },
+    })
+  } catch (error) {
+    if (error instanceof AdminAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status })
+    }
+    return NextResponse.json({ error: 'Unexpected server error' }, { status: 500 })
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { supabase } = await requireAdmin(request)
+    const { id } = params
+
+    const { error } = await supabase
+      .from('products')
+      .update({ is_active: false })
+      .eq('id', id)
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    if (error instanceof AdminAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status })
+    }
+    return NextResponse.json({ error: 'Unexpected server error' }, { status: 500 })
+  }
+}

@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
+import { createClient } from '@/lib/supabase/client';
 import { getAsset } from '@/lib/assets';
 
 interface RegisterModalProps {
@@ -15,22 +16,44 @@ export default function RegisterModal({
   onClose,
   onSwitchToLogin 
 }: RegisterModalProps) {
+  const supabase = useMemo(() => createClient(), []);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     if (!agreeTerms) {
-      alert('Please agree to Terms & Conditions');
+      setError('Please agree to Terms & Conditions');
       return;
     }
-    // Handle register logic
-    console.log('Register:', { fullName, email, password });
+
+    setLoading(true);
+    const [firstName, ...rest] = fullName.split(' ');
+    const lastName = rest.join(' ');
+
+    const { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { firstName, lastName },
+      },
+    });
+
+    if (signUpError) {
+      setError(signUpError.message);
+    } else {
+      onClose();
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -47,6 +70,7 @@ export default function RegisterModal({
           </svg>
         </button>
       </div>
+      {error && <p className="w-full text-center text-xs text-[#F63333] -mt-2">{error}</p>}
 
       {/* Logo */}
       <div className="w-[126px] h-12 relative">
@@ -130,10 +154,11 @@ export default function RegisterModal({
         {/* Submit button */}
         <button
           type="submit"
-          className="w-full h-12 bg-[#161616] rounded-[100px] flex items-center justify-center hover:bg-[#2a2a2a] transition-colors"
+          disabled={loading}
+          className="w-full h-12 bg-[#161616] rounded-[100px] flex items-center justify-center hover:bg-[#2a2a2a] transition-colors disabled:opacity-60"
         >
           <span className="font-['Outfit'] font-normal text-xs text-white uppercase tracking-[0.6px]">
-            Join
+            {loading ? 'Creating...' : 'Join'}
           </span>
         </button>
 
