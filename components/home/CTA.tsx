@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-const backgroundImage = "https://www.figma.com/api/mcp/asset/00b59797-f1e7-446b-b47b-ac24b180d955";
+// Local background image for CTA section
+const backgroundImage = "/assets/hero/product-image.png";
 
 export default function CTA() {
   return (

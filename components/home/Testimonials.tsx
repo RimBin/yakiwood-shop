@@ -10,8 +10,9 @@ interface Testimonial {
   role: string;
 }
 
-const activeTexture = "https://www.figma.com/api/mcp/asset/f06242e9-ff00-46ec-af11-f8cb0afad3fe";
-const mutedTexture = "https://www.figma.com/api/mcp/asset/7d22f1f3-4d31-482e-ab75-b35f2dcff4da";
+// Local texture assets for testimonial cards
+const activeTexture = "/assets/hero/product-image.png";
+const mutedTexture = "/assets/hero/product-image.png";
 
 export default function Testimonials() {
   const t = useTranslations("testimonials");

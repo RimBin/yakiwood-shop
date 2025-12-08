@@ -3,12 +3,12 @@
 import React from 'react';
 import Image from 'next/image';
 
-// Figma assets from Benefits node 759:7566 (mobile) and 790:6793 (desktop)
-const iconVector = "https://www.figma.com/api/mcp/asset/69d8baf5-1e9c-497f-ba63-ad3b64851e16";
-const iconFire = "https://www.figma.com/api/mcp/asset/95323e41-66a3-4601-a529-9a85e11b37f0";
-const iconWarehouse = "https://www.figma.com/api/mcp/asset/126276fc-6d99-44f0-8170-6a2a866daa4e";
-const iconLeaf = "https://www.figma.com/api/mcp/asset/d9b34eb8-8038-4a58-914d-d17e113245d4";
-const iconCube = "https://www.figma.com/api/mcp/asset/21774430-e2b6-4c60-a618-4f58ee5d3f7e";
+// Local assets for WhyUs section
+const iconVector = "/assets/icons/vector-top.svg";
+const iconFire = "/assets/icons/fire.svg";
+const iconWarehouse = "/assets/icons/warehouse.svg";
+const iconLeaf = "/assets/icons/leaf.svg";
+const iconCube = "/assets/icons/cube.svg";
 
 export default function WhyUs() {
   const benefits = [

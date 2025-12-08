@@ -3,8 +3,8 @@
 import React from 'react';
 import Image from 'next/image';
 
-// Figma asset - Steps divider line
-const imgVector37 = "https://www.figma.com/api/mcp/asset/a0dabf49-09ad-4c89-a856-d9241b18e182";
+// Local asset - Steps divider line (placeholder until proper SVG is added)
+const imgVector37 = "/assets/icons/vector-top.svg";
 
 const steps = [
   {
