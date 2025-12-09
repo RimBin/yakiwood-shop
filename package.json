@@ -16,13 +16,18 @@
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.0",
+    "@sanity/image-url": "^1.2.0",
+    "@sanity/vision": "^3.99.0",
     "@stripe/stripe-js": "^8.5.2",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.84.0",
+    "groq": "^3.99.0",
     "next": "16.0.3",
     "next-intl": "^4.5.5",
+    "next-sanity": "^9.12.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "sanity": "^3.99.0",
     "stripe": "^20.0.0",
     "three": "^0.181.2",
     "zustand": "^5.0.8"
