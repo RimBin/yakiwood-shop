@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     const path = `${new Date().toISOString().slice(0, 10)}/${randomUUID()}-${sanitized}`
     const { data, error } = await supabase.storage
       .from(bucket)
-      .createSignedUploadUrl(path, 60 * 10, { contentType, upsert: true })
+      .createSignedUploadUrl(path, { upsert: true })
 
     if (error || !data) {
       return NextResponse.json({ error: error?.message || 'Unable to create upload URL' }, { status: 500 })

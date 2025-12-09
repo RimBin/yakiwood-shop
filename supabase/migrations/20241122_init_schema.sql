@@ -107,32 +107,6 @@ create index orders_status_idx on orders(status);
 create index order_items_order_id_idx on order_items(order_id);
 create index cart_items_user_id_idx on cart_items(user_id);
 
--- User profiles table
-create table user_profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  email text not null,
-  full_name text,
-  phone text,
-  role text default 'user', -- 'user' or 'admin'
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- Delivery addresses table
-create table delivery_addresses (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid references auth.users(id) on delete cascade not null,
-  country text not null,
-  city text not null,
-  street_address text not null,
-  postal_code text not null,
-  is_default boolean default false,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
-create index delivery_addresses_user_id_idx on delivery_addresses(user_id);
-
 -- RLS (Row Level Security) policies
 alter table products enable row level security;
 alter table product_variants enable row level security;
@@ -140,8 +114,6 @@ alter table custom_configurations enable row level security;
 alter table orders enable row level security;
 alter table order_items enable row level security;
 alter table cart_items enable row level security;
-alter table user_profiles enable row level security;
-alter table delivery_addresses enable row level security;
 
 -- Public read access for products
 create policy "Products are viewable by everyone"
@@ -192,42 +164,6 @@ create policy "Users can view their own configurations"
 create policy "Users can create configurations"
   on custom_configurations for insert
   with check (auth.uid() = user_id or user_id is null);
-
--- User profiles
-create policy "Users can view their own profile"
-  on user_profiles for select
-  using (auth.uid() = id);
-
-create policy "Users can update their own profile"
-  on user_profiles for update
-  using (auth.uid() = id);
-
--- Triggers for updated_at
-create trigger update_products_updated_at before update on products
-  for each row execute procedure update_updated_at_column();
-
-create trigger update_orders_updated_at before update on orders
-  for each row execute procedure update_updated_at_column();
-
-create trigger update_cart_items_updated_at before update on cart_items
-  for each row execute procedure update_updated_at_column();
-
-create trigger update_user_profiles_updated_at before update on user_profiles
-  for each row execute procedure update_updated_at_column();
-
-create trigger update_delivery_addresses_updated_at before update on delivery_addresses
-  for each row execute procedure update_updated_at_column();
-create policy "Users can insert their own addresses"
-  on delivery_addresses for insert
-  with check (auth.uid() = user_id);
-
-create policy "Users can update their own addresses"
-  on delivery_addresses for update
-  using (auth.uid() = user_id);
-
-create policy "Users can delete their own addresses"
-  on delivery_addresses for delete
-  using (auth.uid() = user_id);
 
 -- Function to update updated_at timestamp
 create or replace function update_updated_at_column()

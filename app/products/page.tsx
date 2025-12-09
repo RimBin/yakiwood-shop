@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -184,7 +183,7 @@ export default function ProductsPage() {
             onClick={() => fetchProducts(activeFilter)}
             className="h-[48px] px-[40px] py-[10px] bg-[#161616] text-white rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:opacity-90 transition-opacity"
           >
-            Refresh products
+            Load more
           </button>
         </div>
       </div>

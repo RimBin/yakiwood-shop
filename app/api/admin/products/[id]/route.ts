@@ -24,14 +24,21 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, '')
 }
 
+type RouteParams = { id: string }
+type RouteContext = { params: RouteParams } | { params: Promise<RouteParams> }
+
+async function resolveParams(context: RouteContext): Promise<RouteParams> {
+  return await context.params
+}
+
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
     const { supabase } = await requireAdmin(request)
     const body = await request.json()
-    const { id } = params
+    const { id } = await resolveParams(context)
 
     const updates: Record<string, unknown> = {}
     if (body.name !== undefined) updates.name = body.name
@@ -101,11 +108,11 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
     const { supabase } = await requireAdmin(request)
-    const { id } = params
+    const { id } = await resolveParams(context)
 
     const { error } = await supabase
       .from('products')
