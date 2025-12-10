@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared';
@@ -11,6 +11,12 @@ type ProductCard = {
   basePrice: number;
   imageUrl?: string | null;
   woodType?: string;
+  category?: string;
+};
+
+type FilterOptions = {
+  woodTypes: string[];
+  categories: string[];
 };
 
 const fallbackProducts: ProductCard[] = [
@@ -21,6 +27,7 @@ const fallbackProducts: ProductCard[] = [
     basePrice: 89,
     imageUrl: 'https://www.figma.com/api/mcp/asset/f23c6ed9-4370-484f-af3a-f0c7e7f0a462',
     woodType: 'spruce',
+    category: 'cladding',
   },
   {
     id: 'demo-2',
@@ -29,6 +36,7 @@ const fallbackProducts: ProductCard[] = [
     basePrice: 89,
     imageUrl: 'https://www.figma.com/api/mcp/asset/d294a76c-f2ce-4a3b-95c0-16e29ef7e999',
     woodType: 'larch',
+    category: 'cladding',
   },
   {
     id: 'demo-3',
@@ -37,6 +45,7 @@ const fallbackProducts: ProductCard[] = [
     basePrice: 89,
     imageUrl: 'https://www.figma.com/api/mcp/asset/68d7e67c-b955-4f7d-818c-8c7a39878aa0',
     woodType: 'spruce',
+    category: 'decking',
   },
   {
     id: 'demo-4',
@@ -45,41 +54,67 @@ const fallbackProducts: ProductCard[] = [
     basePrice: 89,
     imageUrl: 'https://www.figma.com/api/mcp/asset/96c4c940-c49c-4bd3-8823-483555dc24ba',
     woodType: 'larch',
+    category: 'furniture',
   },
 ];
 
-const filters = [
-  { id: 'all', label: 'All woods' },
-  { id: 'spruce', label: 'Spruce wood' },
-  { id: 'larch', label: 'Larch wood' },
-  { id: 'pine', label: 'Pine wood' },
-];
+const fallbackFilterOptions: FilterOptions = {
+  woodTypes: Array.from(new Set(fallbackProducts.map((item) => item.woodType).filter(Boolean))) as string[],
+  categories: Array.from(new Set(fallbackProducts.map((item) => item.category).filter(Boolean))) as string[],
+};
+
+const woodLabelMap: Record<string, string> = {
+  spruce: 'Eglė',
+  larch: 'Maumedis',
+  oak: 'Ąžuolas',
+};
+
+const categoryLabelMap: Record<string, string> = {
+  cladding: 'Fasadai',
+  decking: 'Terasos',
+  furniture: 'Baldai',
+};
+
+const getWoodLabel = (value: string) => (value === 'all' ? 'Visos medienos' : woodLabelMap[value] || value);
+const getCategoryLabel = (value: string) => (value === 'all' ? 'Visos kategorijos' : categoryLabelMap[value] || value);
 
 export default function ProductsPage() {
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeWood, setActiveWood] = useState('all');
+  const [activeCategory, setActiveCategory] = useState('all');
   const [products, setProducts] = useState<ProductCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>(fallbackFilterOptions);
 
-  const fetchProducts = useMemo(
-    () => async (woodType?: string) => {
+  const fetchProducts = useCallback(
+    async (woodType: string, categoryFilter: string) => {
       setLoading(true);
       setError(null);
       try {
         const params = new URLSearchParams();
-        if (woodType && woodType !== 'all') params.set('woodType', woodType);
-        const response = await fetch(`/api/products?${params.toString()}`, { cache: 'no-store' });
+        if (woodType !== 'all') params.set('woodType', woodType);
+        if (categoryFilter !== 'all') params.set('category', categoryFilter);
+        const query = params.toString();
+        const response = await fetch(`/api/products${query ? `?${query}` : ''}`, { cache: 'no-store' });
         const data = await response.json();
 
         if (response.ok) {
           setProducts(data.products || []);
+          if (data.filters) {
+            setFilterOptions({
+              woodTypes: data.filters.woodTypes || [],
+              categories: data.filters.categories || [],
+            });
+          }
         } else {
           setError(data.error || 'Nepavyko gauti produktų');
           setProducts(fallbackProducts);
+          setFilterOptions(fallbackFilterOptions);
         }
       } catch (err) {
         setError('Nepavyko gauti produktų');
         setProducts(fallbackProducts);
+        setFilterOptions(fallbackFilterOptions);
       } finally {
         setLoading(false);
       }
@@ -88,8 +123,10 @@ export default function ProductsPage() {
   );
 
   useEffect(() => {
-    fetchProducts(activeFilter);
-  }, [activeFilter, fetchProducts]);
+    fetchProducts(activeWood, activeCategory);
+  }, [activeWood, activeCategory, fetchProducts]);
+
+  const headingText = activeCategory !== 'all' ? getCategoryLabel(activeCategory) : getWoodLabel(activeWood);
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
@@ -100,7 +137,7 @@ export default function ProductsPage() {
             className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] text-[#161616] tracking-[-2.8px] md:tracking-[-6.4px]"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
-            All woods
+            {headingText}
           </h1>
           <p
             className="font-['DM_Sans'] font-normal text-[18px] md:text-[32px] leading-[1.1] text-[#161616] tracking-[-0.72px] md:tracking-[-1.28px]"
@@ -114,20 +151,47 @@ export default function ProductsPage() {
 
       {/* Filters */}
       <div className="w-full max-w-[1440px] mx-auto px-[16px] md:px-[40px] py-[24px]">
-        <div className="flex gap-[8px] items-center flex-wrap">
-          {filters.map((filter) => (
-            <button
-              key={filter.id}
-              onClick={() => setActiveFilter(filter.id)}
-              className={`h-[32px] px-[12px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase leading-[1.3] transition-colors ${
-                activeFilter === filter.id
-                  ? 'bg-[#161616] text-white'
-                  : 'border border-[#BBBBBB] bg-transparent text-[#161616] hover:border-[#161616]'
-              }`}
-            >
-              {filter.label}
-            </button>
-          ))}
+        <div className="flex flex-col gap-[16px]">
+          <div>
+            <p className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] mb-[8px]">
+              Medienos tipas
+            </p>
+            <div className="flex gap-[8px] items-center flex-wrap">
+              {['all', ...filterOptions.woodTypes].map((value) => (
+                <button
+                  key={`wood-${value}`}
+                  onClick={() => setActiveWood(value)}
+                  className={`h-[32px] px-[12px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase leading-[1.3] transition-colors ${
+                    activeWood === value
+                      ? 'bg-[#161616] text-white'
+                      : 'border border-[#BBBBBB] bg-transparent text-[#161616] hover:border-[#161616]'
+                  }`}
+                >
+                  {getWoodLabel(value)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] mb-[8px]">
+              Kategorija
+            </p>
+            <div className="flex gap-[8px] items-center flex-wrap">
+              {['all', ...filterOptions.categories].map((value) => (
+                <button
+                  key={`category-${value}`}
+                  onClick={() => setActiveCategory(value)}
+                  className={`h-[32px] px-[12px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase leading-[1.3] transition-colors ${
+                    activeCategory === value
+                      ? 'bg-[#161616] text-white'
+                      : 'border border-[#BBBBBB] bg-transparent text-[#161616] hover:border-[#161616]'
+                  }`}
+                >
+                  {getCategoryLabel(value)}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -180,7 +244,7 @@ export default function ProductsPage() {
         {/* Load More Button */}
         <div className="flex justify-center mt-[64px]">
           <button
-            onClick={() => fetchProducts(activeFilter)}
+            onClick={() => fetchProducts(activeWood, activeCategory)}
             className="h-[48px] px-[40px] py-[10px] bg-[#161616] text-white rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:opacity-90 transition-opacity"
           >
             Load more

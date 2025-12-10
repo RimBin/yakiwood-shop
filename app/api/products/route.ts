@@ -21,6 +21,17 @@ type SanityProduct = {
   gallery?: Array<{ image?: SanityImageSource }>
 }
 
+type SanityProductResult = {
+  products: SanityProduct[]
+  woodFilters?: Array<string | null>
+  categoryFilters?: Array<string | null>
+}
+
+type FilterResponse = {
+  woodTypes: string[]
+  categories: string[]
+}
+
 const fallbackProducts = [
   {
     id: 'demo-1',
@@ -64,6 +75,17 @@ function paginateFallback(offset: number, limit: number) {
   return fallbackProducts.slice(offset, offset + limit)
 }
 
+function buildFilters(values?: Array<string | null>): string[] {
+  const list = (values || []).filter((value): value is string => Boolean(value))
+  return Array.from(new Set(list))
+}
+
+function fallbackFilters(): FilterResponse {
+  const woods = Array.from(new Set(fallbackProducts.map((item) => item.woodType).filter(Boolean))) as string[]
+  const categories = Array.from(new Set(fallbackProducts.map((item) => item.category).filter(Boolean))) as string[]
+  return { woodTypes: woods, categories }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = new URL(request.url).searchParams
@@ -73,10 +95,10 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(toNumber(searchParams.get('limit'), 50), 100)
     const offset = toNumber(searchParams.get('offset'), 0)
     if (!sanityClient) {
-      return NextResponse.json({ products: paginateFallback(offset, limit) })
+      return NextResponse.json({ products: paginateFallback(offset, limit), filters: fallbackFilters() })
     }
 
-    const products = await sanityClient.fetch<SanityProduct[]>(PRODUCT_LIST_QUERY, {
+    const result = await sanityClient.fetch<SanityProductResult>(PRODUCT_LIST_QUERY, {
       category: category || undefined,
       woodType: woodType || undefined,
       search: q ? `*${q}*` : undefined,
@@ -84,7 +106,7 @@ export async function GET(request: NextRequest) {
       end: offset + limit,
     })
 
-    const normalized = products.map((item) => ({
+    const normalized = result.products.map((item) => ({
       id: item._id,
       name: item.name,
       slug: item.slug || item._id,
@@ -99,11 +121,21 @@ export async function GET(request: NextRequest) {
           .filter((value): value is string => Boolean(value)) || [],
     }))
 
-    return NextResponse.json({ products: normalized })
+    return NextResponse.json({
+      products: normalized,
+      filters: {
+        woodTypes: buildFilters(result.woodFilters),
+        categories: buildFilters(result.categoryFilters),
+      },
+    })
   } catch (error) {
     console.error('Sanity products error', error)
     return NextResponse.json(
-      { products: paginateFallback(0, fallbackProducts.length), error: 'Unable to load products' },
+      {
+        products: paginateFallback(0, fallbackProducts.length),
+        filters: fallbackFilters(),
+        error: 'Unable to load products',
+      },
       { status: 200 }
     )
   }
