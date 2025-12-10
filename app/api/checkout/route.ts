@@ -1,20 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
-
-// Lazy initialize Stripe to avoid build-time errors
-let stripe: Stripe | null = null;
-
-function getStripe() {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    throw new Error('Stripe konfigūracija nerasta');
-  }
-  if (!stripe) {
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2025-11-17.clover'
-    });
-  }
-  return stripe;
-}
+import type Stripe from 'stripe';
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,10 +11,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (!process.env.STRIPE_SECRET_KEY) {
-      return NextResponse.json({ error: 'Stripe konfigūracija nerasta' }, { status: 500 });
+      return NextResponse.json({ error: 'Stripe konfigūracija nerasta. Susisiekite su administratoriumi.' }, { status: 500 });
     }
 
-    const stripeClient = getStripe();
+    // Dynamically import Stripe only when needed
+    const StripeConstructor = (await import('stripe')).default;
+    const stripe = new StripeConstructor(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-11-17.clover'
+    });
 
     // NOTE: Real implementation should map product IDs to Stripe Price IDs.
     // For initial scaffold we convert basePrice EUR to cents direct.
@@ -44,7 +33,7 @@ export async function POST(req: NextRequest) {
       }
     }));
 
-    const session = await stripeClient.checkout.sessions.create({
+    const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items,
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3011'}/success?session_id={CHECKOUT_SESSION_ID}`,
