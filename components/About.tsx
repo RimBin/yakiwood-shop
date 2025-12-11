@@ -3,13 +3,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-// Image assets from Figma
-const imgVideo = "https://www.figma.com/api/mcp/asset/477aa6a4-49f3-44f4-8e9a-ebf0bfe0cd06";
-const imgTeam1 = "https://www.figma.com/api/mcp/asset/bf70d331-5e28-461f-8c66-0da654728647";
-const imgTeam2 = "https://www.figma.com/api/mcp/asset/87885949-1e42-4fa2-ac0e-c161d0979163";
-const imgTeam3 = "https://www.figma.com/api/mcp/asset/2bcc8d00-1d2e-4322-bef2-c14fa440d13a";
-const imgTeam4 = "https://www.figma.com/api/mcp/asset/db641b47-8ed9-40bc-91f0-d8baa158f56a";
-const imgCTA = "https://www.figma.com/api/mcp/asset/77b31476-e23e-4535-9de2-4ddf313eab32";
+// Local placeholder for Figma assets (mapped to permanent files)
+const imgVideo = "/assets/imgProject1.jpg";
+const imgTeam1 = "/assets/imgProject2.jpg";
+const imgTeam2 = "/assets/imgProject3.jpg";
+const imgTeam3 = "/assets/imgProject4.jpg";
+const imgTeam4 = "/assets/imgProject5.jpg";
+const imgCTA = "/assets/imgMask.jpg";
 
 export default function About() {
   return (
