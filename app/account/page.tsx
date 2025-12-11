@@ -110,6 +110,48 @@ export default function AccountPage() {
     setError('');
     setSuccess('');
 
+    if (!userId) return;
+
+    // Check if delivery address exists
+    const { data: existingAddress } = await supabase
+      .from('delivery_addresses')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('is_default', true)
+      .single();
+
+    const addressData = {
+      user_id: userId,
+      country: country,
+      city: city,
+      street_address: address,
+      postal_code: postalCode,
+      is_default: true,
+      updated_at: new Date().toISOString()
+    };
+
+    let updateError;
+    if (existingAddress) {
+      const { error } = await supabase
+        .from('delivery_addresses')
+        .update(addressData)
+        .eq('id', existingAddress.id);
+      updateError = error;
+    } else {
+      const { error } = await supabase
+        .from('delivery_addresses')
+        .insert(addressData);
+      updateError = error;
+    }
+
+    if (updateError) {
+      setError('Failed to update delivery info: ' + updateError.message);
+    } else {
+      setSuccess('Delivery information updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    }
+  };
+
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -155,21 +197,9 @@ export default function AccountPage() {
     );
   }
 
-  return (ect('id')
-      .eq('user_id', userId)
-      .eq('is_default', true)
-      .single();
-
-    const addressData = {
-      user_id: userId,
-      country: country,
-      city: city,
-      street_address: address,
-      postal_code: postalCode,
-      is_default: true,
-      updated_at: new Date().toISOString()
-    };
-
+  return (
+    <main className="min-h-screen bg-[#E1E1E1] pt-[80px]">
+      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[40px] pb-[80px]">
         <div className="grid grid-cols-1 lg:grid-cols-[368px_1fr] gap-[40px]">
           {/* Left Sidebar - Menu */}
           <nav className="lg:sticky lg:top-[120px] lg:self-start">
@@ -207,6 +237,13 @@ export default function AccountPage() {
               <hr className="my-[16px] border-[#E1E1E1]" />
               <button
                 onClick={handleSignOut}
+                className="w-full text-left px-[16px] py-[12px] rounded-[4px] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-red-600 hover:bg-red-50 transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          </nav>
+
           {/* Right Content - Forms */}
           <div>
             {/* Error/Success Messages */}
@@ -221,53 +258,6 @@ export default function AccountPage() {
               </div>
             )}
 
-            {/* My Information */}
-            {activeSection === 'info' && (
-              <form onSubmit={handleSaveInfo} className="max-w-[672px]">
-                <div className="pb-[16px] border-b border-[#BBBBBB] mb-[24px]">
-                  <h2 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.3] tracking-[0.14px] sm:tracking-[0.16px] uppercase text-[#161616]">
-                    My Information
-                  </h2>
-                </div>max-w-[1440px] mx-auto px-[16px] sm:px-[40px] pb-[80px]">
-        <div className="grid grid-cols-1 lg:grid-cols-[368px_1fr] gap-[40px]">
-          {/* Left Sidebar - Menu */}
-          <nav className="lg:sticky lg:top-[120px] lg:self-start">
-            <div className="bg-white rounded-[8px] p-[24px]">
-              <button
-                onClick={() => setActiveSection('info')}
-                className={`w-full text-left px-[16px] py-[12px] rounded-[4px] font-['Outfit'] font-normal text-[14px] leading-[1.5] transition-colors ${
-                  activeSection === 'info'
-                    ? 'bg-[#161616] text-white'
-                    : 'text-[#161616] hover:bg-[#E1E1E1]'
-                }`}
-              >
-                My Information
-              </button>
-              <button
-                onClick={() => setActiveSection('delivery')}
-                className={`w-full text-left px-[16px] py-[12px] rounded-[4px] font-['Outfit'] font-normal text-[14px] leading-[1.5] transition-colors ${
-                  activeSection === 'delivery'
-                    ? 'bg-[#161616] text-white'
-                    : 'text-[#161616] hover:bg-[#E1E1E1]'
-                }`}
-              >
-                Delivery Info
-              </button>
-              <button
-                onClick={() => setActiveSection('password')}
-                className={`w-full text-left px-[16px] py-[12px] rounded-[4px] font-['Outfit'] font-normal text-[14px] leading-[1.5] transition-colors ${
-                  activeSection === 'password'
-                    ? 'bg-[#161616] text-white'
-                    : 'text-[#161616] hover:bg-[#E1E1E1]'
-                }`}
-              >
-                Password
-              </button>
-            </div>
-          </nav>
-
-          {/* Right Content - Forms */}
-          <div>
             {/* My Information */}
             {activeSection === 'info' && (
               <form onSubmit={handleSaveInfo} className="max-w-[672px]">
