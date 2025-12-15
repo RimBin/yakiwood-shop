@@ -29,7 +29,7 @@ interface TypographyProps {
   variant: TypographyVariant;
   children: React.ReactNode;
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
 }
 
 /**
@@ -46,7 +46,7 @@ export const Typography: React.FC<TypographyProps> = ({
   as,
 }) => {
   // Default HTML element based on variant
-  const defaultElement: { [key in TypographyVariant]: keyof JSX.IntrinsicElements } = {
+  const defaultElement: { [key in TypographyVariant]: React.ElementType } = {
     h1: 'h1',
     h2: 'h2',
     h3: 'h3',
