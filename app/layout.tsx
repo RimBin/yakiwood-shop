@@ -4,6 +4,7 @@ import "./globals.css";
 import { NextIntlClientProvider } from 'next-intl';
 import enMessages from '@/messages/en.json';
 import { Header, Footer } from '@/components/shared';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang={locale}>
       <body className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased bg-[#e1e1e1]`}>
+        <GoogleAnalytics />
         <NextIntlClientProvider locale={locale} messages={enMessages}>
           <Header />
           {children}
