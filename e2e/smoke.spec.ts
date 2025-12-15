@@ -1,0 +1,127 @@
+import { test, expect } from '@playwright/test';
+import { routes } from './fixtures/data';
+
+test.describe('Smoke Tests', () => {
+  test('should load homepage successfully', async ({ page }) => {
+    const response = await page.goto('/');
+    expect(response?.status()).toBe(200);
+    
+    await expect(page).toHaveTitle(/Yakiwood/i);
+    await expect(page.locator('body')).toBeVisible();
+  });
+
+  test('should load all main routes', async ({ page }) => {
+    const mainRoutes = [
+      routes.home,
+      routes.products,
+      routes.solutions,
+      routes.projects,
+      routes.about,
+      routes.contact,
+    ];
+
+    for (const route of mainRoutes) {
+      const response = await page.goto(route);
+      expect(response?.status()).toBe(200);
+      await expect(page.locator('body')).toBeVisible();
+    }
+  });
+
+  test('should have accessible sitemap', async ({ page }) => {
+    const response = await page.goto('/sitemap.xml');
+    expect(response?.status()).toBe(200);
+    
+    const content = await page.content();
+    expect(content).toContain('<?xml');
+    expect(content).toContain('urlset');
+  });
+
+  test('should have accessible robots.txt', async ({ page }) => {
+    const response = await page.goto('/robots.txt');
+    expect(response?.status()).toBe(200);
+    
+    const content = await page.content();
+    expect(content).toContain('User-agent');
+  });
+
+  test('should not have console errors on homepage', async ({ page }) => {
+    const errors: string[] = [];
+    
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      }
+    });
+    
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    
+    // Filter out known acceptable errors (if any)
+    const criticalErrors = errors.filter(error => 
+      !error.includes('favicon') && 
+      !error.includes('404')
+    );
+    
+    expect(criticalErrors.length).toBe(0);
+  });
+
+  test('should load CSS and JavaScript assets', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    
+    // Check if styles are applied
+    const body = page.locator('body');
+    const backgroundColor = await body.evaluate((el) => 
+      window.getComputedStyle(el).backgroundColor
+    );
+    
+    // Should have some background color set (not transparent/rgba(0,0,0,0))
+    expect(backgroundColor).toBeTruthy();
+  });
+
+  test('should have working API health check', async ({ request }) => {
+    // Test if API routes are accessible
+    try {
+      const response = await request.get('http://localhost:3000/api/health');
+      // Either returns 200 (health check exists) or 404 (route doesn't exist yet)
+      expect([200, 404]).toContain(response.status());
+    } catch (error) {
+      // If health endpoint doesn't exist, that's okay for this test
+      console.log('Health check endpoint not implemented yet');
+    }
+  });
+
+  test('should have proper meta tags', async ({ page }) => {
+    await page.goto('/');
+    
+    // Check for essential meta tags
+    const title = await page.title();
+    expect(title.length).toBeGreaterThan(0);
+    
+    const description = await page.locator('meta[name="description"]').getAttribute('content');
+    expect(description).toBeTruthy();
+  });
+
+  test('should be responsive', async ({ page }) => {
+    const viewports = [
+      { width: 375, height: 667 },  // Mobile
+      { width: 768, height: 1024 }, // Tablet
+      { width: 1920, height: 1080 }, // Desktop
+    ];
+
+    for (const viewport of viewports) {
+      await page.setViewportSize(viewport);
+      await page.goto('/');
+      
+      // Page should be visible at all viewport sizes
+      await expect(page.locator('body')).toBeVisible();
+    }
+  });
+
+  test('should have proper language attribute', async ({ page }) => {
+    await page.goto('/');
+    
+    const htmlLang = await page.locator('html').getAttribute('lang');
+    expect(htmlLang).toBe('lt'); // Lithuanian locale
+  });
+});

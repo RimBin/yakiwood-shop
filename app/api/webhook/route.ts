@@ -2,6 +2,8 @@ import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@/lib/supabase/server';
+import { InventoryManager } from '@/lib/inventory/manager';
+import type { ReservationItem } from '@/lib/inventory/types';
 
 // Types for Stripe event data
 interface CheckoutSessionMetadata {
@@ -11,6 +13,7 @@ interface CheckoutSessionMetadata {
 interface CartItem {
   id: string;
   name: string;
+  slug: string;
   quantity: number;
   basePrice: number;
   color?: string;
@@ -93,8 +96,7 @@ export async function POST(req: Request) {
 
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.log(`Payment succeeded: ${paymentIntent.id}`);
-        // Additional handling if needed (e.g., update order payment status)
+        await handlePaymentSuccess(paymentIntent);
         break;
       }
 
@@ -173,6 +175,24 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
   console.log('Order created:', order.id);
 
+  // Reserve stock for the order
+  if (cartItems.length > 0) {
+    try {
+      // Convert cart items to reservation format
+      const reservationItems: ReservationItem[] = cartItems.map(item => ({
+        product_id: item.id,
+        sku: `${item.slug.toUpperCase()}-${(item.color || 'default').toUpperCase()}`,
+        quantity: item.quantity,
+      }));
+
+      await InventoryManager.reserveStock(reservationItems, order.id);
+      console.log('Stock reserved for order:', order.id);
+    } catch (error) {
+      console.error('Failed to reserve stock:', error);
+      // Log the error but don't fail the order creation
+    }
+  }
+
   // Create order items if we have cart data
   if (cartItems.length > 0 && order) {
     const orderItems = cartItems.map((item) => ({
@@ -207,7 +227,39 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 }
 
 /**
- * Handle failed payment - log and optionally notify
+ * Handle successful payment - confirm sale and update inventory
+ */
+async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
+  console.log(`Payment succeeded: ${paymentIntent.id}`);
+
+  const supabase = await createClient();
+
+  // Find order by payment intent ID
+  const { data: order } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('stripe_payment_id', paymentIntent.id)
+    .single();
+
+  if (order) {
+    try {
+      // Confirm sale - convert reservation to sale
+      await InventoryManager.confirmSale(order.id);
+      console.log('Sale confirmed for order:', order.id);
+
+      // Update order status
+      await supabase
+        .from('orders')
+        .update({ payment_status: 'completed' })
+        .eq('id', order.id);
+    } catch (error) {
+      console.error('Failed to confirm sale:', error);
+    }
+  }
+}
+
+/**
+ * Handle failed payment - release reserved stock
  */
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
   const lastError = paymentIntent.last_payment_error;
@@ -221,6 +273,34 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
     amount: paymentIntent.amount,
     currency: paymentIntent.currency,
   });
+
+  const supabase = await createClient();
+
+  // Find order by payment intent ID
+  const { data: order } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('stripe_payment_id', paymentIntent.id)
+    .single();
+
+  if (order) {
+    try {
+      // Release reserved stock
+      await InventoryManager.releaseStock(order.id);
+      console.log('Stock released for failed payment:', order.id);
+
+      // Update order status
+      await supabase
+        .from('orders')
+        .update({ 
+          status: 'failed',
+          payment_status: 'failed' 
+        })
+        .eq('id', order.id);
+    } catch (error) {
+      console.error('Failed to release stock:', error);
+    }
+  }
 
   // TODO: Optional - send notification email to customer
   // const customerEmail = paymentIntent.receipt_email;

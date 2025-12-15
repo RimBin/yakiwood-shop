@@ -1,52 +1,71 @@
-'use client';
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { fetchProduct, generateProductSchema, generateBreadcrumbSchema } from '@/lib/products';
+import ProductDetailClient from '@/components/products/ProductDetailClient';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+interface ProductPageProps {
+  params: { slug: string };
+}
 
-export default function ProductDetailPage({ params }: { params: { slug: string } }) {
-  const [selectedWidth, setSelectedWidth] = useState('95');
-  const [selectedLength, setSelectedLength] = useState('4000');
-  const [selectedColor, setSelectedColor] = useState('carbon-light');
-  const [selectedProfile, setSelectedProfile] = useState('half-taper');
-  const [quantity, setQuantity] = useState(200);
-  const [expandedAccordion, setExpandedAccordion] = useState('maintenance');
+// Generate metadata for SEO
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const product = await fetchProduct(params.slug);
 
-  // Mock product data - replace with real data
-  const product = {
-    name: 'Natural shou sugi ban plank',
-    price: 89,
-    description: 'Natural Shou Sugi Ban plank is a durable, eco-friendly wood product, charred using traditional Japanese techniques for enhanced weather resistance and a unique, textured finish.',
-    mainImage: '/assets/imgSpruce.png',
-    galleryImages: [
-      '/assets/imgSpruce.png',
-      '/assets/imgLarch1.png',
-      '/assets/imgLarch2.png',
-    ],
+  if (!product) {
+    return {
+      title: 'Product Not Found | Yakiwood',
+      description: 'The requested product could not be found.',
+    };
+  }
+
+  return {
+    title: `${product.name} | Yakiwood`,
+    description: product.shortDescription || product.description,
+    openGraph: {
+      title: product.name,
+      description: product.shortDescription || product.description,
+      images: product.images?.map(img => img.url) || [product.image],
+      type: 'website',
+      url: `https://yakiwood.lt/products/${product.slug}`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: product.name,
+      description: product.shortDescription || product.description,
+      images: [product.image],
+    },
   };
+}
 
-  const widths = ['95 mm', '120 mm', '145 mm'];
-  const lengths = ['3000 mm', '3600 mm', '4000 mm'];
-  const colors = [
-    { id: 'brown', image: '/assets/imgColor1.png' },
-    { id: 'carbon-light', image: '/assets/imgColor2.png', selected: true },
-    { id: 'natural', image: '/assets/imgColor3.png' },
-    { id: 'dark', image: '/assets/imgColor4.png' },
-    { id: 'graphite', image: '/assets/imgColor5.png' },
-    { id: 'latte', image: '/assets/imgColor6.png' },
-    { id: 'silver', image: '/assets/imgColor7.png' },
-  ];
+// Main product page component (Server Component)
+export default async function ProductPage({ params }: ProductPageProps) {
+  const product = await fetchProduct(params.slug);
 
-  const profiles = ['half-taper', 'rhombus', 'rectangle'];
+  if (!product) {
+    notFound();
+  }
+
+  // Generate structured data for SEO
+  const productSchema = generateProductSchema(product);
+  const breadcrumbSchema = generateBreadcrumbSchema(product);
 
   return (
-    <section className="w-full bg-[#E1E1E1] min-h-screen">
-      {/* Breadcrumbs */}
-      <div className="w-full max-w-[1440px] mx-auto px-[16px] md:px-[40px] py-[10px] border-b border-[#BBBBBB]">
-        <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] text-[#7C7C7C]">
-          Home / Shop / <span className="text-[#161616]">Natural Shou sugi ban plank</span>
-        </p>
-      </div>
+    <>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
+      {/* Client Component with product data */}
+      <ProductDetailClient product={product} />
+    </>
+  );
+}
 
       {/* Product Section */}
       <div className="w-full max-w-[1440px] mx-auto px-[16px] md:px-[40px] py-[32px] md:py-[54px]">

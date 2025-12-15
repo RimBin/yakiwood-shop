@@ -2,6 +2,38 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### 1. Environment Setup
+
+**First time setup:**
+
+```bash
+# Copy environment template
+cp .env.example .env.local
+
+# Edit .env.local and add your values
+# See docs/ENVIRONMENT.md for detailed setup guide
+```
+
+**Validate your configuration:**
+
+```bash
+# Check required variables
+npm run env:check
+
+# Check and test API connections
+npm run env:validate
+```
+
+📖 **Full documentation:** [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)
+
+### 2. Install Dependencies
+
+```bash
+npm install --legacy-peer-deps
+```
+
+### 3. Run Development Server
+
 First, run the development server:
 
 ```bash

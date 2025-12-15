@@ -6,12 +6,22 @@
     "dev": "next dev",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "assets:download": "python scripts/download-assets.py",
     "assets:download:node": "node scripts/download-figma-assets.js",
-    "assets:generate": "node scripts/generate-asset-types.js"
+    "assets:generate": "node scripts/generate-asset-types.js",
+    "env:check": "node scripts/check-env.js",
+    "env:validate": "node scripts/check-env.js --validate",
+    "env:check:strict": "node scripts/check-env.js --strict",
+    "audit:performance": "node scripts/performance-audit.js",
+    "analyze": "ANALYZE=true npm run build",
+    "analyze:bundle": "node scripts/analyze-bundle.js"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -29,6 +39,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^14.0.0",

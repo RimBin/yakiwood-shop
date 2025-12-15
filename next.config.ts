@@ -4,6 +4,9 @@ import createNextIntlPlugin from "next-intl/plugin";
 // Point next-intl plugin to the request config file
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
+// Environment variable for bundle analysis
+const ANALYZE = process.env.ANALYZE === 'true';
+
 // Security headers configuration
 const securityHeaders = [
   {
@@ -53,6 +56,37 @@ const securityHeaders = [
   },
 ];
 
+// Cache control headers for static assets
+const cacheHeaders = [
+  {
+    source: '/assets/:path*',
+    headers: [
+      {
+        key: 'Cache-Control',
+        value: 'public, max-age=31536000, immutable',
+      },
+    ],
+  },
+  {
+    source: '/icons/:path*',
+    headers: [
+      {
+        key: 'Cache-Control',
+        value: 'public, max-age=31536000, immutable',
+      },
+    ],
+  },
+  {
+    source: '/images/:path*',
+    headers: [
+      {
+        key: 'Cache-Control',
+        value: 'public, max-age=31536000, immutable',
+      },
+    ],
+  },
+];
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -63,6 +97,12 @@ const nextConfig: NextConfig = {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@react-three/fiber', '@react-three/drei'],
   },
   async headers() {
     return [
@@ -71,7 +111,24 @@ const nextConfig: NextConfig = {
         source: '/(.*)',
         headers: securityHeaders,
       },
+      ...cacheHeaders,
     ];
+  },
+  webpack: (config, { isServer }) => {
+    // Bundle analyzer
+    if (ANALYZE) {
+      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          reportFilename: isServer
+            ? '../analyze/server.html'
+            : './analyze/client.html',
+          openAnalyzer: false,
+        })
+      );
+    }
+    return config;
   },
 };
 

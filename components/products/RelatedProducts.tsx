@@ -1,0 +1,105 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import type { Product } from '@/lib/products';
+import { getRelatedProducts } from '@/lib/products';
+
+interface RelatedProductsProps {
+  productId: string;
+  currentSlug: string;
+}
+
+export default function RelatedProducts({ productId, currentSlug }: RelatedProductsProps) {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadProducts() {
+      setIsLoading(true);
+      const related = await getRelatedProducts(productId, 4);
+      setProducts(related);
+      setIsLoading(false);
+    }
+    loadProducts();
+  }, [productId]);
+
+  if (isLoading) {
+    return (
+      <section className="w-full py-12">
+        <h2 className="font-['DM_Sans'] text-2xl font-medium mb-8">Panašūs produktai</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="animate-pulse">
+              <div className="aspect-square bg-[#EAEAEA] rounded-[24px] mb-4" />
+              <div className="h-4 bg-[#EAEAEA] rounded mb-2" />
+              <div className="h-4 bg-[#EAEAEA] rounded w-2/3" />
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (products.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="w-full py-12">
+      <h2 className="font-['DM_Sans'] text-2xl font-medium tracking-[-0.5px] mb-8">
+        Panašūs produktai
+      </h2>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {products.map((product) => (
+          <Link
+            key={product.id}
+            href={`/produktai/${product.slug}`}
+            className="group block"
+          >
+            <div className="relative aspect-square bg-[#EAEAEA] rounded-[24px] overflow-hidden mb-4 group-hover:shadow-lg transition-shadow">
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              />
+              
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+              
+              {/* Quick view button */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="px-4 py-2 bg-white rounded-full font-['Outfit'] text-xs text-[#161616] shadow-lg">
+                  Peržiūrėti
+                </span>
+              </div>
+            </div>
+            
+            <h3 className="font-['DM_Sans'] font-medium text-[#161616] mb-1 group-hover:text-[#535353] transition-colors">
+              {product.name}
+            </h3>
+            
+            {product.shortDescription && (
+              <p className="font-['Outfit'] text-sm text-[#7C7C7C] mb-2 line-clamp-2">
+                {product.shortDescription}
+              </p>
+            )}
+            
+            <div className="flex items-baseline gap-2">
+              <span className="font-['DM_Sans'] font-medium text-lg text-[#161616]">
+                €{product.basePrice.toFixed(2)}
+              </span>
+              <span className="font-['Outfit'] text-xs text-[#7C7C7C]">
+                nuo
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}

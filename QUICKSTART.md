@@ -1,6 +1,33 @@
-# ✅ Yakiwood Asset System - Setup Complete
+# ✅ Yakiwood Project - Quick Start Guide
 
-## Summary
+## Initial Setup
+
+### 1. **Environment Variables** 🔑
+
+**Required for all features to work:**
+
+```bash
+# Copy environment template
+cp .env.example .env.local
+
+# Edit .env.local with your values
+# Minimum required:
+#   - NEXT_PUBLIC_SITE_URL
+#   - ADMIN_EMAILS
+```
+
+**Validate your setup:**
+```bash
+npm run env:check
+```
+
+📖 **Full guide:** [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)
+
+---
+
+## Asset Management System
+
+### Summary
 
 Your Yakiwood website now has a **complete asset management system** that solves the Figma URL expiry problem by storing all assets locally.
 
