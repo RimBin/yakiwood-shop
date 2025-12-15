@@ -8,7 +8,7 @@ create table products (
   slug text unique not null,
   description text,
   base_price decimal(10,2) not null,
-  wood_type text not null, -- 'spruce', 'larch', 'pine', etc.
+  wood_type text not null, -- 'spruce', 'larch', 'oak', etc.
   category text not null, -- 'cladding', 'decking', 'furniture', etc.
   image_url text,
   model_3d_url text, -- GLB/GLTF model URL

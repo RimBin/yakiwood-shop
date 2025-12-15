@@ -21,11 +21,11 @@ insert into products (name, slug, description, base_price, wood_type, category, 
     true
   ),
   (
-    'Burnt Pine Panels',
-    'burnt-pine-panels',
-    'Elegant burnt pine wall panels with unique grain patterns. Creates stunning accent walls.',
-    38.99,
-    'pine',
+    'Burnt Oak Accent',
+    'burnt-oak-accent',
+    'Elegant burnt oak accent panels with rich grain patterns. Creates stunning accent walls.',
+    58.5,
+    'oak',
     'cladding',
     true
   );
@@ -76,30 +76,4 @@ insert into product_variants (product_id, name, variant_type, hex_color, price_a
     6.00,
     true
   );
-
--- Variants for Burnt Pine Panels
-insert into product_variants (product_id, name, variant_type, hex_color, price_adjustment, is_available) values
-  (
-    (select id from products where slug = 'burnt-pine-panels'),
-    'Natural Burnt',
-    'color',
-    '#332618',
-    0,
-    true
-  ),
-  (
-    (select id from products where slug = 'burnt-pine-panels'),
-    'Charcoal',
-    'color',
-    '#1c1510',
-    4.00,
-    true
-  ),
-  (
-    (select id from products where slug = 'burnt-pine-panels'),
-    'Midnight Black',
-    'color',
-    '#0d0a08',
-    7.00,
-    true
-  );
+ 
