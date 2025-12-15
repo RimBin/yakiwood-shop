@@ -1,38 +1,74 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared';
+import { createClient } from '@/lib/supabase/client';
+
+type Product = {
+  id: string | number;
+  name: string;
+  price: number;
+  image: string;
+  category: string; // wood type
+  slug: string | number;
+};
+
+const supabase = createClient();
+
+const fallbackProducts: Product[] = [
+  { id: 1, slug: 1, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgSpruce.png', category: 'spruce' },
+  { id: 2, slug: 2, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgLarch1.png', category: 'larch' },
+];
 
 export default function ProductsPage() {
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | string>('all');
+  const [allProducts, setAllProducts] = useState<Product[]>(fallbackProducts);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Product data - replace with real data from your database
-  const allProducts = [
-    { id: 1, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgSpruce.png', category: 'spruce' },
-    { id: 2, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgLarch1.png', category: 'larch' },
-    { id: 3, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgProject1.jpg', category: 'spruce' },
-    { id: 4, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgLarch2.png', category: 'larch' },
-    { id: 5, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgProject3.jpg', category: 'spruce' },
-    { id: 6, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgLarch1.png', category: 'larch' },
-    { id: 7, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgProject5.jpg', category: 'spruce' },
-    { id: 8, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgLarch2.png', category: 'larch' },
-    { id: 9, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgProject4.jpg', category: 'spruce' },
-    { id: 10, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgLarch1.png', category: 'larch' },
-    { id: 11, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgProject6.jpg', category: 'spruce' },
-    { id: 12, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgTerrace.jpg', category: 'larch' },
-  ];
+  useEffect(() => {
+    async function loadProducts() {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error || !data) {
+        setIsLoading(false);
+        return;
+      }
+
+      const mapped: Product[] = data.map((p: any, index: number) => ({
+        id: p.id ?? index,
+        slug: p.slug ?? p.id ?? index,
+        name: p.name ?? 'Produktas',
+        price: p.base_price ?? 0,
+        image: p.image || '/assets/imgSpruce.png',
+        category: p.wood_type || 'other',
+      }));
+
+      if (mapped.length > 0) {
+        setAllProducts(mapped);
+      }
+      setIsLoading(false);
+    }
+
+    loadProducts();
+  }, []);
 
   const filters = [
     { id: 'all', label: 'All woods' },
     { id: 'spruce', label: 'Spruce wood' },
     { id: 'larch', label: 'Larch wood' },
+    { id: 'pine', label: 'Pine wood' },
   ];
 
-  const products = activeFilter === 'all' 
-    ? allProducts 
-    : allProducts.filter(p => p.category === activeFilter);
+  const products =
+    activeFilter === 'all'
+      ? allProducts
+      : allProducts.filter((p) => p.category === activeFilter);
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
@@ -79,7 +115,7 @@ export default function ProductsPage() {
           {products.map((product) => (
             <Link
               key={product.id}
-              href={`/products/${product.id}`}
+              href={`/products/${product.slug}`}
               className="flex flex-col gap-[8px] group"
             >
               <div className="relative w-full h-[250px] border border-[#161616] border-opacity-30 overflow-hidden">
