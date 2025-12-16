@@ -12,17 +12,17 @@ import { unstable_cache } from 'next/cache';
  */
 export const CachePresets = {
   // Static content that rarely changes (1 hour)
-  STATIC: { revalidate: 3600, tags: ['static'] },
+  STATIC: { revalidate: 3600, tags: ['static'] } as const,
   
   // Products that change occasionally (30 minutes)
-  PRODUCTS: { revalidate: 1800, tags: ['products'] },
+  PRODUCTS: { revalidate: 1800, tags: ['products'] } as const,
   
   // Frequently updated content (5 minutes)
-  DYNAMIC: { revalidate: 300, tags: ['dynamic'] },
+  DYNAMIC: { revalidate: 300, tags: ['dynamic'] } as const,
   
   // User-specific data (no revalidation, only tag-based)
-  USER: { revalidate: false, tags: ['user'] },
-} as const;
+  USER: { revalidate: false as false, tags: ['user'] } as const,
+};
 
 /**
  * Generic cached query wrapper
@@ -53,7 +53,7 @@ export const getCachedProducts = unstable_cache(
     return products;
   },
   ['products-list'],
-  CachePresets.PRODUCTS
+  { revalidate: 1800, tags: ['products'] }
 );
 
 export const getCachedProduct = (productId: string) =>
@@ -63,7 +63,7 @@ export const getCachedProduct = (productId: string) =>
       return product;
     },
     ['product', productId],
-    CachePresets.PRODUCTS
+    { revalidate: 1800, tags: ['products'] }
   );
 
 export const getCachedProductsByCategory = (category: string) =>
@@ -73,7 +73,7 @@ export const getCachedProductsByCategory = (category: string) =>
       return products;
     },
     ['products-by-category', category],
-    CachePresets.PRODUCTS
+    { revalidate: 1800, tags: ['products'] }
   );
 
 /**

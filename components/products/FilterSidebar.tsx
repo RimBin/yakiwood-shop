@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import RangeSlider from '@/components/ui/RangeSlider';
-import { Minus } from '@/components/icons/Minus';
-import { Plus } from '@/components/icons/Plus';
+import Minus from '@/components/icons/Minus';
+import Plus from '@/components/icons/Plus';
 
 export interface ProductFilters {
   priceRange: [number, number];

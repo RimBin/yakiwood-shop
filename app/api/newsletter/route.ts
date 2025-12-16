@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Netinkami duomenys',
-          details: validation.error.errors,
+          details: validation.error.issues,
         },
         { status: 400 }
       );

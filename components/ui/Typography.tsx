@@ -62,7 +62,7 @@ export const Typography: React.FC<TypographyProps> = ({
     copyright: 'span',
   };
 
-  const Element = as || defaultElement[variant];
+  const Element = (as || defaultElement[variant]) as any;
   const baseStyles = typographyStyles[variant];
 
   return <Element className={`${baseStyles} ${className}`}>{children}</Element>;

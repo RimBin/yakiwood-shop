@@ -8,3 +8,6 @@ import {authorType} from './authorType'
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [blockContentType, categoryType, postType, authorType],
 }
+
+// Named export for sanity.config.ts
+export const schemaTypes = schema.types;

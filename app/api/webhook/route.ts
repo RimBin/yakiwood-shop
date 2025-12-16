@@ -126,7 +126,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   // Extract customer details
   const customerEmail = session.customer_details?.email || session.customer_email;
   const customerName = session.customer_details?.name || 'Guest';
-  const shippingDetails = session.shipping_details || session.customer_details;
+  const shippingDetails = session.customer_details;
 
   if (!customerEmail) {
     throw new Error('No customer email found in session');

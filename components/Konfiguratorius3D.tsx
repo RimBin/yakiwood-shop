@@ -202,15 +202,3 @@ export default function Konfiguratorius3D({
     </div>
   );
 }
-                color,
-                finish,
-              });
-            }}
-          >
-            {t('addToCart')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}

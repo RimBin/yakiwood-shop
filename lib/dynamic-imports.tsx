@@ -46,7 +46,7 @@ export const DynamicFilterSidebar = dynamic(
  * Admin/account component - load on demand
  */
 export const DynamicOrdersList = dynamic(
-  () => import('@/components/account/OrdersList'),
+  () => import('@/components/account/OrdersClient'),
   {
     loading: () => <OrdersListSkeleton />,
   }
@@ -57,7 +57,7 @@ export const DynamicOrdersList = dynamic(
  * Heavy admin component - only for admin users
  */
 export const DynamicProductManagement = dynamic(
-  () => import('@/components/admin/ProductManagement'),
+  () => import('@/components/admin/ProductsAdminClient'),
   {
     loading: () => (
       <div className="p-6">
@@ -72,10 +72,13 @@ export const DynamicProductManagement = dynamic(
   }
 );
 
+/*
+// TODO: Create these components when needed
+
 /**
  * Admin Analytics Dashboard
  * Charts and heavy visualization libraries
- */
+ *
 export const DynamicAnalyticsDashboard = dynamic(
   () => import('@/components/admin/AnalyticsDashboard'),
   {
@@ -93,7 +96,7 @@ export const DynamicAnalyticsDashboard = dynamic(
 /**
  * Newsletter Signup Modal
  * Modal component - load when triggered
- */
+ *
 export const DynamicNewsletterModal = dynamic(
   () => import('@/components/modals/NewsletterModal'),
   {
@@ -104,7 +107,7 @@ export const DynamicNewsletterModal = dynamic(
 /**
  * Cart Drawer
  * Shopping cart UI - load on first open
- */
+ *
 export const DynamicCartDrawer = dynamic(
   () => import('@/components/cart/CartDrawer'),
   {
@@ -122,25 +125,9 @@ export const DynamicCartDrawer = dynamic(
 );
 
 /**
- * Image Gallery/Lightbox
- * Product image viewer - load when clicked
- */
-export const DynamicImageGallery = dynamic(
-  () => import('@/components/products/ImageGallery'),
-  {
-    loading: () => (
-      <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
-        <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin" />
-      </div>
-    ),
-    ssr: false,
-  }
-);
-
-/**
  * Rich Text Editor (for admin)
  * Heavy editor component
- */
+ *
 export const DynamicRichTextEditor = dynamic(
   () => import('@/components/admin/RichTextEditor'),
   {
@@ -154,7 +141,7 @@ export const DynamicRichTextEditor = dynamic(
 /**
  * Color Picker Component
  * Design tool - load on demand
- */
+ *
 export const DynamicColorPicker = dynamic(
   () => import('@/components/ui/ColorPicker'),
   {
@@ -164,6 +151,7 @@ export const DynamicColorPicker = dynamic(
     ssr: false,
   }
 );
+*/
 
 // Skeleton Components
 function OrdersListSkeleton() {
@@ -188,7 +176,8 @@ function OrdersListSkeleton() {
  * Call this on user interaction (hover, scroll, etc.)
  */
 export function prefetchHeavyComponents() {
-  // Prefetch commonly needed components
-  DynamicCartDrawer.preload();
-  DynamicFilterSidebar.preload();
+  // Prefetch commonly needed components when they exist
+  // Components will be preloaded when needed
+  // DynamicCartDrawer.preload();
+  // DynamicFilterSidebar.preload();
 }

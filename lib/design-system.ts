@@ -189,6 +189,37 @@ export const layout = {
 // ============================================================================
 
 /**
+ * Generate responsive clamp() value for fluid typography
+ * @param mobile - Min size (mobile)
+ * @param desktop - Max size (desktop)
+ * @param minViewport - Min viewport width (default: 375px)
+ * @param maxViewport - Max viewport width (default: 1440px)
+ */
+export const clamp = (
+  mobile: number,
+  desktop: number,
+  minViewport = 375,
+  maxViewport = 1440
+): string => {
+  const slope = (desktop - mobile) / (maxViewport - minViewport);
+  const base = mobile - slope * minViewport;
+  return `clamp(${mobile}px, ${base.toFixed(2)}px + ${(slope * 100).toFixed(2)}vw, ${desktop}px)`;
+};
+
+/**
+ * Responsive typography with clamp()
+ * Mobile → Desktop scaling
+ */
+export const responsiveTypography = {
+  h1: clamp(48, 128),        // 48px mobile → 128px desktop
+  h2: clamp(32, 64),         // 32px mobile → 64px desktop
+  h3: clamp(24, 40),         // 24px mobile → 40px desktop
+  h4: clamp(18, 24),         // 18px mobile → 24px desktop
+  bigText: clamp(28, 52),    // 28px mobile → 52px desktop
+  text: clamp(14, 16),       // 14px mobile → 16px desktop
+} as const;
+
+/**
  * Convert design system typography to Tailwind classes
  */
 export const getTypographyClasses = (variant: keyof typeof typography) => {
@@ -200,6 +231,14 @@ export const getTypographyClasses = (variant: keyof typeof typography) => {
   
   return `font-['${fontFamily}'] ${fontWeight}`;
 };
+
+/**
+ * Get responsive font size as inline style
+ * Usage: <h1 style={getResponsiveFontSize('h1')}>
+ */
+export const getResponsiveFontSize = (variant: keyof typeof responsiveTypography) => ({
+  fontSize: responsiveTypography[variant],
+});
 
 /**
  * Convert hex color to RGB for Tailwind

@@ -166,8 +166,8 @@ export function trackNavigation() {
       // Response time
       trackCustomMetric('response_time', navTiming.responseEnd - navTiming.responseStart);
       
-      // DOM processing time
-      trackCustomMetric('dom_processing', navTiming.domComplete - navTiming.domLoading);
+      // DOM processing time (use domComplete and domInteractive instead of deprecated domLoading)
+      trackCustomMetric('dom_processing', navTiming.domComplete - navTiming.domInteractive);
       
       // Load complete time
       trackCustomMetric('load_complete', navTiming.loadEventEnd - navTiming.loadEventStart);
@@ -305,13 +305,13 @@ export function initPerformanceMonitoring() {
   });
 }
 
-// Type augmentation for gtag
+// Type augmentation for gtag - using same signature as lib/analytics.ts
 declare global {
   interface Window {
     gtag?: (
-      command: string,
-      eventName: string,
-      params?: Record<string, any>
+      command: 'config' | 'event' | 'js',
+      targetId: string | Date,
+      config?: Record<string, any>
     ) => void;
   }
 }

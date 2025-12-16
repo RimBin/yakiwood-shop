@@ -133,7 +133,7 @@ export const useCartStore = create<CartState>()(
         }
         return localStorage;
       }),
-      partialPersist: (state) => ({
+      partialize: (state) => ({
         // Only persist items, not UI state like isHydrated
         items: state.items,
       }),

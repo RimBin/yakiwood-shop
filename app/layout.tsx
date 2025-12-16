@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from 'react';
 import { DM_Sans, Outfit, Tiro_Tamil } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from 'next-intl';
@@ -49,7 +50,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang={locale}>
       <body className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased bg-[#e1e1e1]`}>
-        <GoogleAnalytics />
+        <Suspense fallback={null}>
+          <GoogleAnalytics />
+        </Suspense>
         <NextIntlClientProvider locale={locale} messages={enMessages}>
           <Header />
           {children}
