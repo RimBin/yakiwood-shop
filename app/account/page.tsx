@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
+export const dynamic = 'force-dynamic';
+
 export default function AccountPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -33,6 +35,12 @@ export default function AccountPage() {
   // Check authentication on mount
   useEffect(() => {
     const checkAuth = async () => {
+      if (!supabase) {
+        setError('Supabase is not configured.');
+        setLoading(false);
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -84,6 +92,11 @@ export default function AccountPage() {
     setError('');
     setSuccess('');
 
+    if (!supabase) {
+      setError('Supabase is not configured.');
+      return;
+    }
+
     if (!userId) return;
 
     const fullName = `${firstName} ${lastName}`.trim();
@@ -109,6 +122,11 @@ export default function AccountPage() {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    if (!supabase) {
+      setError('Supabase is not configured.');
+      return;
+    }
 
     if (!userId) return;
 
@@ -157,6 +175,11 @@ export default function AccountPage() {
     setError('');
     setSuccess('');
 
+    if (!supabase) {
+      setError('Supabase is not configured.');
+      return;
+    }
+
     // Validate password
     if (newPassword !== confirmPassword) {
       setError('New passwords do not match');
@@ -185,6 +208,11 @@ export default function AccountPage() {
   };
 
   const handleSignOut = async () => {
+    if (!supabase) {
+      router.push('/');
+      return;
+    }
+
     await supabase.auth.signOut();
     router.push('/');
   };
