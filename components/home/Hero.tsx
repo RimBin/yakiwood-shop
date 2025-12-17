@@ -1,6 +1,5 @@
 ﻿import React from 'react';
 import Image from 'next/image';
-import { containerXClasses } from '@/lib/design-system/spacing';
 
 // Local assets for Hero section
 const imgMaskGroup = '/assets/hero/mask-group.png';
@@ -31,7 +30,7 @@ export default function Hero() {
     <section className="w-full bg-[#E1E1E1] relative overflow-hidden">
       {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
       <div className="lg:hidden flex flex-col">
-        <div className={`${containerXClasses} pt-[16px] md:pt-[32px] pb-[8px] flex flex-col gap-[8px] md:gap-[16px]`}>
+        <div className="px-4 md:px-8 pt-4 md:pt-8 pb-2 flex flex-col gap-2 md:gap-4">
           <p className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[600px]" style={{ fontSize: 'clamp(45px, 8vw, 80px)', letterSpacing: 'clamp(-1.8px, -0.04em, -4.4px)' }}>
             {`Timeless beauty, enhanced by fire - `}
             <span className="font-['Tiro_Tamil'] italic">Yakiwood</span>

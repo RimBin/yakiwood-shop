@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { sectionClasses, getGap } from '@/lib/design-system/spacing';
+import { getSectionPadding, getGap } from '@/lib/design-system';
 
 // Local background image for CTA section
 const backgroundImage = "/assets/hero/product-image.png";
@@ -22,7 +22,7 @@ export default function CTA() {
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7625 ===== */}
-      <div className={`lg:hidden relative z-10 flex flex-col items-center justify-center ${sectionClasses}`}>
+      <div className={`lg:hidden relative z-10 flex flex-col items-center justify-center ${getSectionPadding()}`}>
         {/* Heading - Mobile/Tablet */}
         <h2 className="font-['DM_Sans'] font-light text-center max-w-[600px] mb-[32px] md:mb-[40px]" style={{ fontSize: 'clamp(40px, 7vw, 64px)', lineHeight: 1, letterSpacing: 'clamp(-1.8px, -0.04em, -2.56px)' }}>
           <span>Ready to </span>

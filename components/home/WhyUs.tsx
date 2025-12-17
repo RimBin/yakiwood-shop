@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { sectionClasses, getGap } from '@/lib/design-system/spacing';
+import { getSectionPadding, getGap } from '@/lib/design-system';
 
 // Local assets for WhyUs section
 const iconVector = "/assets/icons/vector-top.svg";
@@ -42,7 +42,7 @@ export default function WhyUs() {
   return (
     <section className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7566 ===== */}
-      <div className={`lg:hidden ${sectionClasses}`}>
+      <div className={`lg:hidden ${getSectionPadding()}`}>
         {/* Title Section - Mobile/Tablet */}
         <div className={`flex flex-col ${getGap('sm')} mb-[16px] md:mb-[24px]`}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">

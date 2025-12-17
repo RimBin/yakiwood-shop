@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { sectionClasses, getGap } from '@/lib/design-system/spacing';
+import { getSectionPadding, getGap } from '@/lib/design-system';
 
 // Local asset - Steps divider line (placeholder until proper SVG is added)
 const imgVector37 = "/assets/icons/vector-top.svg";
@@ -34,7 +34,7 @@ export default function Steps() {
   return (
     <section className="w-full bg-[#161616]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7672 ===== */}
-      <div className={`lg:hidden ${sectionClasses}`}>
+      <div className={`lg:hidden ${getSectionPadding()}`}>
         {/* Title Section - Mobile/Tablet */}
         <div className="mb-[32px] md:mb-[40px]">
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-white mb-[8px]">

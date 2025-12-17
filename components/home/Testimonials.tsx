@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState, useRef } from "react";
-import { sectionClasses, containerXClasses } from '@/lib/design-system/spacing';
+import { getSectionSpacing, getContainerPadding } from '@/lib/design-system';
 
 interface Testimonial {
   quote: string;
@@ -55,9 +55,9 @@ export default function Testimonials() {
   return (
     <section id="testimonials" className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7576 ===== */}
-      <div className={`lg:hidden ${sectionClasses}`}>
+      <div className={`lg:hidden ${getSectionSpacing()}`}>
         {/* Title Section - Mobile/Tablet */}
-        <div className={`${containerXClasses} mb-[24px] md:mb-[32px]`}>
+        <div className={`${getContainerPadding()} mb-[24px] md:mb-[32px]`}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
             TESTIMONIALS
           </p>

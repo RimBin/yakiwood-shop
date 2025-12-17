@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { seedProducts } from "@/data/seed-products";
 
 interface Product {
   id: string;
@@ -56,6 +57,18 @@ export default function AdminPage() {
     images: '',
     inStock: true,
   });
+  const [imageFiles, setImageFiles] = useState<string[]>([]);
+  const [customCategory, setCustomCategory] = useState('');
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedFileNames, setSelectedFileNames] = useState('No file selected');
+
+  // Get unique categories from existing products
+  const getUniqueCategories = () => {
+    const defaultCategories = ['facades', 'terraces', 'fences', 'interiors'];
+    const productCategories = products.map(p => p.category).filter(c => !defaultCategories.includes(c));
+    return [...defaultCategories, ...Array.from(new Set(productCategories))];
+  };
 
   // Projects state
   const [projects, setProjects] = useState<Project[]>([]);
@@ -96,18 +109,77 @@ export default function AdminPage() {
     if (savedPosts) setPosts(JSON.parse(savedPosts));
   }, []);
 
+  useEffect(() => {
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.setAttribute('data-text', 'Choose files');
+      fileInput.setAttribute('data-no-file', 'No file selected');
+    }
+  }, []);
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) {
+      setSelectedFileNames('No file selected');
+      return;
+    }
+    const names = Array.from(files).map(f => f.name).join(', ');
+    setSelectedFileNames(names);
+  };
+
   const showMessage = (msg: string) => {
     setMessage(msg);
     setTimeout(() => setMessage(''), 3000);
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const readers: Promise<string>[] = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const reader = new FileReader();
+      
+      const promise = new Promise<string>((resolve) => {
+        reader.onload = (event) => {
+          resolve(event.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      readers.push(promise);
+    }
+
+    Promise.all(readers).then((base64Images) => {
+      setImageFiles([...imageFiles, ...base64Images]);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setImageFiles(imageFiles.filter((_, i) => i !== index));
+  };
+
+  const handleAddCustomCategory = () => {
+    if (customCategory.trim()) {
+      setProductForm({ ...productForm, category: customCategory.toLowerCase().replace(/\s+/g, '-') });
+      setCustomCategory('');
+      setShowCustomCategory(false);
+    }
+  };
+
   // Product handlers
   const handleProductSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const urlImages = productForm.images.split(',').map(url => url.trim()).filter(Boolean);
+    const allImages = [...imageFiles, ...urlImages];
+    
     const newProduct: Product = {
       id: Date.now().toString(),
       ...productForm,
-      images: productForm.images.split(',').map(url => url.trim()).filter(Boolean),
+      images: allImages,
       basePrice: Number(productForm.basePrice),
     };
     
@@ -124,6 +196,7 @@ export default function AdminPage() {
       images: '',
       inStock: true,
     });
+    setImageFiles([]);
     
     showMessage('Product added successfully!');
   };
@@ -241,9 +314,23 @@ export default function AdminPage() {
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}
         <div className="mb-[clamp(32px,4vw,48px)]">
-          <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616] mb-[8px]">
-            Admin Panel
-          </h1>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-[16px] mb-[8px]">
+            <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616]">
+              Admin Panel
+            </h1>
+            {products.length === 0 && (
+              <button
+                onClick={() => {
+                  setProducts(seedProducts as Product[]);
+                  localStorage.setItem('yakiwood_products', JSON.stringify(seedProducts));
+                  showMessage('8 products loaded!');
+                }}
+                className="h-[48px] px-[24px] rounded-[100px] bg-green-500 font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-white hover:bg-green-600 transition-colors whitespace-nowrap"
+              >
+                Load Sample Products
+              </button>
+            )}
+          </div>
           <p className="font-['Outfit'] font-light text-[clamp(14px,1.5vw,16px)] text-[#535353]">
             Manage products, projects, and blog posts
           </p>
@@ -337,15 +424,49 @@ export default function AdminPage() {
                     </label>
                     <select
                       value={productForm.category}
-                      onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
-                      className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                      onChange={(e) => {
+                        if (e.target.value === 'custom') {
+                          setShowCustomCategory(true);
+                        } else {
+                          setProductForm({ ...productForm, category: e.target.value });
+                        }
+                      }}
+                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
                     >
-                      <option value="facades">Facades</option>
-                      <option value="terraces">Terraces</option>
-                      <option value="fences">Fences</option>
-                      <option value="interiors">Interiors</option>
-                      <option value="furniture">Furniture</option>
+                      {getUniqueCategories().map(cat => (
+                        <option key={cat} value={cat}>
+                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </option>
+                      ))}
+                      <option value="custom">+ Add Custom Category</option>
                     </select>
+                    
+                    {showCustomCategory && (
+                      <div className="mt-[12px] flex gap-[8px]">
+                        <input
+                          type="text"
+                          value={customCategory}
+                          onChange={(e) => setCustomCategory(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomCategory())}
+                          placeholder="Enter custom category"
+                          className="flex-1 px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddCustomCategory}
+                          className="px-[16px] py-[12px] rounded-[12px] bg-[#161616] text-white font-['Outfit'] text-[12px] hover:bg-[#535353] transition-colors"
+                        >
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCustomCategory(false)}
+                          className="px-[16px] py-[12px] rounded-[12px] border border-[#BBBBBB] font-['Outfit'] text-[12px] hover:bg-[#EAEAEA] transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -381,14 +502,59 @@ export default function AdminPage() {
 
                 <div>
                   <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                    Image URLs (comma-separated)
+                    Upload Images
                   </label>
+                  <div className="w-full border border-[#BBBBBB] rounded-[12px]">
+                    <input
+                      id="file-upload"
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => { handleFileInputChange(e); handleImageUpload(e); }}
+                      className="sr-only"
+                    />
+
+                    <div className="flex items-center gap-4 p-[12px]">
+                      <label htmlFor="file-upload" className="inline-flex items-center gap-3 bg-[#161616] text-white px-[16px] py-[8px] rounded-[100px] cursor-pointer font-['Outfit'] text-[12px]">
+                        Choose files
+                      </label>
+                      <span className="text-[#535353] font-['Outfit'] text-[14px]">
+                        {selectedFileNames}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {imageFiles.length > 0 && (
+                    <div className="mt-[16px] grid grid-cols-2 md:grid-cols-4 gap-[12px]">
+                      {imageFiles.map((img, index) => (
+                        <div key={index} className="relative group">
+                          <img 
+                            src={img} 
+                            alt={`Preview ${index + 1}`} 
+                            className="w-full h-[120px] object-cover rounded-[12px] border border-[#BBBBBB]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-[4px] right-[4px] w-[24px] h-[24px] rounded-full bg-red-500 text-white text-[14px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
+                    Or add image URLs (comma-separated):
+                  </p>
                   <input
                     type="text"
                     value={productForm.images}
                     onChange={(e) => setProductForm({ ...productForm, images: e.target.value })}
-                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
-                    placeholder="/assets/product1.jpg, /assets/product2.jpg"
+                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none mt-[8px]"
+                    placeholder="/assets/product1.jpg, https://example.com/image.jpg"
                   />
                 </div>
 
@@ -447,14 +613,33 @@ export default function AdminPage() {
                             )}
                           </div>
                           {product.description && (
-                            <p className="font-['Outfit'] text-[14px] text-[#535353] mb-[8px]">
+                            <p className="font-['Outfit'] text-[14px] text-[#535353] mb-[12px]">
                               {product.description}
                             </p>
                           )}
                           {product.images.length > 0 && (
-                            <p className="font-['Outfit'] text-[12px] text-[#535353]">
-                              {product.images.length} image(s)
-                            </p>
+                            <>
+                              <div className="flex gap-[8px] mb-[8px] overflow-x-auto pb-[8px]">
+                                {product.images.slice(0, 4).map((img, idx) => (
+                                  <img 
+                                    key={idx}
+                                    src={img} 
+                                    alt={`${product.name} ${idx + 1}`}
+                                    className="w-[80px] h-[80px] object-cover rounded-[8px] border border-[#BBBBBB] flex-shrink-0"
+                                  />
+                                ))}
+                                {product.images.length > 4 && (
+                                  <div className="w-[80px] h-[80px] rounded-[8px] border border-[#BBBBBB] flex items-center justify-center bg-[#E1E1E1] flex-shrink-0">
+                                    <span className="font-['Outfit'] text-[12px] text-[#535353]">
+                                      +{product.images.length - 4}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              <p className="font-['Outfit'] text-[12px] text-[#535353]">
+                                {product.images.length} image(s) in gallery
+                              </p>
+                            </>
                           )}
                         </div>
                         <button
