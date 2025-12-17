@@ -8,6 +8,9 @@ import {
   searchSubscribers,
 } from '@/lib/newsletter/admin';
 
+// Force dynamic rendering (don't prerender at build time)
+export const dynamic = 'force-dynamic';
+
 // GET /api/admin/newsletter - Get subscribers or stats
 export async function GET(request: NextRequest) {
   try {

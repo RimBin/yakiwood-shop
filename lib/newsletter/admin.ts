@@ -3,10 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 // Admin utilities for managing newsletter subscribers
 // Use these functions in admin dashboard or API routes
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+// Only create client if env vars are available
+const supabaseAdmin = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 export interface Subscriber {
   id: string;
@@ -40,6 +43,10 @@ export async function getSubscribers(filters?: {
   limit?: number;
   offset?: number;
 }): Promise<{ data: Subscriber[]; error: any; count: number }> {
+  if (!supabaseAdmin) {
+    return { data: [], error: new Error('Supabase not configured'), count: 0 };
+  }
+
   let query = supabaseAdmin
     .from('newsletter_subscribers')
     .select('*', { count: 'exact' })
@@ -70,6 +77,18 @@ export async function getSubscribers(filters?: {
  * Get subscriber statistics
  */
 export async function getSubscriberStats(): Promise<SubscriberStats> {
+  if (!supabaseAdmin) {
+    return {
+      total: 0,
+      active: 0,
+      unsubscribed: 0,
+      bounced: 0,
+      pending: 0,
+      bySource: {},
+      recentSignups: 0,
+    };
+  }
+
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -104,6 +123,10 @@ export async function getSubscriberStats(): Promise<SubscriberStats> {
  * Unsubscribe a user by email
  */
 export async function unsubscribeUser(email: string): Promise<{ success: boolean; error?: string }> {
+  if (!supabaseAdmin) {
+    return { success: false, error: 'Supabase not configured' };
+  }
+
   const { error } = await supabaseAdmin
     .from('newsletter_subscribers')
     .update({
@@ -124,6 +147,10 @@ export async function unsubscribeUser(email: string): Promise<{ success: boolean
  * Resubscribe a user by email
  */
 export async function resubscribeUser(email: string): Promise<{ success: boolean; error?: string }> {
+  if (!supabaseAdmin) {
+    return { success: false, error: 'Supabase not configured' };
+  }
+
   const { error } = await supabaseAdmin
     .from('newsletter_subscribers')
     .update({
@@ -145,6 +172,10 @@ export async function resubscribeUser(email: string): Promise<{ success: boolean
  * Delete a subscriber by email (GDPR right to be forgotten)
  */
 export async function deleteSubscriber(email: string): Promise<{ success: boolean; error?: string }> {
+  if (!supabaseAdmin) {
+    return { success: false, error: 'Supabase not configured' };
+  }
+
   const { error } = await supabaseAdmin
     .from('newsletter_subscribers')
     .delete()
@@ -243,6 +274,10 @@ export async function importSubscribersFromCSV(
 export async function searchSubscribers(
   query: string
 ): Promise<{ data: Subscriber[]; error: any }> {
+  if (!supabaseAdmin) {
+    return { data: [], error: new Error('Supabase not configured') };
+  }
+
   const { data, error } = await supabaseAdmin
     .from('newsletter_subscribers')
     .select('*')
