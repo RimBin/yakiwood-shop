@@ -222,6 +222,10 @@ export async function exportSubscribersToCSV(status?: string): Promise<string> {
 export async function importSubscribersFromCSV(
   csvContent: string
 ): Promise<{ success: number; failed: number; errors: string[] }> {
+  if (!supabaseAdmin) {
+    return { success: 0, failed: 0, errors: ['Supabase not configured'] };
+  }
+
   const lines = csvContent.split('\n').filter(line => line.trim());
   const headers = lines[0].split(',');
   
@@ -295,6 +299,10 @@ export async function updateSubscriberMetadata(
   email: string,
   metadata: Record<string, any>
 ): Promise<{ success: boolean; error?: string }> {
+  if (!supabaseAdmin) {
+    return { success: false, error: 'Supabase not configured' };
+  }
+
   const { error } = await supabaseAdmin
     .from('newsletter_subscribers')
     .update({ metadata })
@@ -311,6 +319,10 @@ export async function updateSubscriberMetadata(
  * Mark email as bounced
  */
 export async function markAsBounced(email: string): Promise<{ success: boolean; error?: string }> {
+  if (!supabaseAdmin) {
+    return { success: false, error: 'Supabase not configured' };
+  }
+
   const { error } = await supabaseAdmin
     .from('newsletter_subscribers')
     .update({ status: 'bounced' })
