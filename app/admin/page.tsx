@@ -62,12 +62,12 @@ export default function AdminPage() {
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFileNames, setSelectedFileNames] = useState('No file selected');
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
 
-  // Get unique categories from existing products
-  const getUniqueCategories = () => {
+  // Get all categories (default + custom)
+  const getAllCategories = () => {
     const defaultCategories = ['facades', 'terraces', 'fences', 'interiors'];
-    const productCategories = products.map(p => p.category).filter(c => !defaultCategories.includes(c));
-    return [...defaultCategories, ...Array.from(new Set(productCategories))];
+    return [...defaultCategories, ...customCategories];
   };
 
   // Projects state
@@ -107,6 +107,9 @@ export default function AdminPage() {
 
     const savedPosts = localStorage.getItem('yakiwood_posts');
     if (savedPosts) setPosts(JSON.parse(savedPosts));
+
+    const savedCustomCategories = localStorage.getItem('yakiwood_custom_categories');
+    if (savedCustomCategories) setCustomCategories(JSON.parse(savedCustomCategories));
   }, []);
 
   useEffect(() => {
@@ -163,9 +166,28 @@ export default function AdminPage() {
 
   const handleAddCustomCategory = () => {
     if (customCategory.trim()) {
-      setProductForm({ ...productForm, category: customCategory.toLowerCase().replace(/\s+/g, '-') });
-      setCustomCategory('');
-      setShowCustomCategory(false);
+      const newCat = customCategory.toLowerCase().replace(/\s+/g, '-');
+      if (!customCategories.includes(newCat)) {
+        const updated = [...customCategories, newCat];
+        setCustomCategories(updated);
+        localStorage.setItem('yakiwood_custom_categories', JSON.stringify(updated));
+        setProductForm({ ...productForm, category: newCat });
+        setCustomCategory('');
+        setShowCustomCategory(false);
+        showMessage('Custom category added!');
+      } else {
+        showMessage('Category already exists');
+        setCustomCategory('');
+      }
+    }
+  };
+
+  const handleDeleteCustomCategory = (categoryToDelete: string) => {
+    if (window.confirm(`Delete category "${categoryToDelete}"? Products using this category will keep it.`)) {
+      const updated = customCategories.filter(c => c !== categoryToDelete);
+      setCustomCategories(updated);
+      localStorage.setItem('yakiwood_custom_categories', JSON.stringify(updated));
+      showMessage('Category deleted');
     }
   };
 
@@ -433,7 +455,7 @@ export default function AdminPage() {
                       }}
                       className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
                     >
-                      {getUniqueCategories().map(cat => (
+                      {getAllCategories().map(cat => (
                         <option key={cat} value={cat}>
                           {cat.charAt(0).toUpperCase() + cat.slice(1)}
                         </option>
@@ -465,6 +487,27 @@ export default function AdminPage() {
                         >
                           Cancel
                         </button>
+                      </div>
+                    )}
+                    
+                    {customCategories.length > 0 && (
+                      <div className="mt-[12px]">
+                        <p className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">Custom Categories:</p>
+                        <div className="flex flex-wrap gap-[8px]">
+                          {customCategories.map(cat => (
+                            <div key={cat} className="flex items-center gap-[8px] px-[12px] py-[6px] bg-[#EAEAEA] rounded-[100px] border border-[#BBBBBB]">
+                              <span className="font-['Outfit'] text-[12px] text-[#161616]">{cat}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteCustomCategory(cat)}
+                                className="text-red-500 hover:text-red-700 text-[16px] font-bold leading-none"
+                                title="Delete category"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
