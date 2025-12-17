@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { sectionClasses, getGap } from '@/lib/design-system/spacing';
 
 // Local asset - Steps divider line (placeholder until proper SVG is added)
 const imgVector37 = "/assets/icons/vector-top.svg";
@@ -33,40 +34,40 @@ export default function Steps() {
   return (
     <section className="w-full bg-[#161616]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7672 ===== */}
-      <div className="lg:hidden px-[16px] py-[64px]">
-        {/* Title Section - Mobile */}
-        <div className="mb-[32px]">
+      <div className={`lg:hidden ${sectionClasses}`}>
+        {/* Title Section - Mobile/Tablet */}
+        <div className="mb-[32px] md:mb-[40px]">
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-white mb-[8px]">
             Process
           </p>
-          <p className="font-['DM_Sans'] font-light text-[40px] leading-none tracking-[-1.6px] text-white">
+          <p className="font-['DM_Sans'] font-light leading-none text-white max-w-[600px]" style={{ fontSize: 'clamp(32px, 6vw, 52px)', letterSpacing: 'clamp(-1.6px, -0.04em, -2.08px)' }}>
             <span>Simple & fast </span>
             <span className="font-['Tiro_Tamil'] italic">ordering</span>
             <span> process</span>
           </p>
         </div>
 
-        {/* Steps with vertical line - Mobile */}
-        <div className="relative pl-[40px]">
-          {/* Vertical connecting line */}
-          <div className="absolute left-[15px] top-[24px] bottom-[24px] w-[1px] bg-[#535353]" />
+        {/* Steps with vertical/horizontal line */}
+        <div className="relative md:grid md:grid-cols-2 md:gap-x-[64px] md:gap-y-[40px] pl-[40px] md:pl-0">
+          {/* Vertical connecting line - mobile only */}
+          <div className="md:hidden absolute left-[15px] top-[24px] bottom-[24px] w-[1px] bg-[#535353]" />
 
           {/* Steps */}
-          <div className="flex flex-col gap-[32px]">
+          <div className="flex flex-col gap-[32px] md:contents">
             {steps.map((step, index) => (
-              <div key={index} className="relative flex flex-col gap-[16px]">
-                {/* Step number circle - positioned on the line */}
-                <div className="absolute left-[-40px] top-0 bg-[#161616] border border-[#535353] rounded-[100px] w-[32px] h-[32px] flex items-center justify-center">
+              <div key={index} className="relative flex flex-col gap-[16px] md:gap-[12px]">
+                {/* Step number circle */}
+                <div className="absolute md:relative left-[-40px] md:left-0 top-0 bg-[#161616] border border-[#535353] rounded-[100px] w-[32px] h-[32px] flex items-center justify-center mb-0 md:mb-[8px]">
                   <p className="font-['DM_Sans'] font-medium text-[12px] leading-[1.1] tracking-[0.36px] uppercase text-white">
                     {step.number}
                   </p>
                 </div>
                 {/* Step content */}
                 <div className="flex flex-col gap-[8px]">
-                  <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white">
+                  <p className="font-['DM_Sans'] font-medium text-[16px] md:text-[18px] leading-[1.2] tracking-[-0.36px] text-white">
                     {step.title}
                   </p>
-                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB] max-w-[280px]">
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB] max-w-[280px] md:max-w-full">
                     {step.description}
                   </p>
                 </div>
@@ -75,9 +76,9 @@ export default function Steps() {
           </div>
         </div>
 
-        {/* CTA Button - Mobile */}
-        <div className="mt-[32px]">
-          <button className="bg-white w-full h-[48px] rounded-[100px] flex items-center justify-center">
+        {/* CTA Button - Mobile/Tablet */}
+        <div className="mt-[32px] md:mt-[48px]">
+          <button className="bg-white w-full md:w-auto md:min-w-[240px] h-[48px] rounded-[100px] flex items-center justify-center px-[40px]">
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
               make order
             </p>

@@ -62,7 +62,7 @@ const products: ProductData[] = [
 // Mobile Product Card - Figma 803:13034 (303x532px)
 function MobileProductCard({ product }: { product: ProductData }) {
   return (
-    <div className="bg-[#eaeaea] rounded-[8px] pt-[12px] pb-[16px] px-[12px] w-[303px] flex-shrink-0 flex flex-col gap-[24px] items-center relative">
+    <div className="bg-[#eaeaea] rounded-[8px] pt-[12px] pb-[16px] px-[12px] w-[303px] md:w-[360px] flex-shrink-0 flex flex-col gap-[24px] items-center relative">
       {/* Background mask overlay */}
       <div className="absolute left-0 top-0 w-[303px] h-[532px] pointer-events-none">
         <Image src={imgMask} alt="" fill className="object-cover" />

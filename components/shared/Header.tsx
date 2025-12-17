@@ -73,11 +73,11 @@ export default function Header() {
               ))}
             </nav>
 
-            {/* Cart button + language toggle */}
-            <div className="ml-auto flex items-center gap-[12px]">
+            {/* Cart button + language toggle + mobile menu */}
+            <div className="ml-auto flex items-center gap-[8px] md:gap-[12px]">
               <button 
                 onClick={() => setIsCartOpen(true)}
-                className="border border-[#BBBBBB] border-solid rounded-[100px] flex gap-[8px] h-[48px] items-center justify-center px-[24px] py-[10px] bg-transparent hover:bg-[#161616] hover:text-white transition-colors group relative"
+                className="border border-[#BBBBBB] border-solid rounded-[100px] flex gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[16px] md:px-[24px] py-[10px] bg-transparent hover:bg-[#161616] hover:text-white transition-colors group relative"
               >
                 <div className="relative w-[24px] h-[24px] overflow-clip shrink-0">
                   <Image src={getAsset('imgCart')} alt="Cart" fill style={{ objectFit: 'contain' }} />

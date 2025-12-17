@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState, useRef } from "react";
+import { sectionClasses, containerXClasses } from '@/lib/design-system/spacing';
 
 interface Testimonial {
   quote: string;
@@ -54,27 +55,27 @@ export default function Testimonials() {
   return (
     <section id="testimonials" className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7576 ===== */}
-      <div className="lg:hidden py-[64px]">
-        {/* Title Section - Mobile */}
-        <div className="px-[16px] mb-[24px]">
+      <div className={`lg:hidden ${sectionClasses}`}>
+        {/* Title Section - Mobile/Tablet */}
+        <div className={`${containerXClasses} mb-[24px] md:mb-[32px]`}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
             TESTIMONIALS
           </p>
-          <h2 className="font-['DM_Sans'] font-light text-[40px] leading-none tracking-[-1.6px] text-[#161616]">
+          <h2 className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[500px]" style={{ fontSize: 'clamp(32px, 5vw, 44px)', letterSpacing: 'clamp(-1.6px, -0.04em, -1.76px)' }}>
             What our <span className="font-['Tiro_Tamil'] italic">clients</span> say
           </h2>
         </div>
 
-        {/* Horizontal scroll cards - Mobile: 450px height, 303px width */}
+        {/* Horizontal scroll cards - Responsive */}
         <div 
           ref={scrollRef}
-          className="flex gap-[16px] overflow-x-auto scrollbar-hide px-[16px] pb-[8px]"
+          className="flex gap-[16px] overflow-x-auto scrollbar-hide px-[16px] md:px-[32px] pb-[8px]"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {testimonials.map((testimonial, index) => (
             <article
               key={testimonial.author}
-              className="relative flex-shrink-0 w-[303px] h-[450px] rounded-[16px] overflow-hidden"
+              className="relative flex-shrink-0 w-[303px] md:w-[380px] h-[450px] md:h-[480px] rounded-[16px] overflow-hidden"
             >
               <div className="absolute inset-0">
                 <Image

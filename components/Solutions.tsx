@@ -48,11 +48,11 @@ export default function Solutions() {
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7698 ===== */}
       <div className="lg:hidden">
         {/* Title Section - Mobile */}
-        <div className="px-[16px] pt-[64px] pb-[24px]">
+        <div className="px-[16px] md:px-[32px] pt-[64px] md:pt-[80px] pb-[24px] md:pb-[32px]">
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
             purpose
           </p>
-          <p className="font-['DM_Sans'] font-light text-[40px] leading-none tracking-[-1.6px] text-[#161616] w-[358px]">
+          <p className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[600px]" style={{ fontSize: 'clamp(32px, 6vw, 52px)', letterSpacing: 'clamp(-1.6px, -0.04em, -2.08px)' }}>
             <span>Versatile </span>
             <span className="font-['Tiro_Tamil'] italic">solutions</span>
             <span> for every project</span>
@@ -68,16 +68,16 @@ export default function Solutions() {
             <div key={idx}>
               {/* Card */}
               <div 
-                className={`w-full p-[16px] flex flex-col gap-[16px] cursor-pointer transition-colors ${openIndex === idx ? 'bg-[#161616]' : 'bg-[#e1e1e1]'}`}
+                className={`w-full p-[16px] md:p-[24px] flex flex-col gap-[16px] cursor-pointer transition-colors ${openIndex === idx ? 'bg-[#161616]' : 'bg-[#e1e1e1]'}`}
                 onClick={() => setOpenIndex(openIndex === idx ? -1 : idx)}
               >
                 {/* Title */}
-                <p className={`font-['DM_Sans'] font-normal text-[24px] leading-[1.1] tracking-[-0.96px] w-[328px] ${openIndex === idx ? 'text-white' : 'text-[#161616]'}`}>
+                <p className={`font-['DM_Sans'] font-normal text-[20px] md:text-[24px] leading-[1.1] tracking-[-0.96px] max-w-[600px] ${openIndex === idx ? 'text-white' : 'text-[#161616]'}`}>
                   {solution.title}
                 </p>
                 
-                {/* Image - 56px when closed, 160px when open */}
-                <div className={`w-full rounded-[8px] relative overflow-hidden transition-all ${openIndex === idx ? 'h-[160px]' : 'h-[56px]'}`}>
+                {/* Image - responsive height */}
+                <div className={`w-full rounded-[8px] relative overflow-hidden transition-all ${openIndex === idx ? 'h-[160px] md:h-[220px]' : 'h-[56px] md:h-[80px]'}`}>
                   <Image src={solution.image} alt={solution.title} fill className="object-cover" />
                 </div>
                 

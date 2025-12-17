@@ -17,7 +17,7 @@ export default function About() {
       {/* Cover Section */}
       <div className="border-b border-[#BBBBBB]">
         <div className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[24px] md:pt-[40px] lg:pt-[48px] pb-[24px] md:pb-[40px] lg:pb-[48px]">
-          <p className="font-['DM_Sans'] font-light text-[45px] md:text-[96px] lg:text-[128px] leading-[45px] md:leading-[0.95] lg:leading-[0.95] tracking-[-1.8px] md:tracking-[-4.8px] lg:tracking-[-6.4px] text-[#161616]">
+          <p className="font-['DM_Sans'] font-light leading-[0.95] text-[#161616]" style={{ fontSize: 'clamp(45px, 10vw, 128px)', letterSpacing: 'clamp(-1.8px, -0.05em, -6.4px)' }}>
             About us
           </p>
         </div>
@@ -27,10 +27,10 @@ export default function About() {
       <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[24px] md:pt-[64px] lg:pt-[96px] pb-[24px] md:pb-[0px]">
         <div className="relative lg:min-h-[456px]">
           {/* Big heading text with leading spaces to create indent - matches Figma exactly */}
-          <p className="font-['DM_Sans'] font-light text-[32px] md:text-[42px] lg:text-[52px] leading-[32px] md:leading-[42px] lg:leading-[52px] tracking-[-1.28px] md:tracking-[-1.68px] lg:tracking-[-2.08px] text-[#161616] lg:whitespace-pre-wrap m-0">
+          <p className="font-['DM_Sans'] font-light leading-[1] text-[#161616] lg:whitespace-pre-wrap m-0" style={{ fontSize: 'clamp(28px, 4vw, 52px)', letterSpacing: 'clamp(-1.28px, -0.04em, -2.08px)' }}>
 {`                            At Yakiwood, we are experts in the preparation of burnt wood, specializing in facades, terraces, fences, and interiors. With years of experience, we guarantee high-quality, long-lasting results using a natural, time-tested woodworking method.`}
           </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full lg:max-w-[309px] mt-[16px] lg:mt-0 lg:absolute lg:top-[212px] lg:left-1/2 lg:translate-x-[96px]">
+          <p className="font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full lg:max-w-[309px] mt-[16px] lg:mt-0 lg:absolute lg:top-[212px] lg:left-1/2 lg:translate-x-[96px]">
             We produce wood prepared according to the unique, time-tested Japanese wood-burning technology "Yakisugi" (or "Shou Sugi Ban"). This is the most natural way of preparing wood, giving it both a protective and aesthetic function. The traditional Japanese woodworking technology, which has been around for centuries, was introduced to protect wood from the effects of the environment. Burning shrinks the pores in the surface of the wood, making it stronger and more resistant. At the same time, it retains its properties, naturalness, pattern and colour.
           </p>
         </div>

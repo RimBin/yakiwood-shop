@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { sectionClasses, getGap } from '@/lib/design-system/spacing';
 
 // Local background image for CTA section
 const backgroundImage = "/assets/hero/product-image.png";
@@ -21,20 +22,20 @@ export default function CTA() {
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7625 ===== */}
-      <div className="lg:hidden relative z-10 flex flex-col items-center justify-center py-[80px] px-[16px]">
-        {/* Heading - Mobile */}
-        <h2 className="font-['DM_Sans'] font-light text-[45px] leading-[45px] tracking-[-1.8px] text-[#161616] text-center max-w-[358px] mb-[32px]">
+      <div className={`lg:hidden relative z-10 flex flex-col items-center justify-center ${sectionClasses}`}>
+        {/* Heading - Mobile/Tablet */}
+        <h2 className="font-['DM_Sans'] font-light text-center max-w-[600px] mb-[32px] md:mb-[40px]" style={{ fontSize: 'clamp(40px, 7vw, 64px)', lineHeight: 1, letterSpacing: 'clamp(-1.8px, -0.04em, -2.56px)' }}>
           <span>Ready to </span>
           <span className="font-['Tiro_Tamil'] italic">build </span>
           <span>with fire?</span>
         </h2>
 
-        {/* Buttons - Mobile: Stacked */}
-        <div className="flex flex-col gap-[16px] w-full max-w-[358px]">
+        {/* Buttons - Mobile/Tablet */}
+        <div className="flex flex-col md:flex-row gap-[16px] w-full md:w-auto md:justify-center max-w-[358px] md:max-w-none">
           {/* Primary Button - GET AN OFFER */}
           <Link
             href="/kontaktai"
-            className="bg-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full"
+            className="bg-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full md:w-auto md:px-[40px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
               get an offer

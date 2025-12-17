@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { sectionClasses, getGap } from '@/lib/design-system/spacing';
 
 // Local assets for WhyUs section
 const iconVector = "/assets/icons/vector-top.svg";
@@ -41,13 +42,13 @@ export default function WhyUs() {
   return (
     <section className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7566 ===== */}
-      <div className="lg:hidden px-[16px] py-[64px]">
-        {/* Title Section - Mobile */}
-        <div className="flex flex-col gap-[8px] mb-[16px]">
+      <div className={`lg:hidden ${sectionClasses}`}>
+        {/* Title Section - Mobile/Tablet */}
+        <div className={`flex flex-col ${getGap('sm')} mb-[16px] md:mb-[24px]`}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
             yakiwood
           </p>
-          <p className="font-['DM_Sans'] font-light text-[32px] leading-none tracking-[-1.28px] text-[#161616] w-[358px]">
+          <p className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[700px]" style={{ fontSize: 'clamp(32px, 5vw, 44px)', letterSpacing: 'clamp(-1.28px, -0.04em, -1.76px)' }}>
             <span>We are experts in the preparation of </span>
             <span className="font-['Tiro_Tamil'] italic">burnt wood</span>
             <span>, with many years of </span>
@@ -59,13 +60,13 @@ export default function WhyUs() {
           </p>
         </div>
 
-        {/* Description - Mobile */}
-        <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-[312px] mb-[24px]">
+        {/* Description - Mobile/Tablet */}
+        <p className="font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[600px] mb-[24px] md:mb-[32px]">
           Our aim is to help you create a cosy and sustainable environment using a natural, time-tested woodworking method. We produce wood prepared according to the unique, time-tested Japanese wood-burning technology "Yakisugi" (or "Shou Sugi Ban"). This is the most natural way of preparing wood, giving it both a protective and aesthetic function.
         </p>
 
-        {/* Benefits Cards - Mobile: Stacked vertically with gap-[8px] */}
-        <div className="flex flex-col gap-[8px]">
+        {/* Benefits Cards - Responsive grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[8px] md:gap-[16px]">
           {benefits.map((benefit, idx) => (
             <div key={idx} className="bg-[#eaeaea] rounded-[8px] p-[16px] w-full flex flex-col gap-[16px] items-start">
               {/* Icon */}

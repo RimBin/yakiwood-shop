@@ -106,28 +106,92 @@ export const typography = {
 } as const;
 
 // ============================================================================
-// SPACING
+// SPACING SYSTEM
 // ============================================================================
 
+/**
+ * Spacing scale based on 8px grid
+ * Change these values to update spacing across entire site
+ */
 export const spacing = {
+  // Base units (8px grid)
+  0: '0px',
+  1: '4px',    // 0.5 × 8
+  2: '8px',    // 1 × 8
+  3: '12px',   // 1.5 × 8
+  4: '16px',   // 2 × 8
+  5: '20px',   // 2.5 × 8
+  6: '24px',   // 3 × 8
+  7: '28px',   // 3.5 × 8
+  8: '32px',   // 4 × 8
+  10: '40px',  // 5 × 8
+  12: '48px',  // 6 × 8
+  14: '56px',  // 7 × 8
+  16: '64px',  // 8 × 8
+  20: '80px',  // 10 × 8
+  24: '96px',  // 12 × 8
+  28: '112px', // 14 × 8
+  32: '128px', // 16 × 8
+  
+  // Container padding (responsive)
   container: {
-    mobile: '16px',
-    desktop: '40px',
+    mobile: '16px',   // spacing[4]
+    tablet: '32px',   // spacing[8]
+    desktop: '40px',  // spacing[10]
   },
-  sections: {
-    small: '32px',
-    medium: '56px',
-    large: '80px',
-    xlarge: '120px',
+  
+  // Section spacing (vertical gaps between major sections)
+  section: {
+    mobile: '64px',   // spacing[16]
+    tablet: '80px',   // spacing[20]
+    desktop: '120px', // 24 × 8
   },
-  components: {
-    xs: '4px',
-    sm: '8px',
-    md: '16px',
-    lg: '24px',
-    xl: '40px',
+  
+  // Component spacing (gaps within components)
+  component: {
+    xs: '4px',   // spacing[1]
+    sm: '8px',   // spacing[2]
+    md: '16px',  // spacing[4]
+    lg: '24px',  // spacing[6]
+    xl: '40px',  // spacing[10]
   },
 } as const;
+
+/**
+ * Responsive padding utility
+ * Usage: className={cn(getSectionPadding())}
+ */
+export const getSectionPadding = (axis: 'x' | 'y' | 'all' = 'all') => {
+  if (axis === 'x') return 'px-[16px] md:px-[32px] lg:px-[40px]';
+  if (axis === 'y') return 'py-[64px] md:py-[80px] lg:py-[120px]';
+  return 'px-[16px] md:px-[32px] lg:px-[40px] py-[64px] md:py-[80px] lg:py-[120px]';
+};
+
+/**
+ * Responsive container padding
+ * Usage: className={getContainerPadding()}
+ */
+export const getContainerPadding = () => 'px-[16px] md:px-[32px] lg:px-[40px]';
+
+/**
+ * Responsive section vertical spacing
+ * Usage: className={getSectionSpacing()}
+ */
+export const getSectionSpacing = () => 'py-[64px] md:py-[80px] lg:py-[120px]';
+
+/**
+ * Gap utilities for flex/grid
+ */
+export const getGap = (size: keyof typeof spacing.component) => {
+  const gaps = {
+    xs: 'gap-[4px]',
+    sm: 'gap-[8px]',
+    md: 'gap-[16px]',
+    lg: 'gap-[24px]',
+    xl: 'gap-[40px]',
+  };
+  return gaps[size];
+};
 
 // ============================================================================
 // BORDERS

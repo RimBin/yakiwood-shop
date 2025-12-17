@@ -19,23 +19,23 @@ export default function Projects() {
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7712 ===== */}
       <div className="lg:hidden">
         {/* Title Section - Mobile */}
-        <div className="px-[16px] pt-[64px] pb-[16px]">
+        <div className="px-[16px] md:px-[32px] pt-[64px] md:pt-[80px] pb-[16px] md:pb-[24px]">
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
             Projects
           </p>
-          <p className="font-['DM_Sans'] font-light text-[40px] leading-none tracking-[-1.6px] text-[#161616]">
+          <p className="font-['DM_Sans'] font-light leading-none text-[#161616]" style={{ fontSize: 'clamp(32px, 6vw, 52px)', letterSpacing: 'clamp(-1.6px, -0.04em, -2.08px)' }}>
             <span>Inspiring </span>
             <span className="font-['Tiro_Tamil'] italic">projects</span>
           </p>
         </div>
 
         {/* Description text - Mobile */}
-        <p className="px-[16px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-[358px] mb-[24px]">
+        <p className="px-[16px] md:px-[32px] font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[600px] mb-[24px] md:mb-[32px]">
           People who have chosen charred wood often share their positive impressions and experiences. They note not only the exceptional appearance of the wood, but also its functionality and durability.
         </p>
 
         {/* Projects Grid - Mobile: Complex masonry-like layout from Figma */}
-        <div className="px-[16px] pb-[24px]">
+        <div className="px-[16px] md:px-[32px] pb-[24px] md:pb-[40px]">
           {/* Row 1: Big card (267x268px + text) */}
           <div className="flex flex-col gap-[8px] mb-[16px]">
             <div className="h-[268px] w-[267px] rounded-[8px] relative overflow-hidden">

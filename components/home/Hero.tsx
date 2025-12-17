@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import Image from 'next/image';
+import { containerXClasses } from '@/lib/design-system/spacing';
 
 // Local assets for Hero section
 const imgMaskGroup = '/assets/hero/mask-group.png';
@@ -30,18 +31,18 @@ export default function Hero() {
     <section className="w-full bg-[#E1E1E1] relative overflow-hidden">
       {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
       <div className="lg:hidden flex flex-col">
-        <div className="px-4 pt-4 pb-2 flex flex-col gap-2">
-          <p className="font-['DM_Sans'] font-light text-[45px] leading-none tracking-[-1.8px] text-[#161616] w-[355px] whitespace-pre-wrap">
+        <div className={`${containerXClasses} pt-[16px] md:pt-[32px] pb-[8px] flex flex-col gap-[8px] md:gap-[16px]`}>
+          <p className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[600px]" style={{ fontSize: 'clamp(45px, 8vw, 80px)', letterSpacing: 'clamp(-1.8px, -0.04em, -4.4px)' }}>
             {`Timeless beauty, enhanced by fire - `}
             <span className="font-['Tiro_Tamil'] italic">Yakiwood</span>
           </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] w-[323px]">
+          <p className="font-['Outfit'] font-light text-[14px] md:text-[16px] leading-[1.2] tracking-[0.14px] text-[#161616] max-w-[450px]">
             Discover the elegance and durability of burnt wood, crafted using the ancient Japanese Shou Sugi Ban technique.
           </p>
         </div>
 
         <div className="relative w-full">
-          <div className="bg-[#bbab92] w-full h-[423px] relative">
+          <div className="bg-[#bbab92] w-full h-[423px] md:h-[520px] relative">
             <div className="absolute left-[8.34px] top-0 w-[367px] h-[309.127px] flex items-center justify-center overflow-hidden">
               <div className="rotate-[333.068deg]">
                 <div className="w-[317.433px] h-[185.467px] relative">
