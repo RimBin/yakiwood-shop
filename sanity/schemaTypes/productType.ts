@@ -52,10 +52,14 @@ export const productType = defineType({
       name: 'images',
       title: 'Product Images',
       type: 'array',
-      of: [{ type: 'image' }],
-      options: {
-        hotspot: true,
-      },
+      of: [
+        {
+          type: 'image',
+          options: {
+            hotspot: true,
+          },
+        },
+      ],
     }),
     defineField({
       name: 'finishes',
