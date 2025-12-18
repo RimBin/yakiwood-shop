@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { seedProducts } from "@/data/seed-products";
+import { projects as defaultProjects } from "@/data/projects";
+import Image from "next/image";
 
 interface Product {
   id: string;
@@ -106,7 +108,13 @@ export default function AdminPage() {
     if (savedProducts) setProducts(JSON.parse(savedProducts));
 
     const savedProjects = localStorage.getItem('yakiwood_projects');
-    if (savedProjects) setProjects(JSON.parse(savedProjects));
+    if (savedProjects) {
+      setProjects(JSON.parse(savedProjects));
+    } else {
+      // Load default projects from data/projects.ts if localStorage is empty
+      setProjects(defaultProjects);
+      localStorage.setItem('yakiwood_projects', JSON.stringify(defaultProjects));
+    }
 
     const savedPosts = localStorage.getItem('yakiwood_posts');
     if (savedPosts) setPosts(JSON.parse(savedPosts));
@@ -321,6 +329,25 @@ export default function AdminPage() {
     setProjects(updated);
     localStorage.setItem('yakiwood_projects', JSON.stringify(updated));
     showMessage('Project deleted');
+  };
+
+  const handleProjectImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedProjects = JSON.parse(event.target?.result as string);
+        const updated = [...projects, ...importedProjects];
+        setProjects(updated);
+        localStorage.setItem('yakiwood_projects', JSON.stringify(updated));
+        showMessage(`Imported ${importedProjects.length} projects successfully!`);
+      } catch (error) {
+        showMessage('Error importing projects. Please check the JSON format.');
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleProjectExport = () => {
@@ -907,12 +934,27 @@ export default function AdminPage() {
                 <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616]">
                   Projects ({projects.length})
                 </h2>
-                <button 
-                  onClick={handleProjectExport}
-                  className="h-[36px] px-[16px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase text-white hover:bg-[#535353] transition-colors"
-                >
-                  Export
-                </button>
+                <div className="flex gap-[8px]">
+                  <label 
+                    htmlFor="projectImportInput"
+                    className="h-[36px] px-[16px] rounded-[100px] bg-[#535353] font-['Outfit'] text-[11px] uppercase text-white hover:bg-[#161616] transition-colors cursor-pointer flex items-center"
+                  >
+                    Import
+                  </label>
+                  <input 
+                    id="projectImportInput"
+                    type="file" 
+                    accept=".json" 
+                    onChange={handleProjectImport}
+                    className="hidden"
+                  />
+                  <button 
+                    onClick={handleProjectExport}
+                    className="h-[36px] px-[16px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase text-white hover:bg-[#535353] transition-colors"
+                  >
+                    Export
+                  </button>
+                </div>
               </div>
               
               {projects.length === 0 ? (
