@@ -46,8 +46,7 @@ export default function ProjectsPage() {
       <PageCover>
         <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
             style={{ fontVariationSettings: "'opsz' 14" }}>
-          <span>Įkvepiančios </span>
-          <span className="font-['Tiro_Tamil'] italic">projektas</span>
+          Mūsų projektai
         </h1>
       </PageCover>
 

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { seedProducts } from "@/data/seed-products";
 import { projects as defaultProjects } from "@/data/projects";
 import { Project } from "@/types/project";
@@ -29,10 +30,11 @@ interface Post {
   published: boolean;
 }
 
-type ActiveTab = 'products' | 'projects' | 'posts';
+type ActiveTab = 'dashboard' | 'products' | 'projects' | 'posts';
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('products');
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [message, setMessage] = useState('');
 
   // Products state
@@ -98,6 +100,13 @@ export default function AdminPage() {
     category: 'news',
     published: false,
   });
+
+  // Redirect to dashboard when component loads
+  useEffect(() => {
+    if (activeTab === 'dashboard') {
+      router.push('/admin/dashboard');
+    }
+  }, [activeTab, router]);
 
   useEffect(() => {
     const savedProducts = localStorage.getItem('yakiwood_products');
@@ -704,6 +713,7 @@ export default function AdminPage() {
         {/* Tabs */}
         <div className="flex gap-[8px] mb-[32px] overflow-x-auto pb-[8px]">
           {[
+            { key: 'dashboard', label: 'Dashboard', count: null },
             { key: 'products', label: 'Products', count: products.length },
             { key: 'projects', label: 'Projects', count: projects.length },
             { key: 'posts', label: 'Posts', count: posts.length }
@@ -717,7 +727,7 @@ export default function AdminPage() {
                   : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#DCDCDC]'
               }`}
             >
-              {tab.label} ({tab.count})
+              {tab.label}{tab.count !== null ? ` (${tab.count})` : ''}
             </button>
           ))}
         </div>

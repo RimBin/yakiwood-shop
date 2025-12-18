@@ -79,7 +79,7 @@ export default function AdminOrdersPage() {
   };
 
   const handleResendInvoice = async (invoiceId: string) => {
-    if (!confirm('Ar tikrai norite iš naujo išsiųsti sąskaitą el. paštu?')) return;
+    if (!confirm('Are you sure you want to resend the invoice via email?')) return;
 
     try {
       const res = await fetch(`/api/admin/invoices/${invoiceId}/resend`, {
@@ -87,13 +87,33 @@ export default function AdminOrdersPage() {
       });
 
       if (res.ok) {
-        alert('Sąskaita išsiųsta sėkmingai!');
+        alert('Invoice sent successfully!');
       } else {
-        alert('Klaida siunčiant sąskaitą');
+        alert('Error sending invoice');
       }
     } catch (error) {
       console.error('Error resending invoice:', error);
-      alert('Klaida siunčiant sąskaitą');
+      alert('Error sending invoice');
+    }
+  };
+
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, status: newStatus })
+      });
+
+      if (res.ok) {
+        alert('Order status updated successfully!');
+        loadData();
+      } else {
+        alert('Error updating order status');
+      }
+    } catch (error) {
+      console.error('Error updating order:', error);
+      alert('Error updating order status');
     }
   };
 
@@ -122,13 +142,13 @@ export default function AdminOrdersPage() {
 
   const getStatusText = (status: string) => {
     const texts: Record<string, string> = {
-      pending: 'Laukiama',
-      processing: 'Vykdoma',
-      completed: 'Baigta',
-      cancelled: 'Atšaukta',
-      paid: 'Apmokėta',
-      issued: 'Išrašyta',
-      draft: 'Juodraštis'
+      pending: 'Pending',
+      processing: 'Processing',
+      completed: 'Completed',
+      cancelled: 'Cancelled',
+      paid: 'Paid',
+      issued: 'Issued',
+      draft: 'Draft'
     };
     return texts[status] || status;
   };
@@ -138,10 +158,10 @@ export default function AdminOrdersPage() {
       <div className="max-w-[1400px] mx-auto">
         <div className="mb-[40px]">
           <h1 className="font-['DM_Sans'] font-light text-[36px] md:text-[48px] leading-none tracking-tight text-[#161616] mb-[16px]">
-            Užsakymai ir Sąskaitos
+            Orders & Invoices
           </h1>
           <p className="font-['Outfit'] text-[14px] text-[#535353]">
-            Valdykite visus užsakymus ir sąskaitas vienoje vietoje
+            Manage all orders and invoices in one place
           </p>
         </div>
 
@@ -155,7 +175,7 @@ export default function AdminOrdersPage() {
                 : 'text-[#7C7C7C] hover:text-[#161616]'
             }`}
           >
-            Užsakymai
+            Orders
           </button>
           <button
             onClick={() => setActiveTab('invoices')}
@@ -165,14 +185,14 @@ export default function AdminOrdersPage() {
                 : 'text-[#7C7C7C] hover:text-[#161616]'
             }`}
           >
-            Sąskaitos
+            Invoices
           </button>
         </div>
 
         {loading ? (
           <div className="text-center py-[100px]">
             <div className="font-['Outfit'] text-[16px] text-[#7C7C7C]">
-              Kraunama...
+              Loading...
             </div>
           </div>
         ) : (
@@ -183,7 +203,7 @@ export default function AdminOrdersPage() {
                 {orders.length === 0 ? (
                   <div className="p-[40px] text-center">
                     <p className="font-['Outfit'] text-[14px] text-[#7C7C7C]">
-                      Užsakymų nėra
+                      No orders yet
                     </p>
                   </div>
                 ) : (
@@ -192,25 +212,28 @@ export default function AdminOrdersPage() {
                       <thead className="bg-[#F5F5F5]">
                         <tr>
                           <th className="px-[16px] py-[12px] text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            Numeris
+                            Number
                           </th>
                           <th className="px-[16px] py-[12px] text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            Klientas
+                            Customer
                           </th>
                           <th className="px-[16px] py-[12px] text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            El. paštas
+                            Email
                           </th>
                           <th className="px-[16px] py-[12px] text-right font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            Suma
+                            Total
                           </th>
                           <th className="px-[16px] py-[12px] text-center font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            Būsena
+                            Status
                           </th>
                           <th className="px-[16px] py-[12px] text-center font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            Mokėjimas
+                            Payment
                           </th>
                           <th className="px-[16px] py-[12px] text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            Data
+                            Date
+                          </th>
+                          <th className="px-[16px] py-[12px] text-center font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
+                            Actions
                           </th>
                         </tr>
                       </thead>
@@ -252,6 +275,18 @@ export default function AdminOrdersPage() {
                                 {formatDate(order.created_at)}
                               </span>
                             </td>
+                            <td className="px-[16px] py-[16px] text-center">
+                              <select
+                                value={order.status}
+                                onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                className="px-[12px] py-[6px] border border-[#E1E1E1] rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616]"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -267,7 +302,7 @@ export default function AdminOrdersPage() {
                 {invoices.length === 0 ? (
                   <div className="p-[40px] text-center">
                     <p className="font-['Outfit'] text-[14px] text-[#7C7C7C]">
-                      Sąskaitų nėra
+                      No invoices yet
                     </p>
                   </div>
                 ) : (
@@ -276,25 +311,25 @@ export default function AdminOrdersPage() {
                       <thead className="bg-[#F5F5F5]">
                         <tr>
                           <th className="px-[16px] py-[12px] text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            Numeris
+                            Number
                           </th>
                           <th className="px-[16px] py-[12px] text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            Pirkėjas
+                            Customer
                           </th>
                           <th className="px-[16px] py-[12px] text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            El. paštas
+                            Email
                           </th>
                           <th className="px-[16px] py-[12px] text-right font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            Suma
+                            Total
                           </th>
                           <th className="px-[16px] py-[12px] text-center font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            Būsena
+                            Status
                           </th>
                           <th className="px-[16px] py-[12px] text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            Data
+                            Date
                           </th>
                           <th className="px-[16px] py-[12px] text-center font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-                            Veiksmai
+                            Actions
                           </th>
                         </tr>
                       </thead>
@@ -336,7 +371,7 @@ export default function AdminOrdersPage() {
                                 <button
                                   onClick={() => handleDownloadInvoice(invoice.id)}
                                   className="px-[12px] py-[6px] bg-[#161616] text-white rounded-[4px] font-['Outfit'] text-[11px] uppercase tracking-[0.6px] hover:bg-[#535353] transition-colors"
-                                  title="Parsisiųsti PDF"
+                                  title="Download PDF"
                                 >
                                   PDF
                                 </button>
@@ -344,9 +379,9 @@ export default function AdminOrdersPage() {
                                   <button
                                     onClick={() => handleResendInvoice(invoice.id)}
                                     className="px-[12px] py-[6px] border border-[#161616] text-[#161616] rounded-[4px] font-['Outfit'] text-[11px] uppercase tracking-[0.6px] hover:bg-[#161616] hover:text-white transition-colors"
-                                    title="Išsiųsti el. paštu"
+                                    title="Send via email"
                                   >
-                                    Siųsti
+                                    Send
                                   </button>
                                 )}
                               </div>

@@ -59,9 +59,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-[24px] lg:gap-0">
           <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
               style={{ fontVariationSettings: "'opsz' 14" }}>
-            <span>Versatile </span>
-            <span className="font-['Tiro_Tamil'] italic">solutions</span>
-            <span> for every project</span>
+            Solutions
           </h1>
 
           {/* Desktop Chips */}
@@ -99,7 +97,6 @@ Do you want to give your building a distinctive and attractive appearance? Encou
                 {filter}
               </button>
             ))}
-          </div>
         </div>
       </div>
 
