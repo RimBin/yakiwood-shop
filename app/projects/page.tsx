@@ -19,27 +19,6 @@ const projects = projectsData.map((project, index) => {
     slug: project.slug
   };
 });
-  {
-    id: 7,
-    image: "https://www.figma.com/api/mcp/asset/4d64af69-b66b-4b41-a016-30695bb49a71",
-    title: "Project title",
-    location: "Location",
-    size: "small"
-  },
-  {
-    id: 8,
-    image: "https://www.figma.com/api/mcp/asset/98c2bd55-1fc4-4834-8ac5-1d5005cb7073",
-    title: "Project title",
-    location: "Location",
-    size: "small"
-  },
-  {
-    id: 9,
-    image: "https://www.figma.com/api/mcp/asset/a7ae63e9-e612-41b5-a5c0-8242ba90f9cf",
-    title: "Project title",
-    location: "Location",
-    size: "small"
-});
 
 export default function ProjectsPage() {
   const [currentPage, setCurrentPage] = useState(1);
