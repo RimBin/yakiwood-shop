@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { PageCover } from '@/components/shared/PageLayout';
 import Link from 'next/link';
 import { PageSection } from './shared/PageLayout';
 
@@ -32,13 +33,12 @@ export default function Contact() {
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
       {/* Title */}
-      <div className="w-full border-b border-[#BBBBBB]">
-        <div className="max-w-[1360px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[24px] md:pt-[32px] pb-[32px] md:pb-[48px]">
-          <h1 className="font-['DM_Sans'] font-light leading-[0.95] text-[#161616]" style={{ fontSize: 'clamp(48px, 10vw, 128px)', letterSpacing: 'clamp(-1.8px, -0.05em, -6.4px)', fontVariationSettings: "'opsz' 14" }}>
-            Contact us
-          </h1>
-        </div>
-      </div>
+      <PageCover>
+        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+            style={{ fontVariationSettings: "'opsz' 14" }}>
+          Contact us
+        </h1>
+      </PageCover>
 
       {/* Subtitle + Form */}
       <div className="w-full flex flex-col items-center pt-[64px] md:pt-[80px] lg:pt-[100px] pb-[80px] md:pb-[100px] lg:pb-[120px] px-[16px] md:px-[32px] lg:px-[40px]">

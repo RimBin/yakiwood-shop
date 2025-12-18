@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { PageCover } from '@/components/shared/PageLayout';
 
 export default function SolutionsPage() {
   const [openAccordionIndex, setOpenAccordionIndex] = useState<number | null>(0);
@@ -52,36 +53,19 @@ Do you want to give your building a distinctive and attractive appearance? Encou
   ];
 
   return (
-    <div className="min-h-screen">
-
+    <div className="bg-[#E1E1E1]">
       {/* Hero Section */}
-      <section className="border-b border-[#BBBBBB]">
-        <div className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] py-[32px] lg:py-[48px]">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end mb-[24px] gap-[24px] lg:gap-0">
-            <h1 className="font-['DM_Sans'] font-light text-[56px] lg:text-[128px] leading-[0.95] tracking-[-2.8px] lg:tracking-[-6.4px] text-[#161616]">
-              Purpose
-            </h1>
+      <PageCover>
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-[24px] lg:gap-0">
+          <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+              style={{ fontVariationSettings: "'opsz' 14" }}>
+            <span>Versatile </span>
+            <span className="font-['Tiro_Tamil'] italic">solutions</span>
+            <span> for every project</span>
+          </h1>
 
-            {/* Desktop Chips */}
-            <div className="hidden lg:flex gap-[8px]">
-              {filters.map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setActiveFilter(filter)}
-                  className={`h-[32px] px-[12px] flex items-center justify-center rounded-[100px] font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase cursor-pointer transition-all ${
-                    activeFilter === filter
-                      ? 'bg-[#161616] text-white'
-                      : 'bg-transparent border border-[#BBBBBB] text-[#161616]'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Mobile Chips */}
-          <div className="flex lg:hidden gap-[8px] flex-wrap">
+          {/* Desktop Chips */}
+          <div className="hidden lg:flex gap-[8px]">
             {filters.map((filter) => (
               <button
                 key={filter}
@@ -97,7 +81,27 @@ Do you want to give your building a distinctive and attractive appearance? Encou
             ))}
           </div>
         </div>
-      </section>
+      </PageCover>
+
+      {/* Mobile Chips Below Header */}
+      <div className="lg:hidden max-w-[1440px] mx-auto px-[16px] md:px-[40px] pt-[24px]">
+        <div className="flex gap-[8px] flex-wrap">
+            {filters.map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`h-[32px] px-[12px] flex items-center justify-center rounded-[100px] font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase cursor-pointer transition-all ${
+                  activeFilter === filter
+                    ? 'bg-[#161616] text-white'
+                    : 'bg-transparent border border-[#BBBBBB] text-[#161616]'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Content Section */}
       <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] py-[40px] lg:py-[80px]">

@@ -10,7 +10,13 @@ const stripe = new Stripe(stripeKey, {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { items } = body as { items: Array<{ id: string; name: string; quantity: number; basePrice: number }> };
+    const { items, customerEmail, customerName, customerPhone, customerAddress } = body as { 
+      items: Array<{ id: string; name: string; quantity: number; basePrice: number }>;
+      customerEmail?: string;
+      customerName?: string;
+      customerPhone?: string;
+      customerAddress?: string;
+    };
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'Tuščias krepšelis' }, { status: 400 });
@@ -36,8 +42,15 @@ export async function POST(req: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items,
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3011'}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3011'}/cancel`
+      customer_email: customerEmail,
+      metadata: {
+        customerName: customerName || '',
+        customerPhone: customerPhone || '',
+        customerAddress: customerAddress || '',
+        items: JSON.stringify(items)
+      },
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/cart`
     });
 
     return NextResponse.json({ url: session.url });

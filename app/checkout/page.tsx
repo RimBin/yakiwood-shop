@@ -11,6 +11,7 @@ import LoginModal from '@/components/modals/LoginModal';
 import RegisterModal from '@/components/modals/RegisterModal';
 import SuccessModal from '@/components/modals/SuccessModal';
 import ForgotPasswordModal from '@/components/modals/ForgotPasswordModal';
+import { PageCover } from '@/components/shared/PageLayout';
 
 export default function CheckoutPage() {
   const { items } = useCartStore();
@@ -57,11 +58,12 @@ export default function CheckoutPage() {
   return (
     <main className="min-h-screen bg-[#E1E1E1]">
       {/* Cover Section */}
-      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[40px] pt-[32px] pb-[40px] sm:pt-[32px] sm:pb-[64px]">
-        <h1 className="font-['DM_Sans'] font-light text-[56px] sm:text-[128px] leading-[0.95] tracking-[-2.24px] sm:tracking-[-5.12px] text-[#161616]">
+      <PageCover>
+        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+            style={{ fontVariationSettings: "'opsz' 14" }}>
           Checkout
         </h1>
-      </div>
+      </PageCover>
 
       <form onSubmit={handleSubmit} className="max-w-[1440px] mx-auto px-[16px] sm:px-[40px] pb-[80px]">
         <div className="grid grid-cols-1 lg:grid-cols-[672px_1fr] gap-[40px]">

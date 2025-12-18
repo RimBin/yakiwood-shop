@@ -37,6 +37,8 @@ export default function AdminPage() {
 
   // Products state
   const [products, setProducts] = useState<Product[]>([]);
+  const [showAddProductForm, setShowAddProductForm] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [productForm, setProductForm] = useState({
     name: '',
     slug: '',
@@ -84,6 +86,8 @@ export default function AdminPage() {
 
   // Posts state
   const [posts, setPosts] = useState<Post[]>([]);
+  const [showAddPostForm, setShowAddPostForm] = useState(false);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [postForm, setPostForm] = useState({
     title: '',
     slug: '',
@@ -201,16 +205,41 @@ export default function AdminPage() {
     const urlImages = productForm.images.split(',').map(url => url.trim()).filter(Boolean);
     const allImages = [...imageFiles, ...urlImages];
     
-    const newProduct: Product = {
-      id: Date.now().toString(),
-      ...productForm,
-      images: allImages,
-      basePrice: Number(productForm.basePrice),
-    };
-    
-    const updated = [...products, newProduct];
-    setProducts(updated);
-    localStorage.setItem('yakiwood_products', JSON.stringify(updated));
+    if (editingProductId) {
+      // Edit existing product
+      const updated = products.map(product => {
+        if (product.id === editingProductId) {
+          return {
+            ...product,
+            name: productForm.name,
+            slug: productForm.slug,
+            description: productForm.description,
+            category: productForm.category,
+            basePrice: Number(productForm.basePrice),
+            images: allImages.length > 0 ? allImages : product.images,
+            inStock: productForm.inStock,
+          };
+        }
+        return product;
+      });
+      setProducts(updated);
+      localStorage.setItem('yakiwood_products', JSON.stringify(updated));
+      showMessage('Product updated successfully!');
+      setEditingProductId(null);
+    } else {
+      // Add new product
+      const newProduct: Product = {
+        id: Date.now().toString(),
+        ...productForm,
+        images: allImages,
+        basePrice: Number(productForm.basePrice),
+      };
+      
+      const updated = [...products, newProduct];
+      setProducts(updated);
+      localStorage.setItem('yakiwood_products', JSON.stringify(updated));
+      showMessage('Product added successfully!');
+    }
     
     setProductForm({
       name: '',
@@ -222,8 +251,10 @@ export default function AdminPage() {
       inStock: true,
     });
     setImageFiles([]);
-    
-    showMessage('Product added successfully!');
+    setSelectedFileNames('No file selected');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleProductDelete = (id: string) => {
@@ -231,6 +262,63 @@ export default function AdminPage() {
     setProducts(updated);
     localStorage.setItem('yakiwood_products', JSON.stringify(updated));
     showMessage('Product deleted');
+  };
+
+  const handleProductEdit = (product: Product) => {
+    if (editingProductId === product.id) {
+      handleProductCancelEdit();
+      return;
+    }
+    
+    setShowAddProductForm(false);
+    setEditingProductId(product.id);
+    setProductForm({
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      category: product.category,
+      basePrice: product.basePrice,
+      images: '',
+      inStock: product.inStock,
+    });
+    if (product.images && product.images.length > 0) {
+      setImageFiles(product.images);
+    }
+  };
+
+  const handleProductCancelEdit = () => {
+    setEditingProductId(null);
+    setShowAddProductForm(false);
+    setProductForm({
+      name: '',
+      slug: '',
+      description: '',
+      category: 'facades',
+      basePrice: 0,
+      images: '',
+      inStock: true,
+    });
+    setImageFiles([]);
+    setSelectedFileNames('No file selected');
+  };
+
+  const handleProductImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedProducts = JSON.parse(event.target?.result as string);
+        const updated = [...products, ...importedProducts];
+        setProducts(updated);
+        localStorage.setItem('yakiwood_products', JSON.stringify(updated));
+        showMessage(`Imported ${importedProducts.length} products successfully!`);
+      } catch (error) {
+        showMessage('Error importing products. Please check the JSON format.');
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleProductExport = () => {
@@ -459,15 +547,42 @@ export default function AdminPage() {
   // Post handlers
   const handlePostSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newPost: Post = {
-      id: Date.now().toString(),
-      ...postForm,
-      date: new Date().toISOString(),
-    };
     
-    const updated = [...posts, newPost];
-    setPosts(updated);
-    localStorage.setItem('yakiwood_posts', JSON.stringify(updated));
+    if (editingPostId) {
+      // Edit existing post
+      const updated = posts.map(post => {
+        if (post.id === editingPostId) {
+          return {
+            ...post,
+            title: postForm.title,
+            slug: postForm.slug,
+            excerpt: postForm.excerpt,
+            content: postForm.content,
+            coverImage: postForm.coverImage,
+            author: postForm.author,
+            category: postForm.category,
+            published: postForm.published,
+          };
+        }
+        return post;
+      });
+      setPosts(updated);
+      localStorage.setItem('yakiwood_posts', JSON.stringify(updated));
+      showMessage('Post updated successfully!');
+      setEditingPostId(null);
+    } else {
+      // Add new post
+      const newPost: Post = {
+        id: Date.now().toString(),
+        ...postForm,
+        date: new Date().toISOString(),
+      };
+      
+      const updated = [...posts, newPost];
+      setPosts(updated);
+      localStorage.setItem('yakiwood_posts', JSON.stringify(updated));
+      showMessage('Post added successfully!');
+    }
     
     setPostForm({
       title: '',
@@ -479,8 +594,6 @@ export default function AdminPage() {
       category: 'news',
       published: false,
     });
-    
-    showMessage('Post added successfully!');
   };
 
   const handlePostDelete = (id: string) => {
@@ -488,6 +601,60 @@ export default function AdminPage() {
     setPosts(updated);
     localStorage.setItem('yakiwood_posts', JSON.stringify(updated));
     showMessage('Post deleted');
+  };
+
+  const handlePostEdit = (post: Post) => {
+    if (editingPostId === post.id) {
+      handlePostCancelEdit();
+      return;
+    }
+    
+    setShowAddPostForm(false);
+    setEditingPostId(post.id);
+    setPostForm({
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt,
+      content: post.content,
+      coverImage: post.coverImage,
+      author: post.author,
+      category: post.category,
+      published: post.published,
+    });
+  };
+
+  const handlePostCancelEdit = () => {
+    setEditingPostId(null);
+    setShowAddPostForm(false);
+    setPostForm({
+      title: '',
+      slug: '',
+      excerpt: '',
+      content: '',
+      coverImage: '',
+      author: '',
+      category: 'news',
+      published: false,
+    });
+  };
+
+  const handlePostImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedPosts = JSON.parse(event.target?.result as string);
+        const updated = [...posts, ...importedPosts];
+        setPosts(updated);
+        localStorage.setItem('yakiwood_posts', JSON.stringify(updated));
+        showMessage(`Imported ${importedPosts.length} posts successfully!`);
+      } catch (error) {
+        showMessage('Error importing posts. Please check the JSON format.');
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handlePostExport = () => {
@@ -547,7 +714,7 @@ export default function AdminPage() {
               className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap ${
                 activeTab === tab.key
                   ? 'bg-[#161616] text-white'
-                  : 'bg-white text-[#161616] hover:bg-[#EAEAEA]'
+                  : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#DCDCDC]'
               }`}
             >
               {tab.label} ({tab.count})
@@ -558,12 +725,33 @@ export default function AdminPage() {
         {/* Products Tab */}
         {activeTab === 'products' && (
           <div className="space-y-[32px]">
-            {/* Add Product Form */}
-            <div className="bg-white rounded-[24px] p-[clamp(20px,3vw,32px)]">
-              <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616] mb-[24px]">
-                Add New Product
-              </h2>
-              
+            {/* Add Product Form - Collapsible */}
+            <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(20px,3vw,32px)]">
+              <button
+                onClick={() => {
+                  setShowAddProductForm(!showAddProductForm);
+                  setEditingProductId(null);
+                  if (!showAddProductForm) {
+                    setProductForm({
+                      name: '',
+                      slug: '',
+                      description: '',
+                      category: 'facades',
+                      basePrice: 0,
+                      images: '',
+                      inStock: true,
+                    });
+                    setImageFiles([]);
+                  }
+                }}
+                className="w-full flex items-center justify-between mb-[24px]"
+              >
+                <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616]">
+                  Add New Product
+                </h2>
+                <span className="text-[24px] text-[#161616]">{showAddProductForm ? '−' : '+'}</span>
+              </button>
+              {showAddProductForm && (
               <form onSubmit={handleProductSubmit} className="space-y-[20px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                   <div>
@@ -777,22 +965,38 @@ export default function AdminPage() {
                   Add Product
                 </button>
               </form>
+              )}
             </div>
 
             {/* Products List */}
-            <div className="bg-white rounded-[24px] p-[clamp(20px,3vw,32px)]">
+            <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(20px,3vw,32px)]">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-[16px] mb-[24px]">
                 <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616]">
                   Products ({products.length})
                 </h2>
-                {products.length > 0 && (
-                  <button
-                    onClick={handleProductExport}
-                    className="h-[40px] px-[20px] rounded-[100px] border border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors"
+                <div className="flex gap-[8px]">
+                  <label 
+                    htmlFor="productImportInput"
+                    className="h-[36px] px-[16px] rounded-[100px] bg-[#535353] font-['Outfit'] text-[11px] uppercase text-white hover:bg-[#161616] transition-colors cursor-pointer flex items-center"
                   >
-                    Export JSON
-                  </button>
-                )}
+                    Import
+                  </label>
+                  <input 
+                    id="productImportInput"
+                    type="file" 
+                    accept=".json" 
+                    onChange={handleProductImport}
+                    className="hidden"
+                  />
+                  {products.length > 0 && (
+                    <button
+                      onClick={handleProductExport}
+                      className="h-[36px] px-[16px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase text-white hover:bg-[#535353] transition-colors"
+                    >
+                      Export
+                    </button>
+                  )}
+                </div>
               </div>
 
               {products.length === 0 ? (
@@ -802,65 +1006,169 @@ export default function AdminPage() {
               ) : (
                 <div className="space-y-[16px]">
                   {products.map((product) => (
-                    <div key={product.id} className="border border-[#BBBBBB] rounded-[16px] p-[20px] hover:border-[#161616] transition-colors">
-                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-[16px]">
-                        <div className="flex-1">
-                          <h3 className="font-['DM_Sans'] font-light text-[20px] tracking-[-0.8px] text-[#161616] mb-[4px]">
-                            {product.name}
-                          </h3>
-                          <p className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">
-                            /products/{product.slug}
-                          </p>
-                          <div className="flex flex-wrap gap-[8px] mb-[12px]">
-                            <span className="px-[12px] py-[4px] rounded-[100px] bg-[#E1E1E1] font-['Outfit'] text-[11px] uppercase tracking-[0.55px] text-[#161616]">
-                              {product.category}
-                            </span>
-                            <span className="px-[12px] py-[4px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase tracking-[0.55px] text-white">
-                              €{product.basePrice}
-                            </span>
-                            {product.inStock && (
-                              <span className="px-[12px] py-[4px] rounded-[100px] bg-green-500 font-['Outfit'] text-[11px] uppercase tracking-[0.55px] text-white">
-                                In Stock
+                    <div key={product.id} className="border border-[#BBBBBB] rounded-[16px] overflow-hidden">
+                      <div className="p-[20px]">
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-[16px]">
+                          <div className="flex-1">
+                            <h3 className="font-['DM_Sans'] font-light text-[20px] tracking-[-0.8px] text-[#161616] mb-[4px]">
+                              {product.name}
+                            </h3>
+                            <p className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">
+                              /products/{product.slug}
+                            </p>
+                            <div className="flex flex-wrap gap-[8px] mb-[12px]">
+                              <span className="px-[12px] py-[4px] rounded-[100px] bg-[#E1E1E1] font-['Outfit'] text-[11px] uppercase tracking-[0.55px] text-[#161616]">
+                                {product.category}
                               </span>
+                              <span className="px-[12px] py-[4px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase tracking-[0.55px] text-white">
+                                €{product.basePrice}
+                              </span>
+                              {product.inStock && (
+                                <span className="px-[12px] py-[4px] rounded-[100px] bg-green-500 font-['Outfit'] text-[11px] uppercase tracking-[0.55px] text-white">
+                                  In Stock
+                                </span>
+                              )}
+                            </div>
+                            {product.description && (
+                              <p className="font-['Outfit'] text-[14px] text-[#535353] mb-[12px]">
+                                {product.description}
+                              </p>
+                            )}
+                            {product.images.length > 0 && (
+                              <>
+                                <div className="flex gap-[8px] mb-[8px] overflow-x-auto pb-[8px]">
+                                  {product.images.slice(0, 4).map((img, idx) => (
+                                    <img 
+                                      key={idx}
+                                      src={img} 
+                                      alt={`${product.name} ${idx + 1}`}
+                                      className="w-[80px] h-[80px] object-cover rounded-[8px] border border-[#BBBBBB] flex-shrink-0"
+                                    />
+                                  ))}
+                                  {product.images.length > 4 && (
+                                    <div className="w-[80px] h-[80px] rounded-[8px] border border-[#BBBBBB] flex items-center justify-center bg-[#E1E1E1] flex-shrink-0">
+                                      <span className="font-['Outfit'] text-[12px] text-[#535353]">
+                                        +{product.images.length - 4}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                                <p className="font-['Outfit'] text-[12px] text-[#535353]">
+                                  {product.images.length} image(s) in gallery
+                                </p>
+                              </>
                             )}
                           </div>
-                          {product.description && (
-                            <p className="font-['Outfit'] text-[14px] text-[#535353] mb-[12px]">
-                              {product.description}
-                            </p>
-                          )}
-                          {product.images.length > 0 && (
-                            <>
-                              <div className="flex gap-[8px] mb-[8px] overflow-x-auto pb-[8px]">
-                                {product.images.slice(0, 4).map((img, idx) => (
-                                  <img 
-                                    key={idx}
-                                    src={img} 
-                                    alt={`${product.name} ${idx + 1}`}
-                                    className="w-[80px] h-[80px] object-cover rounded-[8px] border border-[#BBBBBB] flex-shrink-0"
-                                  />
-                                ))}
-                                {product.images.length > 4 && (
-                                  <div className="w-[80px] h-[80px] rounded-[8px] border border-[#BBBBBB] flex items-center justify-center bg-[#E1E1E1] flex-shrink-0">
-                                    <span className="font-['Outfit'] text-[12px] text-[#535353]">
-                                      +{product.images.length - 4}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                              <p className="font-['Outfit'] text-[12px] text-[#535353]">
-                                {product.images.length} image(s) in gallery
-                              </p>
-                            </>
-                          )}
+                          <div className="flex gap-[8px]">
+                            <button 
+                              onClick={() => handleProductEdit(product)} 
+                              className={`h-[36px] px-[16px] rounded-[100px] font-['Outfit'] text-[11px] uppercase text-white transition-colors flex-shrink-0 ${
+                                editingProductId === product.id ? 'bg-[#535353] hover:bg-[#161616]' : 'bg-[#161616] hover:bg-[#535353]'
+                              }`}
+                            >
+                              {editingProductId === product.id ? 'Close' : 'Edit'}
+                            </button>
+                            <button
+                              onClick={() => handleProductDelete(product.id)}
+                              className="h-[36px] px-[16px] rounded-[100px] bg-red-500 font-['Outfit'] font-normal text-[11px] tracking-[0.55px] uppercase text-white hover:bg-red-600 transition-colors flex-shrink-0"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => handleProductDelete(product.id)}
-                          className="h-[36px] px-[16px] rounded-[100px] bg-red-500 font-['Outfit'] font-normal text-[11px] tracking-[0.55px] uppercase text-white hover:bg-red-600 transition-colors"
-                        >
-                          Delete
-                        </button>
                       </div>
+                      
+                      {/* Accordion Edit Form */}
+                      {editingProductId === product.id && (
+                        <div className="border-t border-[#BBBBBB] bg-[#EAEAEA] p-[clamp(20px,3vw,32px)]">
+                          <h3 className="font-['DM_Sans'] text-[18px] tracking-[-0.72px] text-[#161616] mb-[24px]">Edit Product</h3>
+                          <form onSubmit={handleProductSubmit} className="space-y-[20px]">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                              <div>
+                                <input type="text" required value={productForm.name} onChange={(e) => setProductForm({ ...productForm, name: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Product Name" />
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Product display name.</p>
+                              </div>
+                              <div>
+                                <input type="text" required value={productForm.slug} onChange={(e) => setProductForm({ ...productForm, slug: e.target.value.toLowerCase().replace(/\\s+/g, '-') })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="product-slug" />
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">URL-friendly identifier.</p>
+                              </div>
+                            </div>
+                            <div>
+                              <textarea value={productForm.description} onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} rows={3} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Description" />
+                              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Product description for listing.</p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px]">
+                              <div>
+                                <select value={productForm.category} onChange={(e) => setProductForm({ ...productForm, category: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]">
+                                  {getAllCategories().map(cat => (
+                                    <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                                  ))}
+                                </select>
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Product category.</p>
+                              </div>
+                              <div>
+                                <input type="number" required min="0" step="0.01" value={productForm.basePrice} onChange={(e) => setProductForm({ ...productForm, basePrice: Number(e.target.value) })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Price" />
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Base price in EUR.</p>
+                              </div>
+                              <div>
+                                <label className="flex items-center gap-[12px] px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] bg-[#EAEAEA] cursor-pointer">
+                                  <input type="checkbox" checked={productForm.inStock} onChange={(e) => setProductForm({ ...productForm, inStock: e.target.checked })} className="w-[20px] h-[20px]" />
+                                  <span className="font-['Outfit'] text-[14px]">In Stock</span>
+                                </label>
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Product availability.</p>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block font-['Outfit'] text-[14px] text-[#535353] mb-[8px]">
+                                Gallery Images {imageFiles.length > 0 && `(${imageFiles.length} selected)`}
+                              </label>
+                              <input 
+                                ref={fileInputRef}
+                                type="file" 
+                                accept="image/*" 
+                                multiple 
+                                onChange={(e) => {
+                                  handleFileInputChange(e);
+                                  handleImageUpload(e);
+                                }}
+                                className="hidden"
+                                id="product-edit-file-upload"
+                              />
+                              <label 
+                                htmlFor="product-edit-file-upload"
+                                className="flex items-center justify-center w-full h-[48px] px-[16px] border-2 border-dashed border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] text-[#535353] hover:border-[#161616] hover:text-[#161616] transition-colors cursor-pointer bg-[#EAEAEA]"
+                              >
+                                {selectedFileNames}
+                              </label>
+                              {imageFiles.length > 0 && (
+                                <div className="grid grid-cols-4 gap-[8px] mt-[12px]">
+                                  {imageFiles.map((img, i) => (
+                                    <div key={i} className="relative aspect-square rounded-[8px] overflow-hidden border border-[#BBBBBB]">
+                                      <Image src={img} alt={`Preview ${i + 1}`} fill className="object-cover" />
+                                      <button
+                                        type="button"
+                                        onClick={() => setImageFiles(prev => prev.filter((_, idx) => idx !== i))}
+                                        className="absolute top-[4px] right-[4px] w-[24px] h-[24px] bg-red-500 text-white rounded-full flex items-center justify-center text-[12px] hover:bg-red-600 transition-colors"
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Product images for gallery.</p>
+                            </div>
+                            <div className="flex gap-[12px] pt-[12px]">
+                              <button type="submit" className="flex-1 h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[12px] uppercase text-white hover:bg-[#535353] transition-colors">
+                                Update Product
+                              </button>
+                              <button type="button" onClick={handleProductCancelEdit} className="h-[48px] px-[24px] rounded-[100px] bg-[#BBBBBB] font-['Outfit'] text-[12px] uppercase text-[#161616] hover:bg-[#535353] hover:text-white transition-colors">
+                                Cancel
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -873,7 +1181,7 @@ export default function AdminPage() {
         {activeTab === 'projects' && (
           <div className="space-y-[32px]">
             {/* Add New Project - Collapsible */}
-            <div className="bg-white rounded-[24px] p-[clamp(20px,3vw,32px)]">
+            <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(20px,3vw,32px)]">
               <button
                 onClick={() => {
                   setShowAddForm(!showAddForm);
@@ -907,40 +1215,54 @@ export default function AdminPage() {
               
               <form onSubmit={handleProjectSubmit} className="space-y-[20px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
-                  <input 
-                    type="text" 
-                    required 
-                    value={projectForm.title} 
-                    onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })} 
-                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
-                    placeholder="Project Title" 
-                  />
-                  <input 
-                    type="text" 
-                    value={projectForm.subtitle} 
-                    onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })} 
-                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
-                    placeholder="Subtitle (optional)" 
-                  />
+                  <div>
+                    <input 
+                      type="text" 
+                      required 
+                      value={projectForm.title} 
+                      onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })} 
+                      className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
+                      placeholder="Project Title" 
+                    />
+                    <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Project title — shown in listings and project page header.</p>
+                  </div>
+
+                  <div>
+                    <input 
+                      type="text" 
+                      value={projectForm.subtitle} 
+                      onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })} 
+                      className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
+                      placeholder="Subtitle (optional)" 
+                    />
+                    <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Optional short subtitle displayed beside the title.</p>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
-                  <input 
-                    type="text" 
-                    required 
-                    value={projectForm.slug} 
-                    onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} 
-                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
-                    placeholder="project-slug" 
-                  />
-                  <input 
-                    type="text" 
-                    required 
-                    value={projectForm.location} 
-                    onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })} 
-                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
-                    placeholder="Location (e.g., Vilnius, Lithuania)" 
-                  />
+                  <div>
+                    <input 
+                      type="text" 
+                      required 
+                      value={projectForm.slug} 
+                      onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} 
+                      className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
+                      placeholder="project-slug" 
+                    />
+                    <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">URL-friendly identifier, lowercase with hyphens. Auto-generated but editable.</p>
+                  </div>
+
+                  <div>
+                    <input 
+                      type="text" 
+                      required 
+                      value={projectForm.location} 
+                      onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })} 
+                      className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
+                      placeholder="Location (e.g., Vilnius, Lithuania)" 
+                    />
+                    <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">City, Country (e.g., Vilnius, Lithuania).</p>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
@@ -953,6 +1275,7 @@ export default function AdminPage() {
                     <option value="commercial">Commercial</option>
                     <option value="public">Public</option>
                   </select>
+                  <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Project category (residential / commercial / public).</p>
                   
                   <label className="flex items-center gap-[12px] px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px]">
                     <input 
@@ -963,6 +1286,7 @@ export default function AdminPage() {
                     />
                     <span className="font-['Outfit'] text-[14px]">Featured Project</span>
                   </label>
+                  <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Toggle to mark the project as featured (appears in highlighted lists).</p>
                 </div>
 
                 <textarea 
@@ -973,6 +1297,7 @@ export default function AdminPage() {
                   className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
                   placeholder="Short Description (for cards)" 
                 />
+                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">One-line summary shown in project cards.</p>
 
                 <textarea 
                   value={projectForm.fullDescription} 
@@ -981,6 +1306,7 @@ export default function AdminPage() {
                   className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
                   placeholder="Full Description (optional, for project detail page)" 
                 />
+                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Detailed content for the project details page.</p>
 
                 <input 
                   type="text" 
@@ -989,6 +1315,7 @@ export default function AdminPage() {
                   className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
                   placeholder="Products Used (comma-separated, e.g., Black larch, Brown larch)" 
                 />
+                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Comma-separated list (e.g., Black larch, Brown larch).</p>
 
                 <div className="space-y-[12px]">
                   <label className="block">
@@ -1011,6 +1338,7 @@ export default function AdminPage() {
                         </span>
                       </label>
                     </div>
+                    <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Main catalog image (16:9). Displays in listings when set.</p>
                   </label>
 
                   {featuredImageFile && (
@@ -1055,6 +1383,7 @@ export default function AdminPage() {
                         <span className="text-[#535353]">{projectSelectedFileNames}</span>
                       </label>
                     </div>
+                    <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Additional gallery images (square thumbnails).</p>
                   </label>
 
                   {projectImageFiles.length > 0 && (
@@ -1096,7 +1425,7 @@ export default function AdminPage() {
               )}
             </div>
 
-            <div className="bg-white rounded-[24px] p-[clamp(20px,3vw,32px)]">
+            <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(20px,3vw,32px)]">
               <div className="flex justify-between items-center mb-[24px]">
                 <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616]">
                   Projects ({projects.length})
@@ -1183,36 +1512,63 @@ export default function AdminPage() {
                       
                       {/* Accordion Edit Form */}
                       {editingProjectId === project.id && (
-                        <div className="border-t border-[#BBBBBB] bg-[#f5f5f5] p-[20px]">
-                          <h3 className="font-['DM_Sans'] text-[18px] tracking-[-0.72px] text-[#161616] mb-[16px]">Edit Project</h3>
-                          <form onSubmit={handleProjectSubmit} className="space-y-[16px]">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-                              <input type="text" required value={projectForm.title} onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="Project Title" />
-                              <input type="text" value={projectForm.subtitle} onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="Subtitle (optional)" />
+                        <div className="border-t border-[#BBBBBB] bg-[#EAEAEA] p-[clamp(20px,3vw,32px)]">
+                          <h3 className="font-['DM_Sans'] text-[18px] tracking-[-0.72px] text-[#161616] mb-[24px]">Edit Project</h3>
+                          <form onSubmit={handleProjectSubmit} className="space-y-[20px]">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                              <div>
+                                <input type="text" required value={projectForm.title} onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Project Title" />
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Project title — shown in listings and project page header.</p>
+                              </div>
+                              <div>
+                                <input type="text" value={projectForm.subtitle} onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Subtitle (optional)" />
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Optional short subtitle displayed beside the title.</p>
+                              </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-                              <input type="text" required value={projectForm.slug} onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="project-slug" />
-                              <input type="text" required value={projectForm.location} onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="Location" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                              <div>
+                                <input type="text" required value={projectForm.slug} onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="project-slug" />
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">URL-friendly identifier, lowercase with hyphens. Auto-generated but editable.</p>
+                              </div>
+                              <div>
+                                <input type="text" required value={projectForm.location} onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Location" />
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">City, Country (e.g., Vilnius, Lithuania).</p>
+                              </div>
                             </div>
-                            <textarea required value={projectForm.description} onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })} rows={3} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="Description" />
-                            <textarea value={projectForm.fullDescription} onChange={(e) => setProjectForm({ ...projectForm, fullDescription: e.target.value })} rows={4} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="Full Description (optional)" />
-                            <input type="text" value={projectForm.productsUsed} onChange={(e) => setProjectForm({ ...projectForm, productsUsed: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="Products Used (comma-separated)" />
+                            <div>
+                              <textarea required value={projectForm.description} onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })} rows={3} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Description" />
+                              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">One-line summary shown in project cards.</p>
+                            </div>
+                            <div>
+                              <textarea value={projectForm.fullDescription} onChange={(e) => setProjectForm({ ...projectForm, fullDescription: e.target.value })} rows={4} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Full Description (optional)" />
+                              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Detailed content for the project details page.</p>
+                            </div>
+                            <div>
+                              <input type="text" value={projectForm.productsUsed} onChange={(e) => setProjectForm({ ...projectForm, productsUsed: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Products Used (comma-separated)" />
+                              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Comma-separated list (e.g., Black larch, Brown larch).</p>
+                            </div>
                             
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-                              <select value={projectForm.category} onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white">
-                                <option value="residential">Residential</option>
-                                <option value="commercial">Commercial</option>
-                                <option value="public">Public</option>
-                              </select>
-                              <label className="flex items-center gap-[12px] px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] bg-white cursor-pointer">
-                                <input type="checkbox" checked={projectForm.featured} onChange={(e) => setProjectForm({ ...projectForm, featured: e.target.checked })} className="w-[20px] h-[20px]" />
-                                <span className="font-['Outfit'] text-[14px]">Featured Project</span>
-                              </label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                              <div>
+                                <select value={projectForm.category} onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]">
+                                  <option value="residential">Residential</option>
+                                  <option value="commercial">Commercial</option>
+                                  <option value="public">Public</option>
+                                </select>
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Project category (residential / commercial / public).</p>
+                              </div>
+                              <div>
+                                <label className="flex items-center gap-[12px] px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] bg-[#EAEAEA] cursor-pointer">
+                                  <input type="checkbox" checked={projectForm.featured} onChange={(e) => setProjectForm({ ...projectForm, featured: e.target.checked })} className="w-[20px] h-[20px]" />
+                                  <span className="font-['Outfit'] text-[14px]">Featured Project</span>
+                                </label>
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Toggle to mark the project as featured (appears in highlighted lists).</p>
+                              </div>
                             </div>
 
-                            <div className="space-y-[12px]">
+                            <div>
                               <label className="block">
-                                <span className="font-['Outfit'] text-[14px] font-medium text-[#161616] mb-[8px] block">Featured Image (katalogo nuotrauka)</span>
+                                <span className="font-['Outfit'] text-[14px] font-medium text-[#161616] mb-[8px] block">Featured Image</span>
                                 <div className="relative">
                                   <input 
                                     ref={featuredImageInputRef}
@@ -1224,13 +1580,14 @@ export default function AdminPage() {
                                   />
                                   <label 
                                     htmlFor="editFeaturedImageInput"
-                                    className="flex items-center justify-center w-full px-[16px] py-[12px] border-2 border-dashed border-[#161616] rounded-[12px] font-['Outfit'] text-[14px] cursor-pointer hover:bg-white transition-colors bg-white"
+                                    className="flex items-center justify-center w-full px-[16px] py-[12px] border-2 border-dashed border-[#161616] rounded-[12px] font-['Outfit'] text-[14px] cursor-pointer hover:bg-[#f0f0f0] transition-colors bg-[#EAEAEA]"
                                   >
                                     <span className="text-[#161616] font-medium">
                                       {featuredImageFile ? 'Change Featured Image' : 'Upload Featured Image'}
                                     </span>
                                   </label>
                                 </div>
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Main catalog image (16:9). Displays in listings when set.</p>
                               </label>
 
                               {featuredImageFile && (
@@ -1252,9 +1609,9 @@ export default function AdminPage() {
                               )}
                             </div>
 
-                            <div>
+                              <div>
                               <label className="block font-['Outfit'] text-[14px] text-[#535353] mb-[8px]">
-                                Gallery Images (papildomos) {projectImageFiles.length > 0 && `(${projectImageFiles.length} selected)`}
+                                Gallery Images {projectImageFiles.length > 0 && `(${projectImageFiles.length} selected)`}
                               </label>
                               <input 
                                 ref={projectFileInputRef}
@@ -1270,7 +1627,7 @@ export default function AdminPage() {
                               />
                               <label 
                                 htmlFor="project-file-upload"
-                                className="flex items-center justify-center w-full h-[48px] px-[16px] border-2 border-dashed border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] text-[#535353] hover:border-[#161616] hover:text-[#161616] transition-colors cursor-pointer bg-white"
+                                className="flex items-center justify-center w-full h-[48px] px-[16px] border-2 border-dashed border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] text-[#535353] hover:border-[#161616] hover:text-[#161616] transition-colors cursor-pointer bg-[#EAEAEA]"
                               >
                                 {projectSelectedFileNames}
                               </label>
@@ -1290,9 +1647,10 @@ export default function AdminPage() {
                                   ))}
                                 </div>
                               )}
+                              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Additional gallery images (square thumbnails).</p>
                             </div>
 
-                            <div className="flex gap-[12px] pt-[8px]">
+                            <div className="flex gap-[12px] pt-[12px]">
                               <button type="submit" className="flex-1 h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[12px] uppercase text-white hover:bg-[#535353] transition-colors">
                                 Update Project
                               </button>
@@ -1314,41 +1672,153 @@ export default function AdminPage() {
         {/* Posts Tab */}
         {activeTab === 'posts' && (
           <div className="space-y-[32px]">
-            <div className="bg-white rounded-[24px] p-[clamp(20px,3vw,32px)]">
-              <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616] mb-[24px]">
-                Add New Post
-              </h2>
+            <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(20px,3vw,32px)]">
+              <button
+                onClick={() => {
+                  setShowAddPostForm(!showAddPostForm);
+                  setEditingPostId(null);
+                  if (!showAddPostForm) {
+                    setPostForm({
+                      title: '',
+                      slug: '',
+                      excerpt: '',
+                      content: '',
+                      coverImage: '',
+                      author: '',
+                      category: 'news',
+                      published: false,
+                    });
+                  }
+                }}
+                className="w-full flex items-center justify-between mb-[24px]"
+              >
+                <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616]">
+                  Add New Post
+                </h2>
+                <span className="text-[24px] text-[#161616]">{showAddPostForm ? '−' : '+'}</span>
+              </button>
+              {showAddPostForm && (
               
               <form onSubmit={handlePostSubmit} className="space-y-[20px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
-                  <input type="text" required value={postForm.title} onChange={(e) => setPostForm({ ...postForm, title: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Post Title" />
-                  <input type="text" required value={postForm.slug} onChange={(e) => setPostForm({ ...postForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="post-slug" />
+                  <div>
+                    <input type="text" required value={postForm.title} onChange={(e) => setPostForm({ ...postForm, title: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Post Title" />
+                    <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Post title for display.</p>
+                  </div>
+                  <div>
+                    <input type="text" required value={postForm.slug} onChange={(e) => setPostForm({ ...postForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="post-slug" />
+                    <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">URL-friendly identifier.</p>
+                  </div>
                 </div>
-                <textarea required value={postForm.excerpt} onChange={(e) => setPostForm({ ...postForm, excerpt: e.target.value })} rows={2} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Excerpt" />
-                <textarea required value={postForm.content} onChange={(e) => setPostForm({ ...postForm, content: e.target.value })} rows={6} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Content" />
+                <div>
+                  <textarea required value={postForm.excerpt} onChange={(e) => setPostForm({ ...postForm, excerpt: e.target.value })} rows={2} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Excerpt" />
+                  <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Short summary for listing.</p>
+                </div>
+                <div>
+                  <textarea required value={postForm.content} onChange={(e) => setPostForm({ ...postForm, content: e.target.value })} rows={6} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Content" />
+                  <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Full post content.</p>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
-                  <input type="text" required value={postForm.author} onChange={(e) => setPostForm({ ...postForm, author: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Author" />
-                  <input type="text" required value={postForm.coverImage} onChange={(e) => setPostForm({ ...postForm, coverImage: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Cover Image URL" />
+                  <div>
+                    <input type="text" required value={postForm.author} onChange={(e) => setPostForm({ ...postForm, author: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Author" />
+                    <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Author name.</p>
+                  </div>
+                  <div>
+                    <input type="text" required value={postForm.coverImage} onChange={(e) => setPostForm({ ...postForm, coverImage: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Cover Image URL" />
+                    <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Cover image URL.</p>
+                  </div>
                 </div>
                 <button type="submit" className="w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[12px] uppercase text-white hover:bg-[#535353] transition-colors">Add Post</button>
               </form>
+              )}
             </div>
 
-            <div className="bg-white rounded-[24px] p-[clamp(20px,3vw,32px)]">
-              <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616] mb-[24px]">Posts ({posts.length})</h2>
+            <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(20px,3vw,32px)]">
+              <div className="flex items-center justify-between mb-[24px]">
+                <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616]">Posts ({posts.length})</h2>
+                <div className="flex gap-[12px]">
+                  <input
+                    type="file"
+                    accept="application/json"
+                    onChange={handlePostImport}
+                    className="hidden"
+                    id="importPostsFile"
+                  />
+                  <label
+                    htmlFor="importPostsFile"
+                    className="h-[36px] px-[20px] rounded-[100px] border border-[#535353] font-['Outfit'] text-[11px] uppercase text-[#535353] hover:bg-[#DCDCDC] transition-colors cursor-pointer flex items-center"
+                  >
+                    Import
+                  </label>
+                  <button
+                    onClick={handlePostExport}
+                    className="h-[36px] px-[20px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase text-white hover:bg-[#535353] transition-colors"
+                  >
+                    Export
+                  </button>
+                </div>
+              </div>
               {posts.length === 0 ? (
                 <p className="font-['Outfit'] text-[14px] text-[#535353] text-center py-[40px]">No posts yet.</p>
               ) : (
                 <div className="space-y-[16px]">
                   {posts.map((post) => (
                     <div key={post.id} className="border border-[#BBBBBB] rounded-[16px] p-[20px]">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <h3 className="font-['DM_Sans'] text-[20px] tracking-[-0.8px]">{post.title}</h3>
                           <p className="font-['Outfit'] text-[12px] text-[#535353]">By {post.author}</p>
                         </div>
-                        <button onClick={() => handlePostDelete(post.id)} className="h-[36px] px-[16px] rounded-[100px] bg-red-500 font-['Outfit'] text-[11px] uppercase text-white">Delete</button>
+                        <div className="flex gap-[12px]">
+                          <button
+                            onClick={() => handlePostEdit(post)}
+                            className="h-[36px] px-[20px] rounded-[100px] border border-[#161616] font-['Outfit'] text-[11px] uppercase text-[#161616] hover:bg-[#DCDCDC] transition-colors"
+                          >
+                            {editingPostId === post.id ? 'Close' : 'Edit'}
+                          </button>
+                          <button onClick={() => handlePostDelete(post.id)} className="h-[36px] px-[20px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase text-white hover:bg-[#535353] transition-colors">Delete</button>
+                        </div>
                       </div>
+                      
+                      {/* Accordion Edit Form */}
+                      {editingPostId === post.id && (
+                        <div className="mt-[24px] pt-[24px] border-t border-[#BBBBBB]">
+                          <form onSubmit={handlePostSubmit} className="space-y-[20px]">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                              <div>
+                                <input type="text" required value={postForm.title} onChange={(e) => setPostForm({ ...postForm, title: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Post Title" />
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Post title for display.</p>
+                              </div>
+                              <div>
+                                <input type="text" required value={postForm.slug} onChange={(e) => setPostForm({ ...postForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="post-slug" />
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">URL-friendly identifier.</p>
+                              </div>
+                            </div>
+                            <div>
+                              <textarea required value={postForm.excerpt} onChange={(e) => setPostForm({ ...postForm, excerpt: e.target.value })} rows={2} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Excerpt" />
+                              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Short summary for listing.</p>
+                            </div>
+                            <div>
+                              <textarea required value={postForm.content} onChange={(e) => setPostForm({ ...postForm, content: e.target.value })} rows={6} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Content" />
+                              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Full post content.</p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                              <div>
+                                <input type="text" required value={postForm.author} onChange={(e) => setPostForm({ ...postForm, author: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Author" />
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Author name.</p>
+                              </div>
+                              <div>
+                                <input type="text" required value={postForm.coverImage} onChange={(e) => setPostForm({ ...postForm, coverImage: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Cover Image URL" />
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Cover image URL.</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-[12px]">
+                              <button type="submit" className="flex-1 h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[12px] uppercase text-white hover:bg-[#535353] transition-colors">Update Post</button>
+                              <button type="button" onClick={handlePostCancelEdit} className="h-[48px] px-[32px] rounded-[100px] border border-[#161616] font-['Outfit'] text-[12px] uppercase text-[#161616] hover:bg-[#DCDCDC] transition-colors">Cancel</button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

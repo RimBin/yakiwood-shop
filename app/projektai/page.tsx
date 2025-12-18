@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { projects as projectsData } from '@/data/projects';
+import { PageCover } from '@/components/shared/PageLayout';
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -42,19 +43,16 @@ export default function ProjectsPage() {
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
       {/* Title Section */}
-      <div className="w-full border-b border-[#BBBBBB]">
-        <div className="max-w-[1360px] mx-auto px-[40px] pt-[32px] pb-[48px]">
-          <h1
-            className="font-['DM_Sans'] font-light text-[128px] leading-[0.95] text-[#161616] tracking-[-6.4px]"
-            style={{ fontVariationSettings: "'opsz' 14" }}
-          >
-            Our projects
-          </h1>
-        </div>
-      </div>
+      <PageCover>
+        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+            style={{ fontVariationSettings: "'opsz' 14" }}>
+          <span>Įkvepiančios </span>
+          <span className="font-['Tiro_Tamil'] italic">projektas</span>
+        </h1>
+      </PageCover>
 
       {/* Projects Grid */}
-      <div className="max-w-[1360px] mx-auto px-[40px] pt-[64px]">
+      <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px] pt-[64px]">
         <div className="grid grid-cols-12 gap-[16px] auto-rows-auto">
           {currentProjects.map((project, idx) => {
             // Calculate positioning based on masonry layout

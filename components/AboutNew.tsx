@@ -4,20 +4,28 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ArrowRight from '@/components/icons/ArrowRight';
+import { PageCover } from '@/components/shared/PageLayout';
 
 export default function AboutNew() {
   return (
     <div className="w-full">
       {/* Hero Section */}
+      <PageCover>
+        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+            style={{ fontVariationSettings: "'opsz' 14" }}>
+          About us
+        </h1>
+      </PageCover>
+      
       <section className="w-full bg-[#E1E1E1]">
         <div className="mx-auto max-w-[1440px] px-[24px] py-[80px] lg:px-[40px] lg:py-[120px]">
           <div className="flex flex-col gap-[48px]">
             {/* Heading */}
             <div className="flex flex-col gap-[16px]">
-              <p className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">About us</p>
-              <h1 className="font-['DM_Sans'] text-[40px] font-light leading-[1.1] tracking-[-1.6px] text-[#161616] lg:text-[56px] lg:tracking-[-2.24px]">
+              <p className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">Our Story</p>
+              <h2 className="font-['DM_Sans'] text-[40px] font-light leading-[1.1] tracking-[-1.6px] text-[#161616] lg:text-[56px] lg:tracking-[-2.24px]">
                 At Yakiwood, we are experts in the preparation of burnt wood, specializing in facades, terraces, and interior solutions that guarantee high-quality, long-lasting results using natural, time-tested woodworking methods.
-              </h1>
+              </h2>
             </div>
 
             {/* Hero Image */}

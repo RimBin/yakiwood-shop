@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Plus from '@/components/icons/Plus';
 import Minus from '@/components/icons/Minus';
+import { PageCover } from '@/components/shared/PageLayout';
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(0);
@@ -47,19 +48,19 @@ export default function FAQ() {
 
   return (
     <section className="w-full bg-[#E1E1E1]">
+      {/* Page Header */}
+      <PageCover>
+        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+            style={{ fontVariationSettings: "'opsz' 14" }}>
+          <span>Everything you wanted </span>
+          <span className="font-['Tiro_Tamil'] italic">to ask</span>
+          <span> & more</span>
+        </h1>
+      </PageCover>
+      
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7586 ===== */}
       <div className="lg:hidden py-[64px]">
-        {/* Title Section - Mobile */}
-        <div className="px-[16px] mb-[24px]">
-          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-            faq
-          </p>
-          <h2 className="font-['DM_Sans'] font-light text-[40px] leading-none tracking-[-1.6px] text-[#161616]">
-            <span>Everything you wanted </span>
-            <span className="font-['Tiro_Tamil'] italic">to ask</span>
-            <span> & more</span>
-          </h2>
-        </div>
+        {/* Accordion - Mobile */}
 
         {/* Accordion - Mobile */}
         <div className="flex flex-col">
@@ -101,22 +102,6 @@ export default function FAQ() {
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
       <div className="hidden lg:block">
         <div className="max-w-[1440px] mx-auto relative">
-          {/* Title Section - absolute positioning matching Figma */}
-          <div className="relative h-[160px]">
-            <div className="absolute left-[40px] top-0 text-[#161616]">
-              <p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase left-0 top-[25px] whitespace-nowrap">
-                faq
-              </p>
-              <p className="absolute font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] left-[344px] top-0 w-[750px] whitespace-pre-wrap">
-                <span>Everything you wanted </span>
-                <span className="font-['Tiro_Tamil'] italic">to ask</span>
-                <span> & more</span>
-              </p>
-            </div>
-          </div>
-
-          {/* 65px gap before accordion */}
-          <div className="h-[65px]" />
         </div>
 
         {/* Accordion - Full width with centered content */}

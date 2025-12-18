@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ArrowRight from '@/components/icons/ArrowRight';
+import { PageCover } from '@/components/shared/PageLayout';
 
 // Local assets
 const imgProject1 = "/assets/imgProject1.jpg";
@@ -16,19 +17,17 @@ const imgProject6 = "/assets/imgProject6.jpg";
 export default function Projects() {
   return (
     <section className="w-full bg-[#E1E1E1]">
+      {/* Page Header */}
+      <PageCover>
+        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+            style={{ fontVariationSettings: "'opsz' 14" }}>
+          <span>Inspiring </span>
+          <span className="font-['Tiro_Tamil'] italic">projects</span>
+        </h1>
+      </PageCover>
+      
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7712 ===== */}
       <div className="lg:hidden">
-        {/* Title Section - Mobile */}
-        <div className="px-[16px] md:px-[32px] pt-[64px] md:pt-[80px] pb-[16px] md:pb-[24px]">
-          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-            Projects
-          </p>
-          <p className="font-['DM_Sans'] font-light leading-none text-[#161616]" style={{ fontSize: 'clamp(32px, 6vw, 52px)', letterSpacing: 'clamp(-1.6px, -0.04em, -2.08px)' }}>
-            <span>Inspiring </span>
-            <span className="font-['Tiro_Tamil'] italic">projects</span>
-          </p>
-        </div>
-
         {/* Description text - Mobile */}
         <p className="px-[16px] md:px-[32px] font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[600px] mb-[24px] md:mb-[32px]">
           People who have chosen charred wood often share their positive impressions and experiences. They note not only the exceptional appearance of the wood, but also its functionality and durability.
@@ -127,18 +126,6 @@ export default function Projects() {
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
       <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] py-[120px]">
-        {/* Title Section */}
-        <div className="relative h-[160px] mb-[48px]">
-          <p className="absolute left-0 top-[25px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-[#535353]">Projects</p>
-          <h2 className="absolute left-[344px] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616]">
-            Inspiring <span className="font-['Tiro_Tamil'] italic">projects</span>
-          </h2>
-          <Link href="/projektai" className="absolute right-0 top-[25px] flex items-center gap-[12px] text-[#161616]">
-            <span className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px]">View all projects</span>
-            <ArrowRight color="#161616" />
-          </Link>
-        </div>
-
         {/* Desktop Grid */}
         <div className="grid grid-cols-3 gap-[32px]">
           {[imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6].map((img, idx) => (

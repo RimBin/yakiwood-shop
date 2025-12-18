@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import ArrowRight from '@/components/icons/ArrowRight';
+import { PageCover } from '@/components/shared/PageLayout';
 
 // Local assets
 const imgVector33 = "/assets/imgVector33.jpg";
@@ -45,20 +46,18 @@ export default function Solutions() {
 
   return (
     <section className="w-full bg-[#E1E1E1]">
+      {/* Page Header */}
+      <PageCover>
+        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+            style={{ fontVariationSettings: "'opsz' 14" }}>
+          <span>Versatile </span>
+          <span className="font-['Tiro_Tamil'] italic">solutions</span>
+          <span> for every project</span>
+        </h1>
+      </PageCover>
+      
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7698 ===== */}
       <div className="lg:hidden">
-        {/* Title Section - Mobile */}
-        <div className="px-[16px] md:px-[32px] pt-[64px] md:pt-[80px] pb-[24px] md:pb-[32px]">
-          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-            purpose
-          </p>
-          <p className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[600px]" style={{ fontSize: 'clamp(32px, 6vw, 52px)', letterSpacing: 'clamp(-1.6px, -0.04em, -2.08px)' }}>
-            <span>Versatile </span>
-            <span className="font-['Tiro_Tamil'] italic">solutions</span>
-            <span> for every project</span>
-          </p>
-        </div>
-
         {/* Cards - Mobile: Full width accordion style like Figma 759:7702 */}
         <div className="w-full flex flex-col">
           {/* Top border */}
@@ -120,18 +119,6 @@ export default function Solutions() {
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
       <div className="hidden lg:block">
-        {/* Title Section - Desktop */}
-        <div className="max-w-[1440px] mx-auto px-[40px] relative h-[160px] mb-[65px]">
-          <p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] left-[40px] top-[25px]">
-            purpose
-          </p>
-          <p className="absolute font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] left-[384.75px] top-0 w-[713px]">
-            <span>Versatile </span>
-            <span className="font-['Tiro_Tamil'] italic">solutions</span>
-            <span> for every project</span>
-          </p>
-        </div>
-
         {/* Desktop Cards */}
         <div className="w-full flex flex-col items-center gap-px">
         {/* Top divider line */}

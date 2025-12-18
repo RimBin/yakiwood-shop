@@ -1,13 +1,10 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import Image from 'next/image';
 
 export default function LoginPage() {
-  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,23 +12,30 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Demo credentials
+  const demoUsers = {
+    'admin@yakiwood.lt': { password: 'demo123', role: 'admin', name: 'Admin User' },
+    'user@yakiwood.lt': { password: 'demo123', role: 'user', name: 'Demo User' }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    if (!supabase) {
-      setError('Authentication is not configured');
-      setLoading(false);
-      return;
-    }
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (authError) {
-      setError(authError.message);
+    // Check demo credentials
+    const user = demoUsers[email as keyof typeof demoUsers];
+    if (user && user.password === password) {
+      // Store user session in localStorage
+      localStorage.setItem('user', JSON.stringify({ email, role: user.role, name: user.name }));
+      
+      // Redirect based on role
+      router.push(user.role === 'admin' ? '/admin' : '/account');
     } else {
-      router.push('/admin');
+      setError('Neteisingas el. paštas arba slaptažodis');
     }
 
     setLoading(false);
@@ -41,33 +45,23 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    if (!supabase) {
-      setError('Authentication is not configured');
-      setLoading(false);
-      return;
-    }
-
     const demoCredentials = {
-      admin: { email: 'admin@yakiwood.lt', password: 'demo123456' },
-      user: { email: 'user@yakiwood.lt', password: 'demo123456' }
+      admin: { email: 'admin@yakiwood.lt', password: 'demo123', name: 'Admin User' },
+      user: { email: 'user@yakiwood.lt', password: 'demo123', name: 'Demo User' }
     };
 
-    const { email: demoEmail, password: demoPassword } = demoCredentials[role];
+    const demo = demoCredentials[role];
+    setEmail(demo.email);
+    setPassword(demo.password);
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Store user session
+    localStorage.setItem('user', JSON.stringify({ email: demo.email, role, name: demo.name }));
     
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-
-    const { error: authError } = await supabase.auth.signInWithPassword({ 
-      email: demoEmail, 
-      password: demoPassword 
-    });
-
-    if (authError) {
-      setError(authError.message);
-    } else {
-      router.push(role === 'admin' ? '/admin' : '/account');
-    }
-
+    // Redirect based on role
+    router.push(role === 'admin' ? '/admin' : '/account');
     setLoading(false);
   };
 
@@ -102,13 +96,13 @@ export default function LoginPage() {
         {/* Don't have account + Create account link */}
         <div className="flex gap-[8px] items-center justify-center">
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7C7C7C]">
-            Don't have an account yet?
+            Neturite paskyros?
           </p>
           <Link
             href="/register"
             className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:underline"
           >
-            Create account
+            Registruotis
           </Link>
         </div>
 
@@ -186,7 +180,7 @@ export default function LoginPage() {
           {/* Demo logins */}
           <div className="flex flex-col gap-[8px] pt-[8px] border-t border-[#BBBBBB]">
             <p className="font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-[#7C7C7C] text-center">
-              Demo accounts
+              Demo prisijungimas
             </p>
             <div className="flex gap-[8px]">
               <button
@@ -195,7 +189,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="flex-1 h-[36px] border border-[#161616] rounded-[100px] font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors disabled:opacity-60"
               >
-                Admin
+                Administratorius
               </button>
               <button
                 type="button"
@@ -203,7 +197,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="flex-1 h-[36px] border border-[#161616] rounded-[100px] font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors disabled:opacity-60"
               >
-                User
+                Vartotojas
               </button>
             </div>
           </div>

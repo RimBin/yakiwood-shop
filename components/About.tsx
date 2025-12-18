@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { PageCover } from '@/components/shared/PageLayout';
 
 // Image assets from Figma
 const imgVideo = "https://www.figma.com/api/mcp/asset/477aa6a4-49f3-44f4-8e9a-ebf0bfe0cd06";
@@ -15,13 +16,12 @@ export default function About() {
   return (
     <div className="w-full bg-[#E1E1E1]">
       {/* Cover Section */}
-      <div className="border-b border-[#BBBBBB]">
-        <div className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[24px] md:pt-[40px] lg:pt-[48px] pb-[24px] md:pb-[40px] lg:pb-[48px]">
-          <p className="font-['DM_Sans'] font-light leading-[0.95] text-[#161616]" style={{ fontSize: 'clamp(45px, 10vw, 128px)', letterSpacing: 'clamp(-1.8px, -0.05em, -6.4px)' }}>
-            About us
-          </p>
-        </div>
-      </div>
+      <PageCover>
+        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+            style={{ fontVariationSettings: "'opsz' 14" }}>
+          About us
+        </h1>
+      </PageCover>
 
       {/* About Us Description Section */}
       <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[24px] md:pt-[64px] lg:pt-[96px] pb-[24px] md:pb-[0px]">
