@@ -20,6 +20,12 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
+    if (!supabase) {
+      setError('Authentication is not configured');
+      setLoading(false);
+      return;
+    }
+
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (authError) {
@@ -34,6 +40,12 @@ export default function LoginPage() {
   const handleDemoLogin = async (role: 'admin' | 'user') => {
     setError(null);
     setLoading(true);
+
+    if (!supabase) {
+      setError('Authentication is not configured');
+      setLoading(false);
+      return;
+    }
 
     const demoCredentials = {
       admin: { email: 'admin@yakiwood.lt', password: 'demo123456' },

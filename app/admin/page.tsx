@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { seedProducts } from "@/data/seed-products";
 import { projects as defaultProjects } from "@/data/projects";
+import { Project } from "@/types/project";
 import Image from "next/image";
 
 interface Product {
@@ -13,20 +14,6 @@ interface Product {
   basePrice: number;
   images: string[];
   inStock: boolean;
-}
-
-interface Project {
-  id: string;
-  slug: string;
-  title: string;
-  subtitle?: string;
-  location: string;
-  images: string[];
-  productsUsed: string[];
-  description: string;
-  fullDescription?: string;
-  featured?: boolean;
-  category: string;
 }
 
 interface Post {
@@ -74,6 +61,7 @@ export default function AdminPage() {
 
   // Projects state
   const [projects, setProjects] = useState<Project[]>([]);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [projectForm, setProjectForm] = useState({
     title: '',
     subtitle: '',
@@ -292,16 +280,49 @@ export default function AdminPage() {
 
   const handleProjectSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newProject: Project = {
-      id: Date.now().toString(),
-      ...projectForm,
-      images: projectImageFiles.length > 0 ? projectImageFiles : projectForm.images.split(',').map(url => url.trim()).filter(Boolean),
-      productsUsed: projectForm.productsUsed.split(',').map(p => ({ name: p.trim(), slug: p.trim().toLowerCase().replace(/\s+/g, '-') })).filter(p => p.name),
-    };
     
-    const updated = [...projects, newProject];
-    setProjects(updated);
-    localStorage.setItem('yakiwood_projects', JSON.stringify(updated));
+    const urlImages = projectForm.images.split(',').map(url => url.trim()).filter(Boolean);
+    const allImages = [...projectImageFiles, ...urlImages];
+    const productsArray = projectForm.productsUsed.split(',').map(p => ({ name: p.trim(), slug: p.trim().toLowerCase().replace(/\s+/g, '-') })).filter(p => p.name);
+    
+    if (editingProjectId) {
+      // Edit existing project
+      const updated = projects.map(project => {
+        if (project.id === editingProjectId) {
+          return {
+            ...project,
+            title: projectForm.title,
+            subtitle: projectForm.subtitle || undefined,
+            slug: projectForm.slug,
+            location: projectForm.location,
+            images: allImages.length > 0 ? allImages : project.images,
+            productsUsed: productsArray,
+            description: projectForm.description,
+            fullDescription: projectForm.fullDescription,
+            category: projectForm.category as 'residential' | 'commercial',
+            featured: projectForm.featured,
+          };
+        }
+        return project;
+      });
+      setProjects(updated);
+      localStorage.setItem('yakiwood_projects', JSON.stringify(updated));
+      showMessage('Project updated successfully!');
+      setEditingProjectId(null);
+    } else {
+      // Add new project
+      const newProject: Project = {
+        id: Date.now().toString(),
+        ...projectForm,
+        images: allImages.length > 0 ? allImages : projectForm.images.split(',').map(url => url.trim()).filter(Boolean),
+        productsUsed: productsArray,
+      };
+      
+      const updated = [...projects, newProject];
+      setProjects(updated);
+      localStorage.setItem('yakiwood_projects', JSON.stringify(updated));
+      showMessage('Project added successfully!');
+    }
     
     setProjectForm({
       title: '',
@@ -320,8 +341,6 @@ export default function AdminPage() {
     if (projectFileInputRef.current) {
       projectFileInputRef.current.value = '';
     }
-    
-    showMessage('Project added successfully!');
   };
 
   const handleProjectDelete = (id: string) => {
@@ -329,6 +348,48 @@ export default function AdminPage() {
     setProjects(updated);
     localStorage.setItem('yakiwood_projects', JSON.stringify(updated));
     showMessage('Project deleted');
+  };
+
+  const handleProjectEdit = (project: Project) => {
+    setEditingProjectId(project.id);
+    setProjectForm({
+      title: project.title,
+      subtitle: project.subtitle || '',
+      slug: project.slug,
+      location: project.location,
+      images: '',
+      productsUsed: Array.isArray(project.productsUsed) 
+        ? project.productsUsed.map(p => typeof p === 'string' ? p : p.name).join(', ')
+        : project.productsUsed || '',
+      description: project.description,
+      fullDescription: project.fullDescription || '',
+      category: project.category || 'residential',
+      featured: project.featured || false,
+    });
+    // Load existing images to preview
+    if (project.images && project.images.length > 0) {
+      setProjectImageFiles(project.images.map(img => typeof img === 'string' ? img : (img as any).url || ''));
+    }
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleProjectCancelEdit = () => {
+    setEditingProjectId(null);
+    setProjectForm({
+      title: '',
+      subtitle: '',
+      slug: '',
+      location: '',
+      images: '',
+      productsUsed: '',
+      description: '',
+      fullDescription: '',
+      category: 'residential',
+      featured: false,
+    });
+    setProjectImageFiles([]);
+    setProjectSelectedFileNames('No file selected');
   };
 
   const handleProjectImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -777,9 +838,20 @@ export default function AdminPage() {
         {activeTab === 'projects' && (
           <div className="space-y-[32px]">
             <div className="bg-white rounded-[24px] p-[clamp(20px,3vw,32px)]">
-              <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616] mb-[24px]">
-                Add New Project
-              </h2>
+              <div className="flex items-center justify-between mb-[24px]">
+                <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616]">
+                  {editingProjectId ? 'Edit Project' : 'Add New Project'}
+                </h2>
+                {editingProjectId && (
+                  <button
+                    type="button"
+                    onClick={handleProjectCancelEdit}
+                    className="h-[36px] px-[16px] rounded-[100px] border border-[#535353] font-['Outfit'] text-[11px] uppercase text-[#535353] hover:bg-[#535353] hover:text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
               
               <form onSubmit={handleProjectSubmit} className="space-y-[20px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
@@ -924,7 +996,7 @@ export default function AdminPage() {
                   type="submit" 
                   className="w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[12px] uppercase text-white hover:bg-[#535353] transition-colors"
                 >
-                  Add Project
+                  {editingProjectId ? 'Update Project' : 'Add Project'}
                 </button>
               </form>
             </div>
@@ -992,12 +1064,20 @@ export default function AdminPage() {
                                 </p>
                               )}
                             </div>
-                            <button 
-                              onClick={() => handleProjectDelete(project.id)} 
-                              className="h-[36px] px-[16px] rounded-[100px] bg-red-500 font-['Outfit'] text-[11px] uppercase text-white hover:bg-red-600 transition-colors flex-shrink-0"
-                            >
-                              Delete
-                            </button>
+                            <div className="flex gap-[8px]">
+                              <button 
+                                onClick={() => handleProjectEdit(project)} 
+                                className="h-[36px] px-[16px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase text-white hover:bg-[#535353] transition-colors flex-shrink-0"
+                              >
+                                Edit
+                              </button>
+                              <button 
+                                onClick={() => handleProjectDelete(project.id)} 
+                                className="h-[36px] px-[16px] rounded-[100px] bg-red-500 font-['Outfit'] text-[11px] uppercase text-white hover:bg-red-600 transition-colors flex-shrink-0"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>

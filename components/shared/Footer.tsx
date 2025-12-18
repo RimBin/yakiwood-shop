@@ -30,6 +30,14 @@ const navColumns = [
       { label: 'LinkedIn', href: 'https://linkedin.com' },
     ],
   },
+  {
+    title: 'Account',
+    links: [
+      { label: 'My account', href: '/account' },
+      { label: 'Shipping', href: '/policies/shipping' },
+      { label: 'Refund policy', href: '/policies/refund' },
+    ],
+  },
 ];
 
 // Certificate logos with background colors
@@ -165,7 +173,7 @@ export default function Footer() {
               />
             ))}
           </div>
-        </div>
+        </div>4 gap-[24px] flex-1 max-w-[100
       </div>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
@@ -173,7 +181,7 @@ export default function Footer() {
         <div className="flex flex-col gap-[40px]">
           <div className="flex items-start justify-between">
             {/* Navigation Columns - Desktop */}
-            <div className="grid grid-cols-3 gap-[24px] flex-1 max-w-[780px]">
+            <div className="grid grid-cols-4 gap-[24px] flex-1 max-w-[1000px]">
               {navColumns.map((column) => (
                 <div key={column.title}>
                   <h4 className="font-['DM_Sans'] font-normal text-[24px] leading-[1.1] tracking-[-0.96px] text-[#E1E1E1] mb-[12px]">
