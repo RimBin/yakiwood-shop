@@ -84,6 +84,9 @@ export default function AdminPage() {
     category: 'residential',
     featured: false,
   });
+  const [projectImageFiles, setProjectImageFiles] = useState<string[]>([]);
+  const projectFileInputRef = useRef<HTMLInputElement | null>(null);
+  const [projectSelectedFileNames, setProjectSelectedFileNames] = useState('No file selected');
 
   // Posts state
   const [posts, setPosts] = useState<Post[]>([]);
@@ -241,13 +244,51 @@ export default function AdminPage() {
   };
 
   // Project handlers
+  const handleProjectImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const readers: Promise<string>[] = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const reader = new FileReader();
+      
+      const promise = new Promise<string>((resolve) => {
+        reader.onload = (event) => {
+          resolve(event.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      readers.push(promise);
+    }
+    
+    Promise.all(readers).then((base64Images) => {
+      setProjectImageFiles(prev => [...prev, ...base64Images]);
+      
+      const fileNames = Array.from(files).map(f => f.name).join(', ');
+      setProjectSelectedFileNames(fileNames);
+    });
+  };
+
+  const handleProjectFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) {
+      setProjectSelectedFileNames('No file selected');
+      return;
+    }
+    const names = Array.from(files).map(f => f.name).join(', ');
+    setProjectSelectedFileNames(names);
+  };
+
   const handleProjectSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newProject: Project = {
       id: Date.now().toString(),
       ...projectForm,
-      images: projectForm.images.split(',').map(url => url.trim()).filter(Boolean),
-      productsUsed: projectForm.productsUsed.split(',').map(p => p.trim()).filter(Boolean),
+      images: projectImageFiles.length > 0 ? projectImageFiles : projectForm.images.split(',').map(url => url.trim()).filter(Boolean),
+      productsUsed: projectForm.productsUsed.split(',').map(p => ({ name: p.trim(), slug: p.trim().toLowerCase().replace(/\s+/g, '-') })).filter(p => p.name),
     };
     
     const updated = [...projects, newProject];
@@ -266,6 +307,11 @@ export default function AdminPage() {
       category: 'residential',
       featured: false,
     });
+    setProjectImageFiles([]);
+    setProjectSelectedFileNames('No file selected');
+    if (projectFileInputRef.current) {
+      projectFileInputRef.current.value = '';
+    }
     
     showMessage('Project added successfully!');
   };
@@ -710,30 +756,208 @@ export default function AdminPage() {
               
               <form onSubmit={handleProjectSubmit} className="space-y-[20px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
-                  <input type="text" required value={projectForm.title} onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Project Title" />
-                  <input type="text" required value={projectForm.slug} onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="project-slug" />
+                  <input 
+                    type="text" 
+                    required 
+                    value={projectForm.title} 
+                    onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })} 
+                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
+                    placeholder="Project Title" 
+                  />
+                  <input 
+                    type="text" 
+                    value={projectForm.subtitle} 
+                    onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })} 
+                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
+                    placeholder="Subtitle (optional)" 
+                  />
                 </div>
-                <input type="text" required value={projectForm.location} onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Location" />
-                <textarea required value={projectForm.description} onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })} rows={3} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Description" />
-                <input type="text" required value={projectForm.images} onChange={(e) => setProjectForm({ ...projectForm, images: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Image URLs (comma-separated)" />
-                <button type="submit" className="w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[12px] uppercase text-white hover:bg-[#535353] transition-colors">Add Project</button>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                  <input 
+                    type="text" 
+                    required 
+                    value={projectForm.slug} 
+                    onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} 
+                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
+                    placeholder="project-slug" 
+                  />
+                  <input 
+                    type="text" 
+                    required 
+                    value={projectForm.location} 
+                    onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })} 
+                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
+                    placeholder="Location (e.g., Vilnius, Lithuania)" 
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                  <select 
+                    value={projectForm.category} 
+                    onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })} 
+                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]"
+                  >
+                    <option value="residential">Residential</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="public">Public</option>
+                  </select>
+                  
+                  <label className="flex items-center gap-[12px] px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px]">
+                    <input 
+                      type="checkbox" 
+                      checked={projectForm.featured} 
+                      onChange={(e) => setProjectForm({ ...projectForm, featured: e.target.checked })} 
+                      className="w-[20px] h-[20px]"
+                    />
+                    <span className="font-['Outfit'] text-[14px]">Featured Project</span>
+                  </label>
+                </div>
+
+                <textarea 
+                  required 
+                  value={projectForm.description} 
+                  onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })} 
+                  rows={3} 
+                  className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
+                  placeholder="Short Description (for cards)" 
+                />
+
+                <textarea 
+                  value={projectForm.fullDescription} 
+                  onChange={(e) => setProjectForm({ ...projectForm, fullDescription: e.target.value })} 
+                  rows={5} 
+                  className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
+                  placeholder="Full Description (optional, for project detail page)" 
+                />
+
+                <input 
+                  type="text" 
+                  value={projectForm.productsUsed} 
+                  onChange={(e) => setProjectForm({ ...projectForm, productsUsed: e.target.value })} 
+                  className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
+                  placeholder="Products Used (comma-separated, e.g., Black larch, Brown larch)" 
+                />
+
+                <div className="space-y-[12px]">
+                  <label className="block">
+                    <span className="font-['Outfit'] text-[14px] text-[#535353] mb-[8px] block">Upload Images</span>
+                    <div className="relative">
+                      <input 
+                        ref={projectFileInputRef}
+                        type="file" 
+                        multiple 
+                        accept="image/*" 
+                        onChange={(e) => {
+                          handleProjectFileInputChange(e);
+                          handleProjectImageUpload(e);
+                        }}
+                        className="hidden"
+                        id="projectFileInput"
+                      />
+                      <label 
+                        htmlFor="projectFileInput"
+                        className="flex items-center justify-center w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] cursor-pointer hover:bg-[#EAEAEA] transition-colors"
+                      >
+                        <span className="text-[#535353]">{projectSelectedFileNames}</span>
+                      </label>
+                    </div>
+                  </label>
+
+                  {projectImageFiles.length > 0 && (
+                    <div className="grid grid-cols-4 gap-[12px] mt-[12px]">
+                      {projectImageFiles.map((img, idx) => (
+                        <div key={idx} className="relative aspect-square rounded-[8px] overflow-hidden border border-[#BBBBBB]">
+                          <Image src={img} alt={`Preview ${idx + 1}`} fill className="object-cover" />
+                          <button 
+                            type="button"
+                            onClick={() => setProjectImageFiles(prev => prev.filter((_, i) => i !== idx))}
+                            className="absolute top-[4px] right-[4px] w-[24px] h-[24px] bg-red-500 text-white rounded-full flex items-center justify-center text-[12px] hover:bg-red-600"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <p className="font-['Outfit'] text-[12px] text-[#535353]">
+                    Or paste image URLs (comma-separated):
+                  </p>
+                  <input 
+                    type="text" 
+                    value={projectForm.images} 
+                    onChange={(e) => setProjectForm({ ...projectForm, images: e.target.value })} 
+                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
+                    placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg" 
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[12px] uppercase text-white hover:bg-[#535353] transition-colors"
+                >
+                  Add Project
+                </button>
               </form>
             </div>
 
             <div className="bg-white rounded-[24px] p-[clamp(20px,3vw,32px)]">
-              <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616] mb-[24px]">Projects ({projects.length})</h2>
+              <div className="flex justify-between items-center mb-[24px]">
+                <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616]">
+                  Projects ({projects.length})
+                </h2>
+                <button 
+                  onClick={handleProjectExport}
+                  className="h-[36px] px-[16px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase text-white hover:bg-[#535353] transition-colors"
+                >
+                  Export
+                </button>
+              </div>
+              
               {projects.length === 0 ? (
-                <p className="font-['Outfit'] text-[14px] text-[#535353] text-center py-[40px]">No projects yet.</p>
+                <p className="font-['Outfit'] text-[14px] text-[#535353] text-center py-[40px]">No projects yet. Add your first project above!</p>
               ) : (
                 <div className="space-y-[16px]">
                   {projects.map((project) => (
                     <div key={project.id} className="border border-[#BBBBBB] rounded-[16px] p-[20px]">
-                      <div className="flex justify-between">
+                      <div className="flex gap-[16px]">
+                        {project.images && project.images.length > 0 && (
+                          <div className="w-[120px] h-[80px] relative rounded-[8px] overflow-hidden flex-shrink-0">
+                            <Image 
+                              src={typeof project.images[0] === 'string' ? project.images[0] : (project.images[0] as any).url || ''} 
+                              alt={project.title} 
+                              fill 
+                              className="object-cover" 
+                            />
+                          </div>
+                        )}
                         <div className="flex-1">
-                          <h3 className="font-['DM_Sans'] text-[20px] tracking-[-0.8px]">{project.title}</h3>
-                          <p className="font-['Outfit'] text-[12px] text-[#535353]">{project.location}</p>
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-['DM_Sans'] text-[20px] tracking-[-0.8px]">
+                                {project.title}
+                                {project.subtitle && <span className="text-[#535353] ml-[8px]">— {project.subtitle}</span>}
+                                {project.featured && <span className="ml-[8px] text-[12px] bg-[#161616] text-white px-[8px] py-[2px] rounded-[4px]">Featured</span>}
+                              </h3>
+                              <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">{project.location}</p>
+                              <p className="font-['Outfit'] text-[14px] text-[#161616] mt-[8px] line-clamp-2">{project.description}</p>
+                              {project.productsUsed && project.productsUsed.length > 0 && (
+                                <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">
+                                  Products: {Array.isArray(project.productsUsed) 
+                                    ? project.productsUsed.map(p => typeof p === 'string' ? p : p.name).join(', ')
+                                    : project.productsUsed}
+                                </p>
+                              )}
+                            </div>
+                            <button 
+                              onClick={() => handleProjectDelete(project.id)} 
+                              className="h-[36px] px-[16px] rounded-[100px] bg-red-500 font-['Outfit'] text-[11px] uppercase text-white hover:bg-red-600 transition-colors flex-shrink-0"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                        <button onClick={() => handleProjectDelete(project.id)} className="h-[36px] px-[16px] rounded-[100px] bg-red-500 font-['Outfit'] text-[11px] uppercase text-white">Delete</button>
                       </div>
                     </div>
                   ))}

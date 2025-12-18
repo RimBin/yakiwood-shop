@@ -1,28 +1,37 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { projects as projectsData } from '@/data/projects';
 
-// Convert projects data to display format with size pattern
-const projects = projectsData.map((project, index) => {
-  // Create a pattern: big, small, small, small, small, big, ...
-  const sizePattern = ['big', 'small', 'small', 'small', 'small', 'big'];
-  const size = sizePattern[index % sizePattern.length];
-  
-  return {
-    id: index + 1,
-    image: project.images[0],
-    title: project.title,
-    location: project.location,
-    size: size,
-    slug: project.slug
-  };
-});
-
 export default function ProjectsPage() {
+  const [projects, setProjects] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
+
+  useEffect(() => {
+    // Load projects from localStorage or use default data
+    const savedProjects = localStorage.getItem('yakiwood_projects');
+    let loadedProjects = savedProjects ? JSON.parse(savedProjects) : projectsData;
+    
+    // Convert to display format with size pattern
+    const displayProjects = loadedProjects.map((project: any, index: number) => {
+      const sizePattern = ['big', 'small', 'small', 'small', 'small', 'big'];
+      const size = sizePattern[index % sizePattern.length];
+      
+      return {
+        id: index + 1,
+        image: Array.isArray(project.images) ? project.images[0] : project.images,
+        title: project.title,
+        location: project.location,
+        size: size,
+        slug: project.slug
+      };
+    });
+    
+    setProjects(displayProjects);
+  }, []);
+
   const totalPages = Math.ceil(projects.length / itemsPerPage);
 
   // Get current page projects
