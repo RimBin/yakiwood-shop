@@ -5,6 +5,7 @@ export interface Project {
   subtitle?: string;
   location: string;
   images: string[];
+  featuredImage?: string;
   productsUsed: {
     name: string;
     slug: string;

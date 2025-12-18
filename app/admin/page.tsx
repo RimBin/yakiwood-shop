@@ -69,6 +69,7 @@ export default function AdminPage() {
     slug: '',
     location: '',
     images: '',
+    featuredImage: '',
     productsUsed: '',
     description: '',
     fullDescription: '',
@@ -76,7 +77,9 @@ export default function AdminPage() {
     featured: false,
   });
   const [projectImageFiles, setProjectImageFiles] = useState<string[]>([]);
+  const [featuredImageFile, setFeaturedImageFile] = useState<string>('');
   const projectFileInputRef = useRef<HTMLInputElement | null>(null);
+  const featuredImageInputRef = useRef<HTMLInputElement | null>(null);
   const [projectSelectedFileNames, setProjectSelectedFileNames] = useState('No file selected');
 
   // Posts state
@@ -279,12 +282,24 @@ export default function AdminPage() {
     setProjectSelectedFileNames(names);
   };
 
+  const handleFeaturedImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFeaturedImageFile(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleProjectSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     const urlImages = projectForm.images.split(',').map(url => url.trim()).filter(Boolean);
     const allImages = [...projectImageFiles, ...urlImages];
     const productsArray = projectForm.productsUsed.split(',').map(p => ({ name: p.trim(), slug: p.trim().toLowerCase().replace(/\s+/g, '-') })).filter(p => p.name);
+    const featuredImg = featuredImageFile || projectForm.featuredImage || (allImages.length > 0 ? allImages[0] : undefined);
     
     if (editingProjectId) {
       // Edit existing project
@@ -297,6 +312,7 @@ export default function AdminPage() {
             slug: projectForm.slug,
             location: projectForm.location,
             images: allImages.length > 0 ? allImages : project.images,
+            featuredImage: featuredImg,
             productsUsed: productsArray,
             description: projectForm.description,
             fullDescription: projectForm.fullDescription,
@@ -316,6 +332,7 @@ export default function AdminPage() {
         id: Date.now().toString(),
         ...projectForm,
         images: allImages.length > 0 ? allImages : projectForm.images.split(',').map(url => url.trim()).filter(Boolean),
+        featuredImage: featuredImg,
         productsUsed: productsArray,
       };
       
@@ -331,6 +348,7 @@ export default function AdminPage() {
       slug: '',
       location: '',
       images: '',
+      featuredImage: '',
       productsUsed: '',
       description: '',
       fullDescription: '',
@@ -338,9 +356,13 @@ export default function AdminPage() {
       featured: false,
     });
     setProjectImageFiles([]);
+    setFeaturedImageFile('');
     setProjectSelectedFileNames('No file selected');
     if (projectFileInputRef.current) {
       projectFileInputRef.current.value = '';
+    }
+    if (featuredImageInputRef.current) {
+      featuredImageInputRef.current.value = '';
     }
   };
 
@@ -366,6 +388,7 @@ export default function AdminPage() {
       slug: project.slug,
       location: project.location,
       images: '',
+      featuredImage: project.featuredImage || '',
       productsUsed: Array.isArray(project.productsUsed) 
         ? project.productsUsed.map(p => typeof p === 'string' ? p : p.name).join(', ')
         : project.productsUsed || '',
@@ -378,6 +401,9 @@ export default function AdminPage() {
     if (project.images && project.images.length > 0) {
       setProjectImageFiles(project.images.map(img => typeof img === 'string' ? img : (img as any).url || ''));
     }
+    if (project.featuredImage) {
+      setFeaturedImageFile(project.featuredImage);
+    }
   };
 
   const handleProjectCancelEdit = () => {
@@ -389,6 +415,7 @@ export default function AdminPage() {
       slug: '',
       location: '',
       images: '',
+      featuredImage: '',
       productsUsed: '',
       description: '',
       fullDescription: '',
@@ -396,6 +423,7 @@ export default function AdminPage() {
       featured: false,
     });
     setProjectImageFiles([]);
+    setFeaturedImageFile('');
     setProjectSelectedFileNames('No file selected');
   };
 
@@ -857,6 +885,7 @@ export default function AdminPage() {
                       slug: '',
                       location: '',
                       images: '',
+                      featuredImage: '',
                       productsUsed: '',
                       description: '',
                       fullDescription: '',
@@ -864,6 +893,7 @@ export default function AdminPage() {
                       featured: false,
                     });
                     setProjectImageFiles([]);
+                    setFeaturedImageFile('');
                   }
                 }}
                 className="w-full flex items-center justify-between mb-[24px]"
@@ -962,7 +992,49 @@ export default function AdminPage() {
 
                 <div className="space-y-[12px]">
                   <label className="block">
-                    <span className="font-['Outfit'] text-[14px] text-[#535353] mb-[8px] block">Upload Images</span>
+                    <span className="font-['Outfit'] text-[14px] font-medium text-[#161616] mb-[8px] block">Featured Image (katalogo nuotrauka)</span>
+                    <div className="relative">
+                      <input 
+                        ref={featuredImageInputRef}
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleFeaturedImageUpload}
+                        className="hidden"
+                        id="featuredImageInput"
+                      />
+                      <label 
+                        htmlFor="featuredImageInput"
+                        className="flex items-center justify-center w-full px-[16px] py-[12px] border-2 border-dashed border-[#161616] rounded-[12px] font-['Outfit'] text-[14px] cursor-pointer hover:bg-[#EAEAEA] transition-colors"
+                      >
+                        <span className="text-[#161616] font-medium">
+                          {featuredImageFile ? 'Change Featured Image' : 'Upload Featured Image'}
+                        </span>
+                      </label>
+                    </div>
+                  </label>
+
+                  {featuredImageFile && (
+                    <div className="relative w-full aspect-[16/9] rounded-[12px] overflow-hidden border-2 border-[#161616]">
+                      <Image src={featuredImageFile} alt="Featured preview" fill className="object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFeaturedImageFile('');
+                          if (featuredImageInputRef.current) {
+                            featuredImageInputRef.current.value = '';
+                          }
+                        }}
+                        className="absolute top-[8px] right-[8px] w-[32px] h-[32px] bg-red-500 text-white rounded-full flex items-center justify-center text-[18px] hover:bg-red-600 transition-colors"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-[12px]">
+                  <label className="block">
+                    <span className="font-['Outfit'] text-[14px] text-[#535353] mb-[8px] block">Gallery Images (papildomos nuotraukos)</span>
                     <div className="relative">
                       <input 
                         ref={projectFileInputRef}
@@ -1138,9 +1210,51 @@ export default function AdminPage() {
                               </label>
                             </div>
 
+                            <div className="space-y-[12px]">
+                              <label className="block">
+                                <span className="font-['Outfit'] text-[14px] font-medium text-[#161616] mb-[8px] block">Featured Image (katalogo nuotrauka)</span>
+                                <div className="relative">
+                                  <input 
+                                    ref={featuredImageInputRef}
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={handleFeaturedImageUpload}
+                                    className="hidden"
+                                    id="editFeaturedImageInput"
+                                  />
+                                  <label 
+                                    htmlFor="editFeaturedImageInput"
+                                    className="flex items-center justify-center w-full px-[16px] py-[12px] border-2 border-dashed border-[#161616] rounded-[12px] font-['Outfit'] text-[14px] cursor-pointer hover:bg-white transition-colors bg-white"
+                                  >
+                                    <span className="text-[#161616] font-medium">
+                                      {featuredImageFile ? 'Change Featured Image' : 'Upload Featured Image'}
+                                    </span>
+                                  </label>
+                                </div>
+                              </label>
+
+                              {featuredImageFile && (
+                                <div className="relative w-full aspect-[16/9] rounded-[12px] overflow-hidden border-2 border-[#161616]">
+                                  <Image src={featuredImageFile} alt="Featured preview" fill className="object-cover" />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setFeaturedImageFile('');
+                                      if (featuredImageInputRef.current) {
+                                        featuredImageInputRef.current.value = '';
+                                      }
+                                    }}
+                                    className="absolute top-[8px] right-[8px] w-[32px] h-[32px] bg-red-500 text-white rounded-full flex items-center justify-center text-[18px] hover:bg-red-600 transition-colors"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+
                             <div>
-                              <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                                Project Images {projectImageFiles.length > 0 && `(${projectImageFiles.length} selected)`}
+                              <label className="block font-['Outfit'] text-[14px] text-[#535353] mb-[8px]">
+                                Gallery Images (papildomos) {projectImageFiles.length > 0 && `(${projectImageFiles.length} selected)`}
                               </label>
                               <input 
                                 ref={projectFileInputRef}
@@ -1163,8 +1277,15 @@ export default function AdminPage() {
                               {projectImageFiles.length > 0 && (
                                 <div className="grid grid-cols-4 gap-[8px] mt-[12px]">
                                   {projectImageFiles.map((img, i) => (
-                                    <div key={i} className="relative w-full h-[80px] rounded-[8px] overflow-hidden">
+                                    <div key={i} className="relative aspect-square rounded-[8px] overflow-hidden border border-[#BBBBBB]">
                                       <Image src={img} alt={`Preview ${i + 1}`} fill className="object-cover" />
+                                      <button
+                                        type="button"
+                                        onClick={() => setProjectImageFiles(prev => prev.filter((_, idx) => idx !== i))}
+                                        className="absolute top-[4px] right-[4px] w-[24px] h-[24px] bg-red-500 text-white rounded-full flex items-center justify-center text-[12px] hover:bg-red-600 transition-colors"
+                                      >
+                                        ×
+                                      </button>
                                     </div>
                                   ))}
                                 </div>
