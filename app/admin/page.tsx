@@ -61,6 +61,7 @@ export default function AdminPage() {
 
   // Projects state
   const [projects, setProjects] = useState<Project[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [projectForm, setProjectForm] = useState({
     title: '',
@@ -351,6 +352,13 @@ export default function AdminPage() {
   };
 
   const handleProjectEdit = (project: Project) => {
+    // If clicking on already editing project, close it
+    if (editingProjectId === project.id) {
+      handleProjectCancelEdit();
+      return;
+    }
+    
+    setShowAddForm(false);
     setEditingProjectId(project.id);
     setProjectForm({
       title: project.title,
@@ -370,12 +378,11 @@ export default function AdminPage() {
     if (project.images && project.images.length > 0) {
       setProjectImageFiles(project.images.map(img => typeof img === 'string' ? img : (img as any).url || ''));
     }
-    // Scroll to form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleProjectCancelEdit = () => {
     setEditingProjectId(null);
+    setShowAddForm(false);
     setProjectForm({
       title: '',
       subtitle: '',
@@ -837,21 +844,36 @@ export default function AdminPage() {
         {/* Projects Tab */}
         {activeTab === 'projects' && (
           <div className="space-y-[32px]">
+            {/* Add New Project - Collapsible */}
             <div className="bg-white rounded-[24px] p-[clamp(20px,3vw,32px)]">
-              <div className="flex items-center justify-between mb-[24px]">
+              <button
+                onClick={() => {
+                  setShowAddForm(!showAddForm);
+                  setEditingProjectId(null);
+                  if (!showAddForm) {
+                    setProjectForm({
+                      title: '',
+                      subtitle: '',
+                      slug: '',
+                      location: '',
+                      images: '',
+                      productsUsed: '',
+                      description: '',
+                      fullDescription: '',
+                      category: 'residential',
+                      featured: false,
+                    });
+                    setProjectImageFiles([]);
+                  }
+                }}
+                className="w-full flex items-center justify-between mb-[24px]"
+              >
                 <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616]">
-                  {editingProjectId ? 'Edit Project' : 'Add New Project'}
+                  Add New Project
                 </h2>
-                {editingProjectId && (
-                  <button
-                    type="button"
-                    onClick={handleProjectCancelEdit}
-                    className="h-[36px] px-[16px] rounded-[100px] border border-[#535353] font-['Outfit'] text-[11px] uppercase text-[#535353] hover:bg-[#535353] hover:text-white transition-colors"
-                  >
-                    Cancel
-                  </button>
-                )}
-              </div>
+                <span className="text-[24px] text-[#161616]">{showAddForm ? '−' : '+'}</span>
+              </button>
+              {showAddForm && (
               
               <form onSubmit={handleProjectSubmit} className="space-y-[20px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
@@ -996,9 +1018,10 @@ export default function AdminPage() {
                   type="submit" 
                   className="w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[12px] uppercase text-white hover:bg-[#535353] transition-colors"
                 >
-                  {editingProjectId ? 'Update Project' : 'Add Project'}
+                  Add Project
                 </button>
               </form>
+              )}
             </div>
 
             <div className="bg-white rounded-[24px] p-[clamp(20px,3vw,32px)]">
@@ -1034,53 +1057,131 @@ export default function AdminPage() {
               ) : (
                 <div className="space-y-[16px]">
                   {projects.map((project) => (
-                    <div key={project.id} className="border border-[#BBBBBB] rounded-[16px] p-[20px]">
-                      <div className="flex gap-[16px]">
-                        {project.images && project.images.length > 0 && (
-                          <div className="w-[120px] h-[80px] relative rounded-[8px] overflow-hidden flex-shrink-0">
-                            <Image 
-                              src={typeof project.images[0] === 'string' ? project.images[0] : (project.images[0] as any).url || ''} 
-                              alt={project.title} 
-                              fill 
-                              className="object-cover" 
-                            />
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-['DM_Sans'] text-[20px] tracking-[-0.8px]">
-                                {project.title}
-                                {project.subtitle && <span className="text-[#535353] ml-[8px]">— {project.subtitle}</span>}
-                                {project.featured && <span className="ml-[8px] text-[12px] bg-[#161616] text-white px-[8px] py-[2px] rounded-[4px]">Featured</span>}
-                              </h3>
-                              <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">{project.location}</p>
-                              <p className="font-['Outfit'] text-[14px] text-[#161616] mt-[8px] line-clamp-2">{project.description}</p>
-                              {project.productsUsed && project.productsUsed.length > 0 && (
-                                <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">
-                                  Products: {Array.isArray(project.productsUsed) 
-                                    ? project.productsUsed.map(p => typeof p === 'string' ? p : p.name).join(', ')
-                                    : project.productsUsed}
-                                </p>
-                              )}
+                    <div key={project.id} className="border border-[#BBBBBB] rounded-[16px] overflow-hidden">
+                      <div className="p-[20px]">
+                        <div className="flex gap-[16px]">
+                          {project.images && project.images.length > 0 && (
+                            <div className="w-[120px] h-[80px] relative rounded-[8px] overflow-hidden flex-shrink-0">
+                              <Image 
+                                src={typeof project.images[0] === 'string' ? project.images[0] : (project.images[0] as any).url || ''} 
+                                alt={project.title} 
+                                fill 
+                                className="object-cover" 
+                              />
                             </div>
-                            <div className="flex gap-[8px]">
-                              <button 
-                                onClick={() => handleProjectEdit(project)} 
-                                className="h-[36px] px-[16px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase text-white hover:bg-[#535353] transition-colors flex-shrink-0"
-                              >
-                                Edit
-                              </button>
-                              <button 
-                                onClick={() => handleProjectDelete(project.id)} 
-                                className="h-[36px] px-[16px] rounded-[100px] bg-red-500 font-['Outfit'] text-[11px] uppercase text-white hover:bg-red-600 transition-colors flex-shrink-0"
-                              >
-                                Delete
-                              </button>
+                          )}
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h3 className="font-['DM_Sans'] text-[20px] tracking-[-0.8px]">
+                                  {project.title}
+                                  {project.subtitle && <span className="text-[#535353] ml-[8px]">— {project.subtitle}</span>}
+                                  {project.featured && <span className="ml-[8px] text-[12px] bg-[#161616] text-white px-[8px] py-[2px] rounded-[4px]">Featured</span>}
+                                </h3>
+                                <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">{project.location}</p>
+                                <p className="font-['Outfit'] text-[14px] text-[#161616] mt-[8px] line-clamp-2">{project.description}</p>
+                                {project.productsUsed && project.productsUsed.length > 0 && (
+                                  <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">
+                                    Products: {Array.isArray(project.productsUsed) 
+                                      ? project.productsUsed.map(p => typeof p === 'string' ? p : p.name).join(', ')
+                                      : project.productsUsed}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex gap-[8px]">
+                                <button 
+                                  onClick={() => handleProjectEdit(project)} 
+                                  className={`h-[36px] px-[16px] rounded-[100px] font-['Outfit'] text-[11px] uppercase text-white transition-colors flex-shrink-0 ${
+                                    editingProjectId === project.id ? 'bg-[#535353] hover:bg-[#161616]' : 'bg-[#161616] hover:bg-[#535353]'
+                                  }`}
+                                >
+                                  {editingProjectId === project.id ? 'Close' : 'Edit'}
+                                </button>
+                                <button 
+                                  onClick={() => handleProjectDelete(project.id)} 
+                                  className="h-[36px] px-[16px] rounded-[100px] bg-red-500 font-['Outfit'] text-[11px] uppercase text-white hover:bg-red-600 transition-colors flex-shrink-0"
+                                >
+                                  Delete
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
+                      
+                      {/* Accordion Edit Form */}
+                      {editingProjectId === project.id && (
+                        <div className="border-t border-[#BBBBBB] bg-[#f5f5f5] p-[20px]">
+                          <h3 className="font-['DM_Sans'] text-[18px] tracking-[-0.72px] text-[#161616] mb-[16px]">Edit Project</h3>
+                          <form onSubmit={handleProjectSubmit} className="space-y-[16px]">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+                              <input type="text" required value={projectForm.title} onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="Project Title" />
+                              <input type="text" value={projectForm.subtitle} onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="Subtitle (optional)" />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+                              <input type="text" required value={projectForm.slug} onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="project-slug" />
+                              <input type="text" required value={projectForm.location} onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="Location" />
+                            </div>
+                            <textarea required value={projectForm.description} onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })} rows={3} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="Description" />
+                            <textarea value={projectForm.fullDescription} onChange={(e) => setProjectForm({ ...projectForm, fullDescription: e.target.value })} rows={4} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="Full Description (optional)" />
+                            <input type="text" value={projectForm.productsUsed} onChange={(e) => setProjectForm({ ...projectForm, productsUsed: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white" placeholder="Products Used (comma-separated)" />
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+                              <select value={projectForm.category} onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-white">
+                                <option value="residential">Residential</option>
+                                <option value="commercial">Commercial</option>
+                                <option value="public">Public</option>
+                              </select>
+                              <label className="flex items-center gap-[12px] px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] bg-white cursor-pointer">
+                                <input type="checkbox" checked={projectForm.featured} onChange={(e) => setProjectForm({ ...projectForm, featured: e.target.checked })} className="w-[20px] h-[20px]" />
+                                <span className="font-['Outfit'] text-[14px]">Featured Project</span>
+                              </label>
+                            </div>
+
+                            <div>
+                              <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
+                                Project Images {projectImageFiles.length > 0 && `(${projectImageFiles.length} selected)`}
+                              </label>
+                              <input 
+                                ref={projectFileInputRef}
+                                type="file" 
+                                accept="image/*" 
+                                multiple 
+                                onChange={(e) => {
+                                  handleProjectFileInputChange(e);
+                                  handleProjectImageUpload(e);
+                                }}
+                                className="hidden"
+                                id="project-file-upload"
+                              />
+                              <label 
+                                htmlFor="project-file-upload"
+                                className="flex items-center justify-center w-full h-[48px] px-[16px] border-2 border-dashed border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] text-[#535353] hover:border-[#161616] hover:text-[#161616] transition-colors cursor-pointer bg-white"
+                              >
+                                {projectSelectedFileNames}
+                              </label>
+                              {projectImageFiles.length > 0 && (
+                                <div className="grid grid-cols-4 gap-[8px] mt-[12px]">
+                                  {projectImageFiles.map((img, i) => (
+                                    <div key={i} className="relative w-full h-[80px] rounded-[8px] overflow-hidden">
+                                      <Image src={img} alt={`Preview ${i + 1}`} fill className="object-cover" />
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex gap-[12px] pt-[8px]">
+                              <button type="submit" className="flex-1 h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[12px] uppercase text-white hover:bg-[#535353] transition-colors">
+                                Update Project
+                              </button>
+                              <button type="button" onClick={handleProjectCancelEdit} className="h-[48px] px-[24px] rounded-[100px] bg-[#BBBBBB] font-['Outfit'] text-[12px] uppercase text-[#161616] hover:bg-[#535353] hover:text-white transition-colors">
+                                Cancel
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
