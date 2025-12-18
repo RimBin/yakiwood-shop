@@ -2,51 +2,23 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { projects as projectsData } from '@/data/projects';
 
-// Project images from Figma
-const projects = [
-  {
-    id: 1,
-    image: "https://www.figma.com/api/mcp/asset/4d64af69-b66b-4b41-a016-30695bb49a71",
-    title: "Project title",
-    location: "Location",
-    size: "big" // 508px wide
-  },
-  {
-    id: 2,
-    image: "https://www.figma.com/api/mcp/asset/0ed89ce1-4dea-4b06-a032-fed9f16c09fb",
-    title: "Project title",
-    location: "Location",
-    size: "small" // 328px wide
-  },
-  {
-    id: 3,
-    image: "https://www.figma.com/api/mcp/asset/92e912f5-a18a-43c2-80f5-1249cf8e99f5",
-    title: "Leliju apartments",
-    location: "Vilnius, Lithuania",
-    size: "small"
-  },
-  {
-    id: 4,
-    image: "https://www.figma.com/api/mcp/asset/a7ae63e9-e612-41b5-a5c0-8242ba90f9cf",
-    title: "Project title",
-    location: "Location",
-    size: "small"
-  },
-  {
-    id: 5,
-    image: "https://www.figma.com/api/mcp/asset/c17de940-6b4e-4f68-ba50-7e81885fa037",
-    title: "Project title",
-    location: "Location",
-    size: "small"
-  },
-  {
-    id: 6,
-    image: "https://www.figma.com/api/mcp/asset/98c2bd55-1fc4-4834-8ac5-1d5005cb7073",
-    title: "Project title",
-    location: "Location",
-    size: "big"
-  },
+// Convert projects data to display format with size pattern
+const projects = projectsData.map((project, index) => {
+  // Create a pattern: big, small, small, small, small, big, ...
+  const sizePattern = ['big', 'small', 'small', 'small', 'small', 'big'];
+  const size = sizePattern[index % sizePattern.length];
+  
+  return {
+    id: index + 1,
+    image: project.images[0],
+    title: project.title,
+    location: project.location,
+    size: size,
+    slug: project.slug
+  };
+});
   {
     id: 7,
     image: "https://www.figma.com/api/mcp/asset/4d64af69-b66b-4b41-a016-30695bb49a71",
@@ -67,34 +39,17 @@ const projects = [
     title: "Project title",
     location: "Location",
     size: "small"
-  },
-  {
-    id: 10,
-    image: "https://www.figma.com/api/mcp/asset/0ed89ce1-4dea-4b06-a032-fed9f16c09fb",
-    title: "Project title",
-    location: "Location",
-    size: "big"
-  },
-  {
-    id: 11,
-    image: "https://www.figma.com/api/mcp/asset/c17de940-6b4e-4f68-ba50-7e81885fa037",
-    title: "Project title",
-    location: "Location",
-    size: "small"
-  },
-  {
-    id: 12,
-    image: "https://www.figma.com/api/mcp/asset/92e912f5-a18a-43c2-80f5-1249cf8e99f5",
-    title: "Project title",
-    location: "Location",
-    size: "small"
-  },
-];
+});
 
 export default function ProjectsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
-  const totalPages = 4;
+  const totalPages = Math.ceil(projects.length / itemsPerPage);
+
+  // Get current page projects
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProjects = projects.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
@@ -113,7 +68,7 @@ export default function ProjectsPage() {
       {/* Projects Grid */}
       <div className="max-w-[1360px] mx-auto px-[40px] pt-[64px]">
         <div className="grid grid-cols-12 gap-[16px] auto-rows-auto">
-          {projects.map((project, idx) => {
+          {currentProjects.map((project, idx) => {
             // Calculate positioning based on masonry layout
             const isBig = project.size === "big";
             const colSpan = isBig ? "col-span-6" : "col-span-4";
@@ -159,7 +114,7 @@ export default function ProjectsPage() {
           </button>
 
           {/* Page Numbers */}
-          {[1, 2, 3, 4].map((page) => (
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
               onClick={() => setCurrentPage(page)}

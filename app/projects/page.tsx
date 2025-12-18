@@ -2,51 +2,23 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { projects as projectsData } from '@/data/projects';
 
-// Project images from Figma
-const projects = [
-  {
-    id: 1,
-    image: "https://www.figma.com/api/mcp/asset/4d64af69-b66b-4b41-a016-30695bb49a71",
-    title: "Project title",
-    location: "Location",
-    size: "big" // 508px wide
-  },
-  {
-    id: 2,
-    image: "https://www.figma.com/api/mcp/asset/0ed89ce1-4dea-4b06-a032-fed9f16c09fb",
-    title: "Project title",
-    location: "Location",
-    size: "small" // 328px wide
-  },
-  {
-    id: 3,
-    image: "https://www.figma.com/api/mcp/asset/92e912f5-a18a-43c2-80f5-1249cf8e99f5",
-    title: "Leliju apartments",
-    location: "Vilnius, Lithuania",
-    size: "small"
-  },
-  {
-    id: 4,
-    image: "https://www.figma.com/api/mcp/asset/a7ae63e9-e612-41b5-a5c0-8242ba90f9cf",
-    title: "Project title",
-    location: "Location",
-    size: "small"
-  },
-  {
-    id: 5,
-    image: "https://www.figma.com/api/mcp/asset/c17de940-6b4e-4f68-ba50-7e81885fa037",
-    title: "Project title",
-    location: "Location",
-    size: "small"
-  },
-  {
-    id: 6,
-    image: "https://www.figma.com/api/mcp/asset/98c2bd55-1fc4-4834-8ac5-1d5005cb7073",
-    title: "Project title",
-    location: "Location",
-    size: "big"
-  },
+// Convert projects data to display format with size pattern
+const projects = projectsData.map((project, index) => {
+  // Create a pattern: big, small, small, small, small, big, ...
+  const sizePattern = ['big', 'small', 'small', 'small', 'small', 'big'];
+  const size = sizePattern[index % sizePattern.length];
+  
+  return {
+    id: index + 1,
+    image: project.images[0],
+    title: project.title,
+    location: project.location,
+    size: size,
+    slug: project.slug
+  };
+});
   {
     id: 7,
     image: "https://www.figma.com/api/mcp/asset/4d64af69-b66b-4b41-a016-30695bb49a71",
@@ -67,34 +39,17 @@ const projects = [
     title: "Project title",
     location: "Location",
     size: "small"
-  },
-  {
-    id: 10,
-    image: "https://www.figma.com/api/mcp/asset/0ed89ce1-4dea-4b06-a032-fed9f16c09fb",
-    title: "Project title",
-    location: "Location",
-    size: "big"
-  },
-  {
-    id: 11,
-    image: "https://www.figma.com/api/mcp/asset/c17de940-6b4e-4f68-ba50-7e81885fa037",
-    title: "Project title",
-    location: "Location",
-    size: "small"
-  },
-  {
-    id: 12,
-    image: "https://www.figma.com/api/mcp/asset/92e912f5-a18a-43c2-80f5-1249cf8e99f5",
-    title: "Project title",
-    location: "Location",
-    size: "small"
-  },
-];
+});
 
 export default function ProjectsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
-  const totalPages = 4;
+  const totalPages = Math.ceil(projects.length / itemsPerPage);
+
+  // Get current page projects
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProjects = projects.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
@@ -110,173 +65,34 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {/* Projects Grid - Masonry Layout with absolute positioning */}
-      <div className="max-w-[1360px] mx-auto px-[40px] pt-[64px] relative" style={{ minHeight: '3129px' }}>
-        {/* Row 1 - 3 cards */}
-        {/* Card 1: Big - left (508px wide) */}
-        <div className="absolute left-[40px] top-0 w-[508px] flex flex-col gap-[4px]">
-          <div className="h-[520px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[0].image} alt={projects[0].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            {projects[0].title}
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            {projects[0].location}
-          </p>
-        </div>
+      {/* Projects Grid */}
+      <div className="max-w-[1360px] mx-auto px-[40px] pt-[64px]">
+        <div className="grid grid-cols-12 gap-[16px] auto-rows-auto">
+          {currentProjects.map((project, idx) => {
+            // Calculate positioning based on masonry layout
+            const isBig = project.size === "big";
+            const colSpan = isBig ? "col-span-6" : "col-span-4";
+            const height = isBig ? "h-[520px]" : "h-[330px]";
 
-        {/* Card 2: Small - middle (328px) */}
-        <div className="absolute left-[564px] top-0 w-[328px] flex flex-col gap-[4px]">
-          <div className="h-[330px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[1].image} alt={projects[1].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            {projects[1].title}
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            {projects[1].location}
-          </p>
-        </div>
-
-        {/* Card 3: Small - right (328px) */}
-        <div className="absolute left-[908px] top-0 w-[328px] flex flex-col gap-[4px]">
-          <div className="h-[330px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[2].image} alt={projects[2].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            {projects[2].title}
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            {projects[2].location}
-          </p>
-        </div>
-
-        {/* Row 2 - Big card on right, small on left */}
-        {/* Card 4: Small - left (328px) */}
-        <div className="absolute left-[40px] top-[583px] w-[328px] flex flex-col gap-[4px]">
-          <div className="h-[330px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[3].image} alt={projects[3].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            {projects[3].title}
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            {projects[3].location}
-          </p>
-        </div>
-
-        {/* Card 5: Big - middle-right (508px) */}
-        <div className="absolute left-[384px] top-[583px] w-[508px] flex flex-col gap-[4px]">
-          <div className="h-[520px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[5].image} alt={projects[5].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            {projects[5].title}
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            {projects[5].location}
-          </p>
-        </div>
-
-        {/* Card 6: Small - far right (328px) */}
-        <div className="absolute left-[908px] top-[583px] w-[328px] flex flex-col gap-[4px]">
-          <div className="h-[330px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[4].image} alt={projects[4].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            {projects[4].title}
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            {projects[4].location}
-          </p>
-        </div>
-
-        {/* Row 3 - 3 small cards */}
-        <div className="absolute left-[40px] top-[1181px] w-[328px] flex flex-col gap-[4px]">
-          <div className="h-[330px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[6].image} alt={projects[6].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            {projects[6].title}
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            {projects[6].location}
-          </p>
-        </div>
-
-        <div className="absolute left-[384px] top-[1181px] w-[328px] flex flex-col gap-[4px]">
-          <div className="h-[330px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[7].image} alt={projects[7].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            {projects[7].title}
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            {projects[7].location}
-          </p>
-        </div>
-
-        {/* Row 4 - Big on left, small on right */}
-        <div className="absolute left-[40px] top-[1584px] w-[508px] flex flex-col gap-[4px]">
-          <div className="h-[520px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[9].image} alt={projects[9].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            {projects[9].title}
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            {projects[9].location}
-          </p>
-        </div>
-
-        <div className="absolute left-[908px] top-[1584px] w-[328px] flex flex-col gap-[4px]">
-          <div className="h-[330px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[8].image} alt={projects[8].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            {projects[8].title}
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            {projects[8].location}
-          </p>
-        </div>
-
-        {/* Row 5 - 3 cards */}
-        <div className="absolute left-[40px] top-[2179px] w-[328px] flex flex-col gap-[4px]">
-          <div className="h-[330px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[10].image} alt={projects[10].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            {projects[10].title}
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            {projects[10].location}
-          </p>
-        </div>
-
-        <div className="absolute left-[564px] top-[2179px] w-[328px] flex flex-col gap-[4px]">
-          <div className="h-[330px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[11].image} alt={projects[11].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            {projects[11].title}
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            {projects[11].location}
-          </p>
-        </div>
-
-        <div className="absolute left-[908px] top-[2179px] w-[328px] flex flex-col gap-[4px]">
-          <div className="h-[330px] w-full rounded-[8px] relative overflow-hidden">
-            <Image src={projects[0].image} alt={projects[0].title} fill className="object-cover" />
-          </div>
-          <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
-            Project title
-          </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-            Location
-          </p>
+            return (
+              <div key={project.id} className={`${colSpan} flex flex-col gap-[4px]`}>
+                <div className={`${height} w-full rounded-[8px] relative overflow-hidden`}>
+                  <Image 
+                    src={project.image} 
+                    alt={project.title} 
+                    fill 
+                    className="object-cover"
+                  />
+                </div>
+                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
+                  {project.title}
+                </p>
+                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
+                  {project.location}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -296,7 +112,7 @@ export default function ProjectsPage() {
           </button>
 
           {/* Page Numbers */}
-          {[1, 2, 3, 4].map((page) => (
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
