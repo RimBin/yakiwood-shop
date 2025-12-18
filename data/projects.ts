@@ -57,6 +57,117 @@ export const projects: Project[] = [
       'A peaceful retreat in nature with elegant burnt wood facades.',
     category: 'residential',
   },
+  {
+    id: '4',
+    slug: 'harmony-retreat-divi',
+    title: 'Harmony retreat',
+    subtitle: 'Divi',
+    location: 'Lithuania',
+    images: [
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+    ],
+    productsUsed: [
+      { name: 'Black larch', slug: 'black-larch' },
+    ],
+    description:
+      'Harmony retreat Divi project featuring natural burnt wood elements',
+    fullDescription:
+      'A serene retreat space combining modern design with traditional Shou Sugi Ban burnt wood technique, creating a peaceful atmosphere for relaxation and wellness.',
+    category: 'residential',
+    featured: false,
+  },
+  {
+    id: '5',
+    slug: 'forestline-harmony-residences',
+    title: 'Forestline Harmony Residences',
+    location: 'Lithuania',
+    images: [
+      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80',
+    ],
+    productsUsed: [
+      { name: 'Brown larch', slug: 'brown-larch' },
+    ],
+    description:
+      'Forestline Harmony Residences with natural wood aesthetics',
+    fullDescription:
+      'Residential complex harmoniously integrated with forest surroundings using premium burnt wood cladding. The natural texture and warmth of the wood create a perfect connection between architecture and nature.',
+    category: 'residential',
+    featured: false,
+  },
+  {
+    id: '6',
+    slug: 'nordic-driftwood-serenity',
+    title: 'Nordic driftwood serenity',
+    location: 'Lithuania',
+    images: [
+      'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&q=80',
+    ],
+    productsUsed: [
+      { name: 'Carbon larch', slug: 'carbon-larch' },
+    ],
+    description:
+      'Nordic-inspired design with driftwood aesthetics',
+    fullDescription:
+      'A tranquil space inspired by Nordic minimalism and natural driftwood textures, featuring burnt wood surfaces that evoke the weathered beauty of coastal landscapes.',
+    category: 'residential',
+    featured: false,
+  },
+  {
+    id: '7',
+    slug: 'nordic-coastline-living',
+    title: 'Nordic coastline living',
+    location: 'Lithuania',
+    images: [
+      'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=80',
+    ],
+    productsUsed: [
+      { name: 'Black larch', slug: 'black-larch' },
+    ],
+    description:
+      'Coastal living with Nordic design principles',
+    fullDescription:
+      'Modern coastal residence featuring weather-resistant burnt wood cladding inspired by Nordic architecture. The dark, protective finish provides durability while maintaining natural beauty.',
+    category: 'residential',
+    featured: false,
+  },
+  {
+    id: '8',
+    slug: 'modern-office',
+    title: 'Modern office',
+    location: 'Vilnius, Lithuania',
+    images: [
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+    ],
+    productsUsed: [
+      { name: 'Carbon larch', slug: 'carbon-larch' },
+      { name: 'Brown larch', slug: 'brown-larch' },
+    ],
+    description:
+      'Contemporary office space with burnt wood accents',
+    fullDescription:
+      'A sophisticated office environment featuring burnt wood wall panels that create a warm, professional atmosphere. The natural wood elements promote creativity and well-being in the workplace.',
+    category: 'commercial',
+    featured: true,
+  },
+  {
+    id: '9',
+    slug: 'lilys-apartaments',
+    title: "Lily's apartaments",
+    location: 'Kaunas, Lithuania',
+    images: [
+      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80',
+    ],
+    productsUsed: [
+      { name: 'Black larch', slug: 'black-larch' },
+      { name: 'Brown larch', slug: 'brown-larch' },
+    ],
+    description:
+      'Elegant apartment complex with natural wood finishes',
+    fullDescription:
+      'Modern apartment building combining elegance with sustainability through the use of high-quality burnt wood cladding. The natural material provides excellent insulation and a timeless aesthetic.',
+    category: 'residential',
+    featured: false,
+  },
 ];
 
 export function getProjectBySlug(slug: string): Project | undefined {
