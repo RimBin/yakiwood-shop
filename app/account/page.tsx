@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import type { Invoice, InvoiceGenerateRequest } from '@/types/invoice';
+import { createInvoice, getInvoices as getStoredInvoices, saveInvoice } from '@/lib/invoice/utils';
+import { downloadInvoicePDF } from '@/lib/invoice/pdf-generator';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +40,38 @@ interface Address {
   isDefault: boolean;
 }
 
+function formatInvoiceStatus(status: Invoice['status']): string {
+  switch (status) {
+    case 'draft':
+      return 'Juodraštis';
+    case 'issued':
+      return 'Išrašyta';
+    case 'paid':
+      return 'Apmokėta';
+    case 'overdue':
+      return 'Vėluoja';
+    case 'cancelled':
+      return 'Atšaukta';
+    default:
+      return status;
+  }
+}
+
+function formatPaymentMethod(method?: Invoice['paymentMethod']): string {
+  switch (method) {
+    case 'bank_transfer':
+      return 'Banko pavedimas';
+    case 'cash':
+      return 'Grynais';
+    case 'card':
+      return 'Kortele';
+    case 'stripe':
+      return 'Stripe';
+    default:
+      return '—';
+  }
+}
+
 export default function AccountPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -52,6 +87,11 @@ export default function AccountPage() {
   // Orders
   const [orders, setOrders] = useState<Order[]>([]);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+
+  // Invoices
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [expandedInvoice, setExpandedInvoice] = useState<string | null>(null);
+  const [invoiceActionId, setInvoiceActionId] = useState<string | null>(null);
 
   // Addresses
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -108,11 +148,13 @@ export default function AccountPage() {
 
       // Load or create demo orders
       const savedOrders = localStorage.getItem(`user_orders_${userData.email}`);
+      let ordersData: Order[] = [];
       if (savedOrders) {
-        setOrders(JSON.parse(savedOrders));
+        ordersData = JSON.parse(savedOrders);
+        setOrders(ordersData);
       } else {
         // Create demo orders
-        const demoOrders: Order[] = [
+        ordersData = [
           {
             id: 'ORD-2024-001',
             date: '2024-12-15',
@@ -133,17 +175,19 @@ export default function AccountPage() {
             ]
           }
         ];
-        setOrders(demoOrders);
-        localStorage.setItem(`user_orders_${userData.email}`, JSON.stringify(demoOrders));
+        setOrders(ordersData);
+        localStorage.setItem(`user_orders_${userData.email}`, JSON.stringify(ordersData));
       }
 
       // Load or create demo addresses
       const savedAddresses = localStorage.getItem(`user_addresses_${userData.email}`);
+      let addressesData: Address[] = [];
       if (savedAddresses) {
-        setAddresses(JSON.parse(savedAddresses));
+        addressesData = JSON.parse(savedAddresses);
+        setAddresses(addressesData);
       } else {
         // Create demo addresses
-        const demoAddresses: Address[] = [
+        addressesData = [
           {
             id: 'addr-1',
             type: 'delivery',
@@ -157,8 +201,59 @@ export default function AccountPage() {
             isDefault: true
           }
         ];
-        setAddresses(demoAddresses);
-        localStorage.setItem(`user_addresses_${userData.email}`, JSON.stringify(demoAddresses));
+        setAddresses(addressesData);
+        localStorage.setItem(`user_addresses_${userData.email}`, JSON.stringify(addressesData));
+      }
+
+      // Load or create demo invoices (stored globally in localStorage under 'invoices')
+      try {
+        const allInvoices = getStoredInvoices();
+        const userInvoices = allInvoices.filter(
+          (inv) => (inv.buyer.email || '').toLowerCase() === userData.email.toLowerCase()
+        );
+
+        if (userInvoices.length > 0) {
+          setInvoices(userInvoices);
+        } else {
+          const defaultDelivery = addressesData.find((a) => a.type === 'delivery' && a.isDefault) || addressesData[0];
+          const buyerName = `${nameParts[0] || 'Demo'} ${nameParts.slice(1).join(' ') || 'User'}`.trim();
+
+          const firstOrder = ordersData[0];
+          const items = (firstOrder?.items?.length ? firstOrder.items : [{ name: 'Yakiwood produktas', quantity: 1, price: 89.0 }]).map(
+            (item, idx) => ({
+              id: `item-${idx + 1}`,
+              name: item.name,
+              description: undefined,
+              quantity: item.quantity,
+              unitPrice: item.price,
+              vatRate: 0.21,
+            })
+          );
+
+          const request: InvoiceGenerateRequest = {
+            buyer: {
+              name: buyerName,
+              address: defaultDelivery?.address || 'Gedimino pr. 45',
+              city: defaultDelivery?.city || 'Vilnius',
+              postalCode: defaultDelivery?.postalCode || '01109',
+              country: defaultDelivery?.country || 'Lietuva',
+              phone: defaultDelivery?.phone || phone || '+370 600 00000',
+              email: userData.email,
+            },
+            items,
+            paymentMethod: 'bank_transfer',
+            notes: 'Dėkojame už užsakymą!',
+            dueInDays: 14,
+          };
+
+          const created = createInvoice(request);
+          // Ensure email is attached even if request types change
+          created.buyer.email = userData.email;
+          saveInvoice(created);
+          setInvoices([created]);
+        }
+      } catch {
+        setInvoices([]);
       }
 
       setLoading(false);
@@ -276,6 +371,37 @@ export default function AccountPage() {
     localStorage.setItem(`user_addresses_${user.email}`, JSON.stringify(updatedAddresses));
   };
 
+  const handleDownloadInvoice = (invoice: Invoice) => {
+    downloadInvoicePDF(invoice);
+  };
+
+  const handleResendInvoice = async (invoice: Invoice) => {
+    setError('');
+    setSuccess('');
+    setInvoiceActionId(invoice.id);
+
+    try {
+      const res = await fetch('/api/invoices/resend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoice }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data?.error || 'Nepavyko išsiųsti sąskaitos el. paštu');
+        return;
+      }
+
+      setSuccess('Sąskaita išsiųsta el. paštu sėkmingai!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch {
+      setError('Nepavyko išsiųsti sąskaitos el. paštu');
+    } finally {
+      setInvoiceActionId(null);
+    }
+  };
+
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -318,7 +444,7 @@ export default function AccountPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[368px_1fr] gap-[40px]">
           {/* Left Sidebar - Menu */}
           <nav className="lg:sticky lg:top-[120px] lg:self-start">
-            <div className="bg-white rounded-[8px] p-[24px]">
+            <div className="bg-[#EAEAEA] rounded-[8px] p-[24px] border border-[#BBBBBB]">
               <button
                 onClick={() => setActiveSection('info')}
                 className={`w-full text-left px-[16px] py-[12px] rounded-[4px] font-['Outfit'] font-normal text-[14px] leading-[1.5] transition-colors ${
@@ -360,8 +486,12 @@ export default function AccountPage() {
                 Slaptažodis
               </button>
               <button
-                onClick={() => router.push('/account/invoices')}
-                className="w-full text-left px-[16px] py-[12px] rounded-[4px] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] hover:bg-[#E1E1E1] transition-colors"
+                onClick={() => setActiveSection('invoices')}
+                className={`w-full text-left px-[16px] py-[12px] rounded-[4px] font-['Outfit'] font-normal text-[14px] leading-[1.5] transition-colors ${
+                  activeSection === 'invoices'
+                    ? 'bg-[#161616] text-white'
+                    : 'text-[#161616] hover:bg-[#E1E1E1]'
+                }`}
               >
                 Sąskaitos faktūros
               </button>
@@ -409,7 +539,7 @@ export default function AccountPage() {
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       required
-                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-[#EAEAEA]"
                     />
                   </div>
                   <div>
@@ -422,7 +552,7 @@ export default function AccountPage() {
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       required
-                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-[#EAEAEA]"
                     />
                   </div>
                   <div>
@@ -435,7 +565,7 @@ export default function AccountPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-[#EAEAEA]"
                     />
                   </div>
                   <div>
@@ -448,7 +578,7 @@ export default function AccountPage() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       required
-                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-[#EAEAEA]"
                     />
                   </div>
                 </div>
@@ -486,7 +616,7 @@ export default function AccountPage() {
                 ) : (
                   <div className="space-y-[16px]">
                     {orders.map((order) => (
-                      <div key={order.id} className="bg-white rounded-[8px] border border-[#BBBBBB] overflow-hidden">
+                          <div key={order.id} className="bg-[#EAEAEA] rounded-[8px] border border-[#BBBBBB] overflow-hidden">
                         <div className="p-[20px]">
                           <div className="flex flex-wrap items-start justify-between gap-[16px] mb-[16px]">
                             <div>
@@ -582,7 +712,7 @@ export default function AccountPage() {
 
                 {/* Add/Edit Address Form */}
                 {(showAddAddress || editingAddress) && (
-                  <form onSubmit={handleSaveAddress} className="bg-white rounded-[8px] border border-[#BBBBBB] p-[20px] mb-[24px]">
+                  <form onSubmit={handleSaveAddress} className="bg-[#EAEAEA] rounded-[8px] border border-[#BBBBBB] p-[20px] mb-[24px]">
                     <h3 className="font-['Outfit'] font-medium text-[16px] text-[#161616] mb-[16px]">
                       {editingAddress ? 'Redaguoti adresą' : 'Naujas adresas'}
                     </h3>
@@ -623,7 +753,7 @@ export default function AccountPage() {
                           value={addressForm.firstName}
                           onChange={(e) => setAddressForm({ ...addressForm, firstName: e.target.value })}
                           required
-                          className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px]"
+                          className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px] bg-[#EAEAEA]"
                         />
                       </div>
                       <div>
@@ -633,7 +763,7 @@ export default function AccountPage() {
                           value={addressForm.lastName}
                           onChange={(e) => setAddressForm({ ...addressForm, lastName: e.target.value })}
                           required
-                          className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px]"
+                          className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px] bg-[#EAEAEA]"
                         />
                       </div>
                     </div>
@@ -644,7 +774,7 @@ export default function AccountPage() {
                         type="text"
                         value={addressForm.company}
                         onChange={(e) => setAddressForm({ ...addressForm, company: e.target.value })}
-                        className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px]"
+                        className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px] bg-[#EAEAEA]"
                       />
                     </div>
 
@@ -655,7 +785,7 @@ export default function AccountPage() {
                         value={addressForm.address}
                         onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
                         required
-                        className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px]"
+                        className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px] bg-[#EAEAEA]"
                       />
                     </div>
 
@@ -667,7 +797,7 @@ export default function AccountPage() {
                           value={addressForm.city}
                           onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
                           required
-                          className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px]"
+                          className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px] bg-[#EAEAEA]"
                         />
                       </div>
                       <div>
@@ -677,7 +807,7 @@ export default function AccountPage() {
                           value={addressForm.postalCode}
                           onChange={(e) => setAddressForm({ ...addressForm, postalCode: e.target.value })}
                           required
-                          className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px]"
+                          className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px] bg-[#EAEAEA]"
                         />
                       </div>
                       <div>
@@ -687,7 +817,7 @@ export default function AccountPage() {
                           value={addressForm.country}
                           onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}
                           required
-                          className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px]"
+                          className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px] bg-[#EAEAEA]"
                         />
                       </div>
                     </div>
@@ -699,7 +829,7 @@ export default function AccountPage() {
                         value={addressForm.phone}
                         onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
                         required
-                        className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px]"
+                        className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px] bg-[#EAEAEA]"
                       />
                     </div>
 
@@ -757,7 +887,7 @@ export default function AccountPage() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
                     {addresses.map((address) => (
-                      <div key={address.id} className="bg-white rounded-[8px] border border-[#BBBBBB] p-[20px] relative">
+                      <div key={address.id} className="bg-[#EAEAEA] rounded-[8px] border border-[#BBBBBB] p-[20px] relative">
                         {address.isDefault && (
                           <span className="absolute top-[12px] right-[12px] px-[8px] py-[2px] rounded-[100px] bg-green-100 font-['Outfit'] text-[10px] uppercase text-green-700">
                             Numatytasis
@@ -811,6 +941,110 @@ export default function AccountPage() {
               </div>
             )}
 
+            {/* Invoices */}
+            {activeSection === 'invoices' && (
+              <div>
+                <div className="pb-[16px] border-b border-[#BBBBBB] mb-[24px]">
+                  <h2 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.3] tracking-[0.14px] sm:tracking-[0.16px] uppercase text-[#161616]">
+                    Sąskaitos faktūros
+                  </h2>
+                </div>
+
+                {invoices.length === 0 ? (
+                  <div className="text-center py-[40px]">
+                    <p className="font-['Outfit'] text-[14px] text-[#535353] mb-[16px]">Neturite sąskaitų</p>
+                  </div>
+                ) : (
+                  <div className="space-y-[16px]">
+                    {invoices
+                      .slice()
+                      .sort((a, b) => (b.issueDate || '').localeCompare(a.issueDate || ''))
+                      .map((invoice) => (
+                        <div key={invoice.id} className="bg-[#EAEAEA] rounded-[8px] border border-[#BBBBBB] overflow-hidden">
+                          <div className="p-[20px]">
+                            <div className="flex flex-wrap items-start justify-between gap-[16px] mb-[16px]">
+                              <div>
+                                <h3 className="font-['Outfit'] font-medium text-[16px] text-[#161616] mb-[4px]">
+                                  {invoice.invoiceNumber}
+                                </h3>
+                                <p className="font-['Outfit'] text-[12px] text-[#535353]">
+                                  Data: {new Date(invoice.issueDate).toLocaleDateString('lt-LT', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                                <p className="font-['Outfit'] text-[12px] text-[#535353]">
+                                  Apmokėti iki: {new Date(invoice.dueDate).toLocaleDateString('lt-LT', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-[12px] flex-wrap justify-end">
+                                <span className="px-[12px] py-[4px] rounded-[100px] font-['Outfit'] text-[11px] uppercase bg-[#E1E1E1] text-[#161616]">
+                                  {formatInvoiceStatus(invoice.status)}
+                                </span>
+                                <button
+                                  onClick={() => handleDownloadInvoice(invoice)}
+                                  className="h-[36px] px-[20px] rounded-[100px] border border-[#161616] font-['Outfit'] text-[11px] uppercase text-[#161616] hover:bg-[#E1E1E1] transition-colors"
+                                >
+                                  PDF
+                                </button>
+                                <button
+                                  onClick={() => handleResendInvoice(invoice)}
+                                  disabled={invoiceActionId === invoice.id}
+                                  className="h-[36px] px-[20px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase text-white hover:bg-[#535353] transition-colors disabled:opacity-60"
+                                >
+                                  {invoiceActionId === invoice.id ? 'Siunčiama…' : 'Siųsti el. paštu'}
+                                </button>
+                                <button
+                                  onClick={() => setExpandedInvoice(expandedInvoice === invoice.id ? null : invoice.id)}
+                                  className="h-[36px] px-[20px] rounded-[100px] border border-[#535353] font-['Outfit'] text-[11px] uppercase text-[#535353] hover:bg-[#E1E1E1] transition-colors"
+                                >
+                                  {expandedInvoice === invoice.id ? 'Paslėpti' : 'Detalės'}
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="flex justify-between items-center pt-[16px] border-t border-[#E1E1E1]">
+                              <span className="font-['Outfit'] text-[14px] text-[#535353]">
+                                Mokėjimas: <span className="font-medium text-[#161616]">{formatPaymentMethod(invoice.paymentMethod)}</span>
+                              </span>
+                              <span className="font-['Outfit'] text-[14px] text-[#535353]">
+                                Suma: <span className="font-medium text-[#161616]">€{invoice.total.toFixed(2)}</span>
+                              </span>
+                            </div>
+                          </div>
+
+                          {expandedInvoice === invoice.id && (
+                            <div className="p-[20px] pt-0">
+                              <div className="pt-[16px] border-t border-[#E1E1E1]">
+                                <h4 className="font-['Outfit'] font-medium text-[14px] text-[#161616] mb-[12px]">Pirkėjas</h4>
+                                <div className="font-['Outfit'] text-[14px] text-[#535353] space-y-[4px] mb-[16px]">
+                                  <p>{invoice.buyer.name}</p>
+                                  {invoice.buyer.companyName && <p>{invoice.buyer.companyName}</p>}
+                                  <p>{invoice.buyer.address}</p>
+                                  <p>{invoice.buyer.postalCode} {invoice.buyer.city}</p>
+                                  <p>{invoice.buyer.country}</p>
+                                  {invoice.buyer.email && <p>{invoice.buyer.email}</p>}
+                                </div>
+
+                                <h4 className="font-['Outfit'] font-medium text-[14px] text-[#161616] mb-[12px]">Prekės</h4>
+                                <div className="space-y-[8px]">
+                                  {invoice.items.map((item) => (
+                                    <div key={item.id} className="flex justify-between items-start py-[8px]">
+                                      <div className="flex-1 pr-[16px]">
+                                        <p className="font-['Outfit'] text-[14px] text-[#161616]">{item.name}</p>
+                                        <p className="font-['Outfit'] text-[12px] text-[#535353]">Kiekis: {item.quantity}</p>
+                                      </div>
+                                      <p className="font-['Outfit'] text-[14px] font-medium text-[#161616]">€{(item.unitPrice * item.quantity).toFixed(2)}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Change Password */}
             {activeSection === 'password' && (
               <form onSubmit={handleChangePassword} className="max-w-[672px]">
@@ -831,7 +1065,7 @@ export default function AccountPage() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       required
-                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-[#EAEAEA]"
                     />
                   </div>
                   <div>
@@ -844,7 +1078,7 @@ export default function AccountPage() {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
-                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-[#EAEAEA]"
                     />
                   </div>
                   <div>
@@ -857,7 +1091,7 @@ export default function AccountPage() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
-                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+                      className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-[#EAEAEA]"
                     />
                     <p className="mt-[8px] font-['Outfit'] font-light text-[12px] leading-[1.5] text-[#535353]">
                       Slaptažodis turi būti ne trumpesnis nei 6 simboliai
