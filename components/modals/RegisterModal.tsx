@@ -36,6 +36,13 @@ export default function RegisterModal({
     }
 
     setLoading(true);
+
+    if (!supabase) {
+      setError('Supabase is not configured.');
+      setLoading(false);
+      return;
+    }
+
     const [firstName, ...rest] = fullName.split(' ');
     const lastName = rest.join(' ');
 

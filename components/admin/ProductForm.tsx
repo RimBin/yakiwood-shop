@@ -80,6 +80,19 @@ export default function ProductForm({ product, mode }: Props) {
   const router = useRouter();
   const supabase = createClient();
 
+  if (!supabase) {
+    return (
+      <div className="w-full max-w-[1200px] mx-auto px-4 md:px-10 py-8">
+        <h1 className="font-['DM_Sans'] text-2xl font-medium text-[#161616]">
+          Supabase is not configured
+        </h1>
+        <p className="font-['Outfit'] text-sm text-[#535353] mt-2">
+          Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local`.
+        </p>
+      </div>
+    );
+  }
+
   // Form state
   const [name, setName] = useState(product?.name || '');
   const [nameEn, setNameEn] = useState(product?.name_en || '');

@@ -69,6 +69,10 @@ export interface Product {
 export async function fetchProduct(slug: string): Promise<Product | null> {
   try {
     const supabase = createClient();
+
+    if (!supabase) {
+      return null;
+    }
     
     const { data: product, error } = await supabase
       .from('products')
@@ -104,6 +108,10 @@ export async function getRelatedProducts(
 ): Promise<Product[]> {
   try {
     const supabase = createClient();
+
+    if (!supabase) {
+      return [];
+    }
     
     // First get the current product to find related criteria
     const { data: currentProduct } = await supabase
@@ -269,6 +277,10 @@ export function isVariantInStock(variant?: ProductVariant): boolean {
 export async function getProductColors(productId: string): Promise<Color[]> {
   try {
     const supabase = createClient();
+
+    if (!supabase) {
+      return [];
+    }
     
     const { data, error } = await supabase
       .from('product_configurations')
@@ -297,6 +309,10 @@ export async function getProductColors(productId: string): Promise<Color[]> {
 export async function getProductFinishes(productId: string): Promise<Finish[]> {
   try {
     const supabase = createClient();
+
+    if (!supabase) {
+      return [];
+    }
     
     const { data, error } = await supabase
       .from('product_configurations')

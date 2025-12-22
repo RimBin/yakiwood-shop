@@ -34,6 +34,12 @@ export default function LoginModal({
     setLoading(true);
     setError(null);
 
+    if (!supabase) {
+      setError('Supabase is not configured.');
+      setLoading(false);
+      return;
+    }
+
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) {
       setError(authError.message);

@@ -15,8 +15,6 @@ type Product = {
   slug: string | number;
 };
 
-const supabase = createClient();
-
 const fallbackProducts: Product[] = [
   { id: 1, slug: 1, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgSpruce.png', category: 'spruce' },
   { id: 2, slug: 2, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgLarch1.png', category: 'larch' },
@@ -29,6 +27,12 @@ export default function ProductsPage() {
 
   useEffect(() => {
     async function loadProducts() {
+      const supabase = createClient();
+      if (!supabase) {
+        setIsLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('products')
         .select('*')

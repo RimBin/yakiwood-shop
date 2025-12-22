@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCartStore } from '@/lib/cart/store';
 import type { Product, Color, Finish } from '@/lib/products';
 import { calculateProductPrice, getProductColors, getProductFinishes } from '@/lib/products';
+import { Breadcrumbs } from '@/components/ui';
 import ImageGallery from './ImageGallery';
 import ProductTabs from './ProductTabs';
 import RelatedProducts from './RelatedProducts';
@@ -149,16 +150,13 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         </div>
       )}
 
-      {/* Breadcrumbs */}
-      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-4 border-b border-[#BBBBBB]">
-        <nav className="font-['Outfit'] font-normal text-xs text-[#7C7C7C]">
-          <Link href="/" className="hover:text-[#161616] transition-colors">Pagrindinis</Link>
-          <span className="mx-2">/</span>
-          <Link href="/produktai" className="hover:text-[#161616] transition-colors">Produktai</Link>
-          <span className="mx-2">/</span>
-          <span className="text-[#161616]">{product.name}</span>
-        </nav>
-      </div>
+      <Breadcrumbs
+        items={[
+          { label: 'Pagrindinis', href: '/' },
+          { label: 'Produktai', href: '/produktai' },
+          { label: product.name },
+        ]}
+      />
 
       {/* Main Content */}
       <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8 md:py-12">

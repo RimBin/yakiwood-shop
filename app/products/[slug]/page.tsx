@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { fetchProduct, generateProductSchema, generateBreadcrumbSchema } from '@/lib/products';
+import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/products';
+import { fetchProduct } from '@/lib/products.server';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 
 interface ProductPageProps {

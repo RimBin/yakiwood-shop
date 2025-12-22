@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
+import { Breadcrumbs } from '@/components/ui';
 import ProjectGallery from '@/components/projects/ProjectGallery';
 import ProjectInfo from '@/components/projects/ProjectInfo';
 import RelatedProjects from '@/components/projects/RelatedProjects';
@@ -46,22 +46,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <main className="min-h-screen bg-[#E1E1E1]">
-      {/* Breadcrumbs */}
-      <div className="w-full border-b border-[#BBBBBB]">
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-10 py-2.5">
-          <p className="font-['Outfit'] font-normal text-xs text-center lg:text-left text-[#7C7C7C] leading-[1.3]">
-            <Link href="/" className="hover:text-[#161616] transition-colors">
-              Home
-            </Link>
-            {' / '}
-            <Link href="/projects" className="hover:text-[#161616] transition-colors">
-              Projects
-            </Link>
-            {' / '}
-            <span className="text-[#161616]">{project.title}</span>
-          </p>
-        </div>
-      </div>
+      <Breadcrumbs
+        items={[
+          { label: 'Pagrindinis', href: '/' },
+          { label: 'Projektai', href: '/projects' },
+          { label: project.title },
+        ]}
+      />
 
       {/* Title */}
       <div className="w-full py-8 lg:py-12">

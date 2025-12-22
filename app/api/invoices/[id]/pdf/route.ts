@@ -28,10 +28,11 @@ export async function GET(
     }
     
     // Generate PDF
-    const pdfBuffer = await generateInvoicePDF(invoice);
+    const pdfBytes = await generateInvoicePDF(invoice);
+    const pdfBody = Uint8Array.from(pdfBytes).buffer;
     
     // Return PDF as response
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBody, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
