@@ -5,12 +5,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getInvoiceById } from '@/lib/invoice/utils';
 import { generateInvoicePDF } from '@/lib/invoice/pdf-generator';
 
+type RouteParams = { id: string }
+type RouteContext = { params: RouteParams } | { params: Promise<RouteParams> }
+
+async function resolveParams(context: RouteContext): Promise<RouteParams> {
+  return await context.params
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
-    const invoice = getInvoiceById(params.id);
+    const { id } = await resolveParams(context)
+    const invoice = getInvoiceById(id);
     
     if (!invoice) {
       return NextResponse.json(

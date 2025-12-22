@@ -62,7 +62,6 @@ export default function ProductsPage() {
     { id: 'all', label: 'All woods' },
     { id: 'spruce', label: 'Spruce wood' },
     { id: 'larch', label: 'Larch wood' },
-    { id: 'pine', label: 'Pine wood' },
   ];
 
   const products =

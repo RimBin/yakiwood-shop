@@ -1,5 +1,6 @@
 import {DocumentTextIcon} from '@sanity/icons'
 import {defineArrayMember, defineField, defineType} from 'sanity'
+import { slugify } from './utils/slugify'
 
 export const postType = defineType({
   name: 'post',
@@ -16,6 +17,8 @@ export const postType = defineType({
       type: 'slug',
       options: {
         source: 'title',
+        maxLength: 96,
+        slugify: (input: string) => slugify(input, 96),
       },
     }),
     defineField({

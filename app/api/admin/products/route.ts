@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 import { AdminAuthError, requireAdmin } from '@/lib/supabase/admin'
+import { slugify } from '@/lib/slugify'
 
 interface VariantInput {
   id?: string
@@ -25,16 +26,6 @@ interface ProductInput {
   model3dUrl?: string
   isActive?: boolean
   variants?: VariantInput[]
-}
-
-function slugify(value: string) {
-  return value
-    .normalize('NFKD')
-    .replace(/[^\w\s-]/g, '')
-    .trim()
-    .toLowerCase()
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
 }
 
 function validationErrors(body: ProductInput): string[] {

@@ -30,11 +30,21 @@ interface Post {
   published: boolean;
 }
 
-type ActiveTab = 'dashboard' | 'products' | 'projects' | 'posts';
+type ActiveTab = 'products' | 'projects' | 'posts';
+
+function slugify(value: string) {
+  return value
+    .normalize('NFKD')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
 
 export default function AdminPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('products');
   const [message, setMessage] = useState('');
 
   // Products state
@@ -100,13 +110,6 @@ export default function AdminPage() {
     category: 'news',
     published: false,
   });
-
-  // Redirect to dashboard when component loads
-  useEffect(() => {
-    if (activeTab === 'dashboard') {
-      router.push('/admin/dashboard');
-    }
-  }, [activeTab, router]);
 
   useEffect(() => {
     const savedProducts = localStorage.getItem('yakiwood_products');
@@ -210,6 +213,8 @@ export default function AdminPage() {
   // Product handlers
   const handleProductSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const safeSlug = productForm.slug?.trim() ? productForm.slug : slugify(productForm.name);
     
     const urlImages = productForm.images.split(',').map(url => url.trim()).filter(Boolean);
     const allImages = [...imageFiles, ...urlImages];
@@ -221,7 +226,7 @@ export default function AdminPage() {
           return {
             ...product,
             name: productForm.name,
-            slug: productForm.slug,
+            slug: safeSlug,
             description: productForm.description,
             category: productForm.category,
             basePrice: Number(productForm.basePrice),
@@ -240,6 +245,7 @@ export default function AdminPage() {
       const newProduct: Product = {
         id: Date.now().toString(),
         ...productForm,
+        slug: safeSlug,
         images: allImages,
         basePrice: Number(productForm.basePrice),
       };
@@ -395,7 +401,11 @@ export default function AdminPage() {
     
     const urlImages = projectForm.images.split(',').map(url => url.trim()).filter(Boolean);
     const allImages = [...projectImageFiles, ...urlImages];
-    const productsArray = projectForm.productsUsed.split(',').map(p => ({ name: p.trim(), slug: p.trim().toLowerCase().replace(/\s+/g, '-') })).filter(p => p.name);
+    const productsArray = projectForm.productsUsed
+      .split(',')
+      .map(p => ({ name: p.trim(), slug: slugify(p.trim()) }))
+      .filter(p => p.name);
+    const safeSlug = projectForm.slug?.trim() ? projectForm.slug : slugify(projectForm.title);
     const featuredImg = featuredImageFile || projectForm.featuredImage || (allImages.length > 0 ? allImages[0] : undefined);
     
     if (editingProjectId) {
@@ -406,7 +416,7 @@ export default function AdminPage() {
             ...project,
             title: projectForm.title,
             subtitle: projectForm.subtitle || undefined,
-            slug: projectForm.slug,
+            slug: safeSlug,
             location: projectForm.location,
             images: allImages.length > 0 ? allImages : project.images,
             featuredImage: featuredImg,
@@ -428,6 +438,7 @@ export default function AdminPage() {
       const newProject: Project = {
         id: Date.now().toString(),
         ...projectForm,
+        slug: safeSlug,
         images: allImages.length > 0 ? allImages : projectForm.images.split(',').map(url => url.trim()).filter(Boolean),
         featuredImage: featuredImg,
         productsUsed: productsArray,
@@ -556,6 +567,8 @@ export default function AdminPage() {
   // Post handlers
   const handlePostSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const safeSlug = postForm.slug?.trim() ? postForm.slug : slugify(postForm.title);
     
     if (editingPostId) {
       // Edit existing post
@@ -564,7 +577,7 @@ export default function AdminPage() {
           return {
             ...post,
             title: postForm.title,
-            slug: postForm.slug,
+            slug: safeSlug,
             excerpt: postForm.excerpt,
             content: postForm.content,
             coverImage: postForm.coverImage,
@@ -584,6 +597,7 @@ export default function AdminPage() {
       const newPost: Post = {
         id: Date.now().toString(),
         ...postForm,
+        slug: safeSlug,
         date: new Date().toISOString(),
       };
       
@@ -713,23 +727,33 @@ export default function AdminPage() {
         {/* Tabs */}
         <div className="flex gap-[8px] mb-[32px] overflow-x-auto pb-[8px]">
           {[
-            { key: 'dashboard', label: 'Dashboard', count: null },
+            { key: 'dashboard', label: 'Dashboard' },
             { key: 'products', label: 'Products', count: products.length },
             { key: 'projects', label: 'Projects', count: projects.length },
             { key: 'posts', label: 'Posts', count: posts.length }
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as ActiveTab)}
-              className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap ${
-                activeTab === tab.key
-                  ? 'bg-[#161616] text-white'
-                  : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#DCDCDC]'
-              }`}
-            >
-              {tab.label}{tab.count !== null ? ` (${tab.count})` : ''}
-            </button>
-          ))}
+          ].map((tab) => {
+            const isActive = 'count' in tab ? activeTab === tab.key : false;
+
+            return (
+              <button
+                key={tab.key}
+                onClick={() => {
+                  if (tab.key === 'dashboard') {
+                    router.push('/admin/dashboard');
+                    return;
+                  }
+                  setActiveTab(tab.key as ActiveTab);
+                }}
+                className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap ${
+                  isActive
+                    ? 'bg-[#161616] text-white'
+                    : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#DCDCDC]'
+                }`}
+              >
+                {'count' in tab ? `${tab.label} (${tab.count})` : tab.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Products Tab */}
@@ -772,7 +796,18 @@ export default function AdminPage() {
                       type="text"
                       required
                       value={productForm.name}
-                      onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                      onChange={(e) => {
+                        const nextName = e.target.value
+                        setProductForm((prev) => {
+                          const prevAutoSlug = slugify(prev.name)
+                          const shouldAuto = !prev.slug || prev.slug === prevAutoSlug
+                          return {
+                            ...prev,
+                            name: nextName,
+                            slug: shouldAuto ? slugify(nextName) : prev.slug,
+                          }
+                        })
+                      }}
                       className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
                       placeholder="Black Larch Facade Board"
                     />
@@ -786,7 +821,7 @@ export default function AdminPage() {
                       type="text"
                       required
                       value={productForm.slug}
-                      onChange={(e) => setProductForm({ ...productForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                      onChange={(e) => setProductForm({ ...productForm, slug: slugify(e.target.value) })}
                       className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
                       placeholder="black-larch-facade-board"
                     />
@@ -1095,11 +1130,18 @@ export default function AdminPage() {
                           <form onSubmit={handleProductSubmit} className="space-y-[20px]">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                               <div>
-                                <input type="text" required value={productForm.name} onChange={(e) => setProductForm({ ...productForm, name: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Product Name" />
+                                <input type="text" required value={productForm.name} onChange={(e) => {
+                                  const nextName = e.target.value
+                                  setProductForm((prev) => {
+                                    const prevAutoSlug = slugify(prev.name)
+                                    const shouldAuto = !prev.slug || prev.slug === prevAutoSlug
+                                    return { ...prev, name: nextName, slug: shouldAuto ? slugify(nextName) : prev.slug }
+                                  })
+                                }} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Product Name" />
                                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Product display name.</p>
                               </div>
                               <div>
-                                <input type="text" required value={productForm.slug} onChange={(e) => setProductForm({ ...productForm, slug: e.target.value.toLowerCase().replace(/\\s+/g, '-') })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="product-slug" />
+                                <input type="text" required value={productForm.slug} onChange={(e) => setProductForm({ ...productForm, slug: slugify(e.target.value) })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="product-slug" />
                                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">URL-friendly identifier.</p>
                               </div>
                             </div>
@@ -1230,7 +1272,18 @@ export default function AdminPage() {
                       type="text" 
                       required 
                       value={projectForm.title} 
-                      onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })} 
+                      onChange={(e) => {
+                        const nextTitle = e.target.value
+                        setProjectForm((prev) => {
+                          const prevAutoSlug = slugify(prev.title)
+                          const shouldAuto = !prev.slug || prev.slug === prevAutoSlug
+                          return {
+                            ...prev,
+                            title: nextTitle,
+                            slug: shouldAuto ? slugify(nextTitle) : prev.slug,
+                          }
+                        })
+                      }} 
                       className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
                       placeholder="Project Title" 
                     />
@@ -1255,7 +1308,7 @@ export default function AdminPage() {
                       type="text" 
                       required 
                       value={projectForm.slug} 
-                      onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} 
+                      onChange={(e) => setProjectForm({ ...projectForm, slug: slugify(e.target.value) })} 
                       className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" 
                       placeholder="project-slug" 
                     />
@@ -1527,7 +1580,14 @@ export default function AdminPage() {
                           <form onSubmit={handleProjectSubmit} className="space-y-[20px]">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                               <div>
-                                <input type="text" required value={projectForm.title} onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Project Title" />
+                                <input type="text" required value={projectForm.title} onChange={(e) => {
+                                  const nextTitle = e.target.value
+                                  setProjectForm((prev) => {
+                                    const prevAutoSlug = slugify(prev.title)
+                                    const shouldAuto = !prev.slug || prev.slug === prevAutoSlug
+                                    return { ...prev, title: nextTitle, slug: shouldAuto ? slugify(nextTitle) : prev.slug }
+                                  })
+                                }} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Project Title" />
                                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Project title — shown in listings and project page header.</p>
                               </div>
                               <div>
@@ -1537,7 +1597,7 @@ export default function AdminPage() {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                               <div>
-                                <input type="text" required value={projectForm.slug} onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="project-slug" />
+                                <input type="text" required value={projectForm.slug} onChange={(e) => setProjectForm({ ...projectForm, slug: slugify(e.target.value) })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="project-slug" />
                                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">URL-friendly identifier, lowercase with hyphens. Auto-generated but editable.</p>
                               </div>
                               <div>
@@ -1712,11 +1772,18 @@ export default function AdminPage() {
               <form onSubmit={handlePostSubmit} className="space-y-[20px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                   <div>
-                    <input type="text" required value={postForm.title} onChange={(e) => setPostForm({ ...postForm, title: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Post Title" />
+                    <input type="text" required value={postForm.title} onChange={(e) => {
+                      const nextTitle = e.target.value
+                      setPostForm((prev) => {
+                        const prevAutoSlug = slugify(prev.title)
+                        const shouldAuto = !prev.slug || prev.slug === prevAutoSlug
+                        return { ...prev, title: nextTitle, slug: shouldAuto ? slugify(nextTitle) : prev.slug }
+                      })
+                    }} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Post Title" />
                     <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Post title for display.</p>
                   </div>
                   <div>
-                    <input type="text" required value={postForm.slug} onChange={(e) => setPostForm({ ...postForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="post-slug" />
+                    <input type="text" required value={postForm.slug} onChange={(e) => setPostForm({ ...postForm, slug: slugify(e.target.value) })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="post-slug" />
                     <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">URL-friendly identifier.</p>
                   </div>
                 </div>
@@ -1796,11 +1863,18 @@ export default function AdminPage() {
                           <form onSubmit={handlePostSubmit} className="space-y-[20px]">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                               <div>
-                                <input type="text" required value={postForm.title} onChange={(e) => setPostForm({ ...postForm, title: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Post Title" />
+                                <input type="text" required value={postForm.title} onChange={(e) => {
+                                  const nextTitle = e.target.value
+                                  setPostForm((prev) => {
+                                    const prevAutoSlug = slugify(prev.title)
+                                    const shouldAuto = !prev.slug || prev.slug === prevAutoSlug
+                                    return { ...prev, title: nextTitle, slug: shouldAuto ? slugify(nextTitle) : prev.slug }
+                                  })
+                                }} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="Post Title" />
                                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Post title for display.</p>
                               </div>
                               <div>
-                                <input type="text" required value={postForm.slug} onChange={(e) => setPostForm({ ...postForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="post-slug" />
+                                <input type="text" required value={postForm.slug} onChange={(e) => setPostForm({ ...postForm, slug: slugify(e.target.value) })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]" placeholder="post-slug" />
                                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">URL-friendly identifier.</p>
                               </div>
                             </div>

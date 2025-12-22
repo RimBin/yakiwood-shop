@@ -241,7 +241,18 @@ export default function AccountPage() {
   };
 
   const handleEditAddress = (address: Address) => {
-    setAddressForm(address);
+    setAddressForm({
+      type: address.type,
+      firstName: address.firstName,
+      lastName: address.lastName,
+      company: address.company ?? '',
+      address: address.address,
+      city: address.city,
+      postalCode: address.postalCode,
+      country: address.country,
+      phone: address.phone,
+      isDefault: address.isDefault,
+    });
     setEditingAddress(address.id);
     setShowAddAddress(false);
   };

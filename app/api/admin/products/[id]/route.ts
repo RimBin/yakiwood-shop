@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 import { AdminAuthError, requireAdmin } from '@/lib/supabase/admin'
+import { slugify } from '@/lib/slugify'
 
 interface VariantInput {
   id?: string
@@ -12,16 +13,6 @@ interface VariantInput {
   stockQuantity?: number
   sku?: string
   isAvailable?: boolean
-}
-
-function slugify(value: string) {
-  return value
-    .normalize('NFKD')
-    .replace(/[^\w\s-]/g, '')
-    .trim()
-    .toLowerCase()
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
 }
 
 type RouteParams = { id: string }

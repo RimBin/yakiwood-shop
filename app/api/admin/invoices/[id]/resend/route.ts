@@ -3,14 +3,21 @@ import { Resend } from 'resend';
 import { getInvoiceById, convertDBInvoiceToInvoice } from '@/lib/supabase-admin';
 import { InvoicePDFGenerator } from '@/lib/invoice/pdf-generator';
 
+type RouteParams = { id: string }
+type RouteContext = { params: RouteParams } | { params: Promise<RouteParams> }
+
+async function resolveParams(context: RouteContext): Promise<RouteParams> {
+  return await context.params
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
-    const { id } = params;
+    const { id } = await resolveParams(context);
     const dbInvoice = await getInvoiceById(id);
     
     if (!dbInvoice) {
@@ -37,7 +44,7 @@ export async function POST(
           
           <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 5px 0;"><strong>Sąskaitos numeris:</strong> ${invoice.invoiceNumber}</p>
-            <p style="margin: 5px 0;"><strong>Data:</strong> ${new Date(invoice.issuedAt).toLocaleDateString('lt-LT')}</p>
+            <p style="margin: 5px 0;"><strong>Data:</strong> ${new Date(invoice.issueDate).toLocaleDateString('lt-LT')}</p>
             <p style="margin: 5px 0;"><strong>Suma:</strong> ${invoice.total.toFixed(2)} €</p>
           </div>
 

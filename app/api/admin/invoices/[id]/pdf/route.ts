@@ -2,12 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getInvoiceById, convertDBInvoiceToInvoice } from '@/lib/supabase-admin';
 import { InvoicePDFGenerator } from '@/lib/invoice/pdf-generator';
 
+type RouteParams = { id: string }
+type RouteContext = { params: RouteParams } | { params: Promise<RouteParams> }
+
+async function resolveParams(context: RouteContext): Promise<RouteParams> {
+  return await context.params
+}
+
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
-    const { id } = params;
+    const { id } = await resolveParams(context);
     const dbInvoice = await getInvoiceById(id);
     
     if (!dbInvoice) {
@@ -16,9 +23,10 @@ export async function GET(
 
     const invoice = convertDBInvoiceToInvoice(dbInvoice);
     const pdfGenerator = new InvoicePDFGenerator(invoice);
-    const pdfBuffer = pdfGenerator.generate();
+    const pdfBytes = pdfGenerator.generate();
+    const pdfBody = Uint8Array.from(pdfBytes).buffer;
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBody, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="saskaita_${invoice.invoiceNumber}.pdf"`
