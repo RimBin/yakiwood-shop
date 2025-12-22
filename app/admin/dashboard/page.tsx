@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import { Breadcrumbs } from '@/components/ui';
 
 interface DashboardStats {
   totalOrders: number;
@@ -76,7 +77,6 @@ export default function DashboardPage() {
       // Fetch products (from localStorage for now)
       const productsData = localStorage.getItem('yakiwood_products');
       const products: Product[] = productsData ? JSON.parse(productsData) : [];
-
       // Apply filters
       const filteredOrders = applyFilters(orders);
 
@@ -182,6 +182,14 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#EAEAEA]">
+      <Breadcrumbs
+        items={[
+          { label: 'Homepage', href: '/' },
+          { label: 'Admin', href: '/admin' },
+          { label: 'Dashboard' },
+        ]}
+      />
+
       <div className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] py-[40px]">
         {/* Header */}
         <div className="mb-[40px]">

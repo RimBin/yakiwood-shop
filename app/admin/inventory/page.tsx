@@ -5,6 +5,7 @@ import { InventoryTable } from '@/components/admin/InventoryTable';
 import { RestockModal } from '@/components/admin/RestockModal';
 import { AdjustmentModal } from '@/components/admin/AdjustmentModal';
 import type { InventoryWithProduct, InventoryStats, InventoryFilters } from '@/lib/inventory/types';
+import { Breadcrumbs } from '@/components/ui';
 
 export default function InventoryPage() {
   const [items, setItems] = useState<InventoryWithProduct[]>([]);
@@ -98,7 +99,16 @@ export default function InventoryPage() {
   };
 
   return (
-    <div className="p-8">
+    <>
+      <Breadcrumbs
+        items={[
+          { label: 'Homepage', href: '/' },
+          { label: 'Admin', href: '/admin' },
+          { label: 'Inventory' },
+        ]}
+      />
+
+      <div className="p-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Inventory Management</h1>
@@ -247,6 +257,7 @@ export default function InventoryPage() {
           }}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 }

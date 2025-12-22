@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { downloadInvoicePDF } from '@/lib/invoice/pdf-generator';
 import type { Invoice } from '@/types/invoice';
+import { Breadcrumbs } from '@/components/ui';
 
 interface Order {
   id: string;
@@ -154,8 +155,17 @@ export default function AdminOrdersPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#EAEAEA] py-[40px] px-[20px]">
-      <div className="max-w-[1400px] mx-auto">
+    <>
+      <Breadcrumbs
+        items={[
+          { label: 'Homepage', href: '/' },
+          { label: 'Admin', href: '/admin' },
+          { label: 'Orders' },
+        ]}
+      />
+
+      <main className="min-h-screen bg-[#EAEAEA] py-[40px] px-[20px]">
+        <div className="max-w-[1400px] mx-auto">
         <div className="mb-[40px]">
           <h1 className="font-['DM_Sans'] font-light text-[36px] md:text-[48px] leading-none tracking-tight text-[#161616] mb-[16px]">
             Orders & Invoices
@@ -396,7 +406,8 @@ export default function AdminOrdersPage() {
             )}
           </>
         )}
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }

@@ -5,6 +5,7 @@ import { seedProducts } from "@/data/seed-products";
 import { projects as defaultProjects } from "@/data/projects";
 import { Project } from "@/types/project";
 import Image from "next/image";
+import { Breadcrumbs } from "@/components/ui";
 
 interface Product {
   id: string;
@@ -691,8 +692,11 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#E1E1E1] py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
-      <div className="max-w-[1400px] mx-auto">
+    <>
+      <Breadcrumbs items={[{ label: 'Homepage', href: '/' }, { label: 'Admin' }]} />
+
+      <div className="min-h-screen bg-[#E1E1E1] py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
+        <div className="max-w-[1400px] mx-auto">
         {/* Header */}
         <div className="mb-[clamp(32px,4vw,48px)]">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-[16px] mb-[8px]">
@@ -1912,7 +1916,8 @@ export default function AdminPage() {
         )}
 
         {/* Projects Tab - Due to character limit, rest of tabs omitted but follow same pattern */}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Breadcrumbs } from '@/components/ui';
 
 function UnsubscribeContent() {
   const searchParams = useSearchParams();
@@ -162,7 +163,16 @@ export default function UnsubscribePage() {
         <div className="font-['Outfit'] text-[16px] text-[#161616]">Kraunama...</div>
       </div>
     }>
-      <UnsubscribeContent />
+      <>
+        <Breadcrumbs
+          items={[
+            { label: 'Pagrindinis', href: '/' },
+            { label: 'Naujienos', href: '/naujienos' },
+            { label: 'Atsisakyti' },
+          ]}
+        />
+        <UnsubscribeContent />
+      </>
     </Suspense>
   );
 }

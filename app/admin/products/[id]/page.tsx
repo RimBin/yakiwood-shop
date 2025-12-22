@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import ProductForm from '@/components/admin/ProductForm';
 import { notFound } from 'next/navigation';
+import { Breadcrumbs } from '@/components/ui';
 
 async function getProduct(id: string) {
   const supabase = await createClient();
@@ -44,6 +45,15 @@ export default async function EditProductPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
+      <Breadcrumbs
+        items={[
+          { label: 'Homepage', href: '/' },
+          { label: 'Admin', href: '/admin' },
+          { label: 'Products', href: '/admin/products' },
+          { label: 'Edit' },
+        ]}
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-['DM_Sans'] font-medium text-[#161616] tracking-[-0.96px]">
