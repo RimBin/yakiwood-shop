@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
 import { supabaseAdmin, getInvoiceById, convertDBInvoiceToInvoice } from '@/lib/supabase-admin';
 import { InvoicePDFGenerator } from '@/lib/invoice/pdf-generator';
 
@@ -10,13 +9,19 @@ async function resolveParams(context: RouteContext): Promise<RouteParams> {
   return await context.params
 }
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+// Lazy-load Resend only when needed to avoid build-time errors
+function getResendClient() {
+  if (!process.env.RESEND_API_KEY) return null;
+  const { Resend } = require('resend');
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function POST(
   req: NextRequest,
   context: RouteContext
 ) {
   try {
+    const resend = getResendClient();
     if (!resend) {
       return NextResponse.json({ error: 'Email service not configured' }, { status: 503 });
     }

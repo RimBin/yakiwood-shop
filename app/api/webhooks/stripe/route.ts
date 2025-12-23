@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { Resend } from 'resend';
 import { InvoicePDFGenerator } from '@/lib/invoice/pdf-generator';
 import { createInvoice } from '@/lib/invoice/utils';
 import { 
@@ -11,13 +9,23 @@ import {
 } from '@/lib/supabase-admin';
 import type { InvoiceGenerateRequest } from '@/types/invoice';
 
-const stripe = process.env.STRIPE_SECRET_KEY 
-  ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-11-17.clover' })
-  : null;
+// Lazy-load Stripe and Resend only when needed to avoid build-time errors
+function getStripeClient() {
+  if (!process.env.STRIPE_SECRET_KEY) return null;
+  const Stripe = require('stripe');
+  return new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-11-17.clover' });
+}
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+function getResendClient() {
+  if (!process.env.RESEND_API_KEY) return null;
+  const { Resend } = require('resend');
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function POST(req: NextRequest) {
+  const stripe = getStripeClient();
+  const resend = getResendClient();
+  
   if (!stripe || !resend) {
     return NextResponse.json({ error: 'Payment or email service not configured' }, { status: 503 });
   }
