@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type Stripe from 'stripe'; // Import type only
 import { InvoicePDFGenerator } from '@/lib/invoice/pdf-generator';
 import { createInvoice } from '@/lib/invoice/utils';
 import { 
