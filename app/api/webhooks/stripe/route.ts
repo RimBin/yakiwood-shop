@@ -11,13 +11,16 @@ import {
 } from '@/lib/supabase-admin';
 import type { InvoiceGenerateRequest } from '@/types/invoice';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-11-17.clover'
-});
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-11-17.clover' })
+  : null;
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function POST(req: NextRequest) {
+  if (!stripe || !resend) {
+    return NextResponse.json({ error: 'Payment or email service not configured' }, { status: 503 });
+  }
   const body = await req.text();
   const signature = req.headers.get('stripe-signature');
 

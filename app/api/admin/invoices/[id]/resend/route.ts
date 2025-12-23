@@ -10,13 +10,16 @@ async function resolveParams(context: RouteContext): Promise<RouteParams> {
   return await context.params
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function POST(
   req: NextRequest,
   context: RouteContext
 ) {
   try {
+    if (!resend) {
+      return NextResponse.json({ error: 'Email service not configured' }, { status: 503 });
+    }
     if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
     }
