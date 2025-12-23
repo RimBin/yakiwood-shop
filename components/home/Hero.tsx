@@ -98,10 +98,10 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="hidden lg:block relative w-full min-h-[861px]">
+      <div className="hidden lg:block relative w-full h-[861px]">
         {/* Full-width background layer */}
-        <div 
-          className="absolute inset-0 top-[24px] h-[776px] bg-cover bg-center"
+        <div
+          className="absolute left-0 right-0 top-0 h-[776px] bg-cover bg-center"
           style={{ backgroundImage: `url(${imgMaskGroup})` }}
         />
 
