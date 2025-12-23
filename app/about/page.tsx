@@ -1,7 +1,7 @@
 import About from '@/components/About';
 
 export const metadata = {
-  title: 'Apie mus | Yakiwood',
+  title: 'About Us',
   description: 'Yakiwood specializes in traditional Japanese Shou Sugi Ban burnt wood technique for facades, terraces, and interiors.',
 };
 

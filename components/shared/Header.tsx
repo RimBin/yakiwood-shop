@@ -3,21 +3,33 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslations, useLocale } from 'next-intl';
 import { getAsset } from '@/lib/assets';
 import MobileMenu from './MobileMenu';
 import CartSidebar from './CartSidebar';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useCartStore } from '@/lib/cart/store';
 
 export default function Header() {
+  const t = useTranslations();
+  const locale = useLocale();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const items = useCartStore((state) => state.items);
-  const navItems = [
-    { href: '/products', label: 'Products' },
-    { href: '/solutions', label: 'Solutions' },
-    { href: '/projects', label: 'Projects' },
-    { href: '/about', label: 'About us' },
-    { href: '/contact', label: 'Contact' },
+  
+  // Dynamic routes based on locale
+  const navItems = locale === 'lt' ? [
+    { href: '/produktai', label: t('nav.produktai') },
+    { href: '/sprendimai', label: t('nav.sprendimai') },
+    { href: '/projektai', label: t('nav.projektai') },
+    { href: '/apie', label: t('nav.apie') },
+    { href: '/kontaktai', label: t('nav.kontaktai') },
+  ] : [
+    { href: '/products', label: t('nav.products') },
+    { href: '/solutions', label: t('nav.solutions') },
+    { href: '/projects', label: t('nav.projects') },
+    { href: '/about', label: t('nav.about') },
+    { href: '/contact', label: t('nav.contact') },
   ];
   
   return (
@@ -30,7 +42,9 @@ export default function Header() {
             <div className="relative w-[20px] h-[20px] shrink-0">
               <Image src="/assets/icons/fast-delivery.svg" alt="" width={20} height={20} />
             </div>
-            <span className="font-['Outfit'] text-[12px] font-normal uppercase tracking-[0.6px] text-white whitespace-nowrap">FAST DELIVERY</span>
+            <span className="font-['Outfit'] text-[12px] font-normal uppercase tracking-[0.6px] text-white whitespace-nowrap">
+              {t(locale === 'lt' ? 'header.grestasPristatymas' : 'header.fastDelivery').toUpperCase()}
+            </span>
           </div>
 
           {/* Money Back Guarantee */}
@@ -38,7 +52,9 @@ export default function Header() {
             <div className="relative w-[20px] h-[20px] shrink-0">
               <Image src="/assets/icons/money-back.svg" alt="" width={20} height={20} />
             </div>
-            <span className="font-['Outfit'] text-[12px] font-normal uppercase tracking-[0.6px] text-white whitespace-nowrap">MONEY BACK GUARANTEE</span>
+            <span className="font-['Outfit'] text-[12px] font-normal uppercase tracking-[0.6px] text-white whitespace-nowrap">
+              {t(locale === 'lt' ? 'header.piniguGrazinimas' : 'header.moneyBack').toUpperCase()}
+            </span>
           </div>
 
           {/* Eco-Friendly */}
@@ -46,7 +62,9 @@ export default function Header() {
             <div className="relative w-[20px] h-[20px] shrink-0">
               <Image src="/assets/icons/eco-friendly.svg" alt="" width={20} height={20} />
             </div>
-            <span className="font-['Outfit'] text-[12px] font-normal uppercase tracking-[0.6px] text-white whitespace-nowrap">ECO-FRIENDLY</span>
+            <span className="font-['Outfit'] text-[12px] font-normal uppercase tracking-[0.6px] text-white whitespace-nowrap">
+              {t(locale === 'lt' ? 'header.ekologiskas' : 'header.ecoFriendly').toUpperCase()}
+            </span>
           </div>
         </div>
       </div>
@@ -75,6 +93,11 @@ export default function Header() {
 
             {/* Cart button + language toggle + mobile menu */}
             <div className="ml-auto flex items-center gap-[8px] md:gap-[12px]">
+              {/* Language Switcher - hidden on mobile, shown on desktop */}
+              <div className="hidden md:block">
+                <LanguageSwitcher />
+              </div>
+              
               <button 
                 onClick={() => setIsCartOpen(true)}
                 className="border border-[#BBBBBB] border-solid rounded-[100px] flex gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[16px] md:px-[24px] py-[10px] bg-transparent hover:bg-[#161616] hover:text-white transition-colors group relative"
@@ -83,7 +106,7 @@ export default function Header() {
                   <Image src={getAsset('imgCart')} alt="Cart" fill style={{ objectFit: 'contain' }} />
                 </div>
                 <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white shrink-0">
-                  Cart {items.length > 0 && `(${items.length})`}
+                  {t(locale === 'lt' ? 'header.krepselis' : 'header.cart')} {items.length > 0 && `(${items.length})`}
                 </span>
               </button>
 

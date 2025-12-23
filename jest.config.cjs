@@ -9,6 +9,9 @@ const createJestConfig = nextJest({ dir: './' });
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testEnvironment: 'jsdom',
+  // Playwright specs live under /e2e and are run via `npm run test:e2e`.
+  // Jest should only run unit/integration tests.
+  testPathIgnorePatterns: ['<rootDir>/e2e/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
     '^.+\\.(css|less|scss|sass)$': '<rootDir>/__mocks__/styleMock.js',

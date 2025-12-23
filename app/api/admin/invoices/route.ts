@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getAllInvoices } from '@/lib/supabase-admin';
+import { supabaseAdmin, getAllInvoices } from '@/lib/supabase-admin';
 
 export async function GET() {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
     const invoices = await getAllInvoices(200);
     return NextResponse.json({ invoices });
   } catch (error) {

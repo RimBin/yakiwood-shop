@@ -14,13 +14,13 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
   if (!product) {
     return {
-      title: 'Product Not Found | Yakiwood',
+      title: 'Product Not Found',
       description: 'The requested product could not be found.',
     };
   }
 
   return {
-    title: `${product.name} | Yakiwood`,
+    title: product.name,
     description: product.shortDescription || product.description,
     openGraph: {
       title: product.name,

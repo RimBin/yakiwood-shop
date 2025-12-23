@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getAllOrders, updateOrderStatus } from '@/lib/supabase-admin';
+import { supabaseAdmin, getAllOrders, updateOrderStatus } from '@/lib/supabase-admin';
 
 export async function GET() {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
     const orders = await getAllOrders(200);
     return NextResponse.json({ orders });
   } catch (error) {
@@ -13,6 +16,9 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
     const { orderId, status } = await request.json();
     
     if (!orderId || !status) {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { getInvoiceById, convertDBInvoiceToInvoice } from '@/lib/supabase-admin';
+import { supabaseAdmin, getInvoiceById, convertDBInvoiceToInvoice } from '@/lib/supabase-admin';
 import { InvoicePDFGenerator } from '@/lib/invoice/pdf-generator';
 
 type RouteParams = { id: string }
@@ -17,6 +17,9 @@ export async function POST(
   context: RouteContext
 ) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
     const { id } = await resolveParams(context);
     const dbInvoice = await getInvoiceById(id);
     

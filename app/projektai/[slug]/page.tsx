@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   }
 
   return {
-    title: `${project.title} | Yakiwood Projects`,
+    title: project.title,
     description: project.description,
   };
 }

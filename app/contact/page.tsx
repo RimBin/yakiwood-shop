@@ -1,7 +1,7 @@
 import Contact from '@/components/Contact';
 
 export const metadata = { 
-  title: 'Contact - Yakiwood',
+  title: 'Contact',
   description: 'Need assistance? Leave your contact details, and our manager will reach out for a consultation.'
 };
 

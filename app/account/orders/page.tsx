@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import OrdersClient from '@/components/account/OrdersClient';
 
 export const metadata: Metadata = {
-  title: 'Mano užsakymai | Yakiwood',
+  title: 'My Orders',
   description: 'Peržiūrėkite savo užsakymų istoriją',
 };
 

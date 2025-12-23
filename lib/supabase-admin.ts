@@ -5,12 +5,15 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 // Service role client for server-side operations (bypasses RLS)
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
+// Only create client if environment variables are provided
+export const supabaseAdmin = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+  : null;
 
 export interface Order {
   id: string;
@@ -92,6 +95,10 @@ export async function createOrder(data: {
   currency?: string;
   notes?: string;
 }): Promise<Order | null> {
+  if (!supabaseAdmin) {
+    console.warn('Supabase not configured, skipping order creation');
+    return null;
+  }
   const { data: order, error } = await supabaseAdmin
     .from('orders')
     .insert({
@@ -122,6 +129,7 @@ export async function createOrder(data: {
 }
 
 export async function getOrderByStripeSession(sessionId: string): Promise<Order | null> {
+  if (!supabaseAdmin) return null;
   const { data, error } = await supabaseAdmin
     .from('orders')
     .select('*')
@@ -141,6 +149,8 @@ export async function updateOrderStatus(
   status: Order['status'],
   paymentStatus?: Order['payment_status']
 ): Promise<boolean> {
+  if (!supabaseAdmin) return false;
+  
   const updates: any = { status };
   
   if (paymentStatus) {
@@ -169,6 +179,7 @@ export async function updateOrderStatus(
 }
 
 export async function getAllOrders(limit = 100): Promise<Order[]> {
+  if (!supabaseAdmin) return [];
   const { data, error } = await supabaseAdmin
     .from('orders')
     .select('*')
@@ -186,6 +197,7 @@ export async function getAllOrders(limit = 100): Promise<Order[]> {
 // ==================== INVOICES ====================
 
 export async function saveInvoiceToDatabase(invoice: Invoice, orderId?: string): Promise<DBInvoice | null> {
+  if (!supabaseAdmin) return null;
   const { data, error } = await supabaseAdmin
     .from('invoices')
     .insert({
@@ -242,6 +254,7 @@ export async function saveInvoiceToDatabase(invoice: Invoice, orderId?: string):
 }
 
 export async function getInvoiceById(id: string): Promise<DBInvoice | null> {
+  if (!supabaseAdmin) return null;
   const { data, error } = await supabaseAdmin
     .from('invoices')
     .select('*')
@@ -257,6 +270,7 @@ export async function getInvoiceById(id: string): Promise<DBInvoice | null> {
 }
 
 export async function getInvoiceByNumber(invoiceNumber: string): Promise<DBInvoice | null> {
+  if (!supabaseAdmin) return null;
   const { data, error } = await supabaseAdmin
     .from('invoices')
     .select('*')
@@ -272,6 +286,7 @@ export async function getInvoiceByNumber(invoiceNumber: string): Promise<DBInvoi
 }
 
 export async function getAllInvoices(limit = 100): Promise<DBInvoice[]> {
+  if (!supabaseAdmin) return [];
   const { data, error } = await supabaseAdmin
     .from('invoices')
     .select('*')
@@ -290,6 +305,7 @@ export async function updateInvoiceStatus(
   id: string,
   status: DBInvoice['status']
 ): Promise<boolean> {
+  if (!supabaseAdmin) return false;
   const updates: any = { status };
   
   if (status === 'paid') {
@@ -310,6 +326,7 @@ export async function updateInvoiceStatus(
 }
 
 export async function deleteInvoice(id: string): Promise<boolean> {
+  if (!supabaseAdmin) return false;
   const { error } = await supabaseAdmin
     .from('invoices')
     .delete()

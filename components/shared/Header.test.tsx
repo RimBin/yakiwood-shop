@@ -5,8 +5,11 @@ import Header from './Header';
 describe('Header', () => {
   it('renders logo and nav links', () => {
     render(<Header />);
-    expect(screen.getByAltText(/yakiwood logo/i)).toBeInTheDocument();
-    expect(screen.getByText(/products/i)).toBeInTheDocument();
-    expect(screen.getByText(/cart/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /yakiwood homepage/i })).toBeInTheDocument();
+
+    const productLinks = screen.getAllByRole('link', { name: /^products$/i });
+    expect(productLinks.some((link) => link.getAttribute('href') === '/products')).toBe(true);
+
+    expect(screen.getByAltText(/cart/i)).toBeInTheDocument();
   });
 });

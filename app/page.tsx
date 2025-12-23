@@ -4,6 +4,11 @@ import Solutions from '@/components/Solutions';
 import Projects from '@/components/Projects';
 import FAQ from '@/components/FAQ';
 
+export const metadata = {
+  title: 'Home',
+  description: 'Discover the elegance and durability of burnt wood, crafted using the ancient Japanese Shou Sugi Ban technique.',
+};
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#E1E1E1]">
