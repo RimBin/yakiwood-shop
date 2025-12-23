@@ -1,10 +1,10 @@
 ﻿'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Invoice, InvoiceGenerateRequest } from '@/types/invoice';
-import { createInvoice, getInvoices as getStoredInvoices, saveInvoice } from '@/lib/invoice/utils';
+import type { Invoice } from '@/types/invoice';
 import { downloadInvoicePDF } from '@/lib/invoice/pdf-generator';
+import { createClient } from '@/lib/supabase/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +74,7 @@ function formatPaymentMethod(method?: Invoice['paymentMethod']): string {
 
 export default function AccountPage() {
   const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<'info' | 'orders' | 'addresses' | 'password' | 'invoices'>('info');
   const [user, setUser] = useState<User | null>(null);
@@ -119,151 +120,189 @@ export default function AccountPage() {
 
   // Check authentication on mount
   useEffect(() => {
-    const checkAuth = () => {
+    let isCancelled = false;
+
+    const checkAuth = async () => {
+      // Preferred: Supabase auth (production)
+      if (supabase) {
+        const { data, error } = await supabase.auth.getUser();
+
+        if (error || !data.user) {
+          if (!isCancelled) router.push('/login?redirect=/account');
+          return;
+        }
+
+        const supabaseUser = data.user;
+        const displayName =
+          (supabaseUser.user_metadata?.name as string | undefined) ||
+          (supabaseUser.user_metadata?.full_name as string | undefined) ||
+          supabaseUser.email ||
+          'User';
+
+        const userData: User = {
+          email: supabaseUser.email || '',
+          role: 'user',
+          name: displayName,
+        };
+
+        if (!isCancelled) {
+          setUser(userData);
+          setEmail(userData.email);
+        }
+
+        const nameParts = displayName.split(' ');
+        if (!isCancelled) {
+          setFirstName(nameParts[0] || '');
+          setLastName(nameParts.slice(1).join(' ') || '');
+        }
+
+        const savedData = localStorage.getItem(`user_data_${userData.email}`);
+        if (!isCancelled) {
+          if (savedData) {
+            const data = JSON.parse(savedData);
+            setPhone(data.phone || '');
+          } else {
+            setPhone('');
+          }
+        }
+
+        // Keep existing demo orders/addresses behavior for now
+        const savedOrders = localStorage.getItem(`user_orders_${userData.email}`);
+        let ordersData: Order[] = [];
+        if (savedOrders) {
+          ordersData = JSON.parse(savedOrders);
+          if (!isCancelled) setOrders(ordersData);
+        } else {
+          ordersData = [
+            {
+              id: 'ORD-2024-001',
+              date: '2024-12-15',
+              status: 'completed',
+              total: 389.0,
+              items: [
+                { name: 'Lentos paketas "Classic"', quantity: 2, price: 159.0 },
+                { name: 'Fasado dailylentės', quantity: 1, price: 71.0 },
+              ],
+            },
+          ];
+          if (!isCancelled) setOrders(ordersData);
+          localStorage.setItem(`user_orders_${userData.email}`, JSON.stringify(ordersData));
+        }
+
+        const savedAddresses = localStorage.getItem(`user_addresses_${userData.email}`);
+        let addressesData: Address[] = [];
+        if (savedAddresses) {
+          addressesData = JSON.parse(savedAddresses);
+          if (!isCancelled) setAddresses(addressesData);
+        } else {
+          addressesData = [
+            {
+              id: 'addr-1',
+              type: 'delivery',
+              firstName: nameParts[0] || 'User',
+              lastName: nameParts.slice(1).join(' ') || '',
+              address: 'Gedimino pr. 45',
+              city: 'Vilnius',
+              postalCode: '01109',
+              country: 'Lietuva',
+              phone: '+370 600 00000',
+              isDefault: true,
+            },
+          ];
+          if (!isCancelled) setAddresses(addressesData);
+          localStorage.setItem(`user_addresses_${userData.email}`, JSON.stringify(addressesData));
+        }
+
+        if (!isCancelled) setLoading(false);
+        return;
+      }
+
+      // Fallback: demo localStorage auth (when Supabase env is not configured)
       const userStr = localStorage.getItem('user');
-      
       if (!userStr) {
-        router.push('/login');
+        if (!isCancelled) router.push('/login');
         return;
       }
 
       const userData: User = JSON.parse(userStr);
-      setUser(userData);
-      setEmail(userData.email);
-      
-      // Load demo data for demo user
+      if (!isCancelled) {
+        setUser(userData);
+        setEmail(userData.email);
+      }
+
       const nameParts = userData.name.split(' ');
-      setFirstName(nameParts[0] || '');
-      setLastName(nameParts.slice(1).join(' ') || '');
-      
-      // Load saved personal data from localStorage
+      if (!isCancelled) {
+        setFirstName(nameParts[0] || '');
+        setLastName(nameParts.slice(1).join(' ') || '');
+      }
+
       const savedData = localStorage.getItem(`user_data_${userData.email}`);
-      if (savedData) {
-        const data = JSON.parse(savedData);
-        setPhone(data.phone || '');
-      } else {
-        // Set demo phone if no saved data
-        setPhone('+370 600 00000');
-      }
-
-      // Load or create demo orders
-      const savedOrders = localStorage.getItem(`user_orders_${userData.email}`);
-      let ordersData: Order[] = [];
-      if (savedOrders) {
-        ordersData = JSON.parse(savedOrders);
-        setOrders(ordersData);
-      } else {
-        // Create demo orders
-        ordersData = [
-          {
-            id: 'ORD-2024-001',
-            date: '2024-12-15',
-            status: 'completed',
-            total: 389.00,
-            items: [
-              { name: 'Lentos paketas "Classic"', quantity: 2, price: 159.00 },
-              { name: 'Fasado dailylentės', quantity: 1, price: 71.00 }
-            ]
-          },
-          {
-            id: 'ORD-2024-002',
-            date: '2024-11-28',
-            status: 'processing',
-            total: 159.00,
-            items: [
-              { name: 'Lentos paketas "Premium"', quantity: 1, price: 159.00 }
-            ]
-          }
-        ];
-        setOrders(ordersData);
-        localStorage.setItem(`user_orders_${userData.email}`, JSON.stringify(ordersData));
-      }
-
-      // Load or create demo addresses
-      const savedAddresses = localStorage.getItem(`user_addresses_${userData.email}`);
-      let addressesData: Address[] = [];
-      if (savedAddresses) {
-        addressesData = JSON.parse(savedAddresses);
-        setAddresses(addressesData);
-      } else {
-        // Create demo addresses
-        addressesData = [
-          {
-            id: 'addr-1',
-            type: 'delivery',
-            firstName: nameParts[0] || 'Demo',
-            lastName: nameParts.slice(1).join(' ') || 'User',
-            address: 'Gedimino pr. 45',
-            city: 'Vilnius',
-            postalCode: '01109',
-            country: 'Lietuva',
-            phone: '+370 600 00000',
-            isDefault: true
-          }
-        ];
-        setAddresses(addressesData);
-        localStorage.setItem(`user_addresses_${userData.email}`, JSON.stringify(addressesData));
-      }
-
-      // Load or create demo invoices (stored globally in localStorage under 'invoices')
-      try {
-        const allInvoices = getStoredInvoices();
-        const userInvoices = allInvoices.filter(
-          (inv) => (inv.buyer.email || '').toLowerCase() === userData.email.toLowerCase()
-        );
-
-        if (userInvoices.length > 0) {
-          setInvoices(userInvoices);
+      if (!isCancelled) {
+        if (savedData) {
+          const data = JSON.parse(savedData);
+          setPhone(data.phone || '');
         } else {
-          const defaultDelivery = addressesData.find((a) => a.type === 'delivery' && a.isDefault) || addressesData[0];
-          const buyerName = `${nameParts[0] || 'Demo'} ${nameParts.slice(1).join(' ') || 'User'}`.trim();
-
-          const firstOrder = ordersData[0];
-          const items = (firstOrder?.items?.length ? firstOrder.items : [{ name: 'Yakiwood produktas', quantity: 1, price: 89.0 }]).map(
-            (item, idx) => ({
-              id: `item-${idx + 1}`,
-              name: item.name,
-              description: undefined,
-              quantity: item.quantity,
-              unitPrice: item.price,
-              vatRate: 0.21,
-            })
-          );
-
-          const request: InvoiceGenerateRequest = {
-            buyer: {
-              name: buyerName,
-              address: defaultDelivery?.address || 'Gedimino pr. 45',
-              city: defaultDelivery?.city || 'Vilnius',
-              postalCode: defaultDelivery?.postalCode || '01109',
-              country: defaultDelivery?.country || 'Lietuva',
-              phone: defaultDelivery?.phone || phone || '+370 600 00000',
-              email: userData.email,
-            },
-            items,
-            paymentMethod: 'bank_transfer',
-            notes: 'Dėkojame už užsakymą!',
-            dueInDays: 14,
-          };
-
-          const created = createInvoice(request);
-          // Ensure email is attached even if request types change
-          created.buyer.email = userData.email;
-          saveInvoice(created);
-          setInvoices([created]);
+          setPhone('+370 600 00000');
         }
-      } catch {
-        setInvoices([]);
       }
 
-      setLoading(false);
+      const savedOrders = localStorage.getItem(`user_orders_${userData.email}`);
+      if (savedOrders) {
+        if (!isCancelled) setOrders(JSON.parse(savedOrders));
+      }
+
+      const savedAddresses = localStorage.getItem(`user_addresses_${userData.email}`);
+      if (savedAddresses) {
+        if (!isCancelled) setAddresses(JSON.parse(savedAddresses));
+      }
+
+      if (!isCancelled) setLoading(false);
     };
 
-    checkAuth();
-  }, [router]);
+    void checkAuth();
 
-  const handleLogout = () => {
+    return () => {
+      isCancelled = true;
+    };
+  }, [router, supabase]);
+
+  // Load invoices from DB (Supabase via authenticated API)
+  useEffect(() => {
+    if (!supabase) return;
+    if (!user?.email) return;
+
+    let isCancelled = false;
+
+    const loadInvoices = async () => {
+      try {
+        const res = await fetch('/api/account/invoices', { cache: 'no-store' });
+
+        if (!res.ok) {
+          if (!isCancelled) setInvoices([]);
+          return;
+        }
+
+        const data = (await res.json()) as { invoices?: Invoice[] };
+        if (!isCancelled) setInvoices(data.invoices || []);
+      } catch {
+        if (!isCancelled) setInvoices([]);
+      }
+    };
+
+    void loadInvoices();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [user?.email]);
+
+  const handleLogout = async () => {
     localStorage.removeItem('user');
+    try {
+      await supabase?.auth.signOut();
+    } catch {
+      // ignore
+    }
     router.push('/login');
   };
 
@@ -381,10 +420,8 @@ export default function AccountPage() {
     setInvoiceActionId(invoice.id);
 
     try {
-      const res = await fetch('/api/invoices/resend', {
+      const res = await fetch(`/api/account/invoices/${invoice.id}/resend`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ invoice }),
       });
 
       const data = await res.json().catch(() => ({}));
