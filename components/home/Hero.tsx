@@ -30,18 +30,18 @@ export default function Hero() {
     <section className="w-full bg-[#E1E1E1] relative overflow-hidden">
       {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
       <div className="lg:hidden flex flex-col">
-        <div className="px-4 md:px-8 pt-4 md:pt-8 pb-2 flex flex-col gap-2 md:gap-4">
-          <p className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[600px]" style={{ fontSize: 'clamp(45px, 8vw, 80px)', letterSpacing: 'clamp(-1.8px, -0.04em, -4.4px)' }}>
+        <div className="px-4 pt-4 pb-2 flex flex-col gap-2">
+          <p className="font-['DM_Sans'] font-light text-[45px] leading-none tracking-[-1.8px] text-[#161616] w-[355px] whitespace-pre-wrap">
             {`Timeless beauty, enhanced by fire - `}
             <span className="font-['Tiro_Tamil'] italic">Yakiwood</span>
           </p>
-          <p className="font-['Outfit'] font-light text-[14px] md:text-[16px] leading-[1.2] tracking-[0.14px] text-[#161616] max-w-[450px]">
+          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] w-[323px]">
             Discover the elegance and durability of burnt wood, crafted using the ancient Japanese Shou Sugi Ban technique.
           </p>
         </div>
 
         <div className="relative w-full">
-          <div className="bg-[#bbab92] w-full h-[423px] md:h-[520px] relative">
+          <div className="bg-[#bbab92] w-full h-[423px] relative">
             <div className="absolute left-[8.34px] top-0 w-[367px] h-[309.127px] flex items-center justify-center overflow-hidden">
               <div className="rotate-[333.068deg]">
                 <div className="w-[317.433px] h-[185.467px] relative">
@@ -99,11 +99,16 @@ export default function Hero() {
       </div>
 
       <div className="hidden lg:block relative w-full min-h-[861px]">
-        {/* Full-width background layer */}
-        <div 
-          className="absolute inset-0 top-[24px] h-[776px] bg-cover bg-center"
-          style={{ backgroundImage: `url(${imgMaskGroup})` }}
-        />
+        {/* Full-screen wood texture background */}
+        <div className="absolute inset-0 w-full h-full">
+          <Image 
+            src="/assets/hero/Img.svg" 
+            alt="" 
+            fill 
+            className="object-cover"
+            priority
+          />
+        </div>
 
         {/* Centered content container */}
         <div className="relative max-w-[1440px] mx-auto h-full">
