@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/cart/store';
-import RadioButton from '@/components/ui/RadioButton';
 import { Checkbox } from '@/components/ui/Checkbox';
 import ModalOverlay from '@/components/modals/ModalOverlay';
 import LoginModal from '@/components/modals/LoginModal';
@@ -38,21 +37,62 @@ export default function CheckoutPage() {
   const [saveAddress, setSaveAddress] = useState(false);
 
   // Payment Method
-  const [paymentMethod, setPaymentMethod] = useState('card');
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiryDate, setExpiryDate] = useState('');
-  const [cvv, setCvv] = useState('');
-  const [rememberCard, setRememberCard] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Calculate totals
   const subtotal = items.reduce((sum, item) => sum + item.basePrice * item.quantity, 0);
   const shipping = subtotal > 500 ? 0 : 15;
   const total = subtotal + shipping;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle checkout submission
-    console.log('Checkout submitted');
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: items.map(item => ({
+            id: item.id,
+            name: item.name,
+            basePrice: item.basePrice,
+            quantity: item.quantity,
+            color: item.color,
+            finish: item.finish
+          })),
+          customer: {
+            email,
+            name: `${firstName} ${lastName}`,
+            phone,
+            address,
+            city,
+            postalCode,
+            country
+          }
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Nepavyko sukurti mokėjimo sesijos');
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('Negautas mokėjimo URL');
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      setError(err instanceof Error ? err.message : 'Įvyko klaida. Bandykite dar kartą.');
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -232,103 +272,29 @@ export default function CheckoutPage() {
                 </h2>
               </div>
 
-              <div className="space-y-[24px]">
-                {/* Card Payment */}
-                <div>
-                  <div className="flex items-center justify-between mb-[16px]">
-                    <RadioButton
-                      name="payment"
-                      value="card"
-                      label="Credit/Debit Card"
-                      checked={paymentMethod === 'card'}
-                      onChange={() => setPaymentMethod('card')}
-                    />
-                    <div className="flex items-center gap-[8px]">
-                      <span className="text-[12px] text-[#535353]">Stripe</span>
-                    </div>
-                  </div>
-
-                  {paymentMethod === 'card' && (
-                    <div className="space-y-[16px] pl-[32px]">
-                      <div>
-                        <label htmlFor="cardNumber" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                          Card Number
-                        </label>
-                        <input
-                          type="text"
-                          id="cardNumber"
-                          value={cardNumber}
-                          onChange={(e) => setCardNumber(e.target.value)}
-                          placeholder="1234 5678 9012 3456"
-                          required
-                          className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-[16px]">
-                        <div>
-                          <label htmlFor="expiryDate" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                            Expiry Date
-                          </label>
-                          <input
-                            type="text"
-                            id="expiryDate"
-                            value={expiryDate}
-                            onChange={(e) => setExpiryDate(e.target.value)}
-                            placeholder="MM/YY"
-                            required
-                            className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="cvv" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                            CVV
-                          </label>
-                          <input
-                            type="text"
-                            id="cvv"
-                            value={cvv}
-                            onChange={(e) => setCvv(e.target.value)}
-                            placeholder="123"
-                            required
-                            className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
-                          />
-                        </div>
-                      </div>
-                      <Checkbox
-                        id="rememberCard"
-                        label="Remember this card for future purchases"
-                        checked={rememberCard}
-                        onChange={setRememberCard}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Bank Transfer */}
-                <div className="pt-[16px] border-t border-[#BBBBBB]">
-                  <RadioButton
-                    name="payment"
-                    value="bank"
-                    label="Bank Transfer"
-                    checked={paymentMethod === 'bank'}
-                    onChange={() => setPaymentMethod('bank')}
-                  />
-                </div>
-
-                {/* PayPal */}
-                <div className="pt-[16px] border-t border-[#BBBBBB]">
-                  <div className="flex items-center justify-between">
-                    <RadioButton
-                      name="payment"
-                      value="paypal"
-                      label="PayPal"
-                      checked={paymentMethod === 'paypal'}
-                      onChange={() => setPaymentMethod('paypal')}
-                    />
-                    <span className="text-[12px] text-[#535353]">PayPal</span>
+              <div className="bg-[#F5F5F5] rounded-[12px] p-[24px]">
+                <div className="flex items-center gap-[16px] mb-[16px]">
+                  <div className="flex items-center gap-[12px]">
+                    <svg className="w-[48px] h-[32px]" viewBox="0 0 60 25" fill="none">
+                      <rect width="60" height="25" rx="4" fill="#635BFF"/>
+                      <path d="M17.5 8.5h-5c-.8 0-1.5.7-1.5 1.5v5c0 .8.7 1.5 1.5 1.5h5c.8 0 1.5-.7 1.5-1.5v-5c0-.8-.7-1.5-1.5-1.5z" fill="white"/>
+                    </svg>
+                    <span className="font-['Outfit'] font-normal text-[14px] text-[#161616]">
+                      Secure Payment via Stripe
+                    </span>
                   </div>
                 </div>
+                <p className="font-['Outfit'] text-[12px] leading-[1.5] text-[#535353]">
+                  Po paspaudimo "Complete Order" būsite nukreipti į saugią Stripe mokėjimo platformą, kur galėsite sumokėti kortele, Apple Pay, Google Pay arba kitu būdu.
+                </p>
               </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="mt-[24px] p-[16px] bg-red-50 border border-red-200 rounded-[12px]">
+                  <p className="font-['Outfit'] text-[14px] text-red-600">{error}</p>
+                </div>
+              )}
 
               {/* Submit Buttons */}
               <div className="mt-[32px] grid grid-cols-1 sm:grid-cols-2 gap-[16px]">
@@ -340,9 +306,10 @@ export default function CheckoutPage() {
                 </Link>
                 <button
                   type="submit"
-                  className="h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors"
+                  disabled={isProcessing}
+                  className="h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors disabled:bg-[#BBBBBB] disabled:cursor-not-allowed"
                 >
-                  Complete Order
+                  {isProcessing ? 'Processing...' : 'Complete Order'}
                 </button>
               </div>
             </div>

@@ -1,0 +1,162 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useCartStore } from '@/lib/cart/store';
+
+export default function OrderConfirmationPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const sessionId = searchParams.get('session_id');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const clearCart = useCartStore(state => state.clear);
+
+  useEffect(() => {
+    if (!sessionId) {
+      setError('Nerasta sesijos ID');
+      setLoading(false);
+      return;
+    }
+
+    // Clear cart after successful checkout
+    clearCart();
+    setLoading(false);
+  }, [sessionId, clearCart]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#161616] mx-auto mb-4"></div>
+          <p className="font-['Outfit'] text-[14px] text-[#535353]">Kraunasi...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-[24px] p-8 text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <h1 className="font-['DM_Sans'] font-light text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616] mb-4">
+            Klaida
+          </h1>
+          <p className="font-['Outfit'] text-[14px] text-[#535353] mb-6">
+            {error}
+          </p>
+          <Link
+            href="/"
+            className="inline-block h-[48px] px-[24px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors flex items-center justify-center"
+          >
+            Grįžti į pradžią
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center px-4 py-12">
+      <div className="max-w-2xl w-full bg-white rounded-[24px] p-8 md:p-12">
+        {/* Success Icon */}
+        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+
+        {/* Title */}
+        <h1 className="font-['DM_Sans'] font-light text-[40px] md:text-[48px] leading-[1.1] tracking-[-1.92px] text-[#161616] text-center mb-4">
+          Dėkojame už užsakymą!
+        </h1>
+
+        {/* Message */}
+        <div className="text-center mb-8">
+          <p className="font-['Outfit'] text-[16px] leading-[1.5] text-[#535353] mb-4">
+            Jūsų mokėjimas buvo sėkmingai apdorotas. Netrukus gausite el. laišką su užsakymo patvirtinimu ir sąskaita faktūra.
+          </p>
+          <p className="font-['Outfit'] text-[14px] leading-[1.5] text-[#535353]">
+            Sesijos ID: <span className="font-mono text-[12px]">{sessionId}</span>
+          </p>
+        </div>
+
+        {/* Info Box */}
+        <div className="bg-[#F5F5F5] rounded-[16px] p-6 mb-8">
+          <h2 className="font-['DM_Sans'] font-light text-[20px] leading-[1.1] tracking-[-0.8px] text-[#161616] mb-4">
+            Kas toliau?
+          </h2>
+          <ul className="space-y-3">
+            <li className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-[#161616] text-white flex items-center justify-center shrink-0 mt-0.5">
+                <span className="font-['Outfit'] text-[10px]">1</span>
+              </div>
+              <p className="font-['Outfit'] text-[14px] leading-[1.5] text-[#161616]">
+                Gausite užsakymo patvirtinimo el. laišką su sąskaita faktūra
+              </p>
+            </li>
+            <li className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-[#161616] text-white flex items-center justify-center shrink-0 mt-0.5">
+                <span className="font-['Outfit'] text-[10px]">2</span>
+              </div>
+              <p className="font-['Outfit'] text-[14px] leading-[1.5] text-[#161616]">
+                Jūsų užsakymas bus apdorotas per 1-2 darbo dienas
+              </p>
+            </li>
+            <li className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-[#161616] text-white flex items-center justify-center shrink-0 mt-0.5">
+                <span className="font-['Outfit'] text-[10px]">3</span>
+              </div>
+              <p className="font-['Outfit'] text-[14px] leading-[1.5] text-[#161616]">
+                Gausite pranešimą, kai užsakymas bus išsiųstas
+              </p>
+            </li>
+            <li className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-[#161616] text-white flex items-center justify-center shrink-0 mt-0.5">
+                <span className="font-['Outfit'] text-[10px]">4</span>
+              </div>
+              <p className="font-['Outfit'] text-[14px] leading-[1.5] text-[#161616]">
+                Pristatymas per 3-5 darbo dienas (nemokamas virš 500€)
+              </p>
+            </li>
+          </ul>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Link
+            href="/account"
+            className="flex-1 h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors flex items-center justify-center"
+          >
+            Peržiūrėti užsakymus
+          </Link>
+          <Link
+            href="/produktai"
+            className="flex-1 h-[48px] rounded-[100px] border border-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors flex items-center justify-center"
+          >
+            Tęsti apsipirkimą
+          </Link>
+        </div>
+
+        {/* Support */}
+        <div className="mt-8 pt-8 border-t border-[#E1E1E1] text-center">
+          <p className="font-['Outfit'] text-[14px] text-[#535353] mb-2">
+            Turite klausimų apie užsakymą?
+          </p>
+          <Link
+            href="/kontaktai"
+            className="font-['Outfit'] text-[14px] text-[#161616] hover:underline"
+          >
+            Susisiekite su mumis
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
