@@ -96,14 +96,24 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Skip auth check in development mode
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
   useEffect(() => {
+    // In development, auto-authenticate
+    if (isDevelopment) {
+      setIsAuthenticated(true);
+      setIsLoading(false);
+      return;
+    }
+    
     // Check if user is already authenticated
     const auth = localStorage.getItem('yakiwood_auth');
     if (auth === 'true') {
       setIsAuthenticated(true);
     }
     setIsLoading(false);
-  }, []);
+  }, [isDevelopment]);
 
   const handleAuthenticate = () => {
     localStorage.setItem('yakiwood_auth', 'true');

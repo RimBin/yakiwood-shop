@@ -35,42 +35,42 @@ export default function Header() {
   return (
     <header className="w-full sticky top-0 z-50">
       {/* Black Announcement Bar */}
-      <div className="bg-[#161616] w-full py-[12px] px-[16px] sm:px-[24px] lg:px-[40px]">
-        <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-center gap-[16px] sm:gap-[32px] text-white">
+      <div className="bg-[#161616] w-full py-[8px] px-[40px]">
+        <div className="flex items-center justify-center gap-[32px] xl:gap-[200px]">
           {/* Fast Delivery */}
           <div className="flex items-center gap-[8px]">
-            <div className="relative w-[20px] h-[20px] shrink-0">
-              <Image src="/assets/icons/fast-delivery.svg" alt="" width={20} height={20} />
+            <div className="relative w-[24px] h-[24px] shrink-0">
+              <Image src="/assets/icons/icon-base.png" alt="" width={24} height={24} />
             </div>
-            <span className="font-['Outfit'] text-[12px] font-normal uppercase tracking-[0.6px] text-white whitespace-nowrap">
-              {t(locale === 'lt' ? 'header.grestasPristatymas' : 'header.fastDelivery').toUpperCase()}
-            </span>
+            <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
+              Fast delivery
+            </p>
           </div>
 
           {/* Money Back Guarantee */}
-          <div className="flex items-center gap-[8px] text-center md:text-left">
-            <div className="relative w-[20px] h-[20px] shrink-0">
-              <Image src="/assets/icons/money-back.svg" alt="" width={20} height={20} />
+          <div className="flex items-center gap-[8px]">
+            <div className="relative w-[24px] h-[24px] shrink-0">
+              <Image src="/assets/icons/coins-base.png" alt="" width={24} height={24} />
             </div>
-            <span className="font-['Outfit'] text-[12px] font-normal uppercase tracking-[0.6px] text-white whitespace-nowrap">
-              {t(locale === 'lt' ? 'header.piniguGrazinimas' : 'header.moneyBack').toUpperCase()}
-            </span>
+            <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
+              money back garantee
+            </p>
           </div>
 
           {/* Eco-Friendly */}
           <div className="hidden lg:flex items-center gap-[8px]">
-            <div className="relative w-[20px] h-[20px] shrink-0">
-              <Image src="/assets/icons/eco-friendly.svg" alt="" width={20} height={20} />
+            <div className="relative w-[24px] h-[24px] shrink-0">
+              <Image src="/assets/icons/plant-base.png" alt="" width={24} height={24} />
             </div>
-            <span className="font-['Outfit'] text-[12px] font-normal uppercase tracking-[0.6px] text-white whitespace-nowrap">
-              {t(locale === 'lt' ? 'header.ekologiskas' : 'header.ecoFriendly').toUpperCase()}
-            </span>
+            <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
+              eco-friendly
+            </p>
           </div>
         </div>
       </div>
 
       {/* Main Header */}
-      <div className="bg-[#E1E1E1] border-b border-[#bbbbbb] border-solid">
+      <div className="bg-[#E1E1E1]/80 backdrop-blur-md border-b border-[#bbbbbb]/30 border-solid shadow-sm">
         <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[16px]">
           <div className="flex items-center gap-[16px]">
             {/* Logo - exact 126x48px */}
