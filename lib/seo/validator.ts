@@ -70,7 +70,7 @@ export function validateTitle(title?: string): SEOValidationIssue[] {
     issues.push({
       field: 'title',
       severity: 'error',
-      message: 'Title trūksta - tai kritinis SEO elementas',
+      message: 'Title is missing - this is a critical SEO element',
     });
     return issues;
   }
@@ -81,19 +81,19 @@ export function validateTitle(title?: string): SEOValidationIssue[] {
     issues.push({
       field: 'title',
       severity: 'warning',
-      message: `Title per trumpas (${length} simboliai). Rekomenduojama: ${LIMITS.TITLE_MIN}-${LIMITS.TITLE_MAX}`,
+      message: `Title too short (${length} chars). Recommended: ${LIMITS.TITLE_MIN}-${LIMITS.TITLE_MAX}`,
     });
   } else if (length > LIMITS.TITLE_MAX) {
     issues.push({
       field: 'title',
       severity: 'warning',
-      message: `Title per ilgas (${length} simbolių). Rekomenduojama: ${LIMITS.TITLE_MIN}-${LIMITS.TITLE_MAX}. Google gali sutrumpinti.`,
+      message: `Title too long (${length} chars). Recommended: ${LIMITS.TITLE_MIN}-${LIMITS.TITLE_MAX}. Google may truncate.`,
     });
   } else if (length >= LIMITS.TITLE_IDEAL_MIN && length <= LIMITS.TITLE_IDEAL_MAX) {
     issues.push({
       field: 'title',
       severity: 'info',
-      message: `Title optimalaus ilgio (${length} simbolių) ✓`,
+      message: `Title optimal length (${length} chars) ✓`,
     });
   }
 
@@ -104,7 +104,7 @@ export function validateTitle(title?: string): SEOValidationIssue[] {
     issues.push({
       field: 'title',
       severity: 'info',
-      message: 'Title turi pasikartojančių žodžių - svarstykite optimizavimą',
+      message: 'Title has duplicate words - consider optimizing',
     });
   }
 
@@ -121,7 +121,7 @@ export function validateDescription(description?: string): SEOValidationIssue[] 
     issues.push({
       field: 'description',
       severity: 'error',
-      message: 'Description trūksta - tai kritinis SEO elementas',
+      message: 'Description is missing - this is a critical SEO element',
     });
     return issues;
   }
@@ -132,19 +132,19 @@ export function validateDescription(description?: string): SEOValidationIssue[] 
     issues.push({
       field: 'description',
       severity: 'warning',
-      message: `Description per trumpas (${length} simbolių). Rekomenduojama: ${LIMITS.DESCRIPTION_MIN}-${LIMITS.DESCRIPTION_MAX}`,
+      message: `Description too short (${length} characters). Recommended: ${LIMITS.DESCRIPTION_MIN}-${LIMITS.DESCRIPTION_MAX}`,
     });
   } else if (length > LIMITS.DESCRIPTION_MAX) {
     issues.push({
       field: 'description',
       severity: 'warning',
-      message: `Description per ilgas (${length} simbolių). Rekomenduojama: ${LIMITS.DESCRIPTION_MIN}-${LIMITS.DESCRIPTION_MAX}. Google gali sutrumpinti.`,
+      message: `Description too long (${length} characters). Recommended: ${LIMITS.DESCRIPTION_MIN}-${LIMITS.DESCRIPTION_MAX}. Google may truncate.`,
     });
   } else if (length >= LIMITS.DESCRIPTION_IDEAL_MIN && length <= LIMITS.DESCRIPTION_IDEAL_MAX) {
     issues.push({
       field: 'description',
       severity: 'info',
-      message: `Description optimalaus ilgio (${length} simbolių) ✓`,
+      message: `Description optimal length (${length} characters) ✓`,
     });
   }
 
@@ -165,7 +165,7 @@ export function validateOpenGraph(
     issues.push({
       field: 'openGraph',
       severity: 'warning',
-      message: 'Open Graph metadata trūksta - reikalinga socialiniams tinklams',
+      message: 'Open Graph metadata missing - required for social media',
     });
     return issues;
   }
@@ -176,13 +176,13 @@ export function validateOpenGraph(
     issues.push({
       field: 'openGraph.title',
       severity: 'error',
-      message: 'Open Graph title trūksta',
+      message: 'Open Graph title missing',
     });
   } else if (ogTitle.length > LIMITS.OG_TITLE_MAX) {
     issues.push({
       field: 'openGraph.title',
       severity: 'warning',
-      message: `OG title per ilgas (${ogTitle.length} simbolių). Max: ${LIMITS.OG_TITLE_MAX}`,
+      message: `OG title too long (${ogTitle.length} characters). Max: ${LIMITS.OG_TITLE_MAX}`,
     });
   }
 
@@ -192,13 +192,13 @@ export function validateOpenGraph(
     issues.push({
       field: 'openGraph.description',
       severity: 'error',
-      message: 'Open Graph description trūksta',
+      message: 'Open Graph description missing',
     });
   } else if (ogDesc.length > LIMITS.OG_DESCRIPTION_MAX) {
     issues.push({
       field: 'openGraph.description',
       severity: 'warning',
-      message: `OG description per ilgas (${ogDesc.length} simbolių). Max: ${LIMITS.OG_DESCRIPTION_MAX}`,
+      message: `OG description too long (${ogDesc.length} characters). Max: ${LIMITS.OG_DESCRIPTION_MAX}`,
     });
   }
 
@@ -207,7 +207,7 @@ export function validateOpenGraph(
     issues.push({
       field: 'openGraph.images',
       severity: 'warning',
-      message: 'Open Graph image trūksta - rekomenduojama socialiniams dalinimuisi',
+      message: 'Open Graph image missing - recommended for social sharing',
     });
   } else {
     const image = og.images[0];
@@ -215,21 +215,21 @@ export function validateOpenGraph(
       issues.push({
         field: 'openGraph.images',
         severity: 'warning',
-        message: `OG image per siauras (${image.width}px). Rekomenduojama: ${LIMITS.OG_IMAGE_IDEAL_WIDTH}x${LIMITS.OG_IMAGE_IDEAL_HEIGHT}`,
+        message: `OG image too narrow (${image.width}px). Recommended: ${LIMITS.OG_IMAGE_IDEAL_WIDTH}x${LIMITS.OG_IMAGE_IDEAL_HEIGHT}`,
       });
     }
     if (image.height && image.height < LIMITS.OG_IMAGE_MIN_HEIGHT) {
       issues.push({
         field: 'openGraph.images',
         severity: 'warning',
-        message: `OG image per žemas (${image.height}px). Rekomenduojama: ${LIMITS.OG_IMAGE_IDEAL_WIDTH}x${LIMITS.OG_IMAGE_IDEAL_HEIGHT}`,
+        message: `OG image too short (${image.height}px). Recommended: ${LIMITS.OG_IMAGE_IDEAL_WIDTH}x${LIMITS.OG_IMAGE_IDEAL_HEIGHT}`,
       });
     }
     if (!image.alt) {
       issues.push({
         field: 'openGraph.images',
         severity: 'info',
-        message: 'OG image neturi alt texto - rekomenduojama prieinamumui',
+        message: 'OG image missing alt text - recommended for accessibility',
       });
     }
   }
@@ -239,7 +239,7 @@ export function validateOpenGraph(
     issues.push({
       field: 'openGraph.type',
       severity: 'info',
-      message: 'OG type nenustatytas - default bus "website"',
+      message: 'OG type not set - default will be "website"',
     });
   }
 
@@ -260,7 +260,7 @@ export function validateTwitter(
     issues.push({
       field: 'twitter',
       severity: 'info',
-      message: 'Twitter Card metadata trūksta - naudos OG kaip fallback',
+      message: 'Twitter Card metadata missing - will use OG as fallback',
     });
     return issues;
   }
@@ -270,13 +270,13 @@ export function validateTwitter(
     issues.push({
       field: 'twitter.card',
       severity: 'warning',
-      message: 'Twitter card tipo nenustatytas',
+      message: 'Twitter card type not set',
     });
   } else if (!['summary', 'summary_large_image', 'app', 'player'].includes(twitter.card)) {
     issues.push({
       field: 'twitter.card',
       severity: 'warning',
-      message: `Nežinomas Twitter card tipas: ${twitter.card}`,
+      message: `Unknown Twitter card type: ${twitter.card}`,
     });
   }
 
@@ -286,7 +286,7 @@ export function validateTwitter(
     issues.push({
       field: 'twitter.title',
       severity: 'warning',
-      message: `Twitter title per ilgas (${twitterTitle.length} simbolių). Max: ${LIMITS.TWITTER_TITLE_MAX}`,
+      message: `Twitter title too long (${twitterTitle.length} characters). Max: ${LIMITS.TWITTER_TITLE_MAX}`,
     });
   }
 
@@ -296,7 +296,7 @@ export function validateTwitter(
     issues.push({
       field: 'twitter.description',
       severity: 'warning',
-      message: `Twitter description per ilgas (${twitterDesc.length} simbolių). Max: ${LIMITS.TWITTER_DESCRIPTION_MAX}`,
+      message: `Twitter description too long (${twitterDesc.length} characters). Max: ${LIMITS.TWITTER_DESCRIPTION_MAX}`,
     });
   }
 
@@ -313,7 +313,7 @@ export function validateCanonical(canonical?: string, currentUrl?: string): SEOV
     issues.push({
       field: 'canonical',
       severity: 'warning',
-      message: 'Canonical URL trūksta - rekomenduojama dublikatų prevencijai',
+      message: 'Canonical URL missing - recommended for duplicate prevention',
     });
     return issues;
   }
@@ -325,7 +325,7 @@ export function validateCanonical(canonical?: string, currentUrl?: string): SEOV
     issues.push({
       field: 'canonical',
       severity: 'error',
-      message: `Neteisingas canonical URL formatas: ${canonical}`,
+      message: `Invalid canonical URL format: ${canonical}`,
     });
     return issues;
   }
@@ -335,7 +335,7 @@ export function validateCanonical(canonical?: string, currentUrl?: string): SEOV
     issues.push({
       field: 'canonical',
       severity: 'warning',
-      message: 'Canonical URL turėtų naudoti HTTPS',
+      message: 'Canonical URL should use HTTPS',
     });
   }
 

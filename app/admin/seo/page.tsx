@@ -1,285 +1,287 @@
 ﻿'use client';
 
 import React, { useState, useEffect } from 'react';
-import { SEOPreviewCard } from '@/components/admin/SEOPreview';
-import {
-  getAllPages,
-  getPagesWithMissingMetadata,
-  getPagesWithMetadata,
-  calculateSEOCompleteness,
-  PageInfo,
-} from '@/lib/seo/scanner';
-import { validatePageMetadata, getScoreBadgeClass } from '@/lib/seo/validator';
+import { SEOPreview } from '@/components/admin/SEOPreview';
+import { scanAllPages, type PageSEOResult } from '@/lib/seo/scanner';
+import { Breadcrumbs } from '@/components/ui';
+
+type FilterType = 'all' | 'good' | 'warning' | 'error';
 
 export default function SEOAdminPage() {
-  const [allPages, setAllPages] = useState<PageInfo[]>([]);
-  const [stats, setStats] = useState<{
-    total: number;
-    withMetadata: number;
-    withoutMetadata: number;
-    percentage: number;
-  } | null>(null);
-  const [filter, setFilter] = useState<'all' | 'with' | 'without'>('all');
-  const [selectedPage, setSelectedPage] = useState<PageInfo | null>(null);
+  const [pages, setPages] = useState<PageSEOResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [selectedPage, setSelectedPage] = useState<PageSEOResult | null>(null);
 
   useEffect(() => {
-    loadData();
+    const loadPages = async () => {
+      setLoading(true);
+      const scannedPages = await scanAllPages();
+      setPages(scannedPages);
+      setLoading(false);
+    };
+    loadPages();
   }, []);
 
-  async function loadData() {
-    setLoading(true);
-    try {
-      const pages = await getAllPages();
-      const seoStats = await calculateSEOCompleteness();
-      setAllPages(pages);
-      setStats(seoStats);
-    } catch (error) {
-      console.error('Failed to load SEO data:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const filteredPages = allPages.filter((page) => {
-    if (filter === 'with') return page.hasMetadata;
-    if (filter === 'without') return !page.hasMetadata;
+  const filteredPages = pages.filter(page => {
+    if (filter === 'all') return true;
+    if (filter === 'good') return page.seoScore >= 80;
+    if (filter === 'warning') return page.seoScore >= 50 && page.seoScore < 80;
+    if (filter === 'error') return page.seoScore < 50;
     return true;
   });
 
+  const stats = {
+    total: pages.length,
+    good: pages.filter(p => p.seoScore >= 80).length,
+    warning: pages.filter(p => p.seoScore >= 50 && p.seoScore < 80).length,
+    error: pages.filter(p => p.seoScore < 50).length,
+  };
+
+  const averageScore = pages.length > 0 
+    ? Math.round(pages.reduce((sum, p) => sum + p.seoScore, 0) / pages.length)
+    : 0;
+
+  const handleExportJSON = () => {
+    const dataStr = JSON.stringify(pages, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `seo-audit-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600';
+    if (score >= 50) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const getScoreBgColor = (score: number) => {
+    if (score >= 80) return 'bg-green-50 border-green-200';
+    if (score >= 50) return 'bg-yellow-50 border-yellow-200';
+    return 'bg-red-50 border-red-200';
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Kraunama SEO duomenys...</p>
+      <>
+        <Breadcrumbs items={[{ label: 'Homepage', href: '/' }, { label: 'Admin', href: '/admin' }, { label: 'SEO' }]} />
+        <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#161616] mx-auto mb-4"></div>
+            <p className="font-['Outfit'] text-[#535353]">Scanning pages...</p>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
+    <>
+      <Breadcrumbs items={[{ label: 'Homepage', href: '/' }, { label: 'Admin', href: '/admin' }, { label: 'SEO' }]} />
+      
+      <div className="min-h-screen bg-[#E1E1E1] py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
+        <div className="max-w-[1400px] mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">SEO Dashboard</h1>
-          <p className="text-gray-600">
-            Peržiūrėkite ir valdykite visų puslapių SEO metadata
+        <div className="mb-[clamp(32px,4vw,48px)]">
+          <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616] mb-[8px]">
+            SEO Management
+          </h1>
+          <p className="font-['Outfit'] font-light text-[clamp(14px,1.5vw,16px)] text-[#535353]">
+            Monitor and optimize your website's search engine performance
           </p>
         </div>
 
         {/* Stats Cards */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm text-gray-600 mb-1">Bendras rezultatas</div>
-              <div className={`text-4xl font-bold ${getScoreBadgeClass(stats.percentage).split(' ')[1]}`}>
-                {stats.percentage}%
-              </div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm text-gray-600 mb-1">Viso puslapių</div>
-              <div className="text-4xl font-bold text-gray-900">{stats.total}</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm text-gray-600 mb-1">Su metadata</div>
-              <div className="text-4xl font-bold text-green-600">{stats.withMetadata}</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm text-gray-600 mb-1">Be metadata</div>
-              <div className="text-4xl font-bold text-red-600">{stats.withoutMetadata}</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[clamp(16px,2vw,24px)] mb-[clamp(24px,3vw,32px)]">
+          <div className="bg-[#FAFAFA] rounded-[24px] p-[clamp(16px,2vw,24px)] border border-[#E1E1E1]">
+            <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">Total Pages</div>
+            <div className="font-['DM_Sans'] font-light text-[clamp(32px,4vw,48px)] leading-none tracking-[clamp(-1px,-0.025em,-1.44px)] text-[#161616]">
+              {stats.total}
             </div>
           </div>
-        )}
-
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="flex gap-4">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === 'all'
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Visi ({allPages.length})
-            </button>
-            <button
-              onClick={() => setFilter('with')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === 'with'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Su metadata ({allPages.filter((p) => p.hasMetadata).length})
-            </button>
-            <button
-              onClick={() => setFilter('without')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === 'without'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Be metadata ({allPages.filter((p) => !p.hasMetadata).length})
-            </button>
+          <div className="bg-[#FAFAFA] rounded-[24px] p-[clamp(16px,2vw,24px)] border border-[#E1E1E1]">
+            <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">Average Score</div>
+            <div className={`font-['DM_Sans'] font-light text-[clamp(32px,4vw,48px)] leading-none tracking-[clamp(-1px,-0.025em,-1.44px)] ${getScoreColor(averageScore)}`}>
+              {averageScore}%
+            </div>
+          </div>
+          <div className="bg-[#FAFAFA] rounded-[24px] p-[clamp(16px,2vw,24px)] border border-[#E1E1E1]">
+            <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">Good SEO</div>
+            <div className="font-['DM_Sans'] font-light text-[clamp(32px,4vw,48px)] leading-none tracking-[clamp(-1px,-0.025em,-1.44px)] text-green-600">
+              {stats.good}
+            </div>
+          </div>
+          <div className="bg-[#FAFAFA] rounded-[24px] p-[clamp(16px,2vw,24px)] border border-[#E1E1E1]">
+            <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">Needs Work</div>
+            <div className="font-['DM_Sans'] font-light text-[clamp(32px,4vw,48px)] leading-none tracking-[clamp(-1px,-0.025em,-1.44px)] text-red-600">
+              {stats.error}
+            </div>
           </div>
         </div>
 
-        {/* Pages List */}
-        <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+        {/* Filters */}
+        <div className="flex gap-[8px] mb-[32px] overflow-x-auto pb-[8px]">
+          <button
+            onClick={() => setFilter('all')}
+            className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap ${
+              filter === 'all'
+                ? 'bg-[#161616] text-white'
+                : 'bg-[#FAFAFA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616]'
+            }`}
+          >
+            All Pages ({stats.total})
+          </button>
+          <button
+            onClick={() => setFilter('good')}
+            className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap ${
+              filter === 'good'
+                ? 'bg-green-600 text-white'
+                : 'bg-[#FAFAFA] text-green-600 border border-green-200 hover:border-green-600'
+            }`}
+          >
+            Good ({stats.good})
+          </button>
+          <button
+            onClick={() => setFilter('warning')}
+            className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap ${
+              filter === 'warning'
+                ? 'bg-yellow-600 text-white'
+                : 'bg-[#FAFAFA] text-yellow-600 border border-yellow-200 hover:border-yellow-600'
+            }`}
+          >
+            Warning ({stats.warning})
+          </button>
+          <button
+            onClick={() => setFilter('error')}
+            className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap ${
+              filter === 'error'
+                ? 'bg-red-600 text-white'
+                : 'bg-[#FAFAFA] text-red-600 border border-red-200 hover:border-red-600'
+            }`}
+          >
+            Errors ({stats.error})
+          </button>
+          <button
+            onClick={handleExportJSON}
+            className="h-[48px] ml-auto px-[24px] rounded-[100px] bg-[#FAFAFA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap"
+          >
+            Export JSON
+          </button>
+        </div>
+
+        {/* Pages Table */}
+        <div className="bg-[#FAFAFA] rounded-[24px] border border-[#E1E1E1] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-[#FAFAFA] border-b border-[#E1E1E1]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Puslapis
+                  <th className="text-left px-6 py-4 font-['Outfit'] text-sm font-normal text-[#535353]">
+                    Page
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left px-6 py-4 font-['Outfit'] text-sm font-normal text-[#535353]">
                     Title
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
+                  <th className="text-center px-6 py-4 font-['Outfit'] text-sm font-normal text-[#535353]">
+                    Score
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    OG
+                  <th className="text-center px-6 py-4 font-['Outfit'] text-sm font-normal text-[#535353]">
+                    Issues
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Twitter
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    SEO Score
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Veiksmai
+                  <th className="text-center px-6 py-4 font-['Outfit'] text-sm font-normal text-[#535353]">
+                    Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPages.map((page, idx) => {
-                  const validation = page.metadata
-                    ? validatePageMetadata(page.metadata)
-                    : null;
-                  const score = validation?.score || 0;
-
-                  return (
-                    <tr key={idx} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{page.path}</div>
-                        <div className="text-xs text-gray-500">{page.file}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        {page.metadata?.title ? (
-                          <div className="text-sm text-gray-900">
-                            {' '}
-                            <span
-                              className={
-                                page.metadata.title.length > 60 ? 'text-red-600' : ''
-                              }
-                            >
-                              ({page.metadata.title.length}/60)
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="text-sm text-red-600"> Trūksta</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        {page.metadata?.description ? (
-                          <div className="text-sm text-gray-900">
-                            {' '}
-                            <span
-                              className={
-                                page.metadata.description.length > 160
-                                  ? 'text-red-600'
-                                  : ''
-                              }
-                            >
-                              ({page.metadata.description.length}/160)
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="text-sm text-red-600"> Trūksta</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {page.metadata?.openGraph ? (
-                          <div className="text-sm text-green-600"></div>
-                        ) : (
-                          <div className="text-sm text-gray-400"></div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {page.metadata?.twitter ? (
-                          <div className="text-sm text-green-600"></div>
-                        ) : (
-                          <div className="text-sm text-gray-400"></div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div
-                          className={`text-sm font-bold ${getScoreBadgeClass(score).split(' ')[1]}`}
-                        >
-                          {score}/100
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => setSelectedPage(page)}
-                          className="text-blue-600 hover:text-blue-900 font-medium"
-                        >
-                          Peržiūrėti
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+              <tbody className="divide-y divide-[#E1E1E1]">
+                {filteredPages.map((page, index) => (
+                  <tr key={index} className="hover:bg-[#FAFAFA] transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="font-['Outfit'] text-sm text-[#161616] font-medium">
+                        {page.path}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-['Outfit'] text-sm text-[#535353] max-w-xs truncate">
+                        {page.title || 'No title'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span
+                        className={`inline-flex items-center justify-center w-16 h-16 rounded-full border-2 ${getScoreBgColor(
+                          page.seoScore
+                        )}`}
+                      >
+                        <span className={`font-['DM_Sans'] text-xl font-light ${getScoreColor(page.seoScore)}`}>
+                          {page.seoScore}
+                        </span>
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#E1E1E1] font-['Outfit'] text-sm text-[#161616]">
+                        {page.issues.length}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() => setSelectedPage(page)}
+                        className="h-[40px] px-[20px] rounded-[100px] bg-[#161616] text-white font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:bg-[#2a2a2a] transition-colors"
+                      >
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-        </div>
 
-        {/* Selected Page Preview */}
-        {selectedPage && selectedPage.metadata && (
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">
-                Detalus SEO Preview: {selectedPage.path}
-              </h2>
-              <button
-                onClick={() => setSelectedPage(null)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium"
-              >
-                Uždaryti
-              </button>
+          {filteredPages.length === 0 && (
+            <div className="text-center py-12">
+              <p className="font-['Outfit'] text-[#535353]">No pages match the selected filter</p>
             </div>
-            <SEOPreviewCard metadata={selectedPage.metadata} />
-          </div>
-        )}
-
-        {/* Export Button */}
-        <div className="text-center">
-          <button
-            onClick={async () => {
-              const data = JSON.stringify(allPages, null, 2);
-              const blob = new Blob([data], { type: 'application/json' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `seo-audit-${new Date().toISOString().split('T')[0]}.json`;
-              a.click();
-            }}
-            className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium"
-          >
-            Eksportuoti JSON
-          </button>
+          )}
         </div>
       </div>
-    </div>
+
+      {/* Preview Modal */}
+      {selectedPage && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50"
+          onClick={() => setSelectedPage(null)}
+        >
+          <div
+            className="bg-[#FAFAFA] rounded-[24px] max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-[#FAFAFA] border-b border-[#E1E1E1] px-8 py-6 flex items-center justify-between rounded-t-[24px]">
+              <div>
+                <h2 className="font-['DM_Sans'] text-2xl font-light tracking-[-0.96px] text-[#161616]">
+                  {selectedPage.path}
+                </h2>
+                <p className="font-['Outfit'] text-sm text-[#535353] mt-1">
+                  SEO Score: <span className={getScoreColor(selectedPage.seoScore)}>{selectedPage.seoScore}%</span>
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedPage(null)}
+                className="w-10 h-10 rounded-full bg-[#FAFAFA] hover:bg-[#E1E1E1] flex items-center justify-center transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-8">
+              <SEOPreview metadata={selectedPage} />
+            </div>
+          </div>
+        </div>
+      )}
+      </div>
+    </>
   );
 }

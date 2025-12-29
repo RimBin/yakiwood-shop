@@ -4,6 +4,7 @@ import { getMessages } from 'next-intl/server';
 import "./globals.css";
 import AuthWrapper from '@/components/AuthWrapper';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import type { Metadata } from 'next';
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -31,6 +32,60 @@ const tiroTamil = Tiro_Tamil({
   display: "swap",
   fallback: ["serif"],
 });
+
+export const metadata: Metadata = {
+  metadataBase: new URL('https://yakiwood.lt'),
+  title: {
+    template: '%s | Yakiwood',
+    default: 'Yakiwood - Shou Sugi Ban Burnt Wood Specialists',
+  },
+  description: 'Premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
+  keywords: ['Shou Sugi Ban', 'burnt wood', 'yakisugi', 'charred wood', 'wood facades', 'sustainable wood', 'Lithuania'],
+  authors: [{ name: 'Yakiwood' }],
+  creator: 'Yakiwood',
+  publisher: 'Yakiwood',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'lt_LT',
+    url: 'https://yakiwood.lt',
+    siteName: 'Yakiwood',
+    title: 'Yakiwood - Shou Sugi Ban Burnt Wood Specialists',
+    description: 'Premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Yakiwood - Shou Sugi Ban Burnt Wood',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Yakiwood - Shou Sugi Ban Burnt Wood Specialists',
+    description: 'Premium Shou Sugi Ban burnt wood products in Lithuania.',
+    images: ['/og-image.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'your-google-verification-code', // Add your Google Search Console verification
+  },
+};
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const messages = await getMessages();

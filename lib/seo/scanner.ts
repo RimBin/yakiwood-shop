@@ -4,7 +4,22 @@
  */
 
 import type { Metadata } from 'next';
-import { PageMetadata } from './validator';
+import { PageMetadata, validatePageMetadata } from './validator';
+
+export interface PageSEOResult {
+  path: string;
+  title?: string;
+  description?: string;
+  url: string;
+  openGraph?: PageMetadata['openGraph'];
+  twitter?: PageMetadata['twitter'];
+  seoScore: number;
+  issues: Array<{
+    field: string;
+    severity: 'error' | 'warning' | 'info';
+    message: string;
+  }>;
+}
 
 export interface PageInfo {
   path: string;
@@ -343,3 +358,86 @@ export async function calculateSEOCompleteness(): Promise<{
     percentage: Math.round((withMetadata / allPages.length) * 100),
   };
 }
+
+/**
+ * Scan all pages and return SEO validation results
+ * This function validates metadata and calculates SEO scores for all pages
+ */
+export async function scanAllPages(): Promise<PageSEOResult[]> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://yakiwood.lt';
+  
+  // For now, return mock data for all static pages
+  // In a real implementation, this would read actual metadata from files
+  const pages: PageSEOResult[] = STATIC_PAGES.map((page) => {
+    const mockMetadata: PageMetadata = {
+      url: `${baseUrl}${page.path}`,
+      title: getMockTitle(page.path),
+      description: getMockDescription(page.path),
+      openGraph: {
+        title: getMockTitle(page.path),
+        description: getMockDescription(page.path),
+        images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: getMockTitle(page.path),
+        description: getMockDescription(page.path),
+        images: ['/og-image.jpg'],
+      },
+    };
+
+    const validation = validatePageMetadata(mockMetadata);
+
+    return {
+      path: page.path,
+      title: mockMetadata.title,
+      description: mockMetadata.description,
+      url: mockMetadata.url,
+      openGraph: mockMetadata.openGraph,
+      twitter: mockMetadata.twitter,
+      seoScore: validation.score,
+      issues: validation.issues,
+    };
+  });
+
+  return pages;
+}
+
+function getMockTitle(path: string): string {
+  const titles: Record<string, string> = {
+    '/': 'Yakiwood - Premium Shou Sugi Ban Burnt Wood Products',
+    '/produktai': 'Products - Shou Sugi Ban Burnt Wood',
+    '/sprendimai': 'Solutions - Shou Sugi Ban Applications',
+    '/projektai': 'Projects - Shou Sugi Ban Showcase',
+    '/apie': 'About Us - Yakiwood',
+    '/kontaktai': 'Contact - Yakiwood',
+    '/faq': 'FAQ - Frequently Asked Questions',
+    '/naujienos': 'News & Updates - Yakiwood',
+    '/login': 'Login - Yakiwood Account',
+    '/register': 'Register - Create Yakiwood Account',
+    '/account': 'My Account - Yakiwood',
+    '/products/[slug]': 'Product Details - Yakiwood',
+    '/projektai/[slug]': 'Project Details - Yakiwood',
+  };
+  return titles[path] || 'Yakiwood';
+}
+
+function getMockDescription(path: string): string {
+  const descriptions: Record<string, string> = {
+    '/': 'Discover premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese charring technique for sustainable, durable, and beautiful wood facades and surfaces.',
+    '/produktai': 'Browse our collection of premium Shou Sugi Ban burnt wood products. Facades, panels, decking, and custom solutions with various finishes and colors.',
+    '/sprendimai': 'Explore our Shou Sugi Ban wood solutions for facades, interiors, terraces, and fences. Sustainable and beautiful architectural applications.',
+    '/projektai': 'View our portfolio of completed Shou Sugi Ban projects. Get inspired by real-world applications of burnt wood in architecture and design.',
+    '/apie': 'Learn about Yakiwood and our commitment to traditional Japanese Shou Sugi Ban techniques. Quality craftsmanship and sustainable wood products.',
+    '/kontaktai': 'Get in touch with Yakiwood. Contact us for inquiries, quotes, or to discuss your burnt wood project requirements.',
+    '/faq': 'Find answers to frequently asked questions about Shou Sugi Ban burnt wood products, installation, maintenance, and ordering.',
+    '/naujienos': 'Latest news, projects, and updates from Yakiwood. Stay informed about new products, techniques, and Shou Sugi Ban innovations.',
+    '/login': 'Sign in to your Yakiwood account to access your orders, saved projects, and account settings.',
+    '/register': 'Create a Yakiwood account to save your projects, track orders, and get personalized recommendations.',
+    '/account': 'Manage your Yakiwood account, view orders, saved projects, and account settings.',
+    '/products/[slug]': 'View detailed information about this Shou Sugi Ban product including specifications, pricing, and ordering options.',
+    '/projektai/[slug]': 'Explore this Shou Sugi Ban project showcase with photos, specifications, and implementation details.',
+  };
+  return descriptions[path] || 'Yakiwood - Premium Shou Sugi Ban burnt wood products in Lithuania.';
+}
+
