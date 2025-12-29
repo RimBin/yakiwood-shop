@@ -31,7 +31,7 @@ interface Post {
   published: boolean;
 }
 
-type ActiveTab = 'products' | 'projects' | 'posts';
+type ActiveTab = 'products' | 'projects' | 'posts' | 'seo';
 
 function slugify(value: string) {
   return value
@@ -734,9 +734,10 @@ export default function AdminPage() {
             { key: 'dashboard', label: 'Dashboard' },
             { key: 'products', label: 'Products', count: products.length },
             { key: 'projects', label: 'Projects', count: projects.length },
-            { key: 'posts', label: 'Posts', count: posts.length }
+            { key: 'posts', label: 'Posts', count: posts.length },
+            { key: 'seo', label: 'SEO', badge: 'new' }
           ].map((tab) => {
-            const isActive = 'count' in tab ? activeTab === tab.key : false;
+            const isActive = 'count' in tab ? activeTab === tab.key : activeTab === tab.key;
 
             return (
               <button
@@ -744,6 +745,10 @@ export default function AdminPage() {
                 onClick={() => {
                   if (tab.key === 'dashboard') {
                     router.push('/admin/dashboard');
+                    return;
+                  }
+                  if (tab.key === 'seo') {
+                    router.push('/admin/seo');
                     return;
                   }
                   setActiveTab(tab.key as ActiveTab);
@@ -755,6 +760,11 @@ export default function AdminPage() {
                 }`}
               >
                 {'count' in tab ? `${tab.label} (${tab.count})` : tab.label}
+                {'badge' in tab && tab.badge === 'new' && (
+                  <span className="ml-[8px] px-[8px] py-[2px] bg-green-500 text-white text-[10px] rounded-full">
+                    NEW
+                  </span>
+                )}
               </button>
             );
           })}
