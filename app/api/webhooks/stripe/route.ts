@@ -9,26 +9,20 @@ import {
   generateOrderNumber 
 } from '@/lib/supabase-admin';
 import type { InvoiceGenerateRequest } from '@/types/invoice';
+import { sendOrderConfirmation } from '@/lib/email';
 
-// Lazy-load Stripe and Resend only when needed to avoid build-time errors
+// Lazy-load Stripe only when needed to avoid build-time errors
 function getStripeClient() {
   if (!process.env.STRIPE_SECRET_KEY) return null;
   const Stripe = require('stripe');
   return new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-11-17.clover' });
 }
 
-function getResendClient() {
-  if (!process.env.RESEND_API_KEY) return null;
-  const { Resend } = require('resend');
-  return new Resend(process.env.RESEND_API_KEY);
-}
-
 export async function POST(req: NextRequest) {
   const stripe = getStripeClient();
-  const resend = getResendClient();
   
-  if (!stripe || !resend) {
-    return NextResponse.json({ error: 'Payment or email service not configured' }, { status: 503 });
+  if (!stripe) {
+    return NextResponse.json({ error: 'Payment service not configured' }, { status: 503 });
   }
   const body = await req.text();
   const signature = req.headers.get('stripe-signature');
@@ -137,65 +131,19 @@ export async function POST(req: NextRequest) {
       const pdfGenerator = new InvoicePDFGenerator(invoice);
       const pdfBuffer = pdfGenerator.generate();
 
-      // Send email with invoice attachment
-      await resend.emails.send({
-        from: 'Yakiwood <info@yakiwood.lt>',
-        to: customerEmail,
-        subject: `Užsakymas ${orderNumber} - Sąskaita faktūra ${invoice.invoiceNumber}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #161616;">Dėkojame už užsakymą!</h2>
-            <p>Sveiki, ${customerName},</p>
-            <p>Jūsų užsakymas sėkmingai apmokėtas. Pridedame sąskaitą faktūrą.</p>
-            
-            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 5px 0;"><strong>Užsakymo numeris:</strong> ${orderNumber}</p>
-              <p style="margin: 5px 0;"><strong>Sąskaitos numeris:</strong> ${invoice.invoiceNumber}</p>
-              <p style="margin: 5px 0;"><strong>Data:</strong> ${new Date(invoice.issueDate).toLocaleDateString('lt-LT')}</p>
-              <p style="margin: 5px 0;"><strong>Suma:</strong> ${invoice.total.toFixed(2)} €</p>
-              <p style="margin: 5px 0;"><strong>Būsena:</strong> ✅ Apmokėta</p>
-            </div>
+      // Send email with invoice attachment using universal email sender
+      const emailResult = await sendOrderConfirmation(
+        customerEmail,
+        orderNumber,
+        Buffer.from(pdfBuffer)
+      );
 
-            <h3>Užsakytos prekės:</h3>
-            <ul>
-              ${invoice.items.map(item => `
-                <li>${item.name} - ${item.quantity} vnt. × ${item.unitPrice.toFixed(2)} € = ${(item.quantity * item.unitPrice * (1 + item.vatRate)).toFixed(2)} €</li>
-              `).join('')}
-            </ul>
-
-            <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 0;"><strong>📄 Sąskaita faktūra pridėta kaip PDF failas.</strong></p>
-            </div>
-
-            <p><strong>Kiti veiksmai:</strong></p>
-            <p>Jūsų užsakymas pradėtas ruošti. Apie pristatymą informuosime atskirai.</p>
-
-            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
-
-            <p>Jei turite klausimų, susisiekite su mumis:</p>
-            <p>
-              📧 El. paštas: <a href="mailto:info@yakiwood.lt">info@yakiwood.lt</a><br>
-              📞 Tel.: +370 600 00000<br>
-              🌐 <a href="https://yakiwood.lt">www.yakiwood.lt</a>
-            </p>
-
-            <p style="color: #666; font-size: 12px; margin-top: 30px;">
-              UAB "YAKIWOOD"<br>
-              Gedimino pr. 1, Vilnius 01103<br>
-              Įmonės kodas: 123456789<br>
-              PVM kodas: LT123456789012
-            </p>
-          </div>
-        `,
-        attachments: [
-          {
-            filename: `saskaita_${invoice.invoiceNumber}.pdf`,
-            content: Buffer.from(pdfBuffer)
-          }
-        ]
-      });
-
-      console.log(`Order ${orderNumber} created, invoice ${invoice.invoiceNumber} generated and sent to ${customerEmail}`);
+      if (!emailResult.success) {
+        console.error(`Failed to send email to ${customerEmail}:`, emailResult.error);
+        // Don't fail webhook - order is created, just email failed
+      } else {
+        console.log(`Order ${orderNumber} created, invoice ${invoice.invoiceNumber} sent to ${customerEmail}`);
+      }
       
     } catch (error) {
       console.error('Error processing webhook:', error);

@@ -1,0 +1,26 @@
+{
+  "name": "Yakiwood - Shou Sugi Ban Burnt Wood",
+  "short_name": "Yakiwood",
+  "description": "Premium Shou Sugi Ban burnt wood products in Lithuania",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#161616",
+  "theme_color": "#161616",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["business", "lifestyle"],
+  "lang": "lt",
+  "dir": "ltr",
+  "orientation": "portrait"
+}

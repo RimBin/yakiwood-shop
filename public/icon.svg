@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Yakiwood app icon - burnt wood texture pattern -->
+  <rect width="512" height="512" rx="64" fill="#161616"/>
+  
+  <!-- Wood grain pattern -->
+  <g opacity="0.9">
+    <path d="M256 96L256 416M192 144L192 368M320 144L320 368M128 192L128 320M384 192L384 320M64 240L64 272M448 240L448 272" 
+          stroke="#E1E1E1" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Center flame/burn mark -->
+  <circle cx="256" cy="256" r="48" fill="#BBBBBB" opacity="0.6"/>
+  <circle cx="256" cy="256" r="24" fill="#535353"/>
+  
+  <!-- Charred texture -->
+  <g opacity="0.3">
+    <circle cx="200" cy="200" r="8" fill="#BBBBBB"/>
+    <circle cx="312" cy="200" r="6" fill="#BBBBBB"/>
+    <circle cx="200" cy="312" r="6" fill="#BBBBBB"/>
+    <circle cx="312" cy="312" r="8" fill="#BBBBBB"/>
+  </g>
+</svg>

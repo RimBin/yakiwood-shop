@@ -4,59 +4,23 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared';
-import { createClient } from '@/lib/supabase/client';
-
-type Product = {
-  id: string | number;
-  name: string;
-  price: number;
-  image: string;
-  category: string; // wood type
-  slug: string | number;
-};
-
-const fallbackProducts: Product[] = [
-  { id: 1, slug: 1, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgSpruce.png', category: 'spruce' },
-  { id: 2, slug: 2, name: 'Natural shou sugi ban plank', price: 89, image: '/assets/imgLarch1.png', category: 'larch' },
-];
+import { fetchProducts, Product } from '@/lib/products.sanity';
 
 export default function ProductsPage() {
   const [activeFilter, setActiveFilter] = useState<'all' | string>('all');
-  const [allProducts, setAllProducts] = useState<Product[]>(fallbackProducts);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadProducts() {
-      const supabase = createClient();
-      if (!supabase) {
+      try {
+        const products = await fetchProducts();
+        setAllProducts(products);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      } finally {
         setIsLoading(false);
-        return;
       }
-
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error || !data) {
-        setIsLoading(false);
-        return;
-      }
-
-      const mapped: Product[] = data.map((p: any, index: number) => ({
-        id: p.id ?? index,
-        slug: p.slug ?? p.id ?? index,
-        name: p.name ?? 'Produktas',
-        price: p.base_price ?? 0,
-        image: p.image || '/assets/imgSpruce.png',
-        category: p.wood_type || 'other',
-      }));
-
-      if (mapped.length > 0) {
-        setAllProducts(mapped);
-      }
-      setIsLoading(false);
     }
 
     loadProducts();

@@ -87,13 +87,50 @@ export const metadata: Metadata = {
   verification: {
     google: 'your-google-verification-code', // Add your Google Search Console verification
   },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon.svg', type: 'image/svg+xml', sizes: '512x512' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const messages = await getMessages();
 
+  // JSON-LD structured data for Organization
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Yakiwood',
+    url: 'https://yakiwood.lt',
+    logo: 'https://yakiwood.lt/icon.svg',
+    description: 'Premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'Customer Service',
+      email: 'info@yakiwood.lt',
+      availableLanguage: ['Lithuanian', 'English'],
+    },
+    sameAs: [
+      // Add social media profiles when available
+      // 'https://facebook.com/yakiwood',
+      // 'https://instagram.com/yakiwood',
+    ],
+  };
+
   return (
     <html lang="lt">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
+        />
+      </head>
       <body className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased bg-[#e1e1e1]`}>
         <NextIntlClientProvider messages={messages}>
           <GoogleAnalytics />

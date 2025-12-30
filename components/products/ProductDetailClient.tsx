@@ -26,6 +26,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const [loading3D, setLoading3D] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [validationError, setValidationError] = useState<string>('');
+  const [activeThumb, setActiveThumb] = useState(0);
+  const [expandedAccordion, setExpandedAccordion] = useState('maintenance');
 
   const addItem = useCartStore(state => state.addItem);
 
@@ -150,50 +152,39 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         </div>
       )}
 
-      <Breadcrumbs
-        items={[
-          { label: 'Pagrindinis', href: '/' },
-          { label: 'Produktai', href: '/produktai' },
-          { label: product.name },
-        ]}
-      />
+      {/* Breadcrumbs - New Figma Style */}
+      <div className="max-w-[1440px] mx-auto px-[40px] py-[10px] border-b border-[#BBBBBB]">
+        <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] text-[#7C7C7C]">
+          <Link href="/">Home</Link>
+          {' / '}
+          <Link href="/produktai">Shop</Link>
+          {' / '}
+          <span className="text-[#161616]">{product.name}</span>
+        </p>
+      </div>
 
-      {/* Main Content */}
-      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8 md:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Left Column: Images & 3D */}
-          <div className="space-y-4">
-            {/* View Toggle */}
-            {availableColors.length > 0 && (
-              <div className="flex gap-2 mb-4">
+      {/* Main Product Section - New Figma Layout */}
+      <div className="max-w-[1440px] mx-auto px-[40px] py-[54px]">
+        <div className="grid grid-cols-1 lg:grid-cols-[80px_790px_1fr] gap-[16px]">
+          {/* Thumbnail Gallery - Left (hidden on mobile) */}
+          <div className="hidden lg:flex flex-col gap-[12px]">
+            {(product.images || [{ id: '1', url: product.image, alt: product.name, isPrimary: true, order: 0 }])
+              .slice(0, 3)
+              .map((img, idx) => (
                 <button
-                  onClick={() => setShow3D(false)}
-                  className={`flex-1 py-3 px-6 rounded-full font-['Outfit'] text-sm transition-colors ${
-                    !show3D
-                      ? 'bg-[#161616] text-white'
-                      : 'bg-white text-[#161616] border border-[#BBBBBB] hover:border-[#161616]'
+                  key={img.id}
+                  onClick={() => setActiveThumb(idx)}
+                  className={`relative w-[80px] h-[80px] rounded-[4px] overflow-hidden ${
+                    activeThumb === idx ? 'ring-2 ring-[#161616]' : ''
                   }`}
                 >
-                  Nuotraukos
+                  <img src={img.url} alt={img.alt} className="w-full h-full object-cover" />
                 </button>
-                <button
-                  onClick={() => {
-                    setShow3D(true);
-                    setLoading3D(true);
-                    setTimeout(() => setLoading3D(false), 1000);
-                  }}
-                  className={`flex-1 py-3 px-6 rounded-full font-['Outfit'] text-sm transition-colors ${
-                    show3D
-                      ? 'bg-[#161616] text-white'
-                      : 'bg-white text-[#161616] border border-[#BBBBBB] hover:border-[#161616]'
-                  }`}
-                >
-                  3D peržiūra
-                </button>
-              </div>
-            )}
+              ))}
+          </div>
 
-            {/* Content */}
+          {/* Main Image - Center */}
+          <div className="relative bg-[#BBAB92] h-[400px] lg:h-[729px] rounded-[8px] overflow-hidden">
             {show3D && availableColors.length > 0 ? (
               <Konfiguratorius3D
                 productId={product.id}
@@ -204,89 +195,53 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 isLoading={loading3D}
               />
             ) : (
-              <ImageGallery 
-                images={product.images || [{ 
-                  id: '1', 
-                  url: product.image, 
-                  alt: product.name, 
-                  isPrimary: true, 
-                  order: 0 
-                }]} 
-                productName={product.name} 
+              <ImageGallery
+                images={
+                  product.images || [{ id: '1', url: product.image, alt: product.name, isPrimary: true, order: 0 }]
+                }
+                productName={product.name}
               />
             )}
           </div>
 
-          {/* Right Column: Product Info */}
-          <div className="space-y-6">
-            {/* Title */}
-            <div>
-              <h1 className="font-['DM_Sans'] text-3xl md:text-4xl font-medium tracking-[-1px] text-[#161616] mb-3">
+          {/* Product Info - Right */}
+          <div className="flex flex-col gap-[24px]">
+            {/* Title & Price */}
+            <div className="flex flex-col gap-[8px]">
+              <h1 className="font-['DM_Sans'] text-[32px] font-normal leading-[1.1] tracking-[-1.28px] text-[#161616]">
                 {product.name}
               </h1>
-              {product.shortDescription && (
-                <p className="font-['Outfit'] text-[#535353] leading-relaxed">
-                  {product.shortDescription}
-                </p>
-              )}
-            </div>
-
-            {/* Price */}
-            <div className="py-4 border-y border-[#BBBBBB]">
-              <div className="flex items-baseline gap-3">
-                <span className="font-['DM_Sans'] text-4xl font-medium text-[#161616]">
-                  €{pricePerUnit.toFixed(2)}
-                </span>
-                {(selectedColor?.priceModifier || selectedFinish?.priceModifier) && (
-                  <span className="font-['Outfit'] text-sm text-[#7C7C7C] line-through">
-                    €{product.basePrice.toFixed(2)}
-                  </span>
-                )}
-              </div>
-              <p className="font-['Outfit'] text-xs text-[#7C7C7C] mt-1">
-                Kaina be PVM | PVM pridedamas atsiskaitant
+              <p className="font-['DM_Sans'] text-[32px] font-normal leading-[1.1] tracking-[-1.28px] text-[#161616]">
+                {pricePerUnit.toFixed(0)} €
               </p>
             </div>
 
-            {/* Color Selector (if not in 3D mode) */}
+            {/* Description */}
+            <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] max-w-[434px]">
+              {product.shortDescription || product.description}
+            </p>
+
+            {/* Color Selector - New Figma Style */}
             {!show3D && availableColors.length > 0 && (
-              <div className="space-y-3">
-                <label className="font-['DM_Sans'] text-sm font-medium text-[#161616] block">
-                  Spalva
-                  {selectedColor && (
-                    <span className="ml-2 font-['Outfit'] font-normal text-[#7C7C7C]">
-                      ({selectedColor.name})
-                    </span>
-                  )}
-                </label>
-                <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col gap-[8px]">
+                <div className="flex gap-[4px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase">
+                  <span className="text-[#7C7C7C]">Color:</span>
+                  <span className="text-[#161616]">{selectedColor?.name || 'Select color'}</span>
+                </div>
+                <div className="flex gap-[8px] flex-wrap max-h-[43px] overflow-hidden">
                   {availableColors.map((color) => (
                     <button
                       key={color.id}
                       onClick={() => setSelectedColor(color)}
-                      className={`relative group ${
+                      className={`relative w-[32px] h-[32px] rounded-[4px] overflow-hidden ${
                         selectedColor?.id === color.id ? 'ring-2 ring-[#161616] ring-offset-2' : ''
                       }`}
                       title={color.name}
                     >
                       {color.image ? (
-                        <div className="relative w-14 h-14 rounded-lg overflow-hidden border-2 border-[#EAEAEA] group-hover:border-[#BBBBBB] transition-colors">
-                          <img 
-                            src={color.image} 
-                            alt={color.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
+                        <img src={color.image} alt={color.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div
-                          style={{ backgroundColor: color.hex }}
-                          className="w-14 h-14 rounded-lg border-2 border-[#EAEAEA] group-hover:border-[#BBBBBB] transition-colors"
-                        />
-                      )}
-                      {color.priceModifier !== 0 && (
-                        <span className="absolute -top-2 -right-2 bg-[#161616] text-white text-[10px] px-1.5 py-0.5 rounded-full font-['Outfit']">
-                          {color.priceModifier > 0 ? '+' : ''}€{color.priceModifier.toFixed(0)}
-                        </span>
+                        <div style={{ backgroundColor: color.hex }} className="w-full h-full" />
                       )}
                     </button>
                   ))}
@@ -341,132 +296,104 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               </div>
             )}
 
-            {/* Quantity */}
-            <div className="space-y-3">
-              <label className="font-['DM_Sans'] text-sm font-medium text-[#161616] block">
-                Kiekis
-              </label>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center border border-[#BBBBBB] rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-12 h-12 flex items-center justify-center hover:bg-[#F9F9F9] transition-colors"
-                    aria-label="Sumažinti kiekį"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                    </svg>
-                  </button>
-                  <input
-                    type="number"
-                    min="1"
-                    value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-16 h-12 text-center font-['DM_Sans'] text-[#161616] border-x border-[#BBBBBB] focus:outline-none"
-                  />
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-12 h-12 flex items-center justify-center hover:bg-[#F9F9F9] transition-colors"
-                    aria-label="Padidinti kiekį"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </button>
-                </div>
-                {quantity > 1 && (
-                  <span className="font-['Outfit'] text-sm text-[#7C7C7C]">
-                    Viso: €{finalPrice.toFixed(2)}
-                  </span>
-                )}
+            {/* Quantity - New Figma Style */}
+            <div className="flex flex-col gap-[8px]">
+              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7C7C7C]">
+                Quantity m2
+              </p>
+              <div className="border border-[#BBBBBB] h-[48px] px-[16px] py-[8px] flex items-center">
+                <input
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-full font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase text-[#161616] bg-transparent outline-none"
+                />
               </div>
             </div>
 
-            {/* Add to Cart Button */}
-            <div className="space-y-2">
+            {/* Add to Cart Button - New Figma Style */}
+            <div className="flex flex-col gap-[8px]">
               {validationError && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm font-['Outfit'] text-red-600">
                   {validationError}
                 </div>
               )}
+              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] text-center text-[#535353]">
+                Haven't found what you've looking for?{' '}
+                <Link href="/kontaktai" className="text-[#161616] underline">
+                  Contact us
+                </Link>
+              </p>
               <button
                 onClick={handleAddToCart}
                 disabled={isAdding}
-                className="w-full py-4 bg-[#161616] text-white rounded-full font-['DM_Sans'] font-medium text-base hover:bg-[#2d2d2d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-[#161616] text-white h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:bg-[#2d2d2d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isAdding ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Pridedama...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    <span>Pridėti į krepšelį</span>
-                  </>
-                )}
+                {isAdding ? 'Pridedama...' : 'add to cart'}
               </button>
             </div>
+          </div>
+        </div>
 
-            {/* Share Buttons */}
-            <div className="flex items-center gap-3 pt-4 border-t border-[#BBBBBB]">
-              <span className="font-['Outfit'] text-sm text-[#7C7C7C]">Dalintis:</span>
-              <button
-                onClick={() => handleShare('facebook')}
-                className="w-10 h-10 flex items-center justify-center rounded-full border border-[#BBBBBB] hover:border-[#161616] hover:bg-[#F9F9F9] transition-colors"
-                aria-label="Dalintis Facebook"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </button>
-              <button
-                onClick={() => handleShare('linkedin')}
-                className="w-10 h-10 flex items-center justify-center rounded-full border border-[#BBBBBB] hover:border-[#161616] hover:bg-[#F9F9F9] transition-colors"
-                aria-label="Dalintis LinkedIn"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                </svg>
-              </button>
-              <button
-                onClick={() => handleShare('email')}
-                className="w-10 h-10 flex items-center justify-center rounded-full border border-[#BBBBBB] hover:border-[#161616] hover:bg-[#F9F9F9] transition-colors"
-                aria-label="Dalintis el. paštu"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Product Features */}
-            {product.features && product.features.length > 0 && (
-              <div className="pt-6 border-t border-[#BBBBBB]">
-                <ul className="space-y-3">
-                  {product.features.slice(0, 3).map((feature, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <svg 
-                        className="w-5 h-5 text-[#161616] mt-0.5 flex-shrink-0" 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor"
-                      >
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          strokeWidth={2} 
-                          d="M5 13l4 4L19 7" 
-                        />
-                      </svg>
-                      <span className="font-['Outfit'] text-sm text-[#535353]">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+        {/* Accordion Section - New Figma Style */}
+        <div className="mt-[75px] max-w-[672px] mx-auto">
+          <div className="flex flex-col gap-[8px]">
+            {[
+              {
+                id: 'maintenance',
+                title: 'PRODUCT MAINTENANCE',
+                content:
+                  'Every situation is unique, so if you have any questions about maintenance, we encourage you to contact us so that we can assess your needs and offer the most appropriate solution.',
+              },
+              {
+                id: 'disclaimer',
+                title: 'COLOR DISCLAIMER',
+                content:
+                  'Colors may vary slightly from the images shown due to monitor settings and natural wood variations.',
+              },
+              {
+                id: 'shipping',
+                title: 'SHIPPING & RETURN',
+                content: 'Free shipping on orders over 500€. Returns accepted within 14 days of delivery.',
+              },
+              {
+                id: 'payment',
+                title: 'PAYMENT',
+                content: 'We accept all major credit cards, PayPal, and bank transfers.',
+              },
+            ].map((item, index) => (
+              <React.Fragment key={item.id}>
+                {index > 0 && <div className="h-[1px] bg-[#BBBBBB]" />}
+                <div className="flex flex-col gap-[4px]">
+                  <button
+                    onClick={() => setExpandedAccordion(expandedAccordion === item.id ? '' : item.id)}
+                    className="flex items-center justify-between py-[8px]"
+                  >
+                    <span className="font-['Outfit'] font-medium text-[12px] tracking-[0.6px] uppercase text-[#161616]">
+                      {item.title}
+                    </span>
+                    <div className="w-[20px] h-[20px]">
+                      {expandedAccordion === item.id ? (
+                        <svg viewBox="0 0 20 20" fill="none">
+                          <path d="M5 10H15" stroke="#161616" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 20 20" fill="none">
+                          <path d="M10 5V15M5 10H15" stroke="#161616" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                      )}
+                    </div>
+                  </button>
+                  {expandedAccordion === item.id && (
+                    <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] pb-[8px] max-w-[494px]">
+                      {item.content}
+                    </p>
+                  )}
+                </div>
+              </React.Fragment>
+            ))}
+            <div className="h-[1px] bg-[#BBBBBB]" />
           </div>
         </div>
 

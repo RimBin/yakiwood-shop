@@ -54,7 +54,7 @@ export function createMetadata(options: MetadataOptions): Metadata {
       title: `${title} | Yakiwood`,
       description,
       url,
-      type,
+      type: type === 'product' ? 'website' : type, // OpenGraph doesn't support 'product' type
       images: [
         {
           url: imageUrl,
@@ -83,7 +83,7 @@ export function createDynamicMetadata(options: {
   image?: string;
   fallbackImageType?: 'products' | 'projects';
   path: string;
-  type?: 'website' | 'article' | 'product';
+  type?: 'website' | 'article';
 }): Metadata {
   const {
     title,

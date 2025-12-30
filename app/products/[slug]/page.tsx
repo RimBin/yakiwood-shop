@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/products';
-import { fetchProduct } from '@/lib/products.server';
+import { fetchProductBySlug } from '@/lib/products.sanity';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
 
@@ -11,7 +11,8 @@ interface ProductPageProps {
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  const product = await fetchProduct(params.slug);
+  const resolvedParams = await params;
+  const product = await fetchProductBySlug(resolvedParams.slug);
 
   if (!product) {
     return {
@@ -50,7 +51,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 // Main product page component (Server Component)
 export default async function ProductPage({ params }: ProductPageProps) {
-  const product = await fetchProduct(params.slug);
+  const resolvedParams = await params;
+  const product = await fetchProductBySlug(resolvedParams.slug);
 
   if (!product) {
     notFound();
