@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/products';
 import { fetchProduct } from '@/lib/products.server';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
+import { getProductOgImage } from '@/lib/og-image';
 
 interface ProductPageProps {
   params: { slug: string };
@@ -19,13 +20,22 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     };
   }
 
+  const ogImage = product.images?.[0]?.url || product.image;
+
   return {
     title: product.name,
     description: product.shortDescription || product.description,
     openGraph: {
       title: product.name,
       description: product.shortDescription || product.description,
-      images: product.images?.map(img => img.url) || [product.image],
+      images: [
+        {
+          url: getProductOgImage(ogImage),
+          width: 1200,
+          height: 630,
+          alt: product.name,
+        },
+      ],
       type: 'website',
       url: `https://yakiwood.lt/products/${product.slug}`,
     },
@@ -33,7 +43,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       card: 'summary_large_image',
       title: product.name,
       description: product.shortDescription || product.description,
-      images: [product.image],
+      images: [getProductOgImage(ogImage)],
     },
   };
 }

@@ -5,6 +5,7 @@ import "./globals.css";
 import AuthWrapper from '@/components/AuthWrapper';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import type { Metadata } from 'next';
+import { getOgImage } from '@/lib/og-image';
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -58,7 +59,7 @@ export const metadata: Metadata = {
     description: 'Premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: getOgImage('home'),
         width: 1200,
         height: 630,
         alt: 'Yakiwood - Shou Sugi Ban Burnt Wood',
@@ -69,7 +70,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Yakiwood - Shou Sugi Ban Burnt Wood Specialists',
     description: 'Premium Shou Sugi Ban burnt wood products in Lithuania.',
-    images: ['/og-image.jpg'],
+    images: [getOgImage('home')],
+    creator: '@yakiwood',
   },
   robots: {
     index: true,

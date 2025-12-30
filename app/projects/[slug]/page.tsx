@@ -5,6 +5,7 @@ import ProjectGallery from '@/components/projects/ProjectGallery';
 import ProjectInfo from '@/components/projects/ProjectInfo';
 import RelatedProjects from '@/components/projects/RelatedProjects';
 import { getProjectBySlug, getRelatedProjects, projects } from '@/data/projects';
+import { getProjectOgImage } from '@/lib/og-image';
 
 interface ProjectPageProps {
   params: Promise<{
@@ -28,9 +29,31 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
     };
   }
 
+  const ogImage = project.images?.[0] || project.featuredImage;
+
   return {
-    title: project.title,
+    title: `${project.title} - ${project.location} | Yakiwood`,
     description: project.description,
+    openGraph: {
+      title: `${project.title} | Yakiwood`,
+      description: project.description,
+      images: [
+        {
+          url: getProjectOgImage(ogImage),
+          width: 1200,
+          height: 630,
+          alt: project.title,
+        },
+      ],
+      type: 'article',
+      url: `https://yakiwood.lt/projects/${project.slug}`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: project.title,
+      description: project.description,
+      images: [getProjectOgImage(ogImage)],
+    },
   };
 }
 

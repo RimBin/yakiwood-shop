@@ -4,6 +4,7 @@ import Solutions from '@/components/Solutions';
 import Projects from '@/components/Projects';
 import FAQ from '@/components/FAQ';
 import type { Metadata } from 'next';
+import { getOgImage } from '@/lib/og-image';
 
 export const metadata: Metadata = {
   title: 'Yakiwood - Premium Shou Sugi Ban Burnt Wood Products',
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     url: 'https://yakiwood.lt',
     images: [
       {
-        url: '/og-image-home.jpg',
+        url: getOgImage('home'),
         width: 1200,
         height: 630,
         alt: 'Yakiwood Shou Sugi Ban Products',
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Yakiwood - Premium Shou Sugi Ban Burnt Wood Products',
     description: 'Discover premium Shou Sugi Ban burnt wood products in Lithuania.',
-    images: ['/og-image-home.jpg'],
+    images: [getOgImage('home')],
   },
 };
 
