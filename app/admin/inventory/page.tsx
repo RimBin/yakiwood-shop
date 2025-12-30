@@ -118,21 +118,21 @@ export default function InventoryPage() {
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="bg-[#EAEAEA] p-6 rounded-lg shadow">
             <div className="text-sm text-gray-600 mb-1">Total Items</div>
             <div className="text-3xl font-bold">{stats.total_items}</div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="bg-[#EAEAEA] p-6 rounded-lg shadow">
             <div className="text-sm text-gray-600 mb-1">In Stock</div>
             <div className={`text-3xl font-bold ${getStatusColor(stats.in_stock)}`}>
               {stats.in_stock}
             </div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="bg-[#EAEAEA] p-6 rounded-lg shadow">
             <div className="text-sm text-gray-600 mb-1">Low Stock</div>
             <div className="text-3xl font-bold text-yellow-600">{stats.low_stock}</div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="bg-[#EAEAEA] p-6 rounded-lg shadow">
             <div className="text-sm text-gray-600 mb-1">Out of Stock</div>
             <div className="text-3xl font-bold text-red-600">{stats.out_of_stock}</div>
           </div>
@@ -140,7 +140,7 @@ export default function InventoryPage() {
       )}
 
       {/* Filters and Actions */}
-      <div className="bg-white p-6 rounded-lg shadow mb-6">
+      <div className="bg-[#EAEAEA] p-6 rounded-lg shadow mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <div className="flex-1">
@@ -182,7 +182,7 @@ export default function InventoryPage() {
       </div>
 
       {/* Inventory Table */}
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-[#EAEAEA] rounded-lg shadow">
         {loading ? (
           <div className="p-12 text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>

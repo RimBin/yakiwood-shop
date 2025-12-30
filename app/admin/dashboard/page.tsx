@@ -159,7 +159,7 @@ export default function DashboardPage() {
   };
 
   const StatCard = ({ title, value, subtitle, icon }: { title: string; value: string | number; subtitle?: string; icon?: string }) => (
-    <div className="bg-white rounded-[16px] p-[24px] border border-[#E1E1E1]">
+    <div className="bg-[#EAEAEA] rounded-[16px] p-[24px] border border-[#E1E1E1]">
       <div className="flex items-center justify-between mb-[8px]">
         <p className="font-['Outfit'] text-[14px] text-[#535353] uppercase tracking-[0.7px]">{title}</p>
         {icon && <span className="text-[24px]">{icon}</span>}
@@ -202,7 +202,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-[16px] p-[24px] mb-[32px] border border-[#E1E1E1]">
+        <div className="bg-[#EAEAEA] rounded-[16px] p-[24px] mb-[32px] border border-[#E1E1E1]">
           <p className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] mb-[16px]">Filters</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
             {/* Date filter */}
@@ -266,7 +266,7 @@ export default function DashboardPage() {
 
           <a
             href="/admin?tab=products"
-            className="bg-white rounded-[16px] p-[24px] border border-[#E1E1E1] hover:border-[#161616] transition-colors"
+            className="bg-[#EAEAEA] rounded-[16px] p-[24px] border border-[#E1E1E1] hover:border-[#161616] transition-colors"
           >
             <div className="flex items-center justify-between mb-[12px]">
               <span className="text-[32px]">🛍️</span>
@@ -278,7 +278,7 @@ export default function DashboardPage() {
 
           <a
             href="/admin?tab=projects"
-            className="bg-white rounded-[16px] p-[24px] border border-[#E1E1E1] hover:border-[#161616] transition-colors"
+            className="bg-[#EAEAEA] rounded-[16px] p-[24px] border border-[#E1E1E1] hover:border-[#161616] transition-colors"
           >
             <div className="flex items-center justify-between mb-[12px]">
               <span className="text-[32px]">🏗️</span>
@@ -345,7 +345,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Top Products */}
-        <div className="bg-white rounded-[16px] p-[24px] mb-[32px] border border-[#E1E1E1]">
+        <div className="bg-[#EAEAEA] rounded-[16px] p-[24px] mb-[32px] border border-[#E1E1E1]">
           <h2 className="font-['DM_Sans'] text-[24px] font-light text-[#161616] tracking-[-0.96px] mb-[24px]">
             Top Products
           </h2>
@@ -382,7 +382,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Orders */}
-        <div className="bg-white rounded-[16px] p-[24px] border border-[#E1E1E1]">
+        <div className="bg-[#EAEAEA] rounded-[16px] p-[24px] border border-[#E1E1E1]">
           <div className="flex items-center justify-between mb-[24px]">
             <h2 className="font-['DM_Sans'] text-[24px] font-light text-[#161616] tracking-[-0.96px]">
               Recent Orders

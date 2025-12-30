@@ -31,7 +31,7 @@ interface Post {
   published: boolean;
 }
 
-type ActiveTab = 'products' | 'projects' | 'posts' | 'seo';
+type ActiveTab = 'products' | 'projects' | 'posts' | 'seo' | 'email-templates';
 
 function slugify(value: string) {
   return value
@@ -735,7 +735,8 @@ export default function AdminPage() {
             { key: 'products', label: 'Products', count: products.length },
             { key: 'projects', label: 'Projects', count: projects.length },
             { key: 'posts', label: 'Posts', count: posts.length },
-            { key: 'seo', label: 'SEO', badge: 'new' }
+            { key: 'seo', label: 'SEO', badge: 'new' },
+            { key: 'email-templates', label: 'Email Templates', badge: 'new' }
           ].map((tab) => {
             const isActive = 'count' in tab ? activeTab === tab.key : activeTab === tab.key;
 
@@ -749,6 +750,10 @@ export default function AdminPage() {
                   }
                   if (tab.key === 'seo') {
                     router.push('/admin/seo');
+                    return;
+                  }
+                  if (tab.key === 'email-templates') {
+                    router.push('/admin/email-templates');
                     return;
                   }
                   setActiveTab(tab.key as ActiveTab);

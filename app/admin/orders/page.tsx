@@ -209,7 +209,7 @@ export default function AdminOrdersPage() {
           <>
             {/* Orders Tab */}
             {activeTab === 'orders' && (
-              <div className="bg-white rounded-[8px] overflow-hidden">
+              <div className="bg-[#EAEAEA] rounded-[8px] overflow-hidden">
                 {orders.length === 0 ? (
                   <div className="p-[40px] text-center">
                     <p className="font-['Outfit'] text-[14px] text-[#7C7C7C]">
@@ -308,7 +308,7 @@ export default function AdminOrdersPage() {
 
             {/* Invoices Tab */}
             {activeTab === 'invoices' && (
-              <div className="bg-white rounded-[8px] overflow-hidden">
+              <div className="bg-[#EAEAEA] rounded-[8px] overflow-hidden">
                 {invoices.length === 0 ? (
                   <div className="p-[40px] text-center">
                     <p className="font-['Outfit'] text-[14px] text-[#7C7C7C]">
