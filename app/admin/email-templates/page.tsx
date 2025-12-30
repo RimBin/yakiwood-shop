@@ -32,24 +32,24 @@ export default function EmailTemplatesAdmin() {
   };
 
   const categories = [
-    { id: 'transactional' as const, name: 'Transactional', color: 'bg-blue-100 text-blue-800' },
-    { id: 'marketing' as const, name: 'Marketing', color: 'bg-green-100 text-green-800' },
-    { id: 'customer-service' as const, name: 'Customer Service', color: 'bg-purple-100 text-purple-800' },
+    { id: 'transactional' as const, name: 'Sandoriai', color: 'bg-blue-100 text-blue-800' },
+    { id: 'marketing' as const, name: 'Rinkodara', color: 'bg-green-100 text-green-800' },
+    { id: 'customer-service' as const, name: 'Klientų aptarnavimas', color: 'bg-purple-100 text-purple-800' },
   ];
 
   return (
     <>
-      <Breadcrumbs items={[{ label: 'Homepage', href: '/' }, { label: 'Admin', href: '/admin' }, { label: 'Email Templates' }]} />
+      <Breadcrumbs items={[{ label: 'Pradžia', href: '/' }, { label: 'Administravimas', href: '/admin' }, { label: 'El. pašto šablonai' }]} />
       
       <div className="min-h-screen bg-[#E1E1E1] py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
         <div className="max-w-[1400px] mx-auto">
           {/* Header */}
           <div className="mb-[clamp(32px,4vw,48px)]">
             <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616] mb-[8px]">
-              Email Templates
+              El. pašto šablonai
             </h1>
             <p className="font-['Outfit'] font-light text-[clamp(14px,1.5vw,16px)] text-[#535353]">
-              E-commerce email template management and preview
+              El. prekybos el. pašto šablonų valdymas ir peržiūra
             </p>
           </div>
 
@@ -59,7 +59,7 @@ export default function EmailTemplatesAdmin() {
               <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(20px,3vw,32px)]">
                 <div className="mb-[24px]">
                   <h2 className="font-['Outfit'] text-[11px] font-medium text-[#535353] uppercase tracking-[0.55px]">
-                    Available Templates ({EMAIL_TEMPLATES.length})
+                    Prieinami šablonai ({EMAIL_TEMPLATES.length})
                   </h2>
                 </div>
 

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
 
 export const metadata: Metadata = {
-  title: 'News & Updates - Yakiwood',
-  description: 'Latest news, projects, and updates from Yakiwood. Stay informed about new products, techniques, and Shou Sugi Ban innovations.',
+  title: 'Naujienos',
+  description: 'Naujienos, projektai ir naujienos iš Yakiwood. Būkite informuoti apie naujus produktus, technikas ir Shou Sugi Ban inovacijas.',
   openGraph: {
-    title: 'News & Updates - Yakiwood',
-    description: 'Latest news, projects, and updates from Yakiwood.',
+    title: 'Naujienos - Yakiwood',
+    description: 'Naujienos, projektai ir naujienos iš Yakiwood.',
     url: 'https://yakiwood.lt/naujienos',
     images: [{ url: getOgImage('projects'), width: 1200, height: 630 }],
   },

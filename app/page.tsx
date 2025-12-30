@@ -7,12 +7,12 @@ import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
 
 export const metadata: Metadata = {
-  title: 'Yakiwood - Premium Shou Sugi Ban Burnt Wood Products',
-  description: 'Discover premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese charring technique for sustainable, durable, and beautiful wood facades and surfaces.',
-  keywords: ['Shou Sugi Ban', 'yakisugi', 'burnt wood', 'charred wood', 'wood facades', 'sustainable wood', 'Lithuania', 'Japanese technique'],
+  title: 'Yakiwood - Premium Shou Sugi Ban Deginto Medžio Produktai',
+  description: 'Atraskite premium Shou Sugi Ban deginto medžio produktus Lietuvoje. Tradicinė japonų degimo technika tvariai, ilgaamžei ir gražiai medžio fasadų ir paviršių apdailai.',
+  keywords: ['Shou Sugi Ban', 'yakisugi', 'degintas medis', 'anglinis medis', 'medienos fasadai', 'tvari mediena', 'Lietuva', 'japonų technika'],
   openGraph: {
-    title: 'Yakiwood - Premium Shou Sugi Ban Burnt Wood Products',
-    description: 'Discover premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese charring technique for sustainable, durable, and beautiful wood facades and surfaces.',
+    title: 'Yakiwood - Premium Shou Sugi Ban Deginto Medžio Produktai',
+    description: 'Atraskite premium Shou Sugi Ban deginto medžio produktus Lietuvoje. Tradicinė japonų degimo technika tvariai, ilgaamžei ir gražiai medžio fasadų ir paviršių apdailai.',
     url: 'https://yakiwood.lt',
     images: [
       {
@@ -25,8 +25,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Yakiwood - Premium Shou Sugi Ban Burnt Wood Products',
-    description: 'Discover premium Shou Sugi Ban burnt wood products in Lithuania.',
+    title: 'Yakiwood - Premium Shou Sugi Ban Deginto Medžio Produktai',
+    description: 'Atraskite premium Shou Sugi Ban deginto medžio produktus Lietuvoje.',
     images: [getOgImage('home')],
   },
 };

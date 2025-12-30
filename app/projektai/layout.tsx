@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Projects - Shou Sugi Ban Showcase',
-  description: 'View our portfolio of completed Shou Sugi Ban projects. Get inspired by real-world applications of burnt wood in architecture and design.',
+  title: 'Projektai - Shou Sugi Ban Pavyzdžiai',
+  description: 'Peržiūrėkite mūsų įgyvendintų Shou Sugi Ban projektų portfelį. Įkvėpkite realiais deginto medžio panaudojimais architektūroje ir dizaine.',
   openGraph: {
-    title: 'Projects - Yakiwood Shou Sugi Ban Showcase',
-    description: 'View our portfolio of completed Shou Sugi Ban projects.',
+    title: 'Projektai - Yakiwood Shou Sugi Ban',
+    description: 'Peržiūrėkite mūsų įgyvendintų Shou Sugi Ban projektų portfelį.',
     url: 'https://yakiwood.lt/projektai',
     images: [{ url: '/og-image-projects.jpg', width: 1200, height: 630 }],
   },

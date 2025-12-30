@@ -3,11 +3,11 @@ import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
 
 export const metadata: Metadata = {
-  title: 'Products - Shou Sugi Ban Burnt Wood',
-  description: 'Browse our collection of premium Shou Sugi Ban burnt wood products. Facades, panels, decking, and custom solutions with various finishes and colors.',
+  title: 'Produktai - Shou Sugi Ban Degintas Medis',
+  description: 'Naršykite mūsų premium Shou Sugi Ban deginto medžio produktų kolekciją. Fasadai, panelės, terasinė danga ir individualūs sprendimai su įvairiais apdailomis ir spalvomis.',
   openGraph: {
-    title: 'Products - Yakiwood Shou Sugi Ban',
-    description: 'Browse our collection of premium Shou Sugi Ban burnt wood products.',
+    title: 'Produktai - Yakiwood Shou Sugi Ban',
+    description: 'Naršykite mūsų premium Shou Sugi Ban deginto medžio produktų kolekciją.',
     url: 'https://yakiwood.lt/produktai',
     images: [{ url: getOgImage('products'), width: 1200, height: 630 }],
   },

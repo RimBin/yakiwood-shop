@@ -3,11 +3,11 @@ import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
 
 export const metadata: Metadata = {
-  title: 'Solutions - Shou Sugi Ban Applications',
-  description: 'Explore our Shou Sugi Ban wood solutions for facades, interiors, terraces, and fences. Sustainable and beautiful architectural applications.',
+  title: 'Sprendimai - Shou Sugi Ban Panaudojimai',
+  description: 'Atraskite mūsų Shou Sugi Ban medienos sprendimus fasadams, interjerams, terasoms ir tvoroms. Tvarios ir gražios architektūrinės aplikacijos.',
   openGraph: {
-    title: 'Solutions - Yakiwood Shou Sugi Ban',
-    description: 'Explore our Shou Sugi Ban wood solutions for facades, interiors, terraces, and fences.',
+    title: 'Sprendimai - Yakiwood Shou Sugi Ban',
+    description: 'Atraskite mūsų Shou Sugi Ban medienos sprendimus fasadams, interjerams, terasoms ir tvoroms.',
     url: 'https://yakiwood.lt/sprendimai',
     images: [{ url: getOgImage('solutions'), width: 1200, height: 630 }],
   },

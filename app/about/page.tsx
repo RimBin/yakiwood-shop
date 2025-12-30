@@ -3,12 +3,12 @@ import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
 
 export const metadata: Metadata = {
-  title: 'About Us',
-  description: 'Yakiwood specializes in traditional Japanese Shou Sugi Ban burnt wood technique for facades, terraces, and interiors.',
+  title: 'Apie mus',
+  description: 'Yakiwood specializuojasi tradicine japonų Shou Sugi Ban deginto medžio technika fasadams, terasoms ir interjerams.',
   openGraph: {
-    title: 'About Us - Yakiwood',
-    description: 'Yakiwood specializes in traditional Japanese Shou Sugi Ban burnt wood technique.',
-    url: 'https://yakiwood.lt/about',
+    title: 'Apie mus - Yakiwood',
+    description: 'Yakiwood specializuojasi tradicine japonų Shou Sugi Ban deginto medžio technika.',
+    url: 'https://yakiwood.lt/apie',
     images: [{ url: getOgImage('about'), width: 1200, height: 630 }],
   },
   twitter: {

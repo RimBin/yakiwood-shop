@@ -35,7 +35,7 @@ export default function ProductsPage() {
   const products =
     activeFilter === 'all'
       ? allProducts
-      : allProducts.filter((p) => p.category === activeFilter);
+      : allProducts.filter((p) => p.woodType === activeFilter);
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
@@ -100,6 +100,14 @@ export default function ProductsPage() {
               >
                 {product.name}
               </p>
+              {product.woodType && (
+                <p
+                  className="font-['DM_Sans'] font-normal text-[14px] leading-[1.2] text-[#535353] tracking-[-0.28px]"
+                  style={{ fontVariationSettings: "'opsz' 14" }}
+                >
+                  {product.woodType === 'larch' ? 'Maumedis' : 'Eglė'}
+                </p>
+              )}
               <p
                 className="font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#535353] tracking-[-0.32px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}

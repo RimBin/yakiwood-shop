@@ -1,31 +1,48 @@
 import Accordion from '@/components/ui/Accordion';
 import { PageCover } from '@/components/shared/PageLayout';
+import type { Metadata } from 'next';
+import { getOgImage } from '@/lib/og-image';
+
+export const metadata: Metadata = {
+  title: 'DUK - Dažniausiai užduodami klausimai',
+  description: 'Atsakymai į dažniausiai užduodamus klausimus apie Shou Sugi Ban deginto medžio produktus, pristatymą, montavimą ir priežiūrą.',
+  openGraph: {
+    title: 'DUK - Yakiwood',
+    description: 'Atsakymai į dažniausiai užduodamus klausimus apie Shou Sugi Ban deginto medžio produktus.',
+    url: 'https://yakiwood.lt/faq',
+    images: [{ url: getOgImage('about'), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: [getOgImage('about')],
+  },
+};
 
 const faqItems = [
   {
-    title: 'What is Shou Sugi Ban?',
-    content: 'Shou Sugi Ban is an ancient Japanese technique of preserving wood by charring it. This process creates a unique, durable finish that is naturally resistant to fire, insects, and rot.',
+    title: 'Kas yra Shou Sugi Ban?',
+    content: 'Shou Sugi Ban yra senovinė japonų medienos apsaugos technika, deginant ją. Šis procesas sukuria unikalų, ilgaamžį apdailos sluoksnį, kuris natūraliai atsparus ugniai, vabzdžiams ir puvimui.',
     defaultOpen: true,
   },
   {
-    title: 'How long does burnt wood last?',
-    content: 'When properly treated with Shou Sugi Ban technique, wood can last 80-100 years or more without requiring significant maintenance.',
+    title: 'Kiek laiko tarnauja degintas medis?',
+    content: 'Tinkamai apdorotas Shou Sugi Ban technika medis gali tarnauti 80-100 metų ar ilgiau be reikšmingos priežiūros.',
   },
   {
-    title: 'Do you ship internationally?',
-    content: 'Yes, we ship our products worldwide. Shipping costs and delivery times vary depending on your location. Contact us for specific shipping quotes.',
+    title: 'Ar siunčiate į užsienį?',
+    content: 'Taip, siunčiame savo produktus visame pasaulyje. Pristatymo išlaidos ir pristatymo laikas priklauso nuo jūsų vietos. Susisiekite su mumis dėl konkrečios siuntimo kainos.',
   },
   {
-    title: 'Can I customize the color?',
-    content: 'Absolutely! We offer various charring levels from light to deep black, and can also apply different finishes and oils to achieve your desired look.',
+    title: 'Ar galiu pasirinkti spalvą?',
+    content: 'Žinoma! Siūlome įvairius degimo lygius nuo šviesaus iki gilaus juodo, taip pat galime taikyti skirtingas apdailas ir aliejus, kad pasiektume norimą išvaizdą.',
   },
   {
-    title: 'What wood species do you use?',
-    content: 'We primarily work with pine, larch, and cedar. Each species offers unique characteristics in terms of grain pattern and durability.',
+    title: 'Kokias medienos rūšis naudojate?',
+    content: 'Dažniausiai dirbame su pušimi, maumedžiu ir kedru. Kiekviena rūšis pasižymi unikaliomis savybėmis struktūros raštų ir ilgaamžiškumo atžvilgiu.',
   },
   {
-    title: 'Do you offer installation services?',
-    content: 'Yes, we can recommend professional installation partners in your area, or provide detailed installation guidelines for DIY projects.',
+    title: 'Ar siūlote montavimo paslaugas?',
+    content: 'Taip, galime rekomenduoti profesionalius montavimo partnerius jūsų regione arba pateikti išsamias montavimo gaires DIY projektams.',
   },
 ];
 
@@ -36,7 +53,7 @@ export default function FAQPage() {
       <PageCover>
         <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
             style={{ fontVariationSettings: "'opsz' 14" }}>
-          FAQ
+          DUK
         </h1>
       </PageCover>
 

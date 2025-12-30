@@ -67,7 +67,7 @@ export interface ProductFilters {
 }
 
 export type ProductCategory = 'cladding' | 'decking' | 'interior' | 'tiles';
-export type WoodType = 'pine' | 'spruce' | 'oak' | 'larch';
+export type WoodType = 'larch' | 'spruce';
 
 export const PRODUCT_CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: 'cladding', label: 'Fasadai' },
@@ -77,8 +77,7 @@ export const PRODUCT_CATEGORIES: { value: ProductCategory; label: string }[] = [
 ];
 
 export const WOOD_TYPES: { value: WoodType; label: string }[] = [
-  { value: 'pine', label: 'Pušis' },
-  { value: 'spruce', label: 'Eglė' },
-  { value: 'oak', label: 'Ąžuolas' },
-  { value: 'larch', label: 'Maumedis' },
+  { value: 'larch', label: 'Maumedis (Larch)' },
+  { value: 'spruce', label: 'Eglė (Spruce)' },
 ];
+

@@ -693,7 +693,7 @@ export default function AdminPage() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: 'Homepage', href: '/' }, { label: 'Admin' }]} />
+      <Breadcrumbs items={[{ label: 'Pradžia', href: '/' }, { label: 'Administravimas' }]} />
 
       <div className="min-h-screen bg-[#E1E1E1] py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
         <div className="max-w-[1400px] mx-auto">
@@ -701,7 +701,7 @@ export default function AdminPage() {
         <div className="mb-[clamp(32px,4vw,48px)]">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-[16px] mb-[8px]">
             <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616]">
-              Admin Panel
+              Administravimo skydas
             </h1>
             {products.length === 0 && (
               <button
@@ -712,12 +712,12 @@ export default function AdminPage() {
                 }}
                 className="h-[48px] px-[24px] rounded-[100px] bg-green-500 font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-white hover:bg-green-600 transition-colors whitespace-nowrap"
               >
-                Load Sample Products
+                Įkelti pavyzdinius produktus
               </button>
             )}
           </div>
           <p className="font-['Outfit'] font-light text-[clamp(14px,1.5vw,16px)] text-[#535353]">
-            Manage products, projects, and blog posts
+            Tvarkykite produktus, projektus ir įrašus
           </p>
         </div>
 
@@ -731,12 +731,12 @@ export default function AdminPage() {
         {/* Tabs */}
         <div className="flex gap-[8px] mb-[32px] overflow-x-auto pb-[8px]">
           {[
-            { key: 'dashboard', label: 'Dashboard' },
-            { key: 'products', label: 'Products', count: products.length },
-            { key: 'projects', label: 'Projects', count: projects.length },
-            { key: 'posts', label: 'Posts', count: posts.length },
-            { key: 'seo', label: 'SEO', badge: 'new' },
-            { key: 'email-templates', label: 'Email Templates', badge: 'new' }
+            { key: 'dashboard', label: 'Skydelis' },
+            { key: 'products', label: 'Produktai', count: products.length },
+            { key: 'projects', label: 'Projektai', count: projects.length },
+            { key: 'posts', label: 'Įrašai', count: posts.length },
+            { key: 'seo', label: 'SEO', badge: 'naujas' },
+            { key: 'email-templates', label: 'El. pašto šablonai', badge: 'naujas' }
           ].map((tab) => {
             const isActive = 'count' in tab ? activeTab === tab.key : activeTab === tab.key;
 

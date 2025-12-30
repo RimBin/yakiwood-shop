@@ -3,12 +3,12 @@ import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
 
 export const metadata: Metadata = { 
-  title: 'Contact',
-  description: 'Need assistance? Leave your contact details, and our manager will reach out for a consultation.',
+  title: 'Kontaktai',
+  description: 'Reikalinga pagalba? Palikite savo kontaktinius duomenis ir mūsų vadybininkas susisieks dėl konsultacijos.',
   openGraph: {
-    title: 'Contact - Yakiwood',
-    description: 'Need assistance? Leave your contact details, and our manager will reach out for a consultation.',
-    url: 'https://yakiwood.lt/contact',
+    title: 'Kontaktai - Yakiwood',
+    description: 'Reikalinga pagalba? Palikite savo kontaktinius duomenis ir mūsų vadybininkas susisieks dėl konsultacijos.',
+    url: 'https://yakiwood.lt/kontaktai',
     images: [{ url: getOgImage('contact'), width: 1200, height: 630 }],
   },
   twitter: {

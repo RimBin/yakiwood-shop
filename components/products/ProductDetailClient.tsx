@@ -211,6 +211,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <h1 className="font-['DM_Sans'] text-[32px] font-normal leading-[1.1] tracking-[-1.28px] text-[#161616]">
                 {product.name}
               </h1>
+              {product.woodType && (
+                <p className="font-['Outfit'] font-normal text-[14px] leading-[1.2] tracking-[0.14px] text-[#7C7C7C]">
+                  {product.woodType === 'larch' ? 'Maumedis (Larch)' : 'Eglė (Spruce)'}
+                </p>
+              )}
               <p className="font-['DM_Sans'] text-[32px] font-normal leading-[1.1] tracking-[-1.28px] text-[#161616]">
                 {pricePerUnit.toFixed(0)} €
               </p>

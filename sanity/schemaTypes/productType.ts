@@ -45,6 +45,18 @@ export const productType = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'woodType',
+      title: 'Wood Type',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Larch (Maumedis)', value: 'larch' },
+          { title: 'Spruce (Eglė)', value: 'spruce' },
+        ],
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
       name: 'basePrice',
       title: 'Base Price (EUR)',
       type: 'number',
@@ -157,8 +169,17 @@ export const productType = defineType({
   preview: {
     select: {
       title: 'name',
-      subtitle: 'category',
+      category: 'category',
+      woodType: 'woodType',
       media: 'images.0',
+    },
+    prepare({ title, category, woodType, media }) {
+      const woodTypeLabel = woodType === 'larch' ? 'Maumedis' : woodType === 'spruce' ? 'Eglė' : woodType;
+      return {
+        title,
+        subtitle: woodTypeLabel ? `${category} - ${woodTypeLabel}` : category,
+        media,
+      };
     },
   },
 });
