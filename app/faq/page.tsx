@@ -2,21 +2,26 @@ import Accordion from '@/components/ui/Accordion';
 import { PageCover } from '@/components/shared/PageLayout';
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
+import { getTranslations } from 'next-intl/server';
 
-export const metadata: Metadata = {
-  title: 'DUK - Dažniausiai užduodami klausimai',
-  description: 'Atsakymai į dažniausiai užduodamus klausimus apie Shou Sugi Ban deginto medžio produktus, pristatymą, montavimą ir priežiūrą.',
-  openGraph: {
-    title: 'DUK - Yakiwood',
-    description: 'Atsakymai į dažniausiai užduodamus klausimus apie Shou Sugi Ban deginto medžio produktus.',
-    url: 'https://yakiwood.lt/faq',
-    images: [{ url: getOgImage('about'), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    images: [getOgImage('about')],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata.faq');
+  
+  return {
+    title: t('title'),
+    description: t('description'),
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('description'),
+      url: 'https://yakiwood.lt/faq',
+      images: [{ url: getOgImage('about'), width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: [getOgImage('about')],
+    },
+  };
+}
 
 const faqItems = [
   {

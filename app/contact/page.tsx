@@ -1,21 +1,26 @@
 import Contact from '@/components/Contact';
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
+import { getTranslations } from 'next-intl/server';
 
-export const metadata: Metadata = { 
-  title: 'Kontaktai',
-  description: 'Reikalinga pagalba? Palikite savo kontaktinius duomenis ir mūsų vadybininkas susisieks dėl konsultacijos.',
-  openGraph: {
-    title: 'Kontaktai - Yakiwood',
-    description: 'Reikalinga pagalba? Palikite savo kontaktinius duomenis ir mūsų vadybininkas susisieks dėl konsultacijos.',
-    url: 'https://yakiwood.lt/kontaktai',
-    images: [{ url: getOgImage('contact'), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    images: [getOgImage('contact')],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata.contact');
+  
+  return {
+    title: t('title'),
+    description: t('description'),
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('description'),
+      url: 'https://yakiwood.lt/kontaktai',
+      images: [{ url: getOgImage('contact'), width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: [getOgImage('contact')],
+    },
+  };
+}
 
 export default function ContactPage() {
   return (

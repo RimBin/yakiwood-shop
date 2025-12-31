@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/cart/store';
-import type { Product, Color, Finish } from '@/lib/products';
+import type { Product } from '@/lib/products.sanity';
+import type { Color, Finish } from '@/lib/products';
 import { calculateProductPrice, getProductColors, getProductFinishes } from '@/lib/products';
 import { Breadcrumbs } from '@/components/ui';
 import ImageGallery from './ImageGallery';
@@ -51,14 +52,14 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
   // Calculate final price
   const finalPrice = calculateProductPrice(
-    product.basePrice,
+    product.price,
     selectedColor?.priceModifier || 0,
     selectedFinish?.priceModifier || 0,
     quantity
   );
 
   const pricePerUnit = calculateProductPrice(
-    product.basePrice,
+    product.price,
     selectedColor?.priceModifier || 0,
     selectedFinish?.priceModifier || 0,
     1
@@ -123,7 +124,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const handleShare = (platform: 'facebook' | 'linkedin' | 'email') => {
     const url = `https://yakiwood.lt/produktai/${product.slug}`;
     const title = product.name;
-    const description = product.shortDescription || product.description;
+    const description = product.description;
 
     switch (platform) {
       case 'facebook':
@@ -168,7 +169,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         <div className="grid grid-cols-1 lg:grid-cols-[80px_790px_1fr] gap-[16px]">
           {/* Thumbnail Gallery - Left (hidden on mobile) */}
           <div className="hidden lg:flex flex-col gap-[12px]">
-            {(product.images || [{ id: '1', url: product.image, alt: product.name, isPrimary: true, order: 0 }])
+            {(product.images ? product.images.map((url, idx) => ({ id: String(idx), url, alt: product.name, isPrimary: idx === 0, order: idx })) : [{ id: '1', url: product.image, alt: product.name, isPrimary: true, order: 0 }])
               .slice(0, 3)
               .map((img, idx) => (
                 <button
@@ -197,7 +198,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             ) : (
               <ImageGallery
                 images={
-                  product.images || [{ id: '1', url: product.image, alt: product.name, isPrimary: true, order: 0 }]
+                  product.images 
+                    ? product.images.map((url, idx) => ({ id: String(idx), url, alt: product.name, isPrimary: idx === 0, order: idx }))
+                    : [{ id: '1', url: product.image, alt: product.name, isPrimary: true, order: 0 }]
                 }
                 productName={product.name}
               />
@@ -223,7 +226,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
             {/* Description */}
             <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] max-w-[434px]">
-              {product.shortDescription || product.description}
+              {product.description}
             </p>
 
             {/* Color Selector - New Figma Style */}

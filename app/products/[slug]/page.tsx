@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/products';
+import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo/structured-data';
 import { fetchProductBySlug } from '@/lib/products.sanity';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
@@ -21,14 +21,14 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     };
   }
 
-  const ogImage = product.images?.[0]?.url || product.image;
+  const ogImage = product.images?.[0] || product.image;
 
   return {
     title: product.name,
-    description: product.shortDescription || product.description,
+    description: product.description,
     openGraph: {
       title: product.name,
-      description: product.shortDescription || product.description,
+      description: product.description,
       images: [
         {
           url: getProductOgImage(ogImage),
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     twitter: {
       card: 'summary_large_image',
       title: product.name,
-      description: product.shortDescription || product.description,
+      description: product.description,
       images: [getProductOgImage(ogImage)],
     },
   };
@@ -58,9 +58,29 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  // Transform to ProductInput for SEO schema
+  const productInput = {
+    name: product.name,
+    slug: product.slug,
+    description: product.description || '',
+    basePrice: product.price,
+    image: product.image,
+    images: product.images,
+    sku: product.id,
+    category: product.category,
+    woodType: product.woodType,
+    inStock: true,
+  };
+
   // Generate structured data for SEO
-  const productSchema = generateProductSchema(product);
-  const breadcrumbSchema = generateBreadcrumbSchema(product);
+  const productSchema = generateProductSchema(productInput);
+  
+  const breadcrumbItems = [
+    { name: 'Pradžia', url: 'https://yakiwood.lt' },
+    { name: 'Produktai', url: 'https://yakiwood.lt/produktai' },
+    { name: product.name, url: `https://yakiwood.lt/products/${product.slug}` },
+  ];
+  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems);
 
   return (
     <>

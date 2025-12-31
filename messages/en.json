@@ -559,5 +559,135 @@
     "markAllAsRead": "Mark all as read",
     "noNotifications": "No notifications",
     "newNotification": "New notification"
+  },
+  "metadata": {
+    "contact": {
+      "title": "Contact",
+      "description": "Need help? Leave your contact details and our manager will get in touch for consultation.",
+      "ogTitle": "Contact - Yakiwood"
+    },
+    "about": {
+      "title": "About Us",
+      "description": "Learn about Yakiwood - experts in Shou Sugi Ban burnt wood production in Lithuania.",
+      "ogTitle": "About Us - Yakiwood"
+    },
+    "products": {
+      "title": "Products - Shou Sugi Ban Burnt Wood",
+      "description": "Discover our range of Shou Sugi Ban burnt wood products - planks, tiles, and facade cladding.",
+      "ogTitle": "Products - Shou Sugi Ban - Yakiwood"
+    },
+    "solutions": {
+      "title": "Solutions - Shou Sugi Ban Applications",
+      "description": "Explore various Shou Sugi Ban wood applications - from facades to interior design.",
+      "ogTitle": "Solutions - Yakiwood"
+    },
+    "projects": {
+      "title": "Projects - Shou Sugi Ban Examples",
+      "description": "Browse our portfolio of completed Shou Sugi Ban projects and get inspired for your project.",
+      "ogTitle": "Projects - Yakiwood"
+    },
+    "news": {
+      "title": "News",
+      "description": "Read the latest news about Shou Sugi Ban, our projects, and wood processing updates.",
+      "ogTitle": "News - Yakiwood"
+    },
+    "faq": {
+      "title": "FAQ",
+      "description": "Frequently asked questions about Shou Sugi Ban wood products, maintenance, and installation.",
+      "ogTitle": "FAQ - Yakiwood"
+    },
+    "home": {
+      "title": "Yakiwood - Shou Sugi Ban Burnt Wood in Lithuania",
+      "description": "Highest quality Shou Sugi Ban burnt wood products. Facades, interior, terrace - ecological and durable solutions.",
+      "ogTitle": "Yakiwood - Shou Sugi Ban burnt wood"
+    }
+  },
+  "admin": {
+    "breadcrumb": {
+      "home": "Homepage",
+      "admin": "Admin",
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "projects": "Projects",
+      "posts": "Posts",
+      "seo": "SEO",
+      "emailTemplates": "Email Templates",
+      "orders": "Orders",
+      "inventory": "Inventory",
+      "new": "New",
+      "edit": "Edit"
+    },
+    "main": {
+      "title": "Admin Panel",
+      "subtitle": "Manage products, projects, and blog posts",
+      "loadSampleProducts": "Load Sample Products"
+    },
+    "tabs": {
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "projects": "Projects",
+      "posts": "Posts",
+      "seo": "SEO",
+      "emailTemplates": "Email Templates",
+      "badgeNew": "new"
+    },
+    "seo": {
+      "title": "SEO Management",
+      "subtitle": "Monitor and optimize your website's search engine performance",
+      "scanning": "Scanning pages...",
+      "stats": {
+        "totalPages": "Total Pages",
+        "averageScore": "Average Score",
+        "goodSeo": "Good SEO",
+        "needsWork": "Needs Work"
+      },
+      "filters": {
+        "all": "All Pages",
+        "good": "Good",
+        "warning": "Warning",
+        "errors": "Errors"
+      },
+      "table": {
+        "page": "Page",
+        "title": "Title",
+        "score": "Score",
+        "issues": "Issues",
+        "actions": "Actions",
+        "noTitle": "No title"
+      },
+      "actions": {
+        "viewDetails": "View Details",
+        "exportJson": "Export JSON"
+      },
+      "noPages": "No pages match the selected filter",
+      "seoScore": "SEO Score"
+    },
+    "emailTemplates": {
+      "title": "Email Templates",
+      "subtitle": "E-commerce email template management and preview",
+      "availableTemplates": "Available Templates",
+      "categories": {
+        "transactional": "Transactional",
+        "marketing": "Marketing",
+        "customerService": "Customer Service"
+      },
+      "subjectLine": "Subject Line:",
+      "htmlPreview": "HTML Preview",
+      "actions": {
+        "sendTest": "Send Test Email",
+        "copyHtml": "Copy HTML"
+      },
+      "sampleData": "Sample Data",
+      "selectTemplate": "Select a Template",
+      "selectTemplateDescription": "Choose an email template from the list to preview"
+    },
+    "products": {
+      "title": "Products Management",
+      "subtitle": "Manage products, variants and inventory",
+      "newProduct": "New Product",
+      "newProductDesc": "Create a new product with variants",
+      "editProduct": "Edit Product",
+      "editProductDesc": "Update product information and variants"
+    }
   }
 }

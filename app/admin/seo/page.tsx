@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { SEOPreview } from '@/components/admin/SEOPreview';
 import { scanAllPages, type PageSEOResult } from '@/lib/seo/scanner';
 import { Breadcrumbs } from '@/components/ui';
@@ -8,6 +9,8 @@ import { Breadcrumbs } from '@/components/ui';
 type FilterType = 'all' | 'good' | 'warning' | 'error';
 
 export default function SEOAdminPage() {
+  const t = useTranslations('admin.seo');
+  const tBreadcrumb = useTranslations('admin.breadcrumb');
   const [pages, setPages] = useState<PageSEOResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
@@ -68,11 +71,11 @@ export default function SEOAdminPage() {
   if (loading) {
     return (
       <>
-        <Breadcrumbs items={[{ label: 'Pradžia', href: '/' }, { label: 'Administravimas', href: '/admin' }, { label: 'SEO' }]} />
+        <Breadcrumbs items={[{ label: tBreadcrumb('home'), href: '/' }, { label: tBreadcrumb('admin'), href: '/admin' }, { label: tBreadcrumb('seo') }]} />
         <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#161616] mx-auto mb-4"></div>
-            <p className="font-['Outfit'] text-[#535353]">Skenuojami puslapiai...</p>
+            <p className="font-['Outfit'] text-[#535353]">{t('scanning')}</p>
           </div>
         </div>
       </>
@@ -88,35 +91,35 @@ export default function SEOAdminPage() {
         {/* Header */}
         <div className="mb-[clamp(32px,4vw,48px)]">
           <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616] mb-[8px]">
-            SEO Valdymas
+            {t('title')}
           </h1>
           <p className="font-['Outfit'] font-light text-[clamp(14px,1.5vw,16px)] text-[#535353]">
-            Stebėkite ir optimizuokite savo svetainės paieškos sistemų našumą
+            {t('subtitle')}
           </p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[clamp(16px,2vw,24px)] mb-[clamp(24px,3vw,32px)]">
           <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(16px,2vw,24px)] border border-[#E1E1E1]">
-            <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">Iš viso puslapių</div>
+            <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">{t('stats.totalPages')}</div>
             <div className="font-['DM_Sans'] font-light text-[clamp(32px,4vw,48px)] leading-none tracking-[clamp(-1px,-0.025em,-1.44px)] text-[#161616]">
               {stats.total}
             </div>
           </div>
           <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(16px,2vw,24px)] border border-[#E1E1E1]">
-            <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">Vidutinis balas</div>
+            <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">{t('stats.averageScore')}</div>
             <div className={`font-['DM_Sans'] font-light text-[clamp(32px,4vw,48px)] leading-none tracking-[clamp(-1px,-0.025em,-1.44px)] ${getScoreColor(averageScore)}`}>
               {averageScore}%
             </div>
           </div>
           <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(16px,2vw,24px)] border border-[#E1E1E1]">
-            <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">Geras SEO</div>
+            <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">{t('stats.goodSeo')}</div>
             <div className="font-['DM_Sans'] font-light text-[clamp(32px,4vw,48px)] leading-none tracking-[clamp(-1px,-0.025em,-1.44px)] text-green-600">
               {stats.good}
             </div>
           </div>
           <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(16px,2vw,24px)] border border-[#E1E1E1]">
-            <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">Reikia darbo</div>
+            <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">{t('stats.needsWork')}</div>
             <div className="font-['DM_Sans'] font-light text-[clamp(32px,4vw,48px)] leading-none tracking-[clamp(-1px,-0.025em,-1.44px)] text-red-600">
               {stats.error}
             </div>
@@ -133,7 +136,7 @@ export default function SEOAdminPage() {
                 : 'bg-[#EAEAEA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616]'
             }`}
           >
-            All Puslapiai ({stats.total})
+            {t('filters.all')} ({stats.total})
           </button>
           <button
             onClick={() => setFilter('good')}
@@ -143,7 +146,7 @@ export default function SEOAdminPage() {
                 : 'bg-[#EAEAEA] text-green-600 border border-green-200 hover:border-green-600'
             }`}
           >
-            Geri ({stats.good})
+            {t('filters.good')} ({stats.good})
           </button>
           <button
             onClick={() => setFilter('warning')}
@@ -153,7 +156,7 @@ export default function SEOAdminPage() {
                 : 'bg-[#EAEAEA] text-yellow-600 border border-yellow-200 hover:border-yellow-600'
             }`}
           >
-            Įspėjimai ({stats.warning})
+            {t('filters.warning')} ({stats.warning})
           </button>
           <button
             onClick={() => setFilter('error')}
@@ -163,13 +166,13 @@ export default function SEOAdminPage() {
                 : 'bg-[#EAEAEA] text-red-600 border border-red-200 hover:border-red-600'
             }`}
           >
-            Klaidos ({stats.error})
+            {t('filters.errors')} ({stats.error})
           </button>
           <button
             onClick={handleExportJSON}
             className="h-[48px] ml-auto px-[24px] rounded-[100px] bg-[#EAEAEA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap"
           >
-            Eksportuoti JSON
+            {t('actions.exportJson')}
           </button>
         </div>
 
@@ -180,19 +183,19 @@ export default function SEOAdminPage() {
               <thead className="bg-[#EAEAEA] border-b border-[#E1E1E1]">
                 <tr>
                   <th className="text-left px-6 py-4 font-['Outfit'] text-sm font-normal text-[#535353]">
-                    Puslapis
+                    {t('table.page')}
                   </th>
                   <th className="text-left px-6 py-4 font-['Outfit'] text-sm font-normal text-[#535353]">
-                    Pavadinimas
+                    {t('table.title')}
                   </th>
                   <th className="text-center px-6 py-4 font-['Outfit'] text-sm font-normal text-[#535353]">
-                    Balas
+                    {t('table.score')}
                   </th>
                   <th className="text-center px-6 py-4 font-['Outfit'] text-sm font-normal text-[#535353]">
-                    Problemos
+                    {t('table.issues')}
                   </th>
                   <th className="text-center px-6 py-4 font-['Outfit'] text-sm font-normal text-[#535353]">
-                    Veiksmai
+                    {t('table.actions')}
                   </th>
                 </tr>
               </thead>
@@ -206,7 +209,7 @@ export default function SEOAdminPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="font-['Outfit'] text-sm text-[#535353] max-w-xs truncate">
-                        {page.title || 'Nėra pavadinimo'}
+                        {page.title || t('table.noTitle')}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -230,7 +233,7 @@ export default function SEOAdminPage() {
                         onClick={() => setSelectedPage(page)}
                         className="h-[40px] px-[20px] rounded-[100px] bg-[#161616] text-white font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:bg-[#2a2a2a] transition-colors"
                       >
-                        Peržiūrėti detaliai
+                        {t('actions.viewDetails')}
                       </button>
                     </td>
                   </tr>
@@ -241,7 +244,7 @@ export default function SEOAdminPage() {
 
           {filteredPages.length === 0 && (
             <div className="text-center py-12">
-              <p className="font-['Outfit'] text-[#535353]">Nėra puslapių atitinkančių pasirinktą filtrą</p>
+              <p className="font-['Outfit'] text-[#535353]">{t('noPages')}</p>
             </div>
           )}
         </div>
@@ -263,7 +266,7 @@ export default function SEOAdminPage() {
                   {selectedPage.path}
                 </h2>
                 <p className="font-['Outfit'] text-sm text-[#535353] mt-1">
-                  SEO Balas: <span className={getScoreColor(selectedPage.seoScore)}>{selectedPage.seoScore}%</span>
+                  {t('seoScore')}: <span className={getScoreColor(selectedPage.seoScore)}>{selectedPage.seoScore}%</span>
                 </p>
               </div>
               <button

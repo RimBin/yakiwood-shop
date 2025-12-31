@@ -1,20 +1,25 @@
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
+import { getTranslations } from 'next-intl/server';
 
-export const metadata: Metadata = {
-  title: 'Naujienos',
-  description: 'Naujienos, projektai ir naujienos iš Yakiwood. Būkite informuoti apie naujus produktus, technikas ir Shou Sugi Ban inovacijas.',
-  openGraph: {
-    title: 'Naujienos - Yakiwood',
-    description: 'Naujienos, projektai ir naujienos iš Yakiwood.',
-    url: 'https://yakiwood.lt/naujienos',
-    images: [{ url: getOgImage('projects'), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    images: [getOgImage('projects')],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata.news');
+  
+  return {
+    title: t('title'),
+    description: t('description'),
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('description'),
+      url: 'https://yakiwood.lt/naujienos',
+      images: [{ url: getOgImage('projects'), width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: [getOgImage('projects')],
+    },
+  };
+}
 
 export default function NewsPage() {
   return (

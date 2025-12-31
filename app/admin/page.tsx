@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { seedProducts } from "@/data/seed-products";
 import { projects as defaultProjects } from "@/data/projects";
 import { Project } from "@/types/project";
@@ -45,6 +46,7 @@ function slugify(value: string) {
 
 export default function AdminPage() {
   const router = useRouter();
+  const t = useTranslations('admin');
   const [activeTab, setActiveTab] = useState<ActiveTab>('products');
   const [message, setMessage] = useState('');
 
@@ -693,7 +695,7 @@ export default function AdminPage() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: 'Pradžia', href: '/' }, { label: 'Administravimas' }]} />
+      <Breadcrumbs items={[{ label: t('breadcrumb.home'), href: '/' }, { label: t('breadcrumb.admin') }]} />
 
       <div className="min-h-screen bg-[#E1E1E1] py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
         <div className="max-w-[1400px] mx-auto">
@@ -701,7 +703,7 @@ export default function AdminPage() {
         <div className="mb-[clamp(32px,4vw,48px)]">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-[16px] mb-[8px]">
             <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616]">
-              Administravimo skydas
+              {t('main.title')}
             </h1>
             {products.length === 0 && (
               <button
@@ -712,12 +714,12 @@ export default function AdminPage() {
                 }}
                 className="h-[48px] px-[24px] rounded-[100px] bg-green-500 font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-white hover:bg-green-600 transition-colors whitespace-nowrap"
               >
-                Įkelti pavyzdinius produktus
+                {t('main.loadSampleProducts')}
               </button>
             )}
           </div>
           <p className="font-['Outfit'] font-light text-[clamp(14px,1.5vw,16px)] text-[#535353]">
-            Tvarkykite produktus, projektus ir įrašus
+            {t('main.subtitle')}
           </p>
         </div>
 
@@ -731,12 +733,12 @@ export default function AdminPage() {
         {/* Tabs */}
         <div className="flex gap-[8px] mb-[32px] overflow-x-auto pb-[8px]">
           {[
-            { key: 'dashboard', label: 'Skydelis' },
-            { key: 'products', label: 'Produktai', count: products.length },
-            { key: 'projects', label: 'Projektai', count: projects.length },
-            { key: 'posts', label: 'Įrašai', count: posts.length },
-            { key: 'seo', label: 'SEO', badge: 'naujas' },
-            { key: 'email-templates', label: 'El. pašto šablonai', badge: 'naujas' }
+            { key: 'dashboard', label: t('tabs.dashboard') },
+            { key: 'products', label: t('tabs.products'), count: products.length },
+            { key: 'projects', label: t('tabs.projects'), count: projects.length },
+            { key: 'posts', label: t('tabs.posts'), count: posts.length },
+            { key: 'seo', label: t('tabs.seo'), badge: t('tabs.badgeNew') },
+            { key: 'email-templates', label: t('tabs.emailTemplates'), badge: t('tabs.badgeNew') }
           ].map((tab) => {
             const isActive = 'count' in tab ? activeTab === tab.key : activeTab === tab.key;
 

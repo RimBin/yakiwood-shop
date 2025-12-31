@@ -45,7 +45,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.figma.com https://*.unsplash.com https://www.google-analytics.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://www.google-analytics.com https://api.stripe.com https://*.supabase.co wss://*.supabase.co",
+      "connect-src 'self' https://www.google-analytics.com https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://*.sanity.io https://*.apicdn.sanity.io",
       "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
       "object-src 'none'",
       "base-uri 'self'",

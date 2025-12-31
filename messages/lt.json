@@ -323,5 +323,135 @@
     "paskutinesP aiesk": "Paskutinės paieškos",
     "isvalytPaieska": "Išvalyti paiešką",
     "isvalytiIstorija": "Išvalyti istoriją"
+  },
+  "metadata": {
+    "contact": {
+      "title": "Kontaktai",
+      "description": "Reikalinga pagalba? Palikite savo kontaktinius duomenis ir mūsų vadybininkas susisieks dėl konsultacijos.",
+      "ogTitle": "Kontaktai - Yakiwood"
+    },
+    "about": {
+      "title": "Apie mus",
+      "description": "Sužinokite apie Yakiwood - ekspertus Shou Sugi Ban degintos medienos gamyboje Lietuvoje.",
+      "ogTitle": "Apie mus - Yakiwood"
+    },
+    "products": {
+      "title": "Produktai - Shou Sugi Ban Degintas Medis",
+      "description": "Atraskite mūsų Shou Sugi Ban degintos medienos produktų asortimentą - lentos, plytelės ir fasadinės dangos.",
+      "ogTitle": "Produktai - Shou Sugi Ban - Yakiwood"
+    },
+    "solutions": {
+      "title": "Sprendimai - Shou Sugi Ban Panaudojimai",
+      "description": "Tyrinėkite įvairius Shou Sugi Ban medienos panaudojimus - nuo fasadų iki interjero.",
+      "ogTitle": "Sprendimai - Yakiwood"
+    },
+    "projects": {
+      "title": "Projektai - Shou Sugi Ban Pavyzdžiai",
+      "description": "Peržiūrėkite mūsų atliktų Shou Sugi Ban projektų portfelį ir įkvėpkite savo projektui.",
+      "ogTitle": "Projektai - Yakiwood"
+    },
+    "news": {
+      "title": "Naujienos",
+      "description": "Skaitykite naujausias naujienas apie Shou Sugi Ban, mūsų projektus ir medienos apdorojimo naujienas.",
+      "ogTitle": "Naujienos - Yakiwood"
+    },
+    "faq": {
+      "title": "DUK",
+      "description": "Dažnai užduodami klausimai apie Shou Sugi Ban medienos produktus, priežiūrą ir montavimą.",
+      "ogTitle": "DUK - Yakiwood"
+    },
+    "home": {
+      "title": "Yakiwood - Shou Sugi Ban Degintas Medis Lietuvoje",
+      "description": "Aukščiausios kokybės Shou Sugi Ban degintos medienos produktai. Fasadai, interjeras, terasa - ekologiški ir ilgaamžiški sprendimai.",
+      "ogTitle": "Yakiwood - Shou Sugi Ban degintas medis"
+    }
+  },
+  "admin": {
+    "breadcrumb": {
+      "home": "Pradžia",
+      "admin": "Administravimas",
+      "dashboard": "Skydelis",
+      "products": "Produktai",
+      "projects": "Projektai",
+      "posts": "Įrašai",
+      "seo": "SEO",
+      "emailTemplates": "El. pašto šablonai",
+      "orders": "Užsakymai",
+      "inventory": "Atsargos",
+      "new": "Naujas",
+      "edit": "Redaguoti"
+    },
+    "main": {
+      "title": "Administravimo skydas",
+      "subtitle": "Tvarkykite produktus, projektus ir įrašus",
+      "loadSampleProducts": "Įkelti pavyzdinius produktus"
+    },
+    "tabs": {
+      "dashboard": "Skydelis",
+      "products": "Produktai",
+      "projects": "Projektai",
+      "posts": "Įrašai",
+      "seo": "SEO",
+      "emailTemplates": "El. pašto šablonai",
+      "badgeNew": "naujas"
+    },
+    "seo": {
+      "title": "SEO Valdymas",
+      "subtitle": "Stebėkite ir optimizuokite savo svetainės paieškos sistemų našumą",
+      "scanning": "Skenuojami puslapiai...",
+      "stats": {
+        "totalPages": "Iš viso puslapių",
+        "averageScore": "Vidutinis balas",
+        "goodSeo": "Geras SEO",
+        "needsWork": "Reikia darbo"
+      },
+      "filters": {
+        "all": "Visi Puslapiai",
+        "good": "Geri",
+        "warning": "Įspėjimai",
+        "errors": "Klaidos"
+      },
+      "table": {
+        "page": "Puslapis",
+        "title": "Pavadinimas",
+        "score": "Balas",
+        "issues": "Problemos",
+        "actions": "Veiksmai",
+        "noTitle": "Nėra pavadinimo"
+      },
+      "actions": {
+        "viewDetails": "Peržiūrėti detaliai",
+        "exportJson": "Eksportuoti JSON"
+      },
+      "noPages": "Nėra puslapių atitinkančių pasirinktą filtrą",
+      "seoScore": "SEO Balas"
+    },
+    "emailTemplates": {
+      "title": "El. pašto šablonai",
+      "subtitle": "El. prekybos el. pašto šablonų valdymas ir peržiūra",
+      "availableTemplates": "Prieinami šablonai",
+      "categories": {
+        "transactional": "Sandoriai",
+        "marketing": "Rinkodara",
+        "customerService": "Klientų aptarnavimas"
+      },
+      "subjectLine": "Temos eilutė:",
+      "htmlPreview": "HTML Peržiūra",
+      "actions": {
+        "sendTest": "Siųsti bandomąjį",
+        "copyHtml": "Kopijuoti HTML"
+      },
+      "sampleData": "Pavyzdiniai duomenys",
+      "selectTemplate": "Pasirinkite šabloną",
+      "selectTemplateDescription": "Pasirinkite el. pašto šabloną iš sąrašo peržiūrai"
+    },
+    "products": {
+      "title": "Produktų valdymas",
+      "subtitle": "Valdykite produktus, variantas ir atsargas",
+      "newProduct": "Naujas produktas",
+      "newProductDesc": "Sukurkite naują produktą su variantais",
+      "editProduct": "Redaguoti produktą",
+      "editProductDesc": "Atnaujinkite produkto informaciją ir variantas"
+    }
   }
 }

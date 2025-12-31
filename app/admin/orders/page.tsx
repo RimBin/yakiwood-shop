@@ -158,9 +158,9 @@ export default function AdminOrdersPage() {
     <>
       <Breadcrumbs
         items={[
-          { label: 'Homepage', href: '/' },
-          { label: 'Admin', href: '/admin' },
-          { label: 'Orders' },
+          { label: 'Pradžia', href: '/' },
+          { label: 'Administravimas', href: '/admin' },
+          { label: 'Užsakymai' },
         ]}
       />
 

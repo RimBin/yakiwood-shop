@@ -52,9 +52,9 @@ export default async function AdminProductsPage() {
     <div className="min-h-screen bg-[#FAFAFA]">
       <Breadcrumbs
         items={[
-          { label: 'Homepage', href: '/' },
-          { label: 'Admin', href: '/admin' },
-          { label: 'Products' },
+          { label: 'Pradžia', href: '/' },
+          { label: 'Administravimas', href: '/admin' },
+          { label: 'Produktai' },
         ]}
       />
 

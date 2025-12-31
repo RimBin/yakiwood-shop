@@ -47,10 +47,10 @@ export default async function EditProductPage({ params }: PageProps) {
     <div className="min-h-screen bg-[#FAFAFA]">
       <Breadcrumbs
         items={[
-          { label: 'Homepage', href: '/' },
-          { label: 'Admin', href: '/admin' },
-          { label: 'Products', href: '/admin/products' },
-          { label: 'Edit' },
+          { label: 'Pradžia', href: '/' },
+          { label: 'Administravimas', href: '/admin' },
+          { label: 'Produktai', href: '/admin/products' },
+          { label: 'Redaguoti' },
         ]}
       />
 

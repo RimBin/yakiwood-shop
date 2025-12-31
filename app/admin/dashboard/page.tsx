@@ -184,9 +184,9 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#EAEAEA]">
       <Breadcrumbs
         items={[
-          { label: 'Homepage', href: '/' },
-          { label: 'Admin', href: '/admin' },
-          { label: 'Dashboard' },
+          { label: 'Pradžia', href: '/' },
+          { label: 'Administravimas', href: '/admin' },
+          { label: 'Skydelis' },
         ]}
       />
 

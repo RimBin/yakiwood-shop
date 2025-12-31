@@ -32,24 +32,24 @@ export default function EmailTemplatesAdmin() {
   };
 
   const categories = [
-    { id: 'transactional' as const, name: 'Sandoriai', color: 'bg-blue-100 text-blue-800' },
-    { id: 'marketing' as const, name: 'Rinkodara', color: 'bg-green-100 text-green-800' },
-    { id: 'customer-service' as const, name: 'Klientų aptarnavimas', color: 'bg-purple-100 text-purple-800' },
+    { id: 'transactional' as const, name: 'Transactional', color: 'bg-blue-100 text-blue-800' },
+    { id: 'marketing' as const, name: 'Marketing', color: 'bg-green-100 text-green-800' },
+    { id: 'customer-service' as const, name: 'Customer Service', color: 'bg-purple-100 text-purple-800' },
   ];
 
   return (
     <>
-      <Breadcrumbs items={[{ label: 'Pradžia', href: '/' }, { label: 'Administravimas', href: '/admin' }, { label: 'El. pašto šablonai' }]} />
+      <Breadcrumbs items={[{ label: 'Homepage', href: '/' }, { label: 'Admin', href: '/admin' }, { label: 'Email Templates' }]} />
       
       <div className="min-h-screen bg-[#E1E1E1] py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
         <div className="max-w-[1400px] mx-auto">
           {/* Header */}
           <div className="mb-[clamp(32px,4vw,48px)]">
             <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616] mb-[8px]">
-              El. pašto šablonai
+              Email Templates
             </h1>
             <p className="font-['Outfit'] font-light text-[clamp(14px,1.5vw,16px)] text-[#535353]">
-              El. prekybos el. pašto šablonų valdymas ir peržiūra
+              E-commerce email template management and preview
             </p>
           </div>
 
@@ -59,7 +59,7 @@ export default function EmailTemplatesAdmin() {
               <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(20px,3vw,32px)]">
                 <div className="mb-[24px]">
                   <h2 className="font-['Outfit'] text-[11px] font-medium text-[#535353] uppercase tracking-[0.55px]">
-                    Prieinami šablonai ({EMAIL_TEMPLATES.length})
+                    Available Templates ({EMAIL_TEMPLATES.length})
                   </h2>
                 </div>
 
@@ -76,7 +76,7 @@ export default function EmailTemplatesAdmin() {
                         {category.name}
                       </h3>
                       <div className="space-y-[8px]">
-                        {templates.map((template) => (
+                        {templates.map((template: EmailTemplate) => (
                           <button
                             key={template.id}
                             onClick={() => handlePreview(template)}
@@ -108,7 +108,7 @@ export default function EmailTemplatesAdmin() {
             {/* Preview */}
             <div className="lg:col-span-2">
               {selectedTemplate ? (
-                <div className="bg-[#EAEAEA] rounded-[24px] overflow-hidden">
+                <div className="bg-white rounded-[24px] overflow-hidden">
                   <div className="bg-[#161616] text-white p-[clamp(20px,3vw,32px)]">
                     <div className="flex items-start justify-between mb-[20px]">
                       <div className="flex-1">
@@ -176,7 +176,7 @@ export default function EmailTemplatesAdmin() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(40px,6vw,80px)] text-center">
+                <div className="bg-white rounded-[24px] p-[clamp(40px,6vw,80px)] text-center">
                   <div className="text-[#BBBBBB] text-[clamp(48px,8vw,72px)] mb-[16px]">📧</div>
                   <h3 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616] mb-[8px]">
                     Select a Template
@@ -194,7 +194,7 @@ export default function EmailTemplatesAdmin() {
             {categories.map((category) => {
               const templates = getEmailTemplatesByCategory(category.id);
               return (
-                <div key={category.id} className="bg-[#EAEAEA] rounded-[24px] p-[clamp(20px,3vw,24px)]">
+                <div key={category.id} className="bg-white rounded-[24px] p-[clamp(20px,3vw,24px)]">
                   <div className="flex items-center justify-between mb-[16px]">
                     <h3 className="font-['DM_Sans'] font-medium text-[14px] tracking-[-0.28px] text-[#161616]">
                       {category.name}
@@ -204,7 +204,7 @@ export default function EmailTemplatesAdmin() {
                     </span>
                   </div>
                   <div className="space-y-[6px]">
-                    {templates.map((template) => (
+                    {templates.map((template: EmailTemplate) => (
                       <div key={template.id} className="font-['Outfit'] text-[12px] text-[#535353]">
                         • {template.name}
                       </div>

@@ -22,6 +22,10 @@ export interface SanityProduct {
     thickness?: number;
     length?: number;
   };
+  specifications?: Array<{
+    label: string;
+    value: string;
+  }>;
   woodType?: string;
   isActive?: boolean;
 }
@@ -47,15 +51,22 @@ export interface Product {
     thickness?: number;
     length?: number;
   };
+  specifications?: Array<{
+    label: string;
+    value: string;
+  }>;
   woodType?: string;
 }
 
 /**
  * Fetch all active products from Sanity
+ * NOTE: Currently includes draft products for development
  */
 export async function fetchProducts(): Promise<Product[]> {
   try {
-    const query = groq`*[_type == "product" && !(_id in path("drafts.**"))] | order(_createdAt desc) {
+    // Include both published and draft products
+    // Drafts are preferred over published versions with the same ID
+    const query = groq`*[_type == "product"] | order(_createdAt desc) {
       _id,
       name,
       slug,
@@ -65,15 +76,33 @@ export async function fetchProducts(): Promise<Product[]> {
       images,
       finishes,
       dimensions,
+      specifications,
       woodType
     }`;
 
+    console.log('Fetching products from Sanity...');
     const products = await client.fetch<SanityProduct[]>(query);
+    console.log(`Fetched ${products.length} products from Sanity`);
+
+    if (products.length === 0) {
+      console.warn('No products found in Sanity. Make sure products are created and published in Sanity Studio.');
+    }
 
     return products.map(transformSanityProduct);
   } catch (error) {
     console.error('Error fetching products from Sanity:', error);
-    return [];
+    if (error instanceof Error) {
+      console.error('Error details:', error.message);
+      
+      // Check if it's an authentication error
+      if (error.message.includes('Request error') || error.message.includes('401') || error.message.includes('403')) {
+        console.error('\n⚠️  SANITY API TOKEN ISSUE:');
+        console.error('Make sure SANITY_API_TOKEN is set in .env.local');
+        console.error('Get your token from: https://sanity.io/manage/personal/tokens');
+        console.error('Or run: npx sanity manage');
+      }
+    }
+    throw error; // Re-throw to allow component to handle
   }
 }
 
@@ -92,6 +121,7 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
       images,
       finishes,
       dimensions,
+      specifications,
       woodType
     }`;
 
@@ -189,6 +219,7 @@ function transformSanityProduct(sanityProduct: SanityProduct): Product {
     description: sanityProduct.description,
     finishes,
     dimensions: sanityProduct.dimensions,
+    specifications: sanityProduct.specifications,
     woodType: sanityProduct.woodType,
   };
 }

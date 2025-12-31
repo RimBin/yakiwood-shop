@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import type { Product } from '@/lib/products';
+import type { Product } from '@/lib/products.sanity';
 
 interface ProductTabsProps {
   product: Product;
@@ -14,8 +14,8 @@ export default function ProductTabs({ product }: ProductTabsProps) {
 
   const tabs = [
     { id: 'description' as TabType, label: 'Aprašymas', enabled: true },
-    { id: 'specifications' as TabType, label: 'Specifikacijos', enabled: !!product.specifications },
-    { id: 'installation' as TabType, label: 'Montavimas', enabled: !!product.installationGuide },
+    { id: 'specifications' as TabType, label: 'Specifikacijos', enabled: !!product.specifications && product.specifications.length > 0 },
+    { id: 'installation' as TabType, label: 'Montavimas', enabled: false },
     { id: 'reviews' as TabType, label: 'Atsiliepimai', enabled: false }, // Future feature
   ];
 
@@ -50,34 +50,9 @@ export default function ProductTabs({ product }: ProductTabsProps) {
           <div className="prose max-w-none">
             <div 
               className="font-['Outfit'] text-[#161616] leading-relaxed space-y-4"
-              dangerouslySetInnerHTML={{ __html: product.description }}
-            />
-            
-            {product.features && product.features.length > 0 && (
-              <div className="mt-8">
-                <h3 className="font-['DM_Sans'] text-lg font-medium mb-4">Pagrindinės savybės:</h3>
-                <ul className="space-y-2">
-                  {product.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <svg 
-                        className="w-5 h-5 text-[#161616] mt-0.5 flex-shrink-0" 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor"
-                      >
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          strokeWidth={2} 
-                          d="M5 13l4 4L19 7" 
-                        />
-                      </svg>
-                      <span className="font-['Outfit'] text-[#161616]">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            >
+              {product.description}
+            </div>
           </div>
         )}
 
@@ -86,18 +61,18 @@ export default function ProductTabs({ product }: ProductTabsProps) {
           <div className="grid gap-4">
             <table className="w-full border-collapse">
               <tbody>
-                {Object.entries(product.specifications).map(([key, value], index) => (
+                {product.specifications.map((spec, index) => (
                   <tr 
-                    key={key}
+                    key={spec.label}
                     className={`border-b border-[#EAEAEA] ${
                       index % 2 === 0 ? 'bg-[#F9F9F9]' : 'bg-white'
                     }`}
                   >
                     <td className="py-4 px-6 font-['DM_Sans'] font-medium text-[#161616] w-1/3">
-                      {key}
+                      {spec.label}
                     </td>
                     <td className="py-4 px-6 font-['Outfit'] text-[#535353]">
-                      {value}
+                      {spec.value}
                     </td>
                   </tr>
                 ))}
@@ -119,40 +94,11 @@ export default function ProductTabs({ product }: ProductTabsProps) {
         )}
 
         {/* Installation Tab */}
-        {activeTab === 'installation' && product.installationGuide && (
-          <div className="space-y-6">
-            <div 
-              className="prose max-w-none font-['Outfit'] text-[#161616] leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: product.installationGuide }}
-            />
-
-            {/* Installation tips */}
-            <div className="mt-8 p-6 bg-[#FFF8E1] rounded-[24px] border border-[#FFE082]">
-              <div className="flex gap-3">
-                <svg 
-                  className="w-6 h-6 text-[#F57C00] flex-shrink-0" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
-                  />
-                </svg>
-                <div>
-                  <h4 className="font-['DM_Sans'] font-medium text-[#161616] mb-2">
-                    Svarbu žinoti:
-                  </h4>
-                  <p className="font-['Outfit'] text-sm text-[#535353]">
-                    Jei turite klausimų dėl montavimo ar reikia profesionalios pagalbos, 
-                    susisiekite su mumis. Siūlome konsultacijas ir montavimo paslaugas.
-                  </p>
-                </div>
-              </div>
-            </div>
+        {activeTab === 'installation' && (
+          <div className="text-center py-12">
+            <p className="font-['Outfit'] text-[#7C7C7C]">
+              Montavimo instrukcijos bus pridėtos greitai.
+            </p>
           </div>
         )}
 
