@@ -26,8 +26,8 @@ export const productType = defineType({
     defineField({
       name: 'description',
       title: 'Description',
-      type: 'text',
-      rows: 4,
+      type: 'blockContent',
+      description: 'Rich text description with formatting, links, and lists',
     }),
     defineField({
       name: 'category',

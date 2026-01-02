@@ -4,16 +4,17 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared';
+import { fetchProducts, Product } from '@/lib/products.sanity';
 
 interface Product {
   id: string;
   name: string;
   slug: string;
   category: string;
-  wood_type?: 'larch' | 'spruce';
-  base_price: number;
+  woodType?: 'larch' | 'spruce';
+  basePrice: number;
   image?: string;
-  created_at?: string;
+  price: number;
 }
 
 export default function ProductsPage() {
@@ -25,16 +26,10 @@ export default function ProductsPage() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        console.log('Loading products from API...');
-        
-        const response = await fetch('/api/products');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('Products loaded:', data?.length || 0);
-        setAllProducts(data || []);
+        console.log('Loading products from Sanity...');
+        const products = await fetchProducts();
+        console.log('Products loaded:', products.length);
+        setAllProducts(products);
         setError(null);
       } catch (error) {
         console.error('Error loading products:', error);
@@ -56,7 +51,7 @@ export default function ProductsPage() {
   const products =
     activeFilter === 'all'
       ? allProducts
-      : allProducts.filter((p) => p.wood_type === activeFilter);
+      : allProducts.filter((p) => p.woodType === activeFilter);
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
@@ -163,19 +158,19 @@ export default function ProductsPage() {
               >
                 {product.name}
               </p>
-              {product.wood_type && (
+              {product.woodType && (
                 <p
                   className="font-['DM_Sans'] font-normal text-[14px] leading-[1.2] text-[#535353] tracking-[-0.28px]"
                   style={{ fontVariationSettings: "'opsz' 14" }}
                 >
-                  {product.wood_type === 'larch' ? 'Maumedis' : 'Eglė'}
+                  {product.woodType === 'larch' ? 'Maumedis' : 'Eglė'}
                 </p>
               )}
               <p
                 className="font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#535353] tracking-[-0.32px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                From {product.base_price} €
+                From {product.price} €
               </p>
             </Link>
           ))}
