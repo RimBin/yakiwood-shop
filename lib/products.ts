@@ -144,19 +144,6 @@ export async function getRelatedProducts(
 }
 
 /**
- * Calculate final product price with modifiers
- */
-export function calculateProductPrice(
-  basePrice: number,
-  colorModifier: number = 0,
-  finishModifier: number = 0,
-  quantity: number = 1
-): number {
-  const subtotal = basePrice + colorModifier + finishModifier;
-  return subtotal * quantity;
-}
-
-/**
  * Generate JSON-LD Product schema for SEO
  */
 export function generateProductSchema(product: Product): ProductSchema {

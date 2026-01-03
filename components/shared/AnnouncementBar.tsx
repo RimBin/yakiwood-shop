@@ -1,18 +1,19 @@
 import Image from 'next/image';
+import { getAsset } from '@/lib/assets';
 
 export default function AnnouncementBar() {
   const features = [
     {
-      icon: '/assets/icons/package.svg',
+      icon: getAsset('imgIconTruck'),
       text: 'Fast delivery',
     },
     {
-      icon: '/assets/icons/coins.svg',
-      text: 'money back garantee',
+      icon: getAsset('imgIconCoins'),
+      text: 'Money back guarantee',
     },
     {
-      icon: '/assets/icons/plant.svg',
-      text: 'eco-friendly',
+      icon: getAsset('imgIconPlant'),
+      text: 'Eco-friendly',
     },
   ];
 

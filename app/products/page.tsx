@@ -4,21 +4,11 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared';
-import { fetchProducts, Product } from '@/lib/products.sanity';
-
-interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  category: string;
-  woodType?: 'larch' | 'spruce';
-  basePrice: number;
-  image?: string;
-  price: number;
-}
+import { fetchProducts, type Product } from '@/lib/products.sanity';
 
 export default function ProductsPage() {
-  const [activeFilter, setActiveFilter] = useState<'all' | string>('all');
+  const [activeUsage, setActiveUsage] = useState<'all' | string>('all');
+  const [activeWood, setActiveWood] = useState<'all' | string>('all');
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,16 +32,25 @@ export default function ProductsPage() {
     loadProducts();
   }, []);
 
-  const filters = [
-    { id: 'all', label: 'All woods' },
-    { id: 'spruce', label: 'Spruce wood' },
-    { id: 'larch', label: 'Larch wood' },
+  const usageFilters = [
+    { id: 'all', label: 'Visi sprendimai' },
+    { id: 'facade', label: 'Fasadų sistemos' },
+    { id: 'terrace', label: 'Terasų sistemos' },
   ];
 
-  const products =
-    activeFilter === 'all'
-      ? allProducts
-      : allProducts.filter((p) => p.woodType === activeFilter);
+  const woodFilters = [
+    { id: 'all', label: 'Visa mediena' },
+    { id: 'spruce', label: 'Deginta eglė' },
+    { id: 'larch', label: 'Degintas maumedis' },
+  ];
+
+  const products = allProducts.filter((product) => {
+    const matchesUsage = activeUsage === 'all' || product.category === activeUsage;
+    const matchesWood = activeWood === 'all' || product.woodType === activeWood;
+    return matchesUsage && matchesWood;
+  });
+
+  const activeUsageLabel = usageFilters.find((filter) => filter.id === activeUsage)?.label ?? usageFilters[0].label;
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
@@ -62,33 +61,50 @@ export default function ProductsPage() {
             className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] text-[#161616] tracking-[-2.8px] md:tracking-[-6.4px]"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
-            All woods
+            {activeUsageLabel}
           </h1>
           <p
             className="font-['DM_Sans'] font-normal text-[18px] md:text-[32px] leading-[1.1] text-[#161616] tracking-[-0.72px] md:tracking-[-1.28px]"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
-            (18)
+            ({products.length})
           </p>
         </div>
       </PageCover>
 
       {/* Filters */}
       <div className="w-full max-w-[1440px] mx-auto px-[16px] md:px-[40px] py-[24px]">
-        <div className="flex gap-[8px] items-center flex-wrap">
-          {filters.map((filter) => (
-            <button
-              key={filter.id}
-              onClick={() => setActiveFilter(filter.id)}
-              className={`h-[32px] px-[12px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase leading-[1.3] transition-colors ${
-                activeFilter === filter.id
-                  ? 'bg-[#161616] text-white'
-                  : 'border border-[#BBBBBB] bg-transparent text-[#161616] hover:border-[#161616]'
-              }`}
-            >
-              {filter.label}
-            </button>
-          ))}
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-[8px] items-center flex-wrap">
+            {usageFilters.map((filter) => (
+              <button
+                key={filter.id}
+                onClick={() => setActiveUsage(filter.id)}
+                className={`h-[32px] px-[12px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase leading-[1.3] transition-colors ${
+                  activeUsage === filter.id
+                    ? 'bg-[#161616] text-white'
+                    : 'border border-[#BBBBBB] bg-transparent text-[#161616] hover:border-[#161616]'
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-[8px] items-center flex-wrap">
+            {woodFilters.map((filter) => (
+              <button
+                key={filter.id}
+                onClick={() => setActiveWood(filter.id)}
+                className={`h-[28px] px-[12px] rounded-[100px] font-['Outfit'] text-[11px] tracking-[0.5px] uppercase leading-[1.3] transition-colors ${
+                  activeWood === filter.id
+                    ? 'bg-[#161616] text-white'
+                    : 'border border-[#BBBBBB] bg-transparent text-[#161616] hover:border-[#161616]'
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -112,7 +128,7 @@ export default function ProductsPage() {
               {error}
             </p>
             <p className="font-['Outfit'] text-[#7C7C7C] mb-6">
-              Check console for details. <Link href="/contact" className="text-[#161616] underline">Contact us</Link> if the problem persists.
+              Check console for details. <Link href="/kontaktai" className="text-[#161616] underline">Susisiekite</Link> if the problem persists.
             </p>
             <button 
               onClick={() => window.location.reload()} 
@@ -132,7 +148,7 @@ export default function ProductsPage() {
               No products yet
             </h3>
             <p className="font-['Outfit'] text-[#7C7C7C] mb-6">
-              Products will be added soon. If you have any questions, <Link href="/contact" className="text-[#161616] underline">contact us</Link>.
+              Products will be added soon. If you have any questions, <Link href="/kontaktai" className="text-[#161616] underline">susisiekite</Link>.
             </p>
           </div>
         ) : (
@@ -140,7 +156,7 @@ export default function ProductsPage() {
             {products.map((product) => (
             <Link
               key={product.id}
-              href={`/products/${product.slug}`}
+              href={`/produktai/${product.slug}`}
               className="flex flex-col gap-[8px] group"
             >
               <div className="relative w-full h-[250px] border border-[#161616] border-opacity-30 overflow-hidden">
@@ -158,19 +174,19 @@ export default function ProductsPage() {
               >
                 {product.name}
               </p>
-              {product.woodType && (
+              {(product.usageLabel || product.woodLabel) && (
                 <p
                   className="font-['DM_Sans'] font-normal text-[14px] leading-[1.2] text-[#535353] tracking-[-0.28px]"
                   style={{ fontVariationSettings: "'opsz' 14" }}
                 >
-                  {product.woodType === 'larch' ? 'Maumedis' : 'Eglė'}
+                  {[product.usageLabel, product.woodLabel].filter(Boolean).join(' • ')}
                 </p>
               )}
               <p
                 className="font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#535353] tracking-[-0.32px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                From {product.price} €
+                Nuo {product.price.toFixed(0)} €
               </p>
             </Link>
           ))}
@@ -181,7 +197,7 @@ export default function ProductsPage() {
         {!isLoading && products.length > 0 && (
           <div className="flex justify-center mt-[64px]">
             <button className="h-[48px] px-[40px] py-[10px] bg-[#161616] text-white rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:opacity-90 transition-opacity">
-              Load more
+              Rodyti daugiau
             </button>
           </div>
         )}

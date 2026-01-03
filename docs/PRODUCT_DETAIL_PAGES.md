@@ -6,15 +6,15 @@ Comprehensive product detail pages with 3D configurator integration, image galle
 ## Created/Updated Files
 
 ### Core Library Functions
-- **`lib/products.ts`** - Product utility functions
-  - `fetchProduct()` - Fetch product from Supabase by slug
-  - `getRelatedProducts()` - Get related products by category/wood type
-  - `calculateProductPrice()` - Calculate price with modifiers
-  - `generateProductSchema()` - Generate JSON-LD for SEO
-  - `generateBreadcrumbSchema()` - Generate breadcrumb schema
-  - `getProductColors()` - Fetch available colors
-  - `getProductFinishes()` - Fetch available finishes
-  - `isVariantInStock()` - Check stock availability
+- **`lib/products.sanity.ts`** – Sanity-backed product helpers
+  - `fetchProducts()` – Fetch all public products from Sanity
+  - `fetchProductBySlug()` – Resolve a single product (used by product detail pages)
+  - `fetchRelatedProducts()` – Filter related inventory by usage/wood type
+  - `transformSanityProduct()` + `blocksToPlainText()` – Map GROQ responses into strongly typed objects
+- **`lib/pricing.ts`** – Pricing helper utilities
+  - `calculateProductPrice()` – Combine base price + color/profile modifiers + quantity
+- **`lib/seo/structured-data.ts`** – SEO schema helpers
+  - `generateProductSchema()` and `generateBreadcrumbSchema()` – JSON-LD builders consumed inside the product route
 
 ### Components
 
@@ -139,67 +139,37 @@ Comprehensive product detail pages with 3D configurator integration, image galle
 ✅ Share functionality
 ✅ Accessibility features
 
-## Database Schema Requirements
+## Content Schema Requirements
 
-The implementation expects the following Supabase tables:
+Products now live entirely in **Sanity** (`sanity/schemaTypes/productType.ts`). Each document represents a single "usage + wood" combination and exposes all UI-ready data needed for the configurator, pricing, and SEO.
 
-### `products`
-```sql
-- id (uuid, primary key)
-- name (text)
-- slug (text, unique)
-- description (text)
-- short_description (text)
-- base_price (numeric)
-- price (numeric)
-- sku (text)
-- category (text)
-- wood_type (text)
-- image_url (text)
-- image (text)
-- specifications (jsonb)
-- features (text[])
-- installation_guide (text)
-- is_active (boolean)
-- created_at (timestamp)
-- updated_at (timestamp)
-```
+### Product fields
+- `name` – Marketing title, displayed throughout UI and structured data.
+- `slug` – Auto-generated from the name; used for `/produktai/[slug]` routes.
+- `description` – Portable Text block content. Both plain text (for previews/meta) and rich text (ProductTabs) are derived from it.
+- `category` – Usage type (`facade` or `terrace`). Drives filtering, related products, and localized labels.
+- `woodType` – `larch` or `spruce`. Used in filters, labels, and related product matching.
+- `basePrice` – Entry-level EUR price per unit before modifiers.
+- `images` – Array of product/gallery assets. The first image becomes the OG preview.
+- `dimensions` – Optional width/length/thickness metadata shown beside specifications.
+- `specifications` – Array of `{ label, value }` rows rendered inside the Specifications tab.
+- `featured` / `inStock` – Flags powering marketing placements and button states.
 
-### `product_images`
-```sql
-- id (uuid, primary key)
-- product_id (uuid, foreign key)
-- image_url (text)
-- alt_text (text)
-- is_primary (boolean)
-- display_order (integer)
-```
+### Color variants (`colorVariants` array)
+- `name`, optional `slug` – Display label + unique identifier.
+- `hex` – Used for swatch fallback when no image is provided.
+- `image` – Texture/swatch image displayed in the configurator and selectors.
+- `description` – Short marketing note.
+- `priceModifier` – EUR delta applied on top of `basePrice` via `calculateProductPrice()`.
 
-### `product_variants`
-```sql
-- id (uuid, primary key)
-- product_id (uuid, foreign key)
-- sku (text)
-- color_id (uuid)
-- finish_id (uuid)
-- width (numeric)
-- length (numeric)
-- price_modifier (numeric)
-- stock_quantity (integer)
-- is_available (boolean)
-```
+### Profile variants (`profiles` array)
+- `name` + optional `code` – Display label and SKU reference.
+- `description` – Rounded-up marketing text; combined with dimension info in the UI.
+- `dimensions` – Width / thickness / length numbers rendered inline.
+- `image` – Diagram or silhouette for richer selectors.
+- `priceModifier` – EUR delta stacked with the color modifier.
 
-### `product_configurations`
-```sql
-- id (uuid, primary key)
-- product_id (uuid, foreign key)
-- type (text) -- 'color' or 'finish'
-- name (text)
-- value (text) -- hex color for colors
-- description (text)
-- image_url (text)
-- price_modifier (numeric)
-```
+All of the above fields are fetched via GROQ and transformed by `lib/products.sanity.ts`, ensuring frontend components only depend on one strongly typed Product interface.
 
 ## Usage
 
@@ -211,30 +181,35 @@ The implementation expects the following Supabase tables:
 
 ### Programmatic Usage
 ```tsx
-import { fetchProduct } from '@/lib/products';
+import { fetchProductBySlug, fetchRelatedProducts } from '@/lib/products.sanity';
 
-const product = await fetchProduct('product-slug');
+const product = await fetchProductBySlug('product-slug');
+
 if (product) {
-  // Use product data
+  const related = await fetchRelatedProducts({
+    usageType: product.category,
+    woodType: product.woodType,
+    excludeSlug: product.slug,
+  });
+
+  // Feed data into ProductDetailClient, ProductTabs, RelatedProducts, etc.
 }
 ```
 
-### Add Custom Colors/Finishes
-```tsx
-// In Supabase, add to product_configurations table
-INSERT INTO product_configurations (
-  product_id, type, name, value, price_modifier
-) VALUES (
-  'product-uuid', 'color', 'Charcoal', '#1a1410', 5.00
-);
-```
+### Add / Update Colors & Profiles
+1. Open **/studio** (embedded Sanity Studio) and pick the product document.
+2. Use the **Color Variants** array to add or reorder swatches (name, slug, hex/image, modifier).
+3. Use the **Profile Variants** array to maintain dimensional profiles (name, code, dimensions, modifier).
+4. Publish the document – GROQ queries automatically surface the updated entries in `fetchProductBySlug()` results.
 
 ## Configuration
 
 ### Environment Variables
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-key
+NEXT_PUBLIC_SANITY_PROJECT_ID=your-project-id
+NEXT_PUBLIC_SANITY_DATASET=production
+NEXT_PUBLIC_SANITY_API_VERSION=2025-12-10
+SANITY_API_TOKEN=write-token-for-server-side-queries
 ```
 
 ### Google Analytics (Optional)
@@ -299,14 +274,14 @@ All components use the brand design system:
 ## Troubleshooting
 
 ### Product Not Found
-- Ensure `slug` in URL matches database
-- Check `is_active = true` in database
-- Verify Supabase connection
+- Confirm the product document exists and is published in Sanity
+- Ensure the `slug` matches the route and that `category` / `woodType` are set
+- Verify Sanity env variables (`NEXT_PUBLIC_SANITY_*`, `SANITY_API_TOKEN`) are loaded
 
 ### Images Not Loading
-- Check image URLs in database
-- Verify Next.js image domains in `next.config.ts`
-- Check file permissions
+- Inspect the `images` array in Sanity and confirm assets are published (or use local `/public/assets` placeholders)
+- Verify Next.js remote patterns / local asset paths match the new URLs
+- Re-run `npm run assets:download` if referencing manifest-driven local files
 
 ### 3D Not Loading
 - Ensure `@react-three/fiber` and `@react-three/drei` are installed
@@ -337,7 +312,7 @@ All components use the brand design system:
 ## Support
 
 For issues or questions:
-1. Check Supabase data structure
+1. Check Sanity Studio content & publish state
 2. Verify environment variables
 3. Check browser console for errors
 4. Review component props

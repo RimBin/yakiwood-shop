@@ -2,10 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import type { ProductImage } from '@/lib/products';
+
+interface GalleryImage {
+  id: string;
+  url: string;
+  alt?: string;
+  order?: number;
+}
 
 interface ImageGalleryProps {
-  images: ProductImage[];
+  images: GalleryImage[];
   productName: string;
 }
 
@@ -15,7 +21,7 @@ export default function ImageGallery({ images, productName }: ImageGalleryProps)
   const [isZoomed, setIsZoomed] = useState(false);
 
   // Sort images by order
-  const sortedImages = [...images].sort((a, b) => a.order - b.order);
+  const sortedImages = [...images].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const selectedImage = sortedImages[selectedIndex] || sortedImages[0];
 
   // Keyboard navigation

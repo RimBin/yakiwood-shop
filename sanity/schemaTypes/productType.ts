@@ -31,16 +31,15 @@ export const productType = defineType({
     }),
     defineField({
       name: 'category',
-      title: 'Category',
+      title: 'Usage Type',
+      description: 'Primary customer choice – fasadas (cladding) or terasa (decking)',
       type: 'string',
       options: {
         list: [
-          { title: 'Facades', value: 'facades' },
-          { title: 'Terraces', value: 'terraces' },
-          { title: 'Fences', value: 'fences' },
-          { title: 'Interiors', value: 'interiors' },
-          { title: 'Furniture', value: 'furniture' },
+          { title: 'Fasadams', value: 'facade' },
+          { title: 'Terasoms', value: 'terrace' },
         ],
+        layout: 'radio',
       },
       validation: (Rule) => Rule.required(),
     }),
@@ -76,33 +75,103 @@ export const productType = defineType({
       ],
     }),
     defineField({
-      name: 'finishes',
-      title: 'Available Finishes',
+      name: 'colorVariants',
+      title: 'Color Variants',
+      description: 'All available burnt tones for this usage + wood combination',
       type: 'array',
       of: [
         {
           type: 'object',
+          name: 'colorVariant',
           fields: [
             {
               name: 'name',
-              title: 'Finish Name',
+              title: 'Color Name',
               type: 'string',
+              validation: (Rule) => Rule.required(),
             },
             {
-              name: 'colorCode',
-              title: 'Color Code (hex)',
+              name: 'slug',
+              title: 'Color Slug',
+              type: 'slug',
+              options: {
+                source: 'name',
+                maxLength: 64,
+                slugify: (input: string) => slugify(input, 64),
+              },
+            },
+            {
+              name: 'hex',
+              title: 'HEX value',
               type: 'string',
             },
             {
               name: 'image',
-              title: 'Finish Image',
+              title: 'Swatch / sample image',
               type: 'image',
+              options: { hotspot: true },
+            },
+            {
+              name: 'description',
+              title: 'Short note',
+              type: 'text',
             },
             {
               name: 'priceModifier',
               title: 'Price Modifier (EUR)',
               type: 'number',
-              description: 'Additional cost for this finish',
+              description: 'Additional price to add on top of base price when this color is selected',
+            },
+          ],
+        },
+      ],
+    }),
+    defineField({
+      name: 'profiles',
+      title: 'Profile Variants',
+      description: 'Cross-section profiles (e.g. U15, Shadow, Deck board) available for this product',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          name: 'profileVariant',
+          fields: [
+            {
+              name: 'name',
+              title: 'Profile Name',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            },
+            {
+              name: 'code',
+              title: 'Profile Code',
+              type: 'string',
+            },
+            {
+              name: 'description',
+              title: 'Profile Description',
+              type: 'text',
+            },
+            {
+              name: 'dimensions',
+              title: 'Dimensions (mm)',
+              type: 'object',
+              fields: [
+                { name: 'width', title: 'Width', type: 'number' },
+                { name: 'thickness', title: 'Thickness', type: 'number' },
+                { name: 'length', title: 'Length', type: 'number' },
+              ],
+            },
+            {
+              name: 'image',
+              title: 'Profile Diagram',
+              type: 'image',
+              options: { hotspot: true },
+            },
+            {
+              name: 'priceModifier',
+              title: 'Price Modifier (EUR)',
+              type: 'number',
             },
           ],
         },
@@ -174,10 +243,11 @@ export const productType = defineType({
       media: 'images.0',
     },
     prepare({ title, category, woodType, media }) {
+      const usageLabel = category === 'facade' ? 'Fasadams' : category === 'terrace' ? 'Terasoms' : category;
       const woodTypeLabel = woodType === 'larch' ? 'Maumedis' : woodType === 'spruce' ? 'Eglė' : woodType;
       return {
         title,
-        subtitle: woodTypeLabel ? `${category} - ${woodTypeLabel}` : category,
+        subtitle: [usageLabel, woodTypeLabel].filter(Boolean).join(' • '),
         media,
       };
     },

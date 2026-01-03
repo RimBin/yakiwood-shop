@@ -1,21 +1,52 @@
 import { client } from '@/sanity/lib/client';
 import { urlFor } from '@/sanity/lib/image';
 import groq from 'groq';
+import type { PortableTextBlock } from 'sanity';
+
+const USAGE_TYPE_LABELS: Record<string, string> = {
+  facade: 'Fasadų dailylentės',
+  terrace: 'Terasų lentos',
+};
+
+const WOOD_TYPE_LABELS: Record<string, string> = {
+  larch: 'Maumedis',
+  spruce: 'Eglė',
+};
+
+interface SanityColorVariant {
+  _key?: string;
+  name: string;
+  slug?: { current: string };
+  hex?: string;
+  image?: any;
+  description?: string;
+  priceModifier?: number;
+}
+
+interface SanityProfileVariant {
+  _key?: string;
+  name: string;
+  code?: string;
+  description?: string;
+  priceModifier?: number;
+  image?: any;
+  dimensions?: {
+    width?: number;
+    thickness?: number;
+    length?: number;
+  };
+}
 
 export interface SanityProduct {
   _id: string;
   name: string;
   slug: { current: string };
-  description?: string;
+  description?: PortableTextBlock[];
   category: string;
   basePrice: number;
   images?: any[];
-  finishes?: Array<{
-    name: string;
-    colorCode?: string;
-    image?: any;
-    priceModifier?: number;
-  }>;
+  colorVariants?: SanityColorVariant[];
+  profiles?: SanityProfileVariant[];
   dimensions?: {
     width?: number;
     height?: number;
@@ -27,7 +58,30 @@ export interface SanityProduct {
     value: string;
   }>;
   woodType?: string;
-  isActive?: boolean;
+  inStock?: boolean;
+}
+
+export interface ProductColorVariant {
+  id: string;
+  name: string;
+  hex?: string;
+  image?: string;
+  description?: string;
+  priceModifier?: number;
+}
+
+export interface ProductProfileVariant {
+  id: string;
+  name: string;
+  code?: string;
+  description?: string;
+  priceModifier?: number;
+  dimensions?: {
+    width?: number;
+    thickness?: number;
+    length?: number;
+  };
+  image?: string;
 }
 
 export interface Product {
@@ -37,14 +91,14 @@ export interface Product {
   price: number;
   image: string;
   category: string;
+  usageLabel?: string;
+  woodType?: string;
+  woodLabel?: string;
   description?: string;
+  descriptionPortable?: PortableTextBlock[];
   images?: string[];
-  finishes?: Array<{
-    name: string;
-    colorCode?: string;
-    image?: string;
-    priceModifier?: number;
-  }>;
+  colors?: ProductColorVariant[];
+  profiles?: ProductProfileVariant[];
   dimensions?: {
     width?: number;
     height?: number;
@@ -55,7 +109,20 @@ export interface Product {
     label: string;
     value: string;
   }>;
-  woodType?: string;
+  inStock?: boolean;
+}
+
+function blocksToPlainText(blocks?: PortableTextBlock[]): string {
+  if (!blocks) return '';
+  return blocks
+    .map((block) => {
+      if (Array.isArray(block.children)) {
+        return block.children.map((child: any) => child.text).join('');
+      }
+      return '';
+    })
+    .join('\n\n')
+    .trim();
 }
 
 /**
@@ -74,10 +141,12 @@ export async function fetchProducts(): Promise<Product[]> {
       category,
       basePrice,
       images,
-      finishes,
+      colorVariants,
+      profiles,
       dimensions,
       specifications,
-      woodType
+      woodType,
+      inStock
     }`;
 
     console.log('Fetching products from Sanity...');
@@ -119,10 +188,12 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
       category,
       basePrice,
       images,
-      finishes,
+      colorVariants,
+      profiles,
       dimensions,
       specifications,
-      woodType
+      woodType,
+      inStock
     }`;
 
     const product = await client.fetch<SanityProduct>(query, { slug });
@@ -151,7 +222,8 @@ export async function fetchProductsByCategory(category: string): Promise<Product
       category,
       basePrice,
       images,
-      finishes,
+      colorVariants,
+      profiles,
       dimensions,
       woodType
     }`;
@@ -178,7 +250,8 @@ export async function fetchProductsByWoodType(woodType: string): Promise<Product
       category,
       basePrice,
       images,
-      finishes,
+      colorVariants,
+      profiles,
       dimensions,
       woodType
     }`;
@@ -199,14 +272,31 @@ function transformSanityProduct(sanityProduct: SanityProduct): Product {
   const firstImage = sanityProduct.images?.[0];
   const imageUrl = firstImage ? urlFor(firstImage).width(800).url() : '/assets/imgSpruce.png';
 
-  const images = sanityProduct.images?.map((img) => urlFor(img).width(800).url()) || [];
+  const images = sanityProduct.images?.map((img) => urlFor(img).width(1000).url()) || [];
 
-  const finishes = sanityProduct.finishes?.map((finish) => ({
-    name: finish.name,
-    colorCode: finish.colorCode,
-    image: finish.image ? urlFor(finish.image).width(400).url() : undefined,
-    priceModifier: finish.priceModifier || 0,
+  const colors = sanityProduct.colorVariants?.map((color, index) => ({
+    id: color._key || color.slug?.current || `${sanityProduct._id}-color-${index}`,
+    name: color.name,
+    hex: color.hex,
+    image: color.image ? urlFor(color.image).width(400).url() : undefined,
+    description: color.description,
+    priceModifier: color.priceModifier || 0,
   }));
+
+  const profiles = sanityProduct.profiles?.map((profile, index) => ({
+    id: profile._key || `${sanityProduct._id}-profile-${index}`,
+    name: profile.name,
+    code: profile.code,
+    description: profile.description,
+    priceModifier: profile.priceModifier || 0,
+    dimensions: profile.dimensions,
+    image: profile.image ? urlFor(profile.image).width(500).url() : undefined,
+  }));
+
+  const descriptionText = blocksToPlainText(sanityProduct.description);
+
+  const usageLabel = USAGE_TYPE_LABELS[sanityProduct.category] || sanityProduct.category;
+  const woodLabel = sanityProduct.woodType ? WOOD_TYPE_LABELS[sanityProduct.woodType] || sanityProduct.woodType : undefined;
 
   return {
     id: sanityProduct._id,
@@ -216,10 +306,47 @@ function transformSanityProduct(sanityProduct: SanityProduct): Product {
     image: imageUrl,
     images,
     category: sanityProduct.category,
-    description: sanityProduct.description,
-    finishes,
+    usageLabel,
+    woodType: sanityProduct.woodType,
+    woodLabel,
+    description: descriptionText,
+    descriptionPortable: sanityProduct.description,
+    colors,
+    profiles,
     dimensions: sanityProduct.dimensions,
     specifications: sanityProduct.specifications,
-    woodType: sanityProduct.woodType,
+    inStock: sanityProduct.inStock,
   };
+}
+
+export async function fetchRelatedProducts(params: {
+  usageType?: string;
+  woodType?: string;
+  excludeSlug: string;
+  limit?: number;
+}): Promise<Product[]> {
+  const { usageType, woodType, excludeSlug, limit = 4 } = params;
+
+  const query = groq`*[_type == "product" && slug.current != $excludeSlug && (!defined($usageType) || category == $usageType) && (!defined($woodType) || woodType == $woodType)] | order(_createdAt desc)[0...$limit] {
+    _id,
+    name,
+    slug,
+    description,
+    category,
+    basePrice,
+    images,
+    colorVariants,
+    profiles,
+    woodType,
+    inStock
+  }`;
+
+  const related = await client.fetch<SanityProduct[]>(query, {
+    usageType,
+    woodType,
+    excludeSlug,
+    limit,
+  });
+
+  return related.map(transformSanityProduct);
 }

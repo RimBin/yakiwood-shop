@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo/structured-data';
-import { fetchProductBySlug } from '@/lib/products.sanity';
+import { fetchProductBySlug, fetchRelatedProducts } from '@/lib/products.sanity';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
 
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
         },
       ],
       type: 'website',
-      url: `https://yakiwood.lt/products/${product.slug}`,
+      url: `https://yakiwood.lt/produktai/${product.slug}`,
     },
     twitter: {
       card: 'summary_large_image',
@@ -57,6 +57,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (!product) {
     notFound();
   }
+
+  const relatedProducts = await fetchRelatedProducts({
+    usageType: product.category,
+    woodType: product.woodType,
+    excludeSlug: product.slug,
+    limit: 4,
+  });
 
   // Transform to ProductInput for SEO schema
   const productInput = {
@@ -78,7 +85,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const breadcrumbItems = [
     { name: 'Pradžia', url: 'https://yakiwood.lt' },
     { name: 'Produktai', url: 'https://yakiwood.lt/produktai' },
-    { name: product.name, url: `https://yakiwood.lt/products/${product.slug}` },
+    { name: product.name, url: `https://yakiwood.lt/produktai/${product.slug}` },
   ];
   const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems);
 
@@ -95,7 +102,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       />
 
       {/* Client Component with product data */}
-      <ProductDetailClient product={product} />
+      <ProductDetailClient product={product} relatedProducts={relatedProducts} />
     </>
   );
 }

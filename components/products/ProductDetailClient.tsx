@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/cart/store';
-import type { Product } from '@/lib/products.sanity';
-import type { Color, Finish } from '@/lib/products';
-import { calculateProductPrice, getProductColors, getProductFinishes } from '@/lib/products';
-import { Breadcrumbs } from '@/components/ui';
+import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/products.sanity';
+import { calculateProductPrice } from '@/lib/pricing';
 import ImageGallery from './ImageGallery';
 import ProductTabs from './ProductTabs';
 import RelatedProducts from './RelatedProducts';
@@ -14,17 +12,14 @@ import Konfiguratorius3D from '@/components/Konfiguratorius3D';
 
 interface ProductDetailClientProps {
   product: Product;
+  relatedProducts: Product[];
 }
 
-export default function ProductDetailClient({ product }: ProductDetailClientProps) {
-  const [selectedColor, setSelectedColor] = useState<Color | null>(null);
-  const [selectedFinish, setSelectedFinish] = useState<Finish | null>(null);
+export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
-  const [show3D, setShow3D] = useState(false);
-  const [availableColors, setAvailableColors] = useState<Color[]>([]);
-  const [availableFinishes, setAvailableFinishes] = useState<Finish[]>([]);
-  const [loading3D, setLoading3D] = useState(false);
+  const show3D = false;
+  const loading3D = false;
   const [showSuccess, setShowSuccess] = useState(false);
   const [validationError, setValidationError] = useState<string>('');
   const [activeThumb, setActiveThumb] = useState(0);
@@ -32,23 +27,48 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
   const addItem = useCartStore(state => state.addItem);
 
-  // Load colors and finishes
+  const colorOptions = useMemo<ProductColorVariant[]>(() => {
+    return (product.colors || []).map((color, index) => ({
+      ...color,
+      id: color.id || `${product.id}-color-${index}`,
+      hex: color.hex || '#444444',
+      priceModifier: color.priceModifier ?? 0,
+    }));
+  }, [product.colors, product.id]);
+
+  const profileOptions = useMemo<ProductProfileVariant[]>(() => {
+    return (product.profiles || []).map((profile, index) => {
+      const dimensionLabel = [
+        profile.dimensions?.width ? `${profile.dimensions.width} mm` : null,
+        profile.dimensions?.thickness ? `× ${profile.dimensions.thickness} mm` : null,
+        profile.dimensions?.length ? `× ${profile.dimensions.length} mm` : null,
+      ]
+        .filter(Boolean)
+        .join(' ');
+
+      const description = [dimensionLabel, profile.description]
+        .filter(Boolean)
+        .join(' • ');
+
+      return {
+        ...profile,
+        id: profile.id || `${product.id}-profile-${index}`,
+        description,
+        priceModifier: profile.priceModifier ?? 0,
+      };
+    });
+  }, [product.id, product.profiles]);
+
+  const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(colorOptions[0] || null);
+  const [selectedFinish, setSelectedFinish] = useState<ProductProfileVariant | null>(profileOptions[0] || null);
+
   useEffect(() => {
-    async function loadOptions() {
-      const [colors, finishes] = await Promise.all([
-        getProductColors(product.id),
-        getProductFinishes(product.id),
-      ]);
-      
-      setAvailableColors(colors);
-      setAvailableFinishes(finishes);
-      
-      // Pre-select first options
-      if (colors.length > 0) setSelectedColor(colors[0]);
-      if (finishes.length > 0) setSelectedFinish(finishes[0]);
-    }
-    loadOptions();
-  }, [product.id]);
+    setSelectedColor(colorOptions[0] || null);
+  }, [colorOptions]);
+
+  useEffect(() => {
+    setSelectedFinish(profileOptions[0] || null);
+  }, [profileOptions]);
 
   // Calculate final price
   const finalPrice = calculateProductPrice(
@@ -71,12 +91,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     setValidationError('');
 
     // Validation
-    if (availableColors.length > 0 && !selectedColor) {
+    if (colorOptions.length > 0 && !selectedColor) {
       setValidationError('Prašome pasirinkti spalvą');
       return;
     }
-    if (availableFinishes.length > 0 && !selectedFinish) {
-      setValidationError('Prašome pasirinkti apdailą');
+    if (profileOptions.length > 0 && !selectedFinish) {
+      setValidationError('Prašome pasirinkti profilį');
       return;
     }
 
@@ -124,7 +144,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const handleShare = (platform: 'facebook' | 'linkedin' | 'email') => {
     const url = `https://yakiwood.lt/produktai/${product.slug}`;
     const title = product.name;
-    const description = product.description;
+    const description = product.description || '';
 
     switch (platform) {
       case 'facebook':
@@ -186,11 +206,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
           {/* Main Image - Center */}
           <div className="relative bg-[#BBAB92] h-[400px] lg:h-[729px] rounded-[8px] overflow-hidden">
-            {show3D && availableColors.length > 0 ? (
+            {show3D && colorOptions.length > 0 ? (
               <Konfiguratorius3D
                 productId={product.id}
-                availableColors={availableColors}
-                availableFinishes={availableFinishes}
+                availableColors={colorOptions}
+                availableFinishes={profileOptions}
                 onColorChange={setSelectedColor}
                 onFinishChange={setSelectedFinish}
                 isLoading={loading3D}
@@ -214,9 +234,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <h1 className="font-['DM_Sans'] text-[32px] font-normal leading-[1.1] tracking-[-1.28px] text-[#161616]">
                 {product.name}
               </h1>
-              {product.woodType && (
+              {(product.usageLabel || product.woodLabel) && (
                 <p className="font-['Outfit'] font-normal text-[14px] leading-[1.2] tracking-[0.14px] text-[#7C7C7C]">
-                  {product.woodType === 'larch' ? 'Maumedis (Larch)' : 'Eglė (Spruce)'}
+                  {[product.usageLabel, product.woodLabel].filter(Boolean).join(' • ')}
                 </p>
               )}
               <p className="font-['DM_Sans'] text-[32px] font-normal leading-[1.1] tracking-[-1.28px] text-[#161616]">
@@ -226,18 +246,18 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
             {/* Description */}
             <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] max-w-[434px]">
-              {product.description}
+              {product.description || 'Produkto aprašymas ruošiama.'}
             </p>
 
             {/* Color Selector - New Figma Style */}
-            {!show3D && availableColors.length > 0 && (
+            {!show3D && colorOptions.length > 0 && (
               <div className="flex flex-col gap-[8px]">
                 <div className="flex gap-[4px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase">
-                  <span className="text-[#7C7C7C]">Color:</span>
-                  <span className="text-[#161616]">{selectedColor?.name || 'Select color'}</span>
+                  <span className="text-[#7C7C7C]">Spalva:</span>
+                  <span className="text-[#161616]">{selectedColor?.name || 'Pasirinkite spalvą'}</span>
                 </div>
                 <div className="flex gap-[8px] flex-wrap max-h-[43px] overflow-hidden">
-                  {availableColors.map((color) => (
+                  {colorOptions.map((color) => (
                     <button
                       key={color.id}
                       onClick={() => setSelectedColor(color)}
@@ -258,13 +278,13 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             )}
 
             {/* Finish Selector (if not in 3D mode) */}
-            {!show3D && availableFinishes.length > 0 && (
+            {!show3D && profileOptions.length > 0 && (
               <div className="space-y-3">
                 <label className="font-['DM_Sans'] text-sm font-medium text-[#161616] block">
-                  Apdaila
+                  Profilis
                 </label>
                 <div className="grid grid-cols-1 gap-2">
-                  {availableFinishes.map((finish) => (
+                  {profileOptions.map((finish) => (
                     <label
                       key={finish.id}
                       className={`relative flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
@@ -275,7 +295,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                     >
                       <input
                         type="radio"
-                        name="finish"
+                        name="profile"
                         value={finish.id}
                         checked={selectedFinish?.id === finish.id}
                         onChange={() => setSelectedFinish(finish)}
@@ -409,7 +429,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         <ProductTabs product={product} />
 
         {/* Related Products */}
-        <RelatedProducts productId={product.id} currentSlug={product.slug} />
+        <RelatedProducts products={relatedProducts} />
       </div>
 
       {/* Sticky Add to Cart (Mobile) */}

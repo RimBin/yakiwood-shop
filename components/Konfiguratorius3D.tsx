@@ -3,7 +3,7 @@
 import React, { Suspense, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
-import type { Color, Finish } from '@/lib/products';
+import type { ProductColorVariant, ProductProfileVariant } from '@/lib/products.sanity';
 
 interface PlaceholderModelProps {
   color: string;
@@ -21,10 +21,10 @@ function PlaceholderModel({ color }: PlaceholderModelProps) {
 
 export interface Konfiguratorius3DProps {
   productId: string;
-  availableColors: Color[];
-  availableFinishes: Finish[];
-  onColorChange?: (color: Color) => void;
-  onFinishChange?: (finish: Finish) => void;
+  availableColors: ProductColorVariant[];
+  availableFinishes: ProductProfileVariant[];
+  onColorChange?: (color: ProductColorVariant) => void;
+  onFinishChange?: (finish: ProductProfileVariant) => void;
   className?: string;
   isLoading?: boolean;
 }
@@ -38,10 +38,10 @@ export default function Konfiguratorius3D({
   className = '',
   isLoading = false,
 }: Konfiguratorius3DProps) {
-  const [selectedColor, setSelectedColor] = useState<Color | null>(
+  const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(
     availableColors[0] || null
   );
-  const [selectedFinish, setSelectedFinish] = useState<Finish | null>(
+  const [selectedFinish, setSelectedFinish] = useState<ProductProfileVariant | null>(
     availableFinishes[0] || null
   );
   const [modelColor, setModelColor] = useState('#444444');
@@ -52,12 +52,12 @@ export default function Konfiguratorius3D({
     }
   }, [selectedColor]);
 
-  const handleColorSelect = (color: Color) => {
+  const handleColorSelect = (color: ProductColorVariant) => {
     setSelectedColor(color);
     onColorChange?.(color);
   };
 
-  const handleFinishSelect = (finish: Finish) => {
+  const handleFinishSelect = (finish: ProductProfileVariant) => {
     setSelectedFinish(finish);
     onFinishChange?.(finish);
   };
@@ -149,7 +149,7 @@ export default function Konfiguratorius3D({
       {availableFinishes.length > 0 && (
         <div className="flex flex-col gap-3">
           <label className="font-['DM_Sans'] text-sm font-medium text-[#161616]">
-            Apdaila
+            Profilis
           </label>
           <div className="grid grid-cols-1 gap-2">
             {availableFinishes.map((finish) => (

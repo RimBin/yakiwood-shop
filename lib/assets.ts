@@ -43,10 +43,10 @@ const localAssets = {
   imgLogo: '/assets/imgLogo.svg',
   imgCart: '/assets/imgCart.svg',
   
-  // Icons
-  imgIconTruck: '/assets/imgIconTruck.svg',
-  imgIconCoins: '/assets/imgIconCoins.svg',
-  imgIconPlant: '/assets/imgIconPlant.svg',
+  // Icons (use white PNG variants for announcement bar)
+  imgIconTruck: '/assets/icons/icon-base.png',
+  imgIconCoins: '/assets/icons/coins-base.png',
+  imgIconPlant: '/assets/icons/plant-base.png',
   
   // Certifications
   certEpd: '/assets/cert-epd.png',

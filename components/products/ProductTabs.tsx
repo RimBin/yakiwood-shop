@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { PortableText, type PortableTextComponents } from '@portabletext/react';
 import type { Product } from '@/lib/products.sanity';
 
 interface ProductTabsProps {
@@ -18,6 +19,26 @@ export default function ProductTabs({ product }: ProductTabsProps) {
     { id: 'installation' as TabType, label: 'Montavimas', enabled: false },
     { id: 'reviews' as TabType, label: 'Atsiliepimai', enabled: false }, // Future feature
   ];
+
+  const portableComponents: PortableTextComponents = {
+    block: {
+      normal: ({ children }) => (
+        <p className="font-['Outfit'] text-[#161616] leading-relaxed">{children}</p>
+      ),
+    },
+    list: {
+      bullet: ({ children }) => (
+        <ul className="list-disc pl-6 space-y-2 font-['Outfit'] text-[#161616]">{children}</ul>
+      ),
+      number: ({ children }) => (
+        <ol className="list-decimal pl-6 space-y-2 font-['Outfit'] text-[#161616]">{children}</ol>
+      ),
+    },
+    marks: {
+      strong: ({ children }) => <strong className="font-semibold text-[#161616]">{children}</strong>,
+      em: ({ children }) => <em className="italic text-[#535353]">{children}</em>,
+    },
+  };
 
   return (
     <div className="w-full mt-12">
@@ -47,12 +68,14 @@ export default function ProductTabs({ product }: ProductTabsProps) {
       <div className="py-8">
         {/* Description Tab */}
         {activeTab === 'description' && (
-          <div className="prose max-w-none">
-            <div 
-              className="font-['Outfit'] text-[#161616] leading-relaxed space-y-4"
-            >
-              {product.description}
-            </div>
+          <div className="prose max-w-none space-y-4">
+            {product.descriptionPortable ? (
+              <PortableText value={product.descriptionPortable} components={portableComponents} />
+            ) : (
+              <p className="font-['Outfit'] text-[#161616] leading-relaxed">
+                {product.description || 'Informacija ruošiama.'}
+              </p>
+            )}
           </div>
         )}
 
