@@ -3,6 +3,7 @@
     "produktai": "Produktai",
     "sprendimai": "Sprendimai",
     "projektai": "Projektai",
+    "konfiguratorius3d": "3D konfiguratorius",
     "apie": "Apie mus",
     "kontaktai": "Kontaktai",
     "duk": "DUK",
@@ -250,6 +251,17 @@
     }
   },
   "configurator": {
+    "pageTitle": "3D konfiguratorius",
+    "pageDescription": "Pasirinkite spalvą ir profilį, kad pamatytumėte produkto vaizdą 3D erdvėje.",
+    "loadError": "Nepavyko įkelti produktų.",
+    "fallbackNote": "Rodomas demonstracinis konfiguratorius, nes produktų duomenys nebuvo rasti.",
+    "loadingModel": "Kraunamas 3D modelis...",
+    "controlsHint": "Naudokite pelę norėdami pasukti, priartinti ir perkelti",
+    "colorLabel": "Spalva",
+    "profileLabel": "Profilis",
+    "selectColorAria": "Pasirinkti spalvą {name}",
+    "noteTitle": "Pastaba:",
+    "noteBody": "Tikroji spalva ir tekstūra gali šiek tiek skirtis nuo čia rodomos. Kiekviena lentelė yra unikali dėl natūralios medienos savybių.",
     "pavadinimas": "3D produkto konfigūratorius",
     "paantraste": "Pritaikykite savo produktą",
     "spalva": "Spalva",
@@ -359,6 +371,11 @@
       "title": "DUK",
       "description": "Dažnai užduodami klausimai apie Shou Sugi Ban medienos produktus, priežiūrą ir montavimą.",
       "ogTitle": "DUK - Yakiwood"
+    },
+    "configurator3d": {
+      "title": "3D konfiguratorius",
+      "description": "Konfigūruokite produktą 3D erdvėje: pasirinkite spalvą ir profilį, kad pamatytumėte rezultatą.",
+      "ogTitle": "3D konfiguratorius - Yakiwood"
     },
     "home": {
       "title": "Yakiwood - Shou Sugi Ban Degintas Medis Lietuvoje",

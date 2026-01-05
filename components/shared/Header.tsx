@@ -22,12 +22,14 @@ export default function Header() {
     { href: '/produktai', label: t('nav.produktai') },
     { href: '/sprendimai', label: t('nav.sprendimai') },
     { href: '/projektai', label: t('nav.projektai') },
+    { href: '/konfiguratorius3d', label: t('nav.konfiguratorius3d') },
     { href: '/apie', label: t('nav.apie') },
     { href: '/kontaktai', label: t('nav.kontaktai') },
   ] : [
     { href: '/products', label: t('nav.products') },
     { href: '/solutions', label: t('nav.solutions') },
     { href: '/projects', label: t('nav.projects') },
+    { href: '/configurator3d', label: t('nav.configurator3d') },
     { href: '/about', label: t('nav.about') },
     { href: '/contact', label: t('nav.contact') },
   ];

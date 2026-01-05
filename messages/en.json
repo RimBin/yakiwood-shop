@@ -3,6 +3,7 @@
     "products": "Products",
     "solutions": "Solutions",
     "projects": "Projects",
+    "configurator3d": "3D configurator",
     "about": "About us",
     "contact": "Contact",
     "faq": "FAQ",
@@ -472,6 +473,17 @@
     }
   },
   "configurator": {
+    "pageTitle": "3D configurator",
+    "pageDescription": "Choose a color and profile to preview the product in 3D.",
+    "loadError": "Failed to load products.",
+    "fallbackNote": "Showing a demo configurator because product data was not found.",
+    "loadingModel": "Loading 3D model...",
+    "controlsHint": "Use your mouse to rotate, zoom, and pan",
+    "colorLabel": "Color",
+    "profileLabel": "Profile",
+    "selectColorAria": "Select color {name}",
+    "noteTitle": "Note:",
+    "noteBody": "Actual color and texture may vary slightly from what you see here. Each board is unique due to the natural properties of wood.",
     "title": "3D Product Configurator",
     "subtitle": "Customize your product",
     "color": "Color",
@@ -595,6 +607,11 @@
       "title": "FAQ",
       "description": "Frequently asked questions about Shou Sugi Ban wood products, maintenance, and installation.",
       "ogTitle": "FAQ - Yakiwood"
+    },
+    "configurator3d": {
+      "title": "3D configurator",
+      "description": "Configure your product in 3D: choose a color and profile to preview the result.",
+      "ogTitle": "3D configurator - Yakiwood"
     },
     "home": {
       "title": "Yakiwood - Shou Sugi Ban Burnt Wood in Lithuania",

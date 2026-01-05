@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -10,6 +11,13 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+  const locale = useLocale();
+  const t = useTranslations();
+
+  const configuratorLink = locale === 'lt'
+    ? { href: '/konfiguratorius3d', label: t('nav.konfiguratorius3d') }
+    : { href: '/configurator3d', label: t('nav.configurator3d') };
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -81,6 +89,14 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               onClick={onClose}
             >
               Projects
+            </Link>
+
+            <Link
+              href={configuratorLink.href}
+              className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
+              onClick={onClose}
+            >
+              {configuratorLink.label}
             </Link>
             <Link
               href="/about"

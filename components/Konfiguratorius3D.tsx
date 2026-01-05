@@ -2,8 +2,9 @@
 
 import React, { Suspense, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import type { ProductColorVariant, ProductProfileVariant } from '@/lib/products.sanity';
+import { useTranslations } from 'next-intl';
 
 interface PlaceholderModelProps {
   color: string;
@@ -38,6 +39,7 @@ export default function Konfiguratorius3D({
   className = '',
   isLoading = false,
 }: Konfiguratorius3DProps) {
+  const t = useTranslations();
   const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(
     availableColors[0] || null
   );
@@ -70,7 +72,7 @@ export default function Konfiguratorius3D({
           <div className="absolute inset-0 flex items-center justify-center bg-[#EAEAEA] z-10">
             <div className="flex flex-col items-center gap-3">
               <div className="w-12 h-12 border-4 border-[#BBBBBB] border-t-[#161616] rounded-full animate-spin" />
-              <p className="font-['Outfit'] text-sm text-[#7C7C7C]">Kraunamas 3D modelis...</p>
+              <p className="font-['Outfit'] text-sm text-[#7C7C7C]">{t('configurator.loadingModel')}</p>
             </div>
           </div>
         )}
@@ -80,7 +82,6 @@ export default function Konfiguratorius3D({
           <directionalLight position={[5, 5, 5]} intensity={1} />
           <Suspense fallback={null}>
             <PlaceholderModel color={modelColor} />
-            <Environment preset="city" />
           </Suspense>
           <OrbitControls 
             enablePan={true} 
@@ -93,7 +94,7 @@ export default function Konfiguratorius3D({
 
         {/* 3D Controls hint */}
         <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-2 rounded-lg text-xs font-['Outfit'] text-[#535353]">
-          Naudokite pelę norėdami pasukti, priartinti ir perkelti
+          {t('configurator.controlsHint')}
         </div>
       </div>
 
@@ -101,7 +102,7 @@ export default function Konfiguratorius3D({
       {availableColors.length > 0 && (
         <div className="flex flex-col gap-3">
           <label className="font-['DM_Sans'] text-sm font-medium text-[#161616]">
-            Spalva
+            {t('configurator.colorLabel')}
             {selectedColor && (
               <span className="ml-2 font-['Outfit'] font-normal text-[#7C7C7C]">
                 ({selectedColor.name})
@@ -119,7 +120,7 @@ export default function Konfiguratorius3D({
                   className={`relative group ${
                     selectedColor?.id === color.id ? 'ring-2 ring-[#161616] ring-offset-2' : ''
                   }`}
-                  aria-label={`Pasirinkti spalvą ${color.name}`}
+                  aria-label={t('configurator.selectColorAria', { name: color.name })}
                   title={color.name}
                 >
                 {color.image ? (
@@ -153,7 +154,7 @@ export default function Konfiguratorius3D({
       {availableFinishes.length > 0 && (
         <div className="flex flex-col gap-3">
           <label className="font-['DM_Sans'] text-sm font-medium text-[#161616]">
-            Profilis
+            {t('configurator.profileLabel')}
           </label>
           <div className="grid grid-cols-1 gap-2">
             {availableFinishes.map((finish) => {
@@ -203,8 +204,7 @@ export default function Konfiguratorius3D({
       {/* Info Note */}
       <div className="p-4 bg-[#F9F9F9] rounded-lg border border-[#EAEAEA]">
         <p className="font-['Outfit'] text-xs text-[#535353]">
-          💡 <strong>Pastaba:</strong> Tikroji spalva ir tekstūra gali šiek tiek skirtis 
-          nuo čia rodomos. Kiekviena lentelė yra unikali dėl natūralios medienos savybių.
+          <strong>{t('configurator.noteTitle')}</strong> {t('configurator.noteBody')}
         </p>
       </div>
     </div>

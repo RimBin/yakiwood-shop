@@ -93,6 +93,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'www.figma.com', pathname: '/**' },
       { protocol: 'https', hostname: 'figma.com', pathname: '/**' },
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'cdn.sanity.io', pathname: '/**' },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
