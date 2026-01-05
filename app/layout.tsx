@@ -1,6 +1,7 @@
 import { DM_Sans, Outfit, Tiro_Tamil } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { cookies } from 'next/headers';
 import "./globals.css";
 import AuthWrapper from '@/components/AuthWrapper';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
@@ -99,6 +100,12 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const messages = await getMessages();
+  const supportedLocales = ['lt', 'en'];
+  const cookieStore = await cookies();
+  const localeCookie = cookieStore.get('NEXT_LOCALE');
+  const locale = localeCookie?.value && supportedLocales.includes(localeCookie.value)
+    ? localeCookie.value
+    : 'lt';
 
   // JSON-LD structured data for Organization
   const organizationSchema = {
@@ -122,7 +129,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   };
 
   return (
-    <html lang="lt">
+    <html lang={locale}>
       <head>
         <script
           type="application/ld+json"

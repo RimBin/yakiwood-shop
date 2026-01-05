@@ -16,6 +16,34 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
+// Minimal .env loader (no external deps)
+function loadDotEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) return;
+  const content = fs.readFileSync(filePath, 'utf8');
+
+  content.split(/\r?\n/).forEach((rawLine) => {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) return;
+    const eqIndex = line.indexOf('=');
+    if (eqIndex <= 0) return;
+
+    const key = line.slice(0, eqIndex).trim();
+    let value = line.slice(eqIndex + 1).trim();
+
+    // Strip surrounding quotes
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+
+    if (process.env[key] === undefined) {
+      process.env[key] = value;
+    }
+  });
+}
+
 // Colors for terminal output
 const colors = {
   reset: '\x1b[0m',
@@ -637,6 +665,10 @@ async function main() {
     showHelp();
     process.exit(0);
   }
+
+  // Load `.env.local` (and `.env`) so checks work out-of-the-box in dev
+  loadDotEnvFile(path.join(process.cwd(), '.env.local'));
+  loadDotEnvFile(path.join(process.cwd(), '.env'));
 
   log(`${bright}${blue}╔═══════════════════════════════════════════════════════════╗${reset}`);
   log(`${bright}${blue}║     Yakiwood Environment Configuration Checker          ║${reset}`);

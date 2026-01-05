@@ -284,15 +284,18 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                   Profilis
                 </label>
                 <div className="grid grid-cols-1 gap-2">
-                  {profileOptions.map((finish) => (
-                    <label
-                      key={finish.id}
-                      className={`relative flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                        selectedFinish?.id === finish.id
-                          ? 'border-[#161616] bg-[#F9F9F9]'
-                          : 'border-[#EAEAEA] hover:border-[#BBBBBB]'
-                      }`}
-                    >
+                  {profileOptions.map((finish) => {
+                    const priceModifier = finish.priceModifier ?? 0;
+
+                    return (
+                      <label
+                        key={finish.id}
+                        className={`relative flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                          selectedFinish?.id === finish.id
+                            ? 'border-[#161616] bg-[#F9F9F9]'
+                            : 'border-[#EAEAEA] hover:border-[#BBBBBB]'
+                        }`}
+                      >
                       <input
                         type="radio"
                         name="profile"
@@ -306,9 +309,9 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                           <span className="font-['DM_Sans'] font-medium text-[#161616]">
                             {finish.name}
                           </span>
-                          {finish.priceModifier !== 0 && (
+                          {priceModifier !== 0 && (
                             <span className="font-['Outfit'] text-sm text-[#535353]">
-                              {finish.priceModifier > 0 ? '+' : ''}€{finish.priceModifier.toFixed(2)}
+                              {priceModifier > 0 ? '+' : ''}€{priceModifier.toFixed(2)}
                             </span>
                           )}
                         </div>
@@ -318,8 +321,9 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                           </p>
                         )}
                       </div>
-                    </label>
-                  ))}
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             )}

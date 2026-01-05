@@ -8,6 +8,8 @@ import {
   saveInvoiceToDatabase,
   generateOrderNumber 
 } from '@/lib/supabase-admin';
+import { InventoryManager } from '@/lib/inventory/manager';
+import type { ReservationItem } from '@/lib/inventory/types';
 import type { InvoiceGenerateRequest } from '@/types/invoice';
 import { sendOrderConfirmation } from '@/lib/email';
 
@@ -18,10 +20,16 @@ function getStripeClient() {
   return new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-11-17.clover' });
 }
 
+function getStripeWebhookSecret() {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  return typeof secret === 'string' && secret.trim().length > 0 ? secret : null;
+}
+
 export async function POST(req: NextRequest) {
   const stripe = getStripeClient();
+  const webhookSecret = getStripeWebhookSecret();
   
-  if (!stripe) {
+  if (!stripe || !webhookSecret) {
     return NextResponse.json({ error: 'Payment service not configured' }, { status: 503 });
   }
   const body = await req.text();
@@ -37,7 +45,7 @@ export async function POST(req: NextRequest) {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET || ''
+      webhookSecret
     );
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message);
@@ -54,6 +62,9 @@ export async function POST(req: NextRequest) {
       const customerName = session.metadata?.customerName || session.customer_details?.name || 'Klientas';
       const customerPhone = session.metadata?.customerPhone || session.customer_details?.phone || '';
       const customerAddress = session.metadata?.customerAddress || '';
+      const customerCity = session.metadata?.customerCity || '';
+      const customerPostalCode = session.metadata?.customerPostalCode || '';
+      const customerCountry = session.metadata?.customerCountry || 'Lietuva';
       
       if (!customerEmail) {
         console.error('No customer email found');
@@ -62,7 +73,14 @@ export async function POST(req: NextRequest) {
 
       // Parse items from metadata
       const itemsJson = session.metadata?.items || '[]';
-      const items = JSON.parse(itemsJson);
+      let items: any[] = [];
+      try {
+        const parsed = JSON.parse(itemsJson);
+        items = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        console.error('Failed to parse items from Stripe metadata');
+        items = [];
+      }
 
       // Calculate totals
       const subtotal = items.reduce((sum: number, item: any) => 
@@ -96,6 +114,28 @@ export async function POST(req: NextRequest) {
       // Update order to paid
       await updateOrderStatus(order.id, 'processing', 'paid');
 
+      // Best-effort inventory update (does not break webhook on failure)
+      try {
+        const reservationItems: ReservationItem[] = items
+          .filter((item: any) => typeof item?.slug === 'string' && item.slug.trim().length > 0)
+          .map((item: any) => {
+            const option = (item.color || item.finish || 'default').toString();
+            return {
+              product_id: String(item.id || ''),
+              sku: `${String(item.slug).toUpperCase()}-${option.toUpperCase()}`,
+              quantity: Number(item.quantity) || 0,
+            };
+          })
+          .filter((item) => item.quantity > 0);
+
+        if (reservationItems.length > 0) {
+          await InventoryManager.reserveStock(reservationItems, order.id);
+          await InventoryManager.confirmSale(order.id);
+        }
+      } catch (inventoryError) {
+        console.error('Inventory update skipped:', inventoryError);
+      }
+
       // Prepare invoice data
       const invoiceRequest: InvoiceGenerateRequest = {
         buyer: {
@@ -103,9 +143,9 @@ export async function POST(req: NextRequest) {
           email: customerEmail,
           phone: customerPhone || undefined,
           address: customerAddress || 'Nenurodyta',
-          city: 'Lietuva',
-          postalCode: '',
-          country: 'Lietuva'
+          city: customerCity,
+          postalCode: customerPostalCode,
+          country: customerCountry
         },
         items: items.map((item: any, index: number) => ({
           id: item.id || `item-${index}`,

@@ -1,5 +1,6 @@
 // Inventory Manager - Core business logic for inventory operations
 import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import type { 
   InventoryItem, 
   InventoryMovement, 
@@ -11,6 +12,15 @@ import type {
   MovementType
 } from './types';
 
+async function getSupabaseClient() {
+  // Prefer service-role client for server automation (webhooks, background jobs).
+  // Falls back to cookie-based server client for request-context usage.
+  if (supabaseAdmin) {
+    return supabaseAdmin;
+  }
+  return await createClient();
+}
+
 export class InventoryManager {
   /**
    * Check if sufficient stock is available for a product
@@ -20,7 +30,7 @@ export class InventoryManager {
     quantity: number,
     variantId?: string
   ): Promise<StockCheckResult> {
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
     
     const query = supabase
       .from('inventory_items')
@@ -58,7 +68,7 @@ export class InventoryManager {
     orderId: string,
     userId?: string
   ): Promise<void> {
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
     
     for (const item of items) {
       // Get inventory item
@@ -106,7 +116,7 @@ export class InventoryManager {
    * Release reserved stock (payment failed or order cancelled)
    */
   static async releaseStock(orderId: string): Promise<void> {
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
     
     // Get all reservation movements for this order
     const { data: movements, error: movementsError } = await supabase
@@ -163,7 +173,7 @@ export class InventoryManager {
    * Confirm sale (payment successful) - convert reservation to sale
    */
   static async confirmSale(orderId: string): Promise<void> {
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
     
     // Get all reservation movements for this order
     const { data: movements, error: movementsError } = await supabase
@@ -220,7 +230,7 @@ export class InventoryManager {
    * Restock inventory item
    */
   static async restockItem(request: RestockRequest, userId?: string): Promise<void> {
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
     
     // Get inventory item by SKU
     const { data: inventoryItem, error: fetchError } = await supabase
@@ -267,7 +277,7 @@ export class InventoryManager {
    * Adjust inventory (for corrections or damaged goods)
    */
   static async adjustInventory(request: AdjustmentRequest, userId?: string): Promise<void> {
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
     
     // Get inventory item by SKU
     const { data: inventoryItem, error: fetchError } = await supabase
@@ -314,7 +324,7 @@ export class InventoryManager {
    * Get low stock alerts
    */
   static async getLowStockAlerts(): Promise<InventoryAlert[]> {
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
     
     const { data, error } = await supabase
       .from('inventory_alerts')
@@ -333,7 +343,7 @@ export class InventoryManager {
    * Get stock level for a product
    */
   static async getStockLevel(productId: string, variantId?: string): Promise<number> {
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
     
     const query = supabase
       .from('inventory_items')
@@ -359,7 +369,7 @@ export class InventoryManager {
    * Get inventory item by SKU
    */
   static async getItemBySku(sku: string): Promise<InventoryItem | null> {
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
     
     const { data, error } = await supabase
       .from('inventory_items')
@@ -386,7 +396,7 @@ export class InventoryManager {
     performed_by?: string;
     notes?: string;
   }): Promise<void> {
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
     
     const { error } = await supabase
       .from('inventory_movements')
@@ -405,7 +415,7 @@ export class InventoryManager {
    * Resolve an alert
    */
   static async resolveAlert(alertId: string, userId?: string): Promise<void> {
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
     
     const { error } = await supabase
       .from('inventory_alerts')
@@ -427,7 +437,7 @@ export class InventoryManager {
     inventoryItemId: string,
     limit: number = 50
   ): Promise<InventoryMovement[]> {
-    const supabase = await createClient();
+    const supabase = await getSupabaseClient();
     
     const { data, error } = await supabase
       .from('inventory_movements')

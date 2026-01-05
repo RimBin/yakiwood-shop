@@ -1,30 +1,83 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// Ensure secrets are set in .env.local and Vercel env
-const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
-const stripe = new Stripe(stripeKey, {
-  apiVersion: '2025-11-17.clover'
-});
+function getStripeClient() {
+  if (!process.env.STRIPE_SECRET_KEY) return null;
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2025-11-17.clover',
+  });
+}
 
 export async function POST(req: NextRequest) {
   try {
+    const stripe = getStripeClient();
+    if (!stripe) {
+      return NextResponse.json({ error: 'Stripe konfigūracija nerasta' }, { status: 503 });
+    }
+
     const body = await req.json();
-    const { items, customerEmail, customerName, customerPhone, customerAddress } = body as { 
-      items: Array<{ id: string; name: string; quantity: number; basePrice: number }>;
+    const {
+      items,
+      customerEmail: customerEmailRaw,
+      customerName: customerNameRaw,
+      customerPhone: customerPhoneRaw,
+      customerAddress: customerAddressRaw,
+      customer,
+    } = body as {
+      items: Array<{
+        id: string;
+        name: string;
+        slug?: string;
+        quantity: number;
+        basePrice: number;
+        color?: string;
+        finish?: string;
+      }>;
       customerEmail?: string;
       customerName?: string;
       customerPhone?: string;
       customerAddress?: string;
+      customer?: {
+        email?: string;
+        name?: string;
+        phone?: string;
+        address?: string;
+        city?: string;
+        postalCode?: string;
+        country?: string;
+      };
     };
+
+    const customerEmail = customerEmailRaw || customer?.email;
+    const customerName = customerNameRaw || customer?.name;
+    const customerPhone = customerPhoneRaw || customer?.phone;
+
+    const customerCity = customer?.city || '';
+    const customerPostalCode = customer?.postalCode || '';
+    const customerCountry = customer?.country || '';
+    const customerStreetAddress = customerAddressRaw || customer?.address || '';
+    const customerAddress = [
+      customerStreetAddress,
+      customerCity,
+      customerPostalCode,
+      customerCountry,
+    ]
+      .map((value) => (typeof value === 'string' ? value.trim() : ''))
+      .filter(Boolean)
+      .join(', ');
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'Tuščias krepšelis' }, { status: 400 });
     }
 
-    if (!process.env.STRIPE_SECRET_KEY) {
-      return NextResponse.json({ error: 'Stripe konfigūracija nerasta' }, { status: 500 });
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (process.env.NODE_ENV === 'production' && (!siteUrl || !siteUrl.trim())) {
+      return NextResponse.json(
+        { error: 'NEXT_PUBLIC_SITE_URL privalomas production aplinkoje' },
+        { status: 500 }
+      );
     }
+    const resolvedSiteUrl = siteUrl || 'http://localhost:3000';
 
     // NOTE: Real implementation should map product IDs to Stripe Price IDs.
     // For initial scaffold we convert basePrice EUR to cents direct.
@@ -47,10 +100,13 @@ export async function POST(req: NextRequest) {
         customerName: customerName || '',
         customerPhone: customerPhone || '',
         customerAddress: customerAddress || '',
+        customerCity,
+        customerPostalCode,
+        customerCountry,
         items: JSON.stringify(items)
       },
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/cart`
+      success_url: `${resolvedSiteUrl}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${resolvedSiteUrl}/checkout`
     });
 
     return NextResponse.json({ url: session.url });

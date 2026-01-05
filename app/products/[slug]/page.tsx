@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo/structured-data';
-import { fetchProductBySlug, fetchRelatedProducts } from '@/lib/products.sanity';
+import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/products';
+import { fetchProductBySlug } from '@/lib/products.sanity';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
 
@@ -21,14 +21,14 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     };
   }
 
-  const ogImage = product.images?.[0] || product.image;
+  const ogImage = product.images?.[0]?.url || product.image;
 
   return {
     title: product.name,
-    description: product.description,
+    description: product.shortDescription || product.description,
     openGraph: {
       title: product.name,
-      description: product.description,
+      description: product.shortDescription || product.description,
       images: [
         {
           url: getProductOgImage(ogImage),
@@ -38,12 +38,12 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
         },
       ],
       type: 'website',
-      url: `https://yakiwood.lt/produktai/${product.slug}`,
+      url: `https://yakiwood.lt/products/${product.slug}`,
     },
     twitter: {
       card: 'summary_large_image',
       title: product.name,
-      description: product.description,
+      description: product.shortDescription || product.description,
       images: [getProductOgImage(ogImage)],
     },
   };
@@ -58,36 +58,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const relatedProducts = await fetchRelatedProducts({
-    usageType: product.category,
-    woodType: product.woodType,
-    excludeSlug: product.slug,
-    limit: 4,
-  });
-
-  // Transform to ProductInput for SEO schema
-  const productInput = {
-    name: product.name,
-    slug: product.slug,
-    description: product.description || '',
-    basePrice: product.price,
-    image: product.image,
-    images: product.images,
-    sku: product.id,
-    category: product.category,
-    woodType: product.woodType,
-    inStock: true,
-  };
-
   // Generate structured data for SEO
-  const productSchema = generateProductSchema(productInput);
-  
-  const breadcrumbItems = [
-    { name: 'Pradžia', url: 'https://yakiwood.lt' },
-    { name: 'Produktai', url: 'https://yakiwood.lt/produktai' },
-    { name: product.name, url: `https://yakiwood.lt/produktai/${product.slug}` },
-  ];
-  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems);
+  const productSchema = generateProductSchema(product);
+  const breadcrumbSchema = generateBreadcrumbSchema(product);
 
   return (
     <>
@@ -102,7 +75,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       />
 
       {/* Client Component with product data */}
-      <ProductDetailClient product={product} relatedProducts={relatedProducts} />
+      <ProductDetailClient product={product} />
     </>
   );
 }

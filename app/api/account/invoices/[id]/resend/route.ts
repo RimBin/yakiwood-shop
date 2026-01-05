@@ -58,7 +58,11 @@ export async function POST(req: NextRequest, context: RouteContext) {
   const pdfGenerator = new InvoicePDFGenerator(invoice);
   const pdfBytes = pdfGenerator.generate();
 
-  const from = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+  const from =
+    process.env.SYSTEM_EMAIL_FROM ||
+    process.env.RESEND_FROM_EMAIL ||
+    process.env.FROM_EMAIL ||
+    'Yakiwood <noreply@yakiwood.lt>';
 
   await resend.emails.send({
     from,

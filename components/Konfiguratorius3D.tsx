@@ -109,16 +109,19 @@ export default function Konfiguratorius3D({
             )}
           </label>
           <div className="flex flex-wrap gap-3">
-            {availableColors.map((color) => (
-              <button
-                key={color.id}
-                onClick={() => handleColorSelect(color)}
-                className={`relative group ${
-                  selectedColor?.id === color.id ? 'ring-2 ring-[#161616] ring-offset-2' : ''
-                }`}
-                aria-label={`Pasirinkti spalvą ${color.name}`}
-                title={color.name}
-              >
+            {availableColors.map((color) => {
+              const priceModifier = color.priceModifier ?? 0;
+
+              return (
+                <button
+                  key={color.id}
+                  onClick={() => handleColorSelect(color)}
+                  className={`relative group ${
+                    selectedColor?.id === color.id ? 'ring-2 ring-[#161616] ring-offset-2' : ''
+                  }`}
+                  aria-label={`Pasirinkti spalvą ${color.name}`}
+                  title={color.name}
+                >
                 {color.image ? (
                   <div className="relative w-12 h-12 rounded-lg overflow-hidden border-2 border-[#EAEAEA] group-hover:border-[#BBBBBB] transition-colors">
                     <img 
@@ -134,13 +137,14 @@ export default function Konfiguratorius3D({
                   />
                 )}
                 
-                {color.priceModifier !== 0 && (
+                {priceModifier !== 0 && (
                   <span className="absolute -top-2 -right-2 bg-[#161616] text-white text-[10px] px-1.5 py-0.5 rounded-full font-['Outfit']">
-                    {color.priceModifier > 0 ? '+' : ''}€{color.priceModifier.toFixed(0)}
+                    {priceModifier > 0 ? '+' : ''}€{priceModifier.toFixed(0)}
                   </span>
                 )}
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -152,15 +156,18 @@ export default function Konfiguratorius3D({
             Profilis
           </label>
           <div className="grid grid-cols-1 gap-2">
-            {availableFinishes.map((finish) => (
-              <label
-                key={finish.id}
-                className={`relative flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                  selectedFinish?.id === finish.id
-                    ? 'border-[#161616] bg-[#F9F9F9]'
-                    : 'border-[#EAEAEA] hover:border-[#BBBBBB]'
-                }`}
-              >
+            {availableFinishes.map((finish) => {
+              const priceModifier = finish.priceModifier ?? 0;
+
+              return (
+                <label
+                  key={finish.id}
+                  className={`relative flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    selectedFinish?.id === finish.id
+                      ? 'border-[#161616] bg-[#F9F9F9]'
+                      : 'border-[#EAEAEA] hover:border-[#BBBBBB]'
+                  }`}
+                >
                 <input
                   type="radio"
                   name="finish"
@@ -174,9 +181,9 @@ export default function Konfiguratorius3D({
                     <span className="font-['DM_Sans'] font-medium text-[#161616]">
                       {finish.name}
                     </span>
-                    {finish.priceModifier !== 0 && (
+                    {priceModifier !== 0 && (
                       <span className="font-['Outfit'] text-sm text-[#535353]">
-                        {finish.priceModifier > 0 ? '+' : ''}€{finish.priceModifier.toFixed(2)}
+                        {priceModifier > 0 ? '+' : ''}€{priceModifier.toFixed(2)}
                       </span>
                     )}
                   </div>
@@ -186,8 +193,9 @@ export default function Konfiguratorius3D({
                     </p>
                   )}
                 </div>
-              </label>
-            ))}
+                </label>
+              );
+            })}
           </div>
         </div>
       )}

@@ -9,6 +9,7 @@ import { fetchProducts, type Product } from '@/lib/products.sanity';
 export default function ProductsPage() {
   const [activeUsage, setActiveUsage] = useState<'all' | string>('all');
   const [activeWood, setActiveWood] = useState<'all' | string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +48,9 @@ export default function ProductsPage() {
   const products = allProducts.filter((product) => {
     const matchesUsage = activeUsage === 'all' || product.category === activeUsage;
     const matchesWood = activeWood === 'all' || product.woodType === activeWood;
-    return matchesUsage && matchesWood;
+    const q = searchQuery.trim().toLowerCase();
+    const matchesQuery = q.length === 0 || product.name.toLowerCase().includes(q);
+    return matchesUsage && matchesWood && matchesQuery;
   });
 
   const activeUsageLabel = usageFilters.find((filter) => filter.id === activeUsage)?.label ?? usageFilters[0].label;
@@ -75,6 +78,17 @@ export default function ProductsPage() {
       {/* Filters */}
       <div className="w-full max-w-[1440px] mx-auto px-[16px] md:px-[40px] py-[24px]">
         <div className="flex flex-col gap-4">
+          <div className="w-full max-w-[520px]">
+            <label className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
+              Paieška
+            </label>
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Ieškoti produkto"
+              className="w-full h-[40px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+            />
+          </div>
           <div className="flex gap-[8px] items-center flex-wrap">
             {usageFilters.map((filter) => (
               <button

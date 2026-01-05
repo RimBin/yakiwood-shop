@@ -102,9 +102,9 @@ export default function InventoryPage() {
     <>
       <Breadcrumbs
         items={[
-          { label: 'Pradžia', href: '/' },
-          { label: 'Administravimas', href: '/admin' },
-          { label: 'Atsargos' },
+          { label: 'Homepage', href: '/' },
+          { label: 'Admin', href: '/admin' },
+          { label: 'Inventory' },
         ]}
       />
 

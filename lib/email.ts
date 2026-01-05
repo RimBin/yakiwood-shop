@@ -39,7 +39,12 @@ class ResendProvider implements EmailProvider {
   async send(options: EmailOptions) {
     try {
       const { data, error } = await this.client.emails.send({
-        from: options.from || process.env.SYSTEM_EMAIL_FROM || 'Yakiwood <noreply@yakiwood.lt>',
+        from:
+          options.from ||
+          process.env.SYSTEM_EMAIL_FROM ||
+          process.env.RESEND_FROM_EMAIL ||
+          process.env.FROM_EMAIL ||
+          'Yakiwood <noreply@yakiwood.lt>',
         to: options.to,
         subject: options.subject,
         html: options.html,
@@ -87,7 +92,12 @@ class SMTPProvider implements EmailProvider {
   async send(options: EmailOptions) {
     try {
       const info = await this.transporter.sendMail({
-        from: options.from || process.env.SMTP_FROM || process.env.SMTP_USER,
+        from:
+          options.from ||
+          process.env.SMTP_FROM ||
+          process.env.SYSTEM_EMAIL_FROM ||
+          process.env.FROM_EMAIL ||
+          process.env.SMTP_USER,
         to: options.to,
         subject: options.subject,
         html: options.html,
