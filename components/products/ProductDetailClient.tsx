@@ -1,31 +1,23 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { useCartStore } from '@/lib/cart/store';
+import { useLocale, useTranslations } from 'next-intl';
 import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/products.sanity';
-import { calculateProductPrice } from '@/lib/pricing';
-import ImageGallery from './ImageGallery';
-import ProductTabs from './ProductTabs';
-import RelatedProducts from './RelatedProducts';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
 
 interface ProductDetailClientProps {
   product: Product;
-  relatedProducts: Product[];
 }
 
-export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
-  const [quantity, setQuantity] = useState(1);
-  const [isAdding, setIsAdding] = useState(false);
-  const show3D = false;
-  const loading3D = false;
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [validationError, setValidationError] = useState<string>('');
-  const [activeThumb, setActiveThumb] = useState(0);
-  const [expandedAccordion, setExpandedAccordion] = useState('maintenance');
+export default function ProductDetailClient({ product }: ProductDetailClientProps) {
+  const t = useTranslations('productPage');
+  const locale = useLocale();
 
-  const addItem = useCartStore(state => state.addItem);
+  const [show3D, setShow3D] = useState(false);
+  const loading3D = false;
+  const [expandedAccordion, setExpandedAccordion] = useState('aesthetics');
 
   const colorOptions = useMemo<ProductColorVariant[]>(() => {
     return (product.colors || []).map((color, index) => ({
@@ -70,198 +62,171 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
     setSelectedFinish(profileOptions[0] || null);
   }, [profileOptions]);
 
-  // Calculate final price
-  const finalPrice = calculateProductPrice(
-    product.price,
-    selectedColor?.priceModifier || 0,
-    selectedFinish?.priceModifier || 0,
-    quantity
-  );
+  const solutions = [
+    { id: 'facade', label: t('solutions.facade') },
+    { id: 'fence', label: t('solutions.fence') },
+    { id: 'terrace', label: t('solutions.terrace') },
+    { id: 'interior', label: t('solutions.interior') },
+  ] as const;
 
-  const pricePerUnit = calculateProductPrice(
-    product.price,
-    selectedColor?.priceModifier || 0,
-    selectedFinish?.priceModifier || 0,
-    1
-  );
+  const woodTypes = [
+    { id: 'spruce', label: t('woodTypes.spruce') },
+    { id: 'larch', label: t('woodTypes.larch') },
+  ] as const;
 
-  // Handle add to cart
-  const handleAddToCart = async () => {
-    // Clear previous validation errors
-    setValidationError('');
+  const benefits = [
+    {
+      id: 'aesthetics',
+      title: t('benefits.aesthetics.title'),
+      content: t('benefits.aesthetics.content'),
+    },
+    {
+      id: 'eco',
+      title: t('benefits.eco.title'),
+      content: t('benefits.eco.content'),
+    },
+    {
+      id: 'durability',
+      title: t('benefits.durability.title'),
+      content: t('benefits.durability.content'),
+    },
+    {
+      id: 'maintenance',
+      title: t('benefits.maintenance.title'),
+      content: t('benefits.maintenance.content'),
+    },
+  ] as const;
 
-    // Validation
-    if (colorOptions.length > 0 && !selectedColor) {
-      setValidationError('Prašome pasirinkti spalvą');
-      return;
-    }
-    if (profileOptions.length > 0 && !selectedFinish) {
-      setValidationError('Prašome pasirinkti profilį');
-      return;
-    }
-
-    setIsAdding(true);
-
-    try {
-      const cartItem = {
-        id: product.id,
-        name: product.name,
-        slug: product.slug,
-        basePrice: pricePerUnit,
-        quantity,
-        color: selectedColor?.name,
-        finish: selectedFinish?.name,
-        image: product.image,
-      };
-
-      addItem(cartItem);
-
-      // Show success feedback
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-
-      // Optional: Track analytics
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', 'add_to_cart', {
-          currency: 'EUR',
-          value: finalPrice,
-          items: [{
-            item_id: product.id,
-            item_name: product.name,
-            price: pricePerUnit,
-            quantity: quantity,
-          }],
-        });
-      }
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
-      setValidationError('Klaida pridedant į krepšelį. Bandykite dar kartą.');
-    } finally {
-      setIsAdding(false);
-    }
-  };
-
-  const handleShare = (platform: 'facebook' | 'linkedin' | 'email') => {
-    const url = `https://yakiwood.lt/produktai/${product.slug}`;
-    const title = product.name;
-    const description = product.description || '';
-
-    switch (platform) {
-      case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-        break;
-      case 'linkedin':
-        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
-        break;
-      case 'email':
-        window.location.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(description + '\n\n' + url)}`;
-        break;
-    }
+  const contactHref = {
+    pathname: locale === 'en' ? '/contact' : '/kontaktai',
+    query: {
+      produktas: product.name,
+      spalva: selectedColor?.name ?? '',
+      profilis: selectedFinish?.name ?? '',
+      sprendimas: product.category ?? '',
+      perziura: show3D ? '3d' : 'foto',
+    },
   };
 
   return (
     <div className="w-full bg-[#E1E1E1] min-h-screen">
-      {/* Success Toast */}
-      {showSuccess && (
-        <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
-          <div className="bg-[#161616] text-white px-6 py-4 rounded-[24px] shadow-lg flex items-center gap-3">
-            <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span className="font-['Outfit']">Pridėta į krepšelį</span>
-          </div>
-        </div>
-      )}
+      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[16px] lg:py-[24px]">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_520px] gap-[16px] lg:gap-[24px]">
+          {/* Media */}
+          <div className="relative w-full h-[420px] lg:h-[729px] rounded-[8px] overflow-hidden bg-[#EAEAEA]">
+            <button
+              type="button"
+              onClick={() => setShow3D((v) => !v)}
+              className="absolute z-10 top-[16px] right-[16px] h-[32px] px-[12px] rounded-[100px] border border-[#BBBBBB] bg-white/90 font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#161616]"
+              aria-label={show3D ? t('toggleShowPhotoAria') : t('toggleShow3dAria')}
+            >
+              {show3D ? t('photo') : t('view3d')}
+            </button>
 
-      {/* Breadcrumbs - New Figma Style */}
-      <div className="max-w-[1440px] mx-auto px-[40px] py-[10px] border-b border-[#BBBBBB]">
-        <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] text-[#7C7C7C]">
-          <Link href="/">Home</Link>
-          {' / '}
-          <Link href="/produktai">Shop</Link>
-          {' / '}
-          <span className="text-[#161616]">{product.name}</span>
-        </p>
-      </div>
-
-      {/* Main Product Section - New Figma Layout */}
-      <div className="max-w-[1440px] mx-auto px-[40px] py-[54px]">
-        <div className="grid grid-cols-1 lg:grid-cols-[80px_790px_1fr] gap-[16px]">
-          {/* Thumbnail Gallery - Left (hidden on mobile) */}
-          <div className="hidden lg:flex flex-col gap-[12px]">
-            {(product.images ? product.images.map((url, idx) => ({ id: String(idx), url, alt: product.name, isPrimary: idx === 0, order: idx })) : [{ id: '1', url: product.image, alt: product.name, isPrimary: true, order: 0 }])
-              .slice(0, 3)
-              .map((img, idx) => (
-                <button
-                  key={img.id}
-                  onClick={() => setActiveThumb(idx)}
-                  className={`relative w-[80px] h-[80px] rounded-[4px] overflow-hidden ${
-                    activeThumb === idx ? 'ring-2 ring-[#161616]' : ''
-                  }`}
-                >
-                  <img src={img.url} alt={img.alt} className="w-full h-full object-cover" />
-                </button>
-              ))}
-          </div>
-
-          {/* Main Image - Center */}
-          <div className="relative bg-[#BBAB92] h-[400px] lg:h-[729px] rounded-[8px] overflow-hidden">
-            {show3D && colorOptions.length > 0 ? (
-              <Konfiguratorius3D
-                productId={product.id}
-                availableColors={colorOptions}
-                availableFinishes={profileOptions}
-                onColorChange={setSelectedColor}
-                onFinishChange={setSelectedFinish}
-                isLoading={loading3D}
-              />
+            {show3D ? (
+              <div className="absolute inset-0">
+                <Konfiguratorius3D
+                  productId={product.id}
+                  availableColors={colorOptions}
+                  availableFinishes={profileOptions}
+                  selectedColorId={selectedColor?.id}
+                  selectedFinishId={selectedFinish?.id}
+                  isLoading={loading3D}
+                  mode="viewport"
+                  className="h-full"
+                  canvasClassName="h-full"
+                />
+              </div>
             ) : (
-              <ImageGallery
-                images={
-                  product.images 
-                    ? product.images.map((url, idx) => ({ id: String(idx), url, alt: product.name, isPrimary: idx === 0, order: idx }))
-                    : [{ id: '1', url: product.image, alt: product.name, isPrimary: true, order: 0 }]
-                }
-                productName={product.name}
+              <Image
+                src={product.images?.[0] ?? product.image}
+                alt={product.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 60vw"
+                priority
               />
             )}
           </div>
 
-          {/* Product Info - Right */}
-          <div className="flex flex-col gap-[24px]">
-            {/* Title & Price */}
+          {/* Controls */}
+          <div className="flex flex-col gap-[16px] lg:gap-[20px]">
+            <div className="flex items-center gap-[8px]">
+              <Link
+                href="/products"
+                className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] hover:text-[#161616]"
+              >
+                ← {t('back')}
+              </Link>
+            </div>
+
             <div className="flex flex-col gap-[8px]">
-              <h1 className="font-['DM_Sans'] text-[32px] font-normal leading-[1.1] tracking-[-1.28px] text-[#161616]">
+              <h1 className="font-['DM_Sans'] text-[28px] lg:text-[32px] font-normal leading-[1.1] tracking-[-1.28px] text-[#161616]">
                 {product.name}
               </h1>
-              {(product.usageLabel || product.woodLabel) && (
-                <p className="font-['Outfit'] font-normal text-[14px] leading-[1.2] tracking-[0.14px] text-[#7C7C7C]">
-                  {[product.usageLabel, product.woodLabel].filter(Boolean).join(' • ')}
-                </p>
-              )}
-              <p className="font-['DM_Sans'] text-[32px] font-normal leading-[1.1] tracking-[-1.28px] text-[#161616]">
-                {pricePerUnit.toFixed(0)} €
-              </p>
+            </div>
+
+            {/* Wood type */}
+            <div className="flex flex-col gap-[8px]">
+              <div className="flex gap-[8px] flex-wrap">
+                {woodTypes.map((w) => {
+                  const active = product.woodType ? product.woodType === w.id : false;
+                  return (
+                    <button
+                      key={w.id}
+                      type="button"
+                      className={`h-[24px] px-[10px] rounded-[100px] border font-['Outfit'] text-[10px] tracking-[0.6px] uppercase transition-colors ${
+                        active ? 'bg-[#161616] border-[#161616] text-white' : 'bg-transparent border-[#BBBBBB] text-[#535353]'
+                      }`}
+                      aria-pressed={active}
+                    >
+                      {w.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Solutions */}
+            <div className="flex flex-col gap-[8px]">
+              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('solutionsLabel')}</p>
+              <div className="flex gap-[8px] flex-wrap">
+                {solutions.map((s) => {
+                  const active = product.category === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      className={`h-[24px] px-[10px] rounded-[100px] border font-['Outfit'] text-[10px] tracking-[0.6px] uppercase transition-colors ${
+                        active ? 'bg-[#161616] border-[#161616] text-white' : 'bg-transparent border-[#BBBBBB] text-[#535353]'
+                      }`}
+                      aria-pressed={active}
+                    >
+                      {s.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Description */}
             <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] max-w-[434px]">
-              {product.description || 'Produkto aprašymas ruošiama.'}
+              {product.description || t('descriptionFallback')}
             </p>
 
             {/* Color Selector - New Figma Style */}
-            {!show3D && colorOptions.length > 0 && (
+            {colorOptions.length > 0 && (
               <div className="flex flex-col gap-[8px]">
                 <div className="flex gap-[4px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase">
-                  <span className="text-[#7C7C7C]">Spalva:</span>
-                  <span className="text-[#161616]">{selectedColor?.name || 'Pasirinkite spalvą'}</span>
+                  <span className="text-[#7C7C7C]">{t('colorLabelInline')}</span>
+                  <span className="text-[#161616]">{selectedColor?.name || t('selectColorPlaceholder')}</span>
                 </div>
-                <div className="flex gap-[8px] flex-wrap max-h-[43px] overflow-hidden">
+                <div className="flex gap-[8px] flex-wrap">
                   {colorOptions.map((color) => (
                     <button
                       key={color.id}
                       onClick={() => setSelectedColor(color)}
-                      className={`relative w-[32px] h-[32px] rounded-[4px] overflow-hidden ${
+                      className={`relative w-[18px] h-[18px] rounded-full overflow-hidden border border-[#BBBBBB] ${
                         selectedColor?.id === color.id ? 'ring-2 ring-[#161616] ring-offset-2' : ''
                       }`}
                       title={color.name}
@@ -278,182 +243,87 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             )}
 
             {/* Finish Selector (if not in 3D mode) */}
-            {!show3D && profileOptions.length > 0 && (
-              <div className="space-y-3">
-                <label className="font-['DM_Sans'] text-sm font-medium text-[#161616] block">
-                  Profilis
-                </label>
-                <div className="grid grid-cols-1 gap-2">
-                  {profileOptions.map((finish) => {
-                    const priceModifier = finish.priceModifier ?? 0;
-
+            {profileOptions.length > 0 && (
+              <div className="flex flex-col gap-[8px]">
+                <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('profilesLabel')}</p>
+                <div className="flex gap-[8px] flex-wrap">
+                  {profileOptions.slice(0, 4).map((finish) => {
+                    const active = selectedFinish?.id === finish.id;
                     return (
-                      <label
+                      <button
                         key={finish.id}
-                        className={`relative flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                          selectedFinish?.id === finish.id
-                            ? 'border-[#161616] bg-[#F9F9F9]'
-                            : 'border-[#EAEAEA] hover:border-[#BBBBBB]'
+                        type="button"
+                        onClick={() => setSelectedFinish(finish)}
+                        className={`h-[40px] w-[64px] rounded-[4px] border flex items-center justify-center transition-colors ${
+                          active ? 'bg-[#161616] border-[#161616]' : 'bg-transparent border-[#BBBBBB]'
                         }`}
+                        title={finish.name}
+                        aria-pressed={active}
                       >
-                      <input
-                        type="radio"
-                        name="profile"
-                        value={finish.id}
-                        checked={selectedFinish?.id === finish.id}
-                        onChange={() => setSelectedFinish(finish)}
-                        className="mt-0.5 w-4 h-4 text-[#161616] focus:ring-[#161616]"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-['DM_Sans'] font-medium text-[#161616]">
-                            {finish.name}
-                          </span>
-                          {priceModifier !== 0 && (
-                            <span className="font-['Outfit'] text-sm text-[#535353]">
-                              {priceModifier > 0 ? '+' : ''}€{priceModifier.toFixed(2)}
-                            </span>
-                          )}
-                        </div>
-                        {finish.description && (
-                          <p className="mt-1 font-['Outfit'] text-xs text-[#7C7C7C]">
-                            {finish.description}
-                          </p>
-                        )}
-                      </div>
-                      </label>
+                        <svg width="46" height="12" viewBox="0 0 70 12" fill="none" className={active ? 'stroke-white' : 'stroke-[#161616]'}>
+                          <path d="M0 11L35 0V11H70" strokeWidth="1.5" />
+                        </svg>
+                      </button>
                     );
                   })}
                 </div>
               </div>
             )}
 
-            {/* Quantity - New Figma Style */}
+            {/* Benefits */}
             <div className="flex flex-col gap-[8px]">
-              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7C7C7C]">
-                Quantity m2
-              </p>
-              <div className="border border-[#BBBBBB] h-[48px] px-[16px] py-[8px] flex items-center">
-                <input
-                  type="number"
-                  min="1"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase text-[#161616] bg-transparent outline-none"
-                />
+              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('benefitsLabel')}</p>
+              <div className="flex flex-col">
+                {benefits.map((item, index) => (
+                  <React.Fragment key={item.id}>
+                    {index > 0 && <div className="h-[1px] bg-[#BBBBBB]" />}
+                    <button
+                      type="button"
+                      onClick={() => setExpandedAccordion(expandedAccordion === item.id ? '' : item.id)}
+                      className="flex items-center justify-between py-[10px]"
+                    >
+                      <span className="font-['Outfit'] font-medium text-[12px] tracking-[0.6px] uppercase text-[#161616]">
+                        {item.title}
+                      </span>
+                      <div className="w-[20px] h-[20px]">
+                        {expandedAccordion === item.id ? (
+                          <svg viewBox="0 0 20 20" fill="none">
+                            <path d="M5 10H15" stroke="#161616" strokeWidth="2" strokeLinecap="round" />
+                          </svg>
+                        ) : (
+                          <svg viewBox="0 0 20 20" fill="none">
+                            <path d="M10 5V15M5 10H15" stroke="#161616" strokeWidth="2" strokeLinecap="round" />
+                          </svg>
+                        )}
+                      </div>
+                    </button>
+                    {expandedAccordion === item.id && (
+                      <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] pb-[10px] max-w-[494px]">
+                        {item.content}
+                      </p>
+                    )}
+                  </React.Fragment>
+                ))}
+                <div className="h-[1px] bg-[#BBBBBB]" />
               </div>
             </div>
 
-            {/* Add to Cart Button - New Figma Style */}
-            <div className="flex flex-col gap-[8px]">
-              {validationError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm font-['Outfit'] text-red-600">
-                  {validationError}
-                </div>
-              )}
-              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] text-center text-[#535353]">
-                Haven't found what you've looking for?{' '}
-                <Link href="/kontaktai" className="text-[#161616] underline">
-                  Contact us
-                </Link>
-              </p>
-              <button
-                onClick={handleAddToCart}
-                disabled={isAdding}
-                className="w-full bg-[#161616] text-white h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:bg-[#2d2d2d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            {/* CTAs */}
+            <div className="flex flex-col gap-[8px] pt-[8px]">
+              <Link
+                href={contactHref}
+                className="w-full bg-[#161616] text-white h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase flex items-center justify-center hover:bg-[#2d2d2d] transition-colors"
               >
-                {isAdding ? 'Pridedama...' : 'add to cart'}
-              </button>
+                {t('ctaQuote')}
+              </Link>
+              <Link
+                href={contactHref}
+                className="w-full h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase flex items-center justify-center border border-[#161616] text-[#161616] hover:bg-white transition-colors"
+              >
+                {t('ctaContact')}
+              </Link>
             </div>
           </div>
-        </div>
-
-        {/* Accordion Section - New Figma Style */}
-        <div className="mt-[75px] max-w-[672px] mx-auto">
-          <div className="flex flex-col gap-[8px]">
-            {[
-              {
-                id: 'maintenance',
-                title: 'PRODUCT MAINTENANCE',
-                content:
-                  'Every situation is unique, so if you have any questions about maintenance, we encourage you to contact us so that we can assess your needs and offer the most appropriate solution.',
-              },
-              {
-                id: 'disclaimer',
-                title: 'COLOR DISCLAIMER',
-                content:
-                  'Colors may vary slightly from the images shown due to monitor settings and natural wood variations.',
-              },
-              {
-                id: 'shipping',
-                title: 'SHIPPING & RETURN',
-                content: 'Free shipping on orders over 500€. Returns accepted within 14 days of delivery.',
-              },
-              {
-                id: 'payment',
-                title: 'PAYMENT',
-                content: 'We accept all major credit cards, PayPal, and bank transfers.',
-              },
-            ].map((item, index) => (
-              <React.Fragment key={item.id}>
-                {index > 0 && <div className="h-[1px] bg-[#BBBBBB]" />}
-                <div className="flex flex-col gap-[4px]">
-                  <button
-                    onClick={() => setExpandedAccordion(expandedAccordion === item.id ? '' : item.id)}
-                    className="flex items-center justify-between py-[8px]"
-                  >
-                    <span className="font-['Outfit'] font-medium text-[12px] tracking-[0.6px] uppercase text-[#161616]">
-                      {item.title}
-                    </span>
-                    <div className="w-[20px] h-[20px]">
-                      {expandedAccordion === item.id ? (
-                        <svg viewBox="0 0 20 20" fill="none">
-                          <path d="M5 10H15" stroke="#161616" strokeWidth="2" strokeLinecap="round" />
-                        </svg>
-                      ) : (
-                        <svg viewBox="0 0 20 20" fill="none">
-                          <path d="M10 5V15M5 10H15" stroke="#161616" strokeWidth="2" strokeLinecap="round" />
-                        </svg>
-                      )}
-                    </div>
-                  </button>
-                  {expandedAccordion === item.id && (
-                    <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] pb-[8px] max-w-[494px]">
-                      {item.content}
-                    </p>
-                  )}
-                </div>
-              </React.Fragment>
-            ))}
-            <div className="h-[1px] bg-[#BBBBBB]" />
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <ProductTabs product={product} />
-
-        {/* Related Products */}
-        <RelatedProducts products={relatedProducts} />
-      </div>
-
-      {/* Sticky Add to Cart (Mobile) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#BBBBBB] p-4 lg:hidden z-40">
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <p className="font-['DM_Sans'] font-medium text-lg text-[#161616]">
-              €{pricePerUnit.toFixed(2)}
-            </p>
-            <p className="font-['Outfit'] text-xs text-[#7C7C7C]">
-              {quantity > 1 && `${quantity} vnt. • `}Viso: €{finalPrice.toFixed(2)}
-            </p>
-          </div>
-          <button
-            onClick={handleAddToCart}
-            disabled={isAdding}
-            className="px-6 py-3 bg-[#161616] text-white rounded-full font-['Outfit'] text-sm hover:bg-[#2d2d2d] transition-colors disabled:opacity-50 whitespace-nowrap"
-          >
-            {isAdding ? 'Pridedama...' : 'Į krepšelį'}
-          </button>
         </div>
       </div>
     </div>

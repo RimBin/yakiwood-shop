@@ -117,6 +117,49 @@
     "solutions": "Solutions",
     "applications": "Applications"
   },
+  "productPage": {
+    "back": "Back",
+    "photo": "Photo",
+    "view3d": "3D",
+    "toggleShowPhotoAria": "Show photo",
+    "toggleShow3dAria": "Show 3D view",
+    "solutionsLabel": "Solutions",
+    "profilesLabel": "Profiles",
+    "benefitsLabel": "Benefits",
+    "descriptionFallback": "Product description is coming soon.",
+    "colorLabelInline": "Color:",
+    "selectColorPlaceholder": "Select a color",
+    "ctaQuote": "Get a quote",
+    "ctaContact": "Contact",
+    "solutions": {
+      "facade": "Facades",
+      "fence": "Fence",
+      "terrace": "Terrace",
+      "interior": "Interior"
+    },
+    "woodTypes": {
+      "spruce": "Spruce",
+      "larch": "Larch"
+    },
+    "benefits": {
+      "aesthetics": {
+        "title": "BEAUTIFUL NATURAL AESTHETICS",
+        "content": "Bold grain patterns and warm tones give burnt wood a modern yet natural look."
+      },
+      "eco": {
+        "title": "SUSTAINABLE AND ECO-FRIENDLY",
+        "content": "Long-lasting wood and natural treatment reduce the need for maintenance and renewal."
+      },
+      "durability": {
+        "title": "EXCEPTIONAL DURABILITY",
+        "content": "Shou Sugi Ban treatment improves resistance to weathering and extends service life."
+      },
+      "maintenance": {
+        "title": "LOW MAINTENANCE, LONG SERVICE",
+        "content": "Minimal upkeep and long lifetime – ideal for both facades and terraces."
+      }
+    }
+  },
   "products": {
     "title": "Products",
     "allProducts": "All products",
@@ -706,5 +749,79 @@
       "editProduct": "Edit Product",
       "editProductDesc": "Update product information and variants"
     }
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "products": "Products",
+    "projects": "Projects"
+  },
+  "productsPage": {
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search for a product",
+    "usageFilters": {
+      "all": "All solutions",
+      "facade": "Facade systems",
+      "terrace": "Terrace systems"
+    },
+    "woodFilters": {
+      "all": "All wood",
+      "spruce": "Burnt spruce",
+      "larch": "Burnt larch"
+    },
+    "errorTitle": "Error loading products",
+    "errorHelp": "Check console for details.",
+    "errorContactLink": "Contact us",
+    "errorContactSuffix": "if the problem persists.",
+    "retry": "Retry",
+    "emptyTitle": "No products yet",
+    "emptyDescriptionPrefix": "Products will be added soon. If you have any questions,",
+    "emptyContactLink": "contact us",
+    "emptyDescriptionSuffix": ".",
+    "fromPrice": "From {price} €",
+    "loadMore": "Show more"
+  },
+  "productDetail": {
+    "validationSelectColor": "Please select a color",
+    "validationSelectProfile": "Please select a profile",
+    "addToCartError": "Error adding to cart. Please try again.",
+    "addedToCart": "Added to cart",
+    "descriptionFallback": "Product description is being prepared.",
+    "colorLabel": "Color:",
+    "colorPlaceholder": "Select color",
+    "profileLabel": "Profile",
+    "quantityLabel": "Quantity m²",
+    "helpPrefix": "Can't find what you're looking for?",
+    "helpLink": "Contact us",
+    "adding": "Adding...",
+    "addToCart": "Add to cart",
+    "mobilePcs": "pcs",
+    "mobileTotal": "Total:"
+  },
+  "productGallery": {
+    "imageUnavailable": "Image unavailable",
+    "zoomHint": "Click to zoom",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "close": "Close"
+  },
+  "productTabs": {
+    "description": "Description",
+    "specifications": "Specifications",
+    "installation": "Installation",
+    "reviews": "Reviews",
+    "infoPreparing": "Information is being prepared.",
+    "technicalNotesTitle": "Technical notes:",
+    "technicalNote1": "Material naturalness: each board is unique",
+    "technicalNote2": "Color shade may vary from photos",
+    "technicalNote3": "Recommended to store in a dry, ventilated area",
+    "installationSoon": "Installation instructions will be added soon.",
+    "noReviews": "No reviews yet",
+    "beFirst": "Be the first to share your opinion about this product",
+    "writeReviewSoon": "Write a review (soon)"
+  },
+  "relatedProducts": {
+    "title": "Related products",
+    "view": "View",
+    "from": "from"
   }
 }

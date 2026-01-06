@@ -7,18 +7,17 @@ import { useRouter, usePathname } from 'next/navigation';
 interface Language {
   code: string;
   label: string;
-  flag: string;
 }
 
 const languages: Language[] = [
-  { code: 'lt', label: 'Lietuvių', flag: '🇱🇹' },
-  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'lt', label: 'Lietuvių' },
+  { code: 'en', label: 'English' },
 ];
 
 // Route mapping between languages
 const routeMap: Record<string, Record<string, string>> = {
   lt: {
-    '/products': '/produktai',
+    '/products': '/products',
     '/solutions': '/sprendimai',
     '/projects': '/projektai',
     '/about': '/apie',
@@ -95,24 +94,16 @@ export default function LanguageSwitcher() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="
-          flex items-center gap-2 px-3 py-2
-          bg-white border border-[#E1E1E1] rounded-lg
-          font-['DM_Sans'] text-[14px] text-[#161616] font-medium
-          hover:border-[#161616] hover:bg-[#FAFAFA]
-          transition-all duration-200
-          focus:outline-none focus:ring-2 focus:ring-[#161616] focus:ring-offset-2
-        "
+        className="group border border-[#BBBBBB] border-solid rounded-[100px] flex gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[16px] md:px-[20px] py-[10px] bg-transparent hover:bg-[#161616] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#161616] focus-visible:ring-offset-2"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-label="Pasirinkti kalbą"
       >
-        <span className="text-base" aria-hidden="true">
-          {currentLanguage.flag}
+        <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white shrink-0">
+          {currentLanguage.code}
         </span>
-        <span className="uppercase">{currentLanguage.code}</span>
         <svg
-          className={`w-4 h-4 text-[#535353] transition-transform duration-200 ${
+          className={`w-4 h-4 text-[#161616] group-hover:text-white transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`}
           fill="none"
@@ -162,9 +153,6 @@ export default function LanguageSwitcher() {
                 role="option"
                 aria-selected={isActive}
               >
-                <span className="text-base" aria-hidden="true">
-                  {language.flag}
-                </span>
                 <span className="flex-1">{language.label}</span>
                 {isActive && (
                   <svg

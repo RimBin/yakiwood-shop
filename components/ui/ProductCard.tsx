@@ -30,7 +30,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   return (
     <Link 
-      href={`/produktai/${slug}`}
+      href={`/products/${slug}`}
       className={`bg-[#eaeaea] rounded-[8px] flex flex-col gap-[24px] items-center pt-[24px] pb-[40px] px-[24px] relative group hover:shadow-lg transition-shadow ${className}`}
     >
       {/* Product Image */}

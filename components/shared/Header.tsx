@@ -19,7 +19,7 @@ export default function Header() {
   
   // Dynamic routes based on locale
   const navItems = locale === 'lt' ? [
-    { href: '/produktai', label: t('nav.produktai') },
+    { href: '/products', label: t('nav.produktai') },
     { href: '/sprendimai', label: t('nav.sprendimai') },
     { href: '/projektai', label: t('nav.projektai') },
     { href: '/konfiguratorius3d', label: t('nav.konfiguratorius3d') },

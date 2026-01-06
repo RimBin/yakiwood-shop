@@ -8,9 +8,9 @@ describe('Header', () => {
     expect(screen.getByRole('link', { name: /yakiwood homepage/i })).toBeInTheDocument();
 
     // next-intl is mocked in Jest and returns translation keys.
-    // useLocale() is mocked to 'lt', so the header should render Lithuanian routes.
+    // Even when useLocale() is 'lt', product URLs are kept in English (/products).
     const productLinks = screen.getAllByRole('link', { name: /^nav\.produktai$/i });
-    expect(productLinks.some((link) => link.getAttribute('href') === '/produktai')).toBe(true);
+    expect(productLinks.some((link) => link.getAttribute('href') === '/products')).toBe(true);
 
     const configuratorLinks = screen.getAllByRole('link', { name: /^nav\.konfiguratorius3d$/i });
     expect(configuratorLinks.some((link) => link.getAttribute('href') === '/konfiguratorius3d')).toBe(true);

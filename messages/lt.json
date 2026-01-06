@@ -117,6 +117,49 @@
     "sprendimai": "Sprendimai",
     "pritaikymas": "Pritaikymas"
   },
+  "productPage": {
+    "back": "Atgal",
+    "photo": "Foto",
+    "view3d": "3D",
+    "toggleShowPhotoAria": "Rodyti nuotrauką",
+    "toggleShow3dAria": "Rodyti 3D vaizdą",
+    "solutionsLabel": "Sprendimai",
+    "profilesLabel": "Profiliai",
+    "benefitsLabel": "Privalumai",
+    "descriptionFallback": "Produkto aprašymas ruošiamas.",
+    "colorLabelInline": "Spalva:",
+    "selectColorPlaceholder": "Pasirinkite spalvą",
+    "ctaQuote": "Gauti pasiūlymą",
+    "ctaContact": "Susisiekti",
+    "solutions": {
+      "facade": "Fasadai",
+      "fence": "Tvora",
+      "terrace": "Terasa",
+      "interior": "Interjeras"
+    },
+    "woodTypes": {
+      "spruce": "Eglė",
+      "larch": "Maumedis"
+    },
+    "benefits": {
+      "aesthetics": {
+        "title": "GRAŽI NATŪRALI ESTETIKA",
+        "content": "Dėl ryškių raštų ir šiltų tonų deginta mediena suteikia modernų, bet kartu ir natūralų įvaizdį."
+      },
+      "eco": {
+        "title": "TVARU IR DRAUGIŠKA APLINKAI",
+        "content": "Ilgaamžė mediena ir natūralus apdorojimas padeda sumažinti priežiūros ir atnaujinimo poreikį."
+      },
+      "durability": {
+        "title": "IŠSKIRTINIS ATSPARUMAS",
+        "content": "Shou Sugi Ban technologija padidina atsparumą aplinkos poveikiui ir prailgina tarnavimo laiką."
+      },
+      "maintenance": {
+        "title": "MAŽA PRIEŽIŪRA IR ILGA TARNYBA",
+        "content": "Minimalus aptarnavimas ir ilgas eksploatacijos laikas – patogu tiek fasadams, tiek terasoms."
+      }
+    }
+  },
   "products": {
     "pavadinimas": "Produktai",
     "visiProduk tai": "Visi produktai",
@@ -470,5 +513,79 @@
       "editProduct": "Redaguoti produktą",
       "editProductDesc": "Atnaujinkite produkto informaciją ir variantas"
     }
+  },
+  "breadcrumbs": {
+    "home": "Pagrindinis",
+    "products": "Produktai",
+    "projects": "Projektai"
+  },
+  "productsPage": {
+    "searchLabel": "Paieška",
+    "searchPlaceholder": "Ieškoti produkto",
+    "usageFilters": {
+      "all": "Visi sprendimai",
+      "facade": "Fasadų sistemos",
+      "terrace": "Terasų sistemos"
+    },
+    "woodFilters": {
+      "all": "Visa mediena",
+      "spruce": "Deginta eglė",
+      "larch": "Degintas maumedis"
+    },
+    "errorTitle": "Nepavyko įkelti produktų",
+    "errorHelp": "Daugiau informacijos rasite konsolėje.",
+    "errorContactLink": "Susisiekite",
+    "errorContactSuffix": "jei problema kartojasi.",
+    "retry": "Bandyti dar kartą",
+    "emptyTitle": "Produktų kol kas nėra",
+    "emptyDescriptionPrefix": "Produktai bus pridėti netrukus. Jei turite klausimų,",
+    "emptyContactLink": "susisiekite",
+    "emptyDescriptionSuffix": ".",
+    "fromPrice": "Nuo {price} €",
+    "loadMore": "Rodyti daugiau"
+  },
+  "productDetail": {
+    "validationSelectColor": "Prašome pasirinkti spalvą",
+    "validationSelectProfile": "Prašome pasirinkti profilį",
+    "addToCartError": "Klaida pridedant į krepšelį. Bandykite dar kartą.",
+    "addedToCart": "Pridėta į krepšelį",
+    "descriptionFallback": "Produkto aprašymas ruošiama.",
+    "colorLabel": "Spalva:",
+    "colorPlaceholder": "Pasirinkite spalvą",
+    "profileLabel": "Profilis",
+    "quantityLabel": "Kiekis m²",
+    "helpPrefix": "Nerandate ko ieškote?",
+    "helpLink": "Susisiekite",
+    "adding": "Pridedama...",
+    "addToCart": "Į krepšelį",
+    "mobilePcs": "vnt.",
+    "mobileTotal": "Viso:"
+  },
+  "productGallery": {
+    "imageUnavailable": "Nuotrauka neprieinama",
+    "zoomHint": "Spustelėkite, kad priartintumėte",
+    "previousImage": "Ankstesnė nuotrauka",
+    "nextImage": "Kita nuotrauka",
+    "close": "Uždaryti"
+  },
+  "productTabs": {
+    "description": "Aprašymas",
+    "specifications": "Specifikacijos",
+    "installation": "Montavimas",
+    "reviews": "Atsiliepimai",
+    "infoPreparing": "Informacija ruošiama.",
+    "technicalNotesTitle": "Techninės pastabos:",
+    "technicalNote1": "Medžiagos natūralumas: kiekviena lentelė yra unikali",
+    "technicalNote2": "Spalvos atspalvis gali skirtis nuo nuotraukose matyto",
+    "technicalNote3": "Rekomenduojama laikyti sausoje, vėdinamoje patalpoje",
+    "installationSoon": "Montavimo instrukcijos bus pridėtos greitai.",
+    "noReviews": "Atsiliepimų kol kas nėra",
+    "beFirst": "Būkite pirmas, kuris pasidalins savo nuomone apie šį produktą",
+    "writeReviewSoon": "Rašyti atsiliepimą (netrukus)"
+  },
+  "relatedProducts": {
+    "title": "Panašūs produktai",
+    "view": "Peržiūrėti",
+    "from": "nuo"
   }
 }

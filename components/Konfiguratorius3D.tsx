@@ -24,20 +24,28 @@ export interface Konfiguratorius3DProps {
   productId: string;
   availableColors: ProductColorVariant[];
   availableFinishes: ProductProfileVariant[];
+  mode?: 'full' | 'viewport';
+  selectedColorId?: string;
+  selectedFinishId?: string;
   onColorChange?: (color: ProductColorVariant) => void;
   onFinishChange?: (finish: ProductProfileVariant) => void;
   className?: string;
   isLoading?: boolean;
+  canvasClassName?: string;
 }
 
 export default function Konfiguratorius3D({ 
   productId,
   availableColors, 
   availableFinishes,
+  mode = 'full',
+  selectedColorId,
+  selectedFinishId,
   onColorChange,
   onFinishChange,
   className = '',
   isLoading = false,
+  canvasClassName,
 }: Konfiguratorius3DProps) {
   const t = useTranslations();
   const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(
@@ -47,6 +55,18 @@ export default function Konfiguratorius3D({
     availableFinishes[0] || null
   );
   const [modelColor, setModelColor] = useState('#444444');
+
+  useEffect(() => {
+    if (!selectedColorId) return;
+    const next = availableColors.find((c) => c.id === selectedColorId) ?? null;
+    setSelectedColor(next);
+  }, [availableColors, selectedColorId, productId]);
+
+  useEffect(() => {
+    if (!selectedFinishId) return;
+    const next = availableFinishes.find((f) => f.id === selectedFinishId) ?? null;
+    setSelectedFinish(next);
+  }, [availableFinishes, selectedFinishId, productId]);
 
   useEffect(() => {
     if (selectedColor?.hex) {
@@ -65,9 +85,13 @@ export default function Konfiguratorius3D({
   };
 
   return (
-    <div className={`w-full flex flex-col gap-6 ${className}`}>
+    <div className={mode === 'viewport' ? `w-full h-full ${className}` : `w-full flex flex-col gap-6 ${className}`}>
       {/* 3D Canvas */}
-      <div className="relative w-full h-[400px] md:h-[500px] border border-[#BBBBBB] rounded-[24px] overflow-hidden bg-[#EAEAEA]">
+      <div
+        className={`relative w-full border border-[#BBBBBB] rounded-[24px] overflow-hidden bg-[#EAEAEA] ${
+          canvasClassName ?? (mode === 'viewport' ? 'h-full' : 'h-[400px] md:h-[500px]')
+        }`}
+      >
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-[#EAEAEA] z-10">
             <div className="flex flex-col items-center gap-3">
@@ -92,121 +116,126 @@ export default function Konfiguratorius3D({
           />
         </Canvas>
 
-        {/* 3D Controls hint */}
-        <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-2 rounded-lg text-xs font-['Outfit'] text-[#535353]">
-          {t('configurator.controlsHint')}
-        </div>
+        {mode === 'full' && (
+          <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-2 rounded-lg text-xs font-['Outfit'] text-[#535353]">
+            {t('configurator.controlsHint')}
+          </div>
+        )}
       </div>
 
-      {/* Color Selector */}
-      {availableColors.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <label className="font-['DM_Sans'] text-sm font-medium text-[#161616]">
-            {t('configurator.colorLabel')}
-            {selectedColor && (
-              <span className="ml-2 font-['Outfit'] font-normal text-[#7C7C7C]">
-                ({selectedColor.name})
-              </span>
-            )}
-          </label>
-          <div className="flex flex-wrap gap-3">
-            {availableColors.map((color) => {
-              const priceModifier = color.priceModifier ?? 0;
-
-              return (
-                <button
-                  key={color.id}
-                  onClick={() => handleColorSelect(color)}
-                  className={`relative group ${
-                    selectedColor?.id === color.id ? 'ring-2 ring-[#161616] ring-offset-2' : ''
-                  }`}
-                  aria-label={t('configurator.selectColorAria', { name: color.name })}
-                  title={color.name}
-                >
-                {color.image ? (
-                  <div className="relative w-12 h-12 rounded-lg overflow-hidden border-2 border-[#EAEAEA] group-hover:border-[#BBBBBB] transition-colors">
-                    <img 
-                      src={color.image} 
-                      alt={color.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div
-                    style={{ backgroundColor: color.hex }}
-                    className="w-12 h-12 rounded-lg border-2 border-[#EAEAEA] group-hover:border-[#BBBBBB] transition-colors"
-                  />
-                )}
-                
-                {priceModifier !== 0 && (
-                  <span className="absolute -top-2 -right-2 bg-[#161616] text-white text-[10px] px-1.5 py-0.5 rounded-full font-['Outfit']">
-                    {priceModifier > 0 ? '+' : ''}€{priceModifier.toFixed(0)}
+      {mode === 'full' && (
+        <>
+          {/* Color Selector */}
+          {availableColors.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <label className="font-['DM_Sans'] text-sm font-medium text-[#161616]">
+                {t('configurator.colorLabel')}
+                {selectedColor && (
+                  <span className="ml-2 font-['Outfit'] font-normal text-[#7C7C7C]">
+                    ({selectedColor.name})
                   </span>
                 )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {availableColors.map((color) => {
+                  const priceModifier = color.priceModifier ?? 0;
 
-      {/* Finish Selector */}
-      {availableFinishes.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <label className="font-['DM_Sans'] text-sm font-medium text-[#161616]">
-            {t('configurator.profileLabel')}
-          </label>
-          <div className="grid grid-cols-1 gap-2">
-            {availableFinishes.map((finish) => {
-              const priceModifier = finish.priceModifier ?? 0;
-
-              return (
-                <label
-                  key={finish.id}
-                  className={`relative flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    selectedFinish?.id === finish.id
-                      ? 'border-[#161616] bg-[#F9F9F9]'
-                      : 'border-[#EAEAEA] hover:border-[#BBBBBB]'
-                  }`}
-                >
-                <input
-                  type="radio"
-                  name="finish"
-                  value={finish.id}
-                  checked={selectedFinish?.id === finish.id}
-                  onChange={() => handleFinishSelect(finish)}
-                  className="mt-0.5 w-4 h-4 text-[#161616] focus:ring-[#161616]"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-['DM_Sans'] font-medium text-[#161616]">
-                      {finish.name}
-                    </span>
+                  return (
+                    <button
+                      key={color.id}
+                      onClick={() => handleColorSelect(color)}
+                      className={`relative group ${
+                        selectedColor?.id === color.id ? 'ring-2 ring-[#161616] ring-offset-2' : ''
+                      }`}
+                      aria-label={t('configurator.selectColorAria', { name: color.name })}
+                      title={color.name}
+                    >
+                    {color.image ? (
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden border-2 border-[#EAEAEA] group-hover:border-[#BBBBBB] transition-colors">
+                        <img 
+                          src={color.image} 
+                          alt={color.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        style={{ backgroundColor: color.hex }}
+                        className="w-12 h-12 rounded-lg border-2 border-[#EAEAEA] group-hover:border-[#BBBBBB] transition-colors"
+                      />
+                    )}
+                    
                     {priceModifier !== 0 && (
-                      <span className="font-['Outfit'] text-sm text-[#535353]">
-                        {priceModifier > 0 ? '+' : ''}€{priceModifier.toFixed(2)}
+                      <span className="absolute -top-2 -right-2 bg-[#161616] text-white text-[10px] px-1.5 py-0.5 rounded-full font-['Outfit']">
+                        {priceModifier > 0 ? '+' : ''}€{priceModifier.toFixed(0)}
                       </span>
                     )}
-                  </div>
-                  {finish.description && (
-                    <p className="mt-1 font-['Outfit'] text-xs text-[#7C7C7C]">
-                      {finish.description}
-                    </p>
-                  )}
-                </div>
-                </label>
-              );
-            })}
-          </div>
-        </div>
-      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-      {/* Info Note */}
-      <div className="p-4 bg-[#F9F9F9] rounded-lg border border-[#EAEAEA]">
-        <p className="font-['Outfit'] text-xs text-[#535353]">
-          <strong>{t('configurator.noteTitle')}</strong> {t('configurator.noteBody')}
-        </p>
-      </div>
+          {/* Finish Selector */}
+          {availableFinishes.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <label className="font-['DM_Sans'] text-sm font-medium text-[#161616]">
+                {t('configurator.profileLabel')}
+              </label>
+              <div className="grid grid-cols-1 gap-2">
+                {availableFinishes.map((finish) => {
+                  const priceModifier = finish.priceModifier ?? 0;
+
+                  return (
+                    <label
+                      key={finish.id}
+                      className={`relative flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                        selectedFinish?.id === finish.id
+                          ? 'border-[#161616] bg-[#F9F9F9]'
+                          : 'border-[#EAEAEA] hover:border-[#BBBBBB]'
+                      }`}
+                    >
+                    <input
+                      type="radio"
+                      name="finish"
+                      value={finish.id}
+                      checked={selectedFinish?.id === finish.id}
+                      onChange={() => handleFinishSelect(finish)}
+                      className="mt-0.5 w-4 h-4 text-[#161616] focus:ring-[#161616]"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-['DM_Sans'] font-medium text-[#161616]">
+                          {finish.name}
+                        </span>
+                        {priceModifier !== 0 && (
+                          <span className="font-['Outfit'] text-sm text-[#535353]">
+                            {priceModifier > 0 ? '+' : ''}€{priceModifier.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                      {finish.description && (
+                        <p className="mt-1 font-['Outfit'] text-xs text-[#7C7C7C]">
+                          {finish.description}
+                        </p>
+                      )}
+                    </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Info Note */}
+          <div className="p-4 bg-[#F9F9F9] rounded-lg border border-[#EAEAEA]">
+            <p className="font-['Outfit'] text-xs text-[#535353]">
+              <strong>{t('configurator.noteTitle')}</strong> {t('configurator.noteBody')}
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 }

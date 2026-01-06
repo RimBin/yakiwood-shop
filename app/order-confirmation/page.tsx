@@ -137,7 +137,7 @@ export default function OrderConfirmationPage() {
             Peržiūrėti užsakymus
           </Link>
           <Link
-            href="/produktai"
+            href="/products"
             className="flex-1 h-[48px] rounded-[100px] border border-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors flex items-center justify-center"
           >
             Tęsti apsipirkimą

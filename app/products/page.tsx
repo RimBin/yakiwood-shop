@@ -170,7 +170,7 @@ export default function ProductsPage() {
             {products.map((product) => (
             <Link
               key={product.id}
-              href={`/produktai/${product.slug}`}
+              href={`/products/${product.slug}`}
               className="flex flex-col gap-[8px] group"
             >
               <div className="relative w-full h-[250px] border border-[#161616] border-opacity-30 overflow-hidden">

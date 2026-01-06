@@ -116,7 +116,7 @@ export interface ProductInput {
  * @param product - Product data object
  */
 export function generateProductSchema(product: ProductInput): ProductSchema {
-  const productUrl = `${BASE_URL}/produktai/${product.slug}`;
+  const productUrl = `${BASE_URL}/products/${product.slug}`;
   const productImages = product.images || (product.image ? [product.image] : []);
 
   return {
@@ -185,8 +185,8 @@ export function jsonLdScriptContent(
  * const orgSchema = generateOrganizationSchema();
  * const breadcrumbs = generateBreadcrumbSchema([
  *   { name: 'Pagrindinis', url: '/' },
- *   { name: 'Produktai', url: '/produktai' },
- *   { name: 'Deginta eglė', url: '/produktai/burnt-spruce-cladding' }
+ *   { name: 'Produktai', url: '/products' },
+ *   { name: 'Deginta eglė', url: '/products/burnt-spruce-cladding' }
  * ]);
  *
  * // In your JSX:
