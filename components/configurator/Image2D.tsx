@@ -5,7 +5,7 @@ export interface Image2DProps {
   alt: string;
 }
 
-export default function Image2D({ src = '/assets/imgSpruce.png', alt }: Image2DProps) {
+export default function Image2D({ src = '/images/ui/wood/imgSpruce.png', alt }: Image2DProps) {
   return (
     <Image
       src={src}

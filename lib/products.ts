@@ -220,7 +220,7 @@ function transformDatabaseProduct(dbProduct: any): Product {
     sku: dbProduct.sku,
     category: dbProduct.category,
     woodType: dbProduct.wood_type,
-    image: dbProduct.image_url || dbProduct.image || '/assets/placeholder.png',
+    image: dbProduct.image_url || dbProduct.image || '/images/ui/wood/imgSpruce.png',
     images: dbProduct.images?.map((img: any) => ({
       id: img.id,
       url: img.image_url,

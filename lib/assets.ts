@@ -1,57 +1,57 @@
 /**
- * Local asset paths - all assets now stored in /public/assets/
+ * Local asset paths - assets stored under /public/images and /public/icons
  * No more Figma URL dependencies
  */
 
 // Map all assets to local paths
 const localAssets = {
   // Project images
-  imgProject1: '/assets/imgProject1.jpg',
-  imgProject2: '/assets/imgProject2.jpg',
-  imgProject3: '/assets/imgProject3.jpg',
-  imgProject4: '/assets/imgProject4.jpg',
-  imgProject5: '/assets/imgProject5.jpg',
-  imgProject6: '/assets/imgProject6.jpg',
+  imgProject1: '/images/ui/projects/imgProject1.jpg',
+  imgProject2: '/images/ui/projects/imgProject2.jpg',
+  imgProject3: '/images/ui/projects/imgProject3.jpg',
+  imgProject4: '/images/ui/projects/imgProject4.jpg',
+  imgProject5: '/images/ui/projects/imgProject5.jpg',
+  imgProject6: '/images/ui/projects/imgProject6.jpg',
   
   // Wood samples
-  imgSpruce: '/assets/imgSpruce.png',
-  imgLarch1: '/assets/imgLarch1.png',
-  imgLarch2: '/assets/imgLarch2.png',
+  imgSpruce: '/images/ui/wood/imgSpruce.png',
+  imgLarch1: '/images/ui/wood/imgLarch1.png',
+  imgLarch2: '/images/ui/wood/imgLarch2.png',
   
   // Colors
-  imgColor1: '/assets/imgColor1.png',
-  imgColor2: '/assets/imgColor2.png',
-  imgColor3: '/assets/imgColor3.png',
-  imgColor4: '/assets/imgColor4.png',
-  imgColor5: '/assets/imgColor5.png',
-  imgColor6: '/assets/imgColor6.png',
-  imgColor7: '/assets/imgColor7.png',
-  imgColor8: '/assets/imgColor8.png',
+  imgColor1: '/images/ui/colors/imgColor1.png',
+  imgColor2: '/images/ui/colors/imgColor2.png',
+  imgColor3: '/images/ui/colors/imgColor3.png',
+  imgColor4: '/images/ui/colors/imgColor4.png',
+  imgColor5: '/images/ui/colors/imgColor5.png',
+  imgColor6: '/images/ui/colors/imgColor6.png',
+  imgColor7: '/images/ui/colors/imgColor7.png',
+  imgColor8: '/images/ui/colors/imgColor8.png',
   
   // Backgrounds & masks
-  imgMask: '/assets/imgMask.jpg',
-  imgVector33: '/assets/imgVector33.jpg',
-  imgVector37: '/assets/imgVector37.jpg',
+  imgMask: '/images/ui/backgrounds/imgMask.jpg',
+  imgVector33: '/images/ui/backgrounds/imgVector33.jpg',
+  imgVector37: '/images/ui/backgrounds/imgVector37.jpg',
   
   // Category images
-  imgFence: '/assets/imgFence.jpg',
-  imgFacades: '/assets/imgFacades.jpg',
-  imgTerrace: '/assets/imgTerrace.jpg',
-  imgInterior: '/assets/imgInterior.jpg',
+  imgFence: '/images/ui/categories/imgFence.jpg',
+  imgFacades: '/images/ui/categories/imgFacades.jpg',
+  imgTerrace: '/images/ui/categories/imgTerrace.jpg',
+  imgInterior: '/images/ui/categories/imgInterior.jpg',
   
   // Logo & UI
-  imgLogo: '/assets/imgLogo.svg',
-  imgCart: '/assets/icons/shopping-cart-simple.svg',
+  imgLogo: '/images/ui/brand/imgLogo.svg',
+  imgCart: '/icons/ui/shopping-cart-simple.svg',
   
   // Icons (use white PNG variants for announcement bar)
-  imgIconTruck: '/assets/icons/package.png',
-  imgIconCoins: '/assets/icons/coins.png',
-  imgIconPlant: '/assets/icons/plant.png',
+  imgIconTruck: '/icons/ui/package.png',
+  imgIconCoins: '/icons/ui/coins.png',
+  imgIconPlant: '/icons/ui/plant.png',
   
   // Certifications
-  certEpd: '/assets/cert-epd.png',
-  certFsc: '/assets/cert-fsc.png',
-  certEu: '/assets/cert-eu.png',
+  certEpd: '/images/ui/certifications/cert-epd.png',
+  certFsc: '/images/ui/certifications/cert-fsc.png',
+  certEu: '/images/ui/certifications/cert-eu.png',
 } as const;
 
 export type AssetKey = keyof typeof localAssets;

@@ -132,7 +132,7 @@ function transformSeedProduct(seed: (typeof seedProducts)[number]): Product {
     slug: seed.slug,
     name: seed.name,
     price: seed.basePrice,
-    image: seed.images?.[0] ?? '/assets/placeholder-product.jpg',
+    image: seed.images?.[0] ?? '/images/ui/wood/imgSpruce.png',
     images: seed.images ?? [],
     category: seed.category,
     description: seed.description,
@@ -288,7 +288,7 @@ export async function fetchProductsByWoodType(woodType: string): Promise<Product
  */
 function transformSanityProduct(sanityProduct: SanityProduct): Product {
   const firstImage = sanityProduct.images?.[0];
-  const imageUrl = firstImage ? urlFor(firstImage).width(800).url() : '/assets/imgSpruce.png';
+  const imageUrl = firstImage ? urlFor(firstImage).width(800).url() : '/images/ui/wood/imgSpruce.png';
 
   const images = sanityProduct.images?.map((img) => urlFor(img).width(1000).url()) || [];
 
