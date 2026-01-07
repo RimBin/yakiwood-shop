@@ -499,6 +499,8 @@
     "eyebrow": "testimonials",
     "title": "What our clients say",
     "heading": "What our clients say",
+    "pavadinimas": "What our clients say",
+    "antraste": "What our clients say",
     "testimonial1": {
       "quote": "The burnt wood perfectly complemented our modern home design. It looks amazing!",
       "author": "Jonas K.",
@@ -512,6 +514,21 @@
     "testimonial3": {
       "quote": "Outstanding craftsmanship and attention to detail. Exceeded our expectations!",
       "author": "Laura S.",
+      "role": "Interior Designer"
+    },
+    "atsiliepimas1": {
+      "citata": "The burnt wood perfectly complemented our modern home design. It looks amazing!",
+      "autorius": "Jonas K.",
+      "role": "Homeowner"
+    },
+    "atsiliepimas2": {
+      "citata": "Professional service and exceptional quality. Highly recommend!",
+      "autorius": "Mindaugas P.",
+      "role": "Architect"
+    },
+    "atsiliepimas3": {
+      "citata": "Outstanding craftsmanship and attention to detail. Exceeded our expectations!",
+      "autorius": "Laura S.",
       "role": "Interior Designer"
     }
   },

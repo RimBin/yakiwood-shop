@@ -161,7 +161,7 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="absolute left-1/2 -translate-x-1/2 top-[800px] w-[1440px] bg-[#161616] px-[40px] py-[16px] flex gap-[150px] items-center justify-center z-10">
+          <div className="absolute left-0 right-0 top-[800px] w-full bg-[#161616] px-[40px] py-[16px] flex gap-[150px] items-center justify-center z-10">
             {certifications.map((src) => (
               <div key={src} className="h-[32px] w-[72px] relative">
                 <Image src={src} alt="" fill className="object-contain" />
