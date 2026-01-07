@@ -7,12 +7,13 @@ import Accordion from '@/components/ui/Accordion';
 import Button from '@/components/ui/Button';
 import { ColorSwatchGroup } from '@/components/ui/ColorSwatch';
 import ProductCard from '@/components/ui/ProductCard';
+import { assets } from '@/lib/assets';
 
 // Local assets
-const imgProduct = '/assets/imgSpruce.png';
-const imgThumb1 = '/assets/imgSpruce.png';
-const imgThumb2 = '/assets/imgLarch1.png';
-const imgThumb3 = '/assets/imgLarch2.png';
+const imgProduct = assets.wood.spruce;
+const imgThumb1 = assets.wood.spruce;
+const imgThumb2 = assets.wood.larch1;
+const imgThumb3 = assets.wood.larch2;
 
 // Profile icons SVG paths
 const profiles = [
@@ -24,14 +25,14 @@ const profiles = [
 
 // Sample colors
 const productColors = [
-  { id: 'natural', name: 'Natural', image: '/assets/imgColor1.png' },
-  { id: 'carbon-light', name: 'Carbon Light', image: '/assets/imgColor2.png' },
-  { id: 'carbon-dark', name: 'Carbon Dark', image: '/assets/imgColor3.png' },
-  { id: 'brown', name: 'Brown', image: '/assets/imgColor4.png' },
-  { id: 'graphite', name: 'Graphite', image: '/assets/imgColor5.png' },
-  { id: 'latte', name: 'Latte', image: '/assets/imgColor6.png' },
-  { id: 'silver', name: 'Silver', image: '/assets/imgColor7.png' },
-  { id: 'white', name: 'White', image: '/assets/imgColor8.png' },
+  { id: 'natural', name: 'Natural', image: assets.colors[0] },
+  { id: 'carbon-light', name: 'Carbon Light', image: assets.colors[1] },
+  { id: 'carbon-dark', name: 'Carbon Dark', image: assets.colors[2] },
+  { id: 'brown', name: 'Brown', image: assets.colors[3] },
+  { id: 'graphite', name: 'Graphite', image: assets.colors[4] },
+  { id: 'latte', name: 'Latte', image: assets.colors[5] },
+  { id: 'silver', name: 'Silver', image: assets.colors[6] },
+  { id: 'white', name: 'White', image: assets.colors[7] },
 ];
 
 // Accordion items
@@ -278,7 +279,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               slug={i === 1 ? 'spruce-wood' : 'larch-wood'}
               price={89}
               description="Lightweight yet strong, this wood offers a smooth texture and a natural, clean finish. Its versatility and durability make it an excellent choice for both interior and exterior applications."
-              image="/assets/imgSpruce.png"
+              image={assets.wood.spruce}
               labels={['Facades', 'Terrace', 'Interior']}
               colors={productColors.slice(0, 8)}
               selectedColorIndex={1}

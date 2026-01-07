@@ -6,7 +6,7 @@ export const seedProducts = [
     description: 'Deep black charred larch wood with rich texture. Perfect for dramatic facades and modern architecture. Shou Sugi Ban technique creates a durable, weather-resistant finish.',
     category: 'facades',
     basePrice: 89.00,
-    images: ['/assets/products/black-larch.jpg'],
+    images: ['/images/ui/wood/imgLarch1.png'],
     inStock: true,
   },
   {
@@ -16,7 +16,7 @@ export const seedProducts = [
     description: 'Lighter charred finish with blue-grey tones. Elegant option for contemporary projects. Combines durability with subtle aesthetics.',
     category: 'facades',
     basePrice: 92.00,
-    images: ['/assets/products/carbon-light-larch.jpg'],
+    images: ['/images/ui/wood/imgLarch1.png'],
     inStock: true,
   },
   {
@@ -26,7 +26,7 @@ export const seedProducts = [
     description: 'Deep charcoal black with pronounced wood grain texture. Premium choice for high-end architectural projects. Maximum protection and striking appearance.',
     category: 'facades',
     basePrice: 95.00,
-    images: ['/assets/products/carbon-larch.jpg'],
+    images: ['/images/ui/wood/imgLarch1.png'],
     inStock: true,
   },
   {
@@ -36,7 +36,7 @@ export const seedProducts = [
     description: 'Rich brown tones with natural wood character. Warm and inviting finish for residential and commercial applications. Weather-resistant and low maintenance.',
     category: 'facades',
     basePrice: 87.00,
-    images: ['/assets/products/dark-brown-larch.jpg'],
+    images: ['/images/ui/wood/imgLarch1.png'],
     inStock: true,
   },
   {
@@ -46,7 +46,7 @@ export const seedProducts = [
     description: 'Sophisticated grey-black finish with metallic undertones. Perfect for minimalist design. Exceptional longevity and fade resistance.',
     category: 'facades',
     basePrice: 93.00,
-    images: ['/assets/products/graphite-larch.jpg'],
+    images: ['/images/ui/wood/imgLarch1.png'],
     inStock: true,
   },
   {
@@ -56,7 +56,7 @@ export const seedProducts = [
     description: 'Warm grey-beige tones inspired by coffee. Elegant neutral option for versatile design schemes. Natural wood texture beautifully preserved.',
     category: 'facades',
     basePrice: 85.00,
-    images: ['/assets/products/latte-larch.jpg'],
+    images: ['/images/ui/wood/imgLarch1.png'],
     inStock: true,
   },
   {
@@ -66,7 +66,7 @@ export const seedProducts = [
     description: 'Authentic wood grain with rich amber and brown hues. Lightly charred to preserve natural beauty. Perfect for rustic and traditional aesthetics.',
     category: 'facades',
     basePrice: 82.00,
-    images: ['/assets/products/natural-larch.jpg'],
+    images: ['/images/ui/wood/imgLarch1.png'],
     inStock: true,
   },
   {
@@ -76,7 +76,7 @@ export const seedProducts = [
     description: 'Cool blue-grey weathered finish. Scandinavian-inspired aesthetic. Develops beautiful silver patina over time while maintaining structural integrity.',
     category: 'facades',
     basePrice: 90.00,
-    images: ['/assets/products/silver-larch.jpg'],
+    images: ['/images/ui/wood/imgLarch1.png'],
     inStock: true,
   },
 ];

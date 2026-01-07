@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 // Product image placeholder - local asset
-const productPlaceholder = "/assets/imgCart.jpg";
+const productPlaceholder = "/images/ui/imgCart.jpg";
 
 // Close Icon
 const CloseIcon = () => (

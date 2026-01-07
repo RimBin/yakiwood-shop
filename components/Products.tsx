@@ -3,24 +3,26 @@
 import React, { useRef } from 'react';
 import Image from 'next/image';
 import { useCartStore } from '@/lib/cart/store';
+import { assets, getAsset } from '@/lib/assets';
 
-// Local assets from public/assets folder
-const imgMask = "/assets/imgMask.jpg";
+const imgMask = getAsset('imgMask');
 
 // Product images
-const imgSpruce = "/assets/imgSpruce.png";
-const imgLarch1 = "/assets/imgLarch1.png";
-const imgLarch2 = "/assets/imgLarch2.png";
+const imgSpruce = assets.wood.spruce;
+const imgLarch1 = assets.wood.larch1;
+const imgLarch2 = assets.wood.larch2;
 
 // Color swatches
-const imgColor1 = "/assets/imgColor1.png";
-const imgColor2 = "/assets/imgColor2.png";
-const imgColor3 = "/assets/imgColor3.png";
-const imgColor4 = "/assets/imgColor4.png";
-const imgColor5 = "/assets/imgColor5.png";
-const imgColor6 = "/assets/imgColor6.png";
-const imgColor7 = "/assets/imgColor7.png";
-const imgColor8 = "/assets/imgColor8.png";
+const [
+  imgColor1,
+  imgColor2,
+  imgColor3,
+  imgColor4,
+  imgColor5,
+  imgColor6,
+  imgColor7,
+  imgColor8,
+] = assets.colors;
 
 // Product type
 type ProductData = {

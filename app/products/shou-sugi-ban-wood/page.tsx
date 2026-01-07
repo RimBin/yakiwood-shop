@@ -26,7 +26,7 @@ export async function generateMetadata({ searchParams }: ShouSugiBanProductPageP
       url: `https://yakiwood.lt${getCanonicalProductPath(PRODUCT_SLUG)}`,
       images: [
         {
-          url: 'https://yakiwood.lt/assets/imgSpruce.png',
+          url: 'https://yakiwood.lt/images/ui/wood/imgSpruce.png',
           width: 1200,
           height: 630,
           alt: 'Shou Sugi Ban mediena',

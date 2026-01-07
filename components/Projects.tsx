@@ -5,14 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import ArrowRight from '@/components/icons/ArrowRight';
 import { PageCover } from '@/components/shared/PageLayout';
+import { assets } from '@/lib/assets';
 
-// Local assets
-const imgProject1 = "/assets/imgProject1.jpg";
-const imgProject2 = "/assets/imgProject2.jpg";
-const imgProject3 = "/assets/imgProject3.jpg";
-const imgProject4 = "/assets/imgProject4.jpg";
-const imgProject5 = "/assets/imgProject5.jpg";
-const imgProject6 = "/assets/imgProject6.jpg";
+const [imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6] = assets.projects;
 
 export default function Projects() {
   return (

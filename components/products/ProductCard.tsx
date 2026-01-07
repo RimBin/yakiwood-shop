@@ -17,7 +17,7 @@ export default function ProductCard({ product, href }: ProductCardProps) {
     <Link href={linkHref} className="group block">
       <div className="relative aspect-square bg-[#EAEAEA] rounded-[24px] overflow-hidden mb-4 group-hover:shadow-lg transition-shadow">
         <Image
-          src={product.image || '/assets/placeholder-product.jpg'}
+          src={product.image || '/images/ui/wood/imgSpruce.png'}
           alt={product.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"

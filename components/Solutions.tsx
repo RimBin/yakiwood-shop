@@ -4,13 +4,10 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import ArrowRight from '@/components/icons/ArrowRight';
 import { PageCover } from '@/components/shared/PageLayout';
+import { assets, getAsset } from '@/lib/assets';
 
-// Local assets
-const imgVector33 = "/assets/imgVector33.jpg";
-const imgFence = "/assets/imgFence.jpg";
-const imgFacades = "/assets/imgFacades.jpg";
-const imgTerrace = "/assets/imgTerrace.jpg";
-const imgInterior = "/assets/imgInterior.jpg";
+const imgVector33 = getAsset('imgVector33');
+const { fence: imgFence, facades: imgFacades, terrace: imgTerrace, interior: imgInterior } = assets.categories;
 
 type SolutionItem = {
   title: string;

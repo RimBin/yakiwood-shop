@@ -176,7 +176,7 @@ export default function ProductsPage() {
             >
               <div className="relative w-full h-[250px] border border-[#161616] border-opacity-30 overflow-hidden">
                 <Image
-                  src={product.image || '/assets/placeholder-product.jpg'}
+                  src={product.image || '/images/ui/wood/imgSpruce.png'}
                   alt={product.name}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"

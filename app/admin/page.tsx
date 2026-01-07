@@ -1020,7 +1020,7 @@ export default function AdminPage() {
                     value={productForm.images}
                     onChange={(e) => setProductForm({ ...productForm, images: e.target.value })}
                     className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none mt-[8px]"
-                    placeholder="/assets/product1.jpg, https://example.com/image.jpg"
+                    placeholder="/images/products/example.jpg, https://example.com/image.jpg"
                   />
                 </div>
 
