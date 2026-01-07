@@ -64,3 +64,22 @@ body {
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: #7C7C7C;
 }
+
+/* Icon hover effects: apply a negative/inverted color on hover */
+.icon-image {
+  transition: filter 180ms ease-in-out, opacity 180ms ease-in-out;
+  will-change: filter, opacity;
+}
+
+/* When the wrapper (feature or icon-wrapper) is hovered, invert the image colors */
+.feature:hover .icon-image,
+.icon-wrapper:hover .icon-image,
+.group:hover .icon-image {
+  filter: invert(1) hue-rotate(180deg) saturate(1.1);
+}
+
+/* Reduce opacity slightly on hover for a softer effect */
+.feature:hover .icon-image,
+.icon-wrapper:hover .icon-image {
+  opacity: 0.95;
+}

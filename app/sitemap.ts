@@ -3,6 +3,9 @@ import { projects } from '@/data/projects';
 
 const BASE_URL = 'https://yakiwood.lt';
 
+// Indexable variant landing pages (do not include preset/query URLs in sitemap)
+const SHOU_SUGI_BAN_VARIANT_SLUGS = ['larch-carbon', 'spruce-natural', 'accoya-black'] as const;
+
 // Fallback products data when Supabase is not available
 const fallbackProducts = [
   { slug: 'burnt-spruce-cladding', updatedAt: new Date() },
@@ -108,5 +111,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...productPages, ...projectPages];
+  // Static SEO variant landing pages
+  const variantLandingPages: MetadataRoute.Sitemap = SHOU_SUGI_BAN_VARIANT_SLUGS.map((slug) => ({
+    url: `${BASE_URL}/shou-sugi-ban/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...productPages, ...variantLandingPages, ...projectPages];
 }

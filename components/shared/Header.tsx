@@ -104,8 +104,8 @@ export default function Header() {
                 onClick={() => setIsCartOpen(true)}
                 className="border border-[#BBBBBB] border-solid rounded-[100px] flex gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[16px] md:px-[24px] py-[10px] bg-transparent hover:bg-[#161616] hover:text-white transition-colors group relative"
               >
-                <div className="relative w-[24px] h-[24px] overflow-clip shrink-0">
-                  <Image src={getAsset('imgCart')} alt="Cart" fill style={{ objectFit: 'contain' }} />
+                <div className="relative w-[24px] h-[24px] overflow-clip shrink-0 icon-wrapper">
+                  <Image src={getAsset('imgCart')} alt="Cart" fill className="icon-image" style={{ objectFit: 'contain' }} />
                 </div>
                 <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white shrink-0">
                   {t(locale === 'lt' ? 'header.krepselis' : 'header.cart')} {items.length > 0 && `(${items.length})`}

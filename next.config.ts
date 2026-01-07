@@ -105,6 +105,40 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', '@react-three/fiber', '@react-three/drei'],
   },
+  async redirects() {
+    return [
+      {
+        source: '/produktai',
+        destination: '/products',
+        permanent: true,
+      },
+      {
+        source: '/produktai/:path*',
+        destination: '/products/:path*',
+        permanent: true,
+      },
+      {
+        source: '/product/:path*',
+        destination: '/products/:path*',
+        permanent: true,
+      },
+      {
+        source: '/apie',
+        destination: '/about',
+        permanent: true,
+      },
+      {
+        source: '/kontaktai',
+        destination: '/contact',
+        permanent: true,
+      },
+      {
+        source: '/duk',
+        destination: '/faq',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

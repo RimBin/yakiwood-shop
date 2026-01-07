@@ -83,6 +83,72 @@
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "test"
+		},
+		{
+			"label": "test:e2e chromium",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"test:e2e",
+				"--",
+				"--project=chromium"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "test:e2e chromium (rerun)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"test:e2e",
+				"--",
+				"--project=chromium"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "test:e2e chromium (smoke+home+auth+products+cart)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"test:e2e",
+				"--",
+				"--project=chromium",
+				"e2e/smoke.spec.ts",
+				"e2e/homepage.spec.ts",
+				"e2e/auth.spec.ts",
+				"e2e/products.spec.ts",
+				"e2e/cart.spec.ts"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "test:e2e chromium (smoke+home+auth+products+cart)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"test:e2e",
+				"--",
+				"--project=chromium",
+				"e2e/smoke.spec.ts",
+				"e2e/homepage.spec.ts",
+				"e2e/auth.spec.ts",
+				"e2e/products.spec.ts",
+				"e2e/cart.spec.ts"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
 		}
 	]
 }

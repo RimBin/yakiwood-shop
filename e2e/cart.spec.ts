@@ -12,7 +12,8 @@ test.describe('Shopping Cart', () => {
     await page.goto(routes.products);
     
     // Find and click on first product
-    const firstProduct = page.locator('[data-testid="product-card"], article, .product').first();
+    const firstProduct = page.locator('[data-testid="product-card"]').first();
+    await expect(firstProduct).toBeVisible();
     await firstProduct.click();
     
     // Add to cart button (adjust text based on Lithuanian translation)
@@ -35,19 +36,19 @@ test.describe('Shopping Cart', () => {
 
   test('should open cart sidebar', async ({ page }) => {
     await page.goto('/');
-    
-    // Click on cart icon
-    const cartButton = page.locator('[data-testid="cart-button"], button[aria-label*="cart" i], a[href*="cart"]');
-    
-    if (await cartButton.isVisible()) {
+
+    // If the cart is already open, nothing to do.
+    const cartHeading = page.getByRole('heading', { name: /your cart/i }).first();
+    if (await cartHeading.isVisible().catch(() => false)) {
+      await expect(cartHeading).toBeVisible();
+      return;
+    }
+
+    // Prefer the visible header cart button text (avoid matching "Close cart").
+    const cartButton = page.locator('button:has-text("Krepšelis"), button:has-text("Cart")').first();
+    if (await cartButton.isVisible().catch(() => false)) {
       await cartButton.click();
-      
-      // Cart sidebar should open
-      await page.waitForTimeout(300);
-      const cartSidebar = page.locator('[data-testid="cart-sidebar"], aside, .cart-drawer');
-      if (await cartSidebar.isVisible()) {
-        await expect(cartSidebar).toBeVisible();
-      }
+      await expect(cartHeading).toBeVisible();
     }
   });
 
@@ -55,7 +56,8 @@ test.describe('Shopping Cart', () => {
     await page.goto(routes.products);
     
     // Add product to cart first
-    const firstProduct = page.locator('[data-testid="product-card"], article, .product').first();
+    const firstProduct = page.locator('[data-testid="product-card"]').first();
+    await expect(firstProduct).toBeVisible();
     await firstProduct.click();
     
     const addToCartButton = page.locator('button:has-text("Į krepšelį"), button:has-text("Pridėti")');
@@ -64,8 +66,8 @@ test.describe('Shopping Cart', () => {
       await page.waitForTimeout(500);
       
       // Open cart
-      const cartButton = page.locator('[data-testid="cart-button"], button[aria-label*="cart" i]');
-      if (await cartButton.isVisible()) {
+      const cartButton = page.getByRole('button', { name: /krepšelis|cart/i }).first();
+      if (await cartButton.isVisible().catch(() => false)) {
         await cartButton.click();
         await page.waitForTimeout(300);
         
@@ -90,7 +92,8 @@ test.describe('Shopping Cart', () => {
     await page.goto(routes.products);
     
     // Add product to cart first
-    const firstProduct = page.locator('[data-testid="product-card"], article, .product').first();
+    const firstProduct = page.locator('[data-testid="product-card"]').first();
+    await expect(firstProduct).toBeVisible();
     await firstProduct.click();
     
     const addToCartButton = page.locator('button:has-text("Į krepšelį"), button:has-text("Pridėti")');
@@ -99,8 +102,8 @@ test.describe('Shopping Cart', () => {
       await page.waitForTimeout(500);
       
       // Open cart
-      const cartButton = page.locator('[data-testid="cart-button"], button[aria-label*="cart" i]');
-      if (await cartButton.isVisible()) {
+      const cartButton = page.getByRole('button', { name: /krepšelis|cart/i }).first();
+      if (await cartButton.isVisible().catch(() => false)) {
         await cartButton.click();
         await page.waitForTimeout(300);
         
@@ -124,7 +127,8 @@ test.describe('Shopping Cart', () => {
     await page.goto(routes.products);
     
     // Add product to cart
-    const firstProduct = page.locator('[data-testid="product-card"], article, .product').first();
+    const firstProduct = page.locator('[data-testid="product-card"]').first();
+    await expect(firstProduct).toBeVisible();
     await firstProduct.click();
     
     const addToCartButton = page.locator('button:has-text("Į krepšelį"), button:has-text("Pridėti")');
@@ -133,8 +137,8 @@ test.describe('Shopping Cart', () => {
       await page.waitForTimeout(500);
       
       // Open cart
-      const cartButton = page.locator('[data-testid="cart-button"], button[aria-label*="cart" i]');
-      if (await cartButton.isVisible()) {
+      const cartButton = page.getByRole('button', { name: /krepšelis|cart/i }).first();
+      if (await cartButton.isVisible().catch(() => false)) {
         await cartButton.click();
         await page.waitForTimeout(300);
         

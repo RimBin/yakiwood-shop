@@ -3,12 +3,12 @@
  */
 export const testUsers = {
   customer: {
-    email: 'demo@yakiwood.lt',
-    password: 'demo123456',
+    email: 'user@yakiwood.lt',
+    password: 'demo123',
   },
   admin: {
     email: 'admin@yakiwood.lt',
-    password: 'demo123456',
+    password: 'demo123',
   },
 };
 
@@ -33,7 +33,7 @@ export const testProducts = {
  */
 export const routes = {
   home: '/',
-  products: '/produktai',
+  products: '/products',
   solutions: '/sprendimai',
   projects: '/projektai',
   about: '/apie',

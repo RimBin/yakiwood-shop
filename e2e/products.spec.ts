@@ -4,13 +4,14 @@ import { routes } from './fixtures/data';
 test.describe('Products Page', () => {
   test('should display product list', async ({ page }) => {
     await page.goto(routes.products);
-    await expect(page).toHaveURL(/\/produktai/);
+      await expect(page).toHaveURL(/\/products/);
     
     // Wait for products to load
     await page.waitForLoadState('networkidle');
     
     // Check if product cards are present
-    const products = page.locator('[data-testid="product-card"], article, .product');
+    const products = page.locator('[data-testid="product-card"]');
+    await expect(products.first()).toBeVisible();
     const count = await products.count();
     expect(count).toBeGreaterThan(0);
   });
@@ -19,14 +20,18 @@ test.describe('Products Page', () => {
     await page.goto(routes.products);
     
     // Click on first product (adjust selector based on actual implementation)
-    const firstProduct = page.locator('[data-testid="product-card"], article, .product').first();
-    await firstProduct.click();
+    const firstProduct = page.locator('[data-testid="product-card"]').first();
+    await expect(firstProduct).toBeVisible();
+    await Promise.all([
+      page.waitForURL(/\/products\/.+/, { timeout: 10000 }),
+      firstProduct.click(),
+    ]);
     
     // Should navigate to product detail page
-    await expect(page).toHaveURL(/\/produktai\/.+/);
+    await expect(page).toHaveURL(/\/products\/.+/);
     
     // Product detail should have title and price
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
   });
 
   test('should have search functionality', async ({ page }) => {

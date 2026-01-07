@@ -171,6 +171,7 @@ export default function ProductsPage() {
             <Link
               key={product.id}
               href={`/products/${product.slug}`}
+              data-testid="product-card"
               className="flex flex-col gap-[8px] group"
             >
               <div className="relative w-full h-[250px] border border-[#161616] border-opacity-30 overflow-hidden">

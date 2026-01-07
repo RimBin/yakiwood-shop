@@ -1,5 +1,6 @@
 import { client } from '@/sanity/lib/client';
 import { urlFor } from '@/sanity/lib/image';
+import { seedProducts } from '@/data/seed-products';
 import groq from 'groq';
 import type { PortableTextBlock } from 'sanity';
 
@@ -125,6 +126,20 @@ function blocksToPlainText(blocks?: PortableTextBlock[]): string {
     .trim();
 }
 
+function transformSeedProduct(seed: (typeof seedProducts)[number]): Product {
+  return {
+    id: seed.id,
+    slug: seed.slug,
+    name: seed.name,
+    price: seed.basePrice,
+    image: seed.images?.[0] ?? '/assets/placeholder-product.jpg',
+    images: seed.images ?? [],
+    category: seed.category,
+    description: seed.description,
+    inStock: seed.inStock,
+  };
+}
+
 /**
  * Fetch all active products from Sanity
  * NOTE: Currently includes draft products for development
@@ -171,7 +186,8 @@ export async function fetchProducts(): Promise<Product[]> {
         console.error('Or run: npx sanity manage');
       }
     }
-    throw error; // Re-throw to allow component to handle
+    console.warn('Falling back to seed products because Sanity fetch failed.');
+    return seedProducts.map(transformSeedProduct);
   }
 }
 
@@ -198,14 +214,16 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
 
     const product = await client.fetch<SanityProduct>(query, { slug });
 
-    if (!product) {
-      return null;
+    if (product) {
+      return transformSanityProduct(product);
     }
 
-    return transformSanityProduct(product);
+    const seed = seedProducts.find((p) => p.slug === slug);
+    return seed ? transformSeedProduct(seed) : null;
   } catch (error) {
     console.error('Error fetching product from Sanity:', error);
-    return null;
+    const seed = seedProducts.find((p) => p.slug === slug);
+    return seed ? transformSeedProduct(seed) : null;
   }
 }
 

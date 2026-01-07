@@ -5,7 +5,7 @@ import { Page } from '@playwright/test';
  * @param page - Playwright page object
  * @param email - User email
  * @param password - User password
- */
+  await page.goto(`/products/${productSlug}`);
 export async function login(page: Page, email: string, password: string): Promise<void> {
   await page.goto('/login');
   await page.fill('input[name="email"]', email);
@@ -20,7 +20,7 @@ export async function login(page: Page, email: string, password: string): Promis
  * @param productSlug - Product slug/identifier
  */
 export async function addToCart(page: Page, productSlug: string): Promise<void> {
-  await page.goto(`/produktai/${productSlug}`);
+  await page.goto(`/products/${productSlug}`);
   await page.click('button:has-text("Į krepšelį")');
   await page.waitForTimeout(500); // Wait for cart update
 }
