@@ -55,6 +55,9 @@ const localAssets = {
   certEpd: '/images/ui/certifications/cert-epd.png',
   certFsc: '/images/ui/certifications/cert-fsc.png',
   certEu: '/images/ui/certifications/cert-eu.png',
+
+  // Hero
+  heroVector: '/images/hero/Vector.png',
 } as const;
 
 export type AssetKey = keyof typeof localAssets;
