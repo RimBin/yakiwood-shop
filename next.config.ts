@@ -6,6 +6,23 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 // Environment variable for bundle analysis
 const ANALYZE = process.env.ANALYZE === 'true';
+const isDev = process.env.NODE_ENV !== 'production';
+
+const contentSecurityPolicyValue = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://*.figma.com https://*.unsplash.com https://www.google-analytics.com",
+  "font-src 'self' data:",
+  "connect-src 'self' https://www.google-analytics.com https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://*.sanity.io https://*.apicdn.sanity.io https://registry.npmjs.org",
+  "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  // VS Code Simple Browser embeds pages in a webview/iframe. Allow framing in development.
+  isDev ? "frame-ancestors *" : "frame-ancestors 'self'",
+  "upgrade-insecure-requests",
+].join('; ');
 
 // Security headers configuration
 const securityHeaders = [
@@ -17,10 +34,15 @@ const securityHeaders = [
     key: 'Strict-Transport-Security',
     value: 'max-age=63072000; includeSubDomains; preload',
   },
-  {
-    key: 'X-Frame-Options',
-    value: 'SAMEORIGIN',
-  },
+  // VS Code Simple Browser embeds the page; allow it in development by omitting X-Frame-Options.
+  ...(isDev
+    ? []
+    : [
+        {
+          key: 'X-Frame-Options',
+          value: 'SAMEORIGIN',
+        },
+      ]),
   {
     key: 'X-Content-Type-Options',
     value: 'nosniff',
@@ -39,20 +61,7 @@ const securityHeaders = [
   },
   {
     key: 'Content-Security-Policy',
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://*.figma.com https://*.unsplash.com https://www.google-analytics.com",
-      "font-src 'self' data:",
-      "connect-src 'self' https://www.google-analytics.com https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://*.sanity.io https://*.apicdn.sanity.io https://registry.npmjs.org",
-      "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'self'",
-      "upgrade-insecure-requests",
-    ].join('; '),
+    value: contentSecurityPolicyValue,
   },
 ];
 

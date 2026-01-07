@@ -1,9 +1,10 @@
 ﻿'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import { getAsset } from '@/lib/assets';
 import MobileMenu from './MobileMenu';
 import CartSidebar from './CartSidebar';
@@ -13,9 +14,24 @@ import { useCartStore } from '@/lib/cart/store';
 export default function Header() {
   const t = useTranslations();
   const locale = useLocale();
+  const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const items = useCartStore((state) => state.items);
+  
+  const isHomepage = pathname === '/' || pathname === '/lt' || pathname === '/en';
+
+  useEffect(() => {
+    if (!isHomepage) return;
+    
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isHomepage]);
   
   // Dynamic routes based on locale
   const navItems = locale === 'lt' ? [
@@ -35,7 +51,7 @@ export default function Header() {
   ];
   
   return (
-    <header className="w-full sticky top-0 z-50">
+    <header className="w-full fixed top-0 z-50">
       {/* Black Announcement Bar */}
       <div className="bg-[#161616] w-full py-[8px] px-[40px]">
         <div className="flex items-center justify-center gap-[32px] xl:gap-[200px]">
@@ -72,7 +88,11 @@ export default function Header() {
       </div>
 
       {/* Main Header */}
-      <div className="bg-[#E1E1E1]/80 backdrop-blur-md border-b border-[#bbbbbb]/30 border-solid shadow-sm">
+      <div className={`transition-all duration-300 border-b border-solid ${
+        isHomepage && !isScrolled
+          ? 'bg-transparent border-transparent'
+          : 'bg-[#E1E1E1]/80 backdrop-blur-md border-[#bbbbbb]/30 shadow-sm'
+      }`}>
         <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[16px]">
           <div className="flex items-center gap-[16px]">
             {/* Logo - exact 126x48px */}

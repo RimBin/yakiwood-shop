@@ -8,7 +8,12 @@ const certifications = [assets.certifications.fsc, assets.certifications.eu, ass
 
 export default function Hero() {
   return (
-    <section className="w-full bg-[#E1E1E1] relative overflow-hidden">
+    <section className="w-full bg-[#EAEAEA] relative overflow-hidden pt-[85px]">
+      {/* Full-width hero vector background */}
+      <div className="absolute left-0 top-[125px] w-full h-[776px]">
+        <Image src={assets.heroVector} alt="" fill className="object-cover" priority />
+      </div>
+
       {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
       <div className="lg:hidden flex flex-col">
         <div className="px-4 pt-4 pb-2 flex flex-col gap-2">
@@ -79,20 +84,9 @@ export default function Hero() {
       </div>
 
       <div className="hidden lg:block relative w-full min-h-[861px]">
-        {/* Full-screen hero vector background */}
-        <div className="absolute inset-0 w-full h-full">
-          <Image 
-            src={assets.heroVector}
-            alt="" 
-            fill 
-            className="object-cover"
-            priority
-          />
-        </div>
-
         {/* Centered content container */}
         <div className="relative max-w-[1440px] mx-auto h-full">
-          <div className="absolute left-[40px] top-[259px] flex flex-col gap-[24px] z-10">
+          <div className="absolute left-[40px] top-[190px] flex flex-col gap-[24px] z-10">
             <p className="font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] w-[606px] whitespace-pre-wrap">
               {`Timeless beauty, enhanced by fire - `}
               <span className="font-['Tiro_Tamil'] italic tracking-[-1.6px]">Yakiwood</span>
@@ -160,8 +154,11 @@ export default function Hero() {
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="absolute left-0 right-0 top-[800px] w-full bg-[#161616] px-[40px] py-[16px] flex gap-[150px] items-center justify-center z-10">
+        {/* Fullwidth certification bar */}
+        <div className="absolute left-0 right-0 top-[800px] w-full bg-[#161616] py-[16px] flex items-center justify-center z-10">
+          <div className="flex gap-[150px] items-center">
             {certifications.map((src) => (
               <div key={src} className="h-[32px] w-[72px] relative">
                 <Image src={src} alt="" fill className="object-contain" />

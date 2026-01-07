@@ -90,10 +90,8 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico', type: 'image/x-icon', sizes: '16x16 32x32' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon', type: 'image/png', sizes: '32x32' },
       { url: '/icon.svg', type: 'image/svg+xml', sizes: '512x512' },
-      { url: '/favicon.png', type: 'image/png', sizes: '32x32' },
     ],
     apple: '/apple-touch-icon.png',
   },
@@ -139,12 +137,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             __html: JSON.stringify(organizationSchema),
           }}
         />
-        {/* Favicon and touch icons */}
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
-        <link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16" />
-        <link rel="apple-touch-icon" href="/favicon-180.png" sizes="180x180" />
-        <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased bg-[#e1e1e1]`}>
         <NextIntlClientProvider messages={messages}>
