@@ -79,10 +79,10 @@ export default function Hero() {
       </div>
 
       <div className="hidden lg:block relative w-full min-h-[861px]">
-        {/* Full-screen wood texture background */}
+        {/* Full-screen hero vector background */}
         <div className="absolute inset-0 w-full h-full">
           <Image 
-            src={assets.categories.facades}
+            src={assets.heroVector}
             alt="" 
             fill 
             className="object-cover"

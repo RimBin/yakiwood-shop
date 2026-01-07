@@ -38,6 +38,9 @@ const localAssets = {
   imgFacades: '/images/ui/categories/imgFacades.jpg',
   imgTerrace: '/images/ui/categories/imgTerrace.jpg',
   imgInterior: '/images/ui/categories/imgInterior.jpg',
+
+  // Hero background (uploaded vector)
+  heroVector: '/images/hero/Vector.png',
   
   // Logo & UI
   imgLogo: '/images/ui/brand/imgLogo.svg',
