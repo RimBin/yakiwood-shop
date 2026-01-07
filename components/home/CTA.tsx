@@ -3,9 +3,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { getSectionPadding, getGap } from '@/lib/design-system';
+import { assets } from '@/lib/assets';
 
 // Local background image for CTA section
-const backgroundImage = "/assets/hero/product-image.png";
+const backgroundImage = assets.projects[1];
 
 export default function CTA() {
   return (

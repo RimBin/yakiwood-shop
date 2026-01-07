@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState, useRef } from "react";
 import { getSectionSpacing, getContainerPadding } from '@/lib/design-system';
+import { assets } from '@/lib/assets';
 
 interface Testimonial {
   quote: string;
@@ -12,8 +13,8 @@ interface Testimonial {
 }
 
 // Local texture assets for testimonial cards
-const activeTexture = "/assets/hero/product-image.png";
-const mutedTexture = "/assets/hero/product-image.png";
+const activeTexture = assets.projects[2];
+const mutedTexture = assets.projects[2];
 
 export default function Testimonials() {
   const t = useTranslations("testimonials");
@@ -22,19 +23,19 @@ export default function Testimonials() {
 
   const testimonials: Testimonial[] = [
     {
-      quote: t("testimonial1.quote"),
-      author: t("testimonial1.author"),
-      role: t("testimonial1.role"),
+      quote: t("atsiliepimas1.citata"),
+      author: t("atsiliepimas1.autorius"),
+      role: t("atsiliepimas1.role"),
     },
     {
-      quote: t("testimonial2.quote"),
-      author: t("testimonial2.author"),
-      role: t("testimonial2.role"),
+      quote: t("atsiliepimas2.citata"),
+      author: t("atsiliepimas2.autorius"),
+      role: t("atsiliepimas2.role"),
     },
     {
-      quote: t("testimonial3.quote"),
-      author: t("testimonial3.author"),
-      role: t("testimonial3.role"),
+      quote: t("atsiliepimas3.citata"),
+      author: t("atsiliepimas3.autorius"),
+      role: t("atsiliepimas3.role"),
     },
   ];
 
@@ -46,11 +47,7 @@ export default function Testimonials() {
     setActiveIndex((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1));
   };
 
-  const heading = (
-    <>
-      What our <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px] text-[#161616]">clients</span> say
-    </>
-  );
+  const heading = <>{t('antraste')}</>;
 
   return (
     <section id="testimonials" className="w-full bg-[#E1E1E1]">
@@ -59,10 +56,10 @@ export default function Testimonials() {
         {/* Title Section - Mobile/Tablet */}
         <div className={`${getContainerPadding()} mb-[24px] md:mb-[32px]`}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-            TESTIMONIALS
+            {t('eyebrow')}
           </p>
           <h2 className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[500px]" style={{ fontSize: 'clamp(32px, 5vw, 44px)', letterSpacing: 'clamp(-1.6px, -0.04em, -1.76px)' }}>
-            What our <span className="font-['Tiro_Tamil'] italic">clients</span> say
+            {heading}
           </h2>
         </div>
 

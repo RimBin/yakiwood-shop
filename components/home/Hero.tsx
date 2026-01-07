@@ -1,29 +1,10 @@
 ﻿import React from 'react';
 import Image from 'next/image';
+import { assets } from '@/lib/assets';
 
-// Local assets for Hero section
-const imgMaskGroup = '/assets/hero/mask-group.png';
-const imgProductImage = '/assets/hero/product-image.png';
-
-// Payment logos
-const imgMastercard = '/assets/hero/mastercard.png';
-const imgVisa = '/assets/hero/visa.png';
-const imgStripe = '/assets/hero/stripe.png';
-
-// Color swatches for card
-const imgEllipse11 = '/assets/hero/color-ellipse.png';
-const imgBlackLarch = '/assets/hero/color-black-larch.png';
-const imgCarbonLarch = '/assets/hero/color-carbon-larch.png';
-
-// Certificates
-const imgCert1 = '/assets/hero/cert1.png';
-const imgCert2 = '/assets/hero/cert2.png';
-const imgCert3 = '/assets/hero/cert3.png';
-const imgCert4 = '/assets/hero/cert4.png';
-const imgCert5 = '/assets/hero/cert5.png';
-const imgCert6 = '/assets/hero/cert6.png';
-
-const mobileColors = [imgEllipse11, imgBlackLarch, imgCarbonLarch, imgCarbonLarch, imgCarbonLarch, imgCarbonLarch, imgCarbonLarch, imgCarbonLarch];
+const imgProductImage = assets.projects[0];
+const mobileColors = assets.colors;
+const certifications = [assets.certifications.fsc, assets.certifications.eu, assets.certifications.epd];
 
 export default function Hero() {
   return (
@@ -89,12 +70,11 @@ export default function Hero() {
         </div>
 
         <div className="w-full bg-[#161616] px-4 py-2 flex items-center justify-between">
-          <div className="h-[33px] w-[30px] relative"><Image src={imgCert1} alt="" fill className="object-contain"/></div>
-          <div className="h-[15px] w-[52px] relative"><Image src={imgCert2} alt="" fill className="object-contain"/></div>
-          <div className="h-[29px] w-[22px] relative"><Image src={imgCert3} alt="" fill className="object-contain"/></div>
-          <div className="h-[26px] w-[50px] relative"><Image src={imgCert4} alt="" fill className="object-contain"/></div>
-          <div className="h-[30.167px] w-[33px] relative"><Image src={imgCert5} alt="" fill className="object-contain"/></div>
-          <div className="h-[17px] w-[24px] relative"><Image src={imgCert6} alt="" fill className="object-contain"/></div>
+          {certifications.map((src) => (
+            <div key={src} className="h-[28px] w-[56px] relative">
+              <Image src={src} alt="" fill className="object-contain" />
+            </div>
+          ))}
         </div>
       </div>
 
@@ -102,7 +82,7 @@ export default function Hero() {
         {/* Full-screen wood texture background */}
         <div className="absolute inset-0 w-full h-full">
           <Image 
-            src="/assets/hero/Img.svg" 
+            src={assets.categories.facades}
             alt="" 
             fill 
             className="object-cover"
@@ -128,11 +108,14 @@ export default function Hero() {
               </div>
 
               <div className="flex gap-[24.39px] items-center">
-                <div className="h-[21.856px] w-[35.366px] relative"><Image src={imgMastercard} alt="" fill /></div>
-                <div className="h-[11.483px] w-[35.366px] relative"><Image src={imgVisa} alt="" fill /></div>
-                <div className="h-[25px] w-[40.1px] bg-[#7C7C7C]/20 rounded" />
-                <div className="h-[25px] w-[53px] relative"><Image src={imgStripe} alt="" fill /></div>
-                <div className="h-[13.864px] w-[56.594px] bg-[#7C7C7C]/20 rounded" />
+                {['Mastercard', 'Visa', 'Stripe', 'PayPal'].map((label) => (
+                  <span
+                    key={label}
+                    className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]/70"
+                  >
+                    {label}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
@@ -166,7 +149,7 @@ export default function Hero() {
               <div className="flex flex-col gap-[8px]">
                 <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] tracking-[-0.24px] text-white w-full whitespace-pre-wrap">Colors</p>
                 <div className="flex gap-0 pl-0 pr-[4px] isolate">
-                  {[imgEllipse11,imgBlackLarch,imgCarbonLarch,imgCarbonLarch,imgCarbonLarch,imgCarbonLarch].map((src,i)=> (
+                  {assets.colors.slice(0, 6).map((src,i)=> (
                     <div key={i} className="-mr-[4px] w-[32px] h-[32px] relative" style={{zIndex:6-i}}><Image src={src} alt="" width={33} height={33} /></div>
                   ))}
                 </div>
@@ -179,12 +162,11 @@ export default function Hero() {
           </div>
 
           <div className="absolute left-1/2 -translate-x-1/2 top-[800px] w-[1440px] bg-[#161616] px-[40px] py-[16px] flex gap-[150px] items-center justify-center z-10">
-            <div className="h-[53px] w-[46.872px] relative"><Image src={imgCert1} alt="" fill /></div>
-            <div className="h-[24.573px] w-[81.909px] relative"><Image src={imgCert2} alt="" fill /></div>
-            <div className="h-[47.005px] w-[35.013px] relative"><Image src={imgCert3} alt="" fill /></div>
-            <div className="h-[41.528px] w-[80.749px] relative"><Image src={imgCert4} alt="" fill /></div>
-            <div className="h-[48.451px] w-[53px] relative"><Image src={imgCert5} alt="" fill /></div>
-            <div className="h-[27.418px] w-[38.385px] relative"><Image src={imgCert6} alt="" fill /></div>
+            {certifications.map((src) => (
+              <div key={src} className="h-[32px] w-[72px] relative">
+                <Image src={src} alt="" fill className="object-contain" />
+              </div>
+            ))}
           </div>
         </div>
       </div>

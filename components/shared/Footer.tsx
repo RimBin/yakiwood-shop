@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { certifications, payments } from '@/lib/assets/figma-assets';
+import { assets } from '@/lib/assets';
 
 const navColumns = [
   {
@@ -43,55 +43,23 @@ const navColumns = [
 // Certificate logos with background colors
 const certificates = [
   {
-    src: certifications.epd,
+    src: assets.certifications.epd,
     alt: 'EPD certification',
     bg: 'bg-white/10',
   },
   {
-    src: certifications.fsc,
+    src: assets.certifications.fsc,
     alt: 'FSC certification',
     bg: 'bg-white/10',
   },
   {
-    src: certifications.esParama,
-    alt: 'European Union support',
-    bg: 'bg-white',
+    src: assets.certifications.eu,
+    alt: 'EU certification',
+    bg: 'bg-white/10',
   },
 ];
 
-// Payment method logos with dimensions
-const paymentMethods = [
-  {
-    src: payments.mastercard,
-    alt: 'Mastercard',
-    width: 36,
-    height: 22,
-  },
-  {
-    src: payments.visa,
-    alt: 'Visa',
-    width: 36,
-    height: 12,
-  },
-  {
-    src: payments.maestro,
-    alt: 'Maestro',
-    width: 40,
-    height: 25,
-  },
-  {
-    src: payments.stripe,
-    alt: 'Stripe',
-    width: 53,
-    height: 25,
-  },
-  {
-    src: payments.paypal,
-    alt: 'PayPal',
-    width: 57,
-    height: 14,
-  },
-];
+const paymentMethods = ['Mastercard', 'Visa', 'Maestro', 'Stripe', 'PayPal'] as const;
 
 export default function Footer() {
   return (
@@ -162,18 +130,16 @@ export default function Footer() {
             @2025 YAKIWOOD, LLC. All rights reserved
           </p>
           <div className="flex flex-wrap items-center gap-[12px] opacity-40">
-            {paymentMethods.map((pay) => (
-              <Image
-                key={pay.src}
-                src={pay.src}
-                alt={pay.alt}
-                width={pay.width}
-                height={pay.height}
-                className="object-contain grayscale"
-              />
+            {paymentMethods.map((label) => (
+              <span
+                key={label}
+                className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white/70"
+              >
+                {label}
+              </span>
             ))}
           </div>
-        </div>4 gap-[24px] flex-1 max-w-[100
+        </div>
       </div>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
@@ -246,15 +212,13 @@ export default function Footer() {
             </p>
 
             <div className="flex items-center gap-[16px] opacity-40">
-              {paymentMethods.map((pay) => (
-                <Image
-                  key={pay.src}
-                  src={pay.src}
-                  alt={pay.alt}
-                  width={pay.width}
-                  height={pay.height}
-                  className="object-contain grayscale"
-                />
+              {paymentMethods.map((label) => (
+                <span
+                  key={label}
+                  className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white/70"
+                >
+                  {label}
+                </span>
               ))}
             </div>
           </div>

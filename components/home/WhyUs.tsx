@@ -3,39 +3,33 @@
 import React from 'react';
 import Image from 'next/image';
 import { getSectionPadding, getGap } from '@/lib/design-system';
-
-// Local assets for WhyUs section
-const iconVector = "/assets/icons/vector-top.svg";
-const iconFire = "/assets/icons/fire.svg";
-const iconWarehouse = "/assets/icons/warehouse.svg";
-const iconLeaf = "/assets/icons/leaf.svg";
-const iconCube = "/assets/icons/cube.svg";
+import { assets } from '@/lib/assets';
 
 export default function WhyUs() {
   const benefits = [
     {
-      primary: iconFire,
+      primary: assets.icons.truck,
       title: 'Beautiful natural aesthetics',
       description: 'Fire-treated for superior resistance to moisture, pests, and decay.',
-      alt: 'Flame icon'
+      alt: 'Packaging icon'
     },
     {
-      primary: iconWarehouse,
+      primary: assets.icons.coins,
       title: 'Striking Look',
       description: 'Deep texture and rich tones enhance any design.',
-      alt: 'Warehouse icon'
+      alt: 'Coins icon'
     },
     {
-      primary: iconLeaf,
+      primary: assets.icons.plant,
       title: 'Eco-friendly',
       description: 'Sustainably sourced with no harmful chemicals.',
       alt: 'Leaf icon'
     },
     {
-      primary: iconCube,
+      primary: assets.ui.cart,
       title: 'Versatile for any project',
       description: 'Perfect for cladding, decking, and interiors.',
-      alt: 'Cube icon'
+      alt: 'Cart icon'
     }
   ];
 
@@ -71,9 +65,6 @@ export default function WhyUs() {
             <div key={idx} className="bg-[#eaeaea] rounded-[8px] p-[16px] w-full flex flex-col gap-[16px] items-start">
               {/* Icon */}
               <div className="border-[#bbbbbb] border-[0.5px] border-solid rounded-[100px] w-[48px] h-[48px] relative overflow-hidden">
-                <div className="absolute top-0 left-[25%] right-[25%] bottom-1/2">
-                  <Image src={iconVector} alt="" fill className="object-contain" />
-                </div>
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[24px] h-[24px]">
                   <Image src={benefit.primary} alt={benefit.alt} width={24} height={24} />
                 </div>
@@ -121,9 +112,6 @@ export default function WhyUs() {
           {benefits.map((benefit, idx) => (
             <div key={idx} className="bg-[#eaeaea] rounded-[8px] p-[16px] w-[328px] flex flex-col gap-[24px] items-start">
               <div className="border-[#bbbbbb] border-[0.5px] border-solid rounded-[100px] w-[48px] h-[48px] relative overflow-hidden">
-                <div className="absolute top-0 left-[25%] right-[25%] bottom-1/2">
-                  <Image src={iconVector} alt="" fill className="object-contain" />
-                </div>
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[24px] h-[24px]">
                   <Image src={benefit.primary} alt={benefit.alt} width={24} height={24} />
                 </div>

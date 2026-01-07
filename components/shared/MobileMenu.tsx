@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 
 interface MobileMenuProps {
@@ -153,46 +152,14 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
             {/* Payment Icons */}
             <div className="flex flex-wrap items-center justify-center gap-[16px] opacity-40">
-              <div className="relative w-[36px] h-[22px]">
-                <Image
-                  src="/assets/payments/mastercard.svg"
-                  alt="Mastercard"
-                  fill
-                  className="object-contain grayscale"
-                />
-              </div>
-              <div className="relative w-[36px] h-[12px]">
-                <Image
-                  src="/assets/payments/visa.svg"
-                  alt="Visa"
-                  fill
-                  className="object-contain grayscale"
-                />
-              </div>
-              <div className="relative w-[40px] h-[25px]">
-                <Image
-                  src="/assets/payments/maestro.svg"
-                  alt="Maestro"
-                  fill
-                  className="object-contain grayscale"
-                />
-              </div>
-              <div className="relative w-[53px] h-[25px]">
-                <Image
-                  src="/assets/payments/stripe.svg"
-                  alt="Stripe"
-                  fill
-                  className="object-contain grayscale"
-                />
-              </div>
-              <div className="relative w-[57px] h-[14px]">
-                <Image
-                  src="/assets/payments/paypal.svg"
-                  alt="PayPal"
-                  fill
-                  className="object-contain grayscale"
-                />
-              </div>
+              {['Mastercard', 'Visa', 'Maestro', 'Stripe', 'PayPal'].map((label) => (
+                <span
+                  key={label}
+                  className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white/70"
+                >
+                  {label}
+                </span>
+              ))}
             </div>
           </div>
         </div>

@@ -1,10 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
-
-// Local asset
-const imgVector37 = "/assets/imgVector37.jpg";
 
 const steps = [
   {
@@ -56,7 +52,7 @@ export default function OrderingProcess() {
         <div className="absolute left-[40px] top-[345px]">
           {/* Connection line between steps */}
           <div className="absolute left-[62px] top-[24px] w-[1174px] h-0">
-            <Image src={imgVector37} alt="" width={1174} height={1} />
+            <div className="w-[1174px] h-px bg-[#535353]" />
           </div>
 
           {/* Step 1 */}

@@ -1,11 +1,7 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { getSectionPadding, getGap } from '@/lib/design-system';
-
-// Local asset - Steps divider line (placeholder until proper SVG is added)
-const imgVector37 = "/assets/icons/vector-top.svg";
 
 const steps = [
   {
@@ -106,7 +102,7 @@ export default function Steps() {
         <div className="absolute left-[40px] top-[345px] w-[1306px]">
           {/* Connecting line */}
           <div className="absolute h-0 left-[22px] top-[24px] w-[1174px]">
-            <Image src={imgVector37} alt="" width={1174} height={1} />
+            <div className="w-[1174px] h-px bg-[#535353]" />
           </div>
 
           {/* Step 1 */}
