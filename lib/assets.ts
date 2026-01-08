@@ -48,6 +48,12 @@ const localAssets = {
   imgIconCoins: '/icons/ui/coins.png',
   imgIconPlant: '/icons/ui/plant.png',
   
+  // Benefits icons from assets
+  imgIconFire: '/assets/icons/FireSimple.svg',
+  imgIconWarehouse: '/assets/icons/Warehouse.svg',
+  imgIconPlantSvg: '/assets/icons/plant.svg',
+  imgIconCube: '/assets/icons/Cube.svg',
+  
   // Certifications
   certEpd: '/images/ui/certifications/cert-epd.png',
   certFsc: '/images/ui/certifications/cert-fsc.png',
@@ -107,6 +113,10 @@ export const assets = {
     truck: localAssets.imgIconTruck,
     coins: localAssets.imgIconCoins,
     plant: localAssets.imgIconPlant,
+    fire: localAssets.imgIconFire,
+    warehouse: localAssets.imgIconWarehouse,
+    plantSvg: localAssets.imgIconPlantSvg,
+    cube: localAssets.imgIconCube,
   },
   certifications: {
     epd: localAssets.certEpd,

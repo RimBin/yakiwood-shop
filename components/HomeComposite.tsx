@@ -1,6 +1,8 @@
 // Full Figma design snapshot (node 790:6589). Absolute positioning retained for pixel-perfect baseline.
 // Assets expire ~7 days. Future step: refactor to flow layout once verified.
 import React from 'react';
+import Image from 'next/image';
+import { assets } from '@/lib/assets';
 
 // Asset constants (subset – extend if more needed during refinement)
 const img = "https://www.figma.com/api/mcp/asset/03940b92-c1db-419a-9e1e-cc8ac1144d96";
@@ -114,13 +116,15 @@ export default function HomeComposite() {
         <p className="font-['DM_Sans:Light',sans-serif] text-[52px] tracking-[-2.08px] leading-none text-[#161616] whitespace-pre-wrap">We are experts in the preparation of <span className="font-['Tiro_Tamil:Italic',sans-serif] italic">burnt wood</span>, with many years of <span className="font-['Tiro_Tamil:Italic',sans-serif] italic">successful</span> experience in preparing wood for facades, terraces, fences and interiors, and we guarantee a <span className="font-['Tiro_Tamil:Italic',sans-serif] italic">high quality</span> and long-lasting <span className="font-['Tiro_Tamil:Italic',sans-serif] italic">result</span>.</p>
         <div className="absolute left-[40px] top-[432px] flex gap-[16px]">
           {[
-            {title:'Beautiful natural aesthetics',text:'Fire-treated for superior resistance to moisture, pests, and decay.'},
-            {title:'Striking Look',text:'Deep texture and rich tones enhance any design.'},
-            {title:'Eco-friendly',text:'Sustainably sourced with no harmful chemicals.'},
-            {title:'Versatile for any project',text:'Perfect for cladding, decking, and interiors.'},
+            {title:'Beautiful natural aesthetics',text:'Fire-treated for superior resistance to moisture, pests, and decay.', icon: assets.icons.fire},
+            {title:'Striking Look',text:'Deep texture and rich tones enhance any design.', icon: assets.icons.warehouse},
+            {title:'Eco-friendly',text:'Sustainably sourced with no harmful chemicals.', icon: assets.icons.plantSvg},
+            {title:'Versatile for any project',text:'Perfect for cladding, decking, and interiors.', icon: assets.icons.cube},
           ].map((b,i)=> (
             <div key={b.title} className="bg-[#eaeaea] rounded-[8px] p-[16px] w-[328px] flex flex-col gap-[24px]">
-              <div className="rounded-[100px] border border-[#bbbbbb] h-[48px] w-[48px]" />
+              <div className="rounded-[100px] border border-[#bbbbbb] h-[48px] w-[48px] flex items-center justify-center">
+                <Image src={b.icon} alt={b.title} width={24} height={24} className={b.icon === assets.icons.plantSvg ? 'invert' : ''} />
+              </div>
               <div className="flex flex-col gap-[8px]">
                 <p className="font-['DM_Sans:Medium',sans-serif] text-[18px] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>{b.title}</p>
                 <p className="font-['Outfit:Light',sans-serif] text-[14px] tracking-[0.14px] text-[#535353] w-[257px]">{b.text}</p>

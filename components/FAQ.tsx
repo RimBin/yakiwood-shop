@@ -99,7 +99,18 @@ export default function FAQ() {
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
       <div className="hidden lg:block">
-        <div className="max-w-[1440px] mx-auto relative">
+        {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+24px)] */}
+        <div className="max-w-[1440px] mx-auto px-[40px] pt-[120px] pb-[40px]">
+          <div className="relative h-[160px] text-[#161616]">
+            <p className="absolute left-0 top-[25px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase">
+              faq
+            </p>
+            <p className="absolute left-[calc(25%+24px)] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] w-[750px]">
+              <span>Everything you wanted to </span>
+              <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">ask</span>
+              <span> & more</span>
+            </p>
+          </div>
         </div>
 
         {/* Accordion - Full width with centered content */}

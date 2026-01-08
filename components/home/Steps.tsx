@@ -84,12 +84,12 @@ export default function Steps() {
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
       <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] relative">
-        {/* Title Section */}
-        <div className="absolute left-[40px] top-[120px] text-white font-normal z-10">
+        {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+24px)] */}
+        <div className="absolute left-[40px] top-[120px] text-white font-normal z-10 w-full">
           <p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase left-[0px] top-[25px] whitespace-nowrap">
             Process
           </p>
-          <p className="absolute font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] left-[344px] top-[0px] w-[574px] whitespace-pre-wrap">
+          <p className="absolute font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] left-[calc(25%+24px)] top-[0px] w-[574px] whitespace-pre-wrap">
             <span>Simple & </span>
             <span className="text-white">fast</span>
             <span> </span>

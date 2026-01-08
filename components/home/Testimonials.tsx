@@ -121,14 +121,18 @@ export default function Testimonials() {
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
       <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] py-[120px]">
         <div className="flex flex-col gap-[48px]">
-          <div className="flex items-start justify-between gap-[24px]">
-            {/* Eyebrow and Title */}
-            <div className="flex flex-col gap-[8px]">
-              <p className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] leading-[1.2]">TESTIMONIALS</p>
-              <h2 className="font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616]">{heading}</h2>
-            </div>
-            {/* Navigation buttons */}
-            <div className="flex items-center gap-[16px]">
+          {/* Title Row - Figma pattern: eyebrow at left-[40px], heading at left-[calc(25%+25px)] */}
+          <div className="relative h-[80px]">
+            {/* Eyebrow */}
+            <p className="absolute left-0 top-[25px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] leading-[1.2]">
+              TESTIMONIALS
+            </p>
+            {/* Main Heading */}
+            <h2 className="absolute left-[calc(25%+25px)] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] w-[687px]">
+              {heading}
+            </h2>
+            {/* Navigation buttons - positioned at far right */}
+            <div className="absolute right-0 top-[20px] flex items-center gap-[16px]">
               <button
                 onClick={handlePrev}
                 className="w-[40px] h-[40px] rounded-full border border-[#161616] flex items-center justify-center bg-transparent hover:bg-[#161616]/5 transition-colors"

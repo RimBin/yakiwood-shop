@@ -56,9 +56,9 @@ export default function CTA() {
       </div>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden lg:flex relative z-10 flex-col items-center justify-center min-h-[600px] py-[120px] px-[40px]">
+      <div className="hidden lg:flex relative z-10 flex-col items-center justify-center min-h-[1053px] py-[113px] px-[40px]">
         {/* Heading - Desktop */}
-        <h2 className="font-['DM_Sans'] font-light text-[72px] leading-[1.1] tracking-[-2.88px] text-[#161616] text-center mb-[48px]">
+        <h2 className="font-['DM_Sans'] font-light text-[128px] leading-[0.95] tracking-[-6.4px] text-[#161616] text-center mb-[66px] w-[861px]">
           <span>Ready to </span>
           <span className="font-['Tiro_Tamil'] italic">build </span>
           <span>with fire?</span>
@@ -69,20 +69,20 @@ export default function CTA() {
           {/* Secondary Button - GET IN TOUCH */}
           <Link
             href="/kontaktai"
-            className="border border-[#161616] flex items-center justify-center h-[56px] px-[48px] py-[12px] rounded-[100px]"
+            className="border border-[#161616] flex items-center justify-center h-[48px] px-[40px] py-[10px] rounded-[100px]"
           >
-            <span className="font-['Outfit'] font-normal text-[14px] leading-[1.2] tracking-[0.7px] uppercase text-[#161616]">
-              GET IN TOUCH
+            <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
+              get in touch
             </span>
           </Link>
 
           {/* Primary Button - CHOOSE WOOD */}
           <Link
             href="/produktai"
-            className="bg-[#161616] flex items-center justify-center h-[56px] px-[48px] py-[12px] rounded-[100px]"
+            className="bg-[#161616] flex items-center justify-center h-[48px] px-[40px] py-[10px] rounded-[100px]"
           >
-            <span className="font-['Outfit'] font-normal text-[14px] leading-[1.2] tracking-[0.7px] uppercase text-white">
-              CHOOSE WOOD
+            <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
+              Choose wood
             </span>
           </Link>
         </div>

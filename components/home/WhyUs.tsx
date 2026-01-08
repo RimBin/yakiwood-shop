@@ -8,28 +8,28 @@ import { assets } from '@/lib/assets';
 export default function WhyUs() {
   const benefits = [
     {
-      primary: assets.icons.truck,
+      primary: assets.icons.fire,
       title: 'Beautiful natural aesthetics',
       description: 'Fire-treated for superior resistance to moisture, pests, and decay.',
-      alt: 'Packaging icon'
+      alt: 'Fire icon - Beautiful natural aesthetics'
     },
     {
-      primary: assets.icons.coins,
+      primary: assets.icons.warehouse,
       title: 'Striking Look',
       description: 'Deep texture and rich tones enhance any design.',
-      alt: 'Coins icon'
+      alt: 'Image icon - Striking Look'
     },
     {
-      primary: assets.icons.plant,
+      primary: assets.icons.plantSvg,
       title: 'Eco-friendly',
       description: 'Sustainably sourced with no harmful chemicals.',
-      alt: 'Leaf icon'
+      alt: 'Leaf icon - Eco-friendly'
     },
     {
-      primary: assets.ui.cart,
+      primary: assets.icons.cube,
       title: 'Versatile for any project',
       description: 'Perfect for cladding, decking, and interiors.',
-      alt: 'Cart icon'
+      alt: 'Cube icon - Versatile'
     }
   ];
 
@@ -66,7 +66,7 @@ export default function WhyUs() {
               {/* Icon */}
               <div className="border-[#bbbbbb] border-[0.5px] border-solid rounded-[100px] w-[48px] h-[48px] relative overflow-hidden">
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[24px] h-[24px]">
-                  <Image src={benefit.primary} alt={benefit.alt} width={24} height={24} />
+                  <Image src={benefit.primary} alt={benefit.alt} width={24} height={24} className={benefit.primary === assets.icons.plantSvg ? 'invert' : ''} />
                 </div>
               </div>
               {/* Text */}
@@ -84,15 +84,15 @@ export default function WhyUs() {
       </div>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] relative">
+      <div className="hidden lg:block max-w-[1440px] mx-auto relative h-[611px]">
         {/* Label */}
         <p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] left-[40px] top-[18px]">
           yakiwood
         </p>
 
         {/* Main text */}
-        <p className="font-['DM_Sans'] font-light text-[52px] leading-none tracking-[-2.08px] text-[#161616] pt-[0px] w-[1360px]">
-          <span>                             We are experts in the preparation of </span>
+        <p className="absolute font-['DM_Sans'] font-light text-[52px] leading-none tracking-[-2.08px] text-[#161616] left-[40px] top-0 w-[1360px] whitespace-pre-wrap">
+          <span>{`                             We are experts in the preparation of `}</span>
           <span className="font-['Tiro_Tamil'] italic">burnt wood</span>
           <span>, with many years of </span>
           <span className="font-['Tiro_Tamil'] italic">successful</span>
@@ -103,8 +103,8 @@ export default function WhyUs() {
         </p>
 
         {/* Description text */}
-        <p className="absolute font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] left-[calc(50%+48px)] top-[256px] w-[312px]">
-          Our aim is to help you create a cosy and sustainable environment using a natural, time-tested woodworking method. We produce wood prepared according to the unique, time-tested Japanese wood-burning technology "Yakisugi" (or "Shou Sugi Ban"). This is the most natural way of preparing wood, giving it both a protective and aesthetic function.
+        <p className="absolute font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] left-[calc(50%+8px)] top-[256px] w-[312px] whitespace-pre-wrap">
+          Our aim is to help you create a cosy and sustainable environment using a natural, time-tested woodworking method. We produce wood prepared according to the unique, time-tested Japanese wood-burning technology “Yakisugi” (or “Shou Sugi Ban”). This is the most natural way of preparing wood, giving it both a protective and aesthetic function.
         </p>
 
         {/* Benefits cards */}
@@ -113,22 +113,20 @@ export default function WhyUs() {
             <div key={idx} className="bg-[#eaeaea] rounded-[8px] p-[16px] w-[328px] flex flex-col gap-[24px] items-start">
               <div className="border-[#bbbbbb] border-[0.5px] border-solid rounded-[100px] w-[48px] h-[48px] relative overflow-hidden">
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[24px] h-[24px]">
-                  <Image src={benefit.primary} alt={benefit.alt} width={24} height={24} />
+                  <Image src={benefit.primary} alt={benefit.alt} width={24} height={24} className={benefit.primary === assets.icons.plantSvg ? 'invert' : ''} />
                 </div>
               </div>
               <div className="flex flex-col gap-[8px] items-start w-full">
                 <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
                   {benefit.title}
                 </p>
-                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-[257px]">
+                <p className="font-['Outfit'] font-light text-[14px] leading-[0.14px] tracking-[0.14px] text-[#535353] w-[257px]">
                   {benefit.description}
                 </p>
               </div>
             </div>
           ))}
         </div>
-
-        <div className="h-[611px]" />
       </div>
     </section>
   );

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Header, Footer } from '@/components/shared';
+import { usePathname } from 'next/navigation';
 
 function UnderMaintenanceScreen({ onAuthenticate }: { onAuthenticate: () => void }) {
   const [password, setPassword] = useState('');
@@ -95,6 +96,7 @@ function UnderMaintenanceScreen({ onAuthenticate }: { onAuthenticate: () => void
 export default function AuthWrapper({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const pathname = usePathname();
 
   // Skip auth check in development mode
   const isDevelopment = process.env.NODE_ENV === 'development';
@@ -128,10 +130,20 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     return <UnderMaintenanceScreen onAuthenticate={handleAuthenticate} />;
   }
 
+  // Header is fixed; add a top offset so it doesn't overlap page content.
+  // Keep auth/admin/studio screens unchanged to avoid breaking centered layouts.
+  const normalizedPathname = (pathname || '/').replace(/^\/(lt|en)(?=\/|$)/, '');
+  const noHeaderOffsetPrefixes = ['/login', '/register', '/forgot-password', '/reset-password', '/admin', '/studio'];
+  const shouldApplyHeaderOffset = !noHeaderOffsetPrefixes.some(
+    (prefix) => normalizedPathname === prefix || normalizedPathname.startsWith(`${prefix}/`)
+  );
+
   return (
     <>
       <Header />
-      {children}
+      <div className={shouldApplyHeaderOffset ? 'pt-[120px]' : ''}>
+        {children}
+      </div>
       <Footer />
     </>
   );

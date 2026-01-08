@@ -114,6 +114,20 @@ export default function Solutions() {
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
       <div className="hidden lg:block">
+        {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+24px)] */}
+        <div className="max-w-[1440px] mx-auto px-[40px] pt-[120px] pb-[40px]">
+          <div className="relative h-[160px] text-[#161616]">
+            <p className="absolute left-0 top-[25px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase">
+              purpose
+            </p>
+            <p className="absolute left-[calc(25%+24px)] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] w-[713px]">
+              <span>Versatile </span>
+              <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">solutions</span>
+              <span> for every project</span>
+            </p>
+          </div>
+        </div>
+        
         {/* Desktop Cards */}
         <div className="w-full flex flex-col items-center gap-px">
         {/* Top divider line */}
