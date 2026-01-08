@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { getAsset, assets } from '@/lib/assets';
+import { getAsset } from '@/lib/assets';
 
 export default function AnnouncementBar() {
   const features = [
@@ -12,8 +12,7 @@ export default function AnnouncementBar() {
       text: 'Money back guarantee',
     },
     {
-      // Use SVG plant asset (so the same file is used across the site)
-      icon: assets.icons.plantSvg,
+      icon: getAsset('imgIconPlant'),
       text: 'Eco-friendly',
     },
   ];
@@ -28,7 +27,7 @@ export default function AnnouncementBar() {
               alt=""
               width={24}
               height={24}
-              className={`icon-image w-full h-full ${feature.icon === assets.icons.plantSvg ? 'invert' : ''}`}
+              className="icon-image w-full h-full"
             />
           </div>
           <p className="font-['Outfit'] font-normal leading-[1.2] text-[12px] text-white tracking-[0.6px] uppercase">

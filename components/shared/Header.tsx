@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import { getAsset, assets } from '@/lib/assets';
+import { getAsset } from '@/lib/assets';
 import MobileMenu from './MobileMenu';
 import CartSidebar from './CartSidebar';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -78,7 +78,7 @@ export default function Header() {
           {/* Eco-Friendly */}
           <div className="hidden lg:flex items-center gap-[8px]">
             <div className="relative w-[24px] h-[24px] shrink-0">
-              <Image src={assets.icons.plantSvg} alt="Eco-friendly" width={24} height={24} className="invert" />
+              <Image src={getAsset('imgIconPlant')} alt="Eco-friendly" width={24} height={24} />
             </div>
             <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
               Eco-friendly
