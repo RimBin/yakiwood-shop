@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { projects as projectsData } from '@/data/projects';
 // PageCover removed per request
 
@@ -22,7 +23,9 @@ export default function ProjectsPage() {
       
       return {
         id: index + 1,
-        image: Array.isArray(project.images) ? project.images[0] : project.images,
+        image:
+          project.featuredImage ||
+          (Array.isArray(project.images) ? project.images[0] : project.images),
         title: project.title,
         location: project.location,
         size: size,
@@ -54,7 +57,7 @@ export default function ProjectsPage() {
             const height = isBig ? "h-[520px]" : "h-[330px]";
 
             return (
-              <div key={project.id} className={`${colSpan} flex flex-col gap-[4px]`}>
+              <Link key={project.id} href={`/projects/${project.slug}`} className={`${colSpan} flex flex-col gap-[4px]`}>
                 <div className={`${height} w-full rounded-[8px] relative overflow-hidden`}>
                   <Image 
                     src={project.image} 
@@ -69,7 +72,7 @@ export default function ProjectsPage() {
                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
                   {project.location}
                 </p>
-              </div>
+              </Link>
             );
           })}
         </div>

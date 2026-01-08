@@ -1,15 +1,61 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ArrowRight from '@/components/icons/ArrowRight';
 import { PageCover } from '@/components/shared/PageLayout';
 import { assets } from '@/lib/assets';
+import { projects as projectsData } from '@/data/projects';
+import type { Project } from '@/types/project';
 
 const [imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6] = assets.projects;
 
+function getProjectCardImage(project?: Partial<Project> | null): string | undefined {
+  if (!project) return undefined;
+
+  if (typeof project.featuredImage === 'string' && project.featuredImage.trim()) {
+    return project.featuredImage;
+  }
+
+  if (Array.isArray(project.images) && typeof project.images[0] === 'string') {
+    return project.images[0];
+  }
+
+  return undefined;
+}
+
+function getProjectHref(project?: Partial<Project> | null): string {
+  if (project?.slug) return `/projektai/${project.slug}`;
+  return '/projektai';
+}
+
 export default function Projects() {
+  const [projects] = useState<Project[]>(() => {
+    if (typeof window === 'undefined') return projectsData;
+    try {
+      const savedProjects = window.localStorage.getItem('yakiwood_projects');
+      const loadedProjects = savedProjects ? (JSON.parse(savedProjects) as unknown) : null;
+      return Array.isArray(loadedProjects) ? (loadedProjects as Project[]) : projectsData;
+    } catch {
+      return projectsData;
+    }
+  });
+
+  const fallbackImages = useMemo(
+    () => [imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6],
+    []
+  );
+
+  const featuredProjects = useMemo(() => {
+    // Preserve layout that expects 6 items
+    const items = projects.slice(0, 6);
+    while (items.length < 6) {
+      items.push(projectsData[items.length] as Project);
+    }
+    return items;
+  }, [projects]);
+
   return (
     <section className="w-full bg-[#E1E1E1]">
       {/* Page Header */}
@@ -30,51 +76,87 @@ export default function Projects() {
         {/* Projects Grid - Mobile: Complex masonry-like layout from Figma */}
         <div className="px-[16px] md:px-[32px] pb-[24px] md:pb-[40px]">
           {/* Row 1: Big card (267x268px + text) */}
-          <div className="flex flex-col gap-[8px] mb-[16px]">
+          <Link href={getProjectHref(featuredProjects[0])} className="flex flex-col gap-[8px] mb-[16px]">
             <div className="h-[268px] w-[267px] rounded-[8px] relative overflow-hidden">
-              <Image src={imgProject1} alt="Project" fill className="object-cover" />
+              <Image
+                src={getProjectCardImage(featuredProjects[0]) || fallbackImages[0]}
+                alt={featuredProjects[0]?.title || 'Project'}
+                fill
+                className="object-cover"
+              />
             </div>
             <div className="flex flex-col gap-[8px] text-[#161616]">
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">Project title</p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">Location</p>
+              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
+                {featuredProjects[0]?.title || 'Project title'}
+              </p>
+              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
+                {featuredProjects[0]?.location || 'Location'}
+              </p>
             </div>
-          </div>
+          </Link>
 
           {/* Row 2: Middle card (230x176px) - right aligned */}
           <div className="flex justify-end mb-[16px]">
-            <div className="flex flex-col gap-[8px]">
+            <Link href={getProjectHref(featuredProjects[1])} className="flex flex-col gap-[8px]">
               <div className="h-[176px] w-[230px] rounded-[8px] relative overflow-hidden">
-                <Image src={imgProject2} alt="Project" fill className="object-cover" />
+                <Image
+                  src={getProjectCardImage(featuredProjects[1]) || fallbackImages[1]}
+                  alt={featuredProjects[1]?.title || 'Project'}
+                  fill
+                  className="object-cover"
+                />
               </div>
               <div className="flex flex-col gap-[8px] text-[#161616] w-[230px]">
-                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">Project title</p>
-                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">Location</p>
+                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
+                  {featuredProjects[1]?.title || 'Project title'}
+                </p>
+                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
+                  {featuredProjects[1]?.location || 'Location'}
+                </p>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Row 3: Large card (328x330px) - full width */}
-          <div className="flex flex-col gap-[8px] mb-[16px]">
+          <Link href={getProjectHref(featuredProjects[2])} className="flex flex-col gap-[8px] mb-[16px]">
             <div className="h-[330px] w-[328px] rounded-[8px] relative overflow-hidden">
-              <Image src={imgProject3} alt="Project" fill className="object-cover" />
+              <Image
+                src={getProjectCardImage(featuredProjects[2]) || fallbackImages[2]}
+                alt={featuredProjects[2]?.title || 'Project'}
+                fill
+                className="object-cover"
+              />
             </div>
             <div className="flex flex-col gap-[8px] text-[#161616]">
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">Project title</p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">Location</p>
+              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
+                {featuredProjects[2]?.title || 'Project title'}
+              </p>
+              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
+                {featuredProjects[2]?.location || 'Location'}
+              </p>
             </div>
-          </div>
+          </Link>
 
           {/* Row 4: Small card centered (175x177px) */}
           <div className="flex justify-center mb-[16px]">
-            <div className="flex flex-col gap-[8px]">
+            <Link href={getProjectHref(featuredProjects[3])} className="flex flex-col gap-[8px]">
               <div className="h-[177px] w-[175px] rounded-[8px] relative overflow-hidden">
-                <Image src={imgProject4} alt="Leliju apartments" fill className="object-cover" />
+                <Image
+                  src={getProjectCardImage(featuredProjects[3]) || fallbackImages[3]}
+                  alt={featuredProjects[3]?.title || 'Project'}
+                  fill
+                  className="object-cover"
+                />
               </div>
               <div className="flex flex-col gap-[8px] text-[#161616] w-[175px]">
-                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">Leliju apartments</p>
-                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">Vilnius, Lithuania</p>
+                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
+                  {featuredProjects[3]?.title || 'Project title'}
+                </p>
+                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
+                  {featuredProjects[3]?.location || 'Location'}
+                </p>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Description between projects */}
@@ -84,37 +166,55 @@ export default function Projects() {
 
           {/* Row 5: Middle card right aligned (230x176px) */}
           <div className="flex justify-end mb-[16px]">
-            <div className="flex flex-col gap-[8px]">
+            <Link href={getProjectHref(featuredProjects[4])} className="flex flex-col gap-[8px]">
               <div className="h-[176px] w-[230px] rounded-[8px] relative overflow-hidden">
-                <Image src={imgProject6} alt="Project" fill className="object-cover" />
+                <Image
+                  src={getProjectCardImage(featuredProjects[4]) || fallbackImages[5]}
+                  alt={featuredProjects[4]?.title || 'Project'}
+                  fill
+                  className="object-cover"
+                />
               </div>
               <div className="flex flex-col gap-[8px] text-[#161616] w-[230px]">
-                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">Project title</p>
-                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">Location</p>
+                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
+                  {featuredProjects[4]?.title || 'Project title'}
+                </p>
+                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
+                  {featuredProjects[4]?.location || 'Location'}
+                </p>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Row 6: Large card (328x330px) */}
-          <div className="flex flex-col gap-[8px] mb-[24px]">
+          <Link href={getProjectHref(featuredProjects[5])} className="flex flex-col gap-[8px] mb-[24px]">
             <div className="h-[330px] w-[328px] rounded-[8px] relative overflow-hidden">
-              <Image src={imgProject5} alt="Project" fill className="object-cover" />
+              <Image
+                src={getProjectCardImage(featuredProjects[5]) || fallbackImages[4]}
+                alt={featuredProjects[5]?.title || 'Project'}
+                fill
+                className="object-cover"
+              />
             </div>
             <div className="flex flex-col gap-[8px] text-[#161616]">
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">Project title</p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">Location</p>
+              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
+                {featuredProjects[5]?.title || 'Project title'}
+              </p>
+              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
+                {featuredProjects[5]?.location || 'Location'}
+              </p>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* View All Projects Button - Mobile */}
         <div className="flex justify-center pb-[64px]">
-          <div className="flex gap-[8px] items-center h-[24px]">
+          <Link href="/projects" className="flex gap-[8px] items-center h-[24px]">
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
               View all projects
             </p>
             <ArrowRight color="#161616" />
-          </div>
+          </Link>
         </div>
       </div>
 
@@ -130,26 +230,35 @@ export default function Projects() {
             <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">projects</span>
           </p>
           {/* View All Projects button */}
-          <div className="absolute right-0 top-[28px] flex gap-[8px] items-center h-[24px]">
+          <Link href="/projects" className="absolute right-0 top-[28px] flex gap-[8px] items-center h-[24px]">
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
               View all projects
             </p>
             <ArrowRight color="#161616" />
-          </div>
+          </Link>
         </div>
         
         {/* Desktop Grid */}
         <div className="grid grid-cols-3 gap-[32px]">
-          {[imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6].map((img, idx) => (
-            <div key={idx} className="flex flex-col gap-[8px]">
-              <div className={`relative w-full overflow-hidden rounded-[12px] ${idx % 2 === 0 ? 'h-[520px]' : 'h-[330px]'}`}>
-                <Image src={img} alt="Project" fill className="object-cover" />
+          {featuredProjects.map((project, idx) => (
+            <Link key={idx} href={getProjectHref(project)} className="flex flex-col gap-[8px]">
+              <div className={`relative w-full overflow-hidden rounded-[12px] ${idx % 2 === 0 ? 'h-[520px]' : 'h-[330px]'}`}> 
+                <Image
+                  src={getProjectCardImage(project) || fallbackImages[idx]}
+                  alt={project?.title || 'Project'}
+                  fill
+                  className="object-cover"
+                />
               </div>
               <div className="flex flex-col gap-[4px]">
-                <p className="font-['DM_Sans'] text-[18px] font-medium tracking-[-0.36px] text-[#161616]">Project title</p>
-                <p className="font-['Outfit'] text-[14px] font-light tracking-[0.14px] text-[#535353]">Location</p>
+                <p className="font-['DM_Sans'] text-[18px] font-medium tracking-[-0.36px] text-[#161616]">
+                  {project?.title || 'Project title'}
+                </p>
+                <p className="font-['Outfit'] text-[14px] font-light tracking-[0.14px] text-[#535353]">
+                  {project?.location || 'Location'}
+                </p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 

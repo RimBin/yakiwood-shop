@@ -5,9 +5,10 @@ import { Project } from '@/types/project';
 
 interface RelatedProjectsProps {
   projects: Project[];
+  basePath?: '/projects' | '/projektai';
 }
 
-export default function RelatedProjects({ projects }: RelatedProjectsProps) {
+export default function RelatedProjects({ projects, basePath = '/projects' }: RelatedProjectsProps) {
   if (projects.length === 0) return null;
 
   return (
@@ -19,7 +20,7 @@ export default function RelatedProjects({ projects }: RelatedProjectsProps) {
             Related projects
           </h2>
           <Link
-            href="/projects"
+            href={basePath}
             className="hidden lg:flex items-center gap-2 font-['Outfit'] font-normal text-xs uppercase tracking-[0.6px] text-[#161616] hover:gap-3 transition-all"
           >
             View all projects
@@ -36,15 +37,18 @@ export default function RelatedProjects({ projects }: RelatedProjectsProps) {
             const size = index === 1 ? 'large' : index === 0 ? 'medium' : 'small';
             const height = size === 'large' ? 'h-[560px]' : size === 'medium' ? 'h-[300px]' : 'h-[400px]';
 
+            const imageSrc = project.featuredImage || project.images?.[0];
+            if (!imageSrc) return null;
+
             return (
               <Link
                 key={project.id}
-                href={`/projects/${project.slug}`}
+                href={`${basePath}/${project.slug}`}
                 className="group flex flex-col gap-2"
               >
                 <div className={`relative ${height} w-full rounded-lg overflow-hidden`}>
                   <Image
-                    src={project.images[0]}
+                    src={imageSrc}
                     alt={project.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -66,37 +70,42 @@ export default function RelatedProjects({ projects }: RelatedProjectsProps) {
 
         {/* Projects Grid - Mobile */}
         <div className="flex lg:hidden flex-col gap-4 mb-8">
-          {projects.slice(0, 3).map((project) => (
-            <Link
-              key={project.id}
-              href={`/projects/${project.slug}`}
-              className="group flex flex-col gap-2"
-            >
-              <div className="relative h-[230px] w-full rounded overflow-hidden">
-                <Image
-                  src={project.images[0]}
-                  alt={project.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  sizes="(max-width: 768px) 100vw, 358px"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <p className="font-['DM_Sans'] font-medium text-lg leading-[1.1] tracking-[0.18px] text-[#161616]">
-                  {project.title}
-                </p>
-                <p className="font-['DM_Sans'] font-normal text-sm leading-[1.1] tracking-[0.42px] text-[rgba(0,0,0,0.7)]">
-                  {project.location}
-                </p>
-              </div>
-            </Link>
-          ))}
+          {projects.slice(0, 3).map((project) => {
+            const imageSrc = project.featuredImage || project.images?.[0];
+            if (!imageSrc) return null;
+
+            return (
+              <Link
+                key={project.id}
+                href={`${basePath}/${project.slug}`}
+                className="group flex flex-col gap-2"
+              >
+                <div className="relative h-[230px] w-full rounded overflow-hidden">
+                  <Image
+                    src={imageSrc}
+                    alt={project.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    sizes="(max-width: 768px) 100vw, 358px"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <p className="font-['DM_Sans'] font-medium text-lg leading-[1.1] tracking-[0.18px] text-[#161616]">
+                    {project.title}
+                  </p>
+                  <p className="font-['DM_Sans'] font-normal text-sm leading-[1.1] tracking-[0.42px] text-[rgba(0,0,0,0.7)]">
+                    {project.location}
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
 
         {/* View All Button - Mobile */}
         <div className="flex lg:hidden items-center justify-center">
           <Link
-            href="/projects"
+            href={basePath}
             className="flex items-center gap-2 font-['Outfit'] font-normal text-xs uppercase tracking-[0.6px] text-[#161616] py-2"
           >
             View all projects

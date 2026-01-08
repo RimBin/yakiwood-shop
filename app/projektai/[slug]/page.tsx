@@ -87,7 +87,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       </div>
 
       {/* Related Projects */}
-      <RelatedProjects projects={relatedProjects} />
+      <RelatedProjects projects={relatedProjects} basePath="/projektai" />
     </main>
   );
 }
