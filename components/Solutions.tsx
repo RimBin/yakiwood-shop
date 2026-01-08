@@ -4,9 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import ArrowRight from '@/components/icons/ArrowRight';
 import { PageCover } from '@/components/shared/PageLayout';
-import { assets, getAsset } from '@/lib/assets';
-
-const imgVector33 = getAsset('imgVector33');
+import { assets } from '@/lib/assets';
 const { fence: imgFence, facades: imgFacades, terrace: imgTerrace, interior: imgInterior } = assets.categories;
 
 type SolutionItem = {
@@ -19,22 +17,22 @@ const solutions: SolutionItem[] = [
   { 
     title: 'Fence', 
     image: imgFence,
-    description: 'Burnt wood creates beautiful, durable fencing solutions that enhance your property with a distinctive aesthetic.'
+    description: 'Private, elegant, and built to last – charred wood fencing that withstands every season while making a statement.'
   },
   { 
-    title: 'Facades', 
+    title: 'Facade', 
     image: imgFacades,
-    description: 'Burnt wood is an ancient and unique technique that is becoming increasingly popular in modern architecture. The result is wooden facade finishes that give a modern and solid look. This article "Burnt wood for facades: a modern and durable choice" presents the advantages of burnt wood facade finishes and provides recommendations on how to use this technique in your projects.'
+    description: 'Turn any building into a landmark with burnt wood cladding that combines striking aesthetics with long-term protection against the elements.'
   },
   { 
-    title: 'Terace', 
+    title: 'Terrace', 
     image: imgTerrace,
-    description: 'Transform your outdoor space with charred wood terrace solutions that combine beauty with weather resistance.'
+    description: 'Outdoor spaces designed to endure. Our fire-treated decking offers natural texture, slip resistance, and unmatched longevity.'
   },
   { 
     title: 'Interior', 
     image: imgInterior,
-    description: 'Bring the warmth and elegance of Shou Sugi Ban wood into your interior spaces for a unique, natural atmosphere.'
+    description: 'Bring depth, warmth, and texture indoors with premium Shou Sugi Ban wall panels that elevate modern interiors.'
   },
 ];
 
@@ -83,7 +81,7 @@ export default function Solutions() {
                     </p>
                     <div className="flex gap-[8px] items-center h-[24px]">
                       <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                        Learn more
+                        FIND OUT MORE
                       </p>
                       <ArrowRight color="#FFFFFF" />
                     </div>
@@ -128,85 +126,64 @@ export default function Solutions() {
           </div>
         </div>
         
-        {/* Desktop Cards */}
-        <div className="w-full flex flex-col items-center gap-px">
-        {/* Top divider line */}
-        <div className="w-full flex justify-center">
-          <div className="h-0 w-[1360px] relative shrink-0">
-            <Image src={imgVector33} alt="" width={1360} height={1} />
+        {/* Desktop Cards (Accordion) */}
+        <div className="w-full flex flex-col items-center">
+          {/* Top divider line */}
+          <div className="w-full flex justify-center">
+            <div className="w-[1360px] h-px bg-[#BBBBBB]" />
           </div>
-        </div>
 
-        {/* Fence Card */}
-        <div className="bg-[#e1e1e1] w-full">
-          <div className="max-w-[1440px] mx-auto px-[40px] py-[24px] flex gap-[16px] items-start">
-          <div className="w-[328px] shrink-0">
-            <p className="font-['DM_Sans'] font-normal text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616] whitespace-pre-wrap">Fence</p>
-          </div>
-          <div className="w-[672px] h-[100px] rounded-tl-[8px] rounded-tr-[8px] relative overflow-hidden">
-            <Image src={imgFence} alt="Fence" fill className="object-cover" />
-          </div>
-          </div>
-        </div>
+          {solutions.map((solution, idx) => {
+            const isOpen = openIndex === idx;
 
-        {/* Facades Card (featured - full width black) */}
-        <div className="bg-[#161616] w-full">
-          <div className="max-w-[1440px] mx-auto px-[40px] py-[24px] flex gap-[16px] items-start">
-          <div className="w-[328px] shrink-0">
-            <p className="font-['DM_Sans'] font-normal text-[32px] leading-[1.1] tracking-[-1.28px] text-white whitespace-pre-wrap">Facades</p>
-          </div>
-          <div className="w-[672px] h-[300px] rounded-[8px] relative overflow-hidden">
-            <Image src={imgFacades} alt="Facades" fill className="object-cover" />
-          </div>
-          <div className="w-[288px] h-[300px] flex flex-col items-start justify-between shrink-0">
-            <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-white whitespace-pre-wrap">
-              Burnt wood is an ancient and unique technique that is becoming increasingly popular in modern architecture. The result is wooden facade finishes that give a modern and solid look. This article "Burnt wood for facades: a modern and durable choice" presents the advantages of burnt wood facade finishes and provides recommendations on how to use this technique in your projects.
-            </p>
-            <div className="flex gap-[16px] items-center">
-              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">Learn more</p>
-              <ArrowRight color="#FFFFFF" />
-            </div>
-          </div>
-          </div>
-        </div>
+            return (
+              <React.Fragment key={solution.title}>
+                <button
+                  type="button"
+                  className={`${isOpen ? 'bg-[#161616]' : 'bg-[#e1e1e1]'} w-full text-left`}
+                  aria-expanded={isOpen}
+                  aria-controls={`solutions-accordion-panel-${idx}`}
+                  onClick={() => setOpenIndex(isOpen ? -1 : idx)}
+                >
+                  <div
+                    id={`solutions-accordion-panel-${idx}`}
+                    className="max-w-[1440px] mx-auto px-[40px] py-[24px] flex gap-[16px] items-start"
+                  >
+                    <div className="w-[328px] shrink-0">
+                      <p
+                        className={`font-['DM_Sans'] font-normal text-[32px] leading-[1.1] tracking-[-1.28px] whitespace-pre-wrap ${isOpen ? 'text-white' : 'text-[#161616]'}`}
+                      >
+                        {solution.title}
+                      </p>
+                    </div>
 
-        {/* Terrace Card */}
-        <div className="bg-[#e1e1e1] w-full">
-          <div className="max-w-[1440px] mx-auto px-[40px] py-[24px] flex gap-[16px] items-start">
-          <div className="w-[328px] shrink-0">
-            <p className="font-['DM_Sans'] font-normal text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616] whitespace-pre-wrap">Terrace</p>
-          </div>
-          <div className="w-[672px] h-[100px] rounded-tl-[8px] rounded-tr-[8px] relative overflow-hidden">
-            <Image src={imgTerrace} alt="Terrace" fill className="object-cover" />
-          </div>
-          </div>
-        </div>
+                    <div
+                      className={`w-[672px] relative overflow-hidden ${isOpen ? 'h-[300px] rounded-[8px]' : 'h-[100px] rounded-tl-[8px] rounded-tr-[8px]'}`}
+                    >
+                      <Image src={solution.image} alt={solution.title} fill className="object-cover" />
+                    </div>
 
-        {/* Middle divider line */}
-        <div className="w-full flex justify-center">
-          <div className="h-0 w-[1360px] relative shrink-0">
-            <Image src={imgVector33} alt="" width={1360} height={1} />
-          </div>
-        </div>
+                    {isOpen && (
+                      <div className="w-[288px] h-[300px] flex flex-col items-start justify-between shrink-0">
+                        <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-white whitespace-pre-wrap">
+                          {solution.description}
+                        </p>
+                        <div className="flex gap-[16px] items-center">
+                          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">FIND OUT MORE</p>
+                          <ArrowRight color="#FFFFFF" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </button>
 
-        {/* Interior Card */}
-        <div className="bg-[#e1e1e1] w-full">
-          <div className="max-w-[1440px] mx-auto px-[40px] py-[24px] flex gap-[16px] items-start">
-          <div className="w-[328px] shrink-0">
-            <p className="font-['DM_Sans'] font-normal text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616] whitespace-pre-wrap">Interior</p>
-          </div>
-          <div className="w-[672px] h-[100px] rounded-tl-[8px] rounded-tr-[8px] relative overflow-hidden">
-            <Image src={imgInterior} alt="Interior" fill className="object-cover" />
-          </div>
-          </div>
-        </div>
-
-        {/* Bottom divider line */}
-        <div className="w-full flex justify-center">
-          <div className="h-0 w-[1360px] relative shrink-0">
-            <Image src={imgVector33} alt="" width={1360} height={1} />
-          </div>
-        </div>
+                {/* Divider line between cards */}
+                <div className="w-full flex justify-center">
+                  <div className="w-[1360px] h-px bg-[#BBBBBB]" />
+                </div>
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
     </section>

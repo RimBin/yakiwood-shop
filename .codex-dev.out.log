@@ -1,0 +1,14 @@
+
+> yakiwood-website@0.1.0 dev
+> next dev -p 3010
+
+▲ Next.js 16.1.1 (Turbopack)
+- Local:         http://localhost:3010
+- Network:       http://192.168.0.22:3010
+- Environments: .env.local
+- Experiments (use with caution):
+  · optimizePackageImports
+
+✓ Starting...
+  Suggestion: If you intended to restart next dev, terminate the other process, and then try again.
+[?25h

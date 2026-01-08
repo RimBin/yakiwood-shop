@@ -10,24 +10,51 @@ export default function Contact() {
     fullName: '',
     email: '',
     phone: '',
+    // Honeypot field (hidden)
+    company: '',
   });
   const [consent, setConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const startedAtRef = React.useRef<number>(Date.now());
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!consent) return;
     
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsSubmitting(false);
-    setSubmitted(true);
-    setFormData({ fullName: '', email: '', phone: '' });
-    setConsent(false);
+
+    try {
+      setError(null);
+
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          startedAt: startedAtRef.current,
+        }),
+      });
+
+      if (!res.ok) {
+        setError('Failed to send. Please try again later.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      setSubmitted(true);
+      setFormData({ fullName: '', email: '', phone: '', company: '' });
+      setConsent(false);
+      startedAtRef.current = Date.now();
+    } catch {
+      setError('Failed to send. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -61,6 +88,20 @@ export default function Contact() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-[24px]">
+              {/* Honeypot (anti-spam) */}
+              <div className="hidden" aria-hidden="true">
+                <label>
+                  Company
+                  <input
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={formData.company}
+                    onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+                  />
+                </label>
+              </div>
+
               {/* Full Name */}
               <div className="flex flex-col gap-[4px]">
                 <label className="font-['Outfit'] font-normal text-[#7C7C7C] text-[12px] tracking-[0.6px] uppercase leading-[1.3]">
@@ -134,6 +175,12 @@ export default function Contact() {
               >
                 {isSubmitting ? 'SENDING...' : 'LEAVE A REQUEST'}
               </button>
+
+              {error && (
+                <p className="font-['Outfit'] font-light text-[12px] text-[#F63333] leading-[1.3] tracking-[0.14px]">
+                  {error}
+                </p>
+              )}
             </form>
           )}
         </div>

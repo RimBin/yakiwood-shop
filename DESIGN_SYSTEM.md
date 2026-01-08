@@ -234,19 +234,7 @@ Then update `lib/design-system.ts` with the new values.
 
 ## 📝 Examples
 
-### Contact Page Header
-```tsx
-<div className="w-full border-b border-[#BBBBBB] pt-[32px] pb-[32px] bg-[#E1E1E1]">
-  <div className="px-[16px] md:px-[40px]">
-    <h1
-      className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] text-[#161616] tracking-[-2.8px] md:tracking-[-6.4px]"
-      style={{ fontVariationSettings: "'opsz' 14" }}
-    >
-      Contact us
-    </h1>
-  </div>
-</div>
-```
+
 
 ### Form Field
 ```tsx

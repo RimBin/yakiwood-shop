@@ -21,7 +21,8 @@ const contentSecurityPolicyValue = [
   "form-action 'self'",
   // VS Code Simple Browser embeds pages in a webview/iframe. Allow framing in development.
   isDev ? "frame-ancestors *" : "frame-ancestors 'self'",
-  "upgrade-insecure-requests",
+  // Only force HTTPS upgrades in production. In development this can break VS Code WebView/Simple Browser.
+  ...(!isDev ? ['upgrade-insecure-requests'] : []),
 ].join('; ');
 
 // Security headers configuration
@@ -30,10 +31,15 @@ const securityHeaders = [
     key: 'X-DNS-Prefetch-Control',
     value: 'on',
   },
-  {
-    key: 'Strict-Transport-Security',
-    value: 'max-age=63072000; includeSubDomains; preload',
-  },
+  // Only send HSTS in production (and only when serving over HTTPS).
+  ...(isDev
+    ? []
+    : [
+        {
+          key: 'Strict-Transport-Security',
+          value: 'max-age=63072000; includeSubDomains; preload',
+        },
+      ]),
   // VS Code Simple Browser embeds the page; allow it in development by omitting X-Frame-Options.
   ...(isDev
     ? []

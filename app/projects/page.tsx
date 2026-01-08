@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { projects as projectsData } from '@/data/projects';
-import { PageCover } from '@/components/shared/PageLayout';
+// PageCover removed per request
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -42,13 +42,7 @@ export default function ProjectsPage() {
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
-      {/* Title Section */}
-      <PageCover>
-        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
-            style={{ fontVariationSettings: "'opsz' 14" }}>
-          Our projects
-        </h1>
-      </PageCover>
+      {/* Title removed */}
 
       {/* Projects Grid */}
       <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px] pt-[64px]">

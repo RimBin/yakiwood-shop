@@ -1,5 +1,5 @@
 import Accordion from '@/components/ui/Accordion';
-import { PageCover } from '@/components/shared/PageLayout';
+// PageCover removed per request
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
 import { getTranslations } from 'next-intl/server';
@@ -54,13 +54,7 @@ const faqItems = [
 export default function FAQPage() {
   return (
     <main className="min-h-screen bg-[#E1E1E1]">
-      {/* Cover Section */}
-      <PageCover>
-        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
-            style={{ fontVariationSettings: "'opsz' 14" }}>
-          DUK
-        </h1>
-      </PageCover>
+      {/* Cover removed */}
 
       {/* FAQ Content */}
       <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[40px] pb-[80px] sm:pb-[120px]">
