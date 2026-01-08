@@ -1,7 +1,10 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Project } from '@/types/project';
+import { useLocale } from 'next-intl';
 
 interface RelatedProjectsProps {
   projects: Project[];
@@ -11,19 +14,31 @@ interface RelatedProjectsProps {
 export default function RelatedProjects({ projects, basePath = '/projects' }: RelatedProjectsProps) {
   if (projects.length === 0) return null;
 
+  const locale = useLocale();
+  const labels =
+    locale === 'lt'
+      ? {
+          heading: 'Susiję projektai',
+          viewAll: 'Visi projektai',
+        }
+      : {
+          heading: 'Related projects',
+          viewAll: 'View all projects',
+        };
+
   return (
     <section className="w-full px-4 lg:px-10 py-16 lg:py-24">
       <div className="max-w-[1440px] mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8 lg:mb-12">
           <h2 className="font-['DM_Sans'] font-light text-[40px] lg:text-[80px] leading-none tracking-[-1.6px] lg:tracking-[-4.4px] text-[#161616]">
-            Related projects
+            {labels.heading}
           </h2>
           <Link
             href={basePath}
             className="hidden lg:flex items-center gap-2 font-['Outfit'] font-normal text-xs uppercase tracking-[0.6px] text-[#161616] hover:gap-3 transition-all"
           >
-            View all projects
+            {labels.viewAll}
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -108,7 +123,7 @@ export default function RelatedProjects({ projects, basePath = '/projects' }: Re
             href={basePath}
             className="flex items-center gap-2 font-['Outfit'] font-normal text-xs uppercase tracking-[0.6px] text-[#161616] py-2"
           >
-            View all projects
+            {labels.viewAll}
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -118,3 +133,4 @@ export default function RelatedProjects({ projects, basePath = '/projects' }: Re
     </section>
   );
 }
+

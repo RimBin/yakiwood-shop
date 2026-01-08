@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 
 interface ProjectInfoProps {
   title: string;
@@ -17,6 +20,20 @@ export default function ProjectInfo({
   location,
   productsUsed,
 }: ProjectInfoProps) {
+  const locale = useLocale();
+  const labels =
+    locale === 'lt'
+      ? {
+          title: 'Pavadinimas',
+          location: 'Vieta',
+          productsUsed: 'Naudoti produktai',
+        }
+      : {
+          title: 'Title',
+          location: 'Location',
+          productsUsed: 'Products used',
+        };
+
   return (
     <div className="w-full max-w-[670px] mx-auto px-4 lg:px-0">
       <div className="flex flex-col gap-4">
@@ -26,7 +43,7 @@ export default function ProjectInfo({
         {/* Title */}
         <div className="flex flex-col lg:flex-row gap-4 lg:items-center">
           <p className="font-['Outfit'] font-normal text-[#7C7C7C] text-xs uppercase tracking-[0.6px] leading-[1.3] w-full lg:w-[329px]">
-            Title
+            {labels.title}
           </p>
           <p className="font-['Outfit'] font-normal text-[#161616] text-xs uppercase tracking-[0.6px] leading-[1.3]">
             {title}
@@ -40,7 +57,7 @@ export default function ProjectInfo({
         {/* Location */}
         <div className="flex flex-col lg:flex-row gap-4 lg:items-center">
           <p className="font-['Outfit'] font-normal text-[#7C7C7C] text-xs uppercase tracking-[0.6px] leading-[1.3] w-full lg:w-[329px]">
-            Location
+            {labels.location}
           </p>
           <p className="font-['Outfit'] font-normal text-[#161616] text-xs uppercase tracking-[0.6px] leading-[1.3]">
             {location}
@@ -53,7 +70,7 @@ export default function ProjectInfo({
         {/* Products Used */}
         <div className="flex flex-col lg:flex-row gap-4 lg:items-center">
           <p className="font-['Outfit'] font-normal text-[#7C7C7C] text-xs uppercase tracking-[0.6px] leading-[1.3] w-full lg:w-[329px]">
-            Products used
+            {labels.productsUsed}
           </p>
           <div className="flex flex-wrap gap-1">
             {productsUsed.map((product, index) => (
@@ -78,3 +95,4 @@ export default function ProjectInfo({
     </div>
   );
 }
+

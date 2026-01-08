@@ -8,6 +8,7 @@ import { PageCover } from '@/components/shared/PageLayout';
 import { assets } from '@/lib/assets';
 import { projects as projectsData } from '@/data/projects';
 import type { Project } from '@/types/project';
+import { useLocale } from 'next-intl';
 
 const [imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6] = assets.projects;
 
@@ -25,12 +26,15 @@ function getProjectCardImage(project?: Partial<Project> | null): string | undefi
   return undefined;
 }
 
-function getProjectHref(project?: Partial<Project> | null): string {
-  if (project?.slug) return `/projektai/${project.slug}`;
-  return '/projektai';
+function getProjectHref(basePath: '/projects' | '/projektai', project?: Partial<Project> | null): string {
+  if (project?.slug) return `${basePath}/${project.slug}`;
+  return basePath;
 }
 
 export default function Projects() {
+  const locale = useLocale();
+  const basePath: '/projects' | '/projektai' = locale === 'en' ? '/projects' : '/projektai';
+
   const [projects] = useState<Project[]>(() => {
     if (typeof window === 'undefined') return projectsData;
     try {
@@ -76,7 +80,7 @@ export default function Projects() {
         {/* Projects Grid - Mobile: Complex masonry-like layout from Figma */}
         <div className="px-[16px] md:px-[32px] pb-[24px] md:pb-[40px]">
           {/* Row 1: Big card (267x268px + text) */}
-          <Link href={getProjectHref(featuredProjects[0])} className="flex flex-col gap-[8px] mb-[16px]">
+          <Link href={getProjectHref(basePath, featuredProjects[0])} className="flex flex-col gap-[8px] mb-[16px]">
             <div className="h-[268px] w-[267px] rounded-[8px] relative overflow-hidden">
               <Image
                 src={getProjectCardImage(featuredProjects[0]) || fallbackImages[0]}
@@ -97,7 +101,7 @@ export default function Projects() {
 
           {/* Row 2: Middle card (230x176px) - right aligned */}
           <div className="flex justify-end mb-[16px]">
-            <Link href={getProjectHref(featuredProjects[1])} className="flex flex-col gap-[8px]">
+            <Link href={getProjectHref(basePath, featuredProjects[1])} className="flex flex-col gap-[8px]">
               <div className="h-[176px] w-[230px] rounded-[8px] relative overflow-hidden">
                 <Image
                   src={getProjectCardImage(featuredProjects[1]) || fallbackImages[1]}
@@ -118,7 +122,7 @@ export default function Projects() {
           </div>
 
           {/* Row 3: Large card (328x330px) - full width */}
-          <Link href={getProjectHref(featuredProjects[2])} className="flex flex-col gap-[8px] mb-[16px]">
+          <Link href={getProjectHref(basePath, featuredProjects[2])} className="flex flex-col gap-[8px] mb-[16px]">
             <div className="h-[330px] w-[328px] rounded-[8px] relative overflow-hidden">
               <Image
                 src={getProjectCardImage(featuredProjects[2]) || fallbackImages[2]}
@@ -139,7 +143,7 @@ export default function Projects() {
 
           {/* Row 4: Small card centered (175x177px) */}
           <div className="flex justify-center mb-[16px]">
-            <Link href={getProjectHref(featuredProjects[3])} className="flex flex-col gap-[8px]">
+            <Link href={getProjectHref(basePath, featuredProjects[3])} className="flex flex-col gap-[8px]">
               <div className="h-[177px] w-[175px] rounded-[8px] relative overflow-hidden">
                 <Image
                   src={getProjectCardImage(featuredProjects[3]) || fallbackImages[3]}
@@ -166,7 +170,7 @@ export default function Projects() {
 
           {/* Row 5: Middle card right aligned (230x176px) */}
           <div className="flex justify-end mb-[16px]">
-            <Link href={getProjectHref(featuredProjects[4])} className="flex flex-col gap-[8px]">
+            <Link href={getProjectHref(basePath, featuredProjects[4])} className="flex flex-col gap-[8px]">
               <div className="h-[176px] w-[230px] rounded-[8px] relative overflow-hidden">
                 <Image
                   src={getProjectCardImage(featuredProjects[4]) || fallbackImages[5]}
@@ -187,7 +191,7 @@ export default function Projects() {
           </div>
 
           {/* Row 6: Large card (328x330px) */}
-          <Link href={getProjectHref(featuredProjects[5])} className="flex flex-col gap-[8px] mb-[24px]">
+          <Link href={getProjectHref(basePath, featuredProjects[5])} className="flex flex-col gap-[8px] mb-[24px]">
             <div className="h-[330px] w-[328px] rounded-[8px] relative overflow-hidden">
               <Image
                 src={getProjectCardImage(featuredProjects[5]) || fallbackImages[4]}
@@ -209,7 +213,7 @@ export default function Projects() {
 
         {/* View All Projects Button - Mobile */}
         <div className="flex justify-center pb-[64px]">
-          <Link href="/projects" className="flex gap-[8px] items-center h-[24px]">
+          <Link href={basePath} className="flex gap-[8px] items-center h-[24px]">
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
               View all projects
             </p>
@@ -230,7 +234,7 @@ export default function Projects() {
             <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">projects</span>
           </p>
           {/* View All Projects button */}
-          <Link href="/projects" className="absolute right-0 top-[28px] flex gap-[8px] items-center h-[24px]">
+          <Link href={basePath} className="absolute right-0 top-[28px] flex gap-[8px] items-center h-[24px]">
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
               View all projects
             </p>
@@ -241,7 +245,7 @@ export default function Projects() {
         {/* Desktop Grid */}
         <div className="grid grid-cols-3 gap-[32px]">
           {featuredProjects.map((project, idx) => (
-            <Link key={idx} href={getProjectHref(project)} className="flex flex-col gap-[8px]">
+            <Link key={idx} href={getProjectHref(basePath, project)} className="flex flex-col gap-[8px]">
               <div className={`relative w-full overflow-hidden rounded-[12px] ${idx % 2 === 0 ? 'h-[520px]' : 'h-[330px]'}`}> 
                 <Image
                   src={getProjectCardImage(project) || fallbackImages[idx]}

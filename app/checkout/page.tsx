@@ -2,18 +2,110 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useCartStore } from '@/lib/cart/store';
-import { Checkbox } from '@/components/ui/Checkbox';
 import ModalOverlay from '@/components/modals/ModalOverlay';
 import LoginModal from '@/components/modals/LoginModal';
 import RegisterModal from '@/components/modals/RegisterModal';
 import SuccessModal from '@/components/modals/SuccessModal';
 import ForgotPasswordModal from '@/components/modals/ForgotPasswordModal';
-import { PageCover } from '@/components/shared/PageLayout';
+import Link from 'next/link';
+import { seedProducts } from '@/data/seed-products';
+
+function formatMoney(value: number): string {
+  const rounded = Math.round(value);
+  return `${new Intl.NumberFormat('lt-LT').format(rounded)} €`;
+}
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="font-['Outfit'] font-normal leading-[1.3] text-[#7C7C7C] text-[12px] tracking-[0.6px] uppercase w-full whitespace-pre-wrap">
+      {children}
+    </p>
+  );
+}
+
+function TextField(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <input
+      {...props}
+      className={[
+        'border border-[#BBBBBB] border-solid',
+        'bg-transparent',
+        'h-[48px] w-full px-[16px]',
+        "font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]",
+        'outline-none focus:border-[#161616]',
+        props.className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    />
+  );
+}
+
+function TextAreaField(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      {...props}
+      className={[
+        'border border-[#BBBBBB] border-solid',
+        'bg-transparent',
+        'w-full px-[16px] py-[16px]',
+        "font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]",
+        'outline-none focus:border-[#161616] resize-none',
+        props.className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    />
+  );
+}
+
+function FigmaCheckbox({
+  checked,
+  onChange,
+  label,
+  id,
+  required,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label: React.ReactNode;
+  id: string;
+  required?: boolean;
+}) {
+  return (
+    <label htmlFor={id} className="flex items-center gap-[4px]">
+      <input
+        id={id}
+        type="checkbox"
+        checked={checked}
+        required={required}
+        onChange={(e) => onChange(e.target.checked)}
+        className={[
+          'appearance-none',
+          'relative',
+          'size-[16.5px]',
+          'border border-[#161616] border-solid',
+          'checked:bg-[#161616]',
+          "after:content-['']",
+          'after:absolute',
+          'after:left-[5px] after:top-[1px]',
+          'after:w-[5px] after:h-[9px]',
+          'after:border-r-2 after:border-b-2 after:border-white',
+          'after:rotate-45',
+          'after:opacity-0 checked:after:opacity-100',
+        ].join(' ')}
+      />
+      <span className="font-['Outfit'] font-light leading-[1.2] text-[#535353] text-[14px] tracking-[0.14px]">
+        {label}
+      </span>
+    </label>
+  );
+}
 
 export default function CheckoutPage() {
-  const { items } = useCartStore();
+  const items = useCartStore((s) => s.items);
+  const removeItem = useCartStore((s) => s.removeItem);
   
   // Modal states
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -23,10 +115,10 @@ export default function CheckoutPage() {
   const [successMessage, setSuccessMessage] = useState('');
   
   // Contact Information
+  const [fullName, setFullName] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
 
   // Delivery Information
   const [country, setCountry] = useState('');
@@ -34,7 +126,13 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [deliveryNotes, setDeliveryNotes] = useState('');
-  const [saveAddress, setSaveAddress] = useState(false);
+  const [deliverDifferentAddress, setDeliverDifferentAddress] = useState(false);
+
+  // UI-only: payment + coupon
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'cards' | 'paypal'>('stripe');
+  const [couponCode, setCouponCode] = useState('');
+  const [savePaymentInfo, setSavePaymentInfo] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // Payment Method
   const [isProcessing, setIsProcessing] = useState(false);
@@ -68,7 +166,7 @@ export default function CheckoutPage() {
           })),
           customer: {
             email,
-            name: `${firstName} ${lastName}`,
+            name: fullName,
             phone,
             address,
             city,
@@ -96,293 +194,416 @@ export default function CheckoutPage() {
     }
   };
 
+  const getItemImage = (slug: string, id: string) => {
+    const seed = seedProducts.find((p) => p.slug === slug || p.id === id);
+    return seed?.images?.[0] ?? '/images/ui/wood/imgSpruce.png';
+  };
+
   return (
     <main className="min-h-screen bg-[#E1E1E1]">
-      {/* Cover Section */}
-      <PageCover>
-        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
-            style={{ fontVariationSettings: "'opsz' 14" }}>
-          Checkout
+      {/* Cover (matches Figma 896:13072) */}
+      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[40px] py-[32px] border-b border-[#BBBBBB]">
+        <h1
+          className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+          style={{ fontVariationSettings: "'opsz' 14" }}
+        >
+          Atsiskaitymas
         </h1>
-      </PageCover>
+      </div>
 
-      <form onSubmit={handleSubmit} className="max-w-[1440px] mx-auto px-[16px] sm:px-[40px] pb-[80px]">
-        <div className="grid grid-cols-1 lg:grid-cols-[672px_1fr] gap-[40px]">
-          {/* Left Column - Forms */}
-          <div className="space-y-[64px]">
-            {/* Contact Information */}
-            <div>
-              <div className="flex items-center justify-between pb-[16px] border-b border-[#BBBBBB] mb-[24px]">
-                <h2 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.3] tracking-[0.14px] sm:tracking-[0.16px] uppercase text-[#161616]">
-                  Contact Information
-                </h2>
+      <form onSubmit={handleSubmit} className="max-w-[1440px] mx-auto px-[16px] sm:px-[40px] pb-[80px] sm:pb-[120px] pt-[64px]">
+        <div className="grid grid-cols-1 lg:grid-cols-[672px_648px] gap-[32px] items-start">
+          {/* Left Column */}
+          <div className="flex flex-col gap-[64px]">
+            {/* Contact information */}
+            <section className="flex flex-col gap-[24px]">
+              <div className="flex items-center justify-between pb-[16px] border-b border-[#BBBBBB]">
+                <p className="font-['Outfit'] font-normal leading-[1.3] text-[#161616] text-[12px] tracking-[0.6px] uppercase">
+                  Kontaktinė informacija
+                </p>
                 <button
                   type="button"
                   onClick={() => setShowLoginModal(true)}
-                  className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:opacity-70 transition-opacity"
+                  className="font-['Outfit'] font-normal leading-[1.2] text-[#161616] text-[12px] tracking-[0.6px] uppercase hover:opacity-70 transition-opacity"
                 >
-                  Log in
+                  turite paskyrą? prisijunkite
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px]">
-                <div>
-                  <label htmlFor="firstName" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required
-                    className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
-                  />
+              <div className="flex flex-wrap gap-[16px]">
+                <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                  <FieldLabel>
+                    <span>{'vardas, pavardė '}</span>
+                    <span className="text-[#F63333]">*</span>
+                  </FieldLabel>
+                  <TextField value={fullName} onChange={(e) => setFullName(e.target.value)} required />
                 </div>
-                <div>
-                  <label htmlFor="lastName" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required
-                    className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
-                  />
+                <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                  <FieldLabel>įmonės pavadinimas (nebūtina)</FieldLabel>
+                  <TextField value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                 </div>
-                <div>
-                  <label htmlFor="email" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
-                  />
+                <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                  <FieldLabel>
+                    <span>{'el. paštas '}</span>
+                    <span className="text-[#F63333]">*</span>
+                  </FieldLabel>
+                  <TextField type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
-                <div>
-                  <label htmlFor="phone" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                    className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
-                  />
+                <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                  <FieldLabel>
+                    <span>{'tel. numeris '}</span>
+                    <span className="text-[#F63333]">*</span>
+                  </FieldLabel>
+                  <TextField type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
                 </div>
               </div>
-            </div>
+            </section>
 
-            {/* Delivery Method */}
-            <div>
-              <div className="pb-[16px] border-b border-[#BBBBBB] mb-[24px]">
-                <h2 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.3] tracking-[0.14px] sm:tracking-[0.16px] uppercase text-[#161616]">
-                  Delivery Method
-                </h2>
+            {/* Delivery method */}
+            <section className="flex flex-col gap-[24px]">
+              <div className="flex flex-col gap-[8px]">
+                <p className="font-['Outfit'] font-normal leading-[1.3] text-[#161616] text-[12px] tracking-[0.6px] uppercase">
+                  pristatymo informacija
+                </p>
+                <div className="h-px bg-[#BBBBBB]" />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] mb-[24px]">
-                <div>
-                  <label htmlFor="country" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                    Country
-                  </label>
-                  <input
-                    type="text"
-                    id="country"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    required
-                    className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="city" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    id="city"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    required
-                    className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="address" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    id="address"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    required
-                    className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="postalCode" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                    Postal Code
-                  </label>
-                  <input
-                    type="text"
-                    id="postalCode"
-                    value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
-                    required
-                    className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
-                  />
-                </div>
-              </div>
-
-              <Checkbox
-                id="saveAddress"
-                label="Save this address for future orders"
-                checked={saveAddress}
-                onChange={setSaveAddress}
-              />
-
-              <div className="mt-[24px]">
-                <label htmlFor="deliveryNotes" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                  Delivery Notes (Optional)
-                </label>
-                <textarea
-                  id="deliveryNotes"
-                  value={deliveryNotes}
-                  onChange={(e) => setDeliveryNotes(e.target.value)}
-                  rows={4}
-                  className="w-full px-[16px] py-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white resize-none"
-                />
-              </div>
-            </div>
-
-            {/* Payment Method */}
-            <div>
-              <div className="pb-[16px] border-b border-[#BBBBBB] mb-[24px]">
-                <h2 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.3] tracking-[0.14px] sm:tracking-[0.16px] uppercase text-[#161616]">
-                  Payment Method
-                </h2>
-              </div>
-
-              <div className="bg-[#F5F5F5] rounded-[12px] p-[24px]">
-                <div className="flex items-center gap-[16px] mb-[16px]">
-                  <div className="flex items-center gap-[12px]">
-                    <svg className="w-[48px] h-[32px]" viewBox="0 0 60 25" fill="none">
-                      <rect width="60" height="25" rx="4" fill="#635BFF"/>
-                      <path d="M17.5 8.5h-5c-.8 0-1.5.7-1.5 1.5v5c0 .8.7 1.5 1.5 1.5h5c.8 0 1.5-.7 1.5-1.5v-5c0-.8-.7-1.5-1.5-1.5z" fill="white"/>
-                    </svg>
-                    <span className="font-['Outfit'] font-normal text-[14px] text-[#161616]">
-                      Secure Payment via Stripe
-                    </span>
+              <div className="flex flex-col gap-[24px]">
+                <div className="flex flex-wrap gap-[16px]">
+                  <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                    <FieldLabel>
+                      <span>{'šalis '}</span>
+                      <span className="text-[#F63333]">*</span>
+                    </FieldLabel>
+                    <TextField value={country} onChange={(e) => setCountry(e.target.value)} required />
+                  </div>
+                  <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                    <FieldLabel>
+                      <span>{'miestas '}</span>
+                      <span className="text-[#F63333]">*</span>
+                    </FieldLabel>
+                    <TextField value={city} onChange={(e) => setCity(e.target.value)} required />
+                  </div>
+                  <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                    <FieldLabel>
+                      <span>{'adresas '}</span>
+                      <span className="text-[#F63333]">*</span>
+                    </FieldLabel>
+                    <TextField value={address} onChange={(e) => setAddress(e.target.value)} required />
+                  </div>
+                  <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                    <FieldLabel>
+                      <span>{'pašto kodas '}</span>
+                      <span className="text-[#F63333]">*</span>
+                    </FieldLabel>
+                    <TextField value={postalCode} onChange={(e) => setPostalCode(e.target.value)} required />
                   </div>
                 </div>
-                <p className="font-['Outfit'] text-[12px] leading-[1.5] text-[#535353]">
-                  Po paspaudimo "Complete Order" būsite nukreipti į saugią Stripe mokėjimo platformą, kur galėsite sumokėti kortele, Apple Pay, Google Pay arba kitu būdu.
-                </p>
-              </div>
 
-              {/* Error Message */}
-              {error && (
-                <div className="mt-[24px] p-[16px] bg-red-50 border border-red-200 rounded-[12px]">
-                  <p className="font-['Outfit'] text-[14px] text-red-600">{error}</p>
+                <FigmaCheckbox
+                  id="deliverDifferentAddress"
+                  checked={deliverDifferentAddress}
+                  onChange={setDeliverDifferentAddress}
+                  label="Pristatyti kitu adresu?"
+                />
+
+                <div className="flex flex-col gap-[4px]">
+                  <FieldLabel>pastabos užsakymui (nebūtina)</FieldLabel>
+                  <TextAreaField value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} rows={5} className="h-[148px]" />
                 </div>
-              )}
-
-              {/* Submit Buttons */}
-              <div className="mt-[32px] grid grid-cols-1 sm:grid-cols-2 gap-[16px]">
-                <Link
-                  href="/cart"
-                  className="h-[48px] rounded-[100px] border border-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors flex items-center justify-center"
-                >
-                  Return to Cart
-                </Link>
-                <button
-                  type="submit"
-                  disabled={isProcessing}
-                  className="h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors disabled:bg-[#BBBBBB] disabled:cursor-not-allowed"
-                >
-                  {isProcessing ? 'Processing...' : 'Complete Order'}
-                </button>
               </div>
-            </div>
+            </section>
+
+            {/* Payment method */}
+            <section className="flex flex-col gap-[24px]">
+              <div className="flex flex-col gap-[8px]">
+                <p className="font-['Outfit'] font-normal leading-[1.3] text-[#161616] text-[12px] tracking-[0.6px] uppercase">
+                  mokėjimo būdas
+                </p>
+                <div className="h-px bg-[#BBBBBB]" />
+              </div>
+
+              <div className="flex flex-col gap-[16px]">
+                <label className="flex items-center justify-between w-full">
+                  <span className="flex items-center gap-[8px]">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="stripe"
+                      checked={paymentMethod === 'stripe'}
+                      onChange={() => setPaymentMethod('stripe')}
+                      className={[
+                        'size-[24px]',
+                        'appearance-none',
+                        'rounded-[100px]',
+                        'border border-[#161616] border-solid',
+                        'grid place-items-center',
+                        "checked:after:content-['']",
+                        'checked:after:size-[10px] checked:after:rounded-full checked:after:bg-[#161616]',
+                      ].join(' ')}
+                    />
+                    <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
+                      mokėjimo kortelė (stripe)
+                    </span>
+                  </span>
+                  <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
+                    stripe
+                  </span>
+                </label>
+
+                <div className="flex flex-wrap gap-[16px]">
+                  <div className="flex flex-col gap-[4px] w-full">
+                    <FieldLabel>
+                      <span>{'kortelės numeris '}</span>
+                      <span className="text-[#F63333]">*</span>
+                    </FieldLabel>
+                    <TextField value={''} onChange={() => {}} placeholder="" disabled />
+                  </div>
+                  <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                    <FieldLabel>
+                      <span>{'galiojimo data '}</span>
+                      <span className="text-[#F63333]">*</span>
+                    </FieldLabel>
+                    <TextField value={''} onChange={() => {}} placeholder="" disabled />
+                  </div>
+                  <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                    <FieldLabel>
+                      <span>{'cvc kodas '}</span>
+                      <span className="text-[#F63333]">*</span>
+                    </FieldLabel>
+                    <TextField value={''} onChange={() => {}} placeholder="" disabled />
+                  </div>
+                </div>
+
+                <FigmaCheckbox
+                  id="savePayment"
+                  checked={savePaymentInfo}
+                  onChange={setSavePaymentInfo}
+                  label="Išsaugoti šią informaciją kitam kartui"
+                />
+
+                <div className="h-px bg-[#BBBBBB]" />
+
+                <label className="flex items-center justify-between w-full">
+                  <span className="flex items-center gap-[8px]">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cards"
+                      checked={paymentMethod === 'cards'}
+                      onChange={() => setPaymentMethod('cards')}
+                      className={[
+                        'size-[24px]',
+                        'appearance-none',
+                        'rounded-[100px]',
+                        'border border-[#161616] border-solid',
+                        'grid place-items-center',
+                        "checked:after:content-['']",
+                        'checked:after:size-[10px] checked:after:rounded-full checked:after:bg-[#161616]',
+                      ].join(' ')}
+                    />
+                    <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
+                      kreditinė / debetinė kortelė
+                    </span>
+                  </span>
+                  <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
+                    visa
+                  </span>
+                </label>
+
+                <div className="h-px bg-[#BBBBBB]" />
+
+                <label className="flex items-center justify-between w-full">
+                  <span className="flex items-center gap-[8px]">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="paypal"
+                      checked={paymentMethod === 'paypal'}
+                      onChange={() => setPaymentMethod('paypal')}
+                      className={[
+                        'size-[24px]',
+                        'appearance-none',
+                        'rounded-[100px]',
+                        'border border-[#161616] border-solid',
+                        'grid place-items-center',
+                        "checked:after:content-['']",
+                        'checked:after:size-[10px] checked:after:rounded-full checked:after:bg-[#161616]',
+                      ].join(' ')}
+                    />
+                    <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
+                      paypal
+                    </span>
+                  </span>
+                  <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
+                    paypal
+                  </span>
+                </label>
+
+                <div className="h-px bg-[#BBBBBB]" />
+
+                <FigmaCheckbox
+                  id="terms"
+                  checked={agreedToTerms}
+                  onChange={setAgreedToTerms}
+                  required
+                  label={
+                    <span className="text-[#535353]">
+                      Sutinku su{' '}
+                      <Link href="/policies" className="underline">
+                        Taisyklėmis ir sąlygomis
+                      </Link>{' '}
+                      bei{' '}
+                      <Link href="/policies" className="underline">
+                        Privatumo politika
+                      </Link>
+                    </span>
+                  }
+                />
+
+                {/* Error Message (kept from existing flow) */}
+                {error && (
+                  <div className="border border-red-200 bg-red-50 p-[16px]">
+                    <p className="font-['Outfit'] text-[14px] text-red-600">{error}</p>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row gap-[16px]">
+                  <button
+                    type="button"
+                    onClick={() => window.history.back()}
+                    className="border border-[#161616] border-solid h-[48px] px-[40px] py-[10px] rounded-[100px] w-full sm:w-[328px] flex items-center justify-center"
+                  >
+                    <span className="font-['Outfit'] font-normal leading-[1.2] text-[#161616] text-[12px] tracking-[0.6px] uppercase">
+                      grįžti į krepšelį
+                    </span>
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isProcessing}
+                    className="bg-[#161616] h-[48px] px-[40px] py-[10px] rounded-[100px] w-full sm:w-[328px] flex items-center justify-center disabled:bg-[#BBBBBB] disabled:cursor-not-allowed"
+                  >
+                    <span className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase">
+                      {isProcessing ? 'vykdoma...' : 'pateikti užsakymą'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </section>
           </div>
 
-          {/* Right Column - Order Summary */}
-          <div className="lg:sticky lg:top-[120px] lg:self-start">
-            <div className="bg-white rounded-[24px] p-[24px] sm:p-[40px]">
-              <h2 className="font-['DM_Sans'] font-light text-[24px] leading-[1.1] tracking-[-0.96px] text-[#161616] mb-[24px]">
-                Order Summary
-              </h2>
+          {/* Right Column - Order summary */}
+          <aside className="w-full max-w-[648px]">
+            <div className="bg-[#161616] p-[24px] sm:p-[40px] flex flex-col gap-[32px]">
+              <p
+                className="font-['DM_Sans'] font-normal leading-[1.1] text-[24px] text-white tracking-[-0.96px]"
+                style={{ fontVariationSettings: "'opsz' 14" }}
+              >
+                Jūsų užsakymas ({items.length})
+              </p>
 
-              {/* Products */}
-              <div className="space-y-[16px] mb-[24px] pb-[24px] border-b border-[#BBBBBB]">
+              <div className="flex flex-col w-full">
+                <div className="h-px bg-[#535353]" />
                 {items.map((item) => (
-                  <div key={`${item.id}-${item.color}-${item.finish}`} className="flex gap-[16px]">
-                    <div className="w-[80px] h-[90px] rounded-[8px] bg-[#E1E1E1] overflow-hidden shrink-0">
-                      {/* Placeholder - replace with actual product image */}
-                      <div className="w-full h-full bg-gradient-to-br from-[#BBBBBB] to-[#E1E1E1]" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-['DM_Sans'] font-light text-[16px] leading-[1.1] tracking-[-0.64px] text-[#161616] mb-[4px]">
-                        {item.name}
-                      </h3>
-                      <p className="font-['Outfit'] font-light text-[12px] leading-[1.3] text-[#535353] mb-[8px]">
-                        Qty: {item.quantity} pcs
-                      </p>
-                      <div className="font-['DM_Sans'] font-light text-[16px] leading-[1.1] tracking-[-0.64px] text-[#161616]">
-                        {item.basePrice * item.quantity} €
+                  <div key={`${item.id}-${item.color}-${item.finish}`} className="py-[16px]">
+                    <div className="flex gap-[14px] w-full">
+                      <div className="relative w-[111px] h-[125px] overflow-hidden shrink-0">
+                        <Image
+                          src={getItemImage(item.slug, item.id)}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                          sizes="111px"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between gap-[16px]">
+                          <p
+                            className="font-['DM_Sans'] font-medium leading-[1.2] text-[18px] text-white tracking-[-0.36px] max-w-[224px]"
+                            style={{ fontVariationSettings: "'opsz' 14" }}
+                          >
+                            {item.name}
+                          </p>
+                          <p
+                            className="font-['DM_Sans'] font-medium leading-[1.2] text-[18px] text-white tracking-[-0.36px]"
+                            style={{ fontVariationSettings: "'opsz' 14" }}
+                          >
+                            {formatMoney(item.basePrice * item.quantity)}
+                          </p>
+                        </div>
+
+                        <div className="mt-[8px] flex items-end justify-between">
+                          <div className="flex flex-col gap-[4px]">
+                            {(item.color || item.finish) && (
+                              <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">
+                                {(item.color ? `Color: ${item.color}` : '') + (item.color && item.finish ? ' • ' : '') + (item.finish ? `Finish: ${item.finish}` : '')}
+                              </p>
+                            )}
+                            <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">Qty: {item.quantity} pcs</p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.id)}
+                            className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase hover:opacity-70 transition-opacity"
+                          >
+                            Pašalinti
+                          </button>
+                        </div>
                       </div>
                     </div>
+                    <div className="mt-[16px] h-px bg-[#535353]" />
                   </div>
                 ))}
               </div>
 
-              {/* Totals */}
-              <div className="space-y-[12px] mb-[24px]">
-                <div className="flex items-center justify-between">
-                  <span className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                    Subtotal
-                  </span>
-                  <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616]">
-                    {subtotal.toFixed(2)} €
-                  </span>
+              <div className="flex flex-col gap-[16px]">
+                <div className="flex items-center justify-between w-full font-['Outfit'] font-normal leading-[1.3] text-[12px] tracking-[0.6px] uppercase">
+                  <p className="text-[#BBBBBB]">tarpinė suma</p>
+                  <p className="text-white">{formatMoney(subtotal)}</p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                    Shipping
-                  </span>
-                  <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616]">
-                    {shipping === 0 ? 'Free' : `${shipping.toFixed(2)} €`}
-                  </span>
+                <div className="flex items-center justify-between w-full font-['Outfit'] font-normal leading-[1.3] text-[12px] tracking-[0.6px] uppercase">
+                  <p className="text-[#BBBBBB]">pristatymas</p>
+                  <p className="text-white">{formatMoney(shipping)}</p>
                 </div>
               </div>
 
-              {/* Divider */}
-              <div className="h-px bg-[#BBBBBB] mb-[24px]" />
+              <div className="h-px bg-[#BBBBBB]" />
 
-              {/* Total */}
-              <div className="flex items-center justify-between mb-[8px]">
-                <span className="font-['DM_Sans'] font-light text-[24px] leading-[1.1] tracking-[-0.96px] text-[#161616]">
-                  Total
-                </span>
-                <span className="font-['DM_Sans'] font-light text-[24px] leading-[1.1] tracking-[-0.96px] text-[#161616]">
-                  {total.toFixed(2)} €
-                </span>
+              <div className="flex items-center justify-between w-full">
+                <div className="flex flex-col">
+                  <p
+                    className="font-['DM_Sans'] font-normal leading-[1.1] text-[24px] text-white tracking-[-0.96px]"
+                    style={{ fontVariationSettings: "'opsz' 14" }}
+                  >
+                    Viso
+                  </p>
+                  <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">Įskaitant mokesčius</p>
+                </div>
+                <p
+                  className="font-['DM_Sans'] font-normal leading-[1.1] text-[24px] text-white tracking-[-0.96px]"
+                  style={{ fontVariationSettings: "'opsz' 14" }}
+                >
+                  {formatMoney(total)}
+                </p>
               </div>
-              <p className="font-['Outfit'] font-light text-[12px] leading-[1.5] text-[#535353]">
-                Including VAT
-              </p>
             </div>
-          </div>
+
+            {/* Coupon pill */}
+            <div className="mt-[16px] border border-[#BBBBBB] border-solid h-[56px] rounded-[100px] flex items-center justify-between pl-[24px] pr-[8px] py-[16px]">
+              <input
+                type="text"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                placeholder="Įveskite nuolaidos kodą"
+                className="bg-transparent outline-none font-['Outfit'] font-normal leading-[1.2] text-[#7C7C7C] text-[12px] tracking-[0.6px] uppercase flex-1 placeholder:text-[#7C7C7C]"
+              />
+              <button type="button" className="bg-[#161616] h-[48px] px-[40px] py-[10px] rounded-[100px] w-[118px] flex items-center justify-center">
+                <span className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase">taikyti</span>
+              </button>
+            </div>
+          </aside>
         </div>
       </form>
 
