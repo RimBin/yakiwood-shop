@@ -62,11 +62,11 @@ export default function WhyUs() {
         {/* Benefits Cards - Responsive grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[8px] md:gap-[16px]">
           {benefits.map((benefit, idx) => (
-            <div key={idx} className="bg-[#eaeaea] rounded-[8px] p-[16px] w-full flex flex-col gap-[16px] items-start">
+            <div key={idx} className="bg-[#eaeaea] rounded-[8px] p-[16px] w-full flex flex-col gap-[16px] items-start min-h-[140px]">
               {/* Icon */}
               <div className="border-[#bbbbbb] border-[0.5px] border-solid rounded-[100px] w-[48px] h-[48px] relative overflow-hidden">
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[24px] h-[24px]">
-                  <Image src={benefit.primary} alt={benefit.alt} width={24} height={24} className={benefit.primary === assets.icons.plantSvg ? 'invert' : ''} />
+                  <Image src={benefit.primary} alt={benefit.alt} width={24} height={24} />
                 </div>
               </div>
               {/* Text */}
@@ -110,10 +110,10 @@ export default function WhyUs() {
         {/* Benefits cards */}
         <div className="absolute left-[40px] top-[432px] flex gap-[16px] items-center">
           {benefits.map((benefit, idx) => (
-            <div key={idx} className="bg-[#eaeaea] rounded-[8px] p-[16px] w-[328px] flex flex-col gap-[24px] items-start">
+            <div key={idx} className="bg-[#eaeaea] rounded-[8px] p-[16px] w-[328px] flex flex-col gap-[24px] items-start min-h-[160px]">
               <div className="border-[#bbbbbb] border-[0.5px] border-solid rounded-[100px] w-[48px] h-[48px] relative overflow-hidden">
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[24px] h-[24px]">
-                  <Image src={benefit.primary} alt={benefit.alt} width={24} height={24} className={benefit.primary === assets.icons.plantSvg ? 'invert' : ''} />
+                  <Image src={benefit.primary} alt={benefit.alt} width={24} height={24} />
                 </div>
               </div>
               <div className="flex flex-col gap-[8px] items-start w-full">

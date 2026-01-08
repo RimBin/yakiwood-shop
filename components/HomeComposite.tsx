@@ -121,9 +121,9 @@ export default function HomeComposite() {
             {title:'Eco-friendly',text:'Sustainably sourced with no harmful chemicals.', icon: assets.icons.plantSvg},
             {title:'Versatile for any project',text:'Perfect for cladding, decking, and interiors.', icon: assets.icons.cube},
           ].map((b,i)=> (
-            <div key={b.title} className="bg-[#eaeaea] rounded-[8px] p-[16px] w-[328px] flex flex-col gap-[24px]">
+            <div key={b.title} className="bg-[#eaeaea] rounded-[8px] p-[16px] w-[328px] flex flex-col gap-[24px] min-h-[220px]">
               <div className="rounded-[100px] border border-[#bbbbbb] h-[48px] w-[48px] flex items-center justify-center">
-                <Image src={b.icon} alt={b.title} width={24} height={24} className={b.icon === assets.icons.plantSvg ? 'invert' : ''} />
+                <Image src={b.icon} alt={b.title} width={24} height={24} />
               </div>
               <div className="flex flex-col gap-[8px]">
                 <p className="font-['DM_Sans:Medium',sans-serif] text-[18px] tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>{b.title}</p>
