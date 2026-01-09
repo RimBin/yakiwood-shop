@@ -2,8 +2,9 @@
 
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { trackPageView } from '@/lib/analytics';
+import { COOKIE_CONSENT_CHANGED_EVENT, hasAnalyticsConsent } from '@/lib/cookies/consent';
 
 /**
  * Google Analytics 4 Component
@@ -21,6 +22,7 @@ export default function GoogleAnalytics() {
   const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   const isDebugMode = process.env.NEXT_PUBLIC_GA_DEBUG === 'true';
   const isProduction = process.env.NODE_ENV === 'production';
+  const [hasConsent, setHasConsent] = useState(false);
 
   // Don't load GA if measurement ID is not set
   if (!measurementId) {
@@ -29,6 +31,21 @@ export default function GoogleAnalytics() {
 
   // Only load in production or debug mode
   if (!isProduction && !isDebugMode) {
+    return null;
+  }
+
+  // Determine cookie consent (client-side)
+  useEffect(() => {
+    const updateConsent = () => {
+      setHasConsent(hasAnalyticsConsent());
+    };
+
+    updateConsent();
+    window.addEventListener(COOKIE_CONSENT_CHANGED_EVENT, updateConsent);
+    return () => window.removeEventListener(COOKIE_CONSENT_CHANGED_EVENT, updateConsent);
+  }, []);
+
+  if (!hasConsent) {
     return null;
   }
 

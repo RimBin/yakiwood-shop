@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
 
 interface CartSidebarProps {
@@ -12,10 +13,14 @@ interface CartSidebarProps {
 
 export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { items, updateQuantity, removeItem } = useCartStore();
+  const t = useTranslations();
+  const locale = useLocale();
 
   const subtotal = items.reduce((sum, item) => sum + item.basePrice * item.quantity, 0);
   const shipping = subtotal > 500 ? 0 : 15;
   const total = subtotal + shipping;
+
+  const productsHref = locale === 'lt' ? '/products' : '/products';
 
   return (
     <>
@@ -37,12 +42,12 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           {/* Header */}
           <div className="px-[24px] py-[24px] flex items-center justify-between border-b border-[#BBBBBB]">
             <h2 className="font-['DM_Sans'] font-light text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616]">
-              Your cart ({items.length})
+              {t('cart.yourCart')} ({items.length})
             </h2>
             <button
               onClick={onClose}
               className="w-[24px] h-[24px] flex items-center justify-center hover:opacity-70 transition-opacity"
-              aria-label="Close cart"
+              aria-label={t('cart.closeCart')}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18 6L6 18M6 6L18 18" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -55,14 +60,14 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
             // Empty State
             <div className="flex-1 flex flex-col items-center justify-center px-[24px] py-[40px]">
               <h3 className="font-['DM_Sans'] font-light text-[24px] leading-[1.1] tracking-[-0.96px] text-[#161616] mb-[24px] text-center">
-                Your cart is empty
+                {t('cart.emptyCart')}
               </h3>
               <Link
-                href="/products"
+                href={productsHref}
                 onClick={onClose}
                 className="h-[48px] px-[24px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors flex items-center justify-center"
               >
-                Continue Shopping
+                {t('cart.continueShopping')}
               </Link>
             </div>
           ) : (
@@ -145,7 +150,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                 {/* Subtotal */}
                 <div className="flex items-center justify-between">
                   <span className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                    Subtotal
+                    {t('cart.subtotal')}
                   </span>
                   <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616]">
                     {subtotal.toFixed(2)} €
@@ -155,7 +160,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                 {/* Shipping */}
                 <div className="flex items-center justify-between">
                   <span className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                    Shipping
+                    {t('cart.shipping')}
                   </span>
                   <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616]">
                     {shipping === 0 ? 'Free' : `${shipping.toFixed(2)} €`}
@@ -168,7 +173,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                 {/* Total */}
                 <div className="flex items-center justify-between">
                   <span className="font-['DM_Sans'] font-light text-[24px] leading-[1.1] tracking-[-0.96px] text-[#161616]">
-                    Total
+                    {t('cart.total')}
                   </span>
                   <span className="font-['DM_Sans'] font-light text-[24px] leading-[1.1] tracking-[-0.96px] text-[#161616]">
                     {total.toFixed(2)} €
@@ -179,14 +184,23 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                   Including VAT
                 </p>
 
-                {/* Checkout Button */}
-                <Link
-                  href="/checkout"
-                  onClick={onClose}
-                  className="block w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors flex items-center justify-center"
-                >
-                  Proceed to Checkout
-                </Link>
+                {/* Actions */}
+                <div className="flex gap-[8px]">
+                  <Link
+                    href={productsHref}
+                    onClick={onClose}
+                    className="block w-full h-[48px] rounded-[100px] border border-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors flex items-center justify-center"
+                  >
+                    {t('cart.continueShopping')}
+                  </Link>
+                  <Link
+                    href="/checkout"
+                    onClick={onClose}
+                    className="block w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors flex items-center justify-center"
+                  >
+                    {t('cart.checkout')}
+                  </Link>
+                </div>
               </div>
             </>
           )}

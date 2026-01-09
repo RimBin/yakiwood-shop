@@ -13,6 +13,12 @@ export const projectType = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'titleEn',
+      title: 'Project Title (EN)',
+      type: 'string',
+      description: 'English version of the project title',
+    }),
+    defineField({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
@@ -24,4 +30,16 @@ export const projectType = defineType({
       validation: (Rule) => Rule.required(),
     }),
   ],
+  preview: {
+    select: {
+      title: 'title',
+      titleEn: 'titleEn',
+    },
+    prepare({ title, titleEn }) {
+      return {
+        title,
+        subtitle: titleEn ? `EN: ${titleEn}` : undefined,
+      }
+    },
+  },
 })

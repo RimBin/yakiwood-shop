@@ -13,6 +13,12 @@ export const productType = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'nameEn',
+      title: 'Product Name (EN)',
+      type: 'string',
+      description: 'English version of the product name',
+    }),
+    defineField({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
@@ -28,6 +34,12 @@ export const productType = defineType({
       title: 'Description',
       type: 'blockContent',
       description: 'Rich text description with formatting, links, and lists',
+    }),
+    defineField({
+      name: 'descriptionEn',
+      title: 'Description (EN)',
+      type: 'blockContent',
+      description: 'English version of the description',
     }),
     defineField({
       name: 'category',
@@ -238,16 +250,22 @@ export const productType = defineType({
   preview: {
     select: {
       title: 'name',
+      titleEn: 'nameEn',
       category: 'category',
       woodType: 'woodType',
       media: 'images.0',
     },
-    prepare({ title, category, woodType, media }) {
+    prepare({ title, titleEn, category, woodType, media }) {
       const usageLabel = category === 'facade' ? 'Fasadams' : category === 'terrace' ? 'Terasoms' : category;
       const woodTypeLabel = woodType === 'larch' ? 'Maumedis' : woodType === 'spruce' ? 'Eglė' : woodType;
       return {
         title,
-        subtitle: [usageLabel, woodTypeLabel].filter(Boolean).join(' • '),
+        subtitle: [
+          [usageLabel, woodTypeLabel].filter(Boolean).join(' • '),
+          titleEn ? `EN: ${titleEn}` : undefined,
+        ]
+          .filter(Boolean)
+          .join(' — '),
         media,
       };
     },

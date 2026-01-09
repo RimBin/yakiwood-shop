@@ -25,6 +25,72 @@
     "next": "Next",
     "previous": "Previous",
     "loading": "Loading...",
+    "checkout": {
+      "title": "Checkout",
+      "contact": {
+        "title": "Contact information",
+        "haveAccountLogin": "Have an account? Log in",
+        "fullName": "Full name ",
+        "companyNameOptional": "Company name (optional)",
+        "email": "Email ",
+        "phone": "Phone number "
+      },
+      "delivery": {
+        "title": "Delivery information",
+        "country": "Country ",
+        "city": "City ",
+        "address": "Address ",
+        "postalCode": "Postal code ",
+        "deliverDifferentAddress": "Deliver to a different address?",
+        "notesOptional": "Order notes (optional)"
+      },
+      "payment": {
+        "title": "Payment method",
+        "stripeCard": "Card payment (Stripe)",
+        "cardNumber": "Card number ",
+        "expiryDate": "Expiry date ",
+        "cvc": "CVC ",
+        "saveInfo": "Save this information for next time",
+        "creditDebitCard": "Credit / debit card"
+      },
+      "terms": {
+        "agreeTo": "I agree to the {terms} and {privacy}",
+        "terms": "Terms and conditions",
+        "privacy": "Privacy policy"
+      },
+      "actions": {
+        "backToCart": "Back to cart",
+        "submitOrder": "Place order",
+        "processing": "Processing..."
+      },
+      "summary": {
+        "title": "Your order ({count})",
+        "remove": "Remove",
+        "subtotal": "Subtotal",
+        "shipping": "Shipping",
+        "total": "Total",
+        "includingTaxes": "Including taxes",
+        "colorLabel": "Color:",
+        "finishLabel": "Finish:",
+        "quantity": "Qty: {count} pcs"
+      },
+      "coupon": {
+        "placeholder": "Enter discount code",
+        "apply": "Apply"
+      },
+      "success": {
+        "withNumber": "Order {orderNumber} created. We'll contact you about the next steps.",
+        "withoutNumber": "Order created. We'll contact you about the next steps.",
+        "passwordResetEmailSent": "We've sent you an email with a password reset link."
+      },
+      "errors": {
+        "orderCreateFailed": "Failed to create the order",
+        "orderIdMissing": "Failed to get the order ID",
+        "paymentSessionFailed": "Failed to create a payment session",
+        "paymentUrlMissing": "Payment URL missing",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
     "success": "Success!",
     "error": "Error",
     "tryAgain": "Try again",
@@ -60,6 +126,7 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "cookiePolicy": "Cookie Policy",
+    "cookieSettings": "Cookie preferences",
     "copyright": "© 2024 Yakiwood. All rights reserved.",
     "address": "Address",
     "phone": "Phone",
@@ -159,6 +226,21 @@
         "content": "Minimal upkeep and long lifetime – ideal for both facades and terraces."
       }
     }
+  },
+  "cookieConsent": {
+    "title": "Cookies",
+    "description": "We use cookies to ensure the website works properly and (with your consent) to analyze usage.",
+    "policyLink": "Cookie Policy",
+    "reject": "Reject",
+    "accept": "Accept",
+    "customize": "Preferences",
+    "save": "Save",
+    "necessary": "Necessary",
+    "alwaysOn": "always on",
+    "analytics": "Analytics",
+    "analyticsHint": "helps us understand usage",
+    "marketing": "Marketing",
+    "marketingHint": "for personalized ads"
   },
   "products": {
     "title": "Products",

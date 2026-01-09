@@ -4,6 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { assets } from '@/lib/assets';
+import { useLocale } from 'next-intl';
+import { COOKIE_CONSENT_OPEN_EVENT } from '@/lib/cookies/consent';
 
 const navColumns = [
   {
@@ -62,6 +64,13 @@ const certificates = [
 const paymentMethods = ['Mastercard', 'Visa', 'Maestro', 'Stripe', 'PayPal'] as const;
 
 export default function Footer() {
+  const locale = useLocale();
+  const cookieSettingsLabel = locale === 'lt' ? 'Slapukų nustatymai' : 'Cookie preferences';
+
+  const openCookiePreferences = () => {
+    window.dispatchEvent(new Event(COOKIE_CONSENT_OPEN_EVENT));
+  };
+
   return (
     <footer className="w-full bg-[#161616]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 780:13408 ===== */}
@@ -102,6 +111,18 @@ export default function Footer() {
                     </Link>
                   );
                 })}
+
+                {column.title === 'For Customers' && (
+                  <button
+                    type="button"
+                    onClick={openCookiePreferences}
+                    className="w-fit text-left"
+                  >
+                    <span className="font-['Outfit'] font-light text-[14px] leading-[1.3] tracking-[0.14px] text-[#E1E1E1]">
+                      {cookieSettingsLabel}
+                    </span>
+                  </button>
+                )}
               </nav>
             </div>
           ))}
@@ -182,6 +203,18 @@ export default function Footer() {
                         </Link>
                       );
                     })}
+
+                    {column.title === 'For Customers' && (
+                      <button
+                        type="button"
+                        onClick={openCookiePreferences}
+                        className="w-fit text-left"
+                      >
+                        <span className="font-['Outfit'] font-light text-[14px] leading-[1.3] tracking-[0.14px] text-[#E1E1E1] hover:text-white transition-colors">
+                          {cookieSettingsLabel}
+                        </span>
+                      </button>
+                    )}
                   </nav>
                 </div>
               ))}

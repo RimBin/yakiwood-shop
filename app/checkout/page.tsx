@@ -10,10 +10,12 @@ import SuccessModal from '@/components/modals/SuccessModal';
 import ForgotPasswordModal from '@/components/modals/ForgotPasswordModal';
 import Link from 'next/link';
 import { seedProducts } from '@/data/seed-products';
+import { useLocale, useTranslations } from 'next-intl';
 
-function formatMoney(value: number): string {
+function formatMoney(value: number, locale: string): string {
   const rounded = Math.round(value);
-  return `${new Intl.NumberFormat('lt-LT').format(rounded)} €`;
+  const numberLocale = locale === 'en' ? 'en-US' : 'lt-LT';
+  return `${new Intl.NumberFormat(numberLocale).format(rounded)} €`;
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
@@ -104,6 +106,9 @@ function FigmaCheckbox({
 }
 
 export default function CheckoutPage() {
+  const locale = useLocale();
+  const t = useTranslations('checkout');
+
   const items = useCartStore((s) => s.items);
   const removeItem = useCartStore((s) => s.removeItem);
   const clearCart = useCartStore((s) => s.clear);
@@ -185,14 +190,14 @@ export default function CheckoutPage() {
 
       const orderData = await orderRes.json();
       if (!orderRes.ok) {
-        throw new Error(orderData.error || 'Nepavyko sukurti užsakymo');
+        throw new Error(orderData.error || t('errors.orderCreateFailed'));
       }
 
       const orderId = orderData?.order?.id as string | undefined;
       const orderNumber = orderData?.order?.orderNumber as string | undefined;
 
       if (!orderId) {
-        throw new Error('Nepavyko gauti užsakymo ID');
+        throw new Error(t('errors.orderIdMissing'));
       }
 
       // 2) If Stripe selected, create Stripe Checkout Session and redirect
@@ -202,7 +207,7 @@ export default function CheckoutPage() {
               ...productItems,
               {
                 id: 'shipping',
-                name: 'Pristatymas',
+                name: t('summary.shipping'),
                 slug: 'shipping',
                 basePrice: shipping,
                 quantity: 1,
@@ -233,13 +238,13 @@ export default function CheckoutPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Nepavyko sukurti mokėjimo sesijos');
+        throw new Error(data.error || t('errors.paymentSessionFailed'));
       }
 
       if (data.url) {
         window.location.href = data.url;
       } else {
-        throw new Error('Negautas mokėjimo URL');
+        throw new Error(t('errors.paymentUrlMissing'));
       }
 
         return;
@@ -248,15 +253,15 @@ export default function CheckoutPage() {
       // 3) Manual/other methods: order exists, show confirmation
       setSuccessMessage(
         orderNumber
-          ? `Užsakymas ${orderNumber} sukurtas. Susisieksime su jumis dėl tolimesnių veiksmų.`
-          : 'Užsakymas sukurtas. Susisieksime su jumis dėl tolimesnių veiksmų.'
+          ? t('success.withNumber', { orderNumber })
+          : t('success.withoutNumber')
       );
       setShowSuccessModal(true);
       clearCart();
       setIsProcessing(false);
     } catch (err) {
       console.error('Checkout error:', err);
-      setError(err instanceof Error ? err.message : 'Įvyko klaida. Bandykite dar kartą.');
+      setError(err instanceof Error ? err.message : t('errors.generic'));
       setIsProcessing(false);
     }
   };
@@ -274,7 +279,7 @@ export default function CheckoutPage() {
           className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
           style={{ fontVariationSettings: "'opsz' 14" }}
         >
-          Atsiskaitymas
+          {t('title')}
         </h1>
       </div>
 
@@ -286,39 +291,39 @@ export default function CheckoutPage() {
             <section className="flex flex-col gap-[24px]">
               <div className="flex items-center justify-between pb-[16px] border-b border-[#BBBBBB]">
                 <p className="font-['Outfit'] font-normal leading-[1.3] text-[#161616] text-[12px] tracking-[0.6px] uppercase">
-                  Kontaktinė informacija
+                  {t('contact.title')}
                 </p>
                 <button
                   type="button"
                   onClick={() => setShowLoginModal(true)}
                   className="font-['Outfit'] font-normal leading-[1.2] text-[#161616] text-[12px] tracking-[0.6px] uppercase hover:opacity-70 transition-opacity"
                 >
-                  turite paskyrą? prisijunkite
+                  {t('contact.haveAccountLogin')}
                 </button>
               </div>
 
               <div className="flex flex-wrap gap-[16px]">
                 <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                   <FieldLabel>
-                    <span>{'vardas, pavardė '}</span>
+                    <span>{t('contact.fullName')}</span>
                     <span className="text-[#F63333]">*</span>
                   </FieldLabel>
                   <TextField value={fullName} onChange={(e) => setFullName(e.target.value)} required />
                 </div>
                 <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
-                  <FieldLabel>įmonės pavadinimas (nebūtina)</FieldLabel>
+                  <FieldLabel>{t('contact.companyNameOptional')}</FieldLabel>
                   <TextField value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                 </div>
                 <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                   <FieldLabel>
-                    <span>{'el. paštas '}</span>
+                    <span>{t('contact.email')}</span>
                     <span className="text-[#F63333]">*</span>
                   </FieldLabel>
                   <TextField type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
                 <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                   <FieldLabel>
-                    <span>{'tel. numeris '}</span>
+                    <span>{t('contact.phone')}</span>
                     <span className="text-[#F63333]">*</span>
                   </FieldLabel>
                   <TextField type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
@@ -330,7 +335,7 @@ export default function CheckoutPage() {
             <section className="flex flex-col gap-[24px]">
               <div className="flex flex-col gap-[8px]">
                 <p className="font-['Outfit'] font-normal leading-[1.3] text-[#161616] text-[12px] tracking-[0.6px] uppercase">
-                  pristatymo informacija
+                  {t('delivery.title')}
                 </p>
                 <div className="h-px bg-[#BBBBBB]" />
               </div>
@@ -339,28 +344,28 @@ export default function CheckoutPage() {
                 <div className="flex flex-wrap gap-[16px]">
                   <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                     <FieldLabel>
-                      <span>{'šalis '}</span>
+                      <span>{t('delivery.country')}</span>
                       <span className="text-[#F63333]">*</span>
                     </FieldLabel>
                     <TextField value={country} onChange={(e) => setCountry(e.target.value)} required />
                   </div>
                   <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                     <FieldLabel>
-                      <span>{'miestas '}</span>
+                      <span>{t('delivery.city')}</span>
                       <span className="text-[#F63333]">*</span>
                     </FieldLabel>
                     <TextField value={city} onChange={(e) => setCity(e.target.value)} required />
                   </div>
                   <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                     <FieldLabel>
-                      <span>{'adresas '}</span>
+                      <span>{t('delivery.address')}</span>
                       <span className="text-[#F63333]">*</span>
                     </FieldLabel>
                     <TextField value={address} onChange={(e) => setAddress(e.target.value)} required />
                   </div>
                   <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                     <FieldLabel>
-                      <span>{'pašto kodas '}</span>
+                      <span>{t('delivery.postalCode')}</span>
                       <span className="text-[#F63333]">*</span>
                     </FieldLabel>
                     <TextField value={postalCode} onChange={(e) => setPostalCode(e.target.value)} required />
@@ -371,11 +376,11 @@ export default function CheckoutPage() {
                   id="deliverDifferentAddress"
                   checked={deliverDifferentAddress}
                   onChange={setDeliverDifferentAddress}
-                  label="Pristatyti kitu adresu?"
+                  label={t('delivery.deliverDifferentAddress')}
                 />
 
                 <div className="flex flex-col gap-[4px]">
-                  <FieldLabel>pastabos užsakymui (nebūtina)</FieldLabel>
+                  <FieldLabel>{t('delivery.notesOptional')}</FieldLabel>
                   <TextAreaField value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} rows={5} className="h-[148px]" />
                 </div>
               </div>
@@ -385,7 +390,7 @@ export default function CheckoutPage() {
             <section className="flex flex-col gap-[24px]">
               <div className="flex flex-col gap-[8px]">
                 <p className="font-['Outfit'] font-normal leading-[1.3] text-[#161616] text-[12px] tracking-[0.6px] uppercase">
-                  mokėjimo būdas
+                  {t('payment.title')}
                 </p>
                 <div className="h-px bg-[#BBBBBB]" />
               </div>
@@ -410,7 +415,7 @@ export default function CheckoutPage() {
                       ].join(' ')}
                     />
                     <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
-                      mokėjimo kortelė (stripe)
+                      {t('payment.stripeCard')}
                     </span>
                   </span>
                   <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
@@ -421,21 +426,21 @@ export default function CheckoutPage() {
                 <div className="flex flex-wrap gap-[16px]">
                   <div className="flex flex-col gap-[4px] w-full">
                     <FieldLabel>
-                      <span>{'kortelės numeris '}</span>
+                      <span>{t('payment.cardNumber')}</span>
                       <span className="text-[#F63333]">*</span>
                     </FieldLabel>
                     <TextField value={''} onChange={() => {}} placeholder="" disabled />
                   </div>
                   <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                     <FieldLabel>
-                      <span>{'galiojimo data '}</span>
+                      <span>{t('payment.expiryDate')}</span>
                       <span className="text-[#F63333]">*</span>
                     </FieldLabel>
                     <TextField value={''} onChange={() => {}} placeholder="" disabled />
                   </div>
                   <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                     <FieldLabel>
-                      <span>{'cvc kodas '}</span>
+                      <span>{t('payment.cvc')}</span>
                       <span className="text-[#F63333]">*</span>
                     </FieldLabel>
                     <TextField value={''} onChange={() => {}} placeholder="" disabled />
@@ -446,7 +451,7 @@ export default function CheckoutPage() {
                   id="savePayment"
                   checked={savePaymentInfo}
                   onChange={setSavePaymentInfo}
-                  label="Išsaugoti šią informaciją kitam kartui"
+                  label={t('payment.saveInfo')}
                 />
 
                 <div className="h-px bg-[#BBBBBB]" />
@@ -470,7 +475,7 @@ export default function CheckoutPage() {
                       ].join(' ')}
                     />
                     <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
-                      kreditinė / debetinė kortelė
+                      {t('payment.creditDebitCard')}
                     </span>
                   </span>
                   <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
@@ -514,18 +519,18 @@ export default function CheckoutPage() {
                   checked={agreedToTerms}
                   onChange={setAgreedToTerms}
                   required
-                  label={
-                    <span className="text-[#535353]">
-                      Sutinku su{' '}
+                  label={t.rich('terms.agreeTo', {
+                    terms: (chunks) => (
                       <Link href="/policies" className="underline">
-                        Taisyklėmis ir sąlygomis
-                      </Link>{' '}
-                      bei{' '}
-                      <Link href="/policies" className="underline">
-                        Privatumo politika
+                        {chunks}
                       </Link>
-                    </span>
-                  }
+                    ),
+                    privacy: (chunks) => (
+                      <Link href="/policies" className="underline">
+                        {chunks}
+                      </Link>
+                    ),
+                  })}
                 />
 
                 {/* Error Message (kept from existing flow) */}
@@ -543,7 +548,7 @@ export default function CheckoutPage() {
                     className="border border-[#161616] border-solid h-[48px] px-[40px] py-[10px] rounded-[100px] w-full sm:w-[328px] flex items-center justify-center"
                   >
                     <span className="font-['Outfit'] font-normal leading-[1.2] text-[#161616] text-[12px] tracking-[0.6px] uppercase">
-                      grįžti į krepšelį
+                      {t('actions.backToCart')}
                     </span>
                   </button>
                   <button
@@ -552,7 +557,7 @@ export default function CheckoutPage() {
                     className="bg-[#161616] h-[48px] px-[40px] py-[10px] rounded-[100px] w-full sm:w-[328px] flex items-center justify-center disabled:bg-[#BBBBBB] disabled:cursor-not-allowed"
                   >
                     <span className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase">
-                      {isProcessing ? 'vykdoma...' : 'pateikti užsakymą'}
+                      {isProcessing ? t('actions.processing') : t('actions.submitOrder')}
                     </span>
                   </button>
                 </div>
@@ -567,7 +572,7 @@ export default function CheckoutPage() {
                 className="font-['DM_Sans'] font-normal leading-[1.1] text-[24px] text-white tracking-[-0.96px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                Jūsų užsakymas ({items.length})
+                {t('summary.title', { count: items.length })}
               </p>
 
               <div className="flex flex-col w-full">
@@ -596,7 +601,7 @@ export default function CheckoutPage() {
                             className="font-['DM_Sans'] font-medium leading-[1.2] text-[18px] text-white tracking-[-0.36px]"
                             style={{ fontVariationSettings: "'opsz' 14" }}
                           >
-                            {formatMoney(item.basePrice * item.quantity)}
+                            {formatMoney(item.basePrice * item.quantity, locale)}
                           </p>
                         </div>
 
@@ -604,10 +609,14 @@ export default function CheckoutPage() {
                           <div className="flex flex-col gap-[4px]">
                             {(item.color || item.finish) && (
                               <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">
-                                {(item.color ? `Color: ${item.color}` : '') + (item.color && item.finish ? ' • ' : '') + (item.finish ? `Finish: ${item.finish}` : '')}
+                                {(item.color ? `${t('summary.colorLabel')} ${item.color}` : '') +
+                                  (item.color && item.finish ? ' • ' : '') +
+                                  (item.finish ? `${t('summary.finishLabel')} ${item.finish}` : '')}
                               </p>
                             )}
-                            <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">Qty: {item.quantity} pcs</p>
+                            <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">
+                              {t('summary.quantity', { count: item.quantity })}
+                            </p>
                           </div>
 
                           <button
@@ -615,7 +624,7 @@ export default function CheckoutPage() {
                             onClick={() => removeItem(item.id)}
                             className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase hover:opacity-70 transition-opacity"
                           >
-                            Pašalinti
+                            {t('summary.remove')}
                           </button>
                         </div>
                       </div>
@@ -627,12 +636,12 @@ export default function CheckoutPage() {
 
               <div className="flex flex-col gap-[16px]">
                 <div className="flex items-center justify-between w-full font-['Outfit'] font-normal leading-[1.3] text-[12px] tracking-[0.6px] uppercase">
-                  <p className="text-[#BBBBBB]">tarpinė suma</p>
-                  <p className="text-white">{formatMoney(subtotal)}</p>
+                  <p className="text-[#BBBBBB]">{t('summary.subtotal')}</p>
+                  <p className="text-white">{formatMoney(subtotal, locale)}</p>
                 </div>
                 <div className="flex items-center justify-between w-full font-['Outfit'] font-normal leading-[1.3] text-[12px] tracking-[0.6px] uppercase">
-                  <p className="text-[#BBBBBB]">pristatymas</p>
-                  <p className="text-white">{formatMoney(shipping)}</p>
+                  <p className="text-[#BBBBBB]">{t('summary.shipping')}</p>
+                  <p className="text-white">{formatMoney(shipping, locale)}</p>
                 </div>
               </div>
 
@@ -644,15 +653,15 @@ export default function CheckoutPage() {
                     className="font-['DM_Sans'] font-normal leading-[1.1] text-[24px] text-white tracking-[-0.96px]"
                     style={{ fontVariationSettings: "'opsz' 14" }}
                   >
-                    Viso
+                    {t('summary.total')}
                   </p>
-                  <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">Įskaitant mokesčius</p>
+                  <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">{t('summary.includingTaxes')}</p>
                 </div>
                 <p
                   className="font-['DM_Sans'] font-normal leading-[1.1] text-[24px] text-white tracking-[-0.96px]"
                   style={{ fontVariationSettings: "'opsz' 14" }}
                 >
-                  {formatMoney(total)}
+                  {formatMoney(total, locale)}
                 </p>
               </div>
             </div>
@@ -663,11 +672,11 @@ export default function CheckoutPage() {
                 type="text"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
-                placeholder="Įveskite nuolaidos kodą"
+                placeholder={t('coupon.placeholder')}
                 className="bg-transparent outline-none font-['Outfit'] font-normal leading-[1.2] text-[#7C7C7C] text-[12px] tracking-[0.6px] uppercase flex-1 placeholder:text-[#7C7C7C]"
               />
               <button type="button" className="bg-[#161616] h-[48px] px-[40px] py-[10px] rounded-[100px] w-[118px] flex items-center justify-center">
-                <span className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase">taikyti</span>
+                <span className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase">{t('coupon.apply')}</span>
               </button>
             </div>
           </aside>
@@ -707,7 +716,7 @@ export default function CheckoutPage() {
           onClose={() => setShowForgotPasswordModal(false)}
           onSuccess={() => {
             setShowForgotPasswordModal(false);
-            setSuccessMessage('Išsiuntėme el. laišką su slaptažodžio atnaujinimo nuoroda.');
+            setSuccessMessage(t('success.passwordResetEmailSent'));
             setShowSuccessModal(true);
           }}
         />

@@ -38,7 +38,7 @@ test.describe('Shopping Cart', () => {
     await page.goto('/');
 
     // If the cart is already open, nothing to do.
-    const cartHeading = page.getByRole('heading', { name: /your cart/i }).first();
+    const cartHeading = page.getByRole('heading', { name: /your cart|jūsų krepšelis/i }).first();
     if (await cartHeading.isVisible().catch(() => false)) {
       await expect(cartHeading).toBeVisible();
       return;

@@ -13,6 +13,12 @@ export const postType = defineType({
       type: 'string',
     }),
     defineField({
+      name: 'titleEn',
+      title: 'Title (EN)',
+      type: 'string',
+      description: 'English version of the post title',
+    }),
+    defineField({
       name: 'slug',
       type: 'slug',
       options: {
@@ -53,16 +59,28 @@ export const postType = defineType({
       name: 'body',
       type: 'blockContent',
     }),
+    defineField({
+      name: 'bodyEn',
+      title: 'Body (EN)',
+      type: 'blockContent',
+      description: 'English version of the post body',
+    }),
   ],
   preview: {
     select: {
       title: 'title',
+      titleEn: 'titleEn',
       author: 'author.name',
       media: 'mainImage',
     },
     prepare(selection) {
-      const {author} = selection
-      return {...selection, subtitle: author && `by ${author}`}
+      const { author, titleEn } = selection
+      return {
+        ...selection,
+        subtitle: [author ? `by ${author}` : undefined, titleEn ? `EN: ${titleEn}` : undefined]
+          .filter(Boolean)
+          .join(' — '),
+      }
     },
   },
 })

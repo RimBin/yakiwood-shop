@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import "./globals.css";
 import AuthWrapper from '@/components/AuthWrapper';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import CookieConsentBanner from '@/components/CookieConsentBanner';
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
 
@@ -144,6 +145,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <AuthWrapper>
             {children}
           </AuthWrapper>
+          <CookieConsentBanner />
         </NextIntlClientProvider>
       </body>
     </html>

@@ -60,6 +60,7 @@
     "privatumosPolitika": "Privatumo politika",
     "naudojimoPolitika": "Naudojimo sąlygos",
     "slapukuPolitika": "Slapukų politika",
+    "slapukuNustatymai": "Slapukų nustatymai",
     "autorinesToises": "© 2024 Yakiwood. Visos teisės saugomos.",
     "adresas": "Adresas",
     "telefonas": "Telefonas",
@@ -158,6 +159,87 @@
         "title": "MAŽA PRIEŽIŪRA IR ILGA TARNYBA",
         "content": "Minimalus aptarnavimas ir ilgas eksploatacijos laikas – patogu tiek fasadams, tiek terasoms."
       }
+    }
+  },
+  "cookieConsent": {
+    "title": "Slapukai",
+    "description": "Naudojame slapukus, kad užtikrintume svetainės veikimą ir (su Jūsų sutikimu) analizuotume naudojimą.",
+    "policyLink": "Slapukų politika",
+    "reject": "Atmesti",
+    "accept": "Sutinku",
+    "customize": "Nustatymai",
+    "save": "Išsaugoti",
+    "necessary": "Būtini",
+    "alwaysOn": "visada įjungti",
+    "analytics": "Analitiniai",
+    "analyticsHint": "padeda suprasti naudojimą",
+    "marketing": "Marketingo",
+    "marketingHint": "personalizuotai reklamai"
+  },
+  "checkout": {
+    "title": "Atsiskaitymas",
+    "contact": {
+      "title": "Kontaktinė informacija",
+      "haveAccountLogin": "Turite paskyrą? Prisijunkite",
+      "fullName": "Vardas, pavardė ",
+      "companyNameOptional": "Įmonės pavadinimas (nebūtina)",
+      "email": "El. paštas ",
+      "phone": "Tel. numeris "
+    },
+    "delivery": {
+      "title": "Pristatymo informacija",
+      "country": "Šalis ",
+      "city": "Miestas ",
+      "address": "Adresas ",
+      "postalCode": "Pašto kodas ",
+      "deliverDifferentAddress": "Pristatyti kitu adresu?",
+      "notesOptional": "Pastabos užsakymui (nebūtina)"
+    },
+    "payment": {
+      "title": "Mokėjimo būdas",
+      "stripeCard": "Mokėjimo kortelė (Stripe)",
+      "cardNumber": "Kortelės numeris ",
+      "expiryDate": "Galiojimo data ",
+      "cvc": "CVC kodas ",
+      "saveInfo": "Išsaugoti šią informaciją kitam kartui",
+      "creditDebitCard": "Kreditinė / debetinė kortelė"
+    },
+    "terms": {
+      "agreeTo": "Sutinku su {terms} bei {privacy}",
+      "terms": "Taisyklėmis ir sąlygomis",
+      "privacy": "Privatumo politika"
+    },
+    "actions": {
+      "backToCart": "Grįžti į krepšelį",
+      "submitOrder": "Pateikti užsakymą",
+      "processing": "Vykdoma..."
+    },
+    "summary": {
+      "title": "Jūsų užsakymas ({count})",
+      "remove": "Pašalinti",
+      "subtotal": "Tarpinė suma",
+      "shipping": "Pristatymas",
+      "total": "Viso",
+      "includingTaxes": "Įskaitant mokesčius",
+      "colorLabel": "Spalva:",
+      "finishLabel": "Apdaila:",
+      "quantity": "Kiekis: {count} vnt"
+    },
+    "coupon": {
+      "placeholder": "Įveskite nuolaidos kodą",
+      "apply": "Taikyti"
+    },
+    "success": {
+      "withNumber": "Užsakymas {orderNumber} sukurtas. Susisieksime su jumis dėl tolimesnių veiksmų.",
+      "withoutNumber": "Užsakymas sukurtas. Susisieksime su jumis dėl tolimesnių veiksmų.",
+      "passwordResetEmailSent": "Išsiuntėme el. laišką su slaptažodžio atnaujinimo nuoroda."
+    },
+    "errors": {
+      "orderCreateFailed": "Nepavyko sukurti užsakymo",
+      "orderIdMissing": "Nepavyko gauti užsakymo ID",
+      "paymentSessionFailed": "Nepavyko sukurti mokėjimo sesijos",
+      "paymentUrlMissing": "Negautas mokėjimo URL",
+      "generic": "Įvyko klaida. Bandykite dar kartą."
     }
   },
   "products": {
@@ -365,33 +447,62 @@
   },
   "cart": {
     "pavadinimas": "Pirkinių krepšelis",
+    "title": "Pirkinių krepšelis",
     "jasuKrepselis": "Jūsų krepšelis",
+    "yourCart": "Jūsų krepšelis",
     "tuscčiasKrepselis": "Jūsų krepšelis tuščias",
+    "emptyCart": "Jūsų krepšelis tuščias",
     "tuscias KrepselisAprasymas": "Pridėkite prekių, kad pradėtumėte",
+    "emptyCartDescription": "Pridėkite prekių, kad pradėtumėte",
     "testi Pirkimus": "Tęsti pirkimus",
+    "continueShopping": "Tęsti apsipirkimą",
     "ziuretiKrepseli": "Žiūrėti krepšelį",
+    "viewCart": "Žiūrėti krepšelį",
     "atnaujintiKrepseli": "Atnaujinti krepšelį",
+    "updateCart": "Atnaujinti krepšelį",
     "isvalytिKrepseli": "Išvalyti krepšelį",
+    "clearCart": "Išvalyti krepšelį",
     "pasalintiProdukta": "Pašalinti produktą",
+    "removeItem": "Šalinti",
     "kiekis": "Kiekis",
+    "quantity": "Kiekis",
     "tarpinesuma": "Tarpinė suma",
+    "subtotal": "Tarpinė suma",
     "viso": "Viso",
+    "total": "Viso",
     "pristatymas": "Pristatymas",
+    "shipping": "Pristatymas",
     "pristatymasSkaiciuojamas": "Apskaičiuojamas kasos metu",
+    "shippingCalculated": "Apskaičiuojamas kasos metu",
     "mokesčiai": "Mokesčiai",
+    "tax": "Mokesčiai",
     "nuolaida": "Nuolaida",
+    "discount": "Nuolaida",
     "kuponoKodas": "Kupono kodas",
+    "couponCode": "Kupono kodas",
     "taikytiKupona": "Taikyti kuponą",
+    "applyCoupon": "Taikyti kuponą",
     "pasalintiKupona": "Pašalinti kuponą",
+    "removeCoupon": "Pašalinti kuponą",
     "pereiti IPirkima": "Pereiti į pirkimą",
+    "proceedToCheckout": "Pereiti į apmokėjimą",
     "kasa": "Kasa",
+    "checkout": "Apmokėti",
+    "closeCart": "Uždaryti krepšelį",
     "produktasPridedet": "Produktas pridėtas į krepšelį",
+    "itemAdded": "Produktas pridėtas į krepšelį",
     "produktas Pasalintas": "Produktas pašalintas iš krepšelio",
+    "itemRemoved": "Produktas pašalintas iš krepšelio",
     "krepselis Atnaujintas": "Krepšelis atnaujintas",
+    "itemUpdated": "Krepšelis atnaujintas",
     "krepselioKlaida": "Krepšelio klaida",
+    "cartError": "Krepšelio klaida",
     "netinkasKiekis": "Netinkamas kiekis",
+    "invalidQuantity": "Netinkamas kiekis",
     "maksKiekis": "Pasiektas maksimalus kiekis",
+    "maxQuantity": "Pasiektas maksimalus kiekis",
     "prekių": "prekių",
+    "items": "prekių",
     "preке": "prekė"
   },
   "search": {

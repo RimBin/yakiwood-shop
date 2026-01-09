@@ -6,9 +6,10 @@ import {postType} from './postType'
 import {authorType} from './authorType'
 import {productType} from './productType'
 import {projectType} from './projectType'
+import {emailTemplateType} from './emailTemplateType'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [blockContentType, categoryType, postType, authorType, productType, projectType],
+  types: [blockContentType, categoryType, postType, authorType, productType, projectType, emailTemplateType],
 }
 
 // Named export for sanity.config.ts
