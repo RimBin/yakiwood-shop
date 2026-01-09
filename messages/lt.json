@@ -251,7 +251,7 @@
       "creditDebitCard": "Kreditinė / debetinė kortelė"
     },
     "terms": {
-      "agreeTo": "Sutinku su {terms} bei {privacy}",
+      "agreeTo": "Sutinku su <terms>Taisyklėmis ir sąlygomis</terms> bei <privacy>Privatumo politika</privacy>",
       "terms": "Taisyklėmis ir sąlygomis",
       "privacy": "Privatumo politika"
     },
@@ -697,7 +697,22 @@
       "newProduct": "Naujas produktas",
       "newProductDesc": "Sukurkite naują produktą su variantais",
       "editProduct": "Redaguoti produktą",
-      "editProductDesc": "Atnaujinkite produkto informaciją ir variantas"
+      "editProductDesc": "Atnaujinkite produkto informaciją ir variantas",
+      "profile": {
+        "selectPlaceholder": "Pasirinkite profilį",
+        "addNewOption": "+ Pridėti naują profilį",
+        "enterNamePlaceholder": "Įveskite profilio pavadinimą",
+        "addButton": "Pridėti",
+        "cancelButton": "Atšaukti",
+        "existsMessage": "Profilis jau egzistuoja",
+        "addedMessage": "Profilis pridėtas!"
+      },
+      "profileOptions": {
+        "half_taper_45": "Pusė špunto 45",
+        "half_taper_45_deg": "Pusė špunto 45°",
+        "rectangle": "Stačiakampis",
+        "rhombus": "Rombas"
+      }
     }
   },
   "breadcrumbs": {

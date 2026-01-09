@@ -122,6 +122,47 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Legacy product slugs (keep old URLs working)
+      {
+        source: '/products/black',
+        destination: '/products/black-larch',
+        permanent: true,
+      },
+      {
+        source: '/products/carbon-light',
+        destination: '/products/carbon-light-larch',
+        permanent: true,
+      },
+      {
+        source: '/products/carbon',
+        destination: '/products/carbon-larch',
+        permanent: true,
+      },
+      {
+        source: '/products/dark-brown',
+        destination: '/products/dark-brown-larch',
+        permanent: true,
+      },
+      {
+        source: '/products/graphite',
+        destination: '/products/graphite-larch',
+        permanent: true,
+      },
+      {
+        source: '/products/latte',
+        destination: '/products/latte-larch',
+        permanent: true,
+      },
+      {
+        source: '/products/natural',
+        destination: '/products/natural-larch',
+        permanent: true,
+      },
+      {
+        source: '/products/silver',
+        destination: '/products/silver-larch',
+        permanent: true,
+      },
       {
         source: '/produktai',
         destination: '/products',

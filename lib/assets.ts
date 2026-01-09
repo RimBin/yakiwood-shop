@@ -59,6 +59,9 @@ const localAssets = {
   certFsc: '/images/ui/certifications/cert-fsc.png',
   certEu: '/images/ui/certifications/cert-eu.png',
 
+  // Payments
+  imgPayments: '/assets/icons/payments.png',
+
   // Hero
   heroVector: '/images/hero/Vector.png',
 } as const;
@@ -127,6 +130,7 @@ export const assets = {
     logo: localAssets.imgLogo,
     cart: localAssets.imgCart,
   },
+  payments: localAssets.imgPayments,
   // Expose hero vector directly
   heroVector: localAssets.heroVector,
 };

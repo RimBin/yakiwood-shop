@@ -156,6 +156,35 @@ const envVars = {
     getLink: 'https://dashboard.stripe.com/webhooks',
   },
 
+  // PayPal
+  PAYPAL_ENV: {
+    required: false,
+    type: 'enum',
+    values: ['sandbox', 'live', 'production'],
+    description: 'PayPal environment (sandbox/live)',
+    default: 'sandbox',
+    category: 'PayPal',
+  },
+  PAYPAL_CLIENT_ID: {
+    required: 'conditional',
+    condition: 'paypal',
+    type: 'string',
+    description: 'PayPal client ID',
+    example: 'AQ... (from PayPal developer dashboard)',
+    category: 'PayPal',
+    getLink: 'https://developer.paypal.com/dashboard/applications/sandbox',
+  },
+  PAYPAL_CLIENT_SECRET: {
+    required: 'conditional',
+    condition: 'paypal',
+    type: 'string',
+    description: 'PayPal client secret (server-side only)',
+    example: 'EL... (from PayPal developer dashboard)',
+    category: 'PayPal',
+    sensitive: true,
+    getLink: 'https://developer.paypal.com/dashboard/applications/sandbox',
+  },
+
   // Email (Resend)
   RESEND_API_KEY: {
     required: 'conditional',

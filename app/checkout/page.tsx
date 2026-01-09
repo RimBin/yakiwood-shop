@@ -71,10 +71,13 @@ function FigmaCheckbox({
 }: {
   checked: boolean;
   onChange: (checked: boolean) => void;
-  label: React.ReactNode;
+  label: React.ReactNode | React.ComponentType;
   id: string;
   required?: boolean;
 }) {
+  const renderedLabel =
+    typeof label === 'function' ? React.createElement(label as React.ComponentType) : label;
+
   return (
     <label htmlFor={id} className="flex items-center gap-[4px]">
       <input
@@ -99,7 +102,7 @@ function FigmaCheckbox({
         ].join(' ')}
       />
       <span className="font-['Outfit'] font-light leading-[1.2] text-[#535353] text-[14px] tracking-[0.14px]">
-        {label}
+        {renderedLabel}
       </span>
     </label>
   );

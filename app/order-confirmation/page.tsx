@@ -9,21 +9,64 @@ export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const sessionId = searchParams.get('session_id');
+  const provider = searchParams.get('provider');
+  const paypalOrderId = searchParams.get('token');
+  const orderId = searchParams.get('order_id');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const clearCart = useCartStore(state => state.clear);
 
   useEffect(() => {
-    if (!sessionId) {
-      setError('Nerasta sesijos ID');
-      setLoading(false);
-      return;
+    const run = async () => {
+      // PayPal return flow: PayPal appends `token` to return_url. We also include our internal order_id.
+      if (provider === 'paypal') {
+        if (!paypalOrderId) {
+          setError('Nerastas PayPal mokėjimo identifikatorius')
+          setLoading(false)
+          return
+        }
+
+        try {
+          const res = await fetch('/api/paypal/capture', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              paypalOrderId,
+              orderId: orderId || undefined,
+            }),
+          })
+
+          const data = await res.json().catch(() => null)
+
+          if (!res.ok) {
+            throw new Error(data?.error || 'Nepavyko patvirtinti PayPal mokėjimo')
+          }
+
+          clearCart()
+          setLoading(false)
+          return
+        } catch (e: any) {
+          setError(typeof e?.message === 'string' ? e.message : 'Nepavyko patvirtinti PayPal mokėjimo')
+          setLoading(false)
+          return
+        }
+      }
+
+      // Default: Stripe flow uses `session_id`.
+      if (!sessionId) {
+        setError('Nerasta sesijos ID')
+        setLoading(false)
+        return
+      }
+
+      clearCart()
+      setLoading(false)
     }
 
-    // Clear cart after successful checkout
-    clearCart();
-    setLoading(false);
-  }, [sessionId, clearCart]);
+    void run()
+  }, [provider, paypalOrderId, orderId, sessionId, clearCart]);
 
   if (loading) {
     return (
@@ -83,7 +126,15 @@ export default function OrderConfirmationPage() {
             Jūsų mokėjimas buvo sėkmingai apdorotas. Netrukus gausite el. laišką su užsakymo patvirtinimu ir sąskaita faktūra.
           </p>
           <p className="font-['Outfit'] text-[14px] leading-[1.5] text-[#535353]">
-            Sesijos ID: <span className="font-mono text-[12px]">{sessionId}</span>
+            {provider === 'paypal' ? (
+              <>
+                PayPal ID: <span className="font-mono text-[12px]">{paypalOrderId}</span>
+              </>
+            ) : (
+              <>
+                Sesijos ID: <span className="font-mono text-[12px]">{sessionId}</span>
+              </>
+            )}
           </p>
         </div>
 

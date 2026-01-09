@@ -231,6 +231,28 @@
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "build"
+		},
+		{
+			"label": "check /products",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"try { (Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 http://localhost:3000/products).StatusCode } catch { if ($_.Exception.Response) { $_.Exception.Response.StatusCode.value__ } else { $_.Exception.Message } }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "check /products content",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$ProgressPreference='SilentlyContinue'; $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 http://localhost:3000/products; $r.StatusCode; $r.Content.Substring(0,[Math]::Min(400,$r.Content.Length))"
+			],
+			"isBackground": false
 		}
 	]
 }

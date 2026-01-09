@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { assets } from '@/lib/assets';
 
 const imgProductImage = assets.projects[0];
@@ -8,9 +9,9 @@ const certifications = [assets.certifications.fsc, assets.certifications.eu, ass
 
 export default function Hero() {
   return (
-    <section className="w-full bg-[#EAEAEA] relative overflow-hidden pt-[85px]">
+    <section className="w-full bg-[#EAEAEA] relative overflow-hidden">
       {/* Full-width hero vector background */}
-      <div className="absolute left-0 top-[125px] w-full h-[776px]">
+      <div className="absolute left-0 top-0 w-full h-[776px]">
         <Image src={assets.heroVector} alt="" fill className="object-cover" priority />
       </div>
 
@@ -97,19 +98,15 @@ export default function Hero() {
                 {`Discover the elegance and durability of burnt wood, crafted using the ancient Japanese Shou Sugi Ban technique. `}
               </p>
 
-              <div className="border border-[#161616] border-solid px-[40px] py-[10px] h-[48px] rounded-[100px] flex items-center justify-center gap-[10px] w-fit">
-                <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] whitespace-nowrap">Explore catalog</p>
-              </div>
+              <Link
+                href="/products"
+                className="border border-[#161616] border-solid px-[40px] py-[10px] h-[48px] rounded-[100px] flex items-center justify-center gap-[10px] w-fit"
+              >
+                <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] whitespace-nowrap">Explore catalog</span>
+              </Link>
 
-              <div className="flex gap-[24.39px] items-center">
-                {['Mastercard', 'Visa', 'Stripe', 'PayPal'].map((label) => (
-                  <span
-                    key={label}
-                    className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]/70"
-                  >
-                    {label}
-                  </span>
-                ))}
+              <div className="relative h-[16px] w-[220px]">
+                <Image src={assets.payments} alt="Payments" fill className="object-contain" />
               </div>
             </div>
           </div>

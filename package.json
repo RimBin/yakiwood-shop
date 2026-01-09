@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "node scripts/dev.js",
     "dev:unlock": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-unlock.ps1",
+    "demo:bootstrap-users": "node scripts/bootstrap-demo-users.mjs",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:e2e": "playwright test",

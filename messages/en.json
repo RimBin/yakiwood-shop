@@ -390,6 +390,69 @@
   },
   "checkout": {
     "title": "Checkout",
+    "contact": {
+      "title": "Contact information",
+      "haveAccountLogin": "Have an account? Log in",
+      "fullName": "Full name ",
+      "companyNameOptional": "Company name (optional)",
+      "email": "Email ",
+      "phone": "Phone number "
+    },
+    "delivery": {
+      "title": "Delivery information",
+      "country": "Country ",
+      "city": "City ",
+      "address": "Address ",
+      "postalCode": "Postal code ",
+      "deliverDifferentAddress": "Deliver to a different address?",
+      "notesOptional": "Order notes (optional)"
+    },
+    "payment": {
+      "title": "Payment method",
+      "stripeCard": "Card payment (Stripe)",
+      "cardNumber": "Card number ",
+      "expiryDate": "Expiry date ",
+      "cvc": "CVC ",
+      "saveInfo": "Save this information for next time",
+      "creditDebitCard": "Credit / debit card"
+    },
+    "terms": {
+      "agreeTo": "I agree to the {terms} and {privacy}",
+      "terms": "Terms and conditions",
+      "privacy": "Privacy policy"
+    },
+    "actions": {
+      "backToCart": "Back to cart",
+      "submitOrder": "Place order",
+      "processing": "Processing..."
+    },
+    "summary": {
+      "title": "Your order ({count})",
+      "remove": "Remove",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "total": "Total",
+      "includingTaxes": "Including taxes",
+      "colorLabel": "Color:",
+      "finishLabel": "Finish:",
+      "quantity": "Qty: {count} pcs"
+    },
+    "coupon": {
+      "placeholder": "Enter discount code",
+      "apply": "Apply"
+    },
+    "success": {
+      "withNumber": "Order {orderNumber} created. We'll contact you about the next steps.",
+      "withoutNumber": "Order created. We'll contact you about the next steps.",
+      "passwordResetEmailSent": "We've sent you an email with a password reset link."
+    },
+    "errors": {
+      "orderCreateFailed": "Failed to create the order",
+      "orderIdMissing": "Failed to get the order ID",
+      "paymentSessionFailed": "Failed to create a payment session",
+      "paymentUrlMissing": "Payment URL missing",
+      "generic": "Something went wrong. Please try again."
+    },
     "billingDetails": "Billing details",
     "shippingDetails": "Shipping details",
     "shippingAddress": "Shipping address",
@@ -886,7 +949,22 @@
       "newProduct": "New Product",
       "newProductDesc": "Create a new product with variants",
       "editProduct": "Edit Product",
-      "editProductDesc": "Update product information and variants"
+      "editProductDesc": "Update product information and variants",
+      "profile": {
+        "selectPlaceholder": "Select profile",
+        "addNewOption": "+ Add new profile",
+        "enterNamePlaceholder": "Enter profile name",
+        "addButton": "Add",
+        "cancelButton": "Cancel",
+        "existsMessage": "Profile already exists",
+        "addedMessage": "Profile added!"
+      },
+      "profileOptions": {
+        "half_taper_45": "Half taper 45",
+        "half_taper_45_deg": "Half taper 45°",
+        "rectangle": "Rectangle",
+        "rhombus": "Rhombus"
+      }
     }
   },
   "breadcrumbs": {

@@ -2,44 +2,48 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Demo credentials
-  const demoUsers = {
-    'admin@yakiwood.lt': { password: 'demo123', role: 'admin', name: 'Admin User' },
-    'user@yakiwood.lt': { password: 'demo123', role: 'user', name: 'Demo User' }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const supabase = createClient();
+      if (!supabase) {
+        throw new Error('Supabase nesukonfigūruotas arba raktai neteisingi (.env.local).');
+      }
 
-    // Check demo credentials
-    const user = demoUsers[email as keyof typeof demoUsers];
-    if (user && user.password === password) {
-      // Store user session in localStorage
-      localStorage.setItem('user', JSON.stringify({ email, role: user.role, name: user.name }));
-      localStorage.setItem('yakiwood_auth', 'true');
-      
-      // Redirect based on role
-      router.push(user.role === 'admin' ? '/admin' : '/account');
-    } else {
-      setError('Neteisingas el. paštas arba slaptažodis');
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        const msg = String(signInError.message || '')
+        if (msg.toLowerCase().includes('invalid api key')) {
+          throw new Error('Supabase raktai neteisingi (Invalid API key). Patikrinkite NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+        }
+        throw new Error('Neteisingas el. paštas arba slaptažodis');
+      }
+
+      const redirectTo = searchParams.get('redirect') || '/account';
+      router.push(redirectTo);
+    } catch (e: any) {
+      setError(e?.message || 'Nepavyko prisijungti');
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleDemoLogin = async (role: 'admin' | 'user') => {
@@ -55,16 +59,31 @@ export default function LoginPage() {
     setEmail(demo.email);
     setPassword(demo.password);
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const supabase = createClient();
+      if (!supabase) {
+        throw new Error('Supabase nesukonfigūruotas arba raktai neteisingi (.env.local).');
+      }
 
-    // Store user session
-    localStorage.setItem('user', JSON.stringify({ email: demo.email, role, name: demo.name }));
-    localStorage.setItem('yakiwood_auth', 'true');
-    
-    // Redirect based on role
-    router.push(role === 'admin' ? '/admin' : '/account');
-    setLoading(false);
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: demo.email,
+        password: demo.password,
+      });
+
+      if (signInError) {
+        const msg = String(signInError.message || '')
+        if (msg.toLowerCase().includes('invalid api key')) {
+          throw new Error('Supabase raktai neteisingi (Invalid API key). Patikrinkite NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+        }
+        throw new Error('Demo vartotojas nerastas Supabase. Paleiskite `npm run demo:bootstrap-users` arba susikurkite vartotojus Supabase Auth dalyje.');
+      }
+
+      const redirectTo = searchParams.get('redirect') || (role === 'admin' ? '/admin' : '/account');
+      router.push(redirectTo);
+    } catch (e: any) {
+      setError(e?.message || 'Nepavyko prisijungti');
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {

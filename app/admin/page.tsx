@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { seedProducts } from "@/data/seed-products";
@@ -17,6 +17,13 @@ interface Product {
   basePrice: number;
   images: string[];
   inStock: boolean;
+  usage: string[];
+  woodType: string;
+  profile: string;
+  color: string;
+  widthMm: number;
+  lengthMm: number;
+  quantity: number;
 }
 
 interface Post {
@@ -62,6 +69,13 @@ export default function AdminPage() {
     basePrice: 0,
     images: '',
     inStock: true,
+    usage: ['facade'],
+    woodType: 'larch',
+    profile: '',
+    color: 'natural',
+    widthMm: 125,
+    lengthMm: 3000,
+    quantity: 1,
   });
   const [imageFiles, setImageFiles] = useState<string[]>([]);
   const [customCategory, setCustomCategory] = useState('');
@@ -70,10 +84,85 @@ export default function AdminPage() {
   const [selectedFileNames, setSelectedFileNames] = useState('No file selected');
   const [customCategories, setCustomCategories] = useState<string[]>([]);
 
+  // Profiles (demo admin)
+  const [profiles, setProfiles] = useState<string[]>([]);
+  const [showCustomProfile, setShowCustomProfile] = useState(false);
+  const [customProfile, setCustomProfile] = useState('');
+
+  const BUILTIN_PROFILE_KEYS = useMemo(() => (
+    ['half_taper_45', 'half_taper_45_deg', 'rectangle', 'rhombus'] as const
+  ), []);
+
+  const isBuiltinProfileKey = (value: string): boolean => {
+    return (BUILTIN_PROFILE_KEYS as readonly string[]).includes(value);
+  };
+
+  const getProfileLabel = (value: string): string => {
+    if (!value) return '';
+    if (isBuiltinProfileKey(value)) return t(`products.profileOptions.${value}`);
+    return value;
+  };
+
+  const migrateProfileValue = (value: string): string => {
+    const normalized = value.trim().toLowerCase();
+    const map: Record<string, string> = {
+      // EN labels
+      'half taper 45': 'half_taper_45',
+      'half taper 45°': 'half_taper_45_deg',
+      'rectangle': 'rectangle',
+      'rhombus': 'rhombus',
+
+      // LT labels
+      'pusė špunto 45': 'half_taper_45',
+      'pusė špunto 45°': 'half_taper_45_deg',
+      'stačiakampis': 'rectangle',
+      'rombas': 'rhombus',
+    };
+    return map[normalized] ?? value;
+  };
+
+  const COLOR_OPTIONS_BY_WOOD: Record<string, Array<{ value: string; label: string }>> = useMemo(() => {
+    const all = [
+      { value: 'natural', label: 'Natural' },
+      { value: 'carbon-light', label: 'Carbon Light' },
+      { value: 'carbon-dark', label: 'Carbon Dark' },
+      { value: 'brown', label: 'Brown' },
+      { value: 'graphite', label: 'Graphite' },
+      { value: 'latte', label: 'Latte' },
+      { value: 'silver', label: 'Silver' },
+      { value: 'black', label: 'Black' },
+    ];
+
+    // If you want different sets per wood, change these arrays.
+    return {
+      spruce: all,
+      larch: all,
+      pine: all,
+      oak: all,
+    };
+  }, []);
+
+  const activeColorOptions = useMemo(() => {
+    const key = productForm.woodType;
+    return COLOR_OPTIONS_BY_WOOD[key] ?? COLOR_OPTIONS_BY_WOOD.larch;
+  }, [COLOR_OPTIONS_BY_WOOD, productForm.woodType]);
+
   // Get all categories (default + custom)
   const getAllCategories = () => {
     const defaultCategories = ['facades', 'terraces', 'fences', 'interiors'];
     return [...defaultCategories, ...customCategories];
+  };
+
+  const toggleUsage = (usageKey: string) => {
+    setProductForm((prev) => {
+      const next = new Set(prev.usage);
+      if (next.has(usageKey)) {
+        next.delete(usageKey);
+      } else {
+        next.add(usageKey);
+      }
+      return { ...prev, usage: Array.from(next) };
+    });
   };
 
   // Projects state
@@ -132,7 +221,48 @@ export default function AdminPage() {
 
     const savedCustomCategories = localStorage.getItem('yakiwood_custom_categories');
     if (savedCustomCategories) setCustomCategories(JSON.parse(savedCustomCategories));
-  }, []);
+
+    const savedProfiles = localStorage.getItem('yakiwood_profiles');
+    if (savedProfiles) {
+      const parsed = JSON.parse(savedProfiles) as string[];
+      const migrated = parsed.map(migrateProfileValue);
+
+      // If the user has an old default list from earlier demo versions,
+      // upgrade it to the current built-in set.
+      const looksLikeOldDefaults = migrated.some((p) => {
+        const key = p.trim().toLowerCase();
+        return key === 'u-profile' || key === 'u profile' || key === 'flat';
+      });
+
+      const defaults = [...BUILTIN_PROFILE_KEYS] as unknown as string[];
+      const custom = migrated
+        .map((p) => p.trim())
+        .filter(Boolean)
+        .filter((p) => !isBuiltinProfileKey(p))
+        .filter((p) => {
+          const key = p.toLowerCase();
+          return key !== 'u-profile' && key !== 'u profile' && key !== 'flat';
+        });
+
+      const next = Array.from(new Set([...(looksLikeOldDefaults ? defaults : migrated), ...custom]));
+      const finalList = looksLikeOldDefaults ? Array.from(new Set([...defaults, ...custom])) : next;
+
+      setProfiles(finalList);
+      localStorage.setItem('yakiwood_profiles', JSON.stringify(finalList));
+    } else {
+      const defaults = [...BUILTIN_PROFILE_KEYS];
+      setProfiles(defaults as unknown as string[]);
+      localStorage.setItem('yakiwood_profiles', JSON.stringify(defaults));
+    }
+  }, [BUILTIN_PROFILE_KEYS]);
+
+  useEffect(() => {
+    // Ensure selected color is valid for the selected wood.
+    const allowed = new Set(activeColorOptions.map((c) => c.value));
+    if (!allowed.has(productForm.color)) {
+      setProductForm((prev) => ({ ...prev, color: activeColorOptions[0]?.value ?? 'natural' }));
+    }
+  }, [activeColorOptions, productForm.color]);
 
   useEffect(() => {
     const fileInput = document.querySelector('input[type="file"]');
@@ -204,6 +334,27 @@ export default function AdminPage() {
     }
   };
 
+  const handleAddCustomProfile = () => {
+    const label = customProfile.trim();
+    if (!label) return;
+
+    const exists = profiles.some((p) => p.toLowerCase() === label.toLowerCase());
+    if (exists) {
+      showMessage(t('products.profile.existsMessage'));
+      setCustomProfile('');
+      setShowCustomProfile(false);
+      return;
+    }
+
+    const updated = [...profiles, label];
+    setProfiles(updated);
+    localStorage.setItem('yakiwood_profiles', JSON.stringify(updated));
+    setProductForm({ ...productForm, profile: label });
+    setCustomProfile('');
+    setShowCustomProfile(false);
+    showMessage(t('products.profile.addedMessage'));
+  };
+
   const handleDeleteCustomCategory = (categoryToDelete: string) => {
     if (window.confirm(`Delete category "${categoryToDelete}"? Products using this category will keep it.`)) {
       const updated = customCategories.filter(c => c !== categoryToDelete);
@@ -217,7 +368,17 @@ export default function AdminPage() {
   const handleProductSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const deriveCategoryFromUsage = (usage: string[]) => {
+      const u = new Set(usage);
+      if (u.has('facade')) return 'facades';
+      if (u.has('terrace')) return 'terraces';
+      if (u.has('fence')) return 'fences';
+      if (u.has('interior')) return 'interiors';
+      return 'facades';
+    };
+
     const safeSlug = productForm.slug?.trim() ? productForm.slug : slugify(productForm.name);
+    const derivedCategory = deriveCategoryFromUsage(productForm.usage);
     
     const urlImages = productForm.images.split(',').map(url => url.trim()).filter(Boolean);
     const allImages = [...imageFiles, ...urlImages];
@@ -231,10 +392,17 @@ export default function AdminPage() {
             name: productForm.name,
             slug: safeSlug,
             description: productForm.description,
-            category: productForm.category,
+            category: derivedCategory,
             basePrice: Number(productForm.basePrice),
             images: allImages.length > 0 ? allImages : product.images,
             inStock: productForm.inStock,
+            usage: productForm.usage,
+            woodType: productForm.woodType,
+            profile: productForm.profile,
+            color: productForm.color,
+            widthMm: Number(productForm.widthMm),
+            lengthMm: Number(productForm.lengthMm),
+            quantity: Number(productForm.quantity),
           };
         }
         return product;
@@ -248,9 +416,13 @@ export default function AdminPage() {
       const newProduct: Product = {
         id: Date.now().toString(),
         ...productForm,
+        category: derivedCategory,
         slug: safeSlug,
         images: allImages,
         basePrice: Number(productForm.basePrice),
+        widthMm: Number(productForm.widthMm),
+        lengthMm: Number(productForm.lengthMm),
+        quantity: Number(productForm.quantity),
       };
       
       const updated = [...products, newProduct];
@@ -267,6 +439,13 @@ export default function AdminPage() {
       basePrice: 0,
       images: '',
       inStock: true,
+      usage: ['facade'],
+      woodType: 'larch',
+      profile: '',
+      color: 'natural',
+      widthMm: 125,
+      lengthMm: 3000,
+      quantity: 1,
     });
     setImageFiles([]);
     setSelectedFileNames('No file selected');
@@ -298,6 +477,13 @@ export default function AdminPage() {
       basePrice: product.basePrice,
       images: '',
       inStock: product.inStock,
+      usage: Array.isArray(product.usage) && product.usage.length > 0 ? product.usage : ['facade'],
+      woodType: product.woodType || 'larch',
+      profile: product.profile || '',
+      color: product.color || 'natural',
+      widthMm: product.widthMm || 125,
+      lengthMm: product.lengthMm || 3000,
+      quantity: product.quantity || 1,
     });
     if (product.images && product.images.length > 0) {
       setImageFiles(product.images);
@@ -315,6 +501,13 @@ export default function AdminPage() {
       basePrice: 0,
       images: '',
       inStock: true,
+      usage: ['facade'],
+      woodType: 'larch',
+      profile: '',
+      color: 'natural',
+      widthMm: 125,
+      lengthMm: 3000,
+      quantity: 1,
     });
     setImageFiles([]);
     setSelectedFileNames('No file selected');
@@ -800,6 +993,13 @@ export default function AdminPage() {
                       basePrice: 0,
                       images: '',
                       inStock: true,
+                      usage: ['facade'],
+                      woodType: 'larch',
+                      profile: '',
+                      color: 'natural',
+                      widthMm: 125,
+                      lengthMm: 3000,
+                      quantity: 1,
                     });
                     setImageFiles([]);
                   }
@@ -867,78 +1067,7 @@ export default function AdminPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px]">
-                  <div>
-                    <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                      Category *
-                    </label>
-                    <select
-                      value={productForm.category}
-                      onChange={(e) => {
-                        if (e.target.value === 'custom') {
-                          setShowCustomCategory(true);
-                        } else {
-                          setProductForm({ ...productForm, category: e.target.value });
-                        }
-                      }}
-                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
-                    >
-                      {getAllCategories().map(cat => (
-                        <option key={cat} value={cat}>
-                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                        </option>
-                      ))}
-                      <option value="custom">+ Add Custom Category</option>
-                    </select>
-                    
-                    {showCustomCategory && (
-                      <div className="mt-[12px] flex gap-[8px]">
-                        <input
-                          type="text"
-                          value={customCategory}
-                          onChange={(e) => setCustomCategory(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomCategory())}
-                          placeholder="Enter custom category"
-                          className="flex-1 px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddCustomCategory}
-                          className="px-[16px] py-[12px] rounded-[12px] bg-[#161616] text-white font-['Outfit'] text-[12px] hover:bg-[#535353] transition-colors"
-                        >
-                          Add
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setShowCustomCategory(false)}
-                          className="px-[16px] py-[12px] rounded-[12px] border border-[#BBBBBB] font-['Outfit'] text-[12px] hover:bg-[#EAEAEA] transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )}
-                    
-                    {customCategories.length > 0 && (
-                      <div className="mt-[12px]">
-                        <p className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">Custom Categories:</p>
-                        <div className="flex flex-wrap gap-[8px]">
-                          {customCategories.map(cat => (
-                            <div key={cat} className="flex items-center gap-[8px] px-[12px] py-[6px] bg-[#EAEAEA] rounded-[100px] border border-[#BBBBBB]">
-                              <span className="font-['Outfit'] text-[12px] text-[#161616]">{cat}</span>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteCustomCategory(cat)}
-                                className="text-red-500 hover:text-red-700 text-[16px] font-bold leading-none"
-                                title="Delete category"
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
 
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
@@ -968,6 +1097,169 @@ export default function AdminPage() {
                         In Stock
                       </span>
                     </label>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px]">
+                  <div>
+                    <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
+                      Usage
+                    </label>
+                    <div className="flex flex-wrap gap-[8px]">
+                      {[
+                        { key: 'facade', label: 'Facade' },
+                        { key: 'terrace', label: 'Terrace' },
+                        { key: 'interior', label: 'Interior' },
+                        { key: 'fence', label: 'Fence' },
+                      ].map((u) => (
+                        <label
+                          key={u.key}
+                          className="inline-flex items-center gap-[8px] px-[12px] py-[8px] border border-[#BBBBBB] rounded-[100px] cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={productForm.usage.includes(u.key)}
+                            onChange={() => toggleUsage(u.key)}
+                            className="w-[16px] h-[16px]"
+                          />
+                          <span className="font-['Outfit'] text-[12px] text-[#161616] uppercase tracking-[0.6px]">
+                            {u.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
+                      Wood
+                    </label>
+                    <select
+                      value={productForm.woodType}
+                      onChange={(e) => setProductForm({ ...productForm, woodType: e.target.value })}
+                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                    >
+                      <option value="spruce">Spruce</option>
+                      <option value="larch">Larch</option>
+                      <option value="pine">Pine</option>
+                      <option value="oak">Oak</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
+                      Profile
+                    </label>
+                    <select
+                      value={productForm.profile}
+                      onChange={(e) => {
+                        if (e.target.value === '__custom__') {
+                          setShowCustomProfile(true);
+                        } else {
+                          setProductForm({ ...productForm, profile: e.target.value });
+                        }
+                      }}
+                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                    >
+                      <option value="">{t('products.profile.selectPlaceholder')}</option>
+                      {profiles.map((p) => (
+                        <option key={p} value={p}>
+                          {getProfileLabel(p)}
+                        </option>
+                      ))}
+                      <option value="__custom__">{t('products.profile.addNewOption')}</option>
+                    </select>
+
+                    {showCustomProfile && (
+                      <div className="mt-[12px] flex gap-[8px]">
+                        <input
+                          type="text"
+                          value={customProfile}
+                          onChange={(e) => setCustomProfile(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomProfile())}
+                          placeholder={t('products.profile.enterNamePlaceholder')}
+                          className="flex-1 px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddCustomProfile}
+                          className="px-[16px] py-[12px] rounded-[12px] bg-[#161616] text-white font-['Outfit'] text-[12px] hover:bg-[#535353] transition-colors"
+                        >
+                          {t('products.profile.addButton')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCustomProfile(false)}
+                          className="px-[16px] py-[12px] rounded-[12px] border border-[#BBBBBB] font-['Outfit'] text-[12px] hover:bg-[#EAEAEA] transition-colors"
+                        >
+                          {t('products.profile.cancelButton')}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-[20px]">
+                  <div>
+                    <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
+                      Color
+                    </label>
+                    <select
+                      value={productForm.color}
+                      onChange={(e) => setProductForm({ ...productForm, color: e.target.value })}
+                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                    >
+                      {activeColorOptions.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
+                      Width (mm)
+                    </label>
+                    <select
+                      value={productForm.widthMm}
+                      onChange={(e) => setProductForm({ ...productForm, widthMm: Number(e.target.value) })}
+                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                    >
+                      <option value={95}>95</option>
+                      <option value={125}>125</option>
+                      <option value={145}>145</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
+                      Length (mm)
+                    </label>
+                    <select
+                      value={productForm.lengthMm}
+                      onChange={(e) => setProductForm({ ...productForm, lengthMm: Number(e.target.value) })}
+                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                    >
+                      <option value={3000}>3000</option>
+                      <option value={3300}>3300</option>
+                      <option value={3600}>3600</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
+                      Quantity
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={productForm.quantity}
+                      onChange={(e) => setProductForm({ ...productForm, quantity: Number(e.target.value) })}
+                      className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                      placeholder="1"
+                    />
                   </div>
                 </div>
 
@@ -1175,15 +1467,7 @@ export default function AdminPage() {
                               <textarea value={productForm.description} onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} rows={3} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Description" />
                               <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Product description for listing.</p>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px]">
-                              <div>
-                                <select value={productForm.category} onChange={(e) => setProductForm({ ...productForm, category: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]">
-                                  {getAllCategories().map(cat => (
-                                    <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
-                                  ))}
-                                </select>
-                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Product category.</p>
-                              </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                               <div>
                                 <input type="number" required min="0" step="0.01" value={productForm.basePrice} onChange={(e) => setProductForm({ ...productForm, basePrice: Number(e.target.value) })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Price" />
                                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Base price in EUR.</p>

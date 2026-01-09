@@ -26,7 +26,7 @@ type IncomingItem = {
   };
 };
 
-type PaymentProvider = 'stripe' | 'manual';
+type PaymentProvider = 'stripe' | 'paypal' | 'manual';
 
 type CreateOrderBody = {
   items: IncomingItem[];
@@ -191,9 +191,11 @@ export async function POST(req: NextRequest) {
     const totals = computeTotalsFromGross(grossTotal);
 
     const orderNumber = generateOrderNumber();
-    const paymentProvider: PaymentProvider = body.paymentProvider === 'stripe' ? 'stripe' : 'manual';
+    const paymentProvider: PaymentProvider =
+      body.paymentProvider === 'stripe' ? 'stripe' : body.paymentProvider === 'paypal' ? 'paypal' : 'manual';
 
     const notesParts: string[] = [];
+    if (paymentProvider === 'paypal') notesParts.push('Mokėjimas: PayPal.');
     if (paymentProvider === 'manual') notesParts.push('Mokėjimas: rankinis (be Stripe).');
     if (body.couponCode) notesParts.push(`Nuolaidos kodas: ${String(body.couponCode).trim()}`);
     if (body.deliveryNotes) notesParts.push(`Pastabos: ${String(body.deliveryNotes).trim()}`);
