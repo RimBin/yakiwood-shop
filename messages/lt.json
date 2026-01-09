@@ -9,6 +9,30 @@
     "duk": "DUK",
     "pagrindinis": "Pagrindinis"
   },
+  "account": {
+    "title": "Paskyra",
+    "accountDetails": "PASKYROS DUOMENYS",
+    "myOrders": "MANO UŽSAKYMAI",
+    "logout": "ATSIJUNGTI",
+    "table": {
+      "order": "UŽSAKYMAS",
+      "date": "DATA",
+      "status": "STATUSAS",
+      "totalCost": "BENDRA KAINA"
+    },
+    "details": {
+      "dateOfDelivery": "PRISTATYMO DATA",
+      "deliveryAddress": "PRISTATYMO ADRESAS",
+      "paymentMethod": "MOKĖJIMO BŪDAS",
+      "shipping": "PRISTATYMAS",
+      "total": "VISO",
+      "dimensions": "Matmenys:",
+      "qty": "Kiekis:"
+    },
+    "status": {
+      "delivered": "Pristatyta"
+    }
+  },
   "common": {
     "krepselis": "Krepšelis",
     "paieska": "Paieška",

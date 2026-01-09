@@ -428,7 +428,7 @@
     "acceptedCards": "Accepted cards"
   },
   "account": {
-    "title": "My account",
+    "title": "Account",
     "myAccount": "My account",
     "orders": "Orders",
     "myOrders": "My orders",
@@ -487,7 +487,25 @@
     "verifyEmail": "Verify email",
     "emailVerification": "Email verification",
     "verificationSent": "Verification email sent",
-    "checkEmail": "Please check your email"
+    "checkEmail": "Please check your email",
+    "table": {
+      "order": "ORDER",
+      "date": "DATE",
+      "status": "STATUS",
+      "totalCost": "TOTAL COST"
+    },
+    "details": {
+      "dateOfDelivery": "DATE OF DELIVERY",
+      "deliveryAddress": "DELIVERY ADDRESS",
+      "paymentMethod": "PAYMENT METHOD",
+      "shipping": "SHIPPING",
+      "total": "TOTAL",
+      "dimensions": "Dimensions:",
+      "qty": "Qty:"
+    },
+    "status": {
+      "delivered": "Delivered"
+    }
   },
   "orderStatuses": {
     "pending": "Pending",

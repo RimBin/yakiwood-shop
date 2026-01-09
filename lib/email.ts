@@ -7,6 +7,8 @@
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 
+import type { EmailLocale } from './email/bilingualTemplates'
+
 interface EmailOptions {
   to: string;
   subject: string;
@@ -166,41 +168,62 @@ export async function sendOrderConfirmation(
     orderDate?: string;
     totalAmount?: string;
     items?: Array<{ name: string; quantity: number; price: number }>;
-  }
+  },
+  locale: EmailLocale = 'lt'
 ) {
-  // Try to use template if available
+  const resolvedLocale: EmailLocale = locale === 'en' ? 'en' : 'lt'
+
+  // Prefer CMS-edited template, fallback to code defaults
   try {
-    const { getEmailTemplate } = await import('./email/templates');
-    const template = getEmailTemplate('order-confirmation');
-    
-    if (template) {
+    const [{ getEmailTemplateDoc }, { getBilingualEmailTemplate, renderTemplateString }] = await Promise.all([
+      import('./email/cmsTemplates'),
+      import('./email/bilingualTemplates'),
+    ])
+
+    const defaults = getBilingualEmailTemplate('order-confirmation')
+    if (defaults) {
+      const vars = {
+        orderNumber,
+        orderDate: orderData?.orderDate || new Date().toLocaleDateString(resolvedLocale === 'lt' ? 'lt-LT' : 'en-GB'),
+        totalAmount: orderData?.totalAmount || '0.00',
+        items: orderData?.items || [],
+      }
+
+      const doc = await getEmailTemplateDoc('order-confirmation')
+
+      const subjectTemplate =
+        (resolvedLocale === 'lt' ? doc?.subjectLt : doc?.subjectEn) || defaults.subject[resolvedLocale]
+      const htmlTemplate =
+        (resolvedLocale === 'lt' ? doc?.htmlLt : doc?.htmlEn) || defaults.html[resolvedLocale]
+
       return await sendEmail({
         to: email,
-        subject: template.subject({ orderNumber }),
-        html: template.html({
-          orderNumber,
-          orderDate: orderData?.orderDate || new Date().toLocaleDateString('lt-LT'),
-          totalAmount: orderData?.totalAmount || '0.00',
-          items: orderData?.items || [],
-        }),
+        subject: renderTemplateString(subjectTemplate, vars),
+        html: renderTemplateString(htmlTemplate, vars),
         attachments: [
           {
             filename: `saskaita-${orderNumber}.pdf`,
             content: invoicePdf,
           },
         ],
-      });
+      })
     }
-  } catch (error) {
-    console.warn('Email template not available, using fallback');
+  } catch {
+    console.warn('Email template not available, using fallback')
   }
 
   // Fallback to basic HTML
   return await sendEmail({
     to: email,
-    subject: `Yakiwood - Užsakymo patvirtinimas #${orderNumber}`,
+    subject:
+      resolvedLocale === 'lt'
+        ? `Yakiwood - Užsakymo patvirtinimas #${orderNumber}`
+        : `Yakiwood - Order Confirmation #${orderNumber}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        ${
+          resolvedLocale === 'lt'
+            ? `
         <h1 style="color: #161616;">Dėkojame už jūsų užsakymą!</h1>
         <p>Jūsų užsakymas <strong>#${orderNumber}</strong> buvo sėkmingai apmokėtas.</p>
         <p>Pridedame sąskaitą faktūrą PDF formatu.</p>
@@ -213,6 +236,22 @@ export async function sendOrderConfirmation(
           Su pagarba,<br>
           <strong>Yakiwood komanda</strong>
         </p>
+        `
+            : `
+        <h1 style="color: #161616;">Thank you for your order!</h1>
+        <p>Your order <strong>#${orderNumber}</strong> has been successfully paid.</p>
+        <p>We have attached the invoice in PDF format.</p>
+        <p>If you have any questions, contact us:</p>
+        <ul>
+          <li>Email: info@yakiwood.lt</li>
+          <li>Phone: +370 XXX XXXXX</li>
+        </ul>
+        <p style="margin-top: 30px; color: #666;">
+          Best regards,<br>
+          <strong>Yakiwood team</strong>
+        </p>
+        `
+        }
       </div>
     `,
     attachments: [
@@ -228,3 +267,5 @@ export async function sendOrderConfirmation(
  * Export templates for use in other parts of the app
  */
 export * from './email/templates';
+
+export * from './email/bilingualTemplates'

@@ -1,8 +1,6 @@
 ﻿import { Hero, WhyUs, Steps, Testimonials, CTA } from '@/components/home';
 import Products from '@/components/Products';
 import Solutions from '@/components/Solutions';
-import Projects from '@/components/Projects';
-import FAQ from '@/components/FAQ';
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
 import { getTranslations } from 'next-intl/server';
@@ -43,10 +41,8 @@ export default function Home() {
       <WhyUs />
       <Products />
       <Solutions />
-      <Projects />
       <Steps />
       <Testimonials />
-      <FAQ />
       <CTA />
     </main>
   );

@@ -31,6 +31,7 @@ export default function LoginPage() {
     if (user && user.password === password) {
       // Store user session in localStorage
       localStorage.setItem('user', JSON.stringify({ email, role: user.role, name: user.name }));
+      localStorage.setItem('yakiwood_auth', 'true');
       
       // Redirect based on role
       router.push(user.role === 'admin' ? '/admin' : '/account');
@@ -59,6 +60,7 @@ export default function LoginPage() {
 
     // Store user session
     localStorage.setItem('user', JSON.stringify({ email: demo.email, role, name: demo.name }));
+    localStorage.setItem('yakiwood_auth', 'true');
     
     // Redirect based on role
     router.push(role === 'admin' ? '/admin' : '/account');
