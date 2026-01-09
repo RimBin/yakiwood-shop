@@ -24,6 +24,7 @@ interface Product {
   wood_type?: string;
   category?: string;
   usage_type?: string;
+  image_url?: string;
   image?: string;
   is_active: boolean;
   stock_quantity?: number;
@@ -39,6 +40,8 @@ interface Props {
 const USAGE_LABELS: Record<string, string> = {
   facade: 'Fasadui',
   terrace: 'Terasai',
+  interior: 'Interjerui',
+  fence: 'Tvoroms',
 };
 
 export default function ProductsAdminClient({ initialProducts }: Props) {
@@ -260,6 +263,8 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
           <option value="all">Visi pritaikymai</option>
           <option value="facade">Fasadui</option>
           <option value="terrace">Terasai</option>
+          <option value="interior">Interjerui</option>
+          <option value="fence">Tvoroms</option>
         </select>
 
         <select
@@ -353,9 +358,9 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      {product.image ? (
+                      {product.image_url || product.image ? (
                         <Image
-                          src={product.image}
+                          src={product.image_url || product.image || ''}
                           alt={product.name}
                           width={48}
                           height={48}

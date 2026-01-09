@@ -737,6 +737,7 @@ export default function AdminPage() {
             { key: 'products', label: t('tabs.products'), count: products.length },
             { key: 'projects', label: t('tabs.projects'), count: projects.length },
             { key: 'posts', label: t('tabs.posts'), count: posts.length },
+            { key: 'users', label: t('tabs.users') },
             { key: 'seo', label: t('tabs.seo'), badge: t('tabs.badgeNew') },
             { key: 'email-templates', label: t('tabs.emailTemplates'), badge: t('tabs.badgeNew') }
           ].map((tab) => {
@@ -748,6 +749,10 @@ export default function AdminPage() {
                 onClick={() => {
                   if (tab.key === 'dashboard') {
                     router.push('/admin/dashboard');
+                    return;
+                  }
+                  if (tab.key === 'users') {
+                    router.push('/admin/users');
                     return;
                   }
                   if (tab.key === 'seo') {

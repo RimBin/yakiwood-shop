@@ -825,6 +825,7 @@
       "products": "Products",
       "projects": "Projects",
       "posts": "Posts",
+      "users": "Users",
       "seo": "SEO",
       "emailTemplates": "Email Templates",
       "badgeNew": "new"
@@ -896,10 +897,16 @@
   "productsPage": {
     "searchLabel": "Search",
     "searchPlaceholder": "Search for a product",
+    "colorFilterLabel": "Color",
+    "colorFilterAll": "All colors",
+    "profileFilterLabel": "Profile",
+    "profileFilterAll": "All profiles",
     "usageFilters": {
       "all": "All solutions",
       "facade": "Facade systems",
-      "terrace": "Terrace systems"
+      "terrace": "Terrace systems",
+      "interior": "Interior solutions",
+      "fence": "Fence solutions"
     },
     "woodFilters": {
       "all": "All wood",

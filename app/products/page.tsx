@@ -13,6 +13,8 @@ export default function ProductsPage() {
   const t = useTranslations('productsPage');
   const [activeUsage, setActiveUsage] = useState<'all' | string>('all');
   const [activeWood, setActiveWood] = useState<'all' | string>('all');
+  const [activeColor, setActiveColor] = useState<'all' | string>('all');
+  const [activeProfile, setActiveProfile] = useState<'all' | string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -85,6 +87,8 @@ export default function ProductsPage() {
       { id: 'all', label: t('usageFilters.all') },
       { id: 'facade', label: t('usageFilters.facade') },
       { id: 'terrace', label: t('usageFilters.terrace') },
+      { id: 'interior', label: t('usageFilters.interior') },
+      { id: 'fence', label: t('usageFilters.fence') },
     ],
     [t]
   );
@@ -102,6 +106,8 @@ export default function ProductsPage() {
     return {
       facade: t('usageFilters.facade'),
       terrace: t('usageFilters.terrace'),
+      interior: t('usageFilters.interior'),
+      fence: t('usageFilters.fence'),
     };
   }, [t]);
 
@@ -112,12 +118,38 @@ export default function ProductsPage() {
     };
   }, [t]);
 
+  const colorOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const product of allProducts) {
+      for (const color of product.colors ?? []) {
+        if (color?.name) set.add(color.name);
+      }
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [allProducts]);
+
+  const profileOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const product of allProducts) {
+      for (const profile of product.profiles ?? []) {
+        if (profile?.name) set.add(profile.name);
+      }
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [allProducts]);
+
   const products = allProducts.filter((product) => {
     const matchesUsage = activeUsage === 'all' || product.category === activeUsage;
     const matchesWood = activeWood === 'all' || product.woodType === activeWood;
+    const matchesColor =
+      activeColor === 'all' ||
+      (product.colors ?? []).some((c) => (c?.name ?? '').toLowerCase() === activeColor.toLowerCase());
+    const matchesProfile =
+      activeProfile === 'all' ||
+      (product.profiles ?? []).some((p) => (p?.name ?? '').toLowerCase() === activeProfile.toLowerCase());
     const q = searchQuery.trim().toLowerCase();
     const matchesQuery = q.length === 0 || product.name.toLowerCase().includes(q);
-    return matchesUsage && matchesWood && matchesQuery;
+    return matchesUsage && matchesWood && matchesColor && matchesProfile && matchesQuery;
   });
 
   const activeUsageLabel = usageFilters.find((filter) => filter.id === activeUsage)?.label ?? usageFilters[0].label;
@@ -156,6 +188,45 @@ export default function ProductsPage() {
               className="w-full h-[40px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
             />
           </div>
+
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="w-full md:max-w-[360px]">
+              <label className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
+                {t('colorFilterLabel')}
+              </label>
+              <select
+                value={activeColor}
+                onChange={(e) => setActiveColor(e.target.value)}
+                className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+              >
+                <option value="all">{t('colorFilterAll')}</option>
+                {colorOptions.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="w-full md:max-w-[360px]">
+              <label className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
+                {t('profileFilterLabel')}
+              </label>
+              <select
+                value={activeProfile}
+                onChange={(e) => setActiveProfile(e.target.value)}
+                className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+              >
+                <option value="all">{t('profileFilterAll')}</option>
+                {profileOptions.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div className="flex gap-[8px] items-center flex-wrap">
             {usageFilters.map((filter) => (
               <button

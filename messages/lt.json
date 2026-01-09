@@ -636,6 +636,7 @@
       "products": "Produktai",
       "projects": "Projektai",
       "posts": "Įrašai",
+      "users": "Vartotojai",
       "seo": "SEO",
       "emailTemplates": "El. pašto šablonai",
       "badgeNew": "naujas"
@@ -707,10 +708,16 @@
   "productsPage": {
     "searchLabel": "Paieška",
     "searchPlaceholder": "Ieškoti produkto",
+    "colorFilterLabel": "Spalva",
+    "colorFilterAll": "Visos spalvos",
+    "profileFilterLabel": "Profilis",
+    "profileFilterAll": "Visi profiliai",
     "usageFilters": {
       "all": "Visi sprendimai",
       "facade": "Fasadų sistemos",
-      "terrace": "Terasų sistemos"
+      "terrace": "Terasų sistemos",
+      "interior": "Interjero sprendimai",
+      "fence": "Tvorų sprendimai"
     },
     "woodFilters": {
       "all": "Visa mediena",

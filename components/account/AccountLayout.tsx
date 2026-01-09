@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { PageCover } from '@/components/shared/PageLayout';
 
 type Active = 'details' | 'orders';
 
@@ -23,15 +24,18 @@ export default function AccountLayout({
     "font-['Outfit'] uppercase text-[12px] tracking-[0.6px]";
 
   return (
-    <div className="min-h-screen bg-[#E1E1E1]">
-      <div className="mx-auto w-full max-w-[1240px] px-4 py-10 md:px-10 md:py-14">
-        <div className="border-b border-[#BBBBBB] pb-8">
-          <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]">
-            {t('title')}
-          </h1>
-        </div>
+    <section className="w-full bg-[#E1E1E1] min-h-screen">
+      <PageCover>
+        <h1
+          className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+          style={{ fontVariationSettings: "'opsz' 14" }}
+        >
+          {t('title')}
+        </h1>
+      </PageCover>
 
-        <div className="mt-8 flex flex-col gap-8 md:mt-12 md:flex-row md:gap-14">
+      <div className="w-full max-w-[1440px] mx-auto px-[16px] md:px-[40px] py-[40px] md:py-[56px]">
+        <div className="flex flex-col gap-8 md:flex-row md:gap-14">
           <nav className={hasChildren ? 'hidden md:block md:w-[240px]' : 'w-full md:w-[240px]'}>
             <ul className="flex flex-col gap-4">
               <li>
@@ -69,6 +73,6 @@ export default function AccountLayout({
           {hasChildren ? <div className="min-w-0 flex-1">{children}</div> : null}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

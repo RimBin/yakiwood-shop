@@ -56,7 +56,7 @@ interface ProductData {
   height?: number;
   depth?: number;
   weight?: number;
-  image?: string;
+  image_url?: string;
   variants?: Variant[];
 }
 
@@ -113,9 +113,9 @@ export default function ProductForm({ product, mode }: Props) {
   const [height, setHeight] = useState(product?.height?.toString() || '');
   const [depth, setDepth] = useState(product?.depth?.toString() || '');
   const [weight, setWeight] = useState(product?.weight?.toString() || '');
-  const [imageUrl, setImageUrl] = useState(product?.image || '');
+  const [imageUrl, setImageUrl] = useState(product?.image_url || '');
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(product?.image || null);
+  const [imagePreview, setImagePreview] = useState<string | null>(product?.image_url || null);
 
   // Variants state
   const [variants, setVariants] = useState<Variant[]>(product?.variants || []);
@@ -255,7 +255,7 @@ export default function ProductForm({ product, mode }: Props) {
         height: height ? parseFloat(height) : null,
         depth: depth ? parseFloat(depth) : null,
         weight: weight ? parseFloat(weight) : null,
-        image: finalImageUrl,
+        image_url: finalImageUrl,
       };
 
       let productId = product?.id;

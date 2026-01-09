@@ -70,7 +70,7 @@ export interface ProductFilters {
 
 export type ProductCategory = 'cladding' | 'decking' | 'interior' | 'tiles';
 export type WoodType = 'larch' | 'spruce';
-export type UsageType = 'facade' | 'terrace';
+export type UsageType = 'facade' | 'terrace' | 'interior' | 'fence';
 
 export const PRODUCT_CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: 'cladding', label: 'Fasadai' },
@@ -88,4 +88,6 @@ export const WOOD_TYPES: { value: WoodType; label: string }[] = [
 export const USAGE_TYPES: { value: UsageType; label: string }[] = [
   { value: 'facade', label: 'Fasadui (Facade)' },
   { value: 'terrace', label: 'Terasai (Terrace)' },
+  { value: 'interior', label: 'Interjerui (Interior)' },
+  { value: 'fence', label: 'Tvoroms (Fence)' },
 ];
