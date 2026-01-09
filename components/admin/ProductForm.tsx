@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { z } from 'zod';
+import { USAGE_TYPES } from '@/types/admin';
 
 // Validation schema
 const productSchema = z.object({
@@ -14,6 +15,7 @@ const productSchema = z.object({
   description: z.string().optional(),
   description_en: z.string().optional(),
   category: z.string().min(1, 'Kategorija privaloma'),
+  usage_type: z.string().min(1, 'Pritaikymas privalomas'),
   wood_type: z.string().min(1, 'Medienos tipas privalomas'),
   base_price: z.number().min(0, 'Kaina turi būti teigiama'),
   status: z.enum(['draft', 'published']),
@@ -44,6 +46,7 @@ interface ProductData {
   description?: string;
   description_en?: string;
   category: string;
+  usage_type?: string;
   wood_type: string;
   base_price: number;
   is_active: boolean;
@@ -100,6 +103,7 @@ export default function ProductForm({ product, mode }: Props) {
   const [description, setDescription] = useState(product?.description || '');
   const [descriptionEn, setDescriptionEn] = useState(product?.description_en || '');
   const [category, setCategory] = useState(product?.category || '');
+  const [usageType, setUsageType] = useState(product?.usage_type || '');
   const [woodType, setWoodType] = useState(product?.wood_type || '');
   const [basePrice, setBasePrice] = useState(product?.base_price.toString() || '');
   const [status, setStatus] = useState<'draft' | 'published'>(product?.is_active ? 'published' : 'draft');
@@ -186,6 +190,7 @@ export default function ProductForm({ product, mode }: Props) {
         description: description || undefined,
         description_en: descriptionEn || undefined,
         category,
+        usage_type: usageType,
         wood_type: woodType,
         base_price: parseFloat(basePrice),
         status,
@@ -240,6 +245,7 @@ export default function ProductForm({ product, mode }: Props) {
         description: description || null,
         description_en: descriptionEn || null,
         category,
+        usage_type: usageType || null,
         wood_type: woodType,
         base_price: parseFloat(basePrice),
         is_active: status === 'published',
@@ -519,7 +525,28 @@ export default function ProductForm({ product, mode }: Props) {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
+                  Pritaikymas *
+                </label>
+                <select
+                  value={usageType}
+                  onChange={(e) => setUsageType(e.target.value)}
+                  className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
+                    errors.usage_type ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
+                  }`}
+                >
+                  <option value="">Pasirinkite pritaikyma</option>
+                  {USAGE_TYPES.map((usage) => (
+                    <option key={usage.value} value={usage.value}>
+                      {usage.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.usage_type && <p className="text-sm text-red-600 mt-1">{errors.usage_type}</p>}
+              </div>
+
               <div>
                 <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
                   Kategorija *

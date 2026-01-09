@@ -4,9 +4,15 @@ import type { Invoice, InvoiceGenerateRequest } from '@/types/invoice';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
+function looksLikeJwt(value: string): boolean {
+  // Minimal check: three base64url-ish segments separated by dots.
+  // Prevents creating a "working" client with placeholder keys like "service-...".
+  return /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value.trim());
+}
+
 // Service role client for server-side operations (bypasses RLS)
 // Only create client if environment variables are provided
-export const supabaseAdmin = supabaseUrl && supabaseServiceKey 
+export const supabaseAdmin = supabaseUrl && supabaseServiceKey && looksLikeJwt(supabaseServiceKey)
   ? createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
@@ -142,6 +148,49 @@ export async function getOrderByStripeSession(sessionId: string): Promise<Order 
   }
 
   return data;
+}
+
+export async function getOrderById(orderId: string): Promise<Order | null> {
+  if (!supabaseAdmin) return null;
+  const { data, error } = await supabaseAdmin
+    .from('orders')
+    .select('*')
+    .eq('id', orderId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching order by id:', error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function updateOrderStripePayment(
+  orderId: string,
+  data: {
+    stripeSessionId?: string;
+    stripePaymentIntent?: string;
+  }
+): Promise<boolean> {
+  if (!supabaseAdmin) return false;
+  const updates: any = {};
+  if (data.stripeSessionId) updates.stripe_session_id = data.stripeSessionId;
+  if (data.stripePaymentIntent) updates.stripe_payment_intent = data.stripePaymentIntent;
+
+  if (Object.keys(updates).length === 0) return true;
+
+  const { error } = await supabaseAdmin
+    .from('orders')
+    .update(updates)
+    .eq('id', orderId);
+
+  if (error) {
+    console.error('Error updating order stripe fields:', error);
+    return false;
+  }
+
+  return true;
 }
 
 export async function updateOrderStatus(
@@ -390,6 +439,8 @@ export function convertDBInvoiceToInvoice(dbInvoice: DBInvoice): Invoice {
     paymentDate: dbInvoice.paid_at,
     paymentMethod: dbInvoice.payment_method,
     notes: dbInvoice.notes,
+    bankName: dbInvoice.seller_bank_name,
+    bankAccount: dbInvoice.seller_bank_account,
     createdAt: dbInvoice.created_at,
     updatedAt: dbInvoice.updated_at
   };

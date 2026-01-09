@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared';
-import { fetchProducts, type Product } from '@/lib/products.sanity';
+import { fetchProducts, type Product } from '@/lib/products.supabase';
+import { useTranslations } from 'next-intl';
 
 export default function ProductsPage() {
+  const t = useTranslations('productsPage');
   const [activeUsage, setActiveUsage] = useState<'all' | string>('all');
   const [activeWood, setActiveWood] = useState<'all' | string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,17 +35,37 @@ export default function ProductsPage() {
     loadProducts();
   }, []);
 
-  const usageFilters = [
-    { id: 'all', label: 'Visi sprendimai' },
-    { id: 'facade', label: 'Fasadų sistemos' },
-    { id: 'terrace', label: 'Terasų sistemos' },
-  ];
+  const usageFilters = useMemo(
+    () => [
+      { id: 'all', label: t('usageFilters.all') },
+      { id: 'facade', label: t('usageFilters.facade') },
+      { id: 'terrace', label: t('usageFilters.terrace') },
+    ],
+    [t]
+  );
 
-  const woodFilters = [
-    { id: 'all', label: 'Visa mediena' },
-    { id: 'spruce', label: 'Deginta eglė' },
-    { id: 'larch', label: 'Degintas maumedis' },
-  ];
+  const woodFilters = useMemo(
+    () => [
+      { id: 'all', label: t('woodFilters.all') },
+      { id: 'spruce', label: t('woodFilters.spruce') },
+      { id: 'larch', label: t('woodFilters.larch') },
+    ],
+    [t]
+  );
+
+  const usageLabels: Record<string, string> = useMemo(() => {
+    return {
+      facade: t('usageFilters.facade'),
+      terrace: t('usageFilters.terrace'),
+    };
+  }, [t]);
+
+  const woodLabels: Record<string, string> = useMemo(() => {
+    return {
+      spruce: t('woodFilters.spruce'),
+      larch: t('woodFilters.larch'),
+    };
+  }, [t]);
 
   const products = allProducts.filter((product) => {
     const matchesUsage = activeUsage === 'all' || product.category === activeUsage;
@@ -80,12 +102,12 @@ export default function ProductsPage() {
         <div className="flex flex-col gap-4">
           <div className="w-full max-w-[520px]">
             <label className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-              Paieška
+              {t('searchLabel')}
             </label>
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Ieškoti produkto"
+              placeholder={t('searchPlaceholder')}
               className="w-full h-[40px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
             />
           </div>
@@ -136,19 +158,23 @@ export default function ProductsPage() {
               </svg>
             </div>
             <h3 className="font-['DM_Sans'] text-xl font-medium text-[#161616] mb-2">
-              Error loading products
+              {t('errorTitle')}
             </h3>
             <p className="font-['Outfit'] text-[#7C7C7C] mb-2">
               {error}
             </p>
             <p className="font-['Outfit'] text-[#7C7C7C] mb-6">
-              Check console for details. <Link href="/kontaktai" className="text-[#161616] underline">Susisiekite</Link> if the problem persists.
+              {t('errorHelp')}{' '}
+              <Link href="/kontaktai" className="text-[#161616] underline">
+                {t('errorContactLink')}
+              </Link>{' '}
+              {t('errorContactSuffix')}
             </p>
             <button 
               onClick={() => window.location.reload()} 
               className="px-6 py-2 bg-[#161616] text-white rounded-full hover:opacity-90"
             >
-              Retry
+              {t('retry')}
             </button>
           </div>
         ) : products.length === 0 ? (
@@ -159,10 +185,14 @@ export default function ProductsPage() {
               </svg>
             </div>
             <h3 className="font-['DM_Sans'] text-xl font-medium text-[#161616] mb-2">
-              No products yet
+              {t('emptyTitle')}
             </h3>
             <p className="font-['Outfit'] text-[#7C7C7C] mb-6">
-              Products will be added soon. If you have any questions, <Link href="/kontaktai" className="text-[#161616] underline">susisiekite</Link>.
+              {t('emptyDescriptionPrefix')}{' '}
+              <Link href="/kontaktai" className="text-[#161616] underline">
+                {t('emptyContactLink')}
+              </Link>
+              {t('emptyDescriptionSuffix')}
             </p>
           </div>
         ) : (
@@ -189,19 +219,24 @@ export default function ProductsPage() {
               >
                 {product.name}
               </p>
-              {(product.usageLabel || product.woodLabel) && (
+              {(product.category || product.woodType) && (
                 <p
                   className="font-['DM_Sans'] font-normal text-[14px] leading-[1.2] text-[#535353] tracking-[-0.28px]"
                   style={{ fontVariationSettings: "'opsz' 14" }}
                 >
-                  {[product.usageLabel, product.woodLabel].filter(Boolean).join(' • ')}
+                  {[
+                    product.category ? (usageLabels[product.category] ?? product.category) : undefined,
+                    product.woodType ? (woodLabels[product.woodType] ?? product.woodType) : undefined,
+                  ]
+                    .filter(Boolean)
+                    .join(' • ')}
                 </p>
               )}
               <p
                 className="font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#535353] tracking-[-0.32px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                Nuo {product.price.toFixed(0)} €
+                {t('fromPrice', { price: product.price.toFixed(0) })}
               </p>
             </Link>
           ))}
@@ -212,7 +247,7 @@ export default function ProductsPage() {
         {!isLoading && products.length > 0 && (
           <div className="flex justify-center mt-[64px]">
             <button className="h-[48px] px-[40px] py-[10px] bg-[#161616] text-white rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:opacity-90 transition-opacity">
-              Rodyti daugiau
+              {t('loadMore')}
             </button>
           </div>
         )}

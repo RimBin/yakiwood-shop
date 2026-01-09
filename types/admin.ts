@@ -24,6 +24,7 @@ export interface Product {
   description?: string;
   description_en?: string;
   category: string;
+  usage_type?: string;
   wood_type: string;
   base_price: number;
   is_active: boolean;
@@ -47,6 +48,7 @@ export interface ProductFormData {
   description?: string;
   description_en?: string;
   category: string;
+  usage_type?: string;
   wood_type: string;
   base_price: number;
   status: 'draft' | 'published';
@@ -68,6 +70,7 @@ export interface ProductFilters {
 
 export type ProductCategory = 'cladding' | 'decking' | 'interior' | 'tiles';
 export type WoodType = 'larch' | 'spruce';
+export type UsageType = 'facade' | 'terrace';
 
 export const PRODUCT_CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: 'cladding', label: 'Fasadai' },
@@ -81,3 +84,8 @@ export const WOOD_TYPES: { value: WoodType; label: string }[] = [
   { value: 'spruce', label: 'Eglė (Spruce)' },
 ];
 
+
+export const USAGE_TYPES: { value: UsageType; label: string }[] = [
+  { value: 'facade', label: 'Fasadui (Facade)' },
+  { value: 'terrace', label: 'Terasai (Terrace)' },
+];

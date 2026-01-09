@@ -1,7 +1,7 @@
 -- Sample products data for Yakiwood shop
 
 -- Insert products
-insert into products (name, slug, description, base_price, wood_type, category, is_active) values
+insert into products (name, slug, description, base_price, wood_type, category, usage_type, is_active) values
   (
     'Burnt Spruce Cladding',
     'burnt-spruce-cladding',
@@ -9,6 +9,7 @@ insert into products (name, slug, description, base_price, wood_type, category, 
     45.99,
     'spruce',
     'cladding',
+    'facade',
     true
   ),
   (
@@ -18,6 +19,7 @@ insert into products (name, slug, description, base_price, wood_type, category, 
     52.99,
     'larch',
     'decking',
+    'terrace',
     true
   ),
   (
@@ -27,6 +29,7 @@ insert into products (name, slug, description, base_price, wood_type, category, 
     58.5,
     'oak',
     'cladding',
+    'facade',
     true
   );
 

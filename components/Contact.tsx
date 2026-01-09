@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { PageCover } from '@/components/shared/PageLayout';
 import Link from 'next/link';
-import { PageSection } from './shared/PageLayout';
+import { useTranslations } from 'next-intl';
 
 export default function Contact() {
+  const t = useTranslations('contact');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -14,14 +16,28 @@ export default function Contact() {
     company: '',
   });
   const [consent, setConsent] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const startedAtRef = React.useRef<number>(Date.now());
+  const recaptchaRef = React.useRef<ReCAPTCHA | null>(null);
+
+  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!consent) return;
+
+    if (!recaptchaSiteKey) {
+      setError('reCAPTCHA is not configured.');
+      return;
+    }
+
+    if (!recaptchaToken) {
+      setError(t('recaptchaRequired'));
+      return;
+    }
     
     setIsSubmitting(true);
 
@@ -37,11 +53,12 @@ export default function Contact() {
           phone: formData.phone,
           company: formData.company,
           startedAt: startedAtRef.current,
+          recaptchaToken,
         }),
       });
 
       if (!res.ok) {
-        setError('Failed to send. Please try again later.');
+        setError(t('messageError'));
         setIsSubmitting(false);
         return;
       }
@@ -49,9 +66,11 @@ export default function Contact() {
       setSubmitted(true);
       setFormData({ fullName: '', email: '', phone: '', company: '' });
       setConsent(false);
+      setRecaptchaToken(null);
+      recaptchaRef.current?.reset();
       startedAtRef.current = Date.now();
     } catch {
-      setError('Failed to send. Please try again later.');
+      setError(t('messageError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -63,14 +82,14 @@ export default function Contact() {
       <PageCover>
         <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
             style={{ fontVariationSettings: "'opsz' 14" }}>
-          Contact us
+          {t('title')}
         </h1>
       </PageCover>
 
       {/* Subtitle + Form */}
       <div className="w-full flex flex-col items-center pt-[64px] md:pt-[80px] lg:pt-[100px] pb-[80px] md:pb-[100px] lg:pb-[120px] px-[16px] md:px-[32px] lg:px-[40px]">
         <p className="font-['DM_Sans'] font-light leading-none text-[#161616] text-center mb-[40px] md:mb-[54px] lg:mb-[68px] max-w-[838px]" style={{ fontSize: 'clamp(32px, 5vw, 52px)', letterSpacing: 'clamp(-1.28px, -0.04em, -2.08px)', fontVariationSettings: "'opsz' 14" }}>
-          Need assistance? Leave your contact details, and our manager will reach out for a consultation.
+          {t('subtitle')}
         </p>
 
         <div className="w-full max-w-[600px]">
@@ -80,10 +99,10 @@ export default function Contact() {
                 className="font-['DM_Sans'] font-normal text-[32px] text-[#161616] tracking-[-1.28px] mb-[16px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                Thank you!
+                {t('thankYou')}
               </p>
               <p className="font-['Outfit'] font-light text-[16px] text-[#7C7C7C] tracking-[0.16px]">
-                We&apos;ll get back to you shortly.
+                {t('thankYouMessage')}
               </p>
             </div>
           ) : (
@@ -105,7 +124,7 @@ export default function Contact() {
               {/* Full Name */}
               <div className="flex flex-col gap-[4px]">
                 <label className="font-['Outfit'] font-normal text-[#7C7C7C] text-[12px] tracking-[0.6px] uppercase leading-[1.3]">
-                  FULL NAME <span className="text-[#F63333]">*</span>
+                  {t('fullName')} <span className="text-[#F63333]">*</span>
                 </label>
                 <input
                   type="text"
@@ -119,7 +138,7 @@ export default function Contact() {
               {/* Email Address */}
               <div className="flex flex-col gap-[4px]">
                 <label className="font-['Outfit'] font-normal text-[#7C7C7C] text-[12px] tracking-[0.6px] uppercase leading-[1.3]">
-                  EMAIL ADDRESS <span className="text-[#F63333]">*</span>
+                  {t('email')} <span className="text-[#F63333]">*</span>
                 </label>
                 <input
                   type="email"
@@ -133,7 +152,7 @@ export default function Contact() {
               {/* Phone Number */}
               <div className="flex flex-col gap-[4px]">
                 <label className="font-['Outfit'] font-normal text-[#7C7C7C] text-[12px] tracking-[0.6px] uppercase leading-[1.3]">
-                  PHONE NUMBER
+                  {t('phone')}
                 </label>
                 <input
                   type="tel"
@@ -160,20 +179,35 @@ export default function Contact() {
                   )}
                 </button>
                 <p className="flex-1 font-['Outfit'] font-light text-[12px] text-[#535353] leading-[1.3] tracking-[0.14px]">
-                  I agree that my data will be processed directly by Yakiwood or shared with a sales adent located in my area in accordfance with Yakiwood{' '}
+                  {t('privacyConsent')}{' '}
                   <Link href="/privacy-policy" className="text-[#161616] font-normal underline">
-                    Privacy Policy
+                    {t('privacyPolicy')}
                   </Link>
                 </p>
+              </div>
+
+              {/* reCAPTCHA */}
+              <div className="flex justify-center">
+                {recaptchaSiteKey ? (
+                  <ReCAPTCHA
+                    ref={recaptchaRef}
+                    sitekey={recaptchaSiteKey}
+                    onChange={(value) => setRecaptchaToken(value)}
+                  />
+                ) : (
+                  <p className="font-['Outfit'] font-light text-[12px] text-[#F63333] leading-[1.3] tracking-[0.14px]">
+                    reCAPTCHA is not configured.
+                  </p>
+                )}
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting || !consent}
+                disabled={isSubmitting || !consent || !recaptchaToken}
                 className="w-full h-[48px] bg-[#161616] rounded-[100px] flex items-center justify-center font-['Outfit'] font-normal text-white text-[12px] tracking-[0.6px] uppercase hover:opacity-90 transition-opacity disabled:opacity-50 px-[40px] py-[10px]"
               >
-                {isSubmitting ? 'SENDING...' : 'LEAVE A REQUEST'}
+                {isSubmitting ? t('sending') : t('leaveRequest')}
               </button>
 
               {error && (

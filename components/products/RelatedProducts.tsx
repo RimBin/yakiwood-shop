@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import type { Product } from '@/lib/products.sanity';
+import type { Product } from '@/lib/products.supabase';
 
 interface RelatedProductsProps {
   products: Product[];

@@ -23,6 +23,7 @@ interface Product {
   base_price: number;
   wood_type?: string;
   category?: string;
+  usage_type?: string;
   image?: string;
   is_active: boolean;
   stock_quantity?: number;
@@ -34,6 +35,11 @@ interface Product {
 interface Props {
   initialProducts: Product[];
 }
+
+const USAGE_LABELS: Record<string, string> = {
+  facade: 'Fasadui',
+  terrace: 'Terasai',
+};
 
 export default function ProductsAdminClient({ initialProducts }: Props) {
   const router = useRouter();
@@ -55,6 +61,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [usageFilter, setUsageFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
@@ -66,12 +73,13 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.slug.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
+      const matchesUsage = usageFilter === 'all' || product.usage_type === usageFilter;
       const matchesStatus = statusFilter === 'all' || 
                            (statusFilter === 'active' && product.is_active) ||
                            (statusFilter === 'inactive' && !product.is_active);
-      return matchesSearch && matchesCategory && matchesStatus;
+      return matchesSearch && matchesCategory && matchesUsage && matchesStatus;
     });
-  }, [products, searchQuery, categoryFilter, statusFilter]);
+  }, [products, searchQuery, categoryFilter, usageFilter, statusFilter]);
 
   const handleSelectAll = () => {
     if (selectedIds.size === filteredProducts.length) {
@@ -176,6 +184,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
           base_price: product.base_price,
           wood_type: product.wood_type,
           category: product.category,
+          usage_type: product.usage_type,
           image: product.image,
           is_active: false,
           stock_quantity: product.stock_quantity,
@@ -244,6 +253,16 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         </select>
 
         <select
+          value={usageFilter}
+          onChange={(e) => setUsageFilter(e.target.value)}
+          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white"
+        >
+          <option value="all">Visi pritaikymai</option>
+          <option value="facade">Fasadui</option>
+          <option value="terrace">Terasai</option>
+        </select>
+
+        <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white"
@@ -305,6 +324,9 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
                   Kategorija
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
+                  Pritaikymas
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
                   Kaina
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
@@ -354,6 +376,9 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
                   </td>
                   <td className="px-6 py-4 text-sm font-['DM_Sans'] text-[#535353]">
                     {product.category || '-'}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-['DM_Sans'] text-[#535353]">
+                    {product.usage_type ? (USAGE_LABELS[product.usage_type] || product.usage_type) : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm font-['DM_Sans'] font-medium text-[#161616]">
                     €{product.base_price.toFixed(2)}

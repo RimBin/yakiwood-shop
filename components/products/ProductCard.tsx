@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import type { Product } from '@/lib/products.sanity';
+import type { Product } from '@/lib/products.supabase';
+import { useTranslations } from 'next-intl';
 
 interface ProductCardProps {
   product: Product;
@@ -11,7 +12,16 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, href }: ProductCardProps) {
+  const t = useTranslations();
   const linkHref = href || `/produktai/${product.slug}`;
+  const usageLabel = useMemo(() => {
+    if (!product.category) return undefined;
+    const labels: Record<string, string> = {
+      facade: t('productsPage.usageFilters.facade'),
+      terrace: t('productsPage.usageFilters.terrace'),
+    };
+    return labels[product.category] || product.category;
+  }, [product.category, t]);
 
   return (
     <Link href={linkHref} className="group block">
@@ -28,10 +38,10 @@ export default function ProductCard({ product, href }: ProductCardProps) {
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
         
         {/* Category badge (if available) */}
-        {(product.usageLabel || product.category) && (
+        {usageLabel && (
           <div className="absolute top-4 left-4">
             <span className="px-3 py-1 bg-white/90 rounded-full font-['Outfit'] text-xs text-[#161616]">
-              {product.usageLabel || product.category}
+              {usageLabel}
             </span>
           </div>
         )}
@@ -39,7 +49,7 @@ export default function ProductCard({ product, href }: ProductCardProps) {
         {/* Quick view button */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
           <span className="px-4 py-2 bg-white rounded-full font-['Outfit'] text-xs text-[#161616] shadow-lg">
-            Peržiūrėti
+            {t('relatedProducts.view')}
           </span>
         </div>
       </div>
@@ -59,7 +69,7 @@ export default function ProductCard({ product, href }: ProductCardProps) {
           €{product.price.toFixed(0)}
         </span>
         <span className="font-['Outfit'] text-xs text-[#7C7C7C]">
-          nuo
+          {t('relatedProducts.from')}
         </span>
       </div>
     </Link>

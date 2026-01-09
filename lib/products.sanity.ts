@@ -4,15 +4,6 @@ import { seedProducts } from '@/data/seed-products';
 import groq from 'groq';
 import type { PortableTextBlock } from 'sanity';
 
-const USAGE_TYPE_LABELS: Record<string, string> = {
-  facade: 'Fasadų dailylentės',
-  terrace: 'Terasų lentos',
-};
-
-const WOOD_TYPE_LABELS: Record<string, string> = {
-  larch: 'Maumedis',
-  spruce: 'Eglė',
-};
 
 interface SanityColorVariant {
   _key?: string;
@@ -92,9 +83,7 @@ export interface Product {
   price: number;
   image: string;
   category: string;
-  usageLabel?: string;
   woodType?: string;
-  woodLabel?: string;
   description?: string;
   descriptionPortable?: PortableTextBlock[];
   images?: string[];
@@ -135,6 +124,7 @@ function transformSeedProduct(seed: (typeof seedProducts)[number]): Product {
     image: seed.images?.[0] ?? '/images/ui/wood/imgSpruce.png',
     images: seed.images ?? [],
     category: seed.category,
+    woodType: seed.woodType,
     description: seed.description,
     inStock: seed.inStock,
   };
@@ -313,9 +303,6 @@ function transformSanityProduct(sanityProduct: SanityProduct): Product {
 
   const descriptionText = blocksToPlainText(sanityProduct.description);
 
-  const usageLabel = USAGE_TYPE_LABELS[sanityProduct.category] || sanityProduct.category;
-  const woodLabel = sanityProduct.woodType ? WOOD_TYPE_LABELS[sanityProduct.woodType] || sanityProduct.woodType : undefined;
-
   return {
     id: sanityProduct._id,
     slug: sanityProduct.slug.current,
@@ -324,9 +311,7 @@ function transformSanityProduct(sanityProduct: SanityProduct): Product {
     image: imageUrl,
     images,
     category: sanityProduct.category,
-    usageLabel,
     woodType: sanityProduct.woodType,
-    woodLabel,
     description: descriptionText,
     descriptionPortable: sanityProduct.description,
     colors,

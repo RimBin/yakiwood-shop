@@ -106,6 +106,7 @@ function FigmaCheckbox({
 export default function CheckoutPage() {
   const items = useCartStore((s) => s.items);
   const removeItem = useCartStore((s) => s.removeItem);
+  const clearCart = useCartStore((s) => s.clear);
   
   // Modal states
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -149,21 +150,74 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/checkout', {
+      const productItems = items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        slug: item.slug,
+        basePrice: item.basePrice,
+        quantity: item.quantity,
+        color: item.color,
+        finish: item.finish,
+      }));
+
+      // 1) Always create order first (WooCommerce-like)
+      const orderRes = await fetch('/api/orders/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          items: items.map(item => ({
-            id: item.id,
-            name: item.name,
-            slug: item.slug,
-            basePrice: item.basePrice,
-            quantity: item.quantity,
-            color: item.color,
-            finish: item.finish
-          })),
+          items: productItems,
+          customer: {
+            email,
+            name: fullName,
+            phone,
+            address,
+            city,
+            postalCode,
+            country,
+          },
+          deliveryNotes,
+          couponCode: couponCode?.trim() ? couponCode.trim() : undefined,
+          paymentProvider: paymentMethod === 'stripe' ? 'stripe' : 'manual',
+        }),
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        throw new Error(orderData.error || 'Nepavyko sukurti užsakymo');
+      }
+
+      const orderId = orderData?.order?.id as string | undefined;
+      const orderNumber = orderData?.order?.orderNumber as string | undefined;
+
+      if (!orderId) {
+        throw new Error('Nepavyko gauti užsakymo ID');
+      }
+
+      // 2) If Stripe selected, create Stripe Checkout Session and redirect
+      if (paymentMethod === 'stripe') {
+        const itemsForPayment = shipping > 0
+          ? [
+              ...productItems,
+              {
+                id: 'shipping',
+                name: 'Pristatymas',
+                slug: 'shipping',
+                basePrice: shipping,
+                quantity: 1,
+              },
+            ]
+          : productItems;
+
+        const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId,
+          items: itemsForPayment,
           customer: {
             email,
             name: fullName,
@@ -187,6 +241,19 @@ export default function CheckoutPage() {
       } else {
         throw new Error('Negautas mokėjimo URL');
       }
+
+        return;
+      }
+
+      // 3) Manual/other methods: order exists, show confirmation
+      setSuccessMessage(
+        orderNumber
+          ? `Užsakymas ${orderNumber} sukurtas. Susisieksime su jumis dėl tolimesnių veiksmų.`
+          : 'Užsakymas sukurtas. Susisieksime su jumis dėl tolimesnių veiksmų.'
+      );
+      setShowSuccessModal(true);
+      clearCart();
+      setIsProcessing(false);
     } catch (err) {
       console.error('Checkout error:', err);
       setError(err instanceof Error ? err.message : 'Įvyko klaida. Bandykite dar kartą.');
@@ -640,7 +707,7 @@ export default function CheckoutPage() {
           onClose={() => setShowForgotPasswordModal(false)}
           onSuccess={() => {
             setShowForgotPasswordModal(false);
-            setSuccessMessage("We've sent you an email with a link to update your password");
+            setSuccessMessage('Išsiuntėme el. laišką su slaptažodžio atnaujinimo nuoroda.');
             setShowSuccessModal(true);
           }}
         />

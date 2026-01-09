@@ -4,7 +4,9 @@ import { InvoicePDFGenerator } from '@/lib/invoice/pdf-generator';
 import { createInvoice } from '@/lib/invoice/utils';
 import { 
   createOrder, 
+  getOrderById,
   updateOrderStatus, 
+  updateOrderStripePayment,
   saveInvoiceToDatabase,
   generateOrderNumber 
 } from '@/lib/supabase-admin';
@@ -57,6 +59,8 @@ export async function POST(req: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
     
     try {
+      const orderId = session.metadata?.orderId;
+
       // Get customer details
       const customerEmail = session.customer_email || session.customer_details?.email;
       const customerName = session.metadata?.customerName || session.customer_details?.name || 'Klientas';
@@ -82,6 +86,29 @@ export async function POST(req: NextRequest) {
         items = [];
       }
 
+      // If this checkout came from an existing order, update it instead of creating a new one.
+      let order: any | null = null;
+      let orderNumber: string | null = null;
+
+      if (orderId && typeof orderId === 'string' && orderId.trim().length > 0) {
+        const existing = await getOrderById(orderId.trim());
+        if (existing) {
+          order = existing;
+          orderNumber = existing.order_number;
+
+          await updateOrderStripePayment(existing.id, {
+            stripeSessionId: session.id,
+            stripePaymentIntent: typeof session.payment_intent === 'string' ? session.payment_intent : undefined,
+          });
+          await updateOrderStatus(existing.id, 'processing', 'paid');
+
+          // Prefer order items from DB (includes shipping line when created order-first)
+          if (Array.isArray(existing.items) && existing.items.length > 0) {
+            items = existing.items;
+          }
+        }
+      }
+
       // Calculate totals
       const subtotal = items.reduce((sum: number, item: any) => 
         sum + (item.quantity * item.basePrice), 0
@@ -89,35 +116,41 @@ export async function POST(req: NextRequest) {
       const vatAmount = subtotal * 0.21;
       const total = subtotal + vatAmount;
 
-      // Create order in database
-      const orderNumber = generateOrderNumber();
-      const order = await createOrder({
-        orderNumber,
-        stripeSessionId: session.id,
-        customerEmail,
-        customerName,
-        customerPhone,
-        customerAddress,
-        items,
-        subtotal,
-        vatAmount,
-        total,
-        currency: 'EUR',
-        notes: `Stripe mokėjimas ID: ${session.payment_intent}`
-      });
-
+      // Fallback: Create order in database if we didn't find an existing one
       if (!order) {
-        console.error('Failed to create order');
-        return NextResponse.json({ received: true });
-      }
+        const fallbackOrderNumber = generateOrderNumber();
+        orderNumber = fallbackOrderNumber;
+        order = await createOrder({
+          orderNumber: fallbackOrderNumber,
+          stripeSessionId: session.id,
+          customerEmail,
+          customerName,
+          customerPhone,
+          customerAddress,
+          items,
+          subtotal,
+          vatAmount,
+          total,
+          currency: 'EUR',
+          notes: `Stripe mokėjimas ID: ${session.payment_intent}`
+        });
 
-      // Update order to paid
-      await updateOrderStatus(order.id, 'processing', 'paid');
+        if (!order) {
+          console.error('Failed to create order');
+          return NextResponse.json({ received: true });
+        }
+
+        // Update order to paid
+        await updateOrderStatus(order.id, 'processing', 'paid');
+      }
 
       // Best-effort inventory update (does not break webhook on failure)
       try {
         const reservationItems: ReservationItem[] = items
-          .filter((item: any) => typeof item?.slug === 'string' && item.slug.trim().length > 0)
+          .filter((item: any) => {
+            if (item?.id === 'shipping' || item?.slug === 'shipping') return false;
+            return typeof item?.slug === 'string' && item.slug.trim().length > 0;
+          })
           .map((item: any) => {
             const option = (item.color || item.finish || 'default').toString();
             return {
@@ -156,7 +189,7 @@ export async function POST(req: NextRequest) {
         })),
         paymentMethod: 'stripe',
         dueInDays: 0, // Jau apmokėta
-        notes: `Užsakymas ${orderNumber}. Apmokėta per Stripe.`
+        notes: `Užsakymas ${orderNumber || order?.order_number || ''}. Apmokėta per Stripe.`
       };
 
       // Generate invoice
@@ -174,7 +207,7 @@ export async function POST(req: NextRequest) {
       // Send email with invoice attachment using universal email sender
       const emailResult = await sendOrderConfirmation(
         customerEmail,
-        orderNumber,
+        orderNumber || order.order_number,
         Buffer.from(pdfBuffer)
       );
 
@@ -182,7 +215,7 @@ export async function POST(req: NextRequest) {
         console.error(`Failed to send email to ${customerEmail}:`, emailResult.error);
         // Don't fail webhook - order is created, just email failed
       } else {
-        console.log(`Order ${orderNumber} created, invoice ${invoice.invoiceNumber} sent to ${customerEmail}`);
+        console.log(`Order ${orderNumber || order.order_number} processed, invoice ${invoice.invoiceNumber} sent to ${customerEmail}`);
       }
       
     } catch (error) {

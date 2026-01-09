@@ -250,7 +250,8 @@
     "officeAddress": "Office address",
     "businessHours": "Business hours",
     "privacyConsent": "I agree that my data will be processed directly by Yakiwood or shared with a sales agent located in my area in accordance with Yakiwood",
-    "privacyPolicy": "Privacy Policy"
+    "privacyPolicy": "Privacy Policy",
+    "recaptchaRequired": "Please confirm you are not a robot."
   },
   "faq": {
     "title": "FAQ",

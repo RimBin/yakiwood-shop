@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
-import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/products.sanity';
+import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
 
 interface ProductDetailClientProps {

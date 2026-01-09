@@ -5,22 +5,117 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Invoice, InvoiceItem } from '@/types/invoice';
 
+export type InvoiceLocale = 'lt' | 'en';
+
+type InvoiceStrings = {
+  invoiceTitle: string;
+  seriesAndNumber: string;
+  issueDate: string;
+  dueDate: string;
+  seller: string;
+  buyer: string;
+  companyCode: string;
+  vatCode: string;
+  bankDetails: string;
+  bank: string;
+  account: string;
+  swift: string;
+  tableHead: [string, string, string, string, string, string];
+  subtotalExVat: string;
+  vatAmount: string;
+  total: string;
+  paymentMethodLabel: string;
+  paymentMethods: Record<string, string>;
+  page: string;
+  of: string;
+  defaultTerms: string;
+};
+
+function getInvoiceStrings(locale: InvoiceLocale): InvoiceStrings {
+  if (locale === 'en') {
+    return {
+      invoiceTitle: 'INVOICE',
+      seriesAndNumber: 'Series and number:',
+      issueDate: 'Issue date:',
+      dueDate: 'Due date:',
+      seller: 'SELLER:',
+      buyer: 'BUYER:',
+      companyCode: 'Company code:',
+      vatCode: 'VAT code:',
+      bankDetails: 'Bank details:',
+      bank: 'Bank:',
+      account: 'Account:',
+      swift: 'SWIFT:',
+      tableHead: ['No.', 'Product / Service', 'Qty', 'Price', 'VAT', 'Amount'],
+      subtotalExVat: 'Subtotal (excl. VAT):',
+      vatAmount: 'VAT amount:',
+      total: 'TOTAL:',
+      paymentMethodLabel: 'Payment method:',
+      paymentMethods: {
+        bank_transfer: 'Bank transfer',
+        cash: 'Cash',
+        card: 'Card payment',
+        stripe: 'Online payment',
+      },
+      page: 'Page',
+      of: 'of',
+      defaultTerms:
+        'Payment due within 14 days from the invoice date. Late payments may incur 0.05% daily interest on the outstanding amount.',
+    };
+  }
+
+  return {
+    invoiceTitle: 'SĄSKAITA FAKTŪRA',
+    seriesAndNumber: 'Serija ir numeris:',
+    issueDate: 'Išrašymo data:',
+    dueDate: 'Apmokėti iki:',
+    seller: 'PARDAVĖJAS:',
+    buyer: 'PIRKĖJAS:',
+    companyCode: 'Į. k.:',
+    vatCode: 'PVM mok. kodas:',
+    bankDetails: 'Banko rekvizitai:',
+    bank: 'Bankas:',
+    account: 'Sąskaita:',
+    swift: 'SWIFT:',
+    tableHead: ['Nr.', 'Prekė / Paslauga', 'Kiekis', 'Kaina', 'PVM', 'Suma'],
+    subtotalExVat: 'Suma be PVM:',
+    vatAmount: 'PVM suma:',
+    total: 'VISO:',
+    paymentMethodLabel: 'Apmokėjimo būdas:',
+    paymentMethods: {
+      bank_transfer: 'Banko pavedimas',
+      cash: 'Grynaisiais',
+      card: 'Mokėjimo kortele',
+      stripe: 'Elektroninis mokėjimas',
+    },
+    page: 'Puslapis',
+    of: 'iš',
+    defaultTerms:
+      'Apmokėjimas per 14 dienų nuo sąskaitos išrašymo datos. Vėluojant apmokėti taikomos 0.05% delspinigiai nuo neapmokėtos sumos už kiekvieną uždelstą dieną.',
+  };
+}
+
 export class InvoicePDFGenerator {
   private doc: jsPDF;
   private invoice: Invoice;
+  private locale: InvoiceLocale;
+  private strings: InvoiceStrings;
   
-  constructor(invoice: Invoice) {
+  constructor(invoice: Invoice, options?: { locale?: InvoiceLocale }) {
     this.doc = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4'
     });
     this.invoice = invoice;
+    this.locale = options?.locale || 'lt';
+    this.strings = getInvoiceStrings(this.locale);
   }
 
   private formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('lt-LT', {
+    const dateLocale = this.locale === 'en' ? 'en-GB' : 'lt-LT';
+    return date.toLocaleDateString(dateLocale, {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
@@ -39,14 +134,14 @@ export class InvoicePDFGenerator {
     
     // Invoice title
     this.doc.setFontSize(16);
-    this.doc.text('SĄSKAITA FAKTŪRA', 20, 35);
+    this.doc.text(this.strings.invoiceTitle, 20, 35);
     
     // Invoice number and date
     this.doc.setFontSize(10);
     this.doc.setFont('helvetica', 'normal');
-    this.doc.text(`Serija ir numeris: ${this.invoice.invoiceNumber}`, 20, 45);
-    this.doc.text(`Išrašymo data: ${this.formatDate(this.invoice.issueDate)}`, 20, 50);
-    this.doc.text(`Apmokėti iki: ${this.formatDate(this.invoice.dueDate)}`, 20, 55);
+    this.doc.text(`${this.strings.seriesAndNumber} ${this.invoice.invoiceNumber}`, 20, 45);
+    this.doc.text(`${this.strings.issueDate} ${this.formatDate(this.invoice.issueDate)}`, 20, 50);
+    this.doc.text(`${this.strings.dueDate} ${this.formatDate(this.invoice.dueDate)}`, 20, 55);
   }
 
   private addParties() {
@@ -55,7 +150,7 @@ export class InvoicePDFGenerator {
     // Seller (left column)
     this.doc.setFontSize(11);
     this.doc.setFont('helvetica', 'bold');
-    this.doc.text('PARDAVĖJAS:', 20, startY);
+    this.doc.text(this.strings.seller, 20, startY);
     
     this.doc.setFont('helvetica', 'normal');
     this.doc.setFontSize(9);
@@ -63,11 +158,11 @@ export class InvoicePDFGenerator {
     this.doc.text(this.invoice.seller.companyName || this.invoice.seller.name, 20, y);
     y += 4;
     if (this.invoice.seller.companyCode) {
-      this.doc.text(`Į. k.: ${this.invoice.seller.companyCode}`, 20, y);
+      this.doc.text(`${this.strings.companyCode} ${this.invoice.seller.companyCode}`, 20, y);
       y += 4;
     }
     if (this.invoice.seller.vatCode) {
-      this.doc.text(`PVM mok. kodas: ${this.invoice.seller.vatCode}`, 20, y);
+      this.doc.text(`${this.strings.vatCode} ${this.invoice.seller.vatCode}`, 20, y);
       y += 4;
     }
     this.doc.text(this.invoice.seller.address, 20, y);
@@ -80,24 +175,24 @@ export class InvoicePDFGenerator {
     if (this.invoice.bankAccount) {
       y += 6;
       this.doc.setFont('helvetica', 'bold');
-      this.doc.text('Banko rekvizitai:', 20, y);
+      this.doc.text(this.strings.bankDetails, 20, y);
       this.doc.setFont('helvetica', 'normal');
       y += 4;
       if (this.invoice.bankName) {
-        this.doc.text(`Bankas: ${this.invoice.bankName}`, 20, y);
+        this.doc.text(`${this.strings.bank} ${this.invoice.bankName}`, 20, y);
         y += 4;
       }
-      this.doc.text(`Sąskaita: ${this.invoice.bankAccount}`, 20, y);
+      this.doc.text(`${this.strings.account} ${this.invoice.bankAccount}`, 20, y);
       y += 4;
       if (this.invoice.swift) {
-        this.doc.text(`SWIFT: ${this.invoice.swift}`, 20, y);
+        this.doc.text(`${this.strings.swift} ${this.invoice.swift}`, 20, y);
       }
     }
     
     // Buyer (right column)
     this.doc.setFontSize(11);
     this.doc.setFont('helvetica', 'bold');
-    this.doc.text('PIRKĖJAS:', 110, startY);
+    this.doc.text(this.strings.buyer, 110, startY);
     
     this.doc.setFont('helvetica', 'normal');
     this.doc.setFontSize(9);
@@ -105,11 +200,11 @@ export class InvoicePDFGenerator {
     this.doc.text(this.invoice.buyer.companyName || this.invoice.buyer.name, 110, y);
     y += 4;
     if (this.invoice.buyer.companyCode) {
-      this.doc.text(`Į. k.: ${this.invoice.buyer.companyCode}`, 110, y);
+      this.doc.text(`${this.strings.companyCode} ${this.invoice.buyer.companyCode}`, 110, y);
       y += 4;
     }
     if (this.invoice.buyer.vatCode) {
-      this.doc.text(`PVM mok. kodas: ${this.invoice.buyer.vatCode}`, 110, y);
+      this.doc.text(`${this.strings.vatCode} ${this.invoice.buyer.vatCode}`, 110, y);
       y += 4;
     }
     this.doc.text(this.invoice.buyer.address, 110, y);
@@ -140,12 +235,12 @@ export class InvoicePDFGenerator {
 
     autoTable(this.doc, {
       startY: 140,
-      head: [['Nr.', 'Prekė / Paslauga', 'Kiekis', 'Kaina', 'PVM', 'Suma']],
+      head: [this.strings.tableHead],
       body: tableData,
       foot: [
-        ['', '', '', '', 'Suma be PVM:', this.formatCurrency(this.invoice.subtotal)],
-        ['', '', '', '', 'PVM suma:', this.formatCurrency(this.invoice.totalVat)],
-        ['', '', '', '', 'VISO:', this.formatCurrency(this.invoice.total)]
+        ['', '', '', '', this.strings.subtotalExVat, this.formatCurrency(this.invoice.subtotal)],
+        ['', '', '', '', this.strings.vatAmount, this.formatCurrency(this.invoice.totalVat)],
+        ['', '', '', '', this.strings.total, this.formatCurrency(this.invoice.total)]
       ],
       styles: {
         fontSize: 9,
@@ -179,17 +274,12 @@ export class InvoicePDFGenerator {
     // Payment info
     this.doc.setFontSize(10);
     this.doc.setFont('helvetica', 'bold');
-    this.doc.text('Apmokėjimo būdas:', 20, finalY);
+    this.doc.text(this.strings.paymentMethodLabel, 20, finalY);
     this.doc.setFont('helvetica', 'normal');
-    
-    const paymentMethods: Record<string, string> = {
-      bank_transfer: 'Banko pavedimas',
-      cash: 'Grynaisiais',
-      card: 'Mokėjimo kortele',
-      stripe: 'Elektroninis mokėjimas'
-    };
-    
-    const paymentMethod = paymentMethods[this.invoice.paymentMethod || 'bank_transfer'] || 'Nenurodyta';
+
+    const paymentMethod =
+      this.strings.paymentMethods[this.invoice.paymentMethod || 'bank_transfer'] ||
+      (this.locale === 'en' ? 'Not specified' : 'Nenurodyta');
     this.doc.text(paymentMethod, 55, finalY);
     
     // Notes
@@ -201,11 +291,12 @@ export class InvoicePDFGenerator {
     }
     
     // Terms and conditions
-    if (this.invoice.termsAndConditions) {
+    const terms = this.invoice.termsAndConditions || this.strings.defaultTerms;
+    if (terms) {
       const termsY = finalY + (this.invoice.notes ? 20 : 10);
       this.doc.setFontSize(8);
       this.doc.setFont('helvetica', 'normal');
-      const splitTerms = this.doc.splitTextToSize(this.invoice.termsAndConditions, 170);
+      const splitTerms = this.doc.splitTextToSize(terms, 170);
       this.doc.text(splitTerms, 20, termsY);
     }
     
@@ -216,7 +307,7 @@ export class InvoicePDFGenerator {
       this.doc.setFontSize(8);
       this.doc.setTextColor(128);
       this.doc.text(
-        `Puslapis ${i} iš ${pageCount}`,
+        `${this.strings.page} ${i} ${this.strings.of} ${pageCount}`,
         this.doc.internal.pageSize.getWidth() / 2,
         this.doc.internal.pageSize.getHeight() - 10,
         { align: 'center' }

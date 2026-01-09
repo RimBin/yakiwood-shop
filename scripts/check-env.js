@@ -191,6 +191,27 @@ const envVars = {
     category: 'Email',
   },
 
+  // reCAPTCHA (Contact form)
+  NEXT_PUBLIC_RECAPTCHA_SITE_KEY: {
+    required: 'conditional',
+    condition: 'contact-form',
+    type: 'string',
+    description: 'Google reCAPTCHA v2 site key (public, used in contact form UI)',
+    example: '6Lc... (site key from Google reCAPTCHA admin)',
+    category: 'reCAPTCHA',
+    getLink: 'https://www.google.com/recaptcha/admin',
+  },
+  RECAPTCHA_SECRET_KEY: {
+    required: 'conditional',
+    condition: 'contact-form',
+    type: 'string',
+    description: 'Google reCAPTCHA secret key (server-side verification for contact form)',
+    example: '6Lc... (secret key from Google reCAPTCHA admin)',
+    category: 'reCAPTCHA',
+    sensitive: true,
+    getLink: 'https://www.google.com/recaptcha/admin',
+  },
+
   // Analytics
   NEXT_PUBLIC_GA_MEASUREMENT_ID: {
     required: false,
@@ -384,8 +405,8 @@ function checkEnvFile() {
   const envPath = path.join(process.cwd(), '.env.local');
   if (!fs.existsSync(envPath)) {
     log(`⚠️  No .env.local file found`, yellow);
-    log(`   Create one by copying .env.example:`, reset);
-    log(`   ${cyan}cp .env.example .env.local${reset}\n`);
+    log(`   Create one at project root:`, reset);
+    log(`   ${cyan}.env.local${reset}\n`, reset);
     return false;
   }
   log(`✓ .env.local file exists`, green);
@@ -649,10 +670,9 @@ ${bright}DOCUMENTATION:${reset}
   See ${cyan}docs/ENVIRONMENT.md${reset} for complete setup guide
 
 ${bright}QUICK FIX:${reset}
-  1. Copy the example file:
-     ${cyan}cp .env.example .env.local${reset}
+  1. Create ${cyan}.env.local${reset} in project root
   
-  2. Edit .env.local with your values
+  2. Fill it with your values
   
   3. Restart your dev server:
      ${cyan}npm run dev${reset}

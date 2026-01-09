@@ -3,7 +3,7 @@
 import React, { Suspense, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import type { ProductColorVariant, ProductProfileVariant } from '@/lib/products.sanity';
+import type { ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
 import { useTranslations } from 'next-intl';
 
 interface PlaceholderModelProps {

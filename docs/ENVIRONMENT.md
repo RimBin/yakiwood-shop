@@ -4,8 +4,7 @@ This project uses `.env.local` for local development and platform environment va
 
 ## Quick start
 
-1. Copy example file:
-   - `cp .env.example .env.local`
+1. Create `.env.local` in the project root
 2. Fill in real values
 3. Validate:
    - `npm run env:check --strict`
@@ -33,6 +32,11 @@ Sanity (if using CMS content):
 - `NEXT_PUBLIC_SANITY_DATASET`
 - `NEXT_PUBLIC_SANITY_API_VERSION`
 - Optional: `SANITY_API_TOKEN` (private dataset / authenticated requests)
+
+reCAPTCHA (contact form spam protection):
+
+- `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`
+- `RECAPTCHA_SECRET_KEY`
 
 ## Notes
 

@@ -110,6 +110,24 @@ npm run build
 npm start
 ```
 
+## reCAPTCHA (Contact form)
+
+Kontaktų formoje naudojamas Google reCAPTCHA v2 ("I'm not a robot" checkbox) apsaugai nuo spamo.
+
+1. Sukurkite raktus: https://www.google.com/recaptcha/admin/create
+2. Pasirinkite **reCAPTCHA v2** → **Checkbox**
+3. Domenai (rekomenduojama pridėti):
+  - `localhost` (development)
+  - `shop.yakiwood.co.uk` (production)
+4. Į `.env.local` įrašykite:
+
+```env
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your_site_key
+RECAPTCHA_SECRET_KEY=your_secret_key
+```
+
+Po pakeitimų perkraukite dev serverį (Ctrl+C → `npm run dev`).
+
 ## Deployment to Vercel
 
 1. Push to GitHub (already done ✅)

@@ -1,9 +1,17 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin, getAllOrders, updateOrderStatus } from '@/lib/supabase-admin';
+import { getDemoOrderAndInvoice } from '@/lib/demo/dummy-orders';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const url = new URL(request.url);
+    const forceDemo = url.searchParams.get('demo') === '1';
+
     if (!supabaseAdmin) {
+      if (process.env.NODE_ENV !== 'production' || forceDemo) {
+        const { orders } = getDemoOrderAndInvoice();
+        return NextResponse.json({ orders, demo: true });
+      }
       return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
     }
     const orders = await getAllOrders(200);

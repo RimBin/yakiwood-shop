@@ -7,6 +7,8 @@ const ContactPayloadSchema = z.object({
   email: z.string().trim().email().max(254),
   phone: z.string().trim().max(40).optional().or(z.literal('')),
 
+  recaptchaToken: z.string().trim().min(1),
+
   // Anti-spam signals
   company: z.string().optional().or(z.literal('')), // honeypot
   startedAt: z.number().int().optional(),
@@ -73,7 +75,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'Invalid payload' }, { status: 400 });
   }
 
-  const { fullName, email, phone, company, startedAt } = parsed.data;
+  const { fullName, email, phone, company, startedAt, recaptchaToken } = parsed.data;
 
   // Honeypot: bots often fill hidden fields
   if (company && company.trim().length > 0) {
@@ -86,6 +88,11 @@ export async function POST(request: Request) {
     if (delta >= 0 && delta < 2500) {
       return NextResponse.json({ ok: false, error: 'Spam detected' }, { status: 400 });
     }
+  }
+
+  const recaptchaOk = await verifyRecaptcha(recaptchaToken, ip);
+  if (!recaptchaOk.ok) {
+    return NextResponse.json({ ok: false, error: 'reCAPTCHA failed' }, { status: 400 });
   }
 
   const userAgent = request.headers.get('user-agent') ?? '';
@@ -124,6 +131,37 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ ok: true });
+}
+
+async function verifyRecaptcha(token: string, ip: string): Promise<{ ok: boolean }> {
+  const secret = process.env.RECAPTCHA_SECRET_KEY;
+  if (!secret) {
+    // Allow local development to proceed without secret, but enforce in production.
+    if (process.env.NODE_ENV !== 'production') return { ok: true };
+    return { ok: false };
+  }
+
+  const params = new URLSearchParams({
+    secret,
+    response: token,
+  });
+  if (ip && ip !== 'unknown') params.set('remoteip', ip);
+
+  try {
+    const resp = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params.toString(),
+    });
+    if (!resp.ok) return { ok: false };
+
+    const data = (await resp.json()) as { success?: boolean };
+    return { ok: data.success === true };
+  } catch {
+    return { ok: false };
+  }
 }
 
 function escapeHtml(input: string) {

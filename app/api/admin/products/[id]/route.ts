@@ -48,6 +48,7 @@ export async function GET(
         ...product,
         basePrice: product.base_price,
         woodType: product.wood_type,
+        usageType: product.usage_type,
         model3dUrl: product.model_3d_url,
         imageUrl: product.image_url,
       },
@@ -76,6 +77,7 @@ export async function PATCH(
     if (body.basePrice !== undefined) updates.base_price = body.basePrice
     if (body.woodType !== undefined) updates.wood_type = body.woodType
     if (body.category !== undefined) updates.category = body.category
+    if (body.usageType !== undefined) updates.usage_type = body.usageType
     if (body.imageUrl !== undefined) updates.image_url = body.imageUrl
     if (body.model3dUrl !== undefined) updates.model_3d_url = body.model3dUrl
     if (body.isActive !== undefined) updates.is_active = body.isActive
@@ -123,6 +125,7 @@ export async function PATCH(
         ...refreshed,
         basePrice: refreshed.base_price,
         woodType: refreshed.wood_type,
+        usageType: refreshed.usage_type,
         model3dUrl: refreshed.model_3d_url,
         imageUrl: refreshed.image_url,
       },
@@ -153,6 +156,7 @@ export async function PUT(
     if (body.base_price !== undefined) updates.base_price = body.base_price
     if (body.wood_type !== undefined) updates.wood_type = body.wood_type
     if (body.category !== undefined) updates.category = body.category
+    if (body.usage_type !== undefined) updates.usage_type = body.usage_type
     if (body.image !== undefined) updates.image = body.image
     if (body.is_active !== undefined) updates.is_active = body.is_active
     if (body.stock_quantity !== undefined) updates.stock_quantity = body.stock_quantity

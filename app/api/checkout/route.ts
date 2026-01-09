@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const {
+      orderId,
       items,
       customerEmail: customerEmailRaw,
       customerName: customerNameRaw,
@@ -24,6 +25,7 @@ export async function POST(req: NextRequest) {
       customerAddress: customerAddressRaw,
       customer,
     } = body as {
+      orderId?: string;
       items: Array<{
         id: string;
         name: string;
@@ -97,6 +99,7 @@ export async function POST(req: NextRequest) {
       line_items,
       customer_email: customerEmail,
       metadata: {
+        orderId: orderId || '',
         customerName: customerName || '',
         customerPhone: customerPhone || '',
         customerAddress: customerAddress || '',

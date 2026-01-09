@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { generateBreadcrumbSchema, generateProductSchema } from '@/lib/seo/structured-data';
-import { fetchProductBySlug } from '@/lib/products.sanity';
+import { fetchProductBySlug } from '@/lib/products.supabase';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
 

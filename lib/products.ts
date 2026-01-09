@@ -49,6 +49,7 @@ export interface Product {
   basePrice: number;
   sku?: string;
   category?: string;
+  usageType?: string;
   woodType?: string;
   image: string;
   images?: ProductImage[];
@@ -219,6 +220,7 @@ function transformDatabaseProduct(dbProduct: any): Product {
     basePrice: dbProduct.base_price || dbProduct.price || 0,
     sku: dbProduct.sku,
     category: dbProduct.category,
+    usageType: dbProduct.usage_type,
     woodType: dbProduct.wood_type,
     image: dbProduct.image_url || dbProduct.image || '/images/ui/wood/imgSpruce.png',
     images: dbProduct.images?.map((img: any) => ({

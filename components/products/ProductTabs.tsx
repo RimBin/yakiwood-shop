@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { PortableText, type PortableTextComponents } from '@portabletext/react';
-import type { Product } from '@/lib/products.sanity';
+import type { Product } from '@/lib/products.supabase';
 
 interface ProductTabsProps {
   product: Product;
