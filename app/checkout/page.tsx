@@ -184,7 +184,7 @@ export default function CheckoutPage() {
           },
           deliveryNotes,
           couponCode: couponCode?.trim() ? couponCode.trim() : undefined,
-          paymentProvider: paymentMethod === 'stripe' ? 'stripe' : 'manual',
+          paymentProvider: paymentMethod === 'paypal' ? 'paypal' : 'stripe',
         }),
       });
 
@@ -200,8 +200,8 @@ export default function CheckoutPage() {
         throw new Error(t('errors.orderIdMissing'));
       }
 
-      // 2) If Stripe selected, create Stripe Checkout Session and redirect
-      if (paymentMethod === 'stripe') {
+      // 2) If Stripe/cards selected, create Stripe Checkout Session and redirect
+      if (paymentMethod === 'stripe' || paymentMethod === 'cards') {
         const itemsForPayment = shipping > 0
           ? [
               ...productItems,
@@ -250,7 +250,52 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 3) Manual/other methods: order exists, show confirmation
+      // 2b) PayPal: create PayPal checkout and redirect
+      if (paymentMethod === 'paypal') {
+        const itemsForPayment = shipping > 0
+          ? [
+              ...productItems,
+              {
+                id: 'shipping',
+                name: t('summary.shipping'),
+                slug: 'shipping',
+                basePrice: shipping,
+                quantity: 1,
+              },
+            ]
+          : productItems;
+
+        const response = await fetch('/api/paypal/checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderId,
+            items: itemsForPayment,
+            customer: {
+              email,
+              name: fullName,
+            },
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || t('errors.paymentSessionFailed'));
+        }
+
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error(t('errors.paymentUrlMissing'));
+        }
+
+        return;
+      }
+
+      // 3) Fallback: order exists, show confirmation
       setSuccessMessage(
         orderNumber
           ? t('success.withNumber', { orderNumber })

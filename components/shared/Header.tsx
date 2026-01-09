@@ -58,30 +58,30 @@ export default function Header() {
           {/* Fast Delivery */}
           <div className="flex items-center gap-[8px]">
             <div className="relative w-[24px] h-[24px] shrink-0">
-              <Image src={getAsset('imgIconTruck')} alt="Fast delivery" width={24} height={24} />
+              <Image src={getAsset('imgIconTruck')} alt={t('header.fastDelivery')} width={24} height={24} />
             </div>
             <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
-              Fast delivery
+              {t('header.fastDelivery')}
             </p>
           </div>
 
           {/* Money Back Guarantee */}
           <div className="flex items-center gap-[8px]">
             <div className="relative w-[24px] h-[24px] shrink-0">
-              <Image src={getAsset('imgIconCoins')} alt="Money back guarantee" width={24} height={24} />
+              <Image src={getAsset('imgIconCoins')} alt={t('header.moneyBack')} width={24} height={24} />
             </div>
             <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
-              Money back guarantee
+              {t('header.moneyBack')}
             </p>
           </div>
 
           {/* Eco-Friendly */}
           <div className="hidden lg:flex items-center gap-[8px]">
             <div className="relative w-[24px] h-[24px] shrink-0">
-              <Image src={getAsset('imgIconPlant')} alt="Eco-friendly" width={24} height={24} />
+              <Image src={getAsset('imgIconPlant')} alt={t('header.ecoFriendly')} width={24} height={24} />
             </div>
             <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
-              Eco-friendly
+              {t('header.ecoFriendly')}
             </p>
           </div>
         </div>

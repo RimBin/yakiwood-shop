@@ -31,6 +31,25 @@
     },
     "status": {
       "delivered": "Pristatyta"
+    },
+    "form": {
+      "back": "Atgal",
+      "myInformation": "Mano informacija",
+      "deliveryInformation": "Pristatymo informacija",
+      "edit": "Redaguoti",
+      "saveInline": "Išsaugoti",
+      "fullName": "Vardas, pavardė",
+      "companyNameOptional": "Įmonės pavadinimas (nebūtina)",
+      "email": "El. paštas",
+      "phoneNumber": "Tel. numeris",
+      "country": "Šalis",
+      "city": "Miestas",
+      "streetAddress": "Adresas",
+      "postcodeZip": "Pašto kodas",
+      "togglePasswordVisibility": "Rodyti / slėpti slaptažodį",
+      "save": "Išsaugoti",
+      "passwordRequired": "Užpildykite visus slaptažodžio laukus",
+      "passwordMismatch": "Slaptažodžiai nesutampa"
     }
   },
   "common": {
@@ -72,6 +91,9 @@
     "grestasPristatymas": "Greitas pristatymas",
     "piniguGrazinimas": "Pinigų grąžinimo garantija",
     "ekologiskas": "Ekologiškas",
+    "fastDelivery": "Greitas pristatymas",
+    "moneyBack": "Pinigų grąžinimo garantija",
+    "ecoFriendly": "Ekologiškas",
     "krepselis": "Krepšelis",
     "meniu": "Meniu",
     "atidarykMenu": "Atidaryti meniu",
@@ -750,5 +772,60 @@
     "title": "Panašūs produktai",
     "view": "Peržiūrėti",
     "from": "nuo"
+  },
+  "adminUsers": {
+    "title": "Vartotojai",
+    "subtitle": "Tvarkykite vartotojus, roles ir nuolaidas",
+    "loading": "Kraunasi...",
+    "refresh": "Atnaujinti",
+    "breadcrumbs": {
+      "home": "Pradžia",
+      "admin": "Administravimas",
+      "users": "Vartotojai"
+    },
+    "notConfigured": {
+      "title": "Supabase nesukonfigūruotas",
+      "body": "Norint naudoti administravimo funkcijas, reikia sukonfigūruoti Supabase aplinkos kintamuosius."
+    },
+    "users": {
+      "title": "Vartotojai",
+      "email": "El. paštas",
+      "role": "Rolė",
+      "actions": "Veiksmai",
+      "empty": "Vartotojų nerasta",
+      "autoSave": "Išsaugoma automatiškai"
+    },
+    "create": {
+      "title": "Sukurti vartotoją",
+      "email": "El. paštas",
+      "password": "Slaptažodis",
+      "fullName": "Vardas Pavardė",
+      "submit": "Sukurti"
+    },
+    "discounts": {
+      "title": "Rolių nuolaidos",
+      "help": "Nustatykite nuolaidą pagal rolę (procentinė arba fiksuota suma).",
+      "role": "Rolė",
+      "type": "Tipas",
+      "types": {
+        "percent": "Procentinė",
+        "fixed": "Fiksuota suma"
+      },
+      "valuePercent": "Reikšmė (%)",
+      "valueFixed": "Reikšmė (€)",
+      "active": "Aktyvi",
+      "save": "Išsaugoti nuolaidą"
+    },
+    "errors": {
+      "noSession": "Nėra aktyvios sesijos",
+      "loadUsers": "Nepavyko įkelti vartotojų",
+      "loadDiscounts": "Nepavyko įkelti nuolaidų",
+      "generic": "Kažkas nepavyko. Bandykite vėl.",
+      "updateRole": "Nepavyko atnaujinti rolės",
+      "createUser": "Nepavyko sukurti vartotojo",
+      "invalidDiscount": "Neteisinga nuolaidos reikšmė",
+      "invalidPercent": "Procentai turi būti nuo 0 iki 100",
+      "saveDiscount": "Nepavyko išsaugoti nuolaidos"
+    }
   }
 }

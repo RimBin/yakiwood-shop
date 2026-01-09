@@ -1,11 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 import Stripe from 'stripe';
+import { applyRoleDiscount, type RoleDiscount } from '@/lib/pricing/roleDiscounts';
+import { quoteConfigurationPricing, type UsageType } from '@/lib/pricing/configuration';
 
 function getStripeClient() {
   if (!process.env.STRIPE_SECRET_KEY) return null;
   return new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: '2025-11-17.clover',
   });
+}
+
+function createSupabaseRouteClient(request: NextRequest) {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll() {
+          // No-op in route handlers
+        },
+      },
+    }
+  );
+}
+
+async function getAuthenticatedRoleDiscount(request: NextRequest): Promise<RoleDiscount | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) return null;
+
+  const supabase = createSupabaseRouteClient(request);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const role = (profile as any)?.role as string | undefined;
+  if (!role) return null;
+
+  const { data: discountRow } = await supabase
+    .from('role_discounts')
+    .select('role,discount_type,discount_value,currency,is_active')
+    .eq('role', role)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  return (discountRow as RoleDiscount | null) ?? null;
 }
 
 export async function POST(req: NextRequest) {
@@ -34,6 +84,13 @@ export async function POST(req: NextRequest) {
         basePrice: number;
         color?: string;
         finish?: string;
+        configuration?: {
+          usageType?: UsageType;
+          profileVariantId?: string;
+          colorVariantId?: string;
+          widthMm?: number;
+          lengthMm?: number;
+        };
       }>;
       customerEmail?: string;
       customerName?: string;
@@ -81,17 +138,84 @@ export async function POST(req: NextRequest) {
     }
     const resolvedSiteUrl = siteUrl || 'http://localhost:3000';
 
+    // Apply role discount only for authenticated users.
+    const roleDiscount = await getAuthenticatedRoleDiscount(req);
+
+    const discountedItems = roleDiscount
+      ? items.map((item) => {
+          if (item.id === 'shipping') return item;
+          return {
+            ...item,
+            basePrice: applyRoleDiscount(item.basePrice, roleDiscount),
+          };
+        })
+      : items;
+
     // NOTE: Real implementation should map product IDs to Stripe Price IDs.
     // For initial scaffold we convert basePrice EUR to cents direct.
-    const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map(i => ({
+    const lineItemsResolved = await Promise.all(
+      discountedItems.map(async (item) => {
+        // Shipping and other non-product items must keep provided price.
+        if (item.id === 'shipping') {
+          return {
+            quantity: item.quantity,
+            unitAmountCents: Math.round(item.basePrice * 100),
+            displayName: item.name,
+          };
+        }
+
+        const cfg = item.configuration;
+        const hasConfigPricingInputs =
+          cfg &&
+          typeof cfg.widthMm === 'number' &&
+          typeof cfg.lengthMm === 'number' &&
+          typeof item.quantity === 'number' &&
+          item.quantity > 0;
+
+        if (!hasConfigPricingInputs) {
+          return {
+            quantity: item.quantity,
+            unitAmountCents: Math.round(item.basePrice * 100),
+            displayName: item.name,
+          };
+        }
+
+        const quote = await quoteConfigurationPricing({
+          productId: item.id,
+          usageType: cfg.usageType,
+          profileVariantId: cfg.profileVariantId,
+          colorVariantId: cfg.colorVariantId,
+          widthMm: cfg.widthMm as number,
+          lengthMm: cfg.lengthMm as number,
+          quantityBoards: 1,
+        });
+
+        if (!quote) {
+          return {
+            quantity: item.quantity,
+            unitAmountCents: Math.round(item.basePrice * 100),
+            displayName: item.name,
+          };
+        }
+
+        const unitAmountCents = Math.round(quote.unitPricePerBoard * 100);
+        return {
+          quantity: item.quantity,
+          unitAmountCents,
+          displayName: item.name,
+        };
+      })
+    );
+
+    const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = lineItemsResolved.map((i) => ({
       quantity: i.quantity,
       price_data: {
         currency: 'eur',
-        unit_amount: Math.round(i.basePrice * 100),
+        unit_amount: i.unitAmountCents,
         product_data: {
-          name: i.name,
-        }
-      }
+          name: i.displayName,
+        },
+      },
     }));
 
     const session = await stripe.checkout.sessions.create({
@@ -106,7 +230,7 @@ export async function POST(req: NextRequest) {
         customerCity,
         customerPostalCode,
         customerCountry,
-        items: JSON.stringify(items)
+        items: JSON.stringify(discountedItems),
       },
       success_url: `${resolvedSiteUrl}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${resolvedSiteUrl}/checkout`

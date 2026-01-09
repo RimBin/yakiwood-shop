@@ -268,4 +268,13 @@ export async function sendOrderConfirmation(
  */
 export * from './email/templates';
 
-export * from './email/bilingualTemplates'
+export {
+  BILINGUAL_EMAIL_TEMPLATES,
+  getBilingualEmailTemplate,
+  getBilingualEmailTemplatesByCategory,
+  renderTemplateString,
+  type EmailLocale,
+  type EmailTemplateDefinition,
+} from './email/bilingualTemplates'
+
+export { getSampleData as getBilingualSampleData } from './email/bilingualTemplates'

@@ -25,16 +25,18 @@ export default function AccountLayout({
   return (
     <div className="min-h-screen bg-[#E1E1E1]">
       <div className="mx-auto w-full max-w-[1240px] px-4 py-10 md:px-10 md:py-14">
-        <h1 className="font-['DM_Sans'] text-[40px] font-light leading-[1.05] tracking-[-1.6px] text-[#161616] md:text-[56px]">
-          {t('title')}
-        </h1>
+        <div className="border-b border-[#BBBBBB] pb-8">
+          <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]">
+            {t('title')}
+          </h1>
+        </div>
 
         <div className="mt-8 flex flex-col gap-8 md:mt-12 md:flex-row md:gap-14">
-          <nav className={active === 'orders' ? 'hidden md:block md:w-[240px]' : 'w-full md:w-[240px]'}>
+          <nav className={hasChildren ? 'hidden md:block md:w-[240px]' : 'w-full md:w-[240px]'}>
             <ul className="flex flex-col gap-4">
               <li>
                 <Link
-                  href="/account"
+                  href="/account/details"
                   className={`${linkBaseClass} ${
                     active === 'details' ? 'text-[#161616]' : 'text-[#535353]'
                   }`}
@@ -64,11 +66,7 @@ export default function AccountLayout({
             </ul>
           </nav>
 
-          {hasChildren ? (
-            <div className="min-w-0 flex-1 rounded-[24px] bg-white p-6 md:p-10">
-              {children}
-            </div>
-          ) : null}
+          {hasChildren ? <div className="min-w-0 flex-1">{children}</div> : null}
         </div>
       </div>
     </div>

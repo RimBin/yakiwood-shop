@@ -359,6 +359,7 @@
   "cart": {
     "title": "Shopping cart",
     "yourCart": "Your cart",
+    "closeCart": "Close cart",
     "emptyCart": "Your cart is empty",
     "emptyCartDescription": "Add items to get started",
     "continueShopping": "Continue shopping",
@@ -505,6 +506,25 @@
     },
     "status": {
       "delivered": "Delivered"
+    },
+    "form": {
+      "back": "Back",
+      "myInformation": "My information",
+      "deliveryInformation": "Delivery information",
+      "edit": "Edit",
+      "saveInline": "Save",
+      "fullName": "Full name",
+      "companyNameOptional": "Company name (optional)",
+      "email": "Email",
+      "phoneNumber": "Phone number",
+      "country": "Country",
+      "city": "City",
+      "streetAddress": "Street address",
+      "postcodeZip": "Postcode / ZIP",
+      "togglePasswordVisibility": "Toggle password visibility",
+      "save": "Save",
+      "passwordRequired": "Please fill in all password fields",
+      "passwordMismatch": "Passwords do not match"
     }
   },
   "orderStatuses": {
@@ -941,5 +961,60 @@
     "title": "Related products",
     "view": "View",
     "from": "from"
+  },
+  "adminUsers": {
+    "title": "Users",
+    "subtitle": "Manage users, roles and discounts",
+    "loading": "Loading...",
+    "refresh": "Refresh",
+    "breadcrumbs": {
+      "home": "Home",
+      "admin": "Admin",
+      "users": "Users"
+    },
+    "notConfigured": {
+      "title": "Supabase not configured",
+      "body": "To use admin features, configure Supabase environment variables."
+    },
+    "users": {
+      "title": "Users",
+      "email": "Email",
+      "role": "Role",
+      "actions": "Actions",
+      "empty": "No users found",
+      "autoSave": "Auto-saves"
+    },
+    "create": {
+      "title": "Create user",
+      "email": "Email",
+      "password": "Password",
+      "fullName": "Full name",
+      "submit": "Create"
+    },
+    "discounts": {
+      "title": "Role discounts",
+      "help": "Set a discount per role (percent or fixed amount).",
+      "role": "Role",
+      "type": "Type",
+      "types": {
+        "percent": "Percent",
+        "fixed": "Fixed amount"
+      },
+      "valuePercent": "Value (%)",
+      "valueFixed": "Value (€)",
+      "active": "Active",
+      "save": "Save discount"
+    },
+    "errors": {
+      "noSession": "No active session",
+      "loadUsers": "Failed to load users",
+      "loadDiscounts": "Failed to load discounts",
+      "generic": "Something went wrong. Please try again.",
+      "updateRole": "Failed to update role",
+      "createUser": "Failed to create user",
+      "invalidDiscount": "Invalid discount value",
+      "invalidPercent": "Percent must be between 0 and 100",
+      "saveDiscount": "Failed to save discount"
+    }
   }
 }

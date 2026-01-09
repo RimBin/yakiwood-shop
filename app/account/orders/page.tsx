@@ -150,11 +150,14 @@ export default function OrdersPage() {
     const checkAuthAndLoad = async () => {
       let email: string | null = null;
 
-      try {
-        const { data } = await supabase.auth.getUser();
-        if (data?.user?.email) email = data.user.email;
-      } catch {
-        // ignore
+      const supabaseClient = supabase;
+      if (supabaseClient) {
+        try {
+          const { data } = await supabaseClient.auth.getUser();
+          if (data?.user?.email) email = data.user.email;
+        } catch {
+          // ignore
+        }
       }
 
       if (!email) {
@@ -209,10 +212,13 @@ export default function OrdersPage() {
       // ignore
     }
 
-    try {
-      await supabase.auth.signOut();
-    } catch {
-      // ignore
+    const supabaseClient = supabase;
+    if (supabaseClient) {
+      try {
+        await supabaseClient.auth.signOut();
+      } catch {
+        // ignore
+      }
     }
 
     router.push('/login');

@@ -1,14 +1,17 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AccountLayout from '@/components/account/AccountLayout';
+import AccountDetails from '@/components/account/AccountDetails';
 import { createClient } from '@/lib/supabase/client';
 
-export default function AccountPage() {
+export default function AccountDetailsPage() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
+
   const [isLoading, setIsLoading] = useState(true);
+  const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
     let isCancelled = false;
@@ -17,8 +20,11 @@ export default function AccountPage() {
       if (supabase) {
         try {
           const { data } = await supabase.auth.getUser();
-          if (data?.user) {
-            if (!isCancelled) setIsLoading(false);
+          if (data?.user?.email) {
+            if (!isCancelled) {
+              setEmail(data.user.email);
+              setIsLoading(false);
+            }
             return;
           }
         } catch {
@@ -30,7 +36,10 @@ export default function AccountPage() {
         const raw = localStorage.getItem('user');
         const parsed = raw ? (JSON.parse(raw) as { email?: string } | null) : null;
         if (parsed?.email) {
-          if (!isCancelled) setIsLoading(false);
+          if (!isCancelled) {
+            setEmail(parsed.email);
+            setIsLoading(false);
+          }
           return;
         }
       } catch {
@@ -38,7 +47,7 @@ export default function AccountPage() {
       }
 
       if (!isCancelled) {
-        router.push('/login?redirect=/account');
+        router.push('/login?redirect=/account/details');
       }
     };
 
@@ -68,8 +77,11 @@ export default function AccountPage() {
     router.push('/login');
   };
 
-  if (isLoading) return null;
+  if (isLoading || !email) return null;
 
-  return <AccountLayout active="details" onLogout={handleLogout} />;
+  return (
+    <AccountLayout active="details" onLogout={handleLogout}>
+      <AccountDetails userEmail={email} />
+    </AccountLayout>
+  );
 }
-

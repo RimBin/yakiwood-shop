@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { PageCover } from '@/components/shared';
 import { fetchProducts, type Product } from '@/lib/products.supabase';
 import { useTranslations } from 'next-intl';
+import { createClient } from '@/lib/supabase/client';
+import { applyRoleDiscount, type RoleDiscount } from '@/lib/pricing/roleDiscounts';
 
 export default function ProductsPage() {
   const t = useTranslations('productsPage');
@@ -22,7 +24,50 @@ export default function ProductsPage() {
         console.log('Loading products from Sanity...');
         const products = await fetchProducts();
         console.log('Products loaded:', products.length);
-        setAllProducts(products);
+
+        // Apply role discount for authenticated users.
+        const supabase = createClient();
+        if (supabase) {
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+
+          if (user) {
+            const { data: profile } = await supabase
+              .from('user_profiles')
+              .select('role')
+              .eq('id', user.id)
+              .maybeSingle();
+
+            const role = (profile as any)?.role as string | undefined;
+            if (role) {
+              const { data: discountRow } = await supabase
+                .from('role_discounts')
+                .select('role,discount_type,discount_value,currency,is_active')
+                .eq('role', role)
+                .eq('is_active', true)
+                .maybeSingle();
+
+              const discount = (discountRow as RoleDiscount | null) ?? null;
+              if (discount) {
+                setAllProducts(
+                  products.map((p) => ({
+                    ...p,
+                    price: applyRoleDiscount(p.price, discount),
+                  }))
+                );
+              } else {
+                setAllProducts(products);
+              }
+            } else {
+              setAllProducts(products);
+            }
+          } else {
+            setAllProducts(products);
+          }
+        } else {
+          setAllProducts(products);
+        }
         setError(null);
       } catch (error) {
         console.error('Error loading products:', error);

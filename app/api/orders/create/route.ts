@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 import {
   createOrder,
   generateOrderNumber,
   supabaseAdmin,
 } from '@/lib/supabase-admin';
+import { applyRoleDiscount, type RoleDiscount } from '@/lib/pricing/roleDiscounts';
 
 const VAT_RATE = 0.21;
 
@@ -15,6 +17,13 @@ type IncomingItem = {
   basePrice: number;
   color?: string;
   finish?: string;
+  configuration?: {
+    usageType?: string;
+    profileVariantId?: string;
+    colorVariantId?: string;
+    widthMm?: number;
+    lengthMm?: number;
+  };
 };
 
 type PaymentProvider = 'stripe' | 'manual';
@@ -46,6 +55,15 @@ function normalizeItems(items: IncomingItem[]): IncomingItem[] {
       slug: typeof i.slug === 'string' ? i.slug : undefined,
       color: typeof i.color === 'string' ? i.color : undefined,
       finish: typeof i.finish === 'string' ? i.finish : undefined,
+      configuration: i && typeof (i as any).configuration === 'object' && (i as any).configuration !== null
+        ? {
+            usageType: typeof (i as any).configuration.usageType === 'string' ? (i as any).configuration.usageType : undefined,
+            profileVariantId: typeof (i as any).configuration.profileVariantId === 'string' ? (i as any).configuration.profileVariantId : undefined,
+            colorVariantId: typeof (i as any).configuration.colorVariantId === 'string' ? (i as any).configuration.colorVariantId : undefined,
+            widthMm: typeof (i as any).configuration.widthMm === 'number' ? (i as any).configuration.widthMm : undefined,
+            lengthMm: typeof (i as any).configuration.lengthMm === 'number' ? (i as any).configuration.lengthMm : undefined,
+          }
+        : undefined,
     }))
     .filter((i) => i.id.length > 0 && i.name.length > 0 && i.quantity > 0 && i.basePrice >= 0);
 }
@@ -64,6 +82,53 @@ function computeTotalsFromGross(grossTotal: number): { subtotalNet: number; vatA
   return { subtotalNet, vatAmount, totalGross: grossTotal };
 }
 
+function createSupabaseRouteClient(request: NextRequest) {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll() {
+          // No-op in route handlers
+        },
+      },
+    }
+  );
+}
+
+async function getAuthenticatedRoleDiscount(request: NextRequest): Promise<RoleDiscount | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) return null;
+
+  const supabase = createSupabaseRouteClient(request);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const role = (profile as any)?.role as string | undefined;
+  if (!role) return null;
+
+  const { data: discountRow } = await supabase
+    .from('role_discounts')
+    .select('role,discount_type,discount_value,currency,is_active')
+    .eq('role', role)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  return (discountRow as RoleDiscount | null) ?? null;
+}
+
 export async function POST(req: NextRequest) {
   try {
     if (!supabaseAdmin) {
@@ -76,6 +141,18 @@ export async function POST(req: NextRequest) {
     if (!items.length) {
       return NextResponse.json({ error: 'Tuščias krepšelis' }, { status: 400 });
     }
+
+    // Apply role discount only for authenticated users.
+    const roleDiscount = await getAuthenticatedRoleDiscount(req);
+    const discountedItems = roleDiscount
+      ? items.map((item) => {
+          if (item.id === 'shipping') return item;
+          return {
+            ...item,
+            basePrice: applyRoleDiscount(item.basePrice, roleDiscount),
+          };
+        })
+      : items;
 
     const customerEmail = String(body.customer?.email || '').trim();
     const customerName = String(body.customer?.name || '').trim();
@@ -94,12 +171,12 @@ export async function POST(req: NextRequest) {
       .filter(Boolean)
       .join(', ');
 
-    const itemsGrossSubtotal = items.reduce((sum, i) => sum + i.basePrice * i.quantity, 0);
+    const itemsGrossSubtotal = discountedItems.reduce((sum, i) => sum + i.basePrice * i.quantity, 0);
     const shippingGross = computeShippingGross(itemsGrossSubtotal);
 
     const enrichedItems: IncomingItem[] = shippingGross > 0
       ? [
-          ...items,
+          ...discountedItems,
           {
             id: 'shipping',
             name: 'Pristatymas',
@@ -108,7 +185,7 @@ export async function POST(req: NextRequest) {
             basePrice: shippingGross,
           },
         ]
-      : items;
+      : discountedItems;
 
     const grossTotal = enrichedItems.reduce((sum, i) => sum + i.basePrice * i.quantity, 0);
     const totals = computeTotalsFromGross(grossTotal);
