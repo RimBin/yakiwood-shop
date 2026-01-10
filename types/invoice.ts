@@ -29,6 +29,11 @@ export interface Invoice {
   series: string; // e.g., "YW" for Yakiwood
   sequenceNumber: number;
   status: 'draft' | 'issued' | 'paid' | 'cancelled' | 'overdue';
+
+  // DB linkage / exports
+  orderId?: string;
+  pdfUrl?: string;
+  currency?: string; // defaults to EUR when omitted
   
   // Dates
   issueDate: string; // ISO date
@@ -72,6 +77,10 @@ export interface InvoiceGenerateRequest {
   paymentMethod?: Invoice['paymentMethod'];
   notes?: string;
   dueInDays?: number; // defaults to 14
+
+  // Optional metadata (useful for DB-backed flows)
+  orderId?: string;
+  currency?: string; // defaults to EUR when omitted
 }
 
 export interface InvoiceSettings {
@@ -83,4 +92,6 @@ export interface InvoiceSettings {
   swift: string;
   termsAndConditions: string;
   vatRate: number; // default VAT rate
+
+  currency?: string; // defaults to EUR when omitted
 }
