@@ -91,7 +91,7 @@ export default function WhyUs() {
         </p>
 
         {/* Main text */}
-        <p className="absolute font-['DM_Sans'] font-light text-[52px] leading-none tracking-[-2.08px] text-[#161616] left-[40px] top-0 w-[1360px]">
+        <p className="absolute font-['DM_Sans'] font-light text-[52px] leading-none tracking-[-2.08px] text-[#161616] left-[40px] top-0 w-[1360px] pl-[360px]">
           <span>We are experts in the preparation of </span>
           <span className="font-['Tiro_Tamil'] italic">burnt wood</span>
           <span>, with many years of </span>

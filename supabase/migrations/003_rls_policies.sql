@@ -12,23 +12,32 @@
 -- Uses a hardcoded list of admin emails for simplicity
 -- In production, consider using a roles table or Supabase custom claims
 CREATE OR REPLACE FUNCTION is_admin()
-RETURNS boolean AS $$
+RETURNS boolean
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public, auth, pg_catalog
+AS $$
 BEGIN
   RETURN (
     SELECT email FROM auth.users WHERE id = auth.uid()
   ) IN ('admin@yakiwood.lt', 'rimvydas@yakiwood.lt');
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 COMMENT ON FUNCTION is_admin() IS 'Checks if the current authenticated user is an admin based on email whitelist';
 
 -- Function to get current user's email from JWT
 CREATE OR REPLACE FUNCTION get_user_email()
-RETURNS text AS $$
+RETURNS text
+LANGUAGE plpgsql
+STABLE
+SET search_path = public, auth, pg_catalog
+AS $$
 BEGIN
   RETURN auth.jwt()->>'email';
 END;
-$$ LANGUAGE plpgsql STABLE;
+$$;
 
 COMMENT ON FUNCTION get_user_email() IS 'Extracts email from the current JWT token';
 
@@ -77,6 +86,7 @@ DROP POLICY IF EXISTS "Users can update their own profile" ON user_profiles;
 DROP POLICY IF EXISTS "user_profiles_select_own" ON user_profiles;
 DROP POLICY IF EXISTS "user_profiles_insert_own" ON user_profiles;
 DROP POLICY IF EXISTS "user_profiles_update_own" ON user_profiles;
+DROP POLICY IF EXISTS "user_profiles_admin_update" ON user_profiles;
 
 -- Delivery addresses
 DROP POLICY IF EXISTS "Users can insert their own addresses" ON delivery_addresses;
@@ -403,15 +413,44 @@ CREATE POLICY "user_profiles_update_own"
   ON user_profiles
   FOR UPDATE
   USING (auth.uid() = id)
-  WITH CHECK (
-    auth.uid() = id
-    AND
-    -- Prevent users from changing their own role (only admins can do this via direct DB)
-    (role IS NOT DISTINCT FROM OLD.role OR is_admin())
-  );
+  WITH CHECK (auth.uid() = id);
 
 COMMENT ON POLICY "user_profiles_update_own" ON user_profiles IS 
   'Users can update their own profile but cannot change their role';
+
+-- UPDATE: Admins can update any profile (including role changes)
+CREATE POLICY "user_profiles_admin_update"
+  ON user_profiles
+  FOR UPDATE
+  USING (is_admin())
+  WITH CHECK (is_admin());
+
+COMMENT ON POLICY "user_profiles_admin_update" ON user_profiles IS 
+  'Admins can update any user profile, including role changes';
+
+-- Enforce role immutability for non-admin updates (RLS cannot reference OLD.*)
+CREATE OR REPLACE FUNCTION user_profiles_enforce_role_change_admin_only()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth, pg_catalog
+AS $$
+BEGIN
+  IF NEW.role IS DISTINCT FROM OLD.role THEN
+    IF NOT is_admin() THEN
+      RAISE EXCEPTION 'Only admins can change user roles';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS user_profiles_enforce_role_change_admin_only ON user_profiles;
+CREATE TRIGGER user_profiles_enforce_role_change_admin_only
+  BEFORE UPDATE OF role ON user_profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION user_profiles_enforce_role_change_admin_only();
 
 -- ============================================================================
 -- 7. DELIVERY ADDRESSES TABLE POLICIES

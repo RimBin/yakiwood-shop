@@ -69,30 +69,35 @@ create table if not exists role_discounts (
   )
 );
 
+drop trigger if exists update_role_discounts_updated_at on role_discounts;
 create trigger update_role_discounts_updated_at before update on role_discounts
-  for each row execute procedure update_updated_at_column();
+  for each row execute function update_updated_at_column();
 
 alter table role_discounts enable row level security;
 
 -- Authenticated users can read discounts (used to compute effective price client-side).
-create policy if not exists "role_discounts_select_authenticated"
+drop policy if exists "role_discounts_select_authenticated" on role_discounts;
+create policy "role_discounts_select_authenticated"
   on role_discounts
   for select
   using (auth.uid() is not null);
 
 -- Admin-only write policies (also ok with service role bypass).
-create policy if not exists "role_discounts_admin_insert"
+drop policy if exists "role_discounts_admin_insert" on role_discounts;
+create policy "role_discounts_admin_insert"
   on role_discounts
   for insert
   with check (is_admin());
 
-create policy if not exists "role_discounts_admin_update"
+drop policy if exists "role_discounts_admin_update" on role_discounts;
+create policy "role_discounts_admin_update"
   on role_discounts
   for update
   using (is_admin())
   with check (is_admin());
 
-create policy if not exists "role_discounts_admin_delete"
+drop policy if exists "role_discounts_admin_delete" on role_discounts;
+create policy "role_discounts_admin_delete"
   on role_discounts
   for delete
   using (is_admin());
