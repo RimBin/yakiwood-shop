@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import UsersAdminClient from '@/components/admin/UsersAdminClient'
 import { Breadcrumbs } from '@/components/ui'
+import { PageCover, PageLayout } from '@/components/shared/PageLayout'
 
 function looksLikeJwt(value: string | undefined): boolean {
   if (!value) return false
@@ -15,7 +16,7 @@ export default async function AdminUsersPage() {
   // If Supabase keys are placeholders, SSR auth will never work.
   if (!looksLikeJwt(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA]">
+      <section className="w-full bg-[#E1E1E1] min-h-screen">
         <Breadcrumbs
           items={[
             { label: t('breadcrumbs.home'), href: '/' },
@@ -23,17 +24,31 @@ export default async function AdminUsersPage() {
             { label: t('breadcrumbs.users') },
           ]}
         />
-        <div className="mx-auto max-w-[960px] px-[20px] py-[24px]">
-          <div className="rounded-[16px] border border-[#E1E1E1] bg-white p-[16px]">
-            <h1 className="font-['DM_Sans'] text-[18px] text-[#161616]">{t('title')}</h1>
-            <p className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353]">
-              Supabase nesukonfigūruotas arba raktai neteisingi. Įrašykite tikrus
-              `NEXT_PUBLIC_SUPABASE_ANON_KEY` ir `SUPABASE_SERVICE_ROLE_KEY` į `.env.local`,
-              tada paleiskite `npm run demo:bootstrap-users`.
-            </p>
+
+        <PageCover>
+          <h1
+            className="font-['DM_Sans'] font-light text-[40px] md:text-[72px] leading-[0.95] tracking-[-1.6px] md:tracking-[-3.2px] text-[#161616]"
+            style={{ fontVariationSettings: "'opsz' 14" }}
+          >
+            {t('title')}
+          </h1>
+          <p className="mt-[12px] font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[720px]">
+            {t('subtitle')}
+          </p>
+        </PageCover>
+
+        <PageLayout>
+          <div className="py-[24px] md:py-[40px]">
+            <div className="rounded-[16px] border border-[#BBBBBB] bg-white p-[16px]">
+              <p className="font-['Outfit'] text-[14px] text-[#535353]">
+                Supabase nesukonfigūruotas arba raktai neteisingi. Įrašykite tikrus
+                `NEXT_PUBLIC_SUPABASE_ANON_KEY` ir `SUPABASE_SERVICE_ROLE_KEY` į `.env.local`,
+                tada paleiskite `npm run demo:bootstrap-users`.
+              </p>
+            </div>
           </div>
-        </div>
-      </div>
+        </PageLayout>
+      </section>
     )
   }
 
@@ -57,7 +72,7 @@ export default async function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <section className="w-full bg-[#E1E1E1] min-h-screen">
       <Breadcrumbs
         items={[
           { label: t('breadcrumbs.home'), href: '/' },
@@ -65,7 +80,24 @@ export default async function AdminUsersPage() {
           { label: t('breadcrumbs.users') },
         ]}
       />
-      <UsersAdminClient />
-    </div>
+
+      <PageCover>
+        <h1
+          className="font-['DM_Sans'] font-light text-[40px] md:text-[72px] leading-[0.95] tracking-[-1.6px] md:tracking-[-3.2px] text-[#161616]"
+          style={{ fontVariationSettings: "'opsz' 14" }}
+        >
+          {t('title')}
+        </h1>
+        <p className="mt-[12px] font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[720px]">
+          {t('subtitle')}
+        </p>
+      </PageCover>
+
+      <PageLayout>
+        <div className="py-[24px] md:py-[40px]">
+          <UsersAdminClient />
+        </div>
+      </PageLayout>
+    </section>
   )
 }

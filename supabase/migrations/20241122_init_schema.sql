@@ -1,6 +1,15 @@
 -- Enable UUID extension
 create extension if not exists "uuid-ossp";
 
+-- Function to update updated_at timestamp
+create or replace function update_updated_at_column()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
 -- Products table (main product types)
 create table products (
   id uuid primary key default uuid_generate_v4(),
@@ -155,7 +164,13 @@ create policy "Product variants are viewable by everyone"
 -- Users can read their own orders
 create policy "Users can view their own orders"
   on orders for select
-  using (auth.uid() is null or email = auth.jwt()->>'email');
+  using (
+    auth.uid() is not null
+    and (
+      orders.user_id = auth.uid()
+      or orders.email = auth.jwt()->>'email'
+    )
+  );
 
 create policy "Users can view their own order items"
   on order_items for select
@@ -163,7 +178,11 @@ create policy "Users can view their own order items"
     exists (
       select 1 from orders
       where orders.id = order_items.order_id
-      and (orders.user_id = auth.uid() or auth.uid() is null)
+      and auth.uid() is not null
+      and (
+        orders.user_id = auth.uid()
+        or orders.email = auth.jwt()->>'email'
+      )
     )
   );
 
@@ -202,21 +221,6 @@ create policy "Users can update their own profile"
   on user_profiles for update
   using (auth.uid() = id);
 
--- Triggers for updated_at
-create trigger update_products_updated_at before update on products
-  for each row execute procedure update_updated_at_column();
-
-create trigger update_orders_updated_at before update on orders
-  for each row execute procedure update_updated_at_column();
-
-create trigger update_cart_items_updated_at before update on cart_items
-  for each row execute procedure update_updated_at_column();
-
-create trigger update_user_profiles_updated_at before update on user_profiles
-  for each row execute procedure update_updated_at_column();
-
-create trigger update_delivery_addresses_updated_at before update on delivery_addresses
-  for each row execute procedure update_updated_at_column();
 create policy "Users can insert their own addresses"
   on delivery_addresses for insert
   with check (auth.uid() = user_id);
@@ -229,21 +233,23 @@ create policy "Users can delete their own addresses"
   on delivery_addresses for delete
   using (auth.uid() = user_id);
 
--- Function to update updated_at timestamp
-create or replace function update_updated_at_column()
-returns trigger as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$ language plpgsql;
-
 -- Triggers for updated_at
+drop trigger if exists update_products_updated_at on products;
 create trigger update_products_updated_at before update on products
-  for each row execute procedure update_updated_at_column();
+  for each row execute function update_updated_at_column();
 
+drop trigger if exists update_orders_updated_at on orders;
 create trigger update_orders_updated_at before update on orders
-  for each row execute procedure update_updated_at_column();
+  for each row execute function update_updated_at_column();
 
+drop trigger if exists update_cart_items_updated_at on cart_items;
 create trigger update_cart_items_updated_at before update on cart_items
-  for each row execute procedure update_updated_at_column();
+  for each row execute function update_updated_at_column();
+
+drop trigger if exists update_user_profiles_updated_at on user_profiles;
+create trigger update_user_profiles_updated_at before update on user_profiles
+  for each row execute function update_updated_at_column();
+
+drop trigger if exists update_delivery_addresses_updated_at on delivery_addresses;
+create trigger update_delivery_addresses_updated_at before update on delivery_addresses
+  for each row execute function update_updated_at_column();

@@ -198,21 +198,15 @@ export default function UsersAdminClient() {
 
   if (!supabase) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="font-['DM_Sans'] text-2xl font-medium text-[#161616]">{t('notConfigured.title')}</h1>
-        <p className="font-['Outfit'] text-sm text-[#535353] mt-2">{t('notConfigured.body')}</p>
+      <div className="rounded-[16px] border border-[#BBBBBB] bg-white p-[16px]">
+        <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">{t('notConfigured.title')}</h2>
+        <p className="font-['Outfit'] text-[14px] text-[#535353] mt-[8px]">{t('notConfigured.body')}</p>
       </div>
     )
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-['DM_Sans'] font-medium text-[#161616] tracking-[-0.96px]">
-          {t('title')}
-        </h1>
-        <p className="mt-2 text-[#535353] font-['DM_Sans']">{t('subtitle')}</p>
-      </div>
+    <div>
 
       {error && (
         <div className="mb-6 border border-red-200 bg-red-50 text-red-800 rounded-lg px-4 py-3 font-['DM_Sans']">
