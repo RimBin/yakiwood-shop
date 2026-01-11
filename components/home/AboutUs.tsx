@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { assets } from '@/lib/assets';
 import ArrowRight from '@/components/icons/ArrowRight';
@@ -12,11 +13,53 @@ const [imgProject1, imgProject2] = assets.projects;
 
 const partnerNames = ['RIMLT', 'BIKUVA', 'SANKA', 'METALLUM', 'Diktum', 'Sidergas', 'BAU'];
 
+function PartnersMarquee({ items, durationSeconds = 26 }: { items: string[]; durationSeconds?: number }) {
+  const repeated = [...items, ...items];
+
+  return (
+    <div className="relative overflow-hidden">
+      <div
+        className="yw-marquee-track flex gap-[16px]"
+        style={{ ['--yw-marquee-duration' as any]: `${durationSeconds}s` } as React.CSSProperties}
+      >
+        {repeated.map((name, index) => (
+          <div
+            // index is required here because we intentionally duplicate items.
+            key={`${name}-${index}`}
+            className="bg-[#EAEAEA] rounded-[8px] h-[140px] w-[180px] lg:h-[210px] lg:w-[213px] shrink-0 flex items-center justify-center"
+          >
+            <span className="font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-[#161616]">
+              {name}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function AboutUs() {
   const t = useTranslations('about');
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const aboutHref = toLocalePath('/about', currentLocale);
+
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+
+  const videoSrc = useMemo(() => {
+    const base = 'https://www.youtube.com/embed/61yqRQ5lO88';
+    const params = new URLSearchParams({ autoplay: '1', rel: '0', modestbranding: '1' });
+    return `${base}?${params.toString()}`;
+  }, []);
+
+  useEffect(() => {
+    if (!isVideoOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsVideoOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isVideoOpen]);
 
   return (
     <section id="about-us" className="w-full bg-[#E1E1E1]">
@@ -46,9 +89,14 @@ export default function AboutUs() {
             <Image src={imgProject2} alt="" fill className="object-cover" />
             <div className="absolute inset-0 bg-black/20" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-[64px] h-[64px] rounded-full bg-[#161616]/75 flex items-center justify-center">
+              <button
+                type="button"
+                onClick={() => setIsVideoOpen(true)}
+                className="w-[64px] h-[64px] rounded-full bg-[#161616]/75 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#161616] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E1E1E1]"
+                aria-label="Watch video"
+              >
                 <span className="font-['Outfit'] font-normal text-[10px] tracking-[0.6px] uppercase text-white">Watch</span>
-              </div>
+              </button>
             </div>
           </div>
 
@@ -64,14 +112,8 @@ export default function AboutUs() {
           <p className="px-[16px] md:px-[32px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[16px]">
             Our partners
           </p>
-          <div className="flex gap-[16px] overflow-x-auto scrollbar-hide px-[16px] md:px-[32px] pb-[8px]" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            {partnerNames.map((name) => (
-              <div key={name} className="bg-[#EAEAEA] rounded-[8px] h-[140px] w-[180px] shrink-0 flex items-center justify-center">
-                <span className="font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-[#161616]">
-                  {name}
-                </span>
-              </div>
-            ))}
+          <div className="px-[16px] md:px-[32px]">
+            <PartnersMarquee items={partnerNames} durationSeconds={22} />
           </div>
         </div>
       </div>
@@ -105,9 +147,14 @@ export default function AboutUs() {
               <Image src={imgProject2} alt="" fill className="object-cover" />
               <div className="absolute inset-0 bg-black/15" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-[72px] h-[72px] rounded-full bg-[#161616]/75 flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => setIsVideoOpen(true)}
+                  className="w-[72px] h-[72px] rounded-full bg-[#161616]/75 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#161616] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E1E1E1]"
+                  aria-label="Watch video"
+                >
                   <span className="font-['Outfit'] font-normal text-[10px] tracking-[0.6px] uppercase text-white">Watch</span>
-                </div>
+                </button>
               </div>
             </div>
           </div>
@@ -136,16 +183,48 @@ export default function AboutUs() {
           Our partners
         </p>
 
-        <div className="mt-[24px] flex gap-[16px] justify-center">
-          {partnerNames.map((name) => (
-            <div key={name} className="bg-[#EAEAEA] rounded-[8px] h-[210px] w-[213px] flex items-center justify-center">
-              <span className="font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-[#161616]">
-                {name}
-              </span>
-            </div>
-          ))}
+        <div className="mt-[24px]">
+          <PartnersMarquee items={partnerNames} durationSeconds={30} />
         </div>
       </div>
+
+      {isVideoOpen ? (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center px-[16px]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Video"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/70"
+            onClick={() => setIsVideoOpen(false)}
+            aria-label="Close video"
+          />
+
+          <div className="relative w-full max-w-[960px] bg-black rounded-[12px] overflow-hidden shadow-2xl">
+            <div className="absolute right-[12px] top-[12px] z-10">
+              <button
+                type="button"
+                onClick={() => setIsVideoOpen(false)}
+                className="h-[36px] px-[12px] rounded-[100px] bg-white/10 text-white font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="relative w-full aspect-video">
+              <iframe
+                className="absolute inset-0 h-full w-full"
+                src={videoSrc}
+                title="YouTube video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

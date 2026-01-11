@@ -595,6 +595,7 @@
     "free": "Nemokamai",
     "includingVat": "Įskaitant PVM",
     "dimensions": "Matmenys:",
+    "dimensionsNotSet": "Nenurodyta",
     "widthMm": "Plotis (mm)",
     "lengthMm": "Ilgis (mm)",
     "dimensionsHint": "Įveskite matmenis, jei kaina skaičiuojama pagal m²."

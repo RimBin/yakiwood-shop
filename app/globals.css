@@ -103,3 +103,26 @@ body {
 .icon-wrapper:hover .icon-image {
   opacity: 0.95;
 }
+
+/* Partners marquee (judanti eilutė) */
+@keyframes yw-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.yw-marquee-track {
+  width: max-content;
+  will-change: transform;
+  animation: yw-marquee var(--yw-marquee-duration, 28s) linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yw-marquee-track {
+    animation: none;
+    transform: translateX(0);
+  }
+}

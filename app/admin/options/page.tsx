@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Breadcrumbs } from '@/components/ui'
 import ThicknessOptionsAdminClient from '../../../components/admin/ThicknessOptionsAdminClient'
+import ColorOptionsAdminClient from '../../../components/admin/ColorOptionsAdminClient'
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -42,8 +43,45 @@ async function getThicknessOptions() {
   return { options: (data as any[]) ?? [], error: null as string | null }
 }
 
+async function getColorOptions() {
+  const supabase = await requireAdmin()
+
+  const { data, error } = await supabase
+    .from('catalog_options')
+    .select('id, option_type, value_text, value_mm, label_lt, label_en, hex_color, sort_order, is_active')
+    .eq('option_type', 'color')
+    .order('sort_order', { ascending: true, nullsFirst: true })
+
+  if (error) {
+    return { options: [], error: error.message }
+  }
+
+  return { options: (data as any[]) ?? [], error: null as string | null }
+}
+
+async function getColorAssets() {
+  const supabase = await requireAdmin()
+
+  const { data, error } = await supabase
+    .from('product_assets')
+    .select('id, asset_type, url, product_id, color_code, wood_type, usage_type, profile_variant_id, finish_variant_id, is_active')
+    .eq('asset_type', 'photo')
+    .is('product_id', null)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    return { assets: [], error: error.message }
+  }
+
+  return { assets: (data as any[]) ?? [], error: null as string | null }
+}
+
 export default async function AdminOptionsPage() {
   const { options, error } = await getThicknessOptions()
+  const { options: colorOptions, error: colorError } = await getColorOptions()
+  const { assets: colorAssets, error: colorAssetsError } = await getColorAssets()
+
+  const combinedError = error ?? colorError ?? colorAssetsError
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
@@ -65,7 +103,14 @@ export default async function AdminOptionsPage() {
           </p>
         </div>
 
-        <ThicknessOptionsAdminClient initialOptions={options} initialError={error} />
+        <div className="space-y-8">
+          <ThicknessOptionsAdminClient initialOptions={options} initialError={combinedError} />
+          <ColorOptionsAdminClient
+            initialOptions={colorOptions}
+            initialAssets={colorAssets}
+            initialError={combinedError}
+          />
+        </div>
       </div>
     </div>
   )

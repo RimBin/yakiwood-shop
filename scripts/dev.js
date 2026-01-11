@@ -70,7 +70,10 @@ async function main() {
     return;
   }
 
-  const child = spawn(process.execPath, [nextBin, 'dev', ...userArgs], { stdio: 'inherit' });
+  // Turbopack can be flaky on Windows filesystems (SST/compaction errors). Default to Webpack.
+  // If you explicitly want Turbopack, run: `NEXT_DISABLE_TURBOPACK=0 npm run dev`.
+  const env = { ...process.env, NEXT_DISABLE_TURBOPACK: process.env.NEXT_DISABLE_TURBOPACK ?? '1' };
+  const child = spawn(process.execPath, [nextBin, 'dev', ...userArgs], { stdio: 'inherit', env });
   child.on('exit', (code) => process.exit(code ?? 0));
   child.on('error', (error) => {
     console.error(String(error?.message || error));

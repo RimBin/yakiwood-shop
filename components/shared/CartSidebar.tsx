@@ -12,7 +12,7 @@ interface CartSidebarProps {
 }
 
 export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
-  const { items, updateQuantity, removeItem, updateItemConfiguration } = useCartStore();
+  const { items, updateQuantity, removeItem } = useCartStore();
   const t = useTranslations();
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
@@ -107,60 +107,18 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                           )}
 
                           <div className="mt-[10px]">
-                            {(typeof item.configuration?.widthMm === 'number' || typeof item.configuration?.lengthMm === 'number') && (
-                              <p className="font-['Outfit'] font-light text-[12px] leading-[1.4] text-[#535353]">
-                                {t('cart.dimensions')}{' '}
-                                {typeof item.configuration?.widthMm === 'number' ? item.configuration.widthMm : '—'}
-                                ×
-                                {typeof item.configuration?.lengthMm === 'number' ? item.configuration.lengthMm : '—'}
-                                {' '}mm
+                            <p className="font-['Outfit'] font-light text-[12px] leading-[1.4] text-[#535353]">
+                              {t('cart.dimensions')}
+                            </p>
+                            {typeof item.configuration?.widthMm === 'number' && typeof item.configuration?.lengthMm === 'number' ? (
+                              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.4] text-[#161616]">
+                                H{item.configuration.lengthMm}mm x W{item.configuration.widthMm}mm
+                              </p>
+                            ) : (
+                              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.4] text-[#535353]">
+                                {t('cart.dimensionsNotSet')}
                               </p>
                             )}
-
-                            <div className="mt-[8px] grid grid-cols-2 gap-[8px]">
-                              <div className="flex flex-col gap-[4px]">
-                                <label className="font-['Outfit'] font-light text-[12px] leading-[1.3] text-[#535353]">
-                                  {t('cart.widthMm')}
-                                </label>
-                                <input
-                                  inputMode="numeric"
-                                  type="number"
-                                  min={1}
-                                  step={1}
-                                  value={typeof item.configuration?.widthMm === 'number' ? String(item.configuration.widthMm) : ''}
-                                  onChange={(e) => {
-                                    const next = e.target.value.trim();
-                                    updateItemConfiguration(item.lineId, {
-                                      widthMm: next === '' ? undefined : Number(next),
-                                    });
-                                  }}
-                                  className="h-[32px] px-[10px] rounded-[8px] border border-[#BBBBBB] bg-white/70 font-['Outfit'] font-normal text-[14px] leading-[1.2] text-[#161616] outline-none focus:border-[#161616]"
-                                />
-                              </div>
-                              <div className="flex flex-col gap-[4px]">
-                                <label className="font-['Outfit'] font-light text-[12px] leading-[1.3] text-[#535353]">
-                                  {t('cart.lengthMm')}
-                                </label>
-                                <input
-                                  inputMode="numeric"
-                                  type="number"
-                                  min={1}
-                                  step={1}
-                                  value={typeof item.configuration?.lengthMm === 'number' ? String(item.configuration.lengthMm) : ''}
-                                  onChange={(e) => {
-                                    const next = e.target.value.trim();
-                                    updateItemConfiguration(item.lineId, {
-                                      lengthMm: next === '' ? undefined : Number(next),
-                                    });
-                                  }}
-                                  className="h-[32px] px-[10px] rounded-[8px] border border-[#BBBBBB] bg-white/70 font-['Outfit'] font-normal text-[14px] leading-[1.2] text-[#161616] outline-none focus:border-[#161616]"
-                                />
-                              </div>
-                            </div>
-
-                            <p className="mt-[6px] font-['Outfit'] font-light text-[12px] leading-[1.4] text-[#535353]">
-                              {t('cart.dimensionsHint')}
-                            </p>
                           </div>
                         </div>
 

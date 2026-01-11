@@ -7,16 +7,6 @@ export const runtime = 'nodejs'
 
 const LocaleSchema = z.enum(['lt', 'en'])
 
-function toDocId(locale: 'lt' | 'en', entryId: string) {
-  const safe = String(entryId)
-    .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_+|_+$/g, '')
-
-  return `chatbotFaqEntry_${locale}_${safe || 'entry'}`
-}
-
 export async function POST(request: NextRequest) {
   try {
     await requireAdmin(request)
@@ -26,51 +16,60 @@ export async function POST(request: NextRequest) {
 
     const localeParsed = localeParam ? LocaleSchema.safeParse(localeParam) : null
     if (localeParam && !localeParsed?.success) {
-      return NextResponse.json({ success: false, error: 'Invalid locale' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid locale' }, { status: 400 })
     }
 
     const { getStaticFaqEntries } = await import('@/lib/chatbot/faq')
-    const { writeClient, assertWriteToken } = await import('@/sanity/lib/writeClient')
-
-    assertWriteToken()
+    const { supabaseAdmin } = await import('@/lib/supabase-admin')
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Supabase admin not configured' }, { status: 503 })
+    }
 
     const locales: Array<'lt' | 'en'> = localeParsed?.success ? [localeParsed.data] : ['lt', 'en']
 
-    let importedCount = 0
-    let tx = writeClient.transaction()
+    const upsertRows: Array<{
+      locale: 'lt' | 'en'
+      source_key: string
+      enabled: boolean
+      sort_order: number
+      question: string
+      answer: string
+      keywords: string[]
+      suggestions: string[]
+    }> = []
 
     for (const locale of locales) {
       const entries = getStaticFaqEntries(locale)
-
       entries.forEach((e, idx) => {
-        const _id = toDocId(locale, e.id)
-
-        tx = tx.createIfNotExists({
-          _id,
-          _type: 'chatbotFaqEntry',
+        upsertRows.push({
           locale,
+          source_key: String(e.id),
           enabled: true,
-          order: idx * 10,
+          sort_order: idx * 10,
           question: String(e.question),
           answer: String(e.answer),
           keywords: Array.isArray(e.keywords) ? e.keywords.map(String) : [],
           suggestions: Array.isArray(e.suggestions) ? e.suggestions.map(String) : [],
         })
-
-        importedCount += 1
       })
     }
 
-    await tx.commit({ autoGenerateArrayKeys: true })
+    const { data, error } = await supabaseAdmin
+      .from('chatbot_faq_entries')
+      .upsert(upsertRows, { onConflict: 'locale,source_key' })
+      .select('id')
 
-    return NextResponse.json({ success: true, data: { imported: importedCount } }, { status: 200 })
-  } catch (error: unknown) {
-    if (error instanceof AdminAuthError) {
-      return NextResponse.json({ success: false, error: error.message }, { status: error.status })
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    return NextResponse.json({ data: { imported: Array.isArray(data) ? data.length : upsertRows.length } }, { status: 200 })
+  } catch (error: unknown) {
+    if (error instanceof AdminAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status })
+    }
     const message = error instanceof Error ? error.message : 'Failed to import FAQ entries'
-    const status = message.includes('SANITY_API_TOKEN') ? 503 : 500
-    return NextResponse.json({ success: false, error: message }, { status })
+
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

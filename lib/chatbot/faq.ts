@@ -197,31 +197,33 @@ function getFaqCacheStore(): FaqCacheStore {
   return g.__chatbotFaqCache;
 }
 
-async function fetchFaqEntriesFromSanity(locale: SupportedChatbotLocale): Promise<FaqEntry[] | null> {
+async function fetchFaqEntriesFromSupabase(locale: SupportedChatbotLocale): Promise<FaqEntry[] | null> {
   try {
-    const { client } = await import('@/sanity/lib/client');
+    const { supabaseAdmin } = await import('@/lib/supabase-admin');
+    if (!supabaseAdmin) return null;
 
-    const query =
-      '*[_type == "chatbotFaqEntry" && enabled == true && locale == $locale] | order(order asc, _createdAt asc) {\n' +
-      '  "id": _id,\n' +
-      '  question,\n' +
-      '  answer,\n' +
-      '  "keywords": coalesce(keywords, []),\n' +
-      '  "suggestions": coalesce(suggestions, [])\n' +
-      '}';
+    const { data, error } = await supabaseAdmin
+      .from('chatbot_faq_entries')
+      .select('id, question, answer, keywords, suggestions')
+      .eq('locale', locale)
+      .eq('enabled', true)
+      .order('sort_order', { ascending: true });
 
-    const results = await client.fetch<FaqEntry[]>(query, { locale });
-    if (!Array.isArray(results)) return [];
+    if (error) return null;
+    if (!Array.isArray(data)) return [];
 
-    // Ensure stable shapes even if some entries are partially filled.
-    return results
+    return data
       .filter((e) => Boolean(e && e.id && e.question && e.answer))
       .map((e) => ({
-        id: String(e.id),
-        question: String(e.question),
-        answer: String(e.answer),
-        keywords: Array.isArray(e.keywords) ? e.keywords.map(String) : [],
-        suggestions: Array.isArray(e.suggestions) ? e.suggestions.map(String) : undefined,
+        id: String((e as { id: string }).id),
+        question: String((e as { question: string }).question),
+        answer: String((e as { answer: string }).answer),
+        keywords: Array.isArray((e as { keywords?: unknown }).keywords)
+          ? ((e as { keywords: unknown[] }).keywords as unknown[]).map(String)
+          : [],
+        suggestions: Array.isArray((e as { suggestions?: unknown }).suggestions)
+          ? ((e as { suggestions: unknown[] }).suggestions as unknown[]).map(String)
+          : undefined,
       }));
   } catch {
     return null;
@@ -238,9 +240,9 @@ export async function getFaqEntries(locale: string | undefined): Promise<FaqEntr
     return cached.entries.length > 0 ? cached.entries : getStaticFaqEntries(normalized);
   }
 
-  // Cache for a short time to avoid repeated Sanity queries per request.
+  // Cache for a short time to avoid repeated Supabase queries per request.
   const ttlMs = 2 * 60 * 1000; // ~2 minutes
-  const fetched = await fetchFaqEntriesFromSanity(normalized);
+  const fetched = await fetchFaqEntriesFromSupabase(normalized);
 
   if (fetched) {
     cache.byLocale[normalized] = { expiresAt: now + ttlMs, entries: fetched };

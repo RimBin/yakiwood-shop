@@ -82,7 +82,7 @@
         "creditDebitCard": "Credit / debit card"
       },
       "terms": {
-        "agreeTo": "I agree to the {terms} and {privacy}",
+        "agreeTo": "I agree to the <terms>Terms and conditions</terms> and <privacy>Privacy policy</privacy>",
         "terms": "Terms and conditions",
         "privacy": "Privacy policy"
       },
@@ -321,6 +321,7 @@
     "noProjects": "No projects found"
   },
   "about": {
+    "pavadinimas": "about us",
     "title": "About us",
     "aboutYakiwood": "About Yakiwood",
     "ourStory": "Our story",
@@ -421,6 +422,7 @@
     "free": "Free",
     "includingVat": "Including VAT",
     "dimensions": "Dimensions:",
+    "dimensionsNotSet": "Not set",
     "widthMm": "Width (mm)",
     "lengthMm": "Length (mm)",
     "dimensionsHint": "Enter dimensions if pricing is based on m²."
@@ -461,7 +463,7 @@
       "creditDebitCard": "Credit / debit card"
     },
     "terms": {
-      "agreeTo": "I agree to the {terms} and {privacy}",
+      "agreeTo": "I agree to the <terms>Terms and conditions</terms> and <privacy>Privacy policy</privacy>",
       "terms": "Terms and conditions",
       "privacy": "Privacy policy"
     },

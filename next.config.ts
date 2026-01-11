@@ -15,7 +15,7 @@ const contentSecurityPolicyValue = [
   "img-src 'self' data: blob: https://*.figma.com https://*.unsplash.com https://www.google-analytics.com",
   "font-src 'self' data:",
   "connect-src 'self' https://www.google-analytics.com https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://*.sanity.io https://*.apicdn.sanity.io https://registry.npmjs.org",
-  "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+  "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.youtube.com https://www.youtube-nocookie.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
