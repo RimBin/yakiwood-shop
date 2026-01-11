@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
 import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
+import { useCartStore } from '@/lib/cart/store';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
 
 interface ProductDetailClientProps {
@@ -16,6 +17,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const t = useTranslations('productPage');
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const addItem = useCartStore((state) => state.addItem);
 
   const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
   const displayDescription =
@@ -64,6 +66,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
   const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(colorOptions[0] || null);
   const [selectedFinish, setSelectedFinish] = useState<ProductProfileVariant | null>(profileOptions[0] || null);
+  const [selectedThicknessMm, setSelectedThicknessMm] = useState<number>(20);
+
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [quotedUnitPrice, setQuotedUnitPrice] = useState<number | null>(null);
 
   useEffect(() => {
     setSelectedColor(colorOptions[0] || null);
@@ -72,6 +79,109 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   useEffect(() => {
     setSelectedFinish(profileOptions[0] || null);
   }, [profileOptions]);
+
+  const thicknessOptions = useMemo(
+    () => [
+      { valueMm: 20, label: '18/20 mm' },
+      { valueMm: 28, label: '28 mm' },
+    ],
+    []
+  );
+
+  const selectedThicknessLabel = useMemo(() => {
+    return thicknessOptions.find((opt) => opt.valueMm === selectedThicknessMm)?.label ?? `${selectedThicknessMm} mm`;
+  }, [selectedThicknessMm, thicknessOptions]);
+
+  const selectionPrice = useMemo(() => {
+    const colorMod = selectedColor?.priceModifier ?? 0;
+    const finishMod = selectedFinish?.priceModifier ?? 0;
+    return effectivePrice + colorMod + finishMod;
+  }, [effectivePrice, selectedColor?.priceModifier, selectedFinish?.priceModifier]);
+
+  const handleAddToCart = () => {
+    const widthMm = selectedFinish?.dimensions?.width;
+    const lengthMm = selectedFinish?.dimensions?.length;
+
+    addItem({
+      id: product.id,
+      name: displayName,
+      slug: product.slug,
+      basePrice: typeof quotedUnitPrice === 'number' ? quotedUnitPrice : selectionPrice,
+      color: selectedColor?.name,
+      finish: selectedFinish?.name,
+      configuration: {
+        colorVariantId: selectedColor?.id,
+        profileVariantId: selectedFinish?.id,
+        thicknessMm: selectedThicknessMm,
+        widthMm: typeof widthMm === 'number' ? widthMm : undefined,
+        lengthMm: typeof lengthMm === 'number' ? lengthMm : undefined,
+      },
+    });
+  };
+
+  useEffect(() => {
+    const widthMm = selectedFinish?.dimensions?.width;
+    const lengthMm = selectedFinish?.dimensions?.length;
+
+    if (!product?.id) return;
+    if (typeof widthMm !== 'number' || typeof lengthMm !== 'number') {
+      setQuotedUnitPrice(null);
+      setQuoteError(null);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const run = async () => {
+      setQuoteLoading(true);
+      setQuoteError(null);
+      try {
+        const res = await fetch('/api/pricing/quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            productId: product.id,
+            profileVariantId: selectedFinish?.id,
+            colorVariantId: selectedColor?.id,
+            thicknessMm: selectedThicknessMm,
+            widthMm,
+            lengthMm,
+            quantityBoards: 1,
+          }),
+        });
+
+        if (!res.ok) {
+          setQuotedUnitPrice(null);
+          try {
+            const data = await res.json();
+            setQuoteError(typeof data?.error === 'string' ? data.error : null);
+          } catch {
+            setQuoteError(null);
+          }
+          return;
+        }
+
+        const data = await res.json();
+        const unit = Number(data?.unitPricePerBoard);
+        if (Number.isFinite(unit) && unit > 0) {
+          setQuotedUnitPrice(unit);
+        } else {
+          setQuotedUnitPrice(null);
+        }
+      } catch (e: any) {
+        if (e?.name === 'AbortError') return;
+        setQuotedUnitPrice(null);
+        setQuoteError(currentLocale === 'lt' ? 'Nepavyko apskaičiuoti kainos' : 'Failed to calculate price');
+      } finally {
+        setQuoteLoading(false);
+      }
+    };
+
+    run();
+
+    return () => controller.abort();
+  }, [product?.id, selectedFinish?.id, selectedFinish?.dimensions?.width, selectedFinish?.dimensions?.length, selectedColor?.id, selectedThicknessMm, currentLocale]);
 
   const solutions = [
     { id: 'facade', label: t('solutions.facade') },
@@ -114,6 +224,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       produktas: displayName,
       spalva: selectedColor?.name ?? '',
       profilis: selectedFinish?.name ?? '',
+      storis: selectedThicknessLabel,
       sprendimas: product.category ?? '',
       perziura: show3D ? '3d' : 'foto',
     },
@@ -186,6 +297,18 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   </p>
                 ) : null}
               </div>
+
+              {quoteLoading ? (
+                <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
+                  {currentLocale === 'lt' ? 'Skaičiuojama kaina…' : 'Calculating price…'}
+                </p>
+              ) : typeof quotedUnitPrice === 'number' ? (
+                <p className="font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#161616] tracking-[-0.32px]">
+                  {currentLocale === 'lt' ? 'Pasirinkimo kaina:' : 'Selected price:'} {quotedUnitPrice.toFixed(2)} €
+                </p>
+              ) : quoteError ? (
+                <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">{quoteError}</p>
+              ) : null}
             </div>
 
             {/* Wood type */}
@@ -292,6 +415,33 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               </div>
             )}
 
+            {/* Thickness */}
+            <div className="flex flex-col gap-[8px]">
+              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">
+                {currentLocale === 'lt' ? 'Storis' : 'Thickness'}
+              </p>
+              <div className="flex gap-[8px] flex-wrap">
+                {thicknessOptions.map((opt) => {
+                  const active = selectedThicknessMm === opt.valueMm;
+                  return (
+                    <button
+                      key={opt.valueMm}
+                      type="button"
+                      onClick={() => setSelectedThicknessMm(opt.valueMm)}
+                      className={`h-[24px] px-[10px] rounded-[100px] border font-['Outfit'] text-[10px] tracking-[0.6px] uppercase transition-colors ${
+                        active
+                          ? 'bg-[#161616] border-[#161616] text-white'
+                          : 'bg-transparent border-[#BBBBBB] text-[#535353]'
+                      }`}
+                      aria-pressed={active}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Benefits */}
             <div className="flex flex-col gap-[8px]">
               <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('benefitsLabel')}</p>
@@ -332,9 +482,16 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
             {/* CTAs */}
             <div className="flex flex-col gap-[8px] pt-[8px]">
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                className="w-full bg-[#161616] text-white h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase flex items-center justify-center hover:bg-[#2d2d2d] transition-colors"
+              >
+                {currentLocale === 'lt' ? 'Į krepšelį' : 'Add to cart'}
+              </button>
               <Link
                 href={contactHref}
-                className="w-full bg-[#161616] text-white h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase flex items-center justify-center hover:bg-[#2d2d2d] transition-colors"
+                className="w-full bg-white text-[#161616] h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase flex items-center justify-center border border-[#161616] hover:bg-white transition-colors"
               >
                 {t('ctaQuote')}
               </Link>

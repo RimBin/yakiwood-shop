@@ -115,6 +115,7 @@ export default function CheckoutPage() {
   const items = useCartStore((s) => s.items);
   const removeItem = useCartStore((s) => s.removeItem);
   const clearCart = useCartStore((s) => s.clear);
+  const updateItemConfiguration = useCartStore((s) => s.updateItemConfiguration);
   
   // Modal states
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -166,6 +167,7 @@ export default function CheckoutPage() {
         quantity: item.quantity,
         color: item.color,
         finish: item.finish,
+        configuration: item.configuration,
       }));
       // 0) Lock pricing server-side (TTL quote) to avoid trusting client prices.
       const quoteRes = await fetch('/api/pricing/lock', {
@@ -383,6 +385,90 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[672px_648px] gap-[32px] items-start">
           {/* Left Column */}
           <div className="flex flex-col gap-[64px]">
+            {/* Items & dimensions */}
+            <section className="flex flex-col gap-[24px]">
+              <div className="flex flex-col gap-[8px]">
+                <p className="font-['Outfit'] font-normal leading-[1.3] text-[#161616] text-[12px] tracking-[0.6px] uppercase">
+                  {t('items.title')}
+                </p>
+                <div className="h-px bg-[#BBBBBB]" />
+              </div>
+
+              <p className="font-['Outfit'] font-light text-[12px] leading-[1.5] text-[#535353]">
+                {t('items.hint')}
+              </p>
+
+              <div className="flex flex-col gap-[16px]">
+                {items.map((item) => {
+                  const widthValue = item.configuration?.widthMm;
+                  const lengthValue = item.configuration?.lengthMm;
+
+                  return (
+                    <div key={item.lineId} className="border border-[#BBBBBB] rounded-[8px] p-[16px] bg-white/40">
+                      <div className="flex items-start justify-between gap-[16px]">
+                        <div className="min-w-0">
+                          <p className="font-['DM_Sans'] text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616] truncate">
+                            {item.name}
+                          </p>
+                          {(item.color || item.finish) && (
+                            <p className="mt-[4px] font-['Outfit'] text-[12px] leading-[1.4] text-[#535353]">
+                              {(item.color ? `${t('summary.colorLabel')} ${item.color}` : '') +
+                                (item.color && item.finish ? ' • ' : '') +
+                                (item.finish ? `${t('summary.finishLabel')} ${item.finish}` : '')}
+                            </p>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => removeItem(item.lineId)}
+                          className="font-['Outfit'] font-normal leading-[1.2] text-[#161616] text-[12px] tracking-[0.6px] uppercase hover:opacity-70 transition-opacity"
+                        >
+                          {t('summary.remove')}
+                        </button>
+                      </div>
+
+                      <div className="mt-[12px] flex flex-wrap gap-[16px]">
+                        <div className="flex flex-col gap-[4px] w-full sm:w-[240px]">
+                          <FieldLabel>{t('items.widthMm')}</FieldLabel>
+                          <TextField
+                            inputMode="numeric"
+                            type="number"
+                            min={1}
+                            step={1}
+                            value={typeof widthValue === 'number' ? String(widthValue) : ''}
+                            onChange={(e) => {
+                              const next = e.target.value.trim();
+                              updateItemConfiguration(item.lineId, {
+                                widthMm: next === '' ? undefined : Number(next),
+                              });
+                            }}
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-[4px] w-full sm:w-[240px]">
+                          <FieldLabel>{t('items.lengthMm')}</FieldLabel>
+                          <TextField
+                            inputMode="numeric"
+                            type="number"
+                            min={1}
+                            step={1}
+                            value={typeof lengthValue === 'number' ? String(lengthValue) : ''}
+                            onChange={(e) => {
+                              const next = e.target.value.trim();
+                              updateItemConfiguration(item.lineId, {
+                                lengthMm: next === '' ? undefined : Number(next),
+                              });
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
             {/* Contact information */}
             <section className="flex flex-col gap-[24px]">
               <div className="flex items-center justify-between pb-[16px] border-b border-[#BBBBBB]">
@@ -739,6 +825,14 @@ export default function CheckoutPage() {
                                   (item.finish ? `${t('summary.finishLabel')} ${item.finish}` : '')}
                               </p>
                             )}
+                            {typeof item.configuration?.widthMm === 'number' && typeof item.configuration?.lengthMm === 'number' && (
+                              <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">
+                                {t('summary.dimensions', {
+                                  widthMm: item.configuration.widthMm,
+                                  lengthMm: item.configuration.lengthMm,
+                                })}
+                              </p>
+                            )}
                             <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">
                               {t('summary.quantity', { count: item.quantity })}
                             </p>
@@ -746,7 +840,7 @@ export default function CheckoutPage() {
 
                           <button
                             type="button"
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeItem(item.lineId)}
                             className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase hover:opacity-70 transition-opacity"
                           >
                             {t('summary.remove')}

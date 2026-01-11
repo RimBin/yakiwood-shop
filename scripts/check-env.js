@@ -185,6 +185,56 @@ const envVars = {
     getLink: 'https://developer.paypal.com/dashboard/applications/sandbox',
   },
 
+  // Paysera
+  PAYSERA_PROJECT_ID: {
+    required: 'conditional',
+    condition: 'paysera',
+    type: 'string',
+    description: 'Paysera project ID',
+    example: '123456',
+    category: 'Paysera',
+  },
+  PAYSERA_SIGN_PASSWORD: {
+    required: 'conditional',
+    condition: 'paysera',
+    type: 'string',
+    description: 'Paysera sign password (server-side only)',
+    example: '... (from Paysera project settings)',
+    category: 'Paysera',
+    sensitive: true,
+  },
+  PAYSERA_TEST: {
+    required: false,
+    type: 'boolean',
+    description: 'Enable Paysera test mode',
+    default: 'true',
+    category: 'Paysera',
+  },
+  PAYSERA_VERSION: {
+    required: false,
+    type: 'string',
+    description: 'Paysera API version',
+    default: '1.6',
+    category: 'Paysera',
+  },
+
+  // Pricing (quote locking)
+  PRICING_QUOTE_TOKEN_SECRET: {
+    required: true,
+    type: 'string',
+    description: 'HMAC secret used to hash pricing quote tokens (required by /api/pricing/lock)',
+    example: 'a-long-random-string',
+    category: 'Pricing',
+    sensitive: true,
+  },
+  PRICING_QUOTE_TTL_MINUTES: {
+    required: false,
+    type: 'string',
+    description: 'Locked quote TTL in minutes',
+    example: '30',
+    category: 'Pricing',
+  },
+
   // Email (Resend)
   RESEND_API_KEY: {
     required: 'conditional',

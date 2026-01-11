@@ -4,13 +4,19 @@ import { useState, useEffect } from 'react';
 import { Header, Footer } from '@/components/shared';
 import { usePathname } from 'next/navigation';
 
-function UnderMaintenanceScreen({ onAuthenticate }: { onAuthenticate: () => void }) {
+function UnderMaintenanceScreen({
+  onAuthenticate,
+  previewPassword,
+}: {
+  onAuthenticate: () => void
+  previewPassword: string
+}) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'yakiwood2025') {
+    if (password === previewPassword) {
       onAuthenticate();
       setError('');
     } else {
@@ -98,12 +104,21 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
 
+  // Preview gate is disabled by default (including production). Enable explicitly via env.
+  // NOTE: This is a client component; only NEXT_PUBLIC_* env vars are available.
+  const isPreviewGateEnabled =
+    process.env.NEXT_PUBLIC_PREVIEW_GATE_ENABLED === '1' ||
+    process.env.NEXT_PUBLIC_PREVIEW_GATE_ENABLED === 'true';
+
+  const previewPassword =
+    (process.env.NEXT_PUBLIC_PREVIEW_GATE_PASSWORD || '').trim() || 'yakiwood2025';
+
   // Skip auth check in development mode
   const isDevelopment = process.env.NODE_ENV === 'development';
 
   useEffect(() => {
-    // In development, auto-authenticate
-    if (isDevelopment) {
+    // In development (or when gate disabled), auto-authenticate
+    if (isDevelopment || !isPreviewGateEnabled) {
       setIsAuthenticated(true);
       setIsLoading(false);
       return;
@@ -115,7 +130,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
       setIsAuthenticated(true);
     }
     setIsLoading(false);
-  }, [isDevelopment]);
+  }, [isDevelopment, isPreviewGateEnabled]);
 
   const handleAuthenticate = () => {
     localStorage.setItem('yakiwood_auth', 'true');
@@ -127,7 +142,12 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   }
 
   if (!isAuthenticated) {
-    return <UnderMaintenanceScreen onAuthenticate={handleAuthenticate} />;
+    return (
+      <UnderMaintenanceScreen
+        onAuthenticate={handleAuthenticate}
+        previewPassword={previewPassword}
+      />
+    );
   }
 
   // Header is fixed; add a top offset so it doesn't overlap page content.

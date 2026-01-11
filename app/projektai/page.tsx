@@ -16,22 +16,16 @@ export default function ProjectsPage() {
     const savedProjects = localStorage.getItem('yakiwood_projects');
     const loadedProjects = savedProjects ? JSON.parse(savedProjects) : projectsData;
     
-    // Convert to display format with size pattern
-    const displayProjects = loadedProjects.map((project: any, index: number) => {
-      const sizePattern = ['big', 'small', 'small', 'small', 'small', 'big'];
-      const size = sizePattern[index % sizePattern.length];
-      
-      return {
-        id: index + 1,
-        image:
-          project.featuredImage ||
-          (Array.isArray(project.images) ? project.images[0] : project.images),
-        title: project.title,
-        location: project.location,
-        size: size,
-        slug: project.slug
-      };
-    });
+    // Convert to display format
+    const displayProjects = loadedProjects.map((project: any, index: number) => ({
+      id: index + 1,
+      image:
+        project.featuredImage ||
+        (Array.isArray(project.images) ? project.images[0] : project.images),
+      title: project.title,
+      location: project.location,
+      slug: project.slug,
+    }));
     
     setProjects(displayProjects);
   }, []);
@@ -55,37 +49,22 @@ export default function ProjectsPage() {
 
       {/* Projects Grid */}
       <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px] pt-[64px]">
-        <div className="grid grid-cols-12 gap-[16px] auto-rows-auto">
-          {currentProjects.map((project, idx) => {
-            // Calculate positioning based on masonry layout
-            const isBig = project.size === "big";
-            const colSpan = isBig ? "col-span-6" : "col-span-4";
-            const height = isBig ? "h-[520px]" : "h-[330px]";
-
-            return (
-              <Link key={project.id} href={`/projektai/${project.slug}`} className={`${colSpan} flex flex-col gap-[4px]`}>
-                <div className={`${height} w-full rounded-[8px] relative overflow-hidden`}>
-                  <Image 
-                    src={project.image} 
-                    alt={project.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex flex-col gap-[4px]">
-                  <p 
-                    className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]"
-                    style={{ fontVariationSettings: "'opsz' 14" }}
-                  >
-                    {project.title}
-                  </p>
-                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-                    {project.location}
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[32px]">
+          {currentProjects.map((project, idx) => (
+            <Link key={project.id} href={`/projektai/${project.slug}`} className="flex flex-col gap-[8px]">
+              <div className={`relative w-full overflow-hidden rounded-[12px] ${idx % 2 === 0 ? 'h-[520px]' : 'h-[330px]'}`}>
+                <Image src={project.image} alt={project.title} fill className="object-cover" />
+              </div>
+              <div className="flex flex-col gap-[4px]">
+                <p className="font-['DM_Sans'] text-[18px] font-medium tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>
+                  {project.title}
+                </p>
+                <p className="font-['Outfit'] text-[14px] font-light tracking-[0.14px] text-[#535353]">
+                  {project.location}
+                </p>
+              </div>
+            </Link>
+          ))}
         </div>
 
         {/* Pagination */}

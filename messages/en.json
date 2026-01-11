@@ -917,6 +917,7 @@
       "projects": "Projects",
       "posts": "Posts",
       "users": "Users",
+      "chatbot": "Chatbot",
       "seo": "SEO",
       "emailTemplates": "Email Templates",
       "badgeNew": "new"
@@ -1138,6 +1139,78 @@
       "invalidDiscount": "Invalid discount value",
       "invalidPercent": "Percent must be between 0 and 100",
       "saveDiscount": "Failed to save discount"
+    }
+  },
+  "adminChatbot": {
+    "title": "Chatbot",
+    "subtitle": "Manage sessions and FAQ",
+    "tabs": {
+      "sessions": "Sessions",
+      "faq": "FAQ"
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "admin": "Admin",
+      "chatbot": "Chatbot"
+    },
+    "common": {
+      "refresh": "Refresh",
+      "loading": "Loading...",
+      "new": "New",
+      "save": "Save",
+      "saving": "Saving...",
+      "delete": "Delete",
+      "deleting": "Deleting..."
+    },
+    "roles": {
+      "user": "Customer",
+      "assistant": "Assistant",
+      "system": "System"
+    },
+    "sessions": {
+      "title": "Chatbot sessions",
+      "empty": "No sessions yet.",
+      "conversationTitle": "Conversation",
+      "pickSession": "Pick a session on the left.",
+      "eventsCount": "{count} events"
+    },
+    "faq": {
+      "title": "Chatbot FAQ",
+      "empty": "No entries yet.",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "editTitle": "Edit entry",
+      "noticeSaved": "Saved.",
+      "noticeCreated": "Created.",
+      "noticeDeleted": "Deleted."
+    },
+    "form": {
+      "enabled": "Enabled",
+      "order": "Order",
+      "locale": "Language",
+      "question": "Question",
+      "answer": "Answer",
+      "keywords": "Keywords (comma-separated)",
+      "suggestions": "Suggestions (comma-separated)",
+      "id": "ID: {id}",
+      "newEntry": "New entry",
+      "placeholders": {
+        "question": "Enter a question",
+        "answer": "Enter an answer",
+        "keywords": "e.g.: delivery, pricing, warranty",
+        "suggestions": "e.g.: Show products, Contact us, Pricing calculator"
+      }
+    },
+    "errors": {
+      "noAdminSession": "No active admin session.",
+      "parseResponse": "Failed to parse server response (HTTP {status}).",
+      "requestFailed": "Request failed (HTTP {status}).",
+      "loadEventsFailed": "Failed to load events.",
+      "loadFaqFailed": "Failed to load FAQ entries.",
+      "saveFailed": "Failed to save.",
+      "deleteFailed": "Failed to delete.",
+      "questionRequired": "Question is required.",
+      "answerRequired": "Answer is required."
     }
   }
 }

@@ -1,4 +1,51 @@
 {
 	"version": "2.0.0",
-	"tasks": []
+	"tasks": [
+		{
+			"label": "build:next",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "build",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "remove-next-lock",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Remove-Item -Force \"C:\\Users\\rimvy\\yakiwood-website\\.next\\lock\" -ErrorAction SilentlyContinue; if (Test-Path \"C:\\Users\\rimvy\\yakiwood-website\\.next\\lock\") { Write-Error \"lock still exists\"; exit 1 } else { Write-Output \"lock removed\" }"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "build-next",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
 }

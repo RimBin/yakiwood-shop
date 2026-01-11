@@ -168,6 +168,9 @@ STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 
+# CRITICAL - Locked pricing quote tokens (required by /api/pricing/lock)
+PRICING_QUOTE_TOKEN_SECRET=change-me-to-a-long-random-string
+
 # CRITICAL - Order confirmation emails
 RESEND_API_KEY=re_...
 
@@ -183,6 +186,24 @@ NEXT_PUBLIC_SANITY_DATASET=production
 ### 3.3 Optional Variables
 
 ```env
+# Optional - PayPal payments
+PAYPAL_ENV=sandbox # sandbox|live
+PAYPAL_CLIENT_ID=...
+PAYPAL_CLIENT_SECRET=...
+
+# Optional - Paysera payments
+PAYSERA_PROJECT_ID=...
+PAYSERA_SIGN_PASSWORD=...
+PAYSERA_TEST=true
+PAYSERA_VERSION=1.6
+
+# Optional - Quote TTL (minutes)
+PRICING_QUOTE_TTL_MINUTES=30
+
+# Optional - Preview gate (disabled by default; enable only on staging/preview)
+NEXT_PUBLIC_PREVIEW_GATE_ENABLED=false
+NEXT_PUBLIC_PREVIEW_GATE_PASSWORD=...
+
 # Google Analytics
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-...
 

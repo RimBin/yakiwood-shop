@@ -1,4 +1,4 @@
-export type WoodType = 'spruce' | 'larch';
+export type WoodType = 'spruce' | 'larch' | 'accoya';
 export type UsageType = 'facade' | 'terrace' | 'interior' | 'fence';
 export type ColorType =
   | 'natural'
@@ -15,7 +15,7 @@ export type ThicknessType = '18_20' | '28';
 
 export type ConfiguratorView = '2d' | '3d';
 
-export const WOOD_OPTIONS: ReadonlyArray<WoodType> = ['spruce', 'larch'];
+export const WOOD_OPTIONS: ReadonlyArray<WoodType> = ['spruce', 'larch', 'accoya'];
 export const USAGE_OPTIONS: ReadonlyArray<UsageType> = ['facade', 'terrace', 'interior', 'fence'];
 export const COLOR_OPTIONS: ReadonlyArray<ColorType> = [
   'natural',

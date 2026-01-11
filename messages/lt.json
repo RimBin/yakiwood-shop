@@ -269,9 +269,16 @@
       "deliverDifferentAddress": "Pristatyti kitu adresu?",
       "notesOptional": "Pastabos užsakymui (nebūtina)"
     },
+    "items": {
+      "title": "Prekės",
+      "hint": "Jei kaina priklauso nuo ilgio / pločio (m²), nurodykite matmenis milimetrais.",
+      "widthMm": "Plotis (mm)",
+      "lengthMm": "Ilgis (mm)"
+    },
     "payment": {
       "title": "Mokėjimo būdas",
       "stripeCard": "Mokėjimo kortelė (Stripe)",
+      "paysera": "Paysera",
       "cardNumber": "Kortelės numeris ",
       "expiryDate": "Galiojimo data ",
       "cvc": "CVC kodas ",
@@ -297,6 +304,7 @@
       "includingTaxes": "Įskaitant mokesčius",
       "colorLabel": "Spalva:",
       "finishLabel": "Apdaila:",
+      "dimensions": "Matmenys: {widthMm}×{lengthMm} mm",
       "quantity": "Kiekis: {count} vnt"
     },
     "coupon": {
@@ -665,6 +673,7 @@
       "projects": "Projektai",
       "posts": "Įrašai",
       "users": "Vartotojai",
+      "chatbot": "Chatbot",
       "seo": "SEO",
       "emailTemplates": "El. pašto šablonai",
       "badgeNew": "naujas"
@@ -886,6 +895,78 @@
       "invalidDiscount": "Neteisinga nuolaidos reikšmė",
       "invalidPercent": "Procentai turi būti nuo 0 iki 100",
       "saveDiscount": "Nepavyko išsaugoti nuolaidos"
+    }
+  },
+  "adminChatbot": {
+    "title": "Chatbot",
+    "subtitle": "Valdykite sesijas ir DUK",
+    "tabs": {
+      "sessions": "Sesijos",
+      "faq": "DUK"
+    },
+    "breadcrumbs": {
+      "home": "Pradžia",
+      "admin": "Administravimas",
+      "chatbot": "Chatbot"
+    },
+    "common": {
+      "refresh": "Atnaujinti",
+      "loading": "Kraunama...",
+      "new": "Naujas",
+      "save": "Išsaugoti",
+      "saving": "Saugoma...",
+      "delete": "Ištrinti",
+      "deleting": "Trinama..."
+    },
+    "roles": {
+      "user": "Klientas",
+      "assistant": "Asistentas",
+      "system": "Sistema"
+    },
+    "sessions": {
+      "title": "Chatbot sesijos",
+      "empty": "Kol kas nėra sesijų.",
+      "conversationTitle": "Pokalbis",
+      "pickSession": "Pasirink sesiją kairėje.",
+      "eventsCount": "{count} įvyk."
+    },
+    "faq": {
+      "title": "Chatbot DUK",
+      "empty": "Kol kas nėra įrašų.",
+      "statusEnabled": "Įjungta",
+      "statusDisabled": "Išjungta",
+      "editTitle": "Įrašo redagavimas",
+      "noticeSaved": "Išsaugota.",
+      "noticeCreated": "Sukurta.",
+      "noticeDeleted": "Ištrinta."
+    },
+    "form": {
+      "enabled": "Įjungta",
+      "order": "Eiliškumas",
+      "locale": "Kalba",
+      "question": "Klausimas",
+      "answer": "Atsakymas",
+      "keywords": "Raktažodžiai (atskirti kableliais)",
+      "suggestions": "Pasiūlymai (atskirti kableliais)",
+      "id": "ID: {id}",
+      "newEntry": "Naujas įrašas",
+      "placeholders": {
+        "question": "Įvesk klausimą",
+        "answer": "Įvesk atsakymą",
+        "keywords": "pvz.: pristatymas, kainos, garantija",
+        "suggestions": "pvz.: Parodyk produktus, Susisiekime, Kainų skaičiuoklė"
+      }
+    },
+    "errors": {
+      "noAdminSession": "Nėra aktyvios admin sesijos.",
+      "parseResponse": "Nepavyko nuskaityti serverio atsakymo (HTTP {status}).",
+      "requestFailed": "Užklausa nepavyko (HTTP {status}).",
+      "loadEventsFailed": "Nepavyko užkrauti įvykių.",
+      "loadFaqFailed": "Nepavyko užkrauti DUK įrašų.",
+      "saveFailed": "Nepavyko išsaugoti.",
+      "deleteFailed": "Nepavyko ištrinti.",
+      "questionRequired": "Klausimas yra privalomas.",
+      "answerRequired": "Atsakymas yra privalomas."
     }
   }
 }

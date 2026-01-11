@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
@@ -79,7 +78,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
               <div className="flex-1 overflow-y-auto px-[24px] py-[24px]">
                 <div className="space-y-[16px]">
                   {items.map((item) => (
-                    <div key={`${item.id}-${item.color}-${item.finish}`} className="flex gap-[16px] pb-[16px] border-b border-[#BBBBBB]">
+                    <div key={item.lineId} className="flex gap-[16px] pb-[16px] border-b border-[#BBBBBB]">
                       {/* Image */}
                       <div className="w-[111px] h-[125px] rounded-[8px] bg-white overflow-hidden shrink-0">
                         {/* Placeholder - replace with actual product image */}
@@ -116,7 +115,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                           {/* Quantity Controls */}
                           <div className="flex items-center gap-[8px]">
                             <button
-                              onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                              onClick={() => updateQuantity(item.lineId, Math.max(1, item.quantity - 1))}
                               className="w-[24px] h-[24px] flex items-center justify-center hover:opacity-70 transition-opacity"
                             >
                               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -127,7 +126,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.lineId, item.quantity + 1)}
                               className="w-[24px] h-[24px] flex items-center justify-center hover:opacity-70 transition-opacity"
                             >
                               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -135,7 +134,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                               </svg>
                             </button>
                             <button
-                              onClick={() => removeItem(item.id)}
+                              onClick={() => removeItem(item.lineId)}
                               className="ml-[8px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#535353] hover:text-[#161616] transition-colors"
                             >
                               Remove

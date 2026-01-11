@@ -292,13 +292,6 @@ function DesktopProductCard({ product }: { product: ProductData }) {
             ))}
           </div>
         </div>
-        
-        <button
-          onClick={handleAddToCart}
-          className="w-full mt-[8px] py-[12px] bg-[#161616] text-white rounded-[100px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] hover:bg-[#535353] transition-colors"
-        >
-          Pridėti į krepšelį
-        </button>
       </div>
     </div>
   );

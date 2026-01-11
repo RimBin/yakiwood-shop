@@ -30,12 +30,11 @@ const CartIcon = () => (
 
 interface CartItemCardProps {
   item: CartItem;
-  onRemove: (id: string) => void;
-  onUpdateQuantity: (id: string, quantity: number) => void;
+  onRemove: (lineId: string) => void;
   size?: 'small' | 'large';
 }
 
-function CartItemCard({ item, onRemove, onUpdateQuantity, size = 'small' }: CartItemCardProps) {
+function CartItemCard({ item, onRemove, size = 'small' }: CartItemCardProps) {
   const isSmall = size === 'small';
   
   return (
@@ -87,7 +86,7 @@ function CartItemCard({ item, onRemove, onUpdateQuantity, size = 'small' }: Cart
       
       {/* Remove Button */}
       <button 
-        onClick={() => onRemove(item.id)}
+        onClick={() => onRemove(item.lineId)}
         className="absolute bottom-0 right-0 font-['Outfit'] font-normal text-[#161616] text-[12px] tracking-[0.6px] uppercase py-[8px] hover:underline"
       >
         Remove
@@ -102,7 +101,7 @@ interface CartSidebarProps {
 }
 
 export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
-  const { items, removeItem, updateQuantity, total } = useCartStore();
+  const { items, removeItem, total } = useCartStore();
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const [couponCode, setCouponCode] = useState('');
@@ -155,11 +154,10 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
             <div className="flex-1 overflow-y-auto px-[24px] py-[24px]">
               <div className="flex flex-col">
                 {items.map((item, index) => (
-                  <div key={`${item.id}-${item.color}-${item.finish}`}>
+                  <div key={item.lineId}>
                     <CartItemCard 
                       item={item} 
                       onRemove={removeItem} 
-                      onUpdateQuantity={updateQuantity}
                     />
                     {index < items.length - 1 && (
                       <div className="h-[1px] bg-[#BBBBBB] my-[16px]" />
@@ -298,7 +296,7 @@ export function CartButton({ onClick, variant = 'desktop' }: CartButtonProps) {
 
 // Default export - Cart Page Component
 export default function Cart() {
-  const { items, removeItem, updateQuantity, total, clear } = useCartStore();
+  const { items, removeItem, total, clear } = useCartStore();
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const [couponCode, setCouponCode] = useState('');
@@ -360,11 +358,10 @@ export default function Cart() {
             <div className="flex-1">
               <div className="flex flex-col">
                 {items.map((item, index) => (
-                  <div key={`${item.id}-${item.color}-${item.finish}`}>
+                  <div key={item.lineId}>
                     <CartItemCard 
                       item={item} 
                       onRemove={removeItem} 
-                      onUpdateQuantity={updateQuantity}
                       size="large" 
                     />
                     {index < items.length - 1 && (

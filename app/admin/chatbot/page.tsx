@@ -1,7 +1,9 @@
 ﻿'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Breadcrumbs } from '@/components/ui';
+import { PageCover, PageLayout } from '@/components/shared/PageLayout';
 import { createClient } from '@/lib/supabase/client';
 
 type SessionSummary = {
@@ -57,21 +59,6 @@ async function getAdminToken(): Promise<string | null> {
   return data.session?.access_token ?? null;
 }
 
-async function fetchAdmin(input: string, init?: RequestInit): Promise<Response> {
-  const token = await getAdminToken();
-  if (!token) {
-    return new Response(JSON.stringify({ error: 'Nėra aktyvios admin sesijos.' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  const headers = new Headers(init?.headers);
-  headers.set('Authorization', `Bearer ${token}`);
-
-  return fetch(input, { ...init, headers });
-}
-
 function splitCommaList(value: string): string[] {
   return value
     .split(',')
@@ -87,14 +74,14 @@ async function safeJson<T>(resp: Response): Promise<ApiResponse<T>> {
   try {
     return (await resp.json()) as ApiResponse<T>;
   } catch {
-    return { error: `Nepavyko nuskaityti serverio atsakymo (HTTP ${resp.status}).` };
+    return { error: `ERR_PARSE_RESPONSE:${resp.status}` };
   }
 }
 
-function getErrorMessage(resp: Response, bodyError?: string) {
+function getErrorMessageKey(resp: Response, bodyError?: string) {
   if (bodyError) return bodyError;
   if (resp.ok) return null;
-  return `Užklausa nepavyko (HTTP ${resp.status}).`;
+  return `ERR_REQUEST_FAILED:${resp.status}`;
 }
 
 function LocaleSelector({ value, onChange }: { value: Locale; onChange: (v: Locale) => void }) {
@@ -153,6 +140,42 @@ function TabButton({
 }
 
 export default function AdminChatbotPage() {
+  const t = useTranslations('adminChatbot');
+
+  const fetchAdmin = useCallback(
+    async (input: string, init?: RequestInit): Promise<Response> => {
+      const token = await getAdminToken();
+      if (!token) {
+        return new Response(JSON.stringify({ error: t('errors.noAdminSession') }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      const headers = new Headers(init?.headers);
+      headers.set('Authorization', `Bearer ${token}`);
+
+      return fetch(input, { ...init, headers });
+    },
+    [t]
+  );
+
+  const translateApiError = useCallback((message: string | null): string | null => {
+    if (!message) return null;
+
+    if (message.startsWith('ERR_PARSE_RESPONSE:')) {
+      const status = Number.parseInt(message.split(':')[1] || '0', 10);
+      return t('errors.parseResponse', { status: Number.isFinite(status) ? status : 0 });
+    }
+
+    if (message.startsWith('ERR_REQUEST_FAILED:')) {
+      const status = Number.parseInt(message.split(':')[1] || '0', 10);
+      return t('errors.requestFailed', { status: Number.isFinite(status) ? status : 0 });
+    }
+
+    return message;
+  }, [t]);
+
   const [tab, setTab] = useState<'sessions' | 'faq'>('sessions');
 
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
@@ -180,13 +203,13 @@ export default function AdminChatbotPage() {
   const [faqError, setFaqError] = useState<string | null>(null);
   const [faqNotice, setFaqNotice] = useState<string | null>(null);
 
-  async function loadSessions() {
+  const loadSessions = useCallback(async () => {
     setLoading(true);
     setSessionsError(null);
     try {
       const resp = await fetchAdmin('/api/admin/chatbot?action=sessions&limit=50');
       const json = await safeJson<SessionSummary[]>(resp);
-      const errorMsg = getErrorMessage(resp, json.error);
+      const errorMsg = translateApiError(getErrorMessageKey(resp, json.error));
       if (errorMsg) {
         setSessionsError(errorMsg);
         setSessions([]);
@@ -196,15 +219,16 @@ export default function AdminChatbotPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [fetchAdmin, translateApiError]);
 
-  async function loadEvents(sessionId: string) {
+  const loadEvents = useCallback(
+    async (sessionId: string) => {
     try {
       const resp = await fetchAdmin(
         `/api/admin/chatbot?action=events&sessionId=${encodeURIComponent(sessionId)}&limit=300`
       );
       const json = await safeJson<ChatEvent[]>(resp);
-      const errorMsg = getErrorMessage(resp, json.error);
+      const errorMsg = translateApiError(getErrorMessageKey(resp, json.error));
       if (errorMsg) {
         setEvents([
           {
@@ -224,38 +248,43 @@ export default function AdminChatbotPage() {
           id: 'error',
           sessionId,
           role: 'system',
-          message: 'Nepavyko užkrauti įvykių.',
+          message: t('errors.loadEventsFailed'),
           createdAt: new Date().toISOString(),
         },
       ]);
     }
-  }
+    },
+    [fetchAdmin, t, translateApiError]
+  );
 
-  async function loadFaqEntries(locale: Locale) {
-    setFaqLoading(true);
-    setFaqError(null);
-    setFaqNotice(null);
-    try {
-      const resp = await fetchAdmin(`/api/admin/chatbot-faq?locale=${encodeURIComponent(locale)}`, {
-        method: 'GET',
-      });
-      const json = await safeJson<FaqEntry[]>(resp);
-      const errorMsg = getErrorMessage(resp, json.error);
-      if (errorMsg) {
-        setFaqError(errorMsg);
+  const loadFaqEntries = useCallback(
+    async (locale: Locale) => {
+      setFaqLoading(true);
+      setFaqError(null);
+      setFaqNotice(null);
+      try {
+        const resp = await fetchAdmin(`/api/admin/chatbot-faq?locale=${encodeURIComponent(locale)}`, {
+          method: 'GET',
+        });
+        const json = await safeJson<FaqEntry[]>(resp);
+        const errorMsg = translateApiError(getErrorMessageKey(resp, json.error));
+        if (errorMsg) {
+          setFaqError(errorMsg);
+          setFaqEntries([]);
+          return;
+        }
+        setFaqEntries((json.data || []).slice().sort((a, b) => a.order - b.order));
+      } catch {
+        setFaqError(t('errors.loadFaqFailed'));
         setFaqEntries([]);
-        return;
+      } finally {
+        setFaqLoading(false);
       }
-      setFaqEntries((json.data || []).slice().sort((a, b) => a.order - b.order));
-    } catch {
-      setFaqError('Nepavyko užkrauti DUK įrašų.');
-      setFaqEntries([]);
-    } finally {
-      setFaqLoading(false);
-    }
-  }
+    },
+    [fetchAdmin, t, translateApiError]
+  );
 
-  function setDraftFromEntry(entry: FaqEntry) {
+  const setDraftFromEntry = useCallback((entry: FaqEntry) => {
     setFaqDraft({
       id: entry.id,
       locale: entry.locale,
@@ -266,9 +295,9 @@ export default function AdminChatbotPage() {
       keywordsText: joinCommaList(entry.keywords),
       suggestionsText: joinCommaList(entry.suggestions),
     });
-  }
+  }, []);
 
-  function newFaqDraft(locale: Locale) {
+  const newFaqDraft = useCallback((locale: Locale) => {
     setFaqSelectedId(null);
     setFaqDraft({
       id: null,
@@ -282,7 +311,7 @@ export default function AdminChatbotPage() {
     });
     setFaqError(null);
     setFaqNotice(null);
-  }
+  }, []);
 
   async function saveFaq() {
     setFaqSaving(true);
@@ -302,12 +331,12 @@ export default function AdminChatbotPage() {
 
     if (!payload.question) {
       setFaqSaving(false);
-      setFaqError('Klausimas yra privalomas.');
+      setFaqError(t('errors.questionRequired'));
       return;
     }
     if (!payload.answer) {
       setFaqSaving(false);
-      setFaqError('Atsakymas yra privalomas.');
+      setFaqError(t('errors.answerRequired'));
       return;
     }
 
@@ -320,20 +349,20 @@ export default function AdminChatbotPage() {
       });
 
       const json = await safeJson<{ id: string }>(resp);
-      const errorMsg = getErrorMessage(resp, json.error);
+      const errorMsg = translateApiError(getErrorMessageKey(resp, json.error));
       if (errorMsg) {
         setFaqError(errorMsg);
         return;
       }
 
-      setFaqNotice(isUpdate ? 'Išsaugota.' : 'Sukurta.');
+      setFaqNotice(isUpdate ? t('faq.noticeSaved') : t('faq.noticeCreated'));
       await loadFaqEntries(faqLocale);
 
       if (!isUpdate && json.data?.id) {
         setFaqSelectedId(json.data.id);
       }
     } catch {
-      setFaqError('Nepavyko išsaugoti.');
+      setFaqError(t('errors.saveFailed'));
     } finally {
       setFaqSaving(false);
     }
@@ -350,16 +379,16 @@ export default function AdminChatbotPage() {
         method: 'DELETE',
       });
       const json = await safeJson<{ ok: boolean }>(resp);
-      const errorMsg = getErrorMessage(resp, json.error);
+      const errorMsg = translateApiError(getErrorMessageKey(resp, json.error));
       if (errorMsg) {
         setFaqError(errorMsg);
         return;
       }
-      setFaqNotice('Ištrinta.');
+      setFaqNotice(t('faq.noticeDeleted'));
       await loadFaqEntries(faqLocale);
       newFaqDraft(faqLocale);
     } catch {
-      setFaqError('Nepavyko ištrinti.');
+      setFaqError(t('errors.deleteFailed'));
     } finally {
       setFaqDeleting(false);
     }
@@ -367,343 +396,346 @@ export default function AdminChatbotPage() {
 
   useEffect(() => {
     void loadSessions();
-  }, []);
+  }, [loadSessions]);
 
   useEffect(() => {
     if (selected) void loadEvents(selected);
-  }, [selected]);
+  }, [loadEvents, selected]);
 
   useEffect(() => {
     setFaqSelectedId(null);
     newFaqDraft(faqLocale);
     void loadFaqEntries(faqLocale);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faqLocale]);
+  }, [faqLocale, loadFaqEntries, newFaqDraft]);
 
   useEffect(() => {
     if (tab === 'faq' && faqEntries.length === 0 && !faqLoading) {
       void loadFaqEntries(faqLocale);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
+  }, [faqEntries.length, faqLoading, faqLocale, loadFaqEntries, tab]);
 
   useEffect(() => {
     if (!faqSelectedId) return;
     const entry = faqEntries.find((e) => e.id === faqSelectedId);
     if (entry) setDraftFromEntry(entry);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faqSelectedId, faqEntries]);
+  }, [faqEntries, faqSelectedId, setDraftFromEntry]);
+
+  const buttonSecondary =
+    "border border-[#161616] rounded-[100px] h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#F5F5F5]";
+
+  const panelClass = 'rounded-[16px] border border-[#BBBBBB] bg-white p-[16px]';
+
+  const roleLabel = (role: ChatEvent['role']) => {
+    if (role === 'user') return t('roles.user');
+    if (role === 'assistant') return t('roles.assistant');
+    return t('roles.system');
+  };
 
   return (
-    <div className="px-[16px] sm:px-[40px] py-[24px]">
+    <section className="w-full bg-[#E1E1E1] min-h-screen">
       <Breadcrumbs
         items={[
-          { label: 'Admin', href: '/admin' },
-          { label: 'Chatbot', href: '/admin/chatbot' },
+          { label: t('breadcrumbs.home'), href: '/' },
+          { label: t('breadcrumbs.admin'), href: '/admin' },
+          { label: t('breadcrumbs.chatbot') },
         ]}
       />
 
-      <div className="mt-[14px] flex flex-wrap items-center gap-[10px]">
-        <TabButton active={tab === 'sessions'} onClick={() => setTab('sessions')}>
-          Sesijos
-        </TabButton>
-        <TabButton active={tab === 'faq'} onClick={() => setTab('faq')}>
-          DUK
-        </TabButton>
-      </div>
+      <PageCover>
+        <h1
+          className="font-['DM_Sans'] font-light text-[40px] md:text-[72px] leading-[0.95] tracking-[-1.6px] md:tracking-[-3.2px] text-[#161616]"
+          style={{ fontVariationSettings: "'opsz' 14" }}
+        >
+          {t('title')}
+        </h1>
+        <p className="mt-[12px] font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[720px]">
+          {t('subtitle')}
+        </p>
+      </PageCover>
 
-      {tab === 'sessions' ? (
-        <div className="mt-[16px] grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-[16px]">
-          <div className="rounded-[24px] border border-[#BBBBBB] bg-white p-[16px]">
-            <div className="flex items-center justify-between">
-              <h1 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">Chatbot sesijos</h1>
-              <button
-                onClick={() => void loadSessions()}
-                className="border border-[#161616] rounded-[100px] h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#F5F5F5]"
-              >
-                Atnaujinti
-              </button>
-            </div>
-
-            {sessionsError ? (
-              <p className="mt-[12px] font-['Outfit'] text-[13px] text-red-600">{sessionsError}</p>
-            ) : loading ? (
-              <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">Kraunama</p>
-            ) : sessions.length === 0 ? (
-              <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">Kol kas nėra sesijų.</p>
-            ) : (
-              <div className="mt-[12px] space-y-[10px]">
-                {sessions.map((s) => (
-                  <button
-                    key={s.sessionId}
-                    onClick={() => setSelected(s.sessionId)}
-                    className={
-                      'w-full text-left rounded-[16px] border px-[12px] py-[10px] ' +
-                      (selected === s.sessionId
-                        ? 'border-[#161616] bg-[#F5F5F5]'
-                        : 'border-[#BBBBBB] bg-white hover:bg-[#F8F8F8]')
-                    }
-                  >
-                    <div className="font-['DM_Sans'] text-[12px] text-[#161616]">
-                      {s.sessionId.slice(0, 8)}  {s.eventCount} įvyk.
-                    </div>
-                    <div className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">
-                      {s.lastMessagePreview || ''}
-                    </div>
-                    <div className="font-['Outfit'] text-[11px] text-[#888] mt-[6px]">
-                      {new Date(s.lastAt).toLocaleString()}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+      <PageLayout>
+        <div className="py-[24px] md:py-[40px]">
+          <div className="flex flex-wrap items-center gap-[10px]">
+            <TabButton active={tab === 'sessions'} onClick={() => setTab('sessions')}>
+              {t('tabs.sessions')}
+            </TabButton>
+            <TabButton active={tab === 'faq'} onClick={() => setTab('faq')}>
+              {t('tabs.faq')}
+            </TabButton>
           </div>
 
-          <div className="rounded-[24px] border border-[#BBBBBB] bg-white p-[16px]">
-            <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">Pokalbis</h2>
-            {!selected ? (
-              <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">Pasirink sesiją kairėje.</p>
-            ) : (
-              <div className="mt-[12px] space-y-[10px]">
-                {events.map((e) => (
-                  <div key={e.id} className={e.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
-                    <div
+          {tab === 'sessions' ? (
+            <div className="mt-[16px] grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-[16px]">
+              <div className={panelClass}>
+                <div className="flex items-center justify-between">
+                  <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">{t('sessions.title')}</h2>
+                  <button onClick={() => void loadSessions()} className={buttonSecondary}>
+                    {t('common.refresh')}
+                  </button>
+                </div>
+
+                {sessionsError ? (
+                  <p className="mt-[12px] font-['Outfit'] text-[13px] text-red-600">{sessionsError}</p>
+                ) : loading ? (
+                  <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">{t('common.loading')}</p>
+                ) : sessions.length === 0 ? (
+                  <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">{t('sessions.empty')}</p>
+                ) : (
+                  <div className="mt-[12px] space-y-[10px]">
+                    {sessions.map((s) => (
+                      <button
+                        key={s.sessionId}
+                        onClick={() => setSelected(s.sessionId)}
+                        className={
+                          'w-full text-left rounded-[16px] border px-[12px] py-[10px] ' +
+                          (selected === s.sessionId
+                            ? 'border-[#161616] bg-[#F5F5F5]'
+                            : 'border-[#BBBBBB] bg-white hover:bg-[#F8F8F8]')
+                        }
+                      >
+                        <div className="font-['DM_Sans'] text-[12px] text-[#161616]">
+                          {s.sessionId.slice(0, 8)} {t('sessions.eventsCount', { count: s.eventCount })}
+                        </div>
+                        <div className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">
+                          {s.lastMessagePreview || ''}
+                        </div>
+                        <div className="font-['Outfit'] text-[11px] text-[#888] mt-[6px]">
+                          {new Date(s.lastAt).toLocaleString()}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className={panelClass}>
+                <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">
+                  {t('sessions.conversationTitle')}
+                </h2>
+                {!selected ? (
+                  <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">{t('sessions.pickSession')}</p>
+                ) : (
+                  <div className="mt-[12px] space-y-[10px]">
+                    {events.map((e) => (
+                      <div key={e.id} className={e.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
+                        <div
+                          className={
+                            e.role === 'user'
+                              ? 'max-w-[85%] rounded-[16px] bg-[#161616] text-white px-[12px] py-[10px]'
+                              : 'max-w-[85%] rounded-[16px] bg-[#F5F5F5] text-[#161616] px-[12px] py-[10px]'
+                          }
+                        >
+                          <div className="font-['Outfit'] text-[11px] opacity-70 mb-[4px]">
+                            {roleLabel(e.role)} {new Date(e.createdAt).toLocaleString()}
+                          </div>
+                          <div className="font-['Outfit'] text-[13px] leading-[1.4] whitespace-pre-line">
+                            {e.message}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-[16px] grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-[16px]">
+              <div className={panelClass}>
+                <div className="flex flex-wrap items-center justify-between gap-[10px]">
+                  <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">{t('faq.title')}</h2>
+                  <div className="flex items-center gap-[10px]">
+                    <LocaleSelector value={faqLocale} onChange={setFaqLocale} />
+                    <button
+                      type="button"
+                      onClick={() => void loadFaqEntries(faqLocale)}
+                      disabled={faqLoading}
+                      className={buttonSecondary + (faqLoading ? ' opacity-60 cursor-not-allowed' : '')}
+                    >
+                      {t('common.refresh')}
+                    </button>
+                    <button type="button" onClick={() => newFaqDraft(faqLocale)} className={buttonSecondary}>
+                      {t('common.new')}
+                    </button>
+                  </div>
+                </div>
+
+                {faqError ? <p className="mt-[12px] font-['Outfit'] text-[13px] text-red-600">{faqError}</p> : null}
+
+                {faqLoading ? (
+                  <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">{t('common.loading')}</p>
+                ) : faqEntries.length === 0 ? (
+                  <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">{t('faq.empty')}</p>
+                ) : (
+                  <div className="mt-[12px] space-y-[10px]">
+                    {faqEntries.map((e) => {
+                      const active = faqSelectedId === e.id;
+                      return (
+                        <button
+                          key={e.id}
+                          type="button"
+                          onClick={() => setFaqSelectedId(e.id)}
+                          className={
+                            'w-full text-left rounded-[16px] border px-[12px] py-[10px] ' +
+                            (active
+                              ? 'border-[#161616] bg-[#F5F5F5]'
+                              : 'border-[#BBBBBB] bg-white hover:bg-[#F8F8F8]')
+                          }
+                        >
+                          <div className="flex items-center justify-between gap-[10px]">
+                            <div className="font-['DM_Sans'] text-[12px] text-[#161616]">
+                              #{e.order} {e.enabled ? t('faq.statusEnabled') : t('faq.statusDisabled')}
+                            </div>
+                            <div className="font-['Outfit'] text-[11px] text-[#888]">{e.locale.toUpperCase()}</div>
+                          </div>
+                          <div className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">{e.question || ''}</div>
+                          {e.updatedAt ? (
+                            <div className="font-['Outfit'] text-[11px] text-[#888] mt-[6px]">
+                              {new Date(e.updatedAt).toLocaleString()}
+                            </div>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className={panelClass}>
+                <div className="flex flex-wrap items-center justify-between gap-[10px]">
+                  <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">{t('faq.editTitle')}</h2>
+                  <div className="flex items-center gap-[10px]">
+                    <button
+                      type="button"
+                      onClick={() => void saveFaq()}
+                      disabled={faqSaving || faqDeleting}
+                      className={buttonSecondary + (faqSaving || faqDeleting ? ' opacity-60 cursor-not-allowed' : '')}
+                    >
+                      {faqSaving ? t('common.saving') : t('common.save')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void deleteFaq()}
+                      disabled={!faqDraft.id || faqDeleting || faqSaving}
                       className={
-                        e.role === 'user'
-                          ? 'max-w-[85%] rounded-[16px] bg-[#161616] text-white px-[12px] py-[10px]'
-                          : 'max-w-[85%] rounded-[16px] bg-[#F5F5F5] text-[#161616] px-[12px] py-[10px]'
+                        buttonSecondary +
+                        (!faqDraft.id || faqDeleting || faqSaving ? ' opacity-60 cursor-not-allowed' : '')
                       }
                     >
-                      <div className="font-['Outfit'] text-[11px] opacity-70 mb-[4px]">
-                        {e.role}  {new Date(e.createdAt).toLocaleString()}
-                      </div>
-                      <div className="font-['Outfit'] text-[13px] leading-[1.4] whitespace-pre-line">
-                        {e.message}
-                      </div>
+                      {faqDeleting ? t('common.deleting') : t('common.delete')}
+                    </button>
+                  </div>
+                </div>
+
+                {faqNotice ? (
+                  <p className="mt-[10px] font-['Outfit'] text-[13px] text-[#161616]">{faqNotice}</p>
+                ) : null}
+                {faqError ? <p className="mt-[10px] font-['Outfit'] text-[13px] text-red-600">{faqError}</p> : null}
+
+                <form
+                  className="mt-[12px] grid grid-cols-1 gap-[12px]"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void saveFaq();
+                  }}
+                >
+                  <div className="flex flex-wrap items-center gap-[14px]">
+                    <label className="flex items-center gap-[10px]">
+                      <input
+                        type="checkbox"
+                        checked={faqDraft.enabled}
+                        onChange={(e) => setFaqDraft((d) => ({ ...d, enabled: e.target.checked }))}
+                        className="h-[16px] w-[16px] accent-[#161616]"
+                      />
+                      <span className="font-['Outfit'] text-[13px] text-[#161616]">{t('form.enabled')}</span>
+                    </label>
+
+                    <div className="flex items-center gap-[10px]">
+                      <label className="font-['Outfit'] text-[13px] text-[#161616]">{t('form.order')}</label>
+                      <input
+                        type="number"
+                        value={faqDraft.order}
+                        onChange={(e) =>
+                          setFaqDraft((d) => ({ ...d, order: Number.parseInt(e.target.value || '0', 10) }))
+                        }
+                        className="h-[36px] w-[120px] rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px] text-[#161616]"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-[10px]">
+                      <span className="font-['Outfit'] text-[13px] text-[#161616]">{t('form.locale')}</span>
+                      <LocaleSelector
+                        value={faqDraft.locale}
+                        onChange={(v) => {
+                          setFaqDraft((d) => ({ ...d, locale: v }));
+                          setFaqLocale(v);
+                        }}
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="mt-[16px] grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-[16px]">
-          <div className="rounded-[24px] border border-[#BBBBBB] bg-white p-[16px]">
-            <div className="flex flex-wrap items-center justify-between gap-[10px]">
-              <h1 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">Chatbot DUK</h1>
-              <div className="flex items-center gap-[10px]">
-                <LocaleSelector value={faqLocale} onChange={setFaqLocale} />
-                <button
-                  type="button"
-                  onClick={() => void loadFaqEntries(faqLocale)}
-                  disabled={faqLoading}
-                  className={
-                    "border border-[#161616] rounded-[100px] h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#F5F5F5] " +
-                    (faqLoading ? 'opacity-60 cursor-not-allowed' : '')
-                  }
-                >
-                  Refresh
-                </button>
-                <button
-                  type="button"
-                  onClick={() => newFaqDraft(faqLocale)}
-                  className="border border-[#161616] rounded-[100px] h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#F5F5F5]"
-                >
-                  New
-                </button>
-              </div>
-            </div>
 
-            {faqError ? (
-              <p className="mt-[12px] font-['Outfit'] text-[13px] text-red-600">{faqError}</p>
-            ) : null}
+                  <div>
+                    <label className="block font-['Outfit'] text-[13px] text-[#161616] mb-[6px]">
+                      {t('form.question')}
+                    </label>
+                    <input
+                      type="text"
+                      value={faqDraft.question}
+                      onChange={(e) => setFaqDraft((d) => ({ ...d, question: e.target.value }))}
+                      className="h-[40px] w-full rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px] text-[#161616]"
+                      placeholder={t('form.placeholders.question')}
+                    />
+                  </div>
 
-            {faqLoading ? (
-              <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">Kraunama</p>
-            ) : faqEntries.length === 0 ? (
-              <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">Kol kas nėra įrašų.</p>
-            ) : (
-              <div className="mt-[12px] space-y-[10px]">
-                {faqEntries.map((e) => {
-                  const active = faqSelectedId === e.id;
-                  return (
+                  <div>
+                    <label className="block font-['Outfit'] text-[13px] text-[#161616] mb-[6px]">{t('form.answer')}</label>
+                    <textarea
+                      value={faqDraft.answer}
+                      onChange={(e) => setFaqDraft((d) => ({ ...d, answer: e.target.value }))}
+                      className="min-h-[180px] w-full rounded-[12px] border border-[#BBBBBB] px-[12px] py-[10px] font-['Outfit'] text-[13px] text-[#161616]"
+                      placeholder={t('form.placeholders.answer')}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-['Outfit'] text-[13px] text-[#161616] mb-[6px]">{t('form.keywords')}</label>
+                    <input
+                      type="text"
+                      value={faqDraft.keywordsText}
+                      onChange={(e) => setFaqDraft((d) => ({ ...d, keywordsText: e.target.value }))}
+                      className="h-[40px] w-full rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px] text-[#161616]"
+                      placeholder={t('form.placeholders.keywords')}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-['Outfit'] text-[13px] text-[#161616] mb-[6px]">{t('form.suggestions')}</label>
+                    <input
+                      type="text"
+                      value={faqDraft.suggestionsText}
+                      onChange={(e) => setFaqDraft((d) => ({ ...d, suggestionsText: e.target.value }))}
+                      className="h-[40px] w-full rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px] text-[#161616]"
+                      placeholder={t('form.placeholders.suggestions')}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <p className="font-['Outfit'] text-[12px] text-[#535353]">
+                      {faqDraft.id ? t('form.id', { id: faqDraft.id }) : t('form.newEntry')}
+                    </p>
                     <button
-                      key={e.id}
-                      type="button"
-                      onClick={() => setFaqSelectedId(e.id)}
-                      className={
-                        'w-full text-left rounded-[16px] border px-[12px] py-[10px] ' +
-                        (active
-                          ? 'border-[#161616] bg-[#F5F5F5]'
-                          : 'border-[#BBBBBB] bg-white hover:bg-[#F8F8F8]')
-                      }
+                      type="submit"
+                      disabled={faqSaving || faqDeleting}
+                      className={buttonSecondary + (faqSaving || faqDeleting ? ' opacity-60 cursor-not-allowed' : '')}
                     >
-                      <div className="flex items-center justify-between gap-[10px]">
-                        <div className="font-['DM_Sans'] text-[12px] text-[#161616]">
-                          #{e.order}  {e.enabled ? 'Įjungta' : 'Išjungta'}
-                        </div>
-                        <div className="font-['Outfit'] text-[11px] text-[#888]">{e.locale.toUpperCase()}</div>
-                      </div>
-                      <div className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">
-                        {e.question || ''}
-                      </div>
-                      {e.updatedAt ? (
-                        <div className="font-['Outfit'] text-[11px] text-[#888] mt-[6px]">
-                          {new Date(e.updatedAt).toLocaleString()}
-                        </div>
-                      ) : null}
+                      {faqSaving ? t('common.saving') : t('common.save')}
                     </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-[24px] border border-[#BBBBBB] bg-white p-[16px]">
-            <div className="flex flex-wrap items-center justify-between gap-[10px]">
-              <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">Įrašo redagavimas</h2>
-              <div className="flex items-center gap-[10px]">
-                <button
-                  type="button"
-                  onClick={() => void saveFaq()}
-                  disabled={faqSaving || faqDeleting}
-                  className={
-                    "border border-[#161616] rounded-[100px] h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#F5F5F5] " +
-                    (faqSaving || faqDeleting ? 'opacity-60 cursor-not-allowed' : '')
-                  }
-                >
-                  {faqSaving ? 'Saving' : 'Save'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void deleteFaq()}
-                  disabled={!faqDraft.id || faqDeleting || faqSaving}
-                  className={
-                    "border border-[#161616] rounded-[100px] h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#F5F5F5] " +
-                    (!faqDraft.id || faqDeleting || faqSaving ? 'opacity-60 cursor-not-allowed' : '')
-                  }
-                >
-                  {faqDeleting ? 'Deleting' : 'Delete'}
-                </button>
+                  </div>
+                </form>
               </div>
             </div>
-
-            {faqNotice ? (
-              <p className="mt-[10px] font-['Outfit'] text-[13px] text-[#161616]">{faqNotice}</p>
-            ) : null}
-            {faqError ? (
-              <p className="mt-[10px] font-['Outfit'] text-[13px] text-red-600">{faqError}</p>
-            ) : null}
-
-            <form
-              className="mt-[12px] grid grid-cols-1 gap-[12px]"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void saveFaq();
-              }}
-            >
-              <div className="flex flex-wrap items-center gap-[14px]">
-                <label className="flex items-center gap-[10px]">
-                  <input
-                    type="checkbox"
-                    checked={faqDraft.enabled}
-                    onChange={(e) => setFaqDraft((d) => ({ ...d, enabled: e.target.checked }))}
-                    className="h-[16px] w-[16px] accent-[#161616]"
-                  />
-                  <span className="font-['Outfit'] text-[13px] text-[#161616]">Enabled</span>
-                </label>
-
-                <div className="flex items-center gap-[10px]">
-                  <label className="font-['Outfit'] text-[13px] text-[#161616]">Order</label>
-                  <input
-                    type="number"
-                    value={faqDraft.order}
-                    onChange={(e) =>
-                      setFaqDraft((d) => ({ ...d, order: Number.parseInt(e.target.value || '0', 10) }))
-                    }
-                    className="h-[36px] w-[120px] rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px] text-[#161616]"
-                  />
-                </div>
-
-                <div className="flex items-center gap-[10px]">
-                  <span className="font-['Outfit'] text-[13px] text-[#161616]">Locale</span>
-                  <LocaleSelector
-                    value={faqDraft.locale}
-                    onChange={(v) => {
-                      setFaqDraft((d) => ({ ...d, locale: v }));
-                      setFaqLocale(v);
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-['Outfit'] text-[13px] text-[#161616] mb-[6px]">Question</label>
-                <input
-                  type="text"
-                  value={faqDraft.question}
-                  onChange={(e) => setFaqDraft((d) => ({ ...d, question: e.target.value }))}
-                  className="h-[40px] w-full rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px] text-[#161616]"
-                  placeholder="Įvesk klausimą"
-                />
-              </div>
-
-              <div>
-                <label className="block font-['Outfit'] text-[13px] text-[#161616] mb-[6px]">Answer</label>
-                <textarea
-                  value={faqDraft.answer}
-                  onChange={(e) => setFaqDraft((d) => ({ ...d, answer: e.target.value }))}
-                  className="min-h-[180px] w-full rounded-[12px] border border-[#BBBBBB] px-[12px] py-[10px] font-['Outfit'] text-[13px] text-[#161616]"
-                  placeholder="Įvesk atsakymą"
-                />
-              </div>
-
-              <div>
-                <label className="block font-['Outfit'] text-[13px] text-[#161616] mb-[6px]">
-                  Keywords (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  value={faqDraft.keywordsText}
-                  onChange={(e) => setFaqDraft((d) => ({ ...d, keywordsText: e.target.value }))}
-                  className="h-[40px] w-full rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px] text-[#161616]"
-                  placeholder="pvz.: pristatymas, kainos, garantija"
-                />
-              </div>
-
-              <div>
-                <label className="block font-['Outfit'] text-[13px] text-[#161616] mb-[6px]">
-                  Suggestions (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  value={faqDraft.suggestionsText}
-                  onChange={(e) => setFaqDraft((d) => ({ ...d, suggestionsText: e.target.value }))}
-                  className="h-[40px] w-full rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px] text-[#161616]"
-                  placeholder="pvz.: Parodyk produktus, Susisiekime, Kainų skaičiuoklė"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <p className="font-['Outfit'] text-[12px] text-[#535353]">
-                  {faqDraft.id ? `ID: ${faqDraft.id}` : 'Naujas įrašas'}
-                </p>
-                <button
-                  type="submit"
-                  disabled={faqSaving || faqDeleting}
-                  className={
-                    "border border-[#161616] rounded-[100px] h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#F5F5F5] " +
-                    (faqSaving || faqDeleting ? 'opacity-60 cursor-not-allowed' : '')
-                  }
-                >
-                  {faqSaving ? 'Saving' : 'Save'}
-                </button>
-              </div>
-            </form>
-          </div>
+          )}
         </div>
-      )}
-    </div>
+      </PageLayout>
+    </section>
   );
 }

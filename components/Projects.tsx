@@ -4,7 +4,6 @@ import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ArrowRight from '@/components/icons/ArrowRight';
-import { PageCover } from '@/components/shared/PageLayout';
 import { assets } from '@/lib/assets';
 import { projects as projectsData } from '@/data/projects';
 import type { Project } from '@/types/project';
@@ -54,24 +53,19 @@ export default function Projects() {
   );
 
   const featuredProjects = useMemo(() => {
-    // Preserve layout that expects 6 items
+    // Homepage grid shows 6 cards
     const items = projects.slice(0, 6);
     while (items.length < 6) {
-      items.push(projectsData[items.length] as Project);
+      const fallback = projectsData.length > 0 ? projectsData[items.length % projectsData.length] : undefined;
+      items.push((fallback ?? projectsData[0]) as Project);
     }
     return items;
   }, [projects]);
 
   return (
     <section className="w-full bg-[#E1E1E1]">
-      {/* Page Header */}
-      <PageCover>
-        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
-            style={{ fontVariationSettings: "'opsz' 14" }}>
-          
-        </h1>
-      </PageCover>
-      
+      {/* Header removed */}
+
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7712 ===== */}
       <div className="lg:hidden">
         {/* Description text - Mobile */}
@@ -225,7 +219,7 @@ export default function Projects() {
       </div>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] py-[120px]">
+      <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[120px]">
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+25px)] */}
         <div className="relative h-[80px] mb-[64px]">
           <p className="absolute left-0 top-[22px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
@@ -248,9 +242,16 @@ export default function Projects() {
         <div className="grid grid-cols-3 gap-[32px]">
           {featuredProjects.map((project, idx) => (
             <Link key={idx} href={getProjectHref(basePath, project)} className="flex flex-col gap-[8px]">
-              <div className={`relative w-full overflow-hidden rounded-[12px] ${idx % 2 === 0 ? 'h-[520px]' : 'h-[330px]'}`}> 
+              <div
+                className={`relative w-full overflow-hidden rounded-[12px] ${(() => {
+                  const row = Math.floor(idx / 3);
+                  const col = idx % 3;
+                  const isTall = row % 2 === 0 ? col === 0 || col === 2 : col === 1;
+                  return isTall ? 'h-[520px]' : 'h-[330px]';
+                })()}`}
+              >
                 <Image
-                  src={getProjectCardImage(project) || fallbackImages[idx]}
+                  src={getProjectCardImage(project) || fallbackImages[idx % fallbackImages.length]}
                   alt={project?.title || 'Project'}
                   fill
                   className="object-cover"

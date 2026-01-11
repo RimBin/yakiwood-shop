@@ -25,6 +25,8 @@ type IncomingItem = {
     usageType?: string;
     profileVariantId?: string;
     colorVariantId?: string;
+    thicknessOptionId?: string;
+    thicknessMm?: number;
     widthMm?: number;
     lengthMm?: number;
   };
@@ -69,6 +71,8 @@ function normalizeItems(items: IncomingItem[]): IncomingItem[] {
             usageType: typeof (i as any).configuration.usageType === 'string' ? (i as any).configuration.usageType : undefined,
             profileVariantId: typeof (i as any).configuration.profileVariantId === 'string' ? (i as any).configuration.profileVariantId : undefined,
             colorVariantId: typeof (i as any).configuration.colorVariantId === 'string' ? (i as any).configuration.colorVariantId : undefined,
+            thicknessOptionId: typeof (i as any).configuration.thicknessOptionId === 'string' ? (i as any).configuration.thicknessOptionId : undefined,
+            thicknessMm: typeof (i as any).configuration.thicknessMm === 'number' ? (i as any).configuration.thicknessMm : undefined,
             widthMm: typeof (i as any).configuration.widthMm === 'number' ? (i as any).configuration.widthMm : undefined,
             lengthMm: typeof (i as any).configuration.lengthMm === 'number' ? (i as any).configuration.lengthMm : undefined,
           }

@@ -20,6 +20,7 @@ type IncomingItem = {
     profileVariantId?: string
     colorVariantId?: string
     thicknessOptionId?: string
+    thicknessMm?: number
     widthMm?: number
     lengthMm?: number
   }
@@ -27,6 +28,22 @@ type IncomingItem = {
 
 type LockBody = {
   items: IncomingItem[]
+}
+
+async function resolveThicknessOptionIdFromMm(thicknessMm: number): Promise<string | null> {
+  if (!supabaseAdmin) return null
+  if (!Number.isFinite(thicknessMm) || thicknessMm <= 0) return null
+
+  const { data, error } = await supabaseAdmin
+    .from('catalog_options')
+    .select('id')
+    .eq('option_type', 'thickness')
+    .eq('value_mm', Math.round(thicknessMm))
+    .eq('is_active', true)
+    .maybeSingle()
+
+  if (error || !data) return null
+  return typeof (data as any).id === 'string' ? (data as any).id : null
 }
 
 function createSupabaseRouteClient(request: NextRequest) {
@@ -128,6 +145,7 @@ export async function POST(req: NextRequest) {
                   typeof (item as any).configuration.thicknessOptionId === 'string'
                     ? (item as any).configuration.thicknessOptionId
                     : undefined,
+                thicknessMm: typeof (item as any).configuration.thicknessMm === 'number' ? (item as any).configuration.thicknessMm : undefined,
                 widthMm: typeof (item as any).configuration.widthMm === 'number' ? (item as any).configuration.widthMm : undefined,
                 lengthMm: typeof (item as any).configuration.lengthMm === 'number' ? (item as any).configuration.lengthMm : undefined,
               }
@@ -172,12 +190,19 @@ export async function POST(req: NextRequest) {
         let resolvedBy: any = null
 
         if (hasDimensions) {
+          const resolvedThicknessOptionId =
+            typeof cfg?.thicknessOptionId === 'string'
+              ? cfg.thicknessOptionId
+              : typeof cfg?.thicknessMm === 'number'
+                ? await resolveThicknessOptionIdFromMm(cfg.thicknessMm)
+                : null
+
           const quote = await quoteConfigurationPricing({
             productId: item.id,
             usageType: cfg?.usageType,
             profileVariantId: cfg?.profileVariantId,
             colorVariantId: cfg?.colorVariantId,
-            thicknessOptionId: cfg?.thicknessOptionId,
+            thicknessOptionId: resolvedThicknessOptionId ?? undefined,
             widthMm: cfg!.widthMm as number,
             lengthMm: cfg!.lengthMm as number,
             quantityBoards: 1,

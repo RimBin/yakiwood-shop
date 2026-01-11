@@ -95,7 +95,7 @@ Norint realių kainų:
 3. API route'e naudoti `line_items: [{price: product.stripe_price_id, quantity: ...}]`
 
 Webhook'ai:
-`/api/stripe/webhook` (sukursime vėliau) – apdoros `checkout.session.completed` ir įrašys užsakymą į DB.
+`/api/webhooks/stripe` – apdoros `checkout.session.completed` ir įrašys užsakymą į DB.
 
 ## Development
 

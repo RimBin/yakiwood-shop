@@ -21,6 +21,7 @@ interface Product {
   woodType: string;
   profile: string;
   color: string;
+  thicknessMm: number;
   widthMm: number;
   lengthMm: number;
   quantity: number;
@@ -73,6 +74,7 @@ export default function AdminPage() {
     woodType: 'larch',
     profile: '',
     color: 'natural',
+    thicknessMm: 20,
     widthMm: 125,
     lengthMm: 3000,
     quantity: 1,
@@ -398,6 +400,7 @@ export default function AdminPage() {
             woodType: productForm.woodType,
             profile: productForm.profile,
             color: productForm.color,
+            thicknessMm: Number(productForm.thicknessMm),
             widthMm: Number(productForm.widthMm),
             lengthMm: Number(productForm.lengthMm),
             quantity: Number(productForm.quantity),
@@ -418,6 +421,7 @@ export default function AdminPage() {
         slug: safeSlug,
         images: allImages,
         basePrice: Number(productForm.basePrice),
+        thicknessMm: Number(productForm.thicknessMm),
         widthMm: Number(productForm.widthMm),
         lengthMm: Number(productForm.lengthMm),
         quantity: Number(productForm.quantity),
@@ -441,6 +445,7 @@ export default function AdminPage() {
       woodType: 'larch',
       profile: '',
       color: 'natural',
+      thicknessMm: 20,
       widthMm: 125,
       lengthMm: 3000,
       quantity: 1,
@@ -479,6 +484,7 @@ export default function AdminPage() {
       woodType: product.woodType || 'larch',
       profile: product.profile || '',
       color: product.color || 'natural',
+      thicknessMm: typeof (product as any).thicknessMm === 'number' ? (product as any).thicknessMm : 20,
       widthMm: product.widthMm || 125,
       lengthMm: product.lengthMm || 3000,
       quantity: product.quantity || 1,
@@ -503,6 +509,7 @@ export default function AdminPage() {
       woodType: 'larch',
       profile: '',
       color: 'natural',
+      thicknessMm: 20,
       widthMm: 125,
       lengthMm: 3000,
       quantity: 1,
@@ -899,8 +906,12 @@ export default function AdminPage() {
             {products.length === 0 && (
               <button
                 onClick={() => {
-                  setProducts(seedProducts as Product[]);
-                  localStorage.setItem('yakiwood_products', JSON.stringify(seedProducts));
+                  const seeded = (seedProducts as any[]).map((p) => ({
+                    ...p,
+                    thicknessMm: typeof p.thicknessMm === 'number' ? p.thicknessMm : 20,
+                  })) as Product[];
+                  setProducts(seeded);
+                  localStorage.setItem('yakiwood_products', JSON.stringify(seeded));
                   showMessage('8 products loaded!');
                 }}
                 className="h-[48px] px-[24px] rounded-[100px] bg-green-500 font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-white hover:bg-green-600 transition-colors whitespace-nowrap"
@@ -929,6 +940,7 @@ export default function AdminPage() {
             { key: 'projects', label: t('tabs.projects'), count: projects.length },
             { key: 'posts', label: t('tabs.posts'), count: posts.length },
             { key: 'users', label: t('tabs.users') },
+            { key: 'chatbot', label: t('tabs.chatbot') },
             { key: 'seo', label: t('tabs.seo'), badge: t('tabs.badgeNew') },
             { key: 'email-templates', label: t('tabs.emailTemplates'), badge: t('tabs.badgeNew') }
           ].map((tab) => {
@@ -944,6 +956,10 @@ export default function AdminPage() {
                   }
                   if (tab.key === 'users') {
                     router.push('/admin/users');
+                    return;
+                  }
+                  if (tab.key === 'chatbot') {
+                    router.push('/admin/chatbot');
                     return;
                   }
                   if (tab.key === 'seo') {
@@ -995,6 +1011,7 @@ export default function AdminPage() {
                       woodType: 'larch',
                       profile: '',
                       color: 'natural',
+                      thicknessMm: 20,
                       widthMm: 125,
                       lengthMm: 3000,
                       quantity: 1,
@@ -1195,7 +1212,7 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-[20px]">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-[20px]">
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
                       Color
@@ -1210,6 +1227,20 @@ export default function AdminPage() {
                           {c.label}
                         </option>
                       ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
+                      Thickness (mm)
+                    </label>
+                    <select
+                      value={productForm.thicknessMm}
+                      onChange={(e) => setProductForm({ ...productForm, thicknessMm: Number(e.target.value) })}
+                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none yw-select"
+                    >
+                      <option value={20}>18/20</option>
+                      <option value={28}>28</option>
                     </select>
                   </div>
 
