@@ -37,6 +37,24 @@ function coerceString(value: unknown): string {
   return typeof value === 'string' ? value.trim() : ''
 }
 
+function parseMoneyMajorUnits(value: unknown): number {
+  const n = typeof value === 'string' ? Number(value.replace(',', '.')) : typeof value === 'number' ? value : NaN
+  return Number.isFinite(n) ? n : NaN
+}
+
+function approxEqual(a: number, b: number, eps = 0.01): boolean {
+  return Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) <= eps
+}
+
+function extractCaptureAmount(captureData: any): { value: number; currency: string } | null {
+  const purchaseUnit = Array.isArray(captureData?.purchase_units) ? captureData.purchase_units[0] : null
+  const capture = Array.isArray(purchaseUnit?.payments?.captures) ? purchaseUnit.payments.captures[0] : null
+  const currency = typeof capture?.amount?.currency_code === 'string' ? capture.amount.currency_code : null
+  const value = parseMoneyMajorUnits(capture?.amount?.value)
+  if (!currency || !Number.isFinite(value)) return null
+  return { value, currency: currency.toUpperCase() }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const token = await getPayPalAccessToken()
@@ -83,6 +101,22 @@ export async function POST(req: NextRequest) {
     if (orderId && supabaseAdmin) {
       const existing = await getOrderById(orderId)
       if (existing) {
+        const captured = extractCaptureAmount(captureData)
+        if (captured) {
+          const orderCurrency = (existing.currency || 'EUR').toUpperCase()
+          const orderTotal = Number(existing.total)
+          if (captured.currency !== orderCurrency || !approxEqual(captured.value, orderTotal)) {
+            console.error('PayPal amount mismatch', {
+              orderId,
+              capturedCurrency: captured.currency,
+              orderCurrency,
+              capturedValue: captured.value,
+              orderTotal,
+            })
+            return NextResponse.json({ error: 'Neteisinga suma' }, { status: 400 })
+          }
+        }
+
         updatedOrder = await updateOrderStatus(existing.id, 'processing', 'paid')
 
         // Append a note (best-effort; does not fail capture flow).

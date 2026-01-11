@@ -93,6 +93,20 @@ export async function POST(req: NextRequest) {
       if (orderId && typeof orderId === 'string' && orderId.trim().length > 0) {
         const existing = await getOrderById(orderId.trim());
         if (existing) {
+          // Validate amount paid matches our stored order total (tolerate 1 cent rounding).
+          const expectedCents = Math.round(Number(existing.total) * 100);
+          const paidCents = typeof (session as any).amount_total === 'number' ? (session as any).amount_total : null;
+          if (paidCents !== null && Number.isFinite(expectedCents) && Math.abs(paidCents - expectedCents) > 1) {
+            console.error('Stripe amount mismatch', {
+              orderId: existing.id,
+              paidCents,
+              expectedCents,
+              currency: session.currency,
+              orderCurrency: existing.currency,
+            });
+            return NextResponse.json({ received: true });
+          }
+
           order = existing;
           orderNumber = existing.order_number;
 

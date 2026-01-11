@@ -167,6 +167,26 @@ export default function CheckoutPage() {
         color: item.color,
         finish: item.finish,
       }));
+      // 0) Lock pricing server-side (TTL quote) to avoid trusting client prices.
+      const quoteRes = await fetch('/api/pricing/lock', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: productItems,
+        }),
+      });
+
+      const quoteData = await quoteRes.json();
+      if (!quoteRes.ok) {
+        throw new Error(quoteData.error || t('errors.generic'));
+      }
+
+      const quoteToken = quoteData?.quoteToken as string | undefined;
+      if (!quoteToken) {
+        throw new Error(t('errors.generic'));
+      }
 
       // 1) Always create order first (WooCommerce-like)
       const orderRes = await fetch('/api/orders/create', {
@@ -175,6 +195,7 @@ export default function CheckoutPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          quoteToken,
           items: productItems,
           customer: {
             email,
@@ -225,7 +246,7 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify({
           orderId,
-          items: itemsForPayment,
+          items: productItems,
           customer: {
             email,
             name: fullName,
@@ -275,7 +296,7 @@ export default function CheckoutPage() {
           },
           body: JSON.stringify({
             orderId,
-            items: itemsForPayment,
+            items: productItems,
             customer: {
               email,
               name: fullName,

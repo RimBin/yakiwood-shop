@@ -1,5 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+﻿import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { AdminAuthError, requireAdmin } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -28,7 +29,8 @@ const UpdateSchema = z
     suggestions: z.array(z.string().trim().min(1).max(120)).optional(),
   })
   .refine((v) => {
-    const { id: _id, ...rest } = v;
+    const { id, ...rest } = v
+    void id
     return Object.keys(rest).length > 0;
   }, { message: 'Empty patch' });
 
@@ -54,16 +56,18 @@ async function safeJson(request: NextRequest): Promise<unknown> {
 }
 
 export async function GET(request: NextRequest) {
-  const sp = request.nextUrl.searchParams;
-  const locale = sp.get('locale');
-  const includeAllLocales = sp.get('allLocales') === '1';
-
-  const parsedLocale = locale ? LocaleSchema.safeParse(locale) : null;
-  if (locale && !parsedLocale?.success) {
-    return NextResponse.json({ success: false, error: 'Invalid locale' }, { status: 400 });
-  }
-
   try {
+    await requireAdmin(request)
+
+    const sp = request.nextUrl.searchParams
+    const locale = sp.get('locale')
+    const includeAllLocales = sp.get('allLocales') === '1'
+
+    const parsedLocale = locale ? LocaleSchema.safeParse(locale) : null
+    if (locale && !parsedLocale?.success) {
+      return NextResponse.json({ success: false, error: 'Invalid locale' }, { status: 400 })
+    }
+
     const { client } = await import('@/sanity/lib/client');
 
     const query = includeAllLocales
@@ -97,21 +101,26 @@ export async function GET(request: NextRequest) {
       includeAllLocales ? {} : { locale: parsedLocale?.data ?? 'lt' }
     );
 
-    return NextResponse.json({ success: true, data: Array.isArray(data) ? data : [] });
+    return NextResponse.json({ success: true, data: Array.isArray(data) ? data : [] })
   } catch (error: unknown) {
+    if (error instanceof AdminAuthError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: error.status })
+    }
     const message = error instanceof Error ? error.message : 'Failed to load FAQ entries';
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
-  const json = await safeJson(request);
-  const parsed = CreateSchema.safeParse(json);
-  if (!parsed.success) {
-    return NextResponse.json({ success: false, error: 'Invalid payload' }, { status: 400 });
-  }
-
   try {
+    await requireAdmin(request)
+
+    const json = await safeJson(request)
+    const parsed = CreateSchema.safeParse(json)
+    if (!parsed.success) {
+      return NextResponse.json({ success: false, error: 'Invalid payload' }, { status: 400 })
+    }
+
     const { writeClient, assertWriteToken } = await import('@/sanity/lib/writeClient');
     assertWriteToken();
 
@@ -126,22 +135,27 @@ export async function POST(request: NextRequest) {
       suggestions: parsed.data.suggestions ?? [],
     });
 
-    return NextResponse.json({ success: true, data: { id: created._id } }, { status: 201 });
+    return NextResponse.json({ success: true, data: { id: created._id } }, { status: 201 })
   } catch (error: unknown) {
+    if (error instanceof AdminAuthError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: error.status })
+    }
     const message = error instanceof Error ? error.message : 'Failed to create FAQ entry';
     const status = message.includes('SANITY_API_TOKEN') ? 503 : 500;
-    return NextResponse.json({ success: false, error: message }, { status });
+    return NextResponse.json({ success: false, error: message }, { status })
   }
 }
 
 export async function PUT(request: NextRequest) {
-  const json = await safeJson(request);
-  const parsed = UpdateSchema.safeParse(json);
-  if (!parsed.success) {
-    return NextResponse.json({ success: false, error: 'Invalid payload' }, { status: 400 });
-  }
-
   try {
+    await requireAdmin(request)
+
+    const json = await safeJson(request)
+    const parsed = UpdateSchema.safeParse(json)
+    if (!parsed.success) {
+      return NextResponse.json({ success: false, error: 'Invalid payload' }, { status: 400 })
+    }
+
     const { writeClient, assertWriteToken } = await import('@/sanity/lib/writeClient');
     assertWriteToken();
 
@@ -156,31 +170,39 @@ export async function PUT(request: NextRequest) {
     if (Array.isArray(rest.suggestions)) patch.suggestions = rest.suggestions;
 
     await writeClient.patch(id).set(patch).commit();
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true })
   } catch (error: unknown) {
+    if (error instanceof AdminAuthError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: error.status })
+    }
     const message = error instanceof Error ? error.message : 'Failed to update FAQ entry';
     const status = message.includes('SANITY_API_TOKEN') ? 503 : 500;
-    return NextResponse.json({ success: false, error: message }, { status });
+    return NextResponse.json({ success: false, error: message }, { status })
   }
 }
 
 export async function DELETE(request: NextRequest) {
-  const sp = request.nextUrl.searchParams;
-  const id = sp.get('id');
-  const IdSchema = z.string().trim().min(5).max(200);
-  const parsed = IdSchema.safeParse(id);
-  if (!parsed.success) {
-    return NextResponse.json({ success: false, error: 'id is required' }, { status: 400 });
-  }
-
   try {
+    await requireAdmin(request)
+
+    const sp = request.nextUrl.searchParams
+    const id = sp.get('id')
+    const IdSchema = z.string().trim().min(5).max(200)
+    const parsed = IdSchema.safeParse(id)
+    if (!parsed.success) {
+      return NextResponse.json({ success: false, error: 'id is required' }, { status: 400 })
+    }
+
     const { writeClient, assertWriteToken } = await import('@/sanity/lib/writeClient');
     assertWriteToken();
     await writeClient.delete(parsed.data);
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true })
   } catch (error: unknown) {
+    if (error instanceof AdminAuthError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: error.status })
+    }
     const message = error instanceof Error ? error.message : 'Failed to delete FAQ entry';
     const status = message.includes('SANITY_API_TOKEN') ? 503 : 500;
-    return NextResponse.json({ success: false, error: message }, { status });
+    return NextResponse.json({ success: false, error: message }, { status })
   }
 }

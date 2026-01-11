@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import Stripe from 'stripe';
 import { applyRoleDiscount, type RoleDiscount } from '@/lib/pricing/roleDiscounts';
 import { quoteConfigurationPricing, type UsageType } from '@/lib/pricing/configuration';
+import { getOrderById } from '@/lib/supabase-admin';
 
 function getStripeClient() {
   if (!process.env.STRIPE_SECRET_KEY) return null;
@@ -127,7 +128,23 @@ export async function POST(req: NextRequest) {
       .join(', ');
 
     if (!items || items.length === 0) {
-      return NextResponse.json({ error: 'Tuščias krepšelis' }, { status: 400 });
+      // If orderId is provided, we will load items from DB; otherwise this is an error.
+      if (!orderId || typeof orderId !== 'string' || orderId.trim().length === 0) {
+        return NextResponse.json({ error: 'Tuščias krepšelis' }, { status: 400 });
+      }
+    }
+
+    // Authoritative path: load order snapshot from DB when orderId is provided.
+    let resolvedItems = items;
+    if (orderId && typeof orderId === 'string' && orderId.trim().length > 0) {
+      const order = await getOrderById(orderId.trim());
+      if (!order) {
+        return NextResponse.json({ error: 'Užsakymas nerastas' }, { status: 404 });
+      }
+      if (!Array.isArray(order.items) || order.items.length === 0) {
+        return NextResponse.json({ error: 'Užsakymo prekės nerastos' }, { status: 400 });
+      }
+      resolvedItems = order.items as any;
     }
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
@@ -143,14 +160,14 @@ export async function POST(req: NextRequest) {
     const roleDiscount = await getAuthenticatedRoleDiscount(req);
 
     const discountedItems = roleDiscount
-      ? items.map((item) => {
+      ? resolvedItems.map((item) => {
           if (item.id === 'shipping') return item;
           return {
             ...item,
             basePrice: applyRoleDiscount(item.basePrice, roleDiscount),
           };
         })
-      : items;
+      : resolvedItems;
 
     // NOTE: Real implementation should map product IDs to Stripe Price IDs.
     // For initial scaffold we convert basePrice EUR to cents direct.
@@ -232,7 +249,8 @@ export async function POST(req: NextRequest) {
         customerCity,
         customerPostalCode,
         customerCountry,
-        items: JSON.stringify(discountedItems),
+        // Avoid storing full cart in metadata when order-first flow is used.
+        items: orderId ? '' : JSON.stringify(discountedItems),
       },
       success_url: `${resolvedSiteUrl}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${resolvedSiteUrl}/checkout`

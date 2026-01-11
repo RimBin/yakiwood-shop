@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Breadcrumbs } from '@/components/ui';
+import { createClient } from '@/lib/supabase/client';
 
 type SessionSummary = {
   sessionId: string;
@@ -48,6 +49,28 @@ type ApiResponse<T> = {
   data?: T;
   error?: string;
 };
+
+async function getAdminToken(): Promise<string | null> {
+  const supabase = createClient();
+  if (!supabase) return null;
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
+}
+
+async function fetchAdmin(input: string, init?: RequestInit): Promise<Response> {
+  const token = await getAdminToken();
+  if (!token) {
+    return new Response(JSON.stringify({ error: 'Nėra aktyvios admin sesijos.' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const headers = new Headers(init?.headers);
+  headers.set('Authorization', `Bearer ${token}`);
+
+  return fetch(input, { ...init, headers });
+}
 
 function splitCommaList(value: string): string[] {
   return value
@@ -161,7 +184,7 @@ export default function AdminChatbotPage() {
     setLoading(true);
     setSessionsError(null);
     try {
-      const resp = await fetch('/api/admin/chatbot?action=sessions&limit=50');
+      const resp = await fetchAdmin('/api/admin/chatbot?action=sessions&limit=50');
       const json = await safeJson<SessionSummary[]>(resp);
       const errorMsg = getErrorMessage(resp, json.error);
       if (errorMsg) {
@@ -177,7 +200,7 @@ export default function AdminChatbotPage() {
 
   async function loadEvents(sessionId: string) {
     try {
-      const resp = await fetch(
+      const resp = await fetchAdmin(
         `/api/admin/chatbot?action=events&sessionId=${encodeURIComponent(sessionId)}&limit=300`
       );
       const json = await safeJson<ChatEvent[]>(resp);
@@ -213,7 +236,7 @@ export default function AdminChatbotPage() {
     setFaqError(null);
     setFaqNotice(null);
     try {
-      const resp = await fetch(`/api/admin/chatbot-faq?locale=${encodeURIComponent(locale)}`, {
+      const resp = await fetchAdmin(`/api/admin/chatbot-faq?locale=${encodeURIComponent(locale)}`, {
         method: 'GET',
       });
       const json = await safeJson<FaqEntry[]>(resp);
@@ -290,7 +313,7 @@ export default function AdminChatbotPage() {
 
     try {
       const isUpdate = Boolean(faqDraft.id);
-      const resp = await fetch('/api/admin/chatbot-faq', {
+      const resp = await fetchAdmin('/api/admin/chatbot-faq', {
         method: isUpdate ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -323,7 +346,7 @@ export default function AdminChatbotPage() {
     setFaqNotice(null);
 
     try {
-      const resp = await fetch(`/api/admin/chatbot-faq?id=${encodeURIComponent(faqDraft.id)}`, {
+      const resp = await fetchAdmin(`/api/admin/chatbot-faq?id=${encodeURIComponent(faqDraft.id)}`, {
         method: 'DELETE',
       });
       const json = await safeJson<{ ok: boolean }>(resp);

@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import {
+  consumePricingQuote,
   createOrder,
   generateOrderNumber,
+  getOrderByQuoteId,
+  getPricingQuoteByTokenHash,
   supabaseAdmin,
 } from '@/lib/supabase-admin';
 import { applyRoleDiscount, type RoleDiscount } from '@/lib/pricing/roleDiscounts';
+import { hashQuoteToken } from '@/lib/pricing/quote-token';
 
 const VAT_RATE = 0.21;
 
@@ -30,6 +34,7 @@ type PaymentProvider = 'stripe' | 'paypal' | 'paysera' | 'manual';
 
 type CreateOrderBody = {
   items: IncomingItem[];
+  quoteToken?: string;
   customer: {
     email: string;
     name: string;
@@ -43,6 +48,10 @@ type CreateOrderBody = {
   couponCode?: string;
   paymentProvider?: PaymentProvider;
 };
+
+function eurFromCents(cents: number): number {
+  return Math.round(Number(cents) || 0) / 100;
+}
 
 function normalizeItems(items: IncomingItem[]): IncomingItem[] {
   return items
@@ -137,22 +146,104 @@ export async function POST(req: NextRequest) {
 
     const body = (await req.json()) as CreateOrderBody;
 
-    const items = normalizeItems(body.items || []);
-    if (!items.length) {
-      return NextResponse.json({ error: 'Tuščias krepšelis' }, { status: 400 });
-    }
+    const quoteToken = typeof body.quoteToken === 'string' ? body.quoteToken.trim() : '';
 
-    // Apply role discount only for authenticated users.
-    const roleDiscount = await getAuthenticatedRoleDiscount(req);
-    const discountedItems = roleDiscount
-      ? items.map((item) => {
-          if (item.id === 'shipping') return item;
-          return {
-            ...item,
-            basePrice: applyRoleDiscount(item.basePrice, roleDiscount),
-          };
-        })
-      : items;
+    let enrichedItems: IncomingItem[] = [];
+    let totals: { subtotalNet: number; vatAmount: number; totalGross: number } = { subtotalNet: 0, vatAmount: 0, totalGross: 0 };
+    let quoteId: string | undefined;
+
+    if (quoteToken) {
+      let tokenHash: string;
+      try {
+        tokenHash = hashQuoteToken(quoteToken);
+      } catch (e) {
+        return NextResponse.json({ error: 'Quote not configured' }, { status: 503 });
+      }
+
+      const quote = await getPricingQuoteByTokenHash(tokenHash);
+      if (!quote) {
+        return NextResponse.json({ error: 'Kainos pasiūlymas nerastas' }, { status: 404 });
+      }
+
+      if (quote.status !== 'active') {
+        // Idempotency: if already consumed, return existing order if present.
+        const existingOrder = await getOrderByQuoteId(quote.id);
+        if (existingOrder) {
+          return NextResponse.json({
+            order: {
+              id: existingOrder.id,
+              orderNumber: existingOrder.order_number,
+              status: existingOrder.status,
+              paymentStatus: existingOrder.payment_status,
+              total: existingOrder.total,
+              currency: existingOrder.currency,
+            },
+          });
+        }
+        return NextResponse.json({ error: 'Kainos pasiūlymas nebegalioja' }, { status: 400 });
+      }
+
+      const expiresAt = new Date(quote.expires_at).getTime();
+      if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
+        return NextResponse.json({ error: 'Kainos pasiūlymas pasibaigė' }, { status: 400 });
+      }
+
+      quoteId = quote.id;
+
+      const snapshot = Array.isArray(quote.items_snapshot) ? quote.items_snapshot : [];
+      enrichedItems = snapshot.map((i: any) => ({
+        id: String(i.id || '').trim(),
+        name: String(i.name || '').trim(),
+        slug: typeof i.slug === 'string' ? i.slug : undefined,
+        quantity: Number(i.quantity) || 0,
+        basePrice: typeof i.basePrice === 'number' ? i.basePrice : eurFromCents(i.unitPriceCents ?? 0),
+        color: typeof i.color === 'string' ? i.color : undefined,
+        finish: typeof i.finish === 'string' ? i.finish : undefined,
+        configuration: i && typeof i.configuration === 'object' ? i.configuration : undefined,
+      })).filter((i) => i.id.length > 0 && i.name.length > 0 && i.quantity > 0 && i.basePrice >= 0);
+
+      totals = {
+        subtotalNet: eurFromCents(quote.subtotal_net_cents),
+        vatAmount: eurFromCents(quote.vat_cents),
+        totalGross: eurFromCents(quote.total_gross_cents),
+      };
+    } else {
+      const items = normalizeItems(body.items || []);
+      if (!items.length) {
+        return NextResponse.json({ error: 'Tuščias krepšelis' }, { status: 400 });
+      }
+
+      // Apply role discount only for authenticated users.
+      const roleDiscount = await getAuthenticatedRoleDiscount(req);
+      const discountedItems = roleDiscount
+        ? items.map((item) => {
+            if (item.id === 'shipping') return item;
+            return {
+              ...item,
+              basePrice: applyRoleDiscount(item.basePrice, roleDiscount),
+            };
+          })
+        : items;
+
+      const itemsGrossSubtotal = discountedItems.reduce((sum, i) => sum + i.basePrice * i.quantity, 0);
+      const shippingGross = computeShippingGross(itemsGrossSubtotal);
+
+      enrichedItems = shippingGross > 0
+        ? [
+            ...discountedItems,
+            {
+              id: 'shipping',
+              name: 'Pristatymas',
+              slug: 'shipping',
+              quantity: 1,
+              basePrice: shippingGross,
+            },
+          ]
+        : discountedItems;
+
+      const grossTotal = enrichedItems.reduce((sum, i) => sum + i.basePrice * i.quantity, 0);
+      totals = computeTotalsFromGross(grossTotal);
+    }
 
     const customerEmail = String(body.customer?.email || '').trim();
     const customerName = String(body.customer?.name || '').trim();
@@ -170,25 +261,6 @@ export async function POST(req: NextRequest) {
       .map((v) => (typeof v === 'string' ? v.trim() : ''))
       .filter(Boolean)
       .join(', ');
-
-    const itemsGrossSubtotal = discountedItems.reduce((sum, i) => sum + i.basePrice * i.quantity, 0);
-    const shippingGross = computeShippingGross(itemsGrossSubtotal);
-
-    const enrichedItems: IncomingItem[] = shippingGross > 0
-      ? [
-          ...discountedItems,
-          {
-            id: 'shipping',
-            name: 'Pristatymas',
-            slug: 'shipping',
-            quantity: 1,
-            basePrice: shippingGross,
-          },
-        ]
-      : discountedItems;
-
-    const grossTotal = enrichedItems.reduce((sum, i) => sum + i.basePrice * i.quantity, 0);
-    const totals = computeTotalsFromGross(grossTotal);
 
     const orderNumber = generateOrderNumber();
     const paymentProvider: PaymentProvider =
@@ -219,10 +291,16 @@ export async function POST(req: NextRequest) {
       total: totals.totalGross,
       currency: 'EUR',
       notes: notesParts.length ? notesParts.join('\n') : undefined,
+      quoteId,
     });
 
     if (!order) {
       return NextResponse.json({ error: 'Nepavyko sukurti užsakymo' }, { status: 500 });
+    }
+
+    // If created from a quote, consume it (best-effort). Order creation already has quote_id.
+    if (quoteId) {
+      await consumePricingQuote(quoteId, order.id);
     }
 
     return NextResponse.json({

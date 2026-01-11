@@ -47,6 +47,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Neteisingi matmenys arba kiekis' }, { status: 400 })
     }
 
+    const thicknessOptionIdFromMm =
+      typeof body.thicknessMm === 'number'
+        ? await resolveThicknessOptionIdFromMm(body.thicknessMm)
+        : null
+
     const quote = await quoteConfigurationPricing({
       productId,
       usageType: body.usageType,
@@ -55,9 +60,7 @@ export async function POST(req: NextRequest) {
       thicknessOptionId:
         typeof body.thicknessOptionId === 'string' && body.thicknessOptionId.trim()
           ? body.thicknessOptionId
-          : typeof body.thicknessMm === 'number'
-            ? await resolveThicknessOptionIdFromMm(body.thicknessMm)
-            : undefined,
+          : thicknessOptionIdFromMm ?? undefined,
       widthMm,
       lengthMm,
       quantityBoards,

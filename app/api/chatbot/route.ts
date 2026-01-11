@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
   let json: unknown;
   try {
-    const entries = await getFaqEntries(locale);
+    json = await request.json();
   } catch {
     return NextResponse.json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
   }

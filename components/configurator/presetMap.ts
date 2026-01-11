@@ -3,7 +3,6 @@ import type { ColorType, ProfileType, UsageType, WoodType } from './types';
 export const INDEXABLE_SHOU_SUGI_BAN_VARIANT_SLUGS = [
   'larch-carbon',
   'spruce-natural',
-  'accoya-black',
 ] as const;
 
 export type IndexableVariantSlug = (typeof INDEXABLE_SHOU_SUGI_BAN_VARIANT_SLUGS)[number];
@@ -27,12 +26,6 @@ const PRESET_MAP: Record<string, PresetOverrides> = {
     usage: 'facade',
     color: 'natural',
     profile: 'P1',
-  },
-  'accoya-black': {
-    wood: 'accoya',
-    usage: 'facade',
-    color: 'black',
-    profile: 'P3',
   },
 };
 

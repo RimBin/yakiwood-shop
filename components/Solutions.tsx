@@ -42,12 +42,7 @@ export default function Solutions() {
   return (
     <section className="w-full bg-[#E1E1E1]">
       {/* Page Header */}
-      <PageCover>
-        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
-            style={{ fontVariationSettings: "'opsz' 14" }}>
-          Solutions
-        </h1>
-      </PageCover>
+      {/* Removed duplicated header blocks as requested */}
       
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7698 ===== */}
       <div className="lg:hidden">

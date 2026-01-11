@@ -26,6 +26,7 @@ export interface Order {
   order_number: string;
   stripe_session_id?: string;
   stripe_payment_intent?: string;
+  quote_id?: string;
   customer_email: string;
   customer_name: string;
   customer_phone?: string;
@@ -100,6 +101,7 @@ export async function createOrder(data: {
   total: number;
   currency?: string;
   notes?: string;
+  quoteId?: string;
 }): Promise<Order | null> {
   if (!supabaseAdmin) {
     console.warn('Supabase not configured, skipping order creation');
@@ -110,6 +112,7 @@ export async function createOrder(data: {
     .insert({
       order_number: data.orderNumber,
       stripe_session_id: data.stripeSessionId,
+      quote_id: data.quoteId,
       customer_email: data.customerEmail,
       customer_name: data.customerName,
       customer_phone: data.customerPhone,
@@ -241,6 +244,116 @@ export async function getAllOrders(limit = 100): Promise<Order[]> {
   }
 
   return data || [];
+}
+
+export interface PricingQuote {
+  id: string;
+  token_hash: string;
+  status: 'active' | 'consumed' | 'expired';
+  currency: string;
+  vat_rate: number;
+  subtotal_gross_cents: number;
+  shipping_gross_cents: number;
+  total_gross_cents: number;
+  subtotal_net_cents: number;
+  vat_cents: number;
+  items_snapshot: any[];
+  consumed_order_id?: string | null;
+  created_at: string;
+  expires_at: string;
+  consumed_at?: string | null;
+}
+
+export async function createPricingQuote(data: {
+  tokenHash: string;
+  status: PricingQuote['status'];
+  currency: string;
+  vatRate: number;
+  subtotalGrossCents: number;
+  shippingGrossCents: number;
+  totalGrossCents: number;
+  subtotalNetCents: number;
+  vatCents: number;
+  itemsSnapshot: any[];
+  expiresAt: string;
+}): Promise<PricingQuote | null> {
+  if (!supabaseAdmin) return null;
+  const { data: quote, error } = await supabaseAdmin
+    .from('pricing_quotes')
+    .insert({
+      token_hash: data.tokenHash,
+      status: data.status,
+      currency: data.currency,
+      vat_rate: data.vatRate,
+      subtotal_gross_cents: data.subtotalGrossCents,
+      shipping_gross_cents: data.shippingGrossCents,
+      total_gross_cents: data.totalGrossCents,
+      subtotal_net_cents: data.subtotalNetCents,
+      vat_cents: data.vatCents,
+      items_snapshot: data.itemsSnapshot,
+      expires_at: data.expiresAt,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating pricing quote:', error);
+    return null;
+  }
+
+  return quote as PricingQuote;
+}
+
+export async function getPricingQuoteByTokenHash(tokenHash: string): Promise<PricingQuote | null> {
+  if (!supabaseAdmin) return null;
+  const { data, error } = await supabaseAdmin
+    .from('pricing_quotes')
+    .select('*')
+    .eq('token_hash', tokenHash)
+    .single();
+
+  if (error) {
+    console.error('Error fetching pricing quote:', error);
+    return null;
+  }
+
+  return (data as PricingQuote) ?? null;
+}
+
+export async function consumePricingQuote(quoteId: string, orderId: string): Promise<boolean> {
+  if (!supabaseAdmin) return false;
+
+  const { error } = await supabaseAdmin
+    .from('pricing_quotes')
+    .update({
+      status: 'consumed',
+      consumed_at: new Date().toISOString(),
+      consumed_order_id: orderId,
+    })
+    .eq('id', quoteId)
+    .eq('status', 'active');
+
+  if (error) {
+    console.error('Error consuming pricing quote:', error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function getOrderByQuoteId(quoteId: string): Promise<Order | null> {
+  if (!supabaseAdmin) return null;
+  const { data, error } = await supabaseAdmin
+    .from('orders')
+    .select('*')
+    .eq('quote_id', quoteId)
+    .single();
+
+  if (error) {
+    return null;
+  }
+
+  return (data as Order) ?? null;
 }
 
 // ==================== INVOICES ====================

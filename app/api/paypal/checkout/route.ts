@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { quoteConfigurationPricing, type UsageType } from '@/lib/pricing/configuration'
+import { getOrderById, supabaseAdmin } from '@/lib/supabase-admin'
 
 type IncomingItem = {
   id: string
@@ -104,25 +105,42 @@ export async function POST(req: NextRequest) {
     }
 
     const items = Array.isArray(body.items) ? body.items : []
-    if (items.length === 0) {
+
+    const orderId = typeof body.orderId === 'string' ? body.orderId.trim() : ''
+    if (!orderId && items.length === 0) {
       return NextResponse.json({ error: 'Tuščias krepšelis' }, { status: 400 })
     }
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
     const resolvedSiteUrl = siteUrl && siteUrl.trim() ? siteUrl : 'http://localhost:3000'
 
-    const priced = await Promise.all(
-      items.map(async (item) => {
-        const unit = await resolveItemUnitPriceEUR(item)
-        return {
-          name: item.name,
-          quantity: Number(item.quantity) || 0,
-          unit,
-        }
-      })
-    )
+    let grossTotal: number | null = null
 
-    const grossTotal = priced.reduce((sum, i) => sum + i.unit * i.quantity, 0)
+    // Authoritative: if orderId is provided, use DB order total.
+    if (orderId) {
+      if (!supabaseAdmin) {
+        return NextResponse.json({ error: 'Database not configured' }, { status: 503 })
+      }
+      const order = await getOrderById(orderId)
+      if (!order) {
+        return NextResponse.json({ error: 'Užsakymas nerastas' }, { status: 404 })
+      }
+      grossTotal = Number(order.total)
+    } else {
+      const priced = await Promise.all(
+        items.map(async (item) => {
+          const unit = await resolveItemUnitPriceEUR(item)
+          return {
+            name: item.name,
+            quantity: Number(item.quantity) || 0,
+            unit,
+          }
+        })
+      )
+
+      grossTotal = priced.reduce((sum, i) => sum + i.unit * i.quantity, 0)
+    }
+
     if (!Number.isFinite(grossTotal) || grossTotal <= 0) {
       return NextResponse.json({ error: 'Neteisinga suma' }, { status: 400 })
     }
@@ -137,7 +155,7 @@ export async function POST(req: NextRequest) {
         intent: 'CAPTURE',
         purchase_units: [
           {
-            reference_id: body.orderId || 'order',
+            reference_id: orderId || 'order',
             amount: {
               currency_code: 'EUR',
               value: formatAmountEUR(grossTotal),
@@ -148,7 +166,7 @@ export async function POST(req: NextRequest) {
           brand_name: 'Yakiwood',
           landing_page: 'BILLING',
           user_action: 'PAY_NOW',
-          return_url: `${resolvedSiteUrl}/order-confirmation?provider=paypal&order_id=${encodeURIComponent(body.orderId || '')}`,
+          return_url: `${resolvedSiteUrl}/order-confirmation?provider=paypal&order_id=${encodeURIComponent(orderId || '')}`,
           cancel_url: `${resolvedSiteUrl}/checkout`,
         },
       }),

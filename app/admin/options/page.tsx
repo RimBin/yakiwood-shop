@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Breadcrumbs } from '@/components/ui'
-import ThicknessOptionsAdminClient from '@/components/admin/ThicknessOptionsAdminClient'
+import ThicknessOptionsAdminClient from '../../../components/admin/ThicknessOptionsAdminClient'
 
 async function requireAdmin() {
   const supabase = await createClient()
