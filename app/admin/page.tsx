@@ -43,6 +43,94 @@ interface Post {
 
 type ActiveTab = 'products' | 'projects' | 'posts' | 'seo' | 'email-templates';
 
+const PROJECTS_STORAGE_KEY = 'yakiwood_projects';
+
+let adminDbPromise: Promise<IDBDatabase> | null = null;
+
+function openAdminDb(): Promise<IDBDatabase> {
+  if (typeof window === 'undefined') {
+    return Promise.reject(new Error('IndexedDB is not available during SSR'));
+  }
+  if (adminDbPromise) return adminDbPromise;
+
+  adminDbPromise = new Promise((resolve, reject) => {
+    const request = indexedDB.open('yakiwood-admin', 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains('kv')) {
+        db.createObjectStore('kv', { keyPath: 'key' });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error ?? new Error('Failed to open IndexedDB'));
+  });
+
+  return adminDbPromise;
+}
+
+async function kvGet<T>(key: string): Promise<T | null> {
+  try {
+    const db = await openAdminDb();
+    return await new Promise<T | null>((resolve, reject) => {
+      const tx = db.transaction('kv', 'readonly');
+      const store = tx.objectStore('kv');
+      const req = store.get(key);
+      req.onsuccess = () => {
+        const row = req.result as { key: string; value: T } | undefined;
+        resolve(row?.value ?? null);
+      };
+      req.onerror = () => reject(req.error ?? new Error('IndexedDB get failed'));
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function kvSet<T>(key: string, value: T): Promise<void> {
+  const db = await openAdminDb();
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction('kv', 'readwrite');
+    const store = tx.objectStore('kv');
+    store.put({ key, value });
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error ?? new Error('IndexedDB transaction failed'));
+    tx.onabort = () => reject(tx.error ?? new Error('IndexedDB transaction aborted'));
+  });
+}
+
+async function kvRemove(key: string): Promise<void> {
+  try {
+    const db = await openAdminDb();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction('kv', 'readwrite');
+      const store = tx.objectStore('kv');
+      store.delete(key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error ?? new Error('IndexedDB delete failed'));
+      tx.onabort = () => reject(tx.error ?? new Error('IndexedDB delete aborted'));
+    });
+  } catch {
+    // ignore
+  }
+}
+
+async function getProjectsFromStorage(): Promise<Project[] | null> {
+  const fromIdb = await kvGet<Project[]>(PROJECTS_STORAGE_KEY);
+  if (fromIdb && Array.isArray(fromIdb)) return fromIdb;
+
+  try {
+    const legacy = localStorage.getItem(PROJECTS_STORAGE_KEY);
+    if (!legacy) return null;
+    const parsed = JSON.parse(legacy) as Project[];
+    if (!Array.isArray(parsed)) return null;
+    await kvSet(PROJECTS_STORAGE_KEY, parsed);
+    localStorage.removeItem(PROJECTS_STORAGE_KEY);
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 function slugify(value: string) {
   return value
     .normalize('NFKD')
@@ -229,23 +317,28 @@ export default function AdminPage() {
   });
 
   useEffect(() => {
-    const savedProducts = localStorage.getItem('yakiwood_products');
-    if (savedProducts) setProducts(JSON.parse(savedProducts));
+    const run = async () => {
+      const savedProducts = localStorage.getItem('yakiwood_products');
+      if (savedProducts) setProducts(JSON.parse(savedProducts));
 
-    const savedProjects = localStorage.getItem('yakiwood_projects');
-    if (savedProjects) {
-      setProjects(JSON.parse(savedProjects));
-    } else {
-      // Load default projects from data/projects.ts if localStorage is empty
-      setProjects(defaultProjects);
-      localStorage.setItem('yakiwood_projects', JSON.stringify(defaultProjects));
-    }
+      const storedProjects = await getProjectsFromStorage();
+      if (storedProjects) {
+        setProjects(storedProjects);
+      } else {
+        setProjects(defaultProjects);
+        try {
+          await kvSet(PROJECTS_STORAGE_KEY, defaultProjects);
+          localStorage.removeItem(PROJECTS_STORAGE_KEY);
+        } catch {
+          // ignore
+        }
+      }
 
-    const savedPosts = localStorage.getItem('yakiwood_posts');
-    if (savedPosts) setPosts(JSON.parse(savedPosts));
+      const savedPosts = localStorage.getItem('yakiwood_posts');
+      if (savedPosts) setPosts(JSON.parse(savedPosts));
 
-    const savedCustomCategories = localStorage.getItem('yakiwood_custom_categories');
-    if (savedCustomCategories) setCustomCategories(JSON.parse(savedCustomCategories));
+      const savedCustomCategories = localStorage.getItem('yakiwood_custom_categories');
+      if (savedCustomCategories) setCustomCategories(JSON.parse(savedCustomCategories));
 
     const savedCustomWoods = localStorage.getItem('yakiwood_custom_woods');
     if (savedCustomWoods) {
@@ -297,10 +390,10 @@ export default function AdminPage() {
       }
     }
 
-    const savedProfiles = localStorage.getItem('yakiwood_profiles');
-    if (savedProfiles) {
-      const parsed = JSON.parse(savedProfiles) as string[];
-      const migrated = parsed.map(migrateProfileValue);
+      const savedProfiles = localStorage.getItem('yakiwood_profiles');
+      if (savedProfiles) {
+        const parsed = JSON.parse(savedProfiles) as string[];
+        const migrated = parsed.map(migrateProfileValue);
 
       // If the user has an old default list from earlier demo versions,
       // upgrade it to the current built-in set.
@@ -322,13 +415,16 @@ export default function AdminPage() {
       const next = Array.from(new Set([...(looksLikeOldDefaults ? defaults : migrated), ...custom]));
       const finalList = looksLikeOldDefaults ? Array.from(new Set([...defaults, ...custom])) : next;
 
-      setProfiles(finalList);
-      localStorage.setItem('yakiwood_profiles', JSON.stringify(finalList));
-    } else {
-      const defaults = [...BUILTIN_PROFILE_KEYS];
-      setProfiles(defaults as unknown as string[]);
-      localStorage.setItem('yakiwood_profiles', JSON.stringify(defaults));
-    }
+        setProfiles(finalList);
+        localStorage.setItem('yakiwood_profiles', JSON.stringify(finalList));
+      } else {
+        const defaults = [...BUILTIN_PROFILE_KEYS];
+        setProfiles(defaults as unknown as string[]);
+        localStorage.setItem('yakiwood_profiles', JSON.stringify(defaults));
+      }
+    };
+
+    void run();
   }, [BUILTIN_PROFILE_KEYS]);
 
   useEffect(() => {
@@ -796,7 +892,7 @@ export default function AdminPage() {
     reader.readAsDataURL(file);
   };
 
-  const handleProjectSubmit = (e: React.FormEvent) => {
+  const handleProjectSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const urlImages = projectForm.images.split(',').map(url => url.trim()).filter(Boolean);
@@ -830,8 +926,17 @@ export default function AdminPage() {
         return project;
       });
       setProjects(updated);
-      localStorage.setItem('yakiwood_projects', JSON.stringify(updated));
-      showMessage('Project updated successfully!');
+      let persisted = true;
+      try {
+        await kvSet(PROJECTS_STORAGE_KEY, updated);
+      } catch {
+        persisted = false;
+      }
+      showMessage(
+        persisted
+          ? 'Project updated successfully!'
+          : 'Project updated, but could not be saved in this browser (storage limit).'
+      );
       setEditingProjectId(null);
     } else {
       // Add new project
@@ -846,8 +951,17 @@ export default function AdminPage() {
       
       const updated = [...projects, newProject];
       setProjects(updated);
-      localStorage.setItem('yakiwood_projects', JSON.stringify(updated));
-      showMessage('Project added successfully!');
+      let persisted = true;
+      try {
+        await kvSet(PROJECTS_STORAGE_KEY, updated);
+      } catch {
+        persisted = false;
+      }
+      showMessage(
+        persisted
+          ? 'Project added successfully!'
+          : 'Project added, but could not be saved in this browser (storage limit).'
+      );
     }
     
     setProjectForm({
@@ -877,7 +991,9 @@ export default function AdminPage() {
   const handleProjectDelete = (id: string) => {
     const updated = projects.filter(p => p.id !== id);
     setProjects(updated);
-    localStorage.setItem('yakiwood_projects', JSON.stringify(updated));
+    void kvSet(PROJECTS_STORAGE_KEY, updated).catch(() => {
+      // ignore
+    });
     showMessage('Project deleted');
   };
 
@@ -945,7 +1061,9 @@ export default function AdminPage() {
         const importedProjects = JSON.parse(event.target?.result as string);
         const updated = [...projects, ...importedProjects];
         setProjects(updated);
-        localStorage.setItem('yakiwood_projects', JSON.stringify(updated));
+        void kvSet(PROJECTS_STORAGE_KEY, updated).catch(() => {
+          // ignore
+        });
         showMessage(`Imported ${importedProjects.length} projects successfully!`);
       } catch (error) {
         showMessage('Error importing projects. Please check the JSON format.');

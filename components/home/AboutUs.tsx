@@ -13,27 +13,75 @@ const [imgProject1, imgProject2] = assets.projects;
 
 const partnerNames = ['RIMLT', 'BIKUVA', 'SANKA', 'METALLUM', 'Diktum', 'Sidergas', 'BAU'];
 
-function PartnersMarquee({ items, durationSeconds = 26 }: { items: string[]; durationSeconds?: number }) {
+const partnerLogos: Record<
+  string,
+  {
+    src: string;
+    alt: string;
+  }
+> = {
+  RIMLT: { src: '/assets/partners/primlt-2.png', alt: 'RIMLT' },
+  BIKUVA: { src: '/assets/partners/bikuva-1.png', alt: 'BIKUVA' },
+  SANKA: { src: '/assets/partners/chamber-1.png', alt: 'SANKA' },
+  METALLUM: { src: '/assets/partners/metallum-1.png', alt: 'METALLUM' },
+  Diktum: { src: '/assets/partners/diktum-1.png', alt: 'Diktum' },
+  Sidergas: { src: '/assets/partners/sidergas-1.png', alt: 'Sidergas' },
+  BAU: { src: '/assets/partners/BAUEN-1.png', alt: 'BAU' },
+};
+
+function PartnersMarquee({
+  items,
+  durationSeconds = 26,
+  fullBleed = false,
+}: {
+  items: string[];
+  durationSeconds?: number;
+  fullBleed?: boolean;
+}) {
   const repeated = [...items, ...items];
 
   return (
-    <div className="relative overflow-hidden">
+    <div
+      className={`relative overflow-hidden ${
+        fullBleed ? 'w-screen relative left-1/2 right-1/2 -translate-x-1/2' : ''
+      }`}
+    >
       <div
         className="yw-marquee-track flex gap-[16px]"
         style={{ ['--yw-marquee-duration' as any]: `${durationSeconds}s` } as React.CSSProperties}
+        aria-hidden="true"
       >
         {repeated.map((name, index) => (
+          (() => {
+            const logo = partnerLogos[name];
+
+            return (
           <div
             // index is required here because we intentionally duplicate items.
             key={`${name}-${index}`}
             className="bg-[#EAEAEA] rounded-[8px] h-[140px] w-[180px] lg:h-[210px] lg:w-[213px] shrink-0 flex items-center justify-center"
           >
-            <span className="font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-[#161616]">
-              {name}
-            </span>
+            {logo ? (
+              <Image
+                src={logo.src}
+                alt={logo.alt}
+                width={160}
+                height={64}
+                sizes="(min-width: 1024px) 160px, 140px"
+                className="object-contain w-[140px] h-[56px] lg:w-[160px] lg:h-[64px]"
+              />
+            ) : (
+              <span className="font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-[#161616]">
+                {name}
+              </span>
+            )}
           </div>
+            );
+          })()
         ))}
       </div>
+
+      <span className="sr-only">{items.join(', ')}</span>
     </div>
   );
 }
@@ -112,9 +160,7 @@ export default function AboutUs() {
           <p className="px-[16px] md:px-[32px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[16px]">
             Our partners
           </p>
-          <div className="px-[16px] md:px-[32px]">
-            <PartnersMarquee items={partnerNames} durationSeconds={22} />
-          </div>
+          <PartnersMarquee items={partnerNames} durationSeconds={22} fullBleed />
         </div>
       </div>
 
@@ -184,7 +230,7 @@ export default function AboutUs() {
         </p>
 
         <div className="mt-[24px]">
-          <PartnersMarquee items={partnerNames} durationSeconds={30} />
+          <PartnersMarquee items={partnerNames} durationSeconds={30} fullBleed />
         </div>
       </div>
 

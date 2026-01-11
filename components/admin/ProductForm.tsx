@@ -104,6 +104,17 @@ export default function ProductForm({ product, mode }: Props) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(product?.image_url || null);
 
+  // Global photo library selection (product_assets where product_id IS NULL)
+  const [showPhotoLibrary, setShowPhotoLibrary] = useState(false);
+  const [libraryWoodType, setLibraryWoodType] = useState<string>('spruce');
+  const [libraryColorCode, setLibraryColorCode] = useState<string>('');
+  const [libraryColors, setLibraryColors] = useState<Array<{ code: string; label: string }>>([]);
+  const [libraryAssets, setLibraryAssets] = useState<Array<{ id: string; url: string; wood_type: string | null }>>(
+    []
+  );
+  const [libraryIsLoading, setLibraryIsLoading] = useState(false);
+  const [libraryError, setLibraryError] = useState<string | null>(null);
+
   // Variants state
   const [variants, setVariants] = useState<Variant[]>(product?.variants || []);
   const [showVariantForm, setShowVariantForm] = useState(false);
@@ -147,6 +158,7 @@ export default function ProductForm({ product, mode }: Props) {
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
+      setImageUrl('');
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -154,6 +166,99 @@ export default function ProductForm({ product, mode }: Props) {
       reader.readAsDataURL(file);
     }
   };
+
+  const chooseLibraryImage = (url: string) => {
+    setImageUrl(url);
+    setImageFile(null);
+    setImagePreview(url);
+  };
+
+  const clearImageSelection = () => {
+    setImageUrl('');
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const loadLibraryColors = async () => {
+    if (!supabase) return;
+    setLibraryError(null);
+    const { data, error } = await supabase
+      .from('catalog_options')
+      .select('value_text,label_lt,label_en,is_active,sort_order')
+      .eq('option_type', 'color')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true, nullsFirst: true });
+
+    if (error) {
+      setLibraryError(error.message);
+      return;
+    }
+
+    const normalized = (data || [])
+      .map((row: any) => {
+        const code = (row.value_text as string | null) ?? '';
+        const label = (row.label_lt as string | null) || (row.label_en as string | null) || code;
+        return { code, label };
+      })
+      .filter((x) => x.code);
+
+    setLibraryColors(normalized);
+    if (!libraryColorCode && normalized.length > 0) {
+      setLibraryColorCode(normalized[0]!.code);
+    }
+  };
+
+  const loadLibraryAssets = async (opts?: { woodType?: string; colorCode?: string }) => {
+    if (!supabase) return;
+    const woodType = opts?.woodType ?? libraryWoodType;
+    const colorCode = opts?.colorCode ?? libraryColorCode;
+    if (!colorCode) return;
+
+    setLibraryIsLoading(true);
+    setLibraryError(null);
+    try {
+      // Show both exact wood match + global (wood_type IS NULL) as fallback.
+      const { data, error } = await supabase
+        .from('product_assets')
+        .select('id,url,wood_type')
+        .eq('asset_type', 'photo')
+        .is('product_id', null)
+        .eq('color_code', colorCode)
+        .in('wood_type', [woodType, null])
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        setLibraryError(error.message);
+        return;
+      }
+
+      const rows = (data as any[] | null) ?? [];
+      // Prefer exact wood_type first, then NULL.
+      rows.sort((a, b) => {
+        const aw = a.wood_type ? 0 : 1;
+        const bw = b.wood_type ? 0 : 1;
+        return aw - bw;
+      });
+      setLibraryAssets(rows.map((r) => ({ id: r.id as string, url: r.url as string, wood_type: (r.wood_type as string | null) ?? null })));
+    } finally {
+      setLibraryIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!supabase) return;
+    if (!showPhotoLibrary) return;
+    void loadLibraryColors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showPhotoLibrary]);
+
+  useEffect(() => {
+    if (!supabase) return;
+    if (!showPhotoLibrary) return;
+    if (!libraryColorCode) return;
+    void loadLibraryAssets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showPhotoLibrary, libraryWoodType, libraryColorCode]);
 
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile) return null;
@@ -408,6 +513,103 @@ export default function ProductForm({ product, mode }: Props) {
             onChange={handleImageChange}
             className="w-full text-sm font-['DM_Sans'] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#161616] file:text-white hover:file:bg-[#2d2d2d]"
           />
+
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowPhotoLibrary((v) => !v)}
+              className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#FAFAFA]"
+            >
+              {showPhotoLibrary ? 'Slėpti biblioteką' : 'Rinktis iš bibliotekos'}
+            </button>
+            {(imagePreview || imageUrl) ? (
+              <button
+                type="button"
+                onClick={clearImageSelection}
+                className="px-3 py-2 border border-red-200 rounded-lg font-['DM_Sans'] text-sm text-red-700 hover:bg-red-50"
+              >
+                Pašalinti
+              </button>
+            ) : null}
+          </div>
+
+          {showPhotoLibrary ? (
+            <div className="mt-4 border border-[#E1E1E1] rounded-lg p-3 bg-[#FAFAFA]">
+              <p className="font-['DM_Sans'] text-sm font-medium text-[#161616]">Nuotraukų biblioteka</p>
+              <p className="mt-1 font-['Outfit'] text-xs text-[#535353]">
+                Čia pasirenkate jau įkeltas globalias nuotraukas (pvz. spruce + black) iš /admin/options.
+              </p>
+
+              <div className="mt-3 grid grid-cols-1 gap-3">
+                <div>
+                  <label className="block font-['Outfit'] text-xs text-[#535353]">Mediena</label>
+                  <select
+                    value={libraryWoodType}
+                    onChange={(e) => setLibraryWoodType(e.target.value)}
+                    className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] rounded-lg font-['Outfit'] text-sm bg-white"
+                  >
+                    <option value="spruce">Eglė (spruce)</option>
+                    <option value="larch">Maumedis (larch)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-['Outfit'] text-xs text-[#535353]">Spalva</label>
+                  <select
+                    value={libraryColorCode}
+                    onChange={(e) => setLibraryColorCode(e.target.value)}
+                    className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] rounded-lg font-['Outfit'] text-sm bg-white"
+                  >
+                    {libraryColors.length === 0 ? (
+                      <option value="">Nėra spalvų (catalog_options)</option>
+                    ) : (
+                      libraryColors.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.label} ({c.code})
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    disabled={libraryIsLoading || !libraryColorCode}
+                    onClick={() => loadLibraryAssets()}
+                    className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-white disabled:opacity-60"
+                  >
+                    {libraryIsLoading ? 'Kraunama…' : 'Atnaujinti'}
+                  </button>
+                  {libraryError ? (
+                    <span className="font-['Outfit'] text-xs text-red-700">{libraryError}</span>
+                  ) : null}
+                </div>
+
+                {libraryAssets.length === 0 ? (
+                  <p className="font-['Outfit'] text-xs text-[#7C7C7C]">Nerasta nuotraukų šiam deriniui.</p>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2">
+                    {libraryAssets.map((a) => (
+                      <button
+                        key={a.id}
+                        type="button"
+                        onClick={() => chooseLibraryImage(a.url)}
+                        className="relative group border border-[#E1E1E1] rounded-lg overflow-hidden bg-white"
+                        title={a.wood_type ? `wood=${a.wood_type}` : 'wood=any'}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={a.url} alt="asset" className="w-full aspect-square object-cover" />
+                        <div className="absolute inset-x-0 bottom-0 bg-black/50 text-white text-[10px] px-1 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {a.wood_type ? a.wood_type : 'any'}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
 
           {/* Slug Preview */}
           <div className="mt-6 pt-6 border-t border-[#E1E1E1]">

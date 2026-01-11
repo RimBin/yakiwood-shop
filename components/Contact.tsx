@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
 import { PageCover } from '@/components/shared/PageLayout';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -16,28 +15,14 @@ export default function Contact() {
     company: '',
   });
   const [consent, setConsent] = useState(false);
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const startedAtRef = React.useRef<number>(Date.now());
-  const recaptchaRef = React.useRef<ReCAPTCHA | null>(null);
-
-  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!consent) return;
-
-    if (!recaptchaSiteKey) {
-      setError('reCAPTCHA is not configured.');
-      return;
-    }
-
-    if (!recaptchaToken) {
-      setError(t('recaptchaRequired'));
-      return;
-    }
     
     setIsSubmitting(true);
 
@@ -53,7 +38,6 @@ export default function Contact() {
           phone: formData.phone,
           company: formData.company,
           startedAt: startedAtRef.current,
-          recaptchaToken,
         }),
       });
 
@@ -66,8 +50,6 @@ export default function Contact() {
       setSubmitted(true);
       setFormData({ fullName: '', email: '', phone: '', company: '' });
       setConsent(false);
-      setRecaptchaToken(null);
-      recaptchaRef.current?.reset();
       startedAtRef.current = Date.now();
     } catch {
       setError(t('messageError'));
@@ -186,25 +168,10 @@ export default function Contact() {
                 </p>
               </div>
 
-              {/* reCAPTCHA */}
-              <div className="flex justify-center">
-                {recaptchaSiteKey ? (
-                  <ReCAPTCHA
-                    ref={recaptchaRef}
-                    sitekey={recaptchaSiteKey}
-                    onChange={(value) => setRecaptchaToken(value)}
-                  />
-                ) : (
-                  <p className="font-['Outfit'] font-light text-[12px] text-[#F63333] leading-[1.3] tracking-[0.14px]">
-                    reCAPTCHA is not configured.
-                  </p>
-                )}
-              </div>
-
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting || !consent || !recaptchaToken}
+                disabled={isSubmitting || !consent}
                 className="w-full h-[48px] bg-[#161616] rounded-[100px] flex items-center justify-center font-['Outfit'] font-normal text-white text-[12px] tracking-[0.6px] uppercase hover:opacity-90 transition-opacity disabled:opacity-50 px-[40px] py-[10px]"
               >
                 {isSubmitting ? t('sending') : t('leaveRequest')}

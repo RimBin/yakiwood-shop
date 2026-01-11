@@ -72,7 +72,18 @@ export default function ColorOptionsAdminClient({
   const [newLabelEn, setNewLabelEn] = useState('')
   const [newHex, setNewHex] = useState('')
 
-  const fileInputsByColor = useRef<Record<string, HTMLInputElement | null>>({})
+  const fileInputsByKey = useRef<Record<string, HTMLInputElement | null>>({})
+
+  const woodTypeOptions = useMemo(
+    () => [
+      {value: null as string | null, label: 'Visiems (bendras)'}
+      ,
+      {value: 'spruce', label: 'Eglė (spruce)'}
+      ,
+      {value: 'larch', label: 'Maumedis (larch)'}
+    ],
+    []
+  )
 
   const sorted = useMemo(() => {
     return [...options].sort((a, b) => {
@@ -234,7 +245,7 @@ export default function ColorOptionsAdminClient({
     }
   }
 
-  const uploadColorPhotos = async (colorCode: string, files: FileList | null) => {
+  const uploadColorPhotos = async (colorCode: string, woodType: string | null, files: FileList | null) => {
     if (!files || files.length === 0) return
 
     setIsBusy(true)
@@ -245,7 +256,7 @@ export default function ColorOptionsAdminClient({
       for (const file of Array.from(files)) {
         const ext = file.name.split('.').pop() || 'jpg'
         const key = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`
-        const path = `color-library/${colorCode}/${key}.${ext}`
+        const path = `color-library/${colorCode}/${woodType ?? 'any'}/${key}.${ext}`
 
         const {error: uploadError} = await supabase.storage.from('product-images').upload(path, file, {
           cacheControl: '3600',
@@ -267,7 +278,7 @@ export default function ColorOptionsAdminClient({
             asset_type: 'photo',
             url,
             color_code: colorCode,
-            wood_type: null,
+            wood_type: woodType,
             usage_type: null,
             profile_variant_id: null,
             finish_variant_id: null,
@@ -321,7 +332,8 @@ export default function ColorOptionsAdminClient({
           <div>
             <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">Spalvų biblioteka</h2>
             <p className="mt-1 font-['Outfit'] text-sm text-[#535353]">
-              Čia sukuriate spalvas ir galite įkelti nuotraukas (bus įrašoma į `product_assets` su `product_id = NULL`).
+              Čia sukuriate spalvas ir galite įkelti nuotraukas (rašoma į `product_assets` su `product_id = NULL`).
+              Jei norite pvz. „spruce + black“ atskiros foto, įkelkite su pasirinkta mediena.
             </p>
           </div>
 
@@ -403,7 +415,7 @@ export default function ColorOptionsAdminClient({
             <ul className="mt-2 font-['Outfit'] text-sm text-[#535353] list-disc pl-5 space-y-1">
               <li>Spalvos kodas (pvz. <code>black</code>) turi sutapti su tuo, ką siunčiate į kainodarą/konfigūraciją.</li>
               <li>Nuotraukos įkeliamos į Supabase Storage bucket <code>product-images</code>.</li>
-              <li>Ryšys saugomas DB lentelėje <code>product_assets</code> per <code>color_code</code>.</li>
+              <li>Ryšys saugomas DB lentelėje <code>product_assets</code> per <code>color_code</code> ir (jei reikia) <code>wood_type</code>.</li>
             </ul>
           </div>
         </div>
@@ -417,6 +429,13 @@ export default function ColorOptionsAdminClient({
                 const code = opt.value_text ?? ''
                 const hex = opt.hex_color ?? ''
                 const photos = code ? assetsByColor.get(code) ?? [] : []
+                const byWood = new Map<string | null, ColorAssetRow[]>()
+                for (const p of photos) {
+                  const wt = p.wood_type ?? null
+                  const list = byWood.get(wt) ?? []
+                  list.push(p)
+                  byWood.set(wt, list)
+                }
                 const label = opt.label_lt || opt.label_en || code || '(be kodo)'
 
                 return (
@@ -459,54 +478,66 @@ export default function ColorOptionsAdminClient({
 
                     {code ? (
                       <div className="mt-4">
-                        <div className="flex items-center justify-between gap-3 flex-wrap">
-                          <p className="font-['Outfit'] text-sm text-[#535353]">Nuotraukos ({photos.length})</p>
-                          <div>
-                            <input
-                              ref={(el) => {
-                                fileInputsByColor.current[code] = el
-                              }}
-                              type="file"
-                              accept="image/*"
-                              multiple
-                              className="hidden"
-                              onChange={(e) => uploadColorPhotos(code, e.target.files)}
-                            />
-                            <button
-                              type="button"
-                              disabled={isBusy}
-                              onClick={() => fileInputsByColor.current[code]?.click()}
-                              className="px-4 py-2 bg-[#161616] text-white rounded-lg font-['DM_Sans'] text-sm disabled:opacity-60"
-                            >
-                              + Įkelti
-                            </button>
-                          </div>
-                        </div>
+                        <div className="space-y-4">
+                          {woodTypeOptions.map((wt) => {
+                            const key = `${code}::${wt.value ?? 'any'}`
+                            const list = byWood.get(wt.value) ?? []
+                            return (
+                              <div key={key} className="border border-[#E1E1E1] rounded-lg p-3">
+                                <div className="flex items-center justify-between gap-3 flex-wrap">
+                                  <p className="font-['Outfit'] text-sm text-[#535353]">
+                                    Nuotraukos ({wt.label}) • {list.length}
+                                  </p>
+                                  <div>
+                                    <input
+                                      ref={(el) => {
+                                        fileInputsByKey.current[key] = el
+                                      }}
+                                      type="file"
+                                      accept="image/*"
+                                      multiple
+                                      className="hidden"
+                                      onChange={(e) => uploadColorPhotos(code, wt.value, e.target.files)}
+                                    />
+                                    <button
+                                      type="button"
+                                      disabled={isBusy}
+                                      onClick={() => fileInputsByKey.current[key]?.click()}
+                                      className="px-4 py-2 bg-[#161616] text-white rounded-lg font-['DM_Sans'] text-sm disabled:opacity-60"
+                                    >
+                                      + Įkelti
+                                    </button>
+                                  </div>
+                                </div>
 
-                        {photos.length === 0 ? (
-                          <p className="mt-2 font-['Outfit'] text-xs text-[#7C7C7C]">Dar nėra įkeltų nuotraukų.</p>
-                        ) : (
-                          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                            {photos.map((p) => (
-                              <div key={p.id} className="relative group">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  src={p.url}
-                                  alt={code}
-                                  className="w-full aspect-square object-cover rounded-lg border border-[#E1E1E1]"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => deleteAsset(p.id)}
-                                  className="absolute top-1 right-1 w-7 h-7 rounded-full bg-white/90 border border-[#E1E1E1] text-[#161616] opacity-0 group-hover:opacity-100 transition-opacity"
-                                  title="Ištrinti"
-                                >
-                                  ×
-                                </button>
+                                {list.length === 0 ? (
+                                  <p className="mt-2 font-['Outfit'] text-xs text-[#7C7C7C]">Dar nėra įkeltų nuotraukų.</p>
+                                ) : (
+                                  <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                                    {list.map((p) => (
+                                      <div key={p.id} className="relative group">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                          src={p.url}
+                                          alt={`${code}-${wt.value ?? 'any'}`}
+                                          className="w-full aspect-square object-cover rounded-lg border border-[#E1E1E1]"
+                                        />
+                                        <button
+                                          type="button"
+                                          onClick={() => deleteAsset(p.id)}
+                                          className="absolute top-1 right-1 w-7 h-7 rounded-full bg-white/90 border border-[#E1E1E1] text-[#161616] opacity-0 group-hover:opacity-100 transition-opacity"
+                                          title="Ištrinti"
+                                        >
+                                          ×
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                            ))}
-                          </div>
-                        )}
+                            )
+                          })}
+                        </div>
                       </div>
                     ) : (
                       <p className="mt-3 font-['Outfit'] text-xs text-[#7C7C7C]">Pirmiausia nustatykite `value_text` (spalvos kodą).</p>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { Breadcrumbs } from '@/components/ui';
 import ProjectGallery from '@/components/projects/ProjectGallery';
@@ -10,13 +10,46 @@ import { projects as projectsData } from '@/data/projects';
 import type { Project } from '@/types/project';
 import { toLocalePath } from '@/i18n/paths';
 
-function loadProjectsFromLocalStorageOrSeed(): Project[] {
-  if (typeof window === 'undefined') return projectsData;
+const PROJECTS_STORAGE_KEY = 'yakiwood_projects';
+
+function openProjectsDb(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('yakiwood-admin', 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains('kv')) {
+        db.createObjectStore('kv', { keyPath: 'key' });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error ?? new Error('Failed to open IndexedDB'));
+  });
+}
+
+async function readProjectsFromBrowserStorage(): Promise<Project[]> {
+  // Prefer IndexedDB (admin saves there), fallback to legacy localStorage, then seed.
+  try {
+    const db = await openProjectsDb();
+    const fromIdb = await new Promise<unknown | null>((resolve, reject) => {
+      const tx = db.transaction('kv', 'readonly');
+      const store = tx.objectStore('kv');
+      const req = store.get(PROJECTS_STORAGE_KEY);
+      req.onsuccess = () => {
+        const row = req.result as { key: string; value: unknown } | undefined;
+        resolve(row?.value ?? null);
+      };
+      req.onerror = () => reject(req.error ?? new Error('IndexedDB get failed'));
+    });
+
+    if (Array.isArray(fromIdb)) return fromIdb as Project[];
+  } catch {
+    // ignore
+  }
 
   try {
-    const savedProjects = window.localStorage.getItem('yakiwood_projects');
-    const loadedProjects = savedProjects ? (JSON.parse(savedProjects) as unknown) : null;
-    return Array.isArray(loadedProjects) ? (loadedProjects as Project[]) : projectsData;
+    const legacy = window.localStorage.getItem(PROJECTS_STORAGE_KEY);
+    const parsed = legacy ? (JSON.parse(legacy) as unknown) : null;
+    return Array.isArray(parsed) ? (parsed as Project[]) : projectsData;
   } catch {
     return projectsData;
   }
@@ -37,7 +70,19 @@ export default function ProjectDetailClient({
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const resolvedBasePath = toLocalePath(basePath, currentLocale);
-  const [projects] = useState<Project[]>(loadProjectsFromLocalStorageOrSeed);
+  const [projects, setProjects] = useState<Project[]>(projectsData);
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      const loaded = await readProjectsFromBrowserStorage();
+      if (!cancelled) setProjects(loaded);
+    };
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const project = useMemo(() => projects.find((p) => p.slug === slug), [projects, slug]);
   const relatedProjects = useMemo(
