@@ -155,7 +155,7 @@ export default function InventoryPage() {
 
           {/* Status Filter */}
           <select
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent yw-select"
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value as InventoryFilters['status'] })}
           >

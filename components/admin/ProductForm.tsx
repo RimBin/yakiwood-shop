@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
@@ -83,19 +83,6 @@ export default function ProductForm({ product, mode }: Props) {
   const router = useRouter();
   const supabase = createClient();
 
-  if (!supabase) {
-    return (
-      <div className="w-full max-w-[1200px] mx-auto px-4 md:px-10 py-8">
-        <h1 className="font-['DM_Sans'] text-2xl font-medium text-[#161616]">
-          Supabase is not configured
-        </h1>
-        <p className="font-['Outfit'] text-sm text-[#535353] mt-2">
-          Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local`.
-        </p>
-      </div>
-    );
-  }
-
   // Form state
   const [name, setName] = useState(product?.name || '');
   const [nameEn, setNameEn] = useState(product?.name_en || '');
@@ -142,6 +129,19 @@ export default function ProductForm({ product, mode }: Props) {
     }
   }, [name, mode, slug]);
 
+  if (!supabase) {
+    return (
+      <div className="w-full max-w-[1200px] mx-auto px-4 md:px-10 py-8">
+        <h1 className="font-['DM_Sans'] text-2xl font-medium text-[#161616]">
+          Supabase is not configured
+        </h1>
+        <p className="font-['Outfit'] text-sm text-[#535353] mt-2">
+          Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local`.
+        </p>
+      </div>
+    );
+  }
+
   // Handle image file selection
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -155,24 +155,21 @@ export default function ProductForm({ product, mode }: Props) {
     }
   };
 
-  // Upload image to Supabase Storage
   const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return imageUrl || null;
+    if (!imageFile) return null;
 
     try {
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${slug}-${Date.now()}.${fileExt}`;
-      
-      const { data, error } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, imageFile);
+      const fileExt = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const base = (slug || name || 'product')
+        .toLowerCase()
+        .replace(/[^a-z0-9-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
 
+      const fileName = `${base}-${Date.now()}.${fileExt}`;
+      const { error } = await supabase.storage.from('product-images').upload(fileName, imageFile);
       if (error) throw error;
 
-      const { data: publicUrlData } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(fileName);
-
+      const { data: publicUrlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
       return publicUrlData?.publicUrl || null;
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -535,7 +532,7 @@ export default function ProductForm({ product, mode }: Props) {
                   onChange={(e) => setUsageType(e.target.value)}
                   className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
                     errors.usage_type ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
-                  }`}
+                  } yw-select`}
                 >
                   <option value="">Pasirinkite pritaikyma</option>
                   {USAGE_TYPES.map((usage) => (
@@ -556,7 +553,7 @@ export default function ProductForm({ product, mode }: Props) {
                   onChange={(e) => setCategory(e.target.value)}
                   className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
                     errors.category ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
-                  }`}
+                  } yw-select`}
                 >
                   <option value="">Pasirinkite kategoriją</option>
                   {CATEGORIES.map(cat => (
@@ -575,7 +572,7 @@ export default function ProductForm({ product, mode }: Props) {
                   onChange={(e) => setWoodType(e.target.value)}
                   className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
                     errors.wood_type ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
-                  }`}
+                  } yw-select`}
                 >
                   <option value="">Pasirinkite medienos tipą</option>
                   {WOOD_TYPES.map(wood => (
@@ -777,7 +774,7 @@ export default function ProductForm({ product, mode }: Props) {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as 'draft' | 'published')}
-              className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
+              className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] yw-select"
             >
               <option value="draft">Juodraštis</option>
               <option value="published">Publikuotas</option>
@@ -926,7 +923,7 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
             <select
               value={variantType}
               onChange={(e) => setVariantType(e.target.value as 'color' | 'finish')}
-              className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
+              className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] yw-select"
             >
               <option value="color">Spalva</option>
               <option value="finish">Apdaila</option>

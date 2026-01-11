@@ -211,7 +211,7 @@ export default function DashboardPage() {
               <select
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="w-full px-[16px] py-[12px] border border-[#E1E1E1] rounded-[8px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616]"
+                className="w-full px-[16px] py-[12px] border border-[#E1E1E1] rounded-[8px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616] yw-select"
               >
                 <option value="all">All Time</option>
                 <option value="today">Today</option>
@@ -226,7 +226,7 @@ export default function DashboardPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-[16px] py-[12px] border border-[#E1E1E1] rounded-[8px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616]"
+                className="w-full px-[16px] py-[12px] border border-[#E1E1E1] rounded-[8px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616] yw-select"
               >
                 <option value="all">All Orders</option>
                 <option value="pending">Pending</option>

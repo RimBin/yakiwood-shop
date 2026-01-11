@@ -5,6 +5,7 @@ import "./globals.css";
 import AuthWrapper from '@/components/AuthWrapper';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
+import ChatbotWidget from '@/components/ChatbotWidget';
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
 
@@ -139,6 +140,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <GoogleAnalytics />
           <AuthWrapper>
             {children}
+            <ChatbotWidget />
           </AuthWrapper>
           <CookieConsentBanner />
         </NextIntlClientProvider>

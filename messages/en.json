@@ -9,6 +9,33 @@
     "faq": "FAQ",
     "home": "Home"
   },
+  "chatbot": {
+    "button": "Help",
+    "title": "Help (FAQ)",
+    "subtitle": "Quick answers to common questions",
+    "welcome": "Hi! I can help with common questions (pricing, lead time, delivery, maintenance, samples). Ask your question.",
+    "note": "Note: please do not share sensitive personal data (e.g., personal ID). This chat may be used to improve support.",
+    "handoff": "Need a human? Contact us",
+    "placeholder": "Type your question…",
+    "send": "Send",
+    "errors": {
+      "generic": "Couldn't reply right now. Please try again later.",
+      "network": "Network error. Please try again later."
+    },
+    "suggestions": {
+      "price": "How much does it cost?",
+      "delivery": "Do you deliver across Lithuania?",
+      "createRole": {
+        "title": "Create new role",
+        "label": "New role",
+        "placeholder": "e.g. partner",
+        "button": "Create role"
+      },
+      "productionTime": "How long is production?",
+      "maintenance": "How do I maintain the surface?",
+      "samples": "Can I get samples?"
+    }
+  },
   "common": {
     "cart": "Cart",
     "search": "Search",
@@ -22,6 +49,7 @@
     "edit": "Edit",
     "close": "Close",
     "back": "Back",
+      "invalidRole": "Invalid role name (use letters, numbers, _ or -)",
     "next": "Next",
     "previous": "Previous",
     "loading": "Loading...",
@@ -1088,7 +1116,17 @@
       "valuePercent": "Value (%)",
       "valueFixed": "Value (€)",
       "active": "Active",
-      "save": "Save discount"
+      "save": "Save discount",
+      "createRole": {
+        "title": "Create role",
+        "label": "New role name",
+        "placeholder": "e.g. partner",
+        "button": "Create role",
+        "errors": {
+          "invalidRole": "Invalid role name. Use letters, numbers, _ or -, up to 64 characters.",
+          "roleExists": "Role already exists — selected the existing role."
+        }
+      }
     },
     "errors": {
       "noSession": "No active session",

@@ -14,7 +14,7 @@ export default function ProjectsPage() {
   useEffect(() => {
     // Load projects from localStorage or use default data
     const savedProjects = localStorage.getItem('yakiwood_projects');
-    let loadedProjects = savedProjects ? JSON.parse(savedProjects) : projectsData;
+    const loadedProjects = savedProjects ? JSON.parse(savedProjects) : projectsData;
     
     // Convert to display format with size pattern
     const displayProjects = loadedProjects.map((project: any, index: number) => {

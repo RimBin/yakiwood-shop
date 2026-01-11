@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function TestPage() {
   const [clientInfo, setClientInfo] = useState<any>({});
@@ -46,12 +47,12 @@ export default function TestPage() {
             </p>
           </div>
 
-          <a 
+          <Link
             href="/"
             className="block w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded text-center transition-colors"
           >
             Grįžti į pagrindinį puslapį →
-          </a>
+          </Link>
         </div>
       </div>
     </div>

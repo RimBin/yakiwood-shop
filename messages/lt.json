@@ -9,6 +9,33 @@
     "duk": "DUK",
     "pagrindinis": "Pagrindinis"
   },
+  "chatbot": {
+    "button": "Pagalba",
+    "title": "Pagalba (DUK)",
+    "subtitle": "Atsakymai pagal dažniausius klausimus",
+    "welcome": "Sveiki! Aš galiu padėti su dažniausiais klausimais (kaina, terminai, pristatymas, priežiūra, pavyzdžiai). Parašykite klausimą.",
+    "note": "Pastaba: nerašykite jautrios informacijos (pvz., asmens kodo). Pokalbis gali būti naudojamas aptarnavimui gerinti.",
+    "handoff": "Reikia žmogaus? Parašykite per Kontaktus",
+    "placeholder": "Parašykite klausimą…",
+    "send": "Siųsti",
+    "errors": {
+      "generic": "Nepavyko atsakyti. Pabandykite vėliau.",
+      "network": "Klaida. Pabandykite vėliau."
+    },
+    "suggestions": {
+      "price": "Kiek kainuoja?",
+      "delivery": "Ar pristatote visoje Lietuvoje?",
+      "createRole": {
+        "title": "Sukurti naują rolę",
+        "label": "Nauja rolė",
+        "placeholder": "pvz. partneris",
+        "button": "Sukurti rolę"
+      },
+      "productionTime": "Kiek laiko trunka gamyba?",
+      "maintenance": "Kaip prižiūrėti paviršių?",
+      "samples": "Ar galima gauti pavyzdžių?"
+    }
+  },
   "account": {
     "title": "Paskyra",
     "accountDetails": "PASKYROS DUOMENYS",
@@ -22,6 +49,7 @@
     },
     "details": {
       "dateOfDelivery": "PRISTATYMO DATA",
+      "invalidRole": "Neteisingas rolės pavadinimas (naudokite raides, skaičius, _ arba -)",
       "deliveryAddress": "PRISTATYMO ADRESAS",
       "paymentMethod": "MOKĖJIMO BŪDAS",
       "shipping": "PRISTATYMAS",
@@ -836,7 +864,17 @@
       "valuePercent": "Reikšmė (%)",
       "valueFixed": "Reikšmė (€)",
       "active": "Aktyvi",
-      "save": "Išsaugoti nuolaidą"
+      "save": "Išsaugoti nuolaidą",
+      "createRole": {
+        "title": "Sukurti rolę",
+        "label": "Naujos rolės pavadinimas",
+        "placeholder": "pvz. partneris",
+        "button": "Sukurti rolę",
+        "errors": {
+          "invalidRole": "Neteisingas rolės pavadinimas. Naudokite raides, skaičius, _ arba -, iki 64 simbolių.",
+          "roleExists": "Rolė jau egzistuoja – pasirinkta esama rolė."
+        }
+      }
     },
     "errors": {
       "noSession": "Nėra aktyvios sesijos",

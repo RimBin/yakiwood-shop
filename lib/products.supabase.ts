@@ -33,7 +33,7 @@ export interface Product {
   category: string
   woodType?: string
   description?: string
-  descriptionPortable?: any[]
+  descriptionPortable?: unknown[]
   images?: string[]
   colors?: ProductColorVariant[]
   profiles?: ProductProfileVariant[]
@@ -49,7 +49,7 @@ type DbProduct = {
   base_price: string | number
   wood_type: string | null
   category: string | null
-  usage_type: string | null
+  usage_type?: string | null
   image_url: string | null
   is_active: boolean | null
   product_variants?: DbVariant[]
@@ -136,6 +136,61 @@ function transformDbProduct(db: DbProduct): Product {
   }
 }
 
+function formatSupabaseError(error: unknown): string {
+  if (!error) return '<no error details>'
+
+  if (error instanceof Error) {
+    return error.message || error.name
+  }
+
+  if (typeof error === 'string') return error
+
+  if (typeof error === 'object') {
+    const record = error as Record<string, unknown>
+
+    // Supabase/PostgREST errors frequently have non-enumerable properties.
+    const message = typeof record.message === 'string' ? record.message : null
+    const code = typeof record.code === 'string' ? record.code : null
+    const details = typeof record.details === 'string' ? record.details : null
+    const hint = typeof record.hint === 'string' ? record.hint : null
+    const status =
+      typeof record.status === 'number'
+        ? String(record.status)
+        : typeof record.status === 'string'
+          ? record.status
+          : null
+
+    const parts = [
+      message,
+      code ? `code=${code}` : null,
+      status ? `status=${status}` : null,
+      details ? `details=${details}` : null,
+      hint ? `hint=${hint}` : null,
+    ].filter(Boolean)
+
+    if (parts.length > 0) return parts.join(' | ')
+
+    try {
+      const keys = Object.getOwnPropertyNames(error)
+      const picked: Record<string, unknown> = {}
+      for (const key of keys) {
+        picked[key] = (error as Record<string, unknown>)[key]
+      }
+      const json = JSON.stringify(picked)
+      return json === '{}' ? '[object]' : json
+    } catch {
+      return '[object]'
+    }
+  }
+
+  return String(error)
+}
+
+function isMissingUsageTypeColumn(error: unknown): boolean {
+  const msg = formatSupabaseError(error).toLowerCase()
+  return msg.includes('usage_type') && (msg.includes('does not exist') || msg.includes('column'))
+}
+
 export async function fetchProducts(): Promise<Product[]> {
   const supabase = createPublicClient()
 
@@ -143,16 +198,31 @@ export async function fetchProducts(): Promise<Product[]> {
     return seedProducts.map(transformSeedProduct)
   }
 
-  const { data, error } = await supabase
-    .from('products')
-    .select(
-      'id,name,slug,description,base_price,wood_type,category,usage_type,image_url,is_active,product_variants(id,name,variant_type,hex_color,price_adjustment,texture_url,stock_quantity,is_available)'
-    )
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
+  const baseSelect =
+    'id,name,slug,description,base_price,wood_type,category,image_url,is_active,product_variants(id,name,variant_type,hex_color,price_adjustment,texture_url,stock_quantity,is_available)'
+  const selectWithUsageType =
+    'id,name,slug,description,base_price,wood_type,category,usage_type,image_url,is_active,product_variants(id,name,variant_type,hex_color,price_adjustment,texture_url,stock_quantity,is_available)'
+
+  const runQuery = async (select: string) => {
+    return supabase
+      .from('products')
+      .select(select)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+  }
+
+  let { data, error } = await runQuery(selectWithUsageType)
+
+  // Gracefully handle older DB schema missing `usage_type`.
+  if (error && isMissingUsageTypeColumn(error)) {
+    ;({ data, error } = await runQuery(baseSelect))
+  }
 
   if (error) {
-    console.error('Error fetching products from Supabase:', error)
+    // Expected in local/demo environments when DB/RLS/schema isn't ready.
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('Supabase products fetch failed:', formatSupabaseError(error))
+    }
     return seedProducts.map(transformSeedProduct)
   }
 
@@ -171,18 +241,32 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     return seed ? transformSeedProduct(seed) : null
   }
 
-  const { data, error } = await supabase
-    .from('products')
-    .select(
-      'id,name,slug,description,base_price,wood_type,category,usage_type,image_url,is_active,product_variants(id,name,variant_type,hex_color,price_adjustment,texture_url,stock_quantity,is_available)'
-    )
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .single()
+  const baseSelect =
+    'id,name,slug,description,base_price,wood_type,category,image_url,is_active,product_variants(id,name,variant_type,hex_color,price_adjustment,texture_url,stock_quantity,is_available)'
+  const selectWithUsageType =
+    'id,name,slug,description,base_price,wood_type,category,usage_type,image_url,is_active,product_variants(id,name,variant_type,hex_color,price_adjustment,texture_url,stock_quantity,is_available)'
+
+  const runQuery = async (select: string) => {
+    return supabase
+      .from('products')
+      .select(select)
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single()
+  }
+
+  let { data, error } = await runQuery(selectWithUsageType)
+
+  // Gracefully handle older DB schema missing `usage_type`.
+  if (error && isMissingUsageTypeColumn(error)) {
+    ;({ data, error } = await runQuery(baseSelect))
+  }
 
   if (error || !data) {
     if (error) {
-      console.error('Error fetching product by slug from Supabase:', error)
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('Supabase product-by-slug fetch failed:', formatSupabaseError(error))
+      }
     }
 
     const seed = seedProducts.find((p) => p.slug === slug)

@@ -32,6 +32,12 @@ export default function UsersAdminClient() {
   const t = useTranslations('adminUsers')
   const supabase = createClient()
 
+  function getErrorMessage(error: unknown, fallback: string) {
+    if (error instanceof Error && error.message) return error.message
+    if (typeof error === 'string' && error) return error
+    return fallback
+  }
+
   const [users, setUsers] = useState<AdminUserRow[]>([])
   const [discounts, setDiscounts] = useState<DiscountRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -46,6 +52,20 @@ export default function UsersAdminClient() {
   const [discountType, setDiscountType] = useState<'percent' | 'fixed'>('percent')
   const [discountValue, setDiscountValue] = useState<string>('0')
   const [discountActive, setDiscountActive] = useState(true)
+  const [newRoleName, setNewRoleName] = useState('')
+  const [createRoleError, setCreateRoleError] = useState<string | null>(null)
+  const [createRoleInfo, setCreateRoleInfo] = useState<string | null>(null)
+  const [isCreatingRole, setIsCreatingRole] = useState(false)
+
+  function normalizeRoleName(value: string) {
+    return value.trim().replace(/\s+/g, ' ')
+  }
+
+  function isValidRoleName(value: string) {
+    if (!value) return false
+    if (value.length > 64) return false
+    return /^[A-Za-z0-9_-]+(?: [A-Za-z0-9_-]+)*$/.test(value)
+  }
 
   const roles = useMemo(() => {
     const set = new Set<string>(['user', 'admin'])
@@ -96,8 +116,8 @@ export default function UsersAdminClient() {
 
       setUsers((usersJson?.users ?? []) as AdminUserRow[])
       setDiscounts((discountsJson?.discounts ?? []) as DiscountRow[])
-    } catch (e: any) {
-      setError(e?.message || t('errors.generic'))
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, t('errors.generic')))
     } finally {
       setIsLoading(false)
     }
@@ -126,8 +146,8 @@ export default function UsersAdminClient() {
       if (!res.ok) throw new Error(json?.error || t('errors.updateRole'))
 
       setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role } : u)))
-    } catch (e: any) {
-      alert(e?.message || t('errors.updateRole'))
+    } catch (error: unknown) {
+      alert(getErrorMessage(error, t('errors.updateRole')))
     }
   }
 
@@ -159,8 +179,8 @@ export default function UsersAdminClient() {
       setNewUserRole('user')
 
       await loadAll()
-    } catch (e: any) {
-      alert(e?.message || t('errors.createUser'))
+    } catch (error: unknown) {
+      alert(getErrorMessage(error, t('errors.createUser')))
     }
   }
 
@@ -191,8 +211,71 @@ export default function UsersAdminClient() {
       if (!res.ok) throw new Error(json?.error || t('errors.saveDiscount'))
 
       await loadAll()
-    } catch (e: any) {
-      alert(e?.message || t('errors.saveDiscount'))
+    } catch (error: unknown) {
+      alert(getErrorMessage(error, t('errors.saveDiscount')))
+    }
+  }
+
+  async function createRole() {
+    setCreateRoleError(null)
+    setCreateRoleInfo(null)
+
+    const normalizedRole = normalizeRoleName(newRoleName)
+    if (!isValidRoleName(normalizedRole)) {
+      setCreateRoleError(t('discounts.createRole.errors.invalidRole'))
+      return
+    }
+
+    if (roles.includes(normalizedRole)) {
+      setSelectedRole(normalizedRole)
+      setCreateRoleInfo(t('discounts.createRole.errors.roleExists'))
+      return
+    }
+
+    setIsCreatingRole(true)
+    try {
+      const token = await getAdminToken()
+      if (!token) throw new Error(t('errors.noSession'))
+
+      let value = Number(discountValue)
+      if (!Number.isFinite(value) || value < 0) value = 0
+      if (discountType === 'percent' && value > 100) value = 0
+
+      const res = await fetch('/api/admin/role-discounts', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          role: normalizedRole,
+          discountType,
+          discountValue: value,
+          isActive: discountActive,
+        }),
+      })
+
+      type ApiErrorResponse = { error?: unknown }
+      const json = (await res.json().catch(() => ({}))) as ApiErrorResponse
+      if (!res.ok) {
+        const apiError = typeof json?.error === 'string' ? json.error : undefined
+        const maybeExists = res.status === 409 || (apiError && /exists|duplicate/i.test(apiError))
+        if (maybeExists) {
+          setSelectedRole(normalizedRole)
+          setCreateRoleInfo(t('discounts.createRole.errors.roleExists'))
+          return
+        }
+
+        throw new Error(apiError || t('errors.saveDiscount'))
+      }
+
+      setNewRoleName('')
+      setSelectedRole(normalizedRole)
+      await loadAll()
+    } catch (error: unknown) {
+      setCreateRoleError(getErrorMessage(error, t('errors.saveDiscount')))
+    } finally {
+      setIsCreatingRole(false)
     }
   }
 
@@ -245,7 +328,7 @@ export default function UsersAdminClient() {
                         <select
                           value={u.role}
                           onChange={(e) => updateRole(u.id, e.target.value)}
-                          className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white text-sm"
+                          className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white text-sm yw-select"
                         >
                           {roles.map((r) => (
                             <option key={r} value={r}>
@@ -287,7 +370,7 @@ export default function UsersAdminClient() {
               <select
                 value={newUserRole}
                 onChange={(e) => setNewUserRole(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white"
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
               >
                 {roles.map((r) => (
                   <option key={r} value={r}>
@@ -312,13 +395,37 @@ export default function UsersAdminClient() {
           <p className="mt-2 font-['DM_Sans'] text-sm text-[#535353]">{t('discounts.help')}</p>
 
           <div className="mt-4 grid grid-cols-1 gap-3">
+            <div className="rounded-lg border border-[#E1E1E1] bg-[#FAFAFA] p-4">
+              <h3 className="font-['DM_Sans'] text-base font-medium text-[#161616]">{t('discounts.createRole.title')}</h3>
+              <div className="mt-3 grid grid-cols-1 gap-3">
+                <label className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">
+                  {t('discounts.createRole.label')}
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    value={newRoleName}
+                    onChange={(e) => setNewRoleName(e.target.value)}
+                    placeholder={t('discounts.createRole.placeholder')}
+                    className="flex-1 px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={createRole}
+                    className="h-[40px] px-5 bg-[#161616] text-white rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:opacity-90"
+                  >
+                    {t('discounts.createRole.button')}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <label className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">
               {t('discounts.role')}
             </label>
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
-              className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white"
+              className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
             >
               {roles.map((r) => (
                 <option key={r} value={r}>
@@ -334,8 +441,8 @@ export default function UsersAdminClient() {
                 </label>
                 <select
                   value={discountType}
-                  onChange={(e) => setDiscountType(e.target.value as any)}
-                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white"
+                  onChange={(e) => setDiscountType(e.target.value === 'fixed' ? 'fixed' : 'percent')}
+                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
                 >
                   <option value="percent">{t('discounts.types.percent')}</option>
                   <option value="fixed">{t('discounts.types.fixed')}</option>
@@ -362,6 +469,45 @@ export default function UsersAdminClient() {
               />
               {t('discounts.active')}
             </label>
+
+            <div className="mt-3 pt-4 border-t border-[#E1E1E1]">
+              <h3 className="font-['DM_Sans'] text-lg font-medium text-[#161616]">{t('discounts.createRole.title')}</h3>
+
+              <div className="mt-3 grid grid-cols-1 gap-3">
+                <label className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">
+                  {t('discounts.createRole.label')}
+                </label>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    value={newRoleName}
+                    onChange={(e) => {
+                      setNewRoleName(e.target.value)
+                      setCreateRoleError(null)
+                      setCreateRoleInfo(null)
+                    }}
+                    placeholder={t('discounts.createRole.placeholder')}
+                    className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans']"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={createRole}
+                    disabled={isCreatingRole || !isValidRoleName(normalizeRoleName(newRoleName))}
+                    className="h-[48px] px-[40px] bg-[#161616] text-white rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {t('discounts.createRole.button')}
+                  </button>
+                </div>
+
+                {createRoleError && (
+                  <div className="font-['DM_Sans'] text-sm text-red-700">{createRoleError}</div>
+                )}
+                {createRoleInfo && (
+                  <div className="font-['DM_Sans'] text-sm text-[#535353]">{createRoleInfo}</div>
+                )}
+              </div>
+            </div>
 
             <button
               type="button"

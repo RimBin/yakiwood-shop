@@ -200,7 +200,7 @@ export default function ProductsPage() {
               <select
                 value={activeColor}
                 onChange={(e) => setActiveColor(e.target.value)}
-                className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+                className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white yw-select"
               >
                 <option value="all">{t('colorFilterAll')}</option>
                 {colorOptions.map((name) => (
@@ -218,7 +218,7 @@ export default function ProductsPage() {
               <select
                 value={activeProfile}
                 onChange={(e) => setActiveProfile(e.target.value)}
-                className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+                className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white yw-select"
               >
                 <option value="all">{t('profileFilterAll')}</option>
                 {profileOptions.map((name) => (

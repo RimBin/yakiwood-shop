@@ -327,7 +327,7 @@ export default function AdminOrdersPage() {
                               <select
                                 value={order.status}
                                 onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                className="px-[12px] py-[6px] border border-[#E1E1E1] rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616]"
+                                className="px-[12px] py-[6px] border border-[#E1E1E1] rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616] yw-select"
                               >
                                 <option value="pending">Laukiama</option>
                                 <option value="processing">Vykdoma</option>
@@ -356,7 +356,7 @@ export default function AdminOrdersPage() {
                     <select
                       value={invoiceLocale}
                       onChange={(e) => setInvoiceLocale(e.target.value as InvoiceLocale)}
-                      className="px-[12px] py-[6px] border border-[#E1E1E1] bg-white rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616]"
+                      className="px-[12px] py-[6px] border border-[#E1E1E1] bg-white rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616] yw-select"
                       aria-label="Sąskaitos PDF kalba"
                     >
                       <option value="lt">LT</option>
@@ -488,7 +488,7 @@ export default function AdminOrdersPage() {
               <select
                 value={invoiceLocale}
                 onChange={(e) => setInvoiceLocale(e.target.value as InvoiceLocale)}
-                className="px-[12px] py-[6px] border border-[#E1E1E1] bg-white rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616]"
+                className="px-[12px] py-[6px] border border-[#E1E1E1] bg-white rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616] yw-select"
                 aria-label="Peržiūros kalba"
               >
                 <option value="lt">LT</option>

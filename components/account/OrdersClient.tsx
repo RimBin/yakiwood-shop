@@ -94,7 +94,7 @@ export default function OrdersClient({ orders }: OrdersClientProps) {
                 id="status-filter"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-3 border border-[#E1E1E1] rounded-[12px] font-['DM_Sans'] text-[#161616] focus:outline-none focus:ring-2 focus:ring-[#161616] focus:border-transparent"
+                className="w-full px-4 py-3 border border-[#E1E1E1] rounded-[12px] font-['DM_Sans'] text-[#161616] focus:outline-none focus:ring-2 focus:ring-[#161616] focus:border-transparent yw-select"
               >
                 {statuses.map((status) => (
                   <option key={status.value} value={status.value}>

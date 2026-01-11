@@ -1137,7 +1137,7 @@ export default function AdminPage() {
                     <select
                       value={productForm.woodType}
                       onChange={(e) => setProductForm({ ...productForm, woodType: e.target.value })}
-                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none yw-select"
                     >
                       <option value="spruce">Spruce</option>
                       <option value="larch">Larch</option>
@@ -1159,7 +1159,7 @@ export default function AdminPage() {
                           setProductForm({ ...productForm, profile: e.target.value });
                         }
                       }}
-                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none yw-select"
                     >
                       <option value="">{t('products.profile.selectPlaceholder')}</option>
                       {profiles.map((p) => (
@@ -1207,7 +1207,7 @@ export default function AdminPage() {
                     <select
                       value={productForm.color}
                       onChange={(e) => setProductForm({ ...productForm, color: e.target.value })}
-                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none yw-select"
                     >
                       {activeColorOptions.map((c) => (
                         <option key={c.value} value={c.value}>
@@ -1224,7 +1224,7 @@ export default function AdminPage() {
                     <select
                       value={productForm.widthMm}
                       onChange={(e) => setProductForm({ ...productForm, widthMm: Number(e.target.value) })}
-                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none yw-select"
                     >
                       <option value={95}>95</option>
                       <option value={125}>125</option>
@@ -1239,7 +1239,7 @@ export default function AdminPage() {
                     <select
                       value={productForm.lengthMm}
                       onChange={(e) => setProductForm({ ...productForm, lengthMm: Number(e.target.value) })}
-                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                      className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none yw-select"
                     >
                       <option value={3000}>3000</option>
                       <option value={3300}>3300</option>
@@ -1642,7 +1642,7 @@ export default function AdminPage() {
                   <select 
                     value={projectForm.category} 
                     onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })} 
-                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px]"
+                    className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] yw-select"
                   >
                     <option value="residential">Residential</option>
                     <option value="commercial">Commercial</option>
@@ -1930,7 +1930,7 @@ export default function AdminPage() {
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                               <div>
-                                <select value={projectForm.category} onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]">
+                                <select value={projectForm.category} onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA] yw-select">
                                   <option value="residential">Residential</option>
                                   <option value="commercial">Commercial</option>
                                   <option value="public">Public</option>

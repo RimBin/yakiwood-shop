@@ -13,9 +13,9 @@ interface RelatedProjectsProps {
 }
 
 export default function RelatedProjects({ projects, basePath = '/projects' }: RelatedProjectsProps) {
+  const locale = useLocale();
   if (projects.length === 0) return null;
 
-  const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const resolvedBasePath = toLocalePath(basePath, currentLocale);
   const labels =

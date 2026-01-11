@@ -175,7 +175,7 @@ export default function ConfiguratorPage() {
                   const nextProduct = filteredProducts.find((item) => item.id === nextId) ?? null;
                   setProduct(nextProduct);
                 }}
-                className="w-full h-[40px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
+                className="w-full h-[40px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white yw-select"
               >
                 {filteredProducts.map((item) => (
                   <option key={item.id} value={item.id}>

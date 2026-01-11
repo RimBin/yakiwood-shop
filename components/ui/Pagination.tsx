@@ -103,7 +103,7 @@ export default function Pagination({
               id="items-per-page"
               value={itemsPerPage}
               onChange={handleItemsPerPageChange}
-              className="px-3 py-1.5 border border-[#E1E1E1] rounded-lg text-sm font-['DM_Sans'] bg-white focus:outline-none focus:ring-2 focus:ring-[#161616] focus:border-transparent"
+              className="px-3 py-1.5 border border-[#E1E1E1] rounded-lg text-sm font-['DM_Sans'] bg-white focus:outline-none focus:ring-2 focus:ring-[#161616] focus:border-transparent yw-select"
               aria-label="Items per page"
             >
               {PAGE_SIZE_OPTIONS.map((size) => (

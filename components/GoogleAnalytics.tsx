@@ -24,18 +24,14 @@ export default function GoogleAnalytics() {
   const isProduction = process.env.NODE_ENV === 'production';
   const [hasConsent, setHasConsent] = useState(false);
 
-  // Don't load GA if measurement ID is not set
-  if (!measurementId) {
-    return null;
-  }
-
-  // Only load in production or debug mode
-  if (!isProduction && !isDebugMode) {
-    return null;
-  }
+  const shouldLoad = Boolean(measurementId) && (isProduction || isDebugMode);
 
   // Determine cookie consent (client-side)
   useEffect(() => {
+    if (!shouldLoad) {
+      return;
+    }
+
     const updateConsent = () => {
       setHasConsent(hasAnalyticsConsent());
     };
@@ -43,23 +39,25 @@ export default function GoogleAnalytics() {
     updateConsent();
     window.addEventListener(COOKIE_CONSENT_CHANGED_EVENT, updateConsent);
     return () => window.removeEventListener(COOKIE_CONSENT_CHANGED_EVENT, updateConsent);
-  }, []);
-
-  if (!hasConsent) {
-    return null;
-  }
+  }, [shouldLoad]);
 
   // Track page views when route changes
   useEffect(() => {
+    if (!shouldLoad || !hasConsent) return;
+
     if (pathname) {
-      const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '');
+      const query = searchParams?.toString();
+      const url = pathname + (query ? `?${query}` : '');
       trackPageView(url);
     }
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, shouldLoad, hasConsent]);
+
+  if (!shouldLoad || !hasConsent) {
+    return null;
+  }
 
   return (
     <>
-      {/* Global Site Tag (gtag.js) - Google Analytics */}
       <Script
         strategy="afterInteractive"
         src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
@@ -72,10 +70,7 @@ export default function GoogleAnalytics() {
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '${measurementId}', {
-              page_path: window.location.pathname,
-              send_page_view: false
-            });
+            gtag('config', '${measurementId}', { send_page_view: false });
           `,
         }}
       />

@@ -179,7 +179,7 @@ export default function ContactForms({ locale }: { locale: Locale }) {
               />
             </Field>
             <Field label={t.budget}>
-              <select className="h-[44px] bg-[#F3F3F3] border border-[#BBBBBB] rounded-[6px] px-[12px] font-['DM_Sans'] text-[14px] text-[#161616] focus:outline-none focus:border-[#161616]">
+              <select className="h-[44px] bg-[#F3F3F3] border border-[#BBBBBB] rounded-[6px] px-[12px] font-['DM_Sans'] text-[14px] text-[#161616] focus:outline-none focus:border-[#161616] yw-select">
                 <option>{t.placeholderBudget}</option>
                 <option>€5k - €15k</option>
                 <option>€15k - €50k</option>
@@ -187,7 +187,7 @@ export default function ContactForms({ locale }: { locale: Locale }) {
               </select>
             </Field>
             <Field label={t.timeline}>
-              <select className="h-[44px] bg-[#F3F3F3] border border-[#BBBBBB] rounded-[6px] px-[12px] font-['DM_Sans'] text-[14px] text-[#161616] focus:outline-none focus:border-[#161616]">
+              <select className="h-[44px] bg-[#F3F3F3] border border-[#BBBBBB] rounded-[6px] px-[12px] font-['DM_Sans'] text-[14px] text-[#161616] focus:outline-none focus:border-[#161616] yw-select">
                 <option>{t.placeholderTimeline}</option>
                 <option>{locale === 'lt' ? 'Skubiai (2–4 sav.)' : 'Urgent (2–4 weeks)'}</option>
                 <option>{locale === 'lt' ? 'Artimiausi 2–3 mėn.' : 'Next 2–3 months'}</option>

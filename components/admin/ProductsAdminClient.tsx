@@ -47,19 +47,6 @@ const USAGE_LABELS: Record<string, string> = {
 export default function ProductsAdminClient({ initialProducts }: Props) {
   const router = useRouter();
   const supabase = createClient();
-
-  if (!supabase) {
-    return (
-      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8">
-        <h1 className="font-['DM_Sans'] text-2xl font-medium text-[#161616]">
-          Supabase is not configured
-        </h1>
-        <p className="font-['Outfit'] text-sm text-[#535353] mt-2">
-          Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local`.
-        </p>
-      </div>
-    );
-  }
   
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,6 +70,19 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
       return matchesSearch && matchesCategory && matchesUsage && matchesStatus;
     });
   }, [products, searchQuery, categoryFilter, usageFilter, statusFilter]);
+
+  if (!supabase) {
+    return (
+      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8">
+        <h1 className="font-['DM_Sans'] text-2xl font-medium text-[#161616]">
+          Supabase is not configured
+        </h1>
+        <p className="font-['Outfit'] text-sm text-[#535353] mt-2">
+          Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local`.
+        </p>
+      </div>
+    );
+  }
 
   const handleSelectAll = () => {
     if (selectedIds.size === filteredProducts.length) {
@@ -246,7 +246,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white"
+          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
         >
           <option value="all">Visos kategorijos</option>
           <option value="cladding">Fasadai</option>
@@ -258,7 +258,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         <select
           value={usageFilter}
           onChange={(e) => setUsageFilter(e.target.value)}
-          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white"
+          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
         >
           <option value="all">Visi pritaikymai</option>
           <option value="facade">Fasadui</option>
@@ -270,7 +270,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white"
+          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
         >
           <option value="all">Visi statusai</option>
           <option value="active">Aktyvūs</option>

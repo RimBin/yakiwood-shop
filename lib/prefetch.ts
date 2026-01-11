@@ -27,18 +27,6 @@ export function usePrefetchRoutes(routes: string[]) {
  * Prefetch on hover
  * Returns event handlers to attach to links
  */
-export function prefetchOnHover(route: string) {
-  const router = useRouter();
-  
-  return {
-    onMouseEnter: () => router.prefetch(route),
-    onTouchStart: () => router.prefetch(route), // For mobile
-  };
-}
-
-/**
- * Hook to prefetch on hover
- */
 export function usePrefetchOnHover(route: string) {
   const router = useRouter();
   
