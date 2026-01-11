@@ -15,6 +15,7 @@ interface Product {
   description: string;
   category: string;
   basePrice: number;
+  salePrice?: number | null;
   images: string[];
   inStock: boolean;
   usage: string[];
@@ -68,6 +69,7 @@ export default function AdminPage() {
     description: '',
     category: 'facades',
     basePrice: 0,
+    salePrice: '',
     images: '',
     inStock: true,
     usage: ['facade'],
@@ -90,6 +92,27 @@ export default function AdminPage() {
   const [profiles, setProfiles] = useState<string[]>([]);
   const [showCustomProfile, setShowCustomProfile] = useState(false);
   const [customProfile, setCustomProfile] = useState('');
+
+  // Custom options (demo admin)
+  const [customWoods, setCustomWoods] = useState<Array<{ value: string; label: string }>>([]);
+  const [showCustomWood, setShowCustomWood] = useState(false);
+  const [customWoodLabel, setCustomWoodLabel] = useState('');
+
+  const [customColors, setCustomColors] = useState<Array<{ value: string; label: string }>>([]);
+  const [showCustomColor, setShowCustomColor] = useState(false);
+  const [customColorLabel, setCustomColorLabel] = useState('');
+
+  const [customWidths, setCustomWidths] = useState<number[]>([]);
+  const [showCustomWidth, setShowCustomWidth] = useState(false);
+  const [customWidthMm, setCustomWidthMm] = useState('');
+
+  const [customLengths, setCustomLengths] = useState<number[]>([]);
+  const [showCustomLength, setShowCustomLength] = useState(false);
+  const [customLengthMm, setCustomLengthMm] = useState('');
+
+  const [customThicknesses, setCustomThicknesses] = useState<number[]>([]);
+  const [showCustomThickness, setShowCustomThickness] = useState(false);
+  const [customThicknessMm, setCustomThicknessMm] = useState('');
 
   const BUILTIN_PROFILE_KEYS = useMemo(() => (
     ['half_taper_45', 'half_taper_45_deg', 'rectangle', 'rhombus'] as const
@@ -135,12 +158,14 @@ export default function AdminPage() {
       { value: 'black', label: 'Black' },
     ];
 
+    const merged = Array.from(new Map([...all, ...customColors].map((c) => [c.value, c])).values());
+
     // If you want different sets per wood, change these arrays.
     return {
-      spruce: all,
-      larch: all,
+      spruce: merged,
+      larch: merged,
     };
-  }, []);
+  }, [customColors]);
 
   const activeColorOptions = useMemo(() => {
     const key = productForm.woodType;
@@ -221,6 +246,56 @@ export default function AdminPage() {
 
     const savedCustomCategories = localStorage.getItem('yakiwood_custom_categories');
     if (savedCustomCategories) setCustomCategories(JSON.parse(savedCustomCategories));
+
+    const savedCustomWoods = localStorage.getItem('yakiwood_custom_woods');
+    if (savedCustomWoods) {
+      try {
+        const parsed = JSON.parse(savedCustomWoods) as Array<{ value: string; label: string }>;
+        if (Array.isArray(parsed)) setCustomWoods(parsed);
+      } catch {
+        // ignore
+      }
+    }
+
+    const savedCustomColors = localStorage.getItem('yakiwood_custom_colors');
+    if (savedCustomColors) {
+      try {
+        const parsed = JSON.parse(savedCustomColors) as Array<{ value: string; label: string }>;
+        if (Array.isArray(parsed)) setCustomColors(parsed);
+      } catch {
+        // ignore
+      }
+    }
+
+    const savedCustomWidths = localStorage.getItem('yakiwood_custom_widths');
+    if (savedCustomWidths) {
+      try {
+        const parsed = JSON.parse(savedCustomWidths) as number[];
+        if (Array.isArray(parsed)) setCustomWidths(parsed.filter((n) => typeof n === 'number'));
+      } catch {
+        // ignore
+      }
+    }
+
+    const savedCustomLengths = localStorage.getItem('yakiwood_custom_lengths');
+    if (savedCustomLengths) {
+      try {
+        const parsed = JSON.parse(savedCustomLengths) as number[];
+        if (Array.isArray(parsed)) setCustomLengths(parsed.filter((n) => typeof n === 'number'));
+      } catch {
+        // ignore
+      }
+    }
+
+    const savedCustomThicknesses = localStorage.getItem('yakiwood_custom_thicknesses');
+    if (savedCustomThicknesses) {
+      try {
+        const parsed = JSON.parse(savedCustomThicknesses) as number[];
+        if (Array.isArray(parsed)) setCustomThicknesses(parsed.filter((n) => typeof n === 'number'));
+      } catch {
+        // ignore
+      }
+    }
 
     const savedProfiles = localStorage.getItem('yakiwood_profiles');
     if (savedProfiles) {
@@ -355,6 +430,118 @@ export default function AdminPage() {
     showMessage(t('products.profile.addedMessage'));
   };
 
+  const handleAddCustomWood = () => {
+    const label = customWoodLabel.trim();
+    if (!label) return;
+
+    const value = slugify(label);
+    const existsInBuiltins = ['spruce', 'larch'].some((w) => w.toLowerCase() === value.toLowerCase());
+    const existsInCustom = customWoods.some((w) => w.value.toLowerCase() === value.toLowerCase());
+    if (existsInBuiltins || existsInCustom) {
+      showMessage('Wood already exists');
+      setCustomWoodLabel('');
+      setShowCustomWood(false);
+      return;
+    }
+
+    const updated = [...customWoods, { value, label }];
+    setCustomWoods(updated);
+    localStorage.setItem('yakiwood_custom_woods', JSON.stringify(updated));
+    setProductForm({ ...productForm, woodType: value });
+    setCustomWoodLabel('');
+    setShowCustomWood(false);
+    showMessage('Custom wood added!');
+  };
+
+  const handleAddCustomColor = () => {
+    const label = customColorLabel.trim();
+    if (!label) return;
+
+    const value = slugify(label);
+    const existsInBuiltins = activeColorOptions.some((c) => c.value.toLowerCase() === value.toLowerCase());
+    const existsInCustom = customColors.some((c) => c.value.toLowerCase() === value.toLowerCase());
+    if (existsInBuiltins || existsInCustom) {
+      showMessage('Color already exists');
+      setCustomColorLabel('');
+      setShowCustomColor(false);
+      return;
+    }
+
+    const updated = [...customColors, { value, label }];
+    setCustomColors(updated);
+    localStorage.setItem('yakiwood_custom_colors', JSON.stringify(updated));
+    setProductForm({ ...productForm, color: value });
+    setCustomColorLabel('');
+    setShowCustomColor(false);
+    showMessage('Custom color added!');
+  };
+
+  const handleAddCustomWidth = () => {
+    const parsed = Number(customWidthMm);
+    if (!Number.isFinite(parsed) || parsed <= 0) return;
+
+    const value = Math.round(parsed);
+    const exists = [95, 125, 145, ...customWidths].some((w) => w === value);
+    if (exists) {
+      showMessage('Width already exists');
+      setCustomWidthMm('');
+      setShowCustomWidth(false);
+      return;
+    }
+
+    const updated = [...customWidths, value].sort((a, b) => a - b);
+    setCustomWidths(updated);
+    localStorage.setItem('yakiwood_custom_widths', JSON.stringify(updated));
+    setProductForm({ ...productForm, widthMm: value });
+    setCustomWidthMm('');
+    setShowCustomWidth(false);
+    showMessage('Custom width added!');
+  };
+
+  const handleAddCustomLength = () => {
+    const parsed = Number(customLengthMm);
+    if (!Number.isFinite(parsed) || parsed <= 0) return;
+
+    const value = Math.round(parsed);
+    const exists = [3000, 3300, 3600, ...customLengths].some((l) => l === value);
+    if (exists) {
+      showMessage('Length already exists');
+      setCustomLengthMm('');
+      setShowCustomLength(false);
+      return;
+    }
+
+    const updated = [...customLengths, value].sort((a, b) => a - b);
+    setCustomLengths(updated);
+    localStorage.setItem('yakiwood_custom_lengths', JSON.stringify(updated));
+    setProductForm({ ...productForm, lengthMm: value });
+    setCustomLengthMm('');
+    setShowCustomLength(false);
+    showMessage('Custom length added!');
+  };
+
+  const handleAddCustomThickness = () => {
+    const parsed = Number(customThicknessMm);
+    if (!Number.isFinite(parsed) || parsed <= 0) return;
+
+    const value = Math.round(parsed);
+    const exists = [20, 28, ...customThicknesses].some((t) => t === value);
+    if (exists) {
+      showMessage('Thickness already exists');
+      setCustomThicknessMm('');
+      setShowCustomThickness(false);
+      return;
+    }
+
+    const updated = [...customThicknesses, value].sort((a, b) => a - b);
+    setCustomThicknesses(updated);
+    localStorage.setItem('yakiwood_custom_thicknesses', JSON.stringify(updated));
+    setProductForm({ ...productForm, thicknessMm: value });
+    setCustomThicknessMm('');
+    setShowCustomThickness(false);
+    showMessage('Custom thickness added!');
+  };
+
   const handleDeleteCustomCategory = (categoryToDelete: string) => {
     if (window.confirm(`Delete category "${categoryToDelete}"? Products using this category will keep it.`)) {
       const updated = customCategories.filter(c => c !== categoryToDelete);
@@ -379,6 +566,13 @@ export default function AdminPage() {
 
     const safeSlug = productForm.slug?.trim() ? productForm.slug : slugify(productForm.name);
     const derivedCategory = deriveCategoryFromUsage(productForm.usage);
+
+    const salePriceValue =
+      typeof (productForm as any).salePrice === 'string'
+        ? (productForm as any).salePrice.trim()
+        : '';
+    const parsedSalePrice = salePriceValue ? Number(salePriceValue) : NaN;
+    const salePrice = Number.isFinite(parsedSalePrice) && parsedSalePrice > 0 ? parsedSalePrice : null;
     
     const urlImages = productForm.images.split(',').map(url => url.trim()).filter(Boolean);
     const allImages = [...imageFiles, ...urlImages];
@@ -394,6 +588,7 @@ export default function AdminPage() {
             description: productForm.description,
             category: derivedCategory,
             basePrice: Number(productForm.basePrice),
+            salePrice,
             images: allImages.length > 0 ? allImages : product.images,
             inStock: productForm.inStock,
             usage: productForm.usage,
@@ -421,6 +616,7 @@ export default function AdminPage() {
         slug: safeSlug,
         images: allImages,
         basePrice: Number(productForm.basePrice),
+        salePrice,
         thicknessMm: Number(productForm.thicknessMm),
         widthMm: Number(productForm.widthMm),
         lengthMm: Number(productForm.lengthMm),
@@ -439,6 +635,7 @@ export default function AdminPage() {
       description: '',
       category: 'facades',
       basePrice: 0,
+      salePrice: '',
       images: '',
       inStock: true,
       usage: ['facade'],
@@ -478,6 +675,7 @@ export default function AdminPage() {
       description: product.description,
       category: product.category,
       basePrice: product.basePrice,
+      salePrice: typeof (product as any).salePrice === 'number' ? String((product as any).salePrice) : '',
       images: '',
       inStock: product.inStock,
       usage: Array.isArray(product.usage) && product.usage.length > 0 ? product.usage : ['facade'],
@@ -503,6 +701,7 @@ export default function AdminPage() {
       description: '',
       category: 'facades',
       basePrice: 0,
+      salePrice: '',
       images: '',
       inStock: true,
       usage: ['facade'],
@@ -908,6 +1107,7 @@ export default function AdminPage() {
                 onClick={() => {
                   const seeded = (seedProducts as any[]).map((p) => ({
                     ...p,
+                    salePrice: typeof p.salePrice === 'number' ? p.salePrice : null,
                     thicknessMm: typeof p.thicknessMm === 'number' ? p.thicknessMm : 20,
                   })) as Product[];
                   setProducts(seeded);
@@ -1005,6 +1205,7 @@ export default function AdminPage() {
                       description: '',
                       category: 'facades',
                       basePrice: 0,
+                      salePrice: '',
                       images: '',
                       inStock: true,
                       usage: ['facade'],
@@ -1082,7 +1283,7 @@ export default function AdminPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px]">
 
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
@@ -1097,6 +1298,21 @@ export default function AdminPage() {
                       onChange={(e) => setProductForm({ ...productForm, basePrice: Number(e.target.value) })}
                       className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
                       placeholder="89.00"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
+                      Sale Price (EUR)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={(productForm as any).salePrice}
+                      onChange={(e) => setProductForm({ ...(productForm as any), salePrice: e.target.value })}
+                      className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                      placeholder="79.00"
                     />
                   </div>
 
@@ -1151,12 +1367,51 @@ export default function AdminPage() {
                     </label>
                     <select
                       value={productForm.woodType}
-                      onChange={(e) => setProductForm({ ...productForm, woodType: e.target.value })}
+                      onChange={(e) => {
+                        if (e.target.value === '__custom__') {
+                          setShowCustomWood(true);
+                        } else {
+                          setProductForm({ ...productForm, woodType: e.target.value });
+                        }
+                      }}
                       className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none yw-select"
                     >
                       <option value="spruce">Spruce</option>
                       <option value="larch">Larch</option>
+                      {customWoods.map((w) => (
+                        <option key={w.value} value={w.value}>
+                          {w.label}
+                        </option>
+                      ))}
+                      <option value="__custom__">Add new…</option>
                     </select>
+
+                    {showCustomWood && (
+                      <div className="mt-[12px] flex gap-[8px]">
+                        <input
+                          type="text"
+                          value={customWoodLabel}
+                          onChange={(e) => setCustomWoodLabel(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomWood())}
+                          placeholder="Enter wood name"
+                          className="flex-1 px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddCustomWood}
+                          className="px-[16px] py-[12px] rounded-[12px] bg-[#161616] text-white font-['Outfit'] text-[12px] hover:bg-[#535353] transition-colors"
+                        >
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCustomWood(false)}
+                          className="px-[16px] py-[12px] rounded-[12px] border border-[#BBBBBB] font-['Outfit'] text-[12px] hover:bg-[#EAEAEA] transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -1219,7 +1474,13 @@ export default function AdminPage() {
                     </label>
                     <select
                       value={productForm.color}
-                      onChange={(e) => setProductForm({ ...productForm, color: e.target.value })}
+                      onChange={(e) => {
+                        if (e.target.value === '__custom__') {
+                          setShowCustomColor(true);
+                        } else {
+                          setProductForm({ ...productForm, color: e.target.value });
+                        }
+                      }}
                       className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none yw-select"
                     >
                       {activeColorOptions.map((c) => (
@@ -1227,7 +1488,35 @@ export default function AdminPage() {
                           {c.label}
                         </option>
                       ))}
+                      <option value="__custom__">Add new…</option>
                     </select>
+
+                    {showCustomColor && (
+                      <div className="mt-[12px] flex gap-[8px]">
+                        <input
+                          type="text"
+                          value={customColorLabel}
+                          onChange={(e) => setCustomColorLabel(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomColor())}
+                          placeholder="Enter color name"
+                          className="flex-1 px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddCustomColor}
+                          className="px-[16px] py-[12px] rounded-[12px] bg-[#161616] text-white font-['Outfit'] text-[12px] hover:bg-[#535353] transition-colors"
+                        >
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCustomColor(false)}
+                          className="px-[16px] py-[12px] rounded-[12px] border border-[#BBBBBB] font-['Outfit'] text-[12px] hover:bg-[#EAEAEA] transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -1236,12 +1525,53 @@ export default function AdminPage() {
                     </label>
                     <select
                       value={productForm.thicknessMm}
-                      onChange={(e) => setProductForm({ ...productForm, thicknessMm: Number(e.target.value) })}
+                      onChange={(e) => {
+                        if (e.target.value === '__custom__') {
+                          setShowCustomThickness(true);
+                        } else {
+                          setProductForm({ ...productForm, thicknessMm: Number(e.target.value) });
+                        }
+                      }}
                       className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none yw-select"
                     >
-                      <option value={20}>18/20</option>
-                      <option value={28}>28</option>
+                      {Array.from(new Set([20, 28, ...customThicknesses]))
+                        .sort((a, b) => a - b)
+                        .map((mm) => (
+                          <option key={mm} value={mm}>
+                            {mm === 20 ? '18/20' : mm}
+                          </option>
+                        ))}
+                      <option value="__custom__">Add new…</option>
                     </select>
+
+                    {showCustomThickness && (
+                      <div className="mt-[12px] flex gap-[8px]">
+                        <input
+                          type="number"
+                          min={1}
+                          step={1}
+                          value={customThicknessMm}
+                          onChange={(e) => setCustomThicknessMm(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomThickness())}
+                          placeholder="mm"
+                          className="flex-1 px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddCustomThickness}
+                          className="px-[16px] py-[12px] rounded-[12px] bg-[#161616] text-white font-['Outfit'] text-[12px] hover:bg-[#535353] transition-colors"
+                        >
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCustomThickness(false)}
+                          className="px-[16px] py-[12px] rounded-[12px] border border-[#BBBBBB] font-['Outfit'] text-[12px] hover:bg-[#EAEAEA] transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -1250,13 +1580,53 @@ export default function AdminPage() {
                     </label>
                     <select
                       value={productForm.widthMm}
-                      onChange={(e) => setProductForm({ ...productForm, widthMm: Number(e.target.value) })}
+                      onChange={(e) => {
+                        if (e.target.value === '__custom__') {
+                          setShowCustomWidth(true);
+                        } else {
+                          setProductForm({ ...productForm, widthMm: Number(e.target.value) });
+                        }
+                      }}
                       className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none yw-select"
                     >
-                      <option value={95}>95</option>
-                      <option value={125}>125</option>
-                      <option value={145}>145</option>
+                      {Array.from(new Set([95, 125, 145, ...customWidths]))
+                        .sort((a, b) => a - b)
+                        .map((mm) => (
+                          <option key={mm} value={mm}>
+                            {mm}
+                          </option>
+                        ))}
+                      <option value="__custom__">Add new…</option>
                     </select>
+
+                    {showCustomWidth && (
+                      <div className="mt-[12px] flex gap-[8px]">
+                        <input
+                          type="number"
+                          min={1}
+                          step={1}
+                          value={customWidthMm}
+                          onChange={(e) => setCustomWidthMm(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomWidth())}
+                          placeholder="mm"
+                          className="flex-1 px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddCustomWidth}
+                          className="px-[16px] py-[12px] rounded-[12px] bg-[#161616] text-white font-['Outfit'] text-[12px] hover:bg-[#535353] transition-colors"
+                        >
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCustomWidth(false)}
+                          className="px-[16px] py-[12px] rounded-[12px] border border-[#BBBBBB] font-['Outfit'] text-[12px] hover:bg-[#EAEAEA] transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -1265,13 +1635,53 @@ export default function AdminPage() {
                     </label>
                     <select
                       value={productForm.lengthMm}
-                      onChange={(e) => setProductForm({ ...productForm, lengthMm: Number(e.target.value) })}
+                      onChange={(e) => {
+                        if (e.target.value === '__custom__') {
+                          setShowCustomLength(true);
+                        } else {
+                          setProductForm({ ...productForm, lengthMm: Number(e.target.value) });
+                        }
+                      }}
                       className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none yw-select"
                     >
-                      <option value={3000}>3000</option>
-                      <option value={3300}>3300</option>
-                      <option value={3600}>3600</option>
+                      {Array.from(new Set([3000, 3300, 3600, ...customLengths]))
+                        .sort((a, b) => a - b)
+                        .map((mm) => (
+                          <option key={mm} value={mm}>
+                            {mm}
+                          </option>
+                        ))}
+                      <option value="__custom__">Add new…</option>
                     </select>
+
+                    {showCustomLength && (
+                      <div className="mt-[12px] flex gap-[8px]">
+                        <input
+                          type="number"
+                          min={1}
+                          step={1}
+                          value={customLengthMm}
+                          onChange={(e) => setCustomLengthMm(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomLength())}
+                          placeholder="mm"
+                          className="flex-1 px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddCustomLength}
+                          className="px-[16px] py-[12px] rounded-[12px] bg-[#161616] text-white font-['Outfit'] text-[12px] hover:bg-[#535353] transition-colors"
+                        >
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCustomLength(false)}
+                          className="px-[16px] py-[12px] rounded-[12px] border border-[#BBBBBB] font-['Outfit'] text-[12px] hover:bg-[#EAEAEA] transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -1410,9 +1820,20 @@ export default function AdminPage() {
                               <span className="px-[12px] py-[4px] rounded-[100px] bg-[#E1E1E1] font-['Outfit'] text-[11px] uppercase tracking-[0.55px] text-[#161616]">
                                 {product.category}
                               </span>
-                              <span className="px-[12px] py-[4px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase tracking-[0.55px] text-white">
-                                €{product.basePrice}
-                              </span>
+                              {typeof (product as any).salePrice === 'number' && (product as any).salePrice > 0 ? (
+                                <>
+                                  <span className="px-[12px] py-[4px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase tracking-[0.55px] text-white">
+                                    €{(product as any).salePrice}
+                                  </span>
+                                  <span className="px-[12px] py-[4px] rounded-[100px] bg-[#E1E1E1] font-['Outfit'] text-[11px] uppercase tracking-[0.55px] text-[#535353] line-through">
+                                    €{product.basePrice}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="px-[12px] py-[4px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[11px] uppercase tracking-[0.55px] text-white">
+                                  €{product.basePrice}
+                                </span>
+                              )}
                               {product.inStock && (
                                 <span className="px-[12px] py-[4px] rounded-[100px] bg-green-500 font-['Outfit'] text-[11px] uppercase tracking-[0.55px] text-white">
                                   In Stock
@@ -1494,10 +1915,14 @@ export default function AdminPage() {
                               <textarea value={productForm.description} onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} rows={3} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Description" />
                               <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Product description for listing.</p>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px]">
                               <div>
                                 <input type="number" required min="0" step="0.01" value={productForm.basePrice} onChange={(e) => setProductForm({ ...productForm, basePrice: Number(e.target.value) })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Price" />
                                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Base price in EUR.</p>
+                              </div>
+                              <div>
+                                <input type="number" min="0" step="0.01" value={(productForm as any).salePrice} onChange={(e) => setProductForm({ ...(productForm as any), salePrice: e.target.value })} className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] bg-[#EAEAEA]" placeholder="Sale price" />
+                                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Optional sale price in EUR.</p>
                               </div>
                               <div>
                                 <label className="flex items-center gap-[12px] px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] bg-[#EAEAEA] cursor-pointer">

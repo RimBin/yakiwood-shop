@@ -404,7 +404,7 @@ export default function CheckoutPage() {
                   const lengthValue = item.configuration?.lengthMm;
 
                   return (
-                    <div key={item.lineId} className="border border-[#BBBBBB] rounded-[8px] p-[16px] bg-white/40">
+                    <div key={item.addedAt ?? item.lineId} className="border border-[#BBBBBB] rounded-[8px] p-[16px] bg-white/40">
                       <div className="flex items-start justify-between gap-[16px]">
                         <div className="min-w-0">
                           <p className="font-['DM_Sans'] text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616] truncate">

@@ -47,7 +47,20 @@ export default function Testimonials() {
     setActiveIndex((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1));
   };
 
-  const heading = <>{t('antraste')}</>;
+  const headingText = t('antraste');
+  const renderHeading = () => {
+    const italicWord = headingText.includes('clients') ? 'clients' : headingText.includes('klientai') ? 'klientai' : null;
+    if (!italicWord) return headingText;
+
+    const [before, after] = headingText.split(italicWord);
+    return (
+      <>
+        <span>{before}</span>
+        <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">{italicWord}</span>
+        <span>{after}</span>
+      </>
+    );
+  };
 
   return (
     <section id="testimonials" className="w-full bg-[#E1E1E1]">
@@ -59,7 +72,7 @@ export default function Testimonials() {
             {t('eyebrow')}
           </p>
           <h2 className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[500px]" style={{ fontSize: 'clamp(32px, 5vw, 44px)', letterSpacing: 'clamp(-1.6px, -0.04em, -1.76px)' }}>
-            {heading}
+            {renderHeading()}
           </h2>
         </div>
 
@@ -125,12 +138,12 @@ export default function Testimonials() {
           <div className="relative h-[80px]">
             {/* Eyebrow */}
             <p className="absolute left-0 top-[25px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] leading-[1.2]">
-              TESTIMONIALS
+              {t('eyebrow')}
             </p>
             {/* Main Heading */}
-            <h2 className="absolute left-[calc(25%+25px)] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] w-[687px]">
-              {heading}
-            </h2>
+            <p className="absolute left-[calc(25%+25px)] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] w-[687px]">
+              {renderHeading()}
+            </p>
             {/* Navigation buttons - positioned at far right */}
             <div className="absolute right-0 top-[20px] flex items-center gap-[16px]">
               <button
@@ -161,8 +174,8 @@ export default function Testimonials() {
                 <article
                   key={testimonial.author}
                   className={`relative overflow-hidden flex flex-col justify-between transition-all duration-500 ${
-                    isActive ? "w-[570px] rounded-[24px]" : "w-[380px] rounded-[16px] opacity-40"
-                  } min-h-[320px]`}
+                    isActive ? "w-[680px] rounded-[24px]" : "w-[520px] rounded-[24px]"
+                  } h-[460px]`}
                 >
                   <div className="absolute inset-0">
                     <Image
@@ -170,13 +183,13 @@ export default function Testimonials() {
                       alt=""
                       fill
                       className={`object-cover ${
-                        isActive ? "opacity-100" : "opacity-20 mix-blend-luminosity"
+                        isActive ? "opacity-100" : "opacity-25 mix-blend-luminosity"
                       }`}
                       priority={isActive}
                     />
                     <div
                       className={`absolute inset-0 ${
-                        isActive ? "bg-[#3d3d3d]/90" : "bg-white/85"
+                        isActive ? "bg-[#161616]/90" : "bg-white/92"
                       }`}
                     />
                   </div>

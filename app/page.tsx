@@ -1,4 +1,4 @@
-﻿import { Hero, WhyUs, Steps, Testimonials, CTA } from '@/components/home';
+﻿import { Hero, WhyUs, Steps, Testimonials, AboutUs, CTA } from '@/components/home';
 import Products from '@/components/Products';
 import Solutions from '@/components/Solutions';
 import Projects from '@/components/Projects';
@@ -41,6 +41,7 @@ export default function Home() {
       <Projects />
       <Steps />
       <Testimonials />
+      <AboutUs />
       <FAQ />
       <CTA />
     </main>

@@ -12,7 +12,7 @@ interface CartSidebarProps {
 }
 
 export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
-  const { items, updateQuantity, removeItem } = useCartStore();
+  const { items, updateQuantity, removeItem, updateItemConfiguration } = useCartStore();
   const t = useTranslations();
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
@@ -78,7 +78,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
               <div className="flex-1 overflow-y-auto px-[24px] py-[24px]">
                 <div className="space-y-[16px]">
                   {items.map((item) => (
-                    <div key={item.lineId} className="flex gap-[16px] pb-[16px] border-b border-[#BBBBBB]">
+                    <div key={item.addedAt ?? item.lineId} className="flex gap-[16px] pb-[16px] border-b border-[#BBBBBB]">
                       {/* Image */}
                       <div className="w-[111px] h-[125px] rounded-[8px] bg-white overflow-hidden shrink-0">
                         {/* Placeholder - replace with actual product image */}
@@ -95,16 +95,73 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                             <div className="space-y-[4px]">
                               {item.color && (
                                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.3] text-[#161616]">
-                                  Color: {item.color}
+                                  {t('cart.color')} {item.color}
                                 </p>
                               )}
                               {item.finish && (
                                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.3] text-[#161616]">
-                                  Finish: {item.finish}
+                                  {t('cart.finish')} {item.finish}
                                 </p>
                               )}
                             </div>
                           )}
+
+                          <div className="mt-[10px]">
+                            {(typeof item.configuration?.widthMm === 'number' || typeof item.configuration?.lengthMm === 'number') && (
+                              <p className="font-['Outfit'] font-light text-[12px] leading-[1.4] text-[#535353]">
+                                {t('cart.dimensions')}{' '}
+                                {typeof item.configuration?.widthMm === 'number' ? item.configuration.widthMm : '—'}
+                                ×
+                                {typeof item.configuration?.lengthMm === 'number' ? item.configuration.lengthMm : '—'}
+                                {' '}mm
+                              </p>
+                            )}
+
+                            <div className="mt-[8px] grid grid-cols-2 gap-[8px]">
+                              <div className="flex flex-col gap-[4px]">
+                                <label className="font-['Outfit'] font-light text-[12px] leading-[1.3] text-[#535353]">
+                                  {t('cart.widthMm')}
+                                </label>
+                                <input
+                                  inputMode="numeric"
+                                  type="number"
+                                  min={1}
+                                  step={1}
+                                  value={typeof item.configuration?.widthMm === 'number' ? String(item.configuration.widthMm) : ''}
+                                  onChange={(e) => {
+                                    const next = e.target.value.trim();
+                                    updateItemConfiguration(item.lineId, {
+                                      widthMm: next === '' ? undefined : Number(next),
+                                    });
+                                  }}
+                                  className="h-[32px] px-[10px] rounded-[8px] border border-[#BBBBBB] bg-white/70 font-['Outfit'] font-normal text-[14px] leading-[1.2] text-[#161616] outline-none focus:border-[#161616]"
+                                />
+                              </div>
+                              <div className="flex flex-col gap-[4px]">
+                                <label className="font-['Outfit'] font-light text-[12px] leading-[1.3] text-[#535353]">
+                                  {t('cart.lengthMm')}
+                                </label>
+                                <input
+                                  inputMode="numeric"
+                                  type="number"
+                                  min={1}
+                                  step={1}
+                                  value={typeof item.configuration?.lengthMm === 'number' ? String(item.configuration.lengthMm) : ''}
+                                  onChange={(e) => {
+                                    const next = e.target.value.trim();
+                                    updateItemConfiguration(item.lineId, {
+                                      lengthMm: next === '' ? undefined : Number(next),
+                                    });
+                                  }}
+                                  className="h-[32px] px-[10px] rounded-[8px] border border-[#BBBBBB] bg-white/70 font-['Outfit'] font-normal text-[14px] leading-[1.2] text-[#161616] outline-none focus:border-[#161616]"
+                                />
+                              </div>
+                            </div>
+
+                            <p className="mt-[6px] font-['Outfit'] font-light text-[12px] leading-[1.4] text-[#535353]">
+                              {t('cart.dimensionsHint')}
+                            </p>
+                          </div>
                         </div>
 
                         <div className="flex items-center justify-between">
@@ -137,7 +194,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                               onClick={() => removeItem(item.lineId)}
                               className="ml-[8px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#535353] hover:text-[#161616] transition-colors"
                             >
-                              Remove
+                              {t('cart.remove')}
                             </button>
                           </div>
                         </div>
@@ -165,7 +222,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     {t('cart.shipping')}
                   </span>
                   <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616]">
-                    {shipping === 0 ? 'Free' : `${shipping.toFixed(2)} €`}
+                    {shipping === 0 ? t('cart.free') : `${shipping.toFixed(2)} €`}
                   </span>
                 </div>
 
@@ -183,7 +240,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                 </div>
 
                 <p className="font-['Outfit'] font-light text-[12px] leading-[1.5] text-[#535353]">
-                  Including VAT
+                  {t('cart.includingVat')}
                 </p>
 
                 {/* Actions */}

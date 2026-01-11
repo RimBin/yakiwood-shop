@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Breadcrumbs } from '@/components/ui';
 import { PageCover, PageLayout } from '@/components/shared/PageLayout';
@@ -200,8 +200,11 @@ export default function AdminChatbotPage() {
   const [faqLoading, setFaqLoading] = useState(false);
   const [faqSaving, setFaqSaving] = useState(false);
   const [faqDeleting, setFaqDeleting] = useState(false);
+  const [faqImporting, setFaqImporting] = useState(false);
   const [faqError, setFaqError] = useState<string | null>(null);
   const [faqNotice, setFaqNotice] = useState<string | null>(null);
+
+  const faqFetchedLocalesRef = useRef<Set<Locale>>(new Set());
 
   const loadSessions = useCallback(async () => {
     setLoading(true);
@@ -278,6 +281,7 @@ export default function AdminChatbotPage() {
         setFaqError(t('errors.loadFaqFailed'));
         setFaqEntries([]);
       } finally {
+        faqFetchedLocalesRef.current.add(locale);
         setFaqLoading(false);
       }
     },
@@ -312,6 +316,32 @@ export default function AdminChatbotPage() {
     setFaqError(null);
     setFaqNotice(null);
   }, []);
+
+  async function importDefaultFaq(locale: Locale) {
+    setFaqImporting(true);
+    setFaqError(null);
+    setFaqNotice(null);
+
+    try {
+      const resp = await fetchAdmin(
+        `/api/admin/chatbot-faq/import-defaults?locale=${encodeURIComponent(locale)}`,
+        { method: 'POST' }
+      );
+      const json = await safeJson<{ imported: number }>(resp);
+      const errorMsg = translateApiError(getErrorMessageKey(resp, json.error));
+      if (errorMsg) {
+        setFaqError(errorMsg);
+        return;
+      }
+
+      setFaqNotice(t('faq.noticeImported', { count: json.data?.imported ?? 0 }));
+      await loadFaqEntries(locale);
+    } catch {
+      setFaqError(t('errors.importFailed'));
+    } finally {
+      setFaqImporting(false);
+    }
+  }
 
   async function saveFaq() {
     setFaqSaving(true);
@@ -405,14 +435,17 @@ export default function AdminChatbotPage() {
   useEffect(() => {
     setFaqSelectedId(null);
     newFaqDraft(faqLocale);
-    void loadFaqEntries(faqLocale);
-  }, [faqLocale, loadFaqEntries, newFaqDraft]);
+    setFaqEntries([]);
+    setFaqError(null);
+    setFaqNotice(null);
+    setFaqLoading(false);
+  }, [faqLocale, newFaqDraft]);
 
   useEffect(() => {
-    if (tab === 'faq' && faqEntries.length === 0 && !faqLoading) {
-      void loadFaqEntries(faqLocale);
-    }
-  }, [faqEntries.length, faqLoading, faqLocale, loadFaqEntries, tab]);
+    if (tab !== 'faq') return;
+    if (faqFetchedLocalesRef.current.has(faqLocale)) return;
+    void loadFaqEntries(faqLocale);
+  }, [faqLocale, loadFaqEntries, tab]);
 
   useEffect(() => {
     if (!faqSelectedId) return;
@@ -564,7 +597,22 @@ export default function AdminChatbotPage() {
                 {faqLoading ? (
                   <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">{t('common.loading')}</p>
                 ) : faqEntries.length === 0 ? (
-                  <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">{t('faq.empty')}</p>
+                  <div className="mt-[12px]">
+                    <p className="font-['Outfit'] text-[13px] text-[#535353]">{t('faq.empty')}</p>
+                    <div className="mt-[10px] flex flex-wrap items-center gap-[10px]">
+                      <button
+                        type="button"
+                        onClick={() => void importDefaultFaq(faqLocale)}
+                        disabled={faqImporting || faqLoading}
+                        className={
+                          buttonSecondary +
+                          (faqImporting || faqLoading ? ' opacity-60 cursor-not-allowed' : '')
+                        }
+                      >
+                        {faqImporting ? t('faq.importing') : t('faq.importDefaults')}
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   <div className="mt-[12px] space-y-[10px]">
                     {faqEntries.map((e) => {

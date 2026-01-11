@@ -9,6 +9,9 @@
     "duk": "DUK",
     "pagrindinis": "Pagrindinis"
   },
+  "about": {
+    "pavadinimas": "apie mus"
+  },
   "chatbot": {
     "button": "Pagalba",
     "title": "Pagalba (DUK)",
@@ -585,7 +588,16 @@
     "maxQuantity": "Pasiektas maksimalus kiekis",
     "prekių": "prekių",
     "items": "prekių",
-    "preке": "prekė"
+    "preке": "prekė",
+    "remove": "Šalinti",
+    "color": "Spalva:",
+    "finish": "Apdaila:",
+    "free": "Nemokamai",
+    "includingVat": "Įskaitant PVM",
+    "dimensions": "Matmenys:",
+    "widthMm": "Plotis (mm)",
+    "lengthMm": "Ilgis (mm)",
+    "dimensionsHint": "Įveskite matmenis, jei kaina skaičiuojama pagal m²."
   },
   "search": {
     "paieska": "Paieška",
@@ -933,12 +945,15 @@
     "faq": {
       "title": "Chatbot DUK",
       "empty": "Kol kas nėra įrašų.",
+      "importDefaults": "Įkelti numatytus klausimus",
+      "importing": "Įkeliama...",
       "statusEnabled": "Įjungta",
       "statusDisabled": "Išjungta",
       "editTitle": "Įrašo redagavimas",
       "noticeSaved": "Išsaugota.",
       "noticeCreated": "Sukurta.",
-      "noticeDeleted": "Ištrinta."
+      "noticeDeleted": "Ištrinta.",
+      "noticeImported": "Įkelta: {count} įrašų."
     },
     "form": {
       "enabled": "Įjungta",
@@ -963,6 +978,7 @@
       "requestFailed": "Užklausa nepavyko (HTTP {status}).",
       "loadEventsFailed": "Nepavyko užkrauti įvykių.",
       "loadFaqFailed": "Nepavyko užkrauti DUK įrašų.",
+      "importFailed": "Nepavyko įkelti numatytų DUK.",
       "saveFailed": "Nepavyko išsaugoti.",
       "deleteFailed": "Nepavyko ištrinti.",
       "questionRequired": "Klausimas yra privalomas.",

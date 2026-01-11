@@ -395,6 +395,7 @@
     "updateCart": "Update cart",
     "clearCart": "Clear cart",
     "removeItem": "Remove item",
+    "remove": "Remove",
     "quantity": "Quantity",
     "subtotal": "Subtotal",
     "total": "Total",
@@ -414,7 +415,15 @@
     "invalidQuantity": "Invalid quantity",
     "maxQuantity": "Maximum quantity reached",
     "items": "items",
-    "item": "item"
+    "item": "item",
+    "color": "Color:",
+    "finish": "Finish:",
+    "free": "Free",
+    "includingVat": "Including VAT",
+    "dimensions": "Dimensions:",
+    "widthMm": "Width (mm)",
+    "lengthMm": "Length (mm)",
+    "dimensionsHint": "Enter dimensions if pricing is based on m²."
   },
   "checkout": {
     "title": "Checkout",
@@ -435,9 +444,16 @@
       "deliverDifferentAddress": "Deliver to a different address?",
       "notesOptional": "Order notes (optional)"
     },
+    "items": {
+      "title": "Items",
+      "hint": "If pricing depends on length / width (m²), enter dimensions in millimeters.",
+      "widthMm": "Width (mm)",
+      "lengthMm": "Length (mm)"
+    },
     "payment": {
       "title": "Payment method",
       "stripeCard": "Card payment (Stripe)",
+      "paysera": "Paysera",
       "cardNumber": "Card number ",
       "expiryDate": "Expiry date ",
       "cvc": "CVC ",
@@ -463,6 +479,7 @@
       "includingTaxes": "Including taxes",
       "colorLabel": "Color:",
       "finishLabel": "Finish:",
+      "dimensions": "Dimensions: {widthMm}×{lengthMm} mm",
       "quantity": "Qty: {count} pcs"
     },
     "coupon": {
@@ -1177,12 +1194,15 @@
     "faq": {
       "title": "Chatbot FAQ",
       "empty": "No entries yet.",
+      "importDefaults": "Import default questions",
+      "importing": "Importing...",
       "statusEnabled": "Enabled",
       "statusDisabled": "Disabled",
       "editTitle": "Edit entry",
       "noticeSaved": "Saved.",
       "noticeCreated": "Created.",
-      "noticeDeleted": "Deleted."
+      "noticeDeleted": "Deleted.",
+      "noticeImported": "Imported: {count} entries."
     },
     "form": {
       "enabled": "Enabled",
@@ -1207,6 +1227,7 @@
       "requestFailed": "Request failed (HTTP {status}).",
       "loadEventsFailed": "Failed to load events.",
       "loadFaqFailed": "Failed to load FAQ entries.",
+      "importFailed": "Failed to import default FAQ.",
       "saveFailed": "Failed to save.",
       "deleteFailed": "Failed to delete.",
       "questionRequired": "Question is required.",

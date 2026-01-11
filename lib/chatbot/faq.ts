@@ -187,7 +187,7 @@ function normalizeLocale(locale: string | undefined): SupportedChatbotLocale {
   return locale === 'en' ? 'en' : 'lt';
 }
 
-function getStaticFaqEntries(locale: SupportedChatbotLocale): FaqEntry[] {
+export function getStaticFaqEntries(locale: SupportedChatbotLocale): FaqEntry[] {
   return locale === 'en' ? FAQ_ENTRIES_EN : FAQ_ENTRIES_LT;
 }
 
