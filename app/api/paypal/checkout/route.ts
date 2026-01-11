@@ -13,6 +13,7 @@ type IncomingItem = {
     usageType?: UsageType
     profileVariantId?: string
     colorVariantId?: string
+    thicknessOptionId?: string
     widthMm?: number
     lengthMm?: number
   }
@@ -70,6 +71,7 @@ async function resolveItemUnitPriceEUR(item: IncomingItem): Promise<number> {
     usageType: cfg.usageType,
     profileVariantId: cfg.profileVariantId,
     colorVariantId: cfg.colorVariantId,
+    thicknessOptionId: cfg.thicknessOptionId,
     widthMm: cfg.widthMm as number,
     lengthMm: cfg.lengthMm as number,
     quantityBoards: 1,

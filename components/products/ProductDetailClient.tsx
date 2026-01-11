@@ -17,6 +17,15 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
 
+  const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
+  const displayDescription =
+    currentLocale === 'en' && product.descriptionEn ? product.descriptionEn : product.description;
+  const hasSale =
+    typeof product.salePrice === 'number' &&
+    product.salePrice > 0 &&
+    product.salePrice < product.price;
+  const effectivePrice = hasSale ? product.salePrice! : product.price;
+
   const [show3D, setShow3D] = useState(false);
   const loading3D = false;
   const [expandedAccordion, setExpandedAccordion] = useState('aesthetics');
@@ -102,7 +111,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const contactHref = {
     pathname: locale === 'en' ? '/contact' : '/kontaktai',
     query: {
-      produktas: product.name,
+      produktas: displayName,
       spalva: selectedColor?.name ?? '',
       profilis: selectedFinish?.name ?? '',
       sprendimas: product.category ?? '',
@@ -142,7 +151,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             ) : (
               <Image
                 src={product.images?.[0] ?? product.image}
-                alt={product.name}
+                alt={displayName}
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 60vw"
@@ -164,8 +173,19 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
             <div className="flex flex-col gap-[8px]">
               <h1 className="font-['DM_Sans'] text-[28px] lg:text-[32px] font-normal leading-[1.1] tracking-[-1.28px] text-[#161616]">
-                {product.name}
+                {displayName}
               </h1>
+
+              <div className="flex items-baseline gap-[10px]">
+                <p className="font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#535353] tracking-[-0.32px]">
+                  {t('fromPrice', { price: effectivePrice.toFixed(0) })}
+                </p>
+                {hasSale ? (
+                  <p className="font-['DM_Sans'] font-normal text-[14px] leading-[1.2] text-[#7C7C7C] tracking-[-0.28px] line-through">
+                    {product.price.toFixed(0)} €
+                  </p>
+                ) : null}
+              </div>
             </div>
 
             {/* Wood type */}
@@ -213,7 +233,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
             {/* Description */}
             <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] max-w-[434px]">
-              {product.description || t('descriptionFallback')}
+              {displayDescription || t('descriptionFallback')}
             </p>
 
             {/* Color Selector - New Figma Style */}
@@ -331,3 +351,4 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     </div>
   );
 }
+

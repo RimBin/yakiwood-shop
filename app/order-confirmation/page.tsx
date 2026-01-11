@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
@@ -9,7 +9,6 @@ import { toLocalePath } from '@/i18n/paths';
 
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const sessionId = searchParams.get('session_id');
@@ -56,6 +55,19 @@ export default function OrderConfirmationPage() {
           setLoading(false)
           return
         }
+      }
+
+      // Paysera return flow: accepturl includes our internal order_id. Payment is confirmed via webhook only.
+      if (provider === 'paysera') {
+        if (!orderId) {
+          setError('Nerastas užsakymo identifikatorius')
+          setLoading(false)
+          return
+        }
+
+        clearCart()
+        setLoading(false)
+        return
       }
 
       // Default: Stripe flow uses `session_id`.
@@ -127,12 +139,18 @@ export default function OrderConfirmationPage() {
         {/* Message */}
         <div className="text-center mb-8">
           <p className="font-['Outfit'] text-[16px] leading-[1.5] text-[#535353] mb-4">
-            Jūsų mokėjimas buvo sėkmingai apdorotas. Netrukus gausite el. laišką su užsakymo patvirtinimu ir sąskaita faktūra.
+            {provider === 'paysera'
+              ? 'Jūsų užsakymas sukurtas. Mokėjimą patvirtinsime, kai gausime Paysera patvirtinimą. Netrukus gausite el. laišką su užsakymo patvirtinimu.'
+              : 'Jūsų mokėjimas buvo sėkmingai apdorotas. Netrukus gausite el. laišką su užsakymo patvirtinimu ir sąskaita faktūra.'}
           </p>
           <p className="font-['Outfit'] text-[14px] leading-[1.5] text-[#535353]">
             {provider === 'paypal' ? (
               <>
                 PayPal ID: <span className="font-mono text-[12px]">{paypalOrderId}</span>
+              </>
+            ) : provider === 'paysera' ? (
+              <>
+                Užsakymo ID: <span className="font-mono text-[12px]">{orderId}</span>
               </>
             ) : (
               <>
@@ -215,3 +233,4 @@ export default function OrderConfirmationPage() {
     </div>
   );
 }
+

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ConfiguratorConfig, ConfiguratorView, ColorType, ProfileType, UsageType, WoodType } from './types';
+import type { ConfiguratorConfig, ConfiguratorView, ColorType, ProfileType, UsageType, WoodType, ThicknessType } from './types';
 import { getPresetOverrides } from './presetMap';
 
 const STORAGE_KEY = 'yakiwood:configurator:shou-sugi-ban-wood:v1';
@@ -37,6 +37,7 @@ function isStoredConfig(value: unknown): value is ConfiguratorConfig {
     typeof v.usage === 'string' &&
     typeof v.color === 'string' &&
     typeof v.profile === 'string' &&
+    typeof v.thickness === 'string' &&
     typeof v.view === 'string' &&
     typeof v.createdAt === 'string' &&
     typeof v.updatedAt === 'string'
@@ -62,6 +63,7 @@ export function useConfiguratorState({ productSlug, presetSlug }: UseConfigurato
       usage: 'facade',
       color: 'natural',
       profile: 'P1',
+      thickness: '18_20',
       view: '2d',
       createdAt: ts,
       updatedAt: ts,
@@ -135,6 +137,10 @@ export function useConfiguratorState({ productSlug, presetSlug }: UseConfigurato
     setConfig((prev) => ({ ...prev, profile, updatedAt: nowIso() }));
   }, []);
 
+  const setThickness = useCallback((thickness: ThicknessType) => {
+    setConfig((prev) => ({ ...prev, thickness, updatedAt: nowIso() }));
+  }, []);
+
   const setView = useCallback((view: ConfiguratorView) => {
     setConfig((prev) => ({ ...prev, view, updatedAt: nowIso() }));
   }, []);
@@ -177,6 +183,7 @@ export function useConfiguratorState({ productSlug, presetSlug }: UseConfigurato
       setUsage,
       setColor,
       setProfile,
+      setThickness,
       setView,
       submitOffer,
       resetOfferStatus: () => setOfferStatus('idle'),

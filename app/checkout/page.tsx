@@ -138,7 +138,7 @@ export default function CheckoutPage() {
   const [deliverDifferentAddress, setDeliverDifferentAddress] = useState(false);
 
   // UI-only: payment + coupon
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'cards' | 'paypal'>('stripe');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'cards' | 'paypal' | 'paysera'>('stripe');
   const [couponCode, setCouponCode] = useState('');
   const [savePaymentInfo, setSavePaymentInfo] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -187,7 +187,7 @@ export default function CheckoutPage() {
           },
           deliveryNotes,
           couponCode: couponCode?.trim() ? couponCode.trim() : undefined,
-          paymentProvider: paymentMethod === 'paypal' ? 'paypal' : 'stripe',
+          paymentProvider: paymentMethod === 'paysera' ? 'paysera' : paymentMethod === 'paypal' ? 'paypal' : 'stripe',
         }),
       });
 
@@ -280,6 +280,33 @@ export default function CheckoutPage() {
               email,
               name: fullName,
             },
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || t('errors.paymentSessionFailed'));
+        }
+
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error(t('errors.paymentUrlMissing'));
+        }
+
+        return;
+      }
+
+      // 2c) Paysera: init Paysera checkout and redirect
+      if (paymentMethod === 'paysera') {
+        const response = await fetch('/api/paysera/init', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderId,
           }),
         });
 
@@ -557,6 +584,35 @@ export default function CheckoutPage() {
                   </span>
                   <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
                     paypal
+                  </span>
+                </label>
+
+                <div className="h-px bg-[#BBBBBB]" />
+
+                <label className="flex items-center justify-between w-full">
+                  <span className="flex items-center gap-[8px]">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="paysera"
+                      checked={paymentMethod === 'paysera'}
+                      onChange={() => setPaymentMethod('paysera')}
+                      className={[
+                        'size-[24px]',
+                        'appearance-none',
+                        'rounded-[100px]',
+                        'border border-[#161616] border-solid',
+                        'grid place-items-center',
+                        "checked:after:content-['']",
+                        'checked:after:size-[10px] checked:after:rounded-full checked:after:bg-[#161616]',
+                      ].join(' ')}
+                    />
+                    <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
+                      {t('payment.paysera')}
+                    </span>
+                  </span>
+                  <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
+                    paysera
                   </span>
                 </label>
 

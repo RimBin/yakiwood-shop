@@ -1,14 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { quoteConfigurationPricing, type UsageType } from '@/lib/pricing/configuration'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 type QuoteBody = {
   productId: string
   usageType?: UsageType
   profileVariantId?: string
   colorVariantId?: string
+  thicknessOptionId?: string
+  thicknessMm?: number
   widthMm: number
   lengthMm: number
   quantityBoards: number
+}
+
+async function resolveThicknessOptionIdFromMm(thicknessMm: number): Promise<string | null> {
+  if (!supabaseAdmin) return null
+  if (!Number.isFinite(thicknessMm) || thicknessMm <= 0) return null
+
+  const { data, error } = await supabaseAdmin
+    .from('catalog_options')
+    .select('id')
+    .eq('option_type', 'thickness')
+    .eq('value_mm', Math.round(thicknessMm))
+    .eq('is_active', true)
+    .maybeSingle()
+
+  if (error || !data) return null
+  return typeof (data as any).id === 'string' ? (data as any).id : null
 }
 
 export async function POST(req: NextRequest) {
@@ -33,6 +52,12 @@ export async function POST(req: NextRequest) {
       usageType: body.usageType,
       profileVariantId: body.profileVariantId,
       colorVariantId: body.colorVariantId,
+      thicknessOptionId:
+        typeof body.thicknessOptionId === 'string' && body.thicknessOptionId.trim()
+          ? body.thicknessOptionId
+          : typeof body.thicknessMm === 'number'
+            ? await resolveThicknessOptionIdFromMm(body.thicknessMm)
+            : undefined,
       widthMm,
       lengthMm,
       quantityBoards,

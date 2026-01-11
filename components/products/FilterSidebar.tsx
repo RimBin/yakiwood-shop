@@ -23,7 +23,7 @@ interface FilterSidebarProps {
 }
 
 const CATEGORIES = ['Lentos', 'Plytelės', 'Fasadai', 'Interjeras'];
-const WOOD_TYPES = ['Pušis', 'Eglė', 'Ąžuolas'];
+const WOOD_TYPES = ['Eglė', 'Maumedis'];
 const COLORS = [
   { name: 'Juoda', hex: '#161616' },
   { name: 'Ruda', hex: '#8B4513' },

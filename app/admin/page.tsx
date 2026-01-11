@@ -137,8 +137,6 @@ export default function AdminPage() {
     return {
       spruce: all,
       larch: all,
-      pine: all,
-      oak: all,
     };
   }, []);
 
@@ -1141,8 +1139,6 @@ export default function AdminPage() {
                     >
                       <option value="spruce">Spruce</option>
                       <option value="larch">Larch</option>
-                      <option value="pine">Pine</option>
-                      <option value="oak">Oak</option>
                     </select>
                   </div>
 

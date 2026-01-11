@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
 import Image2D from './Image2D';
 import OptionGroup from './OptionGroup';
-import { COLOR_OPTIONS, PROFILE_OPTIONS, USAGE_OPTIONS, WOOD_OPTIONS, type ColorType, type ProfileType, type UsageType, type WoodType } from './types';
+import { COLOR_OPTIONS, PROFILE_OPTIONS, THICKNESS_OPTIONS, USAGE_OPTIONS, WOOD_OPTIONS, type ColorType, type ProfileType, type ThicknessType, type UsageType, type WoodType } from './types';
 import { useConfiguratorState } from './useConfiguratorState';
 
 const LazyView3D = dynamic(() => import('./View3D'), {
@@ -38,6 +38,15 @@ export default function ConfiguratorClient({ productSlug, presetSlug }: Configur
   );
   const profileOptions = useMemo(
     () => PROFILE_OPTIONS.map((v) => ({ value: v, label: v })),
+    []
+  );
+
+  const thicknessOptions = useMemo(
+    () =>
+      THICKNESS_OPTIONS.map((v) => ({
+        value: v,
+        label: v === '18_20' ? '18/20 mm' : '28 mm',
+      })),
     []
   );
 
@@ -105,6 +114,14 @@ export default function ConfiguratorClient({ productSlug, presetSlug }: Configur
               onChange={actions.setProfile}
             />
 
+            <OptionGroup<ThicknessType>
+              label="Storis"
+              ariaLabel="thickness"
+              value={config.thickness}
+              options={thicknessOptions}
+              onChange={actions.setThickness}
+            />
+
             <div className="border border-[#BBBBBB] rounded-[8px] bg-white p-[12px]">
               <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">Konfiguracija</p>
               <pre className="mt-[8px] font-mono text-[11px] text-[#161616] whitespace-pre-wrap" data-testid="configurator-summary">
@@ -115,6 +132,7 @@ export default function ConfiguratorClient({ productSlug, presetSlug }: Configur
                     usage: config.usage,
                     color: config.color,
                     profile: config.profile,
+                    thickness: config.thickness,
                     preset: config.presetSlug ?? null,
                   },
                   null,

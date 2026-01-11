@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
   let json: unknown;
   try {
-    json = await request.json();
+    const entries = await getFaqEntries(locale);
   } catch {
     return NextResponse.json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
   }
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
     meta: { page: page ?? null },
   });
 
-  const entries = getFaqEntries(locale);
+  const entries = await getFaqEntries(locale);
   const { entry, confidence } = matchFaq(message, entries);
 
   await appendEvent({

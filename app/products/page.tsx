@@ -59,6 +59,10 @@ export default function ProductsPage() {
                   products.map((p) => ({
                     ...p,
                     price: applyRoleDiscount(p.price, discount),
+                    salePrice:
+                      typeof p.salePrice === 'number'
+                        ? applyRoleDiscount(p.salePrice, discount)
+                        : undefined,
                   }))
                 );
               } else {
@@ -151,7 +155,8 @@ export default function ProductsPage() {
       activeProfile === 'all' ||
       (product.profiles ?? []).some((p) => (p?.name ?? '').toLowerCase() === activeProfile.toLowerCase());
     const q = searchQuery.trim().toLowerCase();
-    const matchesQuery = q.length === 0 || product.name.toLowerCase().includes(q);
+    const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
+    const matchesQuery = q.length === 0 || displayName.toLowerCase().includes(q);
     return matchesUsage && matchesWood && matchesColor && matchesProfile && matchesQuery;
   });
 
@@ -317,6 +322,15 @@ export default function ProductsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-[16px] md:gap-x-[19px] gap-y-[40px] md:gap-y-[56px]">
             {products.map((product) => (
+              (() => {
+                const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
+                const hasSale =
+                  typeof product.salePrice === 'number' &&
+                  product.salePrice > 0 &&
+                  product.salePrice < product.price;
+                const effectivePrice = hasSale ? product.salePrice! : product.price;
+
+                return (
             <Link
               key={product.id}
               href={toLocalePath(`/products/${product.slug}`, currentLocale)}
@@ -336,7 +350,7 @@ export default function ProductsPage() {
                 className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] text-[#161616] tracking-[-0.36px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                {product.name}
+                {displayName}
               </p>
               {(product.category || product.woodType) && (
                 <p
@@ -355,9 +369,18 @@ export default function ProductsPage() {
                 className="font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#535353] tracking-[-0.32px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                {t('fromPrice', { price: product.price.toFixed(0) })}
+                <span className={hasSale ? 'text-[#161616]' : undefined}>
+                  {t('fromPrice', { price: effectivePrice.toFixed(0) })}
+                </span>
+                {hasSale ? (
+                  <span className="ml-[10px] text-[#7C7C7C] line-through">
+                    {product.price.toFixed(0)} €
+                  </span>
+                ) : null}
               </p>
             </Link>
+              );
+            })()
           ))}
           </div>
         )}

@@ -7,6 +7,7 @@ export type ConfigurationPriceSelectors = {
   usageType?: UsageType
   profileVariantId?: string
   colorVariantId?: string
+  thicknessOptionId?: string
   widthMm?: number
   lengthMm?: number
 }
@@ -46,6 +47,7 @@ type DbConfigurationPriceRow = {
   usage_type: string | null
   profile_variant_id: string | null
   color_variant_id: string | null
+  thickness_option_id?: string | null
   width_mm: number | null
   length_mm: number | null
 }
@@ -55,6 +57,7 @@ function calcSpecificity(row: DbConfigurationPriceRow): number {
     (row.usage_type ? 1 : 0) +
     (row.profile_variant_id ? 1 : 0) +
     (row.color_variant_id ? 1 : 0) +
+    (row.thickness_option_id ? 1 : 0) +
     (row.width_mm !== null ? 1 : 0) +
     (row.length_mm !== null ? 1 : 0)
   )
@@ -69,15 +72,26 @@ export async function resolveConfigurationUnitPricePerM2(
   const usageType = selectors.usageType
   const profileVariantId = selectors.profileVariantId
   const colorVariantId = selectors.colorVariantId
+  const thicknessOptionId = selectors.thicknessOptionId
   const widthMm = typeof selectors.widthMm === 'number' ? selectors.widthMm : undefined
   const lengthMm = typeof selectors.lengthMm === 'number' ? selectors.lengthMm : undefined
 
   // Fetch a small candidate set; then rank in code (stable even if SQL ordering differs by NULL semantics).
-  const { data, error } = await supabaseAdmin
+  const withThickness = await supabaseAdmin
     .from('product_configuration_prices')
-    .select('id,unit_price_per_m2,usage_type,profile_variant_id,color_variant_id,width_mm,length_mm')
+    .select(
+      'id,unit_price_per_m2,usage_type,profile_variant_id,color_variant_id,thickness_option_id,width_mm,length_mm'
+    )
     .eq('product_id', productId)
     .eq('is_active', true)
+
+  const { data, error } = withThickness.error
+    ? await supabaseAdmin
+        .from('product_configuration_prices')
+        .select('id,unit_price_per_m2,usage_type,profile_variant_id,color_variant_id,width_mm,length_mm')
+        .eq('product_id', productId)
+        .eq('is_active', true)
+    : withThickness
 
   if (error || !data) {
     console.error('Failed to fetch configuration prices', error)
@@ -93,6 +107,13 @@ export async function resolveConfigurationUnitPricePerM2(
 
     if (row.color_variant_id !== null && colorVariantId && row.color_variant_id !== colorVariantId) return false
     if (row.color_variant_id !== null && !colorVariantId) return false
+
+    // Thickness is an optional selector (newer schema). Only filter when the column exists.
+    if (row.thickness_option_id !== undefined) {
+      if (row.thickness_option_id !== null && thicknessOptionId && row.thickness_option_id !== thicknessOptionId)
+        return false
+      if (row.thickness_option_id !== null && !thicknessOptionId) return false
+    }
 
     if (row.width_mm !== null && widthMm && row.width_mm !== widthMm) return false
     if (row.width_mm !== null && !widthMm) return false
@@ -129,6 +150,7 @@ export async function quoteConfigurationPricing(input: {
   usageType?: UsageType
   profileVariantId?: string
   colorVariantId?: string
+  thicknessOptionId?: string
   widthMm: number
   lengthMm: number
   quantityBoards: number
@@ -146,6 +168,7 @@ export async function quoteConfigurationPricing(input: {
     usageType: input.usageType,
     profileVariantId: input.profileVariantId,
     colorVariantId: input.colorVariantId,
+    thicknessOptionId: input.thicknessOptionId,
     widthMm,
     lengthMm,
   })

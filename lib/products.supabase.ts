@@ -1,5 +1,6 @@
 import { seedProducts } from '@/data/seed-products'
 import { createPublicClient } from '@/lib/supabase/public'
+import type { TypedObject } from '@portabletext/types'
 
 export interface ProductColorVariant {
   id: string
@@ -28,12 +29,15 @@ export interface Product {
   id: string
   slug: string
   name: string
+  nameEn?: string
   price: number
+  salePrice?: number
   image: string
   category: string
   woodType?: string
   description?: string
-  descriptionPortable?: unknown[]
+  descriptionEn?: string
+  descriptionPortable?: TypedObject | TypedObject[]
   images?: string[]
   colors?: ProductColorVariant[]
   profiles?: ProductProfileVariant[]
@@ -44,9 +48,12 @@ export interface Product {
 type DbProduct = {
   id: string
   name: string
+  name_en?: string | null
   slug: string
   description: string | null
+  description_en?: string | null
   base_price: string | number
+  sale_price?: string | number | null
   wood_type: string | null
   category: string | null
   usage_type?: string | null
@@ -58,10 +65,14 @@ type DbProduct = {
 type DbVariant = {
   id: string
   name: string
+  label_lt?: string | null
+  label_en?: string | null
+  value_mm?: number | null
   variant_type: string
   hex_color: string | null
   price_adjustment: string | number | null
   texture_url: string | null
+  image_url?: string | null
   stock_quantity: number | null
   is_available: boolean | null
 }
@@ -97,9 +108,9 @@ function transformDbProduct(db: DbProduct): Product {
     .filter((v) => v.variant_type === 'color')
     .map((v) => ({
       id: v.id,
-      name: v.name,
+      name: v.label_lt ?? v.name,
       hex: v.hex_color ?? undefined,
-      image: v.texture_url ?? undefined,
+      image: v.image_url ?? v.texture_url ?? undefined,
       priceModifier: v.price_adjustment === null ? undefined : toNumber(v.price_adjustment),
     }))
 
@@ -107,9 +118,9 @@ function transformDbProduct(db: DbProduct): Product {
     .filter((v) => v.variant_type === 'finish' || v.variant_type === 'profile')
     .map((v) => ({
       id: v.id,
-      name: v.name,
+      name: v.label_lt ?? v.name,
       priceModifier: v.price_adjustment === null ? undefined : toNumber(v.price_adjustment),
-      image: v.texture_url ?? undefined,
+      image: v.image_url ?? v.texture_url ?? undefined,
     }))
 
   const image = db.image_url || '/images/ui/wood/imgSpruce.png'
@@ -124,12 +135,15 @@ function transformDbProduct(db: DbProduct): Product {
     id: db.id,
     slug: db.slug,
     name: db.name,
+    nameEn: db.name_en ?? undefined,
     price: toNumber(db.base_price),
+    salePrice: db.sale_price === null ? undefined : toNumber(db.sale_price),
     image,
     images: db.image_url ? [db.image_url] : [],
     category: usage,
     woodType: db.wood_type ?? undefined,
     description: db.description ?? undefined,
+    descriptionEn: db.description_en ?? undefined,
     colors: colors.length ? colors : undefined,
     profiles: profiles.length ? profiles : undefined,
     inStock,
@@ -186,11 +200,6 @@ function formatSupabaseError(error: unknown): string {
   return String(error)
 }
 
-function isMissingUsageTypeColumn(error: unknown): boolean {
-  const msg = formatSupabaseError(error).toLowerCase()
-  return msg.includes('usage_type') && (msg.includes('does not exist') || msg.includes('column'))
-}
-
 export async function fetchProducts(): Promise<Product[]> {
   const supabase = createPublicClient()
 
@@ -198,25 +207,11 @@ export async function fetchProducts(): Promise<Product[]> {
     return seedProducts.map(transformSeedProduct)
   }
 
-  const baseSelect =
-    'id,name,slug,description,base_price,wood_type,category,image_url,is_active,product_variants(id,name,variant_type,hex_color,price_adjustment,texture_url,stock_quantity,is_available)'
-  const selectWithUsageType =
-    'id,name,slug,description,base_price,wood_type,category,usage_type,image_url,is_active,product_variants(id,name,variant_type,hex_color,price_adjustment,texture_url,stock_quantity,is_available)'
-
-  const runQuery = async (select: string) => {
-    return supabase
-      .from('products')
-      .select(select)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-  }
-
-  let { data, error } = await runQuery(selectWithUsageType)
-
-  // Gracefully handle older DB schema missing `usage_type`.
-  if (error && isMissingUsageTypeColumn(error)) {
-    ;({ data, error } = await runQuery(baseSelect))
-  }
+  const { data, error } = await supabase
+    .from('products')
+    .select('*, product_variants(*)')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
 
   if (error) {
     // Expected in local/demo environments when DB/RLS/schema isn't ready.
@@ -241,26 +236,12 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     return seed ? transformSeedProduct(seed) : null
   }
 
-  const baseSelect =
-    'id,name,slug,description,base_price,wood_type,category,image_url,is_active,product_variants(id,name,variant_type,hex_color,price_adjustment,texture_url,stock_quantity,is_available)'
-  const selectWithUsageType =
-    'id,name,slug,description,base_price,wood_type,category,usage_type,image_url,is_active,product_variants(id,name,variant_type,hex_color,price_adjustment,texture_url,stock_quantity,is_available)'
-
-  const runQuery = async (select: string) => {
-    return supabase
-      .from('products')
-      .select(select)
-      .eq('slug', slug)
-      .eq('is_active', true)
-      .single()
-  }
-
-  let { data, error } = await runQuery(selectWithUsageType)
-
-  // Gracefully handle older DB schema missing `usage_type`.
-  if (error && isMissingUsageTypeColumn(error)) {
-    ;({ data, error } = await runQuery(baseSelect))
-  }
+  const { data, error } = await supabase
+    .from('products')
+    .select('*, product_variants(*)')
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .single()
 
   if (error || !data) {
     if (error) {

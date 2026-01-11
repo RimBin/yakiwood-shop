@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
           usageType?: UsageType;
           profileVariantId?: string;
           colorVariantId?: string;
+          thicknessOptionId?: string;
           widthMm?: number;
           lengthMm?: number;
         };
@@ -185,6 +186,7 @@ export async function POST(req: NextRequest) {
           usageType: cfg.usageType,
           profileVariantId: cfg.profileVariantId,
           colorVariantId: cfg.colorVariantId,
+          thicknessOptionId: cfg.thicknessOptionId,
           widthMm: cfg.widthMm as number,
           lengthMm: cfg.lengthMm as number,
           quantityBoards: 1,

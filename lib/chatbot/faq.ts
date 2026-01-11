@@ -174,7 +174,78 @@ const FAQ_ENTRIES_EN: FaqEntry[] = [
 
 export type SupportedChatbotLocale = 'lt' | 'en';
 
-export function getFaqEntries(locale: string | undefined): FaqEntry[] {
-  if (locale === 'en') return FAQ_ENTRIES_EN;
-  return FAQ_ENTRIES_LT;
+type FaqCacheEntry = {
+  expiresAt: number;
+  entries: FaqEntry[]; // may be empty if Sanity query returned empty
+};
+
+type FaqCacheStore = {
+  byLocale: Partial<Record<SupportedChatbotLocale, FaqCacheEntry>>;
+};
+
+function normalizeLocale(locale: string | undefined): SupportedChatbotLocale {
+  return locale === 'en' ? 'en' : 'lt';
+}
+
+function getStaticFaqEntries(locale: SupportedChatbotLocale): FaqEntry[] {
+  return locale === 'en' ? FAQ_ENTRIES_EN : FAQ_ENTRIES_LT;
+}
+
+function getFaqCacheStore(): FaqCacheStore {
+  const g = globalThis as unknown as { __chatbotFaqCache?: FaqCacheStore };
+  if (!g.__chatbotFaqCache) g.__chatbotFaqCache = { byLocale: {} };
+  return g.__chatbotFaqCache;
+}
+
+async function fetchFaqEntriesFromSanity(locale: SupportedChatbotLocale): Promise<FaqEntry[] | null> {
+  try {
+    const { client } = await import('@/sanity/lib/client');
+
+    const query =
+      '*[_type == "chatbotFaqEntry" && enabled == true && locale == $locale] | order(order asc, _createdAt asc) {\n' +
+      '  "id": _id,\n' +
+      '  question,\n' +
+      '  answer,\n' +
+      '  "keywords": coalesce(keywords, []),\n' +
+      '  "suggestions": coalesce(suggestions, [])\n' +
+      '}';
+
+    const results = await client.fetch<FaqEntry[]>(query, { locale });
+    if (!Array.isArray(results)) return [];
+
+    // Ensure stable shapes even if some entries are partially filled.
+    return results
+      .filter((e) => Boolean(e && e.id && e.question && e.answer))
+      .map((e) => ({
+        id: String(e.id),
+        question: String(e.question),
+        answer: String(e.answer),
+        keywords: Array.isArray(e.keywords) ? e.keywords.map(String) : [],
+        suggestions: Array.isArray(e.suggestions) ? e.suggestions.map(String) : undefined,
+      }));
+  } catch {
+    return null;
+  }
+}
+
+export async function getFaqEntries(locale: string | undefined): Promise<FaqEntry[]> {
+  const normalized = normalizeLocale(locale);
+  const now = Date.now();
+
+  const cache = getFaqCacheStore();
+  const cached = cache.byLocale[normalized];
+  if (cached && cached.expiresAt > now) {
+    return cached.entries.length > 0 ? cached.entries : getStaticFaqEntries(normalized);
+  }
+
+  // Cache for a short time to avoid repeated Sanity queries per request.
+  const ttlMs = 2 * 60 * 1000; // ~2 minutes
+  const fetched = await fetchFaqEntriesFromSanity(normalized);
+
+  if (fetched) {
+    cache.byLocale[normalized] = { expiresAt: now + ttlMs, entries: fetched };
+    return fetched.length > 0 ? fetched : getStaticFaqEntries(normalized);
+  }
+
+  return getStaticFaqEntries(normalized);
 }

@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+﻿import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { generateBreadcrumbSchema, generateProductSchema } from '@/lib/seo/structured-data';
@@ -28,18 +28,22 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const productPath = toLocalePath(`/products/${product.slug}`, currentLocale);
 
+  const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
+  const displayDescription =
+    currentLocale === 'en' && product.descriptionEn ? product.descriptionEn : product.description;
+
   return {
-    title: product.name,
-    description: product.description,
+    title: displayName,
+    description: displayDescription,
     openGraph: {
-      title: product.name,
-      description: product.description,
+      title: displayName,
+      description: displayDescription,
       images: [
         {
           url: getProductOgImage(ogImage),
           width: 1200,
           height: 630,
-          alt: product.name,
+          alt: displayName,
         },
       ],
       type: 'website',
@@ -47,8 +51,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     },
     twitter: {
       card: 'summary_large_image',
-      title: product.name,
-      description: product.description,
+      title: displayName,
+      description: displayDescription,
       images: [getProductOgImage(ogImage)],
     },
   };
@@ -66,12 +70,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const locale = await getLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
 
+  const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
+  const displayDescription =
+    currentLocale === 'en' && product.descriptionEn ? product.descriptionEn : product.description;
+  const hasSale =
+    typeof product.salePrice === 'number' && product.salePrice > 0 && product.salePrice < product.price;
+  const offerPrice = hasSale ? product.salePrice! : product.price;
+
   // Generate structured data for SEO
   const productSchema = generateProductSchema({
-    name: product.name,
+    name: displayName,
     slug: product.slug,
-    description: product.description ?? '',
-    basePrice: product.price,
+    description: displayDescription ?? '',
+    basePrice: offerPrice,
     image: product.image,
     images: product.images,
     category: product.category,
@@ -88,7 +99,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       url: toLocalePath('/products', currentLocale),
     },
     {
-      name: product.name,
+      name: displayName,
       url: toLocalePath(`/products/${product.slug}`, currentLocale),
     },
   ]);
@@ -110,3 +121,4 @@ export default async function ProductPage({ params }: ProductPageProps) {
     </>
   );
 }
+
