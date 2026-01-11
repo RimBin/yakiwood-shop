@@ -1,9 +1,11 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getLocale } from 'next-intl/server';
 import { generateBreadcrumbSchema, generateProductSchema } from '@/lib/seo/structured-data';
 import { fetchProductBySlug } from '@/lib/products.supabase';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
+import { toLocalePath } from '@/i18n/paths';
 
 interface ProductPageProps {
   params: { slug: string };
@@ -22,6 +24,9 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   }
 
   const ogImage = product.images?.[0] || product.image;
+  const locale = await getLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const productPath = toLocalePath(`/products/${product.slug}`, currentLocale);
 
   return {
     title: product.name,
@@ -38,7 +43,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
         },
       ],
       type: 'website',
-      url: `https://yakiwood.lt/products/${product.slug}`,
+      url: `https://yakiwood.lt${productPath}`,
     },
     twitter: {
       card: 'summary_large_image',
@@ -58,6 +63,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  const locale = await getLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
   // Generate structured data for SEO
   const productSchema = generateProductSchema({
     name: product.name,
@@ -71,9 +79,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
     inStock: product.inStock,
   });
   const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: 'Pagrindinis', url: '/' },
-    { name: 'Produktai', url: '/products' },
-    { name: product.name, url: `/products/${product.slug}` },
+    {
+      name: currentLocale === 'lt' ? 'Pagrindinis' : 'Home',
+      url: toLocalePath('/', currentLocale),
+    },
+    {
+      name: currentLocale === 'lt' ? 'Produktai' : 'Products',
+      url: toLocalePath('/products', currentLocale),
+    },
+    {
+      name: product.name,
+      url: toLocalePath(`/products/${product.slug}`, currentLocale),
+    },
   ]);
 
   return (

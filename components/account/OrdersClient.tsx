@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useLocale } from 'next-intl';
 import OrderCard from './OrderCard';
+import { toLocalePath } from '@/i18n/paths';
 
 interface Order {
   id: string;
@@ -41,6 +43,8 @@ export default function OrdersClient({ orders }: OrdersClientProps) {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
 
   // Filter orders
   const filteredOrders = orders.filter((order) => {
@@ -151,7 +155,7 @@ export default function OrdersClient({ orders }: OrdersClientProps) {
               </p>
               {(!searchQuery && statusFilter === 'all') && (
                 <a
-                  href="/produktai"
+                  href={toLocalePath('/produktai', currentLocale)}
                   className="inline-block px-8 py-3 bg-[#161616] text-white rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#2d2d2d] transition-colors"
                 >
                   Žiūrėti produktus

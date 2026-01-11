@@ -2,7 +2,9 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { PageCover } from '@/components/shared/PageLayout';
+import { toLocalePath } from '@/i18n/paths';
 
 // Image assets from Figma
 const imgVideo = "https://www.figma.com/api/mcp/asset/477aa6a4-49f3-44f4-8e9a-ebf0bfe0cd06";
@@ -13,6 +15,9 @@ const imgTeam4 = "https://www.figma.com/api/mcp/asset/db641b47-8ed9-40bc-91f0-d8
 const imgCTA = "https://www.figma.com/api/mcp/asset/77b31476-e23e-4535-9de2-4ddf313eab32";
 
 export default function About() {
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
   return (
     <div className="w-full bg-[#E1E1E1]">
       {/* Cover Section */}
@@ -423,7 +428,7 @@ export default function About() {
           </p>
           <div className="flex flex-col md:flex-row gap-[16px] items-center">
             <Link
-              href="/kontaktai"
+              href={toLocalePath('/kontaktai', currentLocale)}
               className="bg-[#161616] rounded-[100px] px-[40px] py-[10px] h-[48px] flex items-center justify-center"
             >
               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
@@ -431,7 +436,7 @@ export default function About() {
               </p>
             </Link>
             <Link
-              href="/kontaktai"
+              href={toLocalePath('/kontaktai', currentLocale)}
               className="border border-[#161616] rounded-[100px] px-[40px] py-[10px] h-[48px] flex items-center justify-center"
             >
               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">

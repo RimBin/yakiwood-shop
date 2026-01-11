@@ -9,6 +9,7 @@ import { assets } from '@/lib/assets';
 import { projects as projectsData } from '@/data/projects';
 import type { Project } from '@/types/project';
 import { useLocale } from 'next-intl';
+import { toLocalePath } from '@/i18n/paths';
 
 const [imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6] = assets.projects;
 
@@ -26,14 +27,15 @@ function getProjectCardImage(project?: Partial<Project> | null): string | undefi
   return undefined;
 }
 
-function getProjectHref(basePath: '/projects' | '/projektai', project?: Partial<Project> | null): string {
+function getProjectHref(basePath: string, project?: Partial<Project> | null): string {
   if (project?.slug) return `${basePath}/${project.slug}`;
   return basePath;
 }
 
 export default function Projects() {
   const locale = useLocale();
-  const basePath: '/projects' | '/projektai' = locale === 'en' ? '/projects' : '/projektai';
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const basePath = toLocalePath('/projects', currentLocale);
 
   const [projects] = useState<Project[]>(() => {
     if (typeof window === 'undefined') return projectsData;

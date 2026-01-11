@@ -58,37 +58,91 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1.0,
     },
     {
+      url: `${BASE_URL}/lt`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
       url: `${BASE_URL}/products`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/projektai`,
+      url: `${BASE_URL}/lt/produktai`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
-      url: `${BASE_URL}/sprendimai`,
+      url: `${BASE_URL}/projects`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/lt/projektai`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/solutions`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${BASE_URL}/apie`,
+      url: `${BASE_URL}/lt/sprendimai`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
-      url: `${BASE_URL}/kontaktai`,
+      url: `${BASE_URL}/about`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
-      url: `${BASE_URL}/duk`,
+      url: `${BASE_URL}/lt/apie`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/contact`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${BASE_URL}/lt/kontaktai`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${BASE_URL}/faq`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${BASE_URL}/lt/duk`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.4,
+    },
+    {
+      url: `${BASE_URL}/configurator3d`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/lt/konfiguratorius3d`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.5,
@@ -96,28 +150,52 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Dynamic product pages
-  const productPages: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${BASE_URL}/products/${product.slug}`,
-    lastModified: product.updatedAt,
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }));
+  const productPages: MetadataRoute.Sitemap = products.flatMap((product) => [
+    {
+      url: `${BASE_URL}/products/${product.slug}`,
+      lastModified: product.updatedAt,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/lt/produktai/${product.slug}`,
+      lastModified: product.updatedAt,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+  ]);
 
   // Dynamic project pages
-  const projectPages: MetadataRoute.Sitemap = projects.map((project) => ({
-    url: `${BASE_URL}/projektai/${project.slug}`,
-    lastModified: now,
-    changeFrequency: 'monthly',
-    priority: 0.7,
-  }));
+  const projectPages: MetadataRoute.Sitemap = projects.flatMap((project) => [
+    {
+      url: `${BASE_URL}/projects/${project.slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/lt/projektai/${project.slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+  ]);
 
   // Static SEO variant landing pages
-  const variantLandingPages: MetadataRoute.Sitemap = SHOU_SUGI_BAN_VARIANT_SLUGS.map((slug) => ({
-    url: `${BASE_URL}/shou-sugi-ban/${slug}`,
-    lastModified: now,
-    changeFrequency: 'monthly',
-    priority: 0.7,
-  }));
+  const variantLandingPages: MetadataRoute.Sitemap = SHOU_SUGI_BAN_VARIANT_SLUGS.flatMap((slug) => [
+    {
+      url: `${BASE_URL}/shou-sugi-ban/${slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/lt/shou-sugi-ban/${slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+  ]);
 
   return [...staticPages, ...productPages, ...variantLandingPages, ...projectPages];
 }

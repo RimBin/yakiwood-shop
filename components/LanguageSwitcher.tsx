@@ -14,23 +14,45 @@ const languages: Language[] = [
   { code: 'en', label: 'English' },
 ];
 
-// Route mapping between languages
-const routeMap: Record<string, Record<string, string>> = {
-  lt: {
-    '/products': '/products',
-    '/solutions': '/sprendimai',
-    '/projects': '/projektai',
-    '/about': '/apie',
-    '/contact': '/kontaktai',
-  },
-  en: {
-    '/produktai': '/products',
-    '/sprendimai': '/solutions',
-    '/projektai': '/projects',
-    '/apie': '/about',
-    '/kontaktai': '/contact',
-  },
-};
+type PrefixMap = Array<{ from: string; to: string }>;
+
+const enToLt: PrefixMap = [
+  { from: '/products', to: '/produktai' },
+  { from: '/solutions', to: '/sprendimai' },
+  { from: '/projects', to: '/projektai' },
+  { from: '/about', to: '/apie' },
+  { from: '/contact', to: '/kontaktai' },
+  { from: '/faq', to: '/duk' },
+  { from: '/configurator3d', to: '/konfiguratorius3d' },
+];
+
+const ltToEn: PrefixMap = enToLt.map(({ from, to }) => ({ from: to, to: from }));
+
+function replaceLeadingPath(pathname: string, mapping: PrefixMap): string {
+  for (const { from, to } of mapping) {
+    if (pathname === from || pathname.startsWith(`${from}/`)) {
+      return pathname.replace(from, to);
+    }
+  }
+  return pathname;
+}
+
+function toLtPath(pathname: string): string {
+  if (pathname === '/lt' || pathname.startsWith('/lt/')) return pathname;
+  if (pathname === '/') return '/lt';
+
+  const mapped = replaceLeadingPath(pathname, enToLt);
+  return `/lt${mapped}`;
+}
+
+function toEnPath(pathname: string): string {
+  if (pathname === '/') return '/';
+  if (pathname === '/lt') return '/';
+  if (!pathname.startsWith('/lt/')) return pathname;
+
+  const withoutPrefix = pathname.slice(3);
+  return replaceLeadingPath(withoutPrefix, ltToEn);
+}
 
 export default function LanguageSwitcher() {
   const locale = useLocale();
@@ -69,19 +91,7 @@ export default function LanguageSwitcher() {
     // Store preference in cookie (expires in 1 year)
     document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=31536000;SameSite=Lax`;
 
-    // Map current route to equivalent in new language
-    let newPath = pathname;
-    const routeMappings = routeMap[newLocale];
-
-    if (routeMappings) {
-      // Check if current path needs translation
-      for (const [from, to] of Object.entries(routeMappings)) {
-        if (pathname === from || pathname.startsWith(`${from}/`)) {
-          newPath = pathname.replace(from, to);
-          break;
-        }
-      }
-    }
+    const newPath = newLocale === 'lt' ? toLtPath(pathname) : toEnPath(pathname);
 
     setIsOpen(false);
     router.push(newPath);

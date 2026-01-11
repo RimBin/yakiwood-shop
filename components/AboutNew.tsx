@@ -3,10 +3,15 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import ArrowRight from '@/components/icons/ArrowRight';
 import { PageCover } from '@/components/shared/PageLayout';
+import { toLocalePath } from '@/i18n/paths';
 
 export default function AboutNew() {
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
   return (
     <div className="w-full">
       {/* Hero Section */}
@@ -287,7 +292,7 @@ export default function AboutNew() {
             {/* Buttons */}
             <div className="flex flex-col gap-[16px] sm:flex-row">
               <Link
-                href="/kontaktai"
+                href={toLocalePath('/kontaktai', currentLocale)}
                 className="flex items-center justify-center gap-[12px] rounded-[100px] bg-[#161616] px-[32px] py-[16px] text-white transition-opacity hover:opacity-90"
               >
                 <span className="font-['Outfit'] text-[14px] font-normal uppercase tracking-[0.7px]">
@@ -296,7 +301,7 @@ export default function AboutNew() {
                 <ArrowRight color="#FFFFFF" />
               </Link>
               <Link
-                href="/produktai"
+                href={toLocalePath('/produktai', currentLocale)}
                 className="flex items-center justify-center gap-[12px] rounded-[100px] border border-[#161616] bg-transparent px-[32px] py-[16px] text-[#161616] transition-colors hover:bg-[#161616] hover:text-white"
               >
                 <span className="font-['Outfit'] text-[14px] font-normal uppercase tracking-[0.7px]">

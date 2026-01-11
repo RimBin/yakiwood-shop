@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { PageCover, PageSection } from '@/components/shared';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
 import { fetchProducts, type Product, type ProductColorVariant, type ProductProfileVariant } from '@/lib/products.supabase';
+import { toLocalePath } from '@/i18n/paths';
 
 const FALLBACK_COLORS: ProductColorVariant[] = [
   { id: 'demo-black', name: 'Black', hex: '#161616', priceModifier: 0 },
@@ -19,6 +20,8 @@ const FALLBACK_PROFILES: ProductProfileVariant[] = [
 
 export default function ConfiguratorPage() {
   const t = useTranslations();
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
 
   const [product, setProduct] = useState<Product | null>(null);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -195,7 +198,7 @@ export default function ConfiguratorPage() {
             <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('productsPage.emptyTitle')}</p>
             <p className="mt-2 font-['Outfit'] text-[12px] text-[#7C7C7C]">
               {t('productsPage.emptyDescriptionPrefix')}{' '}
-              <a href="/kontaktai" className="text-[#161616] underline">
+              <a href={toLocalePath('/kontaktai', currentLocale)} className="text-[#161616] underline">
                 {t('productsPage.emptyContactLink')}
               </a>
               {t('productsPage.emptyDescriptionSuffix')}

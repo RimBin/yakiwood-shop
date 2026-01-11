@@ -56,7 +56,7 @@
 			"args": [
 				"-NoProfile",
 				"-Command",
-				"try { (Invoke-WebRequest -UseBasicParsing http://localhost:3000/products/black).StatusCode } catch { if ($_.Exception.Response) { $_.Exception.Response.StatusCode.value__ } else { $_.Exception.Message } }"
+				"$ProgressPreference='SilentlyContinue'; function Check([string]$url) { try { $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 $url; $loc = $r.Headers.Location; if ($loc) { Write-Output ($url + ' status=' + $r.StatusCode + ' location=' + $loc) } else { Write-Output ($url + ' status=' + $r.StatusCode) } } catch { if ($_.Exception.Response) { Write-Output ($url + ' status=' + $_.Exception.Response.StatusCode.value__) } else { Write-Output ($url + ' error=' + $_.Exception.Message) } } }; Check 'http://localhost:3000/products/black'; Check 'http://localhost:3000/products/black/'"
 			],
 			"isBackground": false,
 			"problemMatcher": []
@@ -68,7 +68,7 @@
 			"args": [
 				"-NoProfile",
 				"-Command",
-				"(Invoke-WebRequest -UseBasicParsing http://localhost:3000/products/black).StatusCode; (Invoke-WebRequest -UseBasicParsing http://localhost:3000/products/black).Content.Substring(0,200)"
+				"$ProgressPreference='SilentlyContinue'; $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 http://localhost:3000/products/black/; $r.StatusCode; $r.Content.Substring(0,[Math]::Min(200,$r.Content.Length))"
 			],
 			"isBackground": false,
 			"problemMatcher": []

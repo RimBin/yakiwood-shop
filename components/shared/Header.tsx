@@ -10,6 +10,7 @@ import MobileMenu from './MobileMenu';
 import CartSidebar from './CartSidebar';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useCartStore } from '@/lib/cart/store';
+import { toLocalePath } from '@/i18n/paths';
 
 export default function Header() {
   const t = useTranslations();
@@ -20,7 +21,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const items = useCartStore((state) => state.items);
   
-  const isHomepage = pathname === '/' || pathname === '/lt' || pathname === '/en';
+  const isHomepage = pathname === '/' || pathname === '/lt';
 
   useEffect(() => {
     if (!isHomepage) return;
@@ -33,21 +34,32 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isHomepage]);
   
-  // Dynamic routes based on locale
-  const navItems = locale === 'lt' ? [
-    { href: '/products', label: t('nav.produktai') },
-    { href: '/sprendimai', label: t('nav.sprendimai') },
-    { href: '/projektai', label: t('nav.projektai') },
-    { href: '/konfiguratorius3d', label: t('nav.konfiguratorius3d') },
-    { href: '/apie', label: t('nav.apie') },
-    { href: '/kontaktai', label: t('nav.kontaktai') },
-  ] : [
-    { href: '/products', label: t('nav.products') },
-    { href: '/solutions', label: t('nav.solutions') },
-    { href: '/projects', label: t('nav.projects') },
-    { href: '/configurator3d', label: t('nav.configurator3d') },
-    { href: '/about', label: t('nav.about') },
-    { href: '/contact', label: t('nav.contact') },
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const navItems = [
+    {
+      href: toLocalePath('/products', currentLocale),
+      label: t(locale === 'lt' ? 'nav.produktai' : 'nav.products'),
+    },
+    {
+      href: toLocalePath('/solutions', currentLocale),
+      label: t(locale === 'lt' ? 'nav.sprendimai' : 'nav.solutions'),
+    },
+    {
+      href: toLocalePath('/projects', currentLocale),
+      label: t(locale === 'lt' ? 'nav.projektai' : 'nav.projects'),
+    },
+    {
+      href: toLocalePath('/configurator3d', currentLocale),
+      label: t(locale === 'lt' ? 'nav.konfiguratorius3d' : 'nav.configurator3d'),
+    },
+    {
+      href: toLocalePath('/about', currentLocale),
+      label: t(locale === 'lt' ? 'nav.apie' : 'nav.about'),
+    },
+    {
+      href: toLocalePath('/contact', currentLocale),
+      label: t(locale === 'lt' ? 'nav.kontaktai' : 'nav.contact'),
+    },
   ];
   
   return (
@@ -96,7 +108,11 @@ export default function Header() {
         <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[16px]">
           <div className="flex items-center gap-[16px]">
             {/* Logo - exact 126x48px */}
-            <Link href="/" aria-label="Yakiwood homepage" className="h-[48px] w-[126px] relative shrink-0">
+            <Link
+              href={toLocalePath('/', currentLocale)}
+              aria-label="Yakiwood homepage"
+              className="h-[48px] w-[126px] relative shrink-0"
+            >
               <Image src={getAsset('imgLogo')} alt="Yakiwood Logo" fill style={{ objectFit: 'contain' }} />
             </Link>
 

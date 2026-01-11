@@ -165,12 +165,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/produktai',
-        destination: '/products',
+        destination: '/lt/produktai',
         permanent: true,
       },
       {
         source: '/produktai/:path*',
-        destination: '/products/:path*',
+        destination: '/lt/produktai/:path*',
         permanent: true,
       },
       {
@@ -180,23 +180,126 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/apie',
-        destination: '/about',
+        destination: '/lt/apie',
         permanent: true,
       },
       {
         source: '/kontaktai',
-        destination: '/contact',
+        destination: '/lt/kontaktai',
         permanent: true,
       },
       {
         source: '/duk',
-        destination: '/faq',
+        destination: '/lt/duk',
+        permanent: true,
+      },
+      {
+        source: '/sprendimai',
+        destination: '/lt/sprendimai',
+        permanent: true,
+      },
+      {
+        source: '/sprendimai/:path*',
+        destination: '/lt/sprendimai/:path*',
+        permanent: true,
+      },
+      {
+        source: '/projektai',
+        destination: '/lt/projektai',
+        permanent: true,
+      },
+      {
+        source: '/projektai/:path*',
+        destination: '/lt/projektai/:path*',
+        permanent: true,
+      },
+      {
+        source: '/konfiguratorius3d',
+        destination: '/lt/konfiguratorius3d',
+        permanent: true,
+      },
+      {
+        source: '/konfiguratorius3d/:path*',
+        destination: '/lt/konfiguratorius3d/:path*',
         permanent: true,
       },
     ];
   },
   async headers() {
     return [
+      // Keep technical flows accessible but out of the index (also covers /lt/* variants)
+      {
+        source: '/checkout',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/lt/checkout',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/order-confirmation',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/lt/order-confirmation',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/login',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/lt/login',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/register',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/lt/register',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/forgot-password',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/lt/forgot-password',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/reset-password',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/lt/reset-password',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/account/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/lt/account/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/admin/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/lt/admin/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/studio/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/lt/studio/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
       {
         // Apply security headers to all routes
         source: '/(.*)',

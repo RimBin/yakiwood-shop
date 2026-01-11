@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { assets } from '@/lib/assets';
 import { useLocale } from 'next-intl';
 import { COOKIE_CONSENT_OPEN_EVENT } from '@/lib/cookies/consent';
+import { toLocalePath } from '@/i18n/paths';
 
 const navColumns = [
   {
@@ -65,6 +66,7 @@ const paymentMethods = ['Mastercard', 'Visa', 'Maestro', 'Stripe', 'PayPal'] as 
 
 export default function Footer() {
   const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const cookieSettingsLabel = locale === 'lt' ? 'Slapukų nustatymai' : 'Cookie preferences';
 
   const openCookiePreferences = () => {
@@ -106,7 +108,7 @@ export default function Footer() {
                   }
 
                   return (
-                    <Link key={item.label} href={item.href} className="w-fit">
+                    <Link key={item.label} href={toLocalePath(item.href, currentLocale)} className="w-fit">
                       {content}
                     </Link>
                   );
@@ -198,7 +200,7 @@ export default function Footer() {
                       }
 
                       return (
-                        <Link key={item.label} href={item.href} className="w-fit">
+                        <Link key={item.label} href={toLocalePath(item.href, currentLocale)} className="w-fit">
                           {content}
                         </Link>
                       );

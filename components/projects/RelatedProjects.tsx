@@ -5,16 +5,19 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Project } from '@/types/project';
 import { useLocale } from 'next-intl';
+import { toLocalePath } from '@/i18n/paths';
 
 interface RelatedProjectsProps {
   projects: Project[];
-  basePath?: '/projects' | '/projektai';
+  basePath?: string;
 }
 
 export default function RelatedProjects({ projects, basePath = '/projects' }: RelatedProjectsProps) {
   if (projects.length === 0) return null;
 
   const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const resolvedBasePath = toLocalePath(basePath, currentLocale);
   const labels =
     locale === 'lt'
       ? {
@@ -35,7 +38,7 @@ export default function RelatedProjects({ projects, basePath = '/projects' }: Re
             {labels.heading}
           </h2>
           <Link
-            href={basePath}
+            href={resolvedBasePath}
             className="hidden lg:flex items-center gap-2 font-['Outfit'] font-normal text-xs uppercase tracking-[0.6px] text-[#161616] hover:gap-3 transition-all"
           >
             {labels.viewAll}
@@ -58,7 +61,7 @@ export default function RelatedProjects({ projects, basePath = '/projects' }: Re
             return (
               <Link
                 key={project.id}
-                href={`${basePath}/${project.slug}`}
+                href={`${resolvedBasePath}/${project.slug}`}
                 className="group flex flex-col gap-2"
               >
                 <div className={`relative ${height} w-full rounded-lg overflow-hidden`}>
@@ -92,7 +95,7 @@ export default function RelatedProjects({ projects, basePath = '/projects' }: Re
             return (
               <Link
                 key={project.id}
-                href={`${basePath}/${project.slug}`}
+                href={`${resolvedBasePath}/${project.slug}`}
                 className="group flex flex-col gap-2"
               >
                 <div className="relative h-[230px] w-full rounded overflow-hidden">

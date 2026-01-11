@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type Stripe from 'stripe'; // Import type only
 import { InvoicePDFGenerator } from '@/lib/invoice/pdf-generator';
-import { createInvoice } from '@/lib/invoice/utils';
+import { createInvoice, splitGrossToNet } from '@/lib/invoice/utils';
 import { 
   createOrder, 
   getOrderById,
@@ -109,12 +109,9 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Calculate totals
-      const subtotal = items.reduce((sum: number, item: any) => 
-        sum + (item.quantity * item.basePrice), 0
-      );
-      const vatAmount = subtotal * 0.21;
-      const total = subtotal + vatAmount;
+      // Prices in cart/checkout are treated as GROSS (VAT included).
+      const grossTotal = items.reduce((sum: number, item: any) => sum + (item.quantity * item.basePrice), 0);
+      const totals = splitGrossToNet(grossTotal, 0.21);
 
       // Fallback: Create order in database if we didn't find an existing one
       if (!order) {
@@ -128,9 +125,9 @@ export async function POST(req: NextRequest) {
           customerPhone,
           customerAddress,
           items,
-          subtotal,
-          vatAmount,
-          total,
+          subtotal: totals.net,
+          vatAmount: totals.vat,
+          total: totals.gross,
           currency: 'EUR',
           notes: `Stripe mokėjimas ID: ${session.payment_intent}`
         });
@@ -184,12 +181,18 @@ export async function POST(req: NextRequest) {
           id: item.id || `item-${index}`,
           name: item.name,
           quantity: item.quantity,
+          // basePrice is gross (incl VAT) in checkout.
           unitPrice: item.basePrice,
-          vatRate: 0.21
+          vatRate: 0.21,
+          unit: item.unit || undefined,
         })),
         paymentMethod: 'stripe',
-        dueInDays: 0, // Jau apmokėta
-        notes: `Užsakymas ${orderNumber || order?.order_number || ''}. Apmokėta per Stripe.`
+        pricesIncludeVat: true,
+        dueInDays: 0, // already paid
+        orderId: order?.id,
+        orderNumber: orderNumber || order?.order_number || undefined,
+        documentTitle: 'Production - Shou sugi ban',
+        notes: `Order ${orderNumber || order?.order_number || ''}. Paid via Stripe.`
       };
 
       // Generate invoice

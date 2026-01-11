@@ -4,6 +4,8 @@ import { useCartStore, CartItem } from '@/lib/cart/store';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useLocale } from 'next-intl';
+import { toLocalePath } from '@/i18n/paths';
 
 // Product image placeholder - local asset
 const productPlaceholder = "/images/ui/imgCart.jpg";
@@ -101,6 +103,8 @@ interface CartSidebarProps {
 
 export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { items, removeItem, updateQuantity, total } = useCartStore();
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const [couponCode, setCouponCode] = useState('');
   
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -137,7 +141,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
               Your cart is empty
             </p>
             <Link
-              href="/produktai"
+              href={toLocalePath('/produktai', currentLocale)}
               onClick={onClose}
               className="border border-[#161616] rounded-[100px] px-[40px] py-[14px] font-['Outfit'] font-normal text-[#161616] text-[12px] tracking-[0.6px] uppercase leading-[1.2] hover:bg-[#161616] hover:text-white transition-colors"
             >
@@ -295,6 +299,8 @@ export function CartButton({ onClick, variant = 'desktop' }: CartButtonProps) {
 // Default export - Cart Page Component
 export default function Cart() {
   const { items, removeItem, updateQuantity, total, clear } = useCartStore();
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const [couponCode, setCouponCode] = useState('');
   
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -340,7 +346,7 @@ export default function Cart() {
             Your cart is empty
           </p>
           <Link
-            href="/produktai"
+            href={toLocalePath('/produktai', currentLocale)}
             className="border border-[#161616] rounded-[100px] px-[40px] py-[14px] font-['Outfit'] font-normal text-[#161616] text-[12px] tracking-[0.6px] uppercase leading-[1.2] hover:bg-[#161616] hover:text-white transition-colors"
           >
             Return to shop

@@ -5,12 +5,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared';
 import { fetchProducts, type Product } from '@/lib/products.supabase';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { applyRoleDiscount, type RoleDiscount } from '@/lib/pricing/roleDiscounts';
+import { toLocalePath } from '@/i18n/paths';
 
 export default function ProductsPage() {
   const t = useTranslations('productsPage');
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const [activeUsage, setActiveUsage] = useState<'all' | string>('all');
   const [activeWood, setActiveWood] = useState<'all' | string>('all');
   const [activeColor, setActiveColor] = useState<'all' | string>('all');
@@ -281,7 +284,7 @@ export default function ProductsPage() {
             </p>
             <p className="font-['Outfit'] text-[#7C7C7C] mb-6">
               {t('errorHelp')}{' '}
-              <Link href="/kontaktai" className="text-[#161616] underline">
+              <Link href={toLocalePath('/kontaktai', currentLocale)} className="text-[#161616] underline">
                 {t('errorContactLink')}
               </Link>{' '}
               {t('errorContactSuffix')}
@@ -305,7 +308,7 @@ export default function ProductsPage() {
             </h3>
             <p className="font-['Outfit'] text-[#7C7C7C] mb-6">
               {t('emptyDescriptionPrefix')}{' '}
-              <Link href="/kontaktai" className="text-[#161616] underline">
+              <Link href={toLocalePath('/kontaktai', currentLocale)} className="text-[#161616] underline">
                 {t('emptyContactLink')}
               </Link>
               {t('emptyDescriptionSuffix')}
@@ -316,7 +319,7 @@ export default function ProductsPage() {
             {products.map((product) => (
             <Link
               key={product.id}
-              href={`/products/${product.slug}`}
+              href={toLocalePath(`/products/${product.slug}`, currentLocale)}
               data-testid="product-card"
               className="flex flex-col gap-[8px] group"
             >

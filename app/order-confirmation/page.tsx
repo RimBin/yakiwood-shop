@@ -3,11 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
+import { toLocalePath } from '@/i18n/paths';
 
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const sessionId = searchParams.get('session_id');
   const provider = searchParams.get('provider');
   const paypalOrderId = searchParams.get('token');
@@ -182,13 +186,13 @@ export default function OrderConfirmationPage() {
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-4">
           <Link
-            href="/account"
+            href={toLocalePath('/account', currentLocale)}
             className="flex-1 h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors flex items-center justify-center"
           >
             Peržiūrėti užsakymus
           </Link>
           <Link
-            href="/products"
+            href={toLocalePath('/products', currentLocale)}
             className="flex-1 h-[48px] rounded-[100px] border border-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors flex items-center justify-center"
           >
             Tęsti apsipirkimą
@@ -201,7 +205,7 @@ export default function OrderConfirmationPage() {
             Turite klausimų apie užsakymą?
           </p>
           <Link
-            href="/kontaktai"
+            href={toLocalePath('/kontaktai', currentLocale)}
             className="font-['Outfit'] text-[14px] text-[#161616] hover:underline"
           >
             Susisiekite su mumis

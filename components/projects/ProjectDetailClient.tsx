@@ -8,6 +8,7 @@ import ProjectInfo from '@/components/projects/ProjectInfo';
 import RelatedProjects from '@/components/projects/RelatedProjects';
 import { projects as projectsData } from '@/data/projects';
 import type { Project } from '@/types/project';
+import { toLocalePath } from '@/i18n/paths';
 
 function loadProjectsFromLocalStorageOrSeed(): Project[] {
   if (typeof window === 'undefined') return projectsData;
@@ -27,13 +28,15 @@ export default function ProjectDetailClient({
   labels,
 }: {
   slug: string;
-  basePath: '/projects' | '/projektai';
+  basePath: string;
   labels: {
     home: string;
     projects: string;
   };
 }) {
   const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const resolvedBasePath = toLocalePath(basePath, currentLocale);
   const [projects] = useState<Project[]>(loadProjectsFromLocalStorageOrSeed);
 
   const project = useMemo(() => projects.find((p) => p.slug === slug), [projects, slug]);
@@ -49,8 +52,8 @@ export default function ProjectDetailClient({
       <main className="min-h-screen bg-[#E1E1E1]">
         <Breadcrumbs
           items={[
-            { label: labels.home, href: '/' },
-            { label: labels.projects, href: basePath },
+            { label: labels.home, href: toLocalePath('/', currentLocale) },
+            { label: labels.projects, href: resolvedBasePath },
             { label: notFoundTitle },
           ]}
         />
@@ -67,8 +70,8 @@ export default function ProjectDetailClient({
     <main className="min-h-screen bg-[#E1E1E1]">
       <Breadcrumbs
         items={[
-          { label: labels.home, href: '/' },
-          { label: labels.projects, href: basePath },
+          { label: labels.home, href: toLocalePath('/', currentLocale) },
+          { label: labels.projects, href: resolvedBasePath },
           { label: project.title },
         ]}
       />

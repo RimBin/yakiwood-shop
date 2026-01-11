@@ -2,13 +2,18 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { getSectionPadding, getGap } from '@/lib/design-system';
 import { assets } from '@/lib/assets';
+import { toLocalePath } from '@/i18n/paths';
 
 // Local background image for CTA section
 const backgroundImage = assets.projects[1];
 
 export default function CTA() {
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
   return (
     <section className="relative w-full overflow-hidden bg-[#E1E1E1]">
       {/* Background Image with opacity and luminosity blend */}
@@ -35,7 +40,7 @@ export default function CTA() {
         <div className="flex flex-col md:flex-row gap-[16px] w-full md:w-auto md:justify-center max-w-[358px] md:max-w-none">
           {/* Primary Button - GET AN OFFER */}
           <Link
-            href="/kontaktai"
+            href={toLocalePath('/kontaktai', currentLocale)}
             className="bg-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full md:w-auto md:px-[40px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
@@ -45,7 +50,7 @@ export default function CTA() {
 
           {/* Secondary Button - GET IN TOUCH */}
           <Link
-            href="/kontaktai"
+            href={toLocalePath('/kontaktai', currentLocale)}
             className="border border-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
@@ -68,7 +73,7 @@ export default function CTA() {
         <div className="flex gap-[16px] items-center justify-center">
           {/* Secondary Button - GET IN TOUCH */}
           <Link
-            href="/kontaktai"
+            href={toLocalePath('/kontaktai', currentLocale)}
             className="border border-[#161616] flex items-center justify-center h-[48px] px-[40px] py-[10px] rounded-[100px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
@@ -78,7 +83,7 @@ export default function CTA() {
 
           {/* Primary Button - CHOOSE WOOD */}
           <Link
-            href="/produktai"
+            href={toLocalePath('/produktai', currentLocale)}
             className="bg-[#161616] flex items-center justify-center h-[48px] px-[40px] py-[10px] rounded-[100px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">

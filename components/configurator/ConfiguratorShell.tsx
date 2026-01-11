@@ -1,18 +1,23 @@
 import Link from 'next/link';
+import { getLocale } from 'next-intl/server';
 import ConfiguratorClient from './ConfiguratorClient';
+import { toLocalePath } from '@/i18n/paths';
 
 export interface ConfiguratorShellProps {
   productSlug: string;
   presetSlug?: string | null;
 }
 
-export default function ConfiguratorShell({ productSlug, presetSlug }: ConfiguratorShellProps) {
+export default async function ConfiguratorShell({ productSlug, presetSlug }: ConfiguratorShellProps) {
+  const locale = await getLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
   return (
     <main className="w-full bg-[#E1E1E1] min-h-screen">
       <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[16px] lg:py-[24px]">
         <div className="flex items-center gap-[8px]">
           <Link
-            href="/products"
+            href={toLocalePath('/products', currentLocale)}
             className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] hover:text-[#161616]"
           >
             ← Produktai

@@ -33,7 +33,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   return (
     <ProjectDetailClient
       slug={params.slug}
-      basePath="/projektai"
+      basePath="/projects"
       labels={{ home: 'Pagrindinis', projects: 'Projektai' }}
     />
   );

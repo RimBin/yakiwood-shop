@@ -1,7 +1,12 @@
 import NewsletterSignup from './NewsletterSignup';
 import Link from 'next/link';
+import { getLocale } from 'next-intl/server';
+import { toLocalePath } from '@/i18n/paths';
 
-export default function Footer() {
+export default async function Footer() {
+  const locale = await getLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
   return (
     <footer className="bg-[#161616] text-white py-12 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -18,27 +23,27 @@ export default function Footer() {
           <h4 className="text-lg font-['DM_Sans'] font-medium mb-4">Nuorodos</h4>
           <ul className="space-y-2 text-sm font-['DM_Sans']">
             <li>
-              <Link href="/produktai" className="text-[#BBBBBB] hover:text-white transition-colors">
+              <Link href={toLocalePath('/produktai', currentLocale)} className="text-[#BBBBBB] hover:text-white transition-colors">
                 Produktai
               </Link>
             </li>
             <li>
-              <Link href="/sprendimai" className="text-[#BBBBBB] hover:text-white transition-colors">
+              <Link href={toLocalePath('/sprendimai', currentLocale)} className="text-[#BBBBBB] hover:text-white transition-colors">
                 Sprendimai
               </Link>
             </li>
             <li>
-              <Link href="/projektai" className="text-[#BBBBBB] hover:text-white transition-colors">
+              <Link href={toLocalePath('/projektai', currentLocale)} className="text-[#BBBBBB] hover:text-white transition-colors">
                 Projektai
               </Link>
             </li>
             <li>
-              <Link href="/apie" className="text-[#BBBBBB] hover:text-white transition-colors">
+              <Link href={toLocalePath('/apie', currentLocale)} className="text-[#BBBBBB] hover:text-white transition-colors">
                 Apie mus
               </Link>
             </li>
             <li>
-              <Link href="/kontaktai" className="text-[#BBBBBB] hover:text-white transition-colors">
+              <Link href={toLocalePath('/kontaktai', currentLocale)} className="text-[#BBBBBB] hover:text-white transition-colors">
                 Kontaktai
               </Link>
             </li>
@@ -50,22 +55,22 @@ export default function Footer() {
           <h4 className="text-lg font-['DM_Sans'] font-medium mb-4">Informacija</h4>
           <ul className="space-y-2 text-sm font-['DM_Sans']">
             <li>
-              <Link href="/policies" className="text-[#BBBBBB] hover:text-white transition-colors">
+              <Link href={toLocalePath('/policies', currentLocale)} className="text-[#BBBBBB] hover:text-white transition-colors">
                 Privatumo politika
               </Link>
             </li>
             <li>
-              <Link href="/policies" className="text-[#BBBBBB] hover:text-white transition-colors">
+              <Link href={toLocalePath('/policies', currentLocale)} className="text-[#BBBBBB] hover:text-white transition-colors">
                 Naudojimo sąlygos
               </Link>
             </li>
             <li>
-              <Link href="/cookie-policy" className="text-[#BBBBBB] hover:text-white transition-colors">
+              <Link href={toLocalePath('/cookie-policy', currentLocale)} className="text-[#BBBBBB] hover:text-white transition-colors">
                 Slapukų politika
               </Link>
             </li>
             <li>
-              <Link href="/faq" className="text-[#BBBBBB] hover:text-white transition-colors">
+              <Link href={toLocalePath('/faq', currentLocale)} className="text-[#BBBBBB] hover:text-white transition-colors">
                 DUK
               </Link>
             </li>

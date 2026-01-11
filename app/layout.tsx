@@ -1,7 +1,6 @@
 import { DM_Sans, Outfit, Tiro_Tamil } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { cookies } from 'next/headers';
+import { getLocale, getMessages } from 'next-intl/server';
 import "./globals.css";
 import AuthWrapper from '@/components/AuthWrapper';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
@@ -54,7 +53,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    locale: 'lt_LT',
+    locale: 'en_US',
+    alternateLocale: ['lt_LT'],
     url: 'https://yakiwood.lt',
     siteName: 'Yakiwood',
     title: 'Yakiwood - Shou Sugi Ban Burnt Wood Specialists',
@@ -101,12 +101,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const messages = await getMessages();
-  const supportedLocales = ['lt', 'en'];
-  const cookieStore = await cookies();
-  const localeCookie = cookieStore.get('NEXT_LOCALE');
-  const locale = localeCookie?.value && supportedLocales.includes(localeCookie.value)
-    ? localeCookie.value
-    : 'lt';
+  const locale = await getLocale();
 
   // JSON-LD structured data for Organization
   const organizationSchema = {
@@ -140,7 +135,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased bg-[#e1e1e1]`}>
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <GoogleAnalytics />
           <AuthWrapper>
             {children}

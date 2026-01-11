@@ -40,7 +40,7 @@ export interface DBInvoiceRow {
   due_date: string;
   paid_at?: string | null;
 
-  payment_method: 'bank_transfer' | 'cash' | 'card' | 'stripe';
+  payment_method: 'bank_transfer' | 'cash' | 'card' | 'stripe' | 'paypal' | 'manual';
 
   notes?: string | null;
   pdf_url?: string | null;

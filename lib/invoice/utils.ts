@@ -6,16 +6,15 @@ export const DEFAULT_INVOICE_SETTINGS: InvoiceSettings = {
   series: 'YW',
   nextSequenceNumber: 1,
   seller: {
-    name: 'Yakiwood',
-    companyName: 'UAB "Yakiwood"',
-    companyCode: '123456789',
-    vatCode: 'LT123456789012',
-    address: 'Gedimino pr. 1',
-    city: 'Vilnius',
-    postalCode: '01103',
+    name: 'UAB YAKIWOOD',
+    companyName: 'UAB YAKIWOOD',
+    companyCode: '305636457',
+    vatCode: 'LT100013670911',
+    address: 'Butrimonių g. 7',
+    city: 'Kaunas',
+    postalCode: 'LT-50218',
     country: 'Lietuva',
-    phone: '+370 600 00000',
-    email: 'info@yakiwood.lt'
+    email: 'sales@yakiwood.eu'
   },
   bankName: 'Swedbank',
   bankAccount: 'LT00 0000 0000 0000 0000',
@@ -24,13 +23,55 @@ export const DEFAULT_INVOICE_SETTINGS: InvoiceSettings = {
   vatRate: 0.21 // 21% PVM Lietuvoje
 };
 
-// Calculate item total with VAT
-export function calculateItemTotal(
-  quantity: number,
-  unitPrice: number,
-  vatRate: number
-): number {
-  return quantity * unitPrice * (1 + vatRate);
+function round2(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+export function splitGrossToNet(gross: number, vatRate: number): { net: number; vat: number; gross: number } {
+  const grossSafe = Number(gross) || 0;
+  const rate = Number(vatRate) || 0;
+  if (grossSafe <= 0 || rate <= 0) return { net: round2(grossSafe), vat: 0, gross: round2(grossSafe) };
+  const net = grossSafe / (1 + rate);
+  const vat = grossSafe - net;
+  return { net: round2(net), vat: round2(vat), gross: round2(grossSafe) };
+}
+
+export function buildInvoiceItem(input: {
+  id: string;
+  name: string;
+  description?: string;
+  quantity: number;
+  unitPrice: number;
+  vatRate: number;
+  unit?: string;
+  pricesIncludeVat?: boolean;
+}): InvoiceItem {
+  const quantity = Number(input.quantity) || 0;
+  const vatRate = Number(input.vatRate) || 0;
+  const unit = input.unit;
+  const unitPriceRaw = Number(input.unitPrice) || 0;
+
+  const unitNet = input.pricesIncludeVat ? splitGrossToNet(unitPriceRaw, vatRate).net : unitPriceRaw;
+  const unitGross = input.pricesIncludeVat ? unitPriceRaw : unitNet * (1 + vatRate);
+
+  const lineNet = quantity * unitNet;
+  const lineVat = lineNet * vatRate;
+  const lineGross = lineNet + lineVat;
+
+  return {
+    id: input.id,
+    name: input.name,
+    description: input.description,
+    quantity: round2(quantity),
+    unit,
+    unitPrice: round2(unitNet),
+    unitPriceInclVat: round2(unitGross),
+    vatRate,
+    totalExclVat: round2(lineNet),
+    vatAmount: round2(lineVat),
+    totalInclVat: round2(lineGross),
+    total: round2(lineGross),
+  };
 }
 
 // Calculate invoice totals
@@ -39,17 +80,11 @@ export function calculateInvoiceTotals(items: InvoiceItem[]): {
   totalVat: number;
   total: number;
 } {
-  const subtotal = items.reduce((sum, item) => {
-    return sum + (item.quantity * item.unitPrice);
-  }, 0);
-  
-  const totalVat = items.reduce((sum, item) => {
-    return sum + (item.quantity * item.unitPrice * item.vatRate);
-  }, 0);
-  
-  const total = subtotal + totalVat;
-  
-  return { subtotal, totalVat, total };
+  const subtotal = items.reduce((sum, item) => sum + (Number(item.totalExclVat) || item.quantity * item.unitPrice), 0);
+  const totalVat = items.reduce((sum, item) => sum + (Number(item.vatAmount) || item.quantity * item.unitPrice * item.vatRate), 0);
+  const total = items.reduce((sum, item) => sum + (Number(item.totalInclVat) || item.total), 0);
+
+  return { subtotal: round2(subtotal), totalVat: round2(totalVat), total: round2(total) };
 }
 
 // Generate invoice number
@@ -68,11 +103,15 @@ export function createInvoice(
   const dueDate = new Date(now);
   dueDate.setDate(dueDate.getDate() + (request.dueInDays || 14));
   
-  // Calculate totals for items
-  const items: InvoiceItem[] = request.items.map(item => {
-    const total = calculateItemTotal(item.quantity, item.unitPrice, item.vatRate);
-    return { ...item, total };
-  });
+  const pricesIncludeVat = request.pricesIncludeVat === true;
+
+  const items: InvoiceItem[] = request.items.map((item) =>
+    buildInvoiceItem({
+      ...item,
+      pricesIncludeVat,
+      unit: item.unit || (pricesIncludeVat ? 'vnt' : item.unit),
+    })
+  );
   
   const totals = calculateInvoiceTotals(items);
   const invoiceNumber = generateInvoiceNumber(settings.series, settings.nextSequenceNumber);
@@ -96,7 +135,11 @@ export function createInvoice(
     totalVat: totals.totalVat,
     total: totals.total,
     
+    orderId: request.orderId,
+    orderNumber: request.orderNumber,
+    documentTitle: request.documentTitle,
     paymentMethod: request.paymentMethod,
+    payments: request.payments,
     bankName: settings.bankName,
     bankAccount: settings.bankAccount,
     swift: settings.swift,
@@ -104,6 +147,7 @@ export function createInvoice(
     notes: request.notes,
     termsAndConditions: settings.termsAndConditions,
     
+    currency: request.currency || settings.currency || 'EUR',
     createdAt: now.toISOString(),
     updatedAt: now.toISOString()
   };

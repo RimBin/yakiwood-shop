@@ -1,13 +1,18 @@
 ﻿import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getLocale } from 'next-intl/server';
 import { assets } from '@/lib/assets';
+import { toLocalePath } from '@/i18n/paths';
 
 const imgProductImage = assets.projects[0];
 const mobileColors = assets.colors;
 const certifications = [assets.certifications.fsc, assets.certifications.eu, assets.certifications.epd];
 
-export default function Hero() {
+export default async function Hero() {
+  const locale = await getLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
   return (
     <section className="w-full bg-[#EAEAEA] relative overflow-hidden">
       {/* Full-width hero vector background */}
@@ -99,7 +104,7 @@ export default function Hero() {
               </p>
 
               <Link
-                href="/products"
+                href={toLocalePath('/products', currentLocale)}
                 className="border border-[#161616] border-solid px-[40px] py-[10px] h-[48px] rounded-[100px] flex items-center justify-center gap-[10px] w-fit"
               >
                 <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] whitespace-nowrap">Explore catalog</span>

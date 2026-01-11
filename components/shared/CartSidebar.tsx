@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
+import { toLocalePath } from '@/i18n/paths';
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -15,12 +16,14 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { items, updateQuantity, removeItem } = useCartStore();
   const t = useTranslations();
   const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
 
   const subtotal = items.reduce((sum, item) => sum + item.basePrice * item.quantity, 0);
   const shipping = subtotal > 500 ? 0 : 15;
   const total = subtotal + shipping;
 
-  const productsHref = locale === 'lt' ? '/products' : '/products';
+  const productsHref = toLocalePath('/products', currentLocale);
+  const checkoutHref = toLocalePath('/checkout', currentLocale);
 
   return (
     <>
@@ -194,7 +197,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     {t('cart.continueShopping')}
                   </Link>
                   <Link
-                    href="/checkout"
+                    href={checkoutHref}
                     onClick={onClose}
                     className="block w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors flex items-center justify-center"
                   >

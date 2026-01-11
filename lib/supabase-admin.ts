@@ -78,7 +78,7 @@ export interface DBInvoice {
   issued_at: string;
   due_date: string;
   paid_at?: string;
-  payment_method: 'bank_transfer' | 'cash' | 'card' | 'stripe';
+  payment_method: 'bank_transfer' | 'cash' | 'card' | 'stripe' | 'paypal' | 'manual';
   notes?: string;
   pdf_url?: string;
   created_at: string;

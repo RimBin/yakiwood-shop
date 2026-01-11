@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { toLocalePath } from '@/i18n/paths';
 import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
 
@@ -14,6 +15,7 @@ interface ProductDetailClientProps {
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   const t = useTranslations('productPage');
   const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
 
   const [show3D, setShow3D] = useState(false);
   const loading3D = false;
@@ -153,7 +155,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           <div className="flex flex-col gap-[16px] lg:gap-[20px]">
             <div className="flex items-center gap-[8px]">
               <Link
-                href="/products"
+                href={toLocalePath('/products', currentLocale)}
                 className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] hover:text-[#161616]"
               >
                 ← {t('back')}

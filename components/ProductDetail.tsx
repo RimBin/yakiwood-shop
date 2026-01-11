@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import Accordion from '@/components/ui/Accordion';
 import Button from '@/components/ui/Button';
 import { ColorSwatchGroup } from '@/components/ui/ColorSwatch';
 import ProductCard from '@/components/ui/ProductCard';
 import { assets } from '@/lib/assets';
+import { toLocalePath } from '@/i18n/paths';
 
 // Local assets
 const imgProduct = assets.wood.spruce;
@@ -58,6 +60,8 @@ interface ProductDetailProps {
 }
 
 export default function ProductDetail({ product }: ProductDetailProps) {
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const [selectedWidth, setSelectedWidth] = useState('95');
   const [selectedLength, setSelectedLength] = useState('4000');
   const [selectedColor, setSelectedColor] = useState('carbon-light');
@@ -75,9 +79,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       {/* Breadcrumbs */}
       <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[10px] border-b border-[#bbbbbb]">
         <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] text-[#7c7c7c]">
-          <Link href="/" className="hover:text-[#161616]">Home</Link>
+          <Link href={toLocalePath('/', currentLocale)} className="hover:text-[#161616]">Home</Link>
           {' / '}
-          <Link href="/produktai" className="hover:text-[#161616]">Shop</Link>
+          <Link href={toLocalePath('/produktai', currentLocale)} className="hover:text-[#161616]">Shop</Link>
           {' / '}
           <span className="text-[#161616]">{product.name}</span>
         </p>
@@ -238,7 +242,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             <div className="flex flex-col gap-[8px] items-center max-w-[434px]">
               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#535353] text-center">
                 Haven't found what you're looking for?{' '}
-                <Link href="/kontaktai" className="text-[#161616] underline">
+                <Link href={toLocalePath('/kontaktai', currentLocale)} className="text-[#161616] underline">
                   Contact us
                 </Link>
               </p>
@@ -260,7 +264,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             Related products
           </h2>
           <Link 
-            href="/produktai"
+            href={toLocalePath('/produktai', currentLocale)}
             className="hidden lg:flex items-center gap-[8px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-[#161616] hover:opacity-70"
           >
             View all products

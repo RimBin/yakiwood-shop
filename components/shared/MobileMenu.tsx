@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { toLocalePath } from '@/i18n/paths';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -13,9 +14,12 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const locale = useLocale();
   const t = useTranslations();
 
-  const configuratorLink = locale === 'lt'
-    ? { href: '/konfiguratorius3d', label: t('nav.konfiguratorius3d') }
-    : { href: '/configurator3d', label: t('nav.configurator3d') };
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
+  const configuratorLink = {
+    href: toLocalePath('/configurator3d', currentLocale),
+    label: t(locale === 'lt' ? 'nav.konfiguratorius3d' : 'nav.configurator3d'),
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -62,28 +66,28 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           {/* Navigation Links */}
           <nav className="flex flex-col gap-[24px] mb-auto">
             <Link
-              href="/account"
+              href={toLocalePath('/account', currentLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
               Account
             </Link>
             <Link
-              href="/products"
+              href={toLocalePath('/products', currentLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
               Products
             </Link>
             <Link
-              href="/solutions"
+              href={toLocalePath('/solutions', currentLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
               Solutions
             </Link>
             <Link
-              href="/projects"
+              href={toLocalePath('/projects', currentLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
@@ -98,14 +102,14 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               {configuratorLink.label}
             </Link>
             <Link
-              href="/about"
+              href={toLocalePath('/about', currentLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
               About us
             </Link>
             <Link
-              href="/contact"
+              href={toLocalePath('/contact', currentLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >

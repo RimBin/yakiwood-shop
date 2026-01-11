@@ -9,89 +9,68 @@ export type InvoiceLocale = 'lt' | 'en';
 
 type InvoiceStrings = {
   invoiceTitle: string;
+  headerTitleFallback: string;
   seriesAndNumber: string;
   issueDate: string;
+  orderNumber: string;
   dueDate: string;
   seller: string;
   buyer: string;
+  document: string;
   companyCode: string;
   vatCode: string;
-  bankDetails: string;
-  bank: string;
-  account: string;
-  swift: string;
-  tableHead: [string, string, string, string, string, string];
+  tableHead: [string, string, string, string, string];
   subtotalExVat: string;
+  totalInclVat: string;
+  advancePaid: string;
+  remainingDue: string;
   vatAmount: string;
   total: string;
-  paymentMethodLabel: string;
-  paymentMethods: Record<string, string>;
-  page: string;
-  of: string;
-  defaultTerms: string;
 };
 
 function getInvoiceStrings(locale: InvoiceLocale): InvoiceStrings {
   if (locale === 'en') {
     return {
-      invoiceTitle: 'INVOICE',
-      seriesAndNumber: 'Series and number:',
-      issueDate: 'Issue date:',
+      invoiceTitle: 'VAT INVOICE',
+      headerTitleFallback: 'Production - Shou sugi ban',
+      seriesAndNumber: 'Series / No:',
+      issueDate: 'Date:',
+      orderNumber: 'Order No:',
       dueDate: 'Due date:',
-      seller: 'SELLER:',
-      buyer: 'BUYER:',
+      seller: 'SELLER',
+      buyer: 'BUYER',
+      document: 'DOCUMENT',
       companyCode: 'Company code:',
       vatCode: 'VAT code:',
-      bankDetails: 'Bank details:',
-      bank: 'Bank:',
-      account: 'Account:',
-      swift: 'SWIFT:',
-      tableHead: ['No.', 'Product / Service', 'Qty', 'Price', 'VAT', 'Amount'],
+      tableHead: ['Item', 'Quantity', 'Unit', 'Unit price', 'Total excl. VAT'],
       subtotalExVat: 'Subtotal (excl. VAT):',
       vatAmount: 'VAT amount:',
+      totalInclVat: 'Total incl. VAT:',
+      advancePaid: 'Advance paid:',
+      remainingDue: 'Remaining due:',
       total: 'TOTAL:',
-      paymentMethodLabel: 'Payment method:',
-      paymentMethods: {
-        bank_transfer: 'Bank transfer',
-        cash: 'Cash',
-        card: 'Card payment',
-        stripe: 'Online payment',
-      },
-      page: 'Page',
-      of: 'of',
-      defaultTerms:
-        'Payment due within 14 days from the invoice date. Late payments may incur 0.05% daily interest on the outstanding amount.',
     };
   }
 
   return {
-    invoiceTitle: 'SĄSKAITA FAKTŪRA',
-    seriesAndNumber: 'Serija ir numeris:',
-    issueDate: 'Išrašymo data:',
+    invoiceTitle: 'PVM SĄSKAITA FAKTŪRA',
+    headerTitleFallback: 'Production - Shou sugi ban',
+    seriesAndNumber: 'Serija / Nr.:',
+    issueDate: 'Data:',
+    orderNumber: 'Užsakymo Nr.:',
     dueDate: 'Apmokėti iki:',
-    seller: 'PARDAVĖJAS:',
-    buyer: 'PIRKĖJAS:',
+    seller: 'PARDAVĖJAS',
+    buyer: 'PIRKĖJAS',
+    document: 'DOKUMENTAS',
     companyCode: 'Į. k.:',
     vatCode: 'PVM mok. kodas:',
-    bankDetails: 'Banko rekvizitai:',
-    bank: 'Bankas:',
-    account: 'Sąskaita:',
-    swift: 'SWIFT:',
-    tableHead: ['Nr.', 'Prekė / Paslauga', 'Kiekis', 'Kaina', 'PVM', 'Suma'],
+    tableHead: ['Prekė / Paslauga', 'Kiekis', 'Vnt.', 'Vnt. kaina', 'Suma be PVM'],
     subtotalExVat: 'Suma be PVM:',
     vatAmount: 'PVM suma:',
+    totalInclVat: 'Suma su PVM:',
+    advancePaid: 'Avansas apmokėtas:',
+    remainingDue: 'Mokėtina suma:',
     total: 'VISO:',
-    paymentMethodLabel: 'Apmokėjimo būdas:',
-    paymentMethods: {
-      bank_transfer: 'Banko pavedimas',
-      cash: 'Grynaisiais',
-      card: 'Mokėjimo kortele',
-      stripe: 'Elektroninis mokėjimas',
-    },
-    page: 'Puslapis',
-    of: 'iš',
-    defaultTerms:
-      'Apmokėjimas per 14 dienų nuo sąskaitos išrašymo datos. Vėluojant apmokėti taikomos 0.05% delspinigiai nuo neapmokėtos sumos už kiekvieną uždelstą dieną.',
   };
 }
 
@@ -108,7 +87,8 @@ export class InvoicePDFGenerator {
       format: 'a4'
     });
     this.invoice = invoice;
-    this.locale = options?.locale || 'lt';
+    // Default to EN to match the provided invoice template/screenshot.
+    this.locale = options?.locale || 'en';
     this.strings = getInvoiceStrings(this.locale);
   }
 
@@ -123,196 +103,192 @@ export class InvoicePDFGenerator {
   }
 
   private formatCurrency(amount: number): string {
-    return `${amount.toFixed(2)} €`;
+    const currency = this.invoice.currency || 'EUR';
+    return `${amount.toFixed(2)} ${currency}`;
+  }
+
+  private formatQty(value: number): string {
+    return `${(Number(value) || 0).toFixed(2)}`;
+  }
+
+  private computeAdvancePaid(): number {
+    const payments = Array.isArray(this.invoice.payments) ? this.invoice.payments : [];
+    const paid = payments
+      .filter((p) => p && p.status === 'succeeded')
+      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    if (paid > 0) return paid;
+    if (this.invoice.status === 'paid' || !!this.invoice.paymentDate) return this.invoice.total;
+    return 0;
+  }
+
+  private computeRemainingDue(): number {
+    const remaining = this.invoice.total - this.computeAdvancePaid();
+    return remaining < 0 ? 0 : remaining;
   }
 
   private addHeader() {
-    // Company logo/name
-    this.doc.setFontSize(24);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.text('YAKIWOOD', 20, 20);
-    
-    // Invoice title
-    this.doc.setFontSize(16);
-    this.doc.text(this.strings.invoiceTitle, 20, 35);
-    
-    // Invoice number and date
-    this.doc.setFontSize(10);
+    const pageWidth = this.doc.internal.pageSize.getWidth();
+
+    // Top black bar
+    this.doc.setFillColor(22, 22, 22);
+    this.doc.rect(0, 0, pageWidth, 28, 'F');
+
+    // Brand (left)
+    this.doc.setTextColor(255, 255, 255);
     this.doc.setFont('helvetica', 'normal');
-    this.doc.text(`${this.strings.seriesAndNumber} ${this.invoice.invoiceNumber}`, 20, 45);
-    this.doc.text(`${this.strings.issueDate} ${this.formatDate(this.invoice.issueDate)}`, 20, 50);
-    this.doc.text(`${this.strings.dueDate} ${this.formatDate(this.invoice.dueDate)}`, 20, 55);
+    this.doc.setFontSize(26);
+    this.doc.text('YAKIWOOD', 20, 18);
+
+    // Header title (center)
+    const headerTitle = this.invoice.documentTitle || this.strings.headerTitleFallback;
+    this.doc.setFontSize(11);
+    this.doc.text(headerTitle, pageWidth / 2, 16, { align: 'center' });
+
+    // Reset text color
+    this.doc.setTextColor(0, 0, 0);
+
+    // Title
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setFontSize(16);
+    this.doc.text(this.strings.invoiceTitle, 20, 45);
   }
 
   private addParties() {
-    const startY = 65;
-    
-    // Seller (left column)
-    this.doc.setFontSize(11);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.text(this.strings.seller, 20, startY);
-    
+    const startY = 55;
+
+    const colSellerX = 20;
+    const colBuyerX = 90;
+    const colDocX = 150;
+
+    const headingY = startY;
+    const contentY = startY + 7;
+    const lineH = 4;
+
+    // Headings
     this.doc.setFont('helvetica', 'normal');
     this.doc.setFontSize(9);
-    let y = startY + 5;
-    this.doc.text(this.invoice.seller.companyName || this.invoice.seller.name, 20, y);
-    y += 4;
+    this.doc.text(this.strings.seller, colSellerX, headingY);
+    this.doc.text(this.strings.buyer, colBuyerX, headingY);
+    this.doc.text(this.strings.document, colDocX, headingY);
+
+    // Content
+    this.doc.setFontSize(8.5);
+
+    let yLeft = contentY;
+    this.doc.text(this.invoice.seller.companyName || this.invoice.seller.name, colSellerX, yLeft);
+    yLeft += lineH;
     if (this.invoice.seller.companyCode) {
-      this.doc.text(`${this.strings.companyCode} ${this.invoice.seller.companyCode}`, 20, y);
-      y += 4;
+      this.doc.text(`${this.strings.companyCode} ${this.invoice.seller.companyCode}`, colSellerX, yLeft);
+      yLeft += lineH;
     }
     if (this.invoice.seller.vatCode) {
-      this.doc.text(`${this.strings.vatCode} ${this.invoice.seller.vatCode}`, 20, y);
-      y += 4;
+      this.doc.text(`${this.strings.vatCode} ${this.invoice.seller.vatCode}`, colSellerX, yLeft);
+      yLeft += lineH;
     }
-    this.doc.text(this.invoice.seller.address, 20, y);
-    y += 4;
-    this.doc.text(`${this.invoice.seller.postalCode} ${this.invoice.seller.city}`, 20, y);
-    y += 4;
-    this.doc.text(this.invoice.seller.country, 20, y);
-    
-    // Bank details
-    if (this.invoice.bankAccount) {
-      y += 6;
-      this.doc.setFont('helvetica', 'bold');
-      this.doc.text(this.strings.bankDetails, 20, y);
-      this.doc.setFont('helvetica', 'normal');
-      y += 4;
-      if (this.invoice.bankName) {
-        this.doc.text(`${this.strings.bank} ${this.invoice.bankName}`, 20, y);
-        y += 4;
-      }
-      this.doc.text(`${this.strings.account} ${this.invoice.bankAccount}`, 20, y);
-      y += 4;
-      if (this.invoice.swift) {
-        this.doc.text(`${this.strings.swift} ${this.invoice.swift}`, 20, y);
-      }
+    this.doc.text(`Address: ${this.invoice.seller.address}`, colSellerX, yLeft);
+    yLeft += lineH;
+    this.doc.text(`${this.invoice.seller.postalCode} ${this.invoice.seller.city}`, colSellerX, yLeft);
+    yLeft += lineH;
+    this.doc.text(this.invoice.seller.country, colSellerX, yLeft);
+    yLeft += lineH;
+    if (this.invoice.seller.email) {
+      this.doc.text(`Email: ${this.invoice.seller.email}`, colSellerX, yLeft);
     }
-    
-    // Buyer (right column)
-    this.doc.setFontSize(11);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.text(this.strings.buyer, 110, startY);
-    
-    this.doc.setFont('helvetica', 'normal');
-    this.doc.setFontSize(9);
-    y = startY + 5;
-    this.doc.text(this.invoice.buyer.companyName || this.invoice.buyer.name, 110, y);
-    y += 4;
+
+    let yMid = contentY;
+    this.doc.text(this.invoice.buyer.companyName || this.invoice.buyer.name, colBuyerX, yMid);
+    yMid += lineH;
     if (this.invoice.buyer.companyCode) {
-      this.doc.text(`${this.strings.companyCode} ${this.invoice.buyer.companyCode}`, 110, y);
-      y += 4;
+      this.doc.text(`${this.strings.companyCode} ${this.invoice.buyer.companyCode}`, colBuyerX, yMid);
+      yMid += lineH;
     }
     if (this.invoice.buyer.vatCode) {
-      this.doc.text(`${this.strings.vatCode} ${this.invoice.buyer.vatCode}`, 110, y);
-      y += 4;
+      this.doc.text(`${this.strings.vatCode} ${this.invoice.buyer.vatCode}`, colBuyerX, yMid);
+      yMid += lineH;
     }
-    this.doc.text(this.invoice.buyer.address, 110, y);
-    y += 4;
-    this.doc.text(`${this.invoice.buyer.postalCode} ${this.invoice.buyer.city}`, 110, y);
-    y += 4;
-    this.doc.text(this.invoice.buyer.country, 110, y);
-    
-    if (this.invoice.buyer.phone) {
-      y += 4;
-      this.doc.text(`Tel.: ${this.invoice.buyer.phone}`, 110, y);
-    }
-    if (this.invoice.buyer.email) {
-      y += 4;
-      this.doc.text(`El. p.: ${this.invoice.buyer.email}`, 110, y);
-    }
+    this.doc.text(this.invoice.buyer.address, colBuyerX, yMid);
+    yMid += lineH;
+    this.doc.text(`${this.invoice.buyer.postalCode} ${this.invoice.buyer.city}`, colBuyerX, yMid);
+    yMid += lineH;
+    this.doc.text(this.invoice.buyer.country, colBuyerX, yMid);
+
+    const orderNo = this.invoice.orderNumber || this.invoice.invoiceNumber;
+    let yDoc = contentY;
+    this.doc.text(`${this.strings.seriesAndNumber} ${this.invoice.invoiceNumber}`, colDocX, yDoc);
+    yDoc += lineH;
+    this.doc.text(`${this.strings.issueDate} ${this.formatDate(this.invoice.issueDate)}`, colDocX, yDoc);
+    yDoc += lineH;
+    this.doc.text(`${this.strings.orderNumber} ${orderNo}`, colDocX, yDoc);
   }
 
   private addItemsTable() {
-    const tableData = this.invoice.items.map((item, index) => [
-      (index + 1).toString(),
-      item.name,
-      item.quantity.toString(),
-      this.formatCurrency(item.unitPrice),
-      `${(item.vatRate * 100).toFixed(0)}%`,
-      this.formatCurrency(item.total)
-    ]);
+    const tableData = this.invoice.items.map((item) => {
+      const unit = item.unit || 'vnt';
+      const lineNet = typeof item.totalExclVat === 'number' ? item.totalExclVat : item.quantity * item.unitPrice;
+      return [
+        item.name,
+        this.formatQty(item.quantity),
+        unit,
+        this.formatCurrency(item.unitPrice),
+        this.formatCurrency(lineNet),
+      ];
+    });
 
     autoTable(this.doc, {
-      startY: 140,
+      startY: 95,
       head: [this.strings.tableHead],
       body: tableData,
-      foot: [
-        ['', '', '', '', this.strings.subtotalExVat, this.formatCurrency(this.invoice.subtotal)],
-        ['', '', '', '', this.strings.vatAmount, this.formatCurrency(this.invoice.totalVat)],
-        ['', '', '', '', this.strings.total, this.formatCurrency(this.invoice.total)]
-      ],
       styles: {
         fontSize: 9,
         cellPadding: 3
       },
       headStyles: {
-        fillColor: [22, 22, 22], // #161616
-        textColor: [255, 255, 255],
-        fontStyle: 'bold'
-      },
-      footStyles: {
-        fillColor: [234, 234, 234], // #EAEAEA
-        textColor: [22, 22, 22],
-        fontStyle: 'bold'
+        fillColor: [245, 245, 245],
+        textColor: [0, 0, 0],
+        fontStyle: 'normal'
       },
       columnStyles: {
-        0: { cellWidth: 10, halign: 'center' },
-        1: { cellWidth: 70 },
-        2: { cellWidth: 20, halign: 'center' },
-        3: { cellWidth: 30, halign: 'right' },
-        4: { cellWidth: 20, halign: 'center' },
-        5: { cellWidth: 30, halign: 'right' }
+        0: { cellWidth: 80 },
+        1: { cellWidth: 25, halign: 'right' },
+        2: { cellWidth: 15, halign: 'center' },
+        3: { cellWidth: 25, halign: 'right' },
+        4: { cellWidth: 25, halign: 'right' }
       },
       margin: { left: 20, right: 20 }
     });
   }
 
   private addFooter() {
-    const finalY = (this.doc as any).lastAutoTable.finalY + 15;
-    
-    // Payment info
-    this.doc.setFontSize(10);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.text(this.strings.paymentMethodLabel, 20, finalY);
-    this.doc.setFont('helvetica', 'normal');
+    const finalY = (this.doc as any).lastAutoTable.finalY + 20;
+    const rightX = this.doc.internal.pageSize.getWidth() - 20;
 
-    const paymentMethod =
-      this.strings.paymentMethods[this.invoice.paymentMethod || 'bank_transfer'] ||
-      (this.locale === 'en' ? 'Not specified' : 'Nenurodyta');
-    this.doc.text(paymentMethod, 55, finalY);
-    
-    // Notes
-    if (this.invoice.notes) {
-      this.doc.setFontSize(9);
-      this.doc.setFont('helvetica', 'italic');
-      const splitNotes = this.doc.splitTextToSize(this.invoice.notes, 170);
-      this.doc.text(splitNotes, 20, finalY + 10);
-    }
-    
-    // Terms and conditions
-    const terms = this.invoice.termsAndConditions || this.strings.defaultTerms;
-    if (terms) {
-      const termsY = finalY + (this.invoice.notes ? 20 : 10);
-      this.doc.setFontSize(8);
-      this.doc.setFont('helvetica', 'normal');
-      const splitTerms = this.doc.splitTextToSize(terms, 170);
-      this.doc.text(splitTerms, 20, termsY);
-    }
-    
-    // Footer with page number
-    const pageCount = this.doc.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      this.doc.setPage(i);
-      this.doc.setFontSize(8);
-      this.doc.setTextColor(128);
-      this.doc.text(
-        `${this.strings.page} ${i} ${this.strings.of} ${pageCount}`,
-        this.doc.internal.pageSize.getWidth() / 2,
-        this.doc.internal.pageSize.getHeight() - 10,
-        { align: 'center' }
-      );
-    }
+    const subtotal = this.invoice.subtotal;
+    const vat = this.invoice.totalVat;
+    const total = this.invoice.total;
+    const paid = this.computeAdvancePaid();
+    const remaining = this.computeRemainingDue();
+
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setFontSize(9);
+
+    const labelX = rightX - 55;
+    const valueX = rightX;
+    const lineH = 6;
+    let y = finalY;
+
+    const drawLine = (label: string, value: string, bold = false) => {
+      this.doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      this.doc.text(label, labelX, y, { align: 'right' });
+      this.doc.text(value, valueX, y, { align: 'right' });
+      y += lineH;
+    };
+
+    drawLine(this.strings.subtotalExVat, this.formatCurrency(subtotal));
+    drawLine(this.strings.vatAmount, this.formatCurrency(vat));
+    drawLine(this.strings.totalInclVat, this.formatCurrency(total), true);
+    y += 4;
+    drawLine(this.strings.advancePaid, this.formatCurrency(paid));
+    drawLine(this.strings.remainingDue, this.formatCurrency(remaining), true);
   }
 
   public generate(): Uint8Array {
