@@ -19,7 +19,7 @@ export default async function Hero() {
     <section className="w-full bg-[#EAEAEA] relative overflow-hidden">
       {/* Full-width hero vector background */}
       <div className="absolute inset-0">
-        <Image src={assets.heroVector} alt="" fill className="object-cover" priority />
+        <Image src={assets.heroVector} alt="" fill className="object-cover" priority sizes="100vw" />
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
@@ -39,7 +39,14 @@ export default async function Hero() {
             <div className="absolute left-[8.34px] top-0 w-[367px] h-[309.127px] flex items-center justify-center overflow-hidden">
               <div className="rotate-[333.068deg]">
                 <div className="w-[317.433px] h-[185.467px] relative">
-                  <Image src={imgProductImage} alt="Shou Sugi Ban Plank" fill className="object-cover" />
+                    <Image
+                      src={imgProductImage}
+                      alt="Shou Sugi Ban Plank"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 320px, 575px"
+                      priority
+                    />
                 </div>
               </div>
             </div>
@@ -74,7 +81,7 @@ export default async function Hero() {
                     className="-mr-[4px] w-[24px] h-[24px] relative rounded-full overflow-hidden border border-white/40"
                     style={{ zIndex: assets.colorSwatches.length - i }}
                   >
-                    <Image src={src} alt="" fill className="object-cover" />
+                    <Image src={src} alt="" fill className="object-cover" sizes="24px" />
                   </div>
                 ))}
               </div>
@@ -93,7 +100,7 @@ export default async function Hero() {
         <div className="w-full bg-[#161616] px-4 py-2 flex items-center justify-between">
           {certifications.map((src) => (
             <div key={src} className="h-[28px] w-[56px] relative">
-              <Image src={src} alt="" fill className="object-contain" />
+              <Image src={src} alt="" fill className="object-contain" sizes="56px" />
             </div>
           ))}
         </div>
@@ -121,7 +128,7 @@ export default async function Hero() {
               </Link>
 
               <div className="relative h-[22px] w-[280px]">
-                <Image src={assets.payments} alt="Payments" fill className="object-contain" />
+                <Image src={assets.payments} alt="Payments" fill className="object-contain" sizes="280px" />
               </div>
             </div>
           </div>
@@ -131,7 +138,16 @@ export default async function Hero() {
 
             <div className="absolute left-[2px] top-[42.86px] w-[663.054px] h-[558.481px] flex items-center justify-center overflow-hidden">
               <div className="rotate-[333.068deg]">
-                <div className="w-[573.487px] h-[335.073px] relative"><Image src={imgProductImage} alt="Shou Sugi Ban Plank" fill className="object-cover" /></div>
+                <div className="w-[573.487px] h-[335.073px] relative">
+                  <Image
+                    src={imgProductImage}
+                    alt="Shou Sugi Ban Plank"
+                    fill
+                    className="object-cover"
+                    sizes="575px"
+                    priority
+                  />
+                </div>
               </div>
             </div>
 
@@ -161,7 +177,7 @@ export default async function Hero() {
                       className="-mr-[6px] w-[32px] h-[32px] relative rounded-full overflow-hidden border border-white/40"
                       style={{ zIndex: assets.colorSwatches.length - i }}
                     >
-                      <Image src={src} alt="" fill className="object-cover" />
+                      <Image src={src} alt="" fill className="object-cover" sizes="32px" />
                     </div>
                   ))}
                 </div>
@@ -183,7 +199,7 @@ export default async function Hero() {
           <div className="flex gap-[150px] items-center">
             {certifications.map((src) => (
               <div key={src} className="h-[32px] w-[72px] relative">
-                <Image src={src} alt="" fill className="object-contain" />
+                <Image src={src} alt="" fill className="object-contain" sizes="72px" />
               </div>
             ))}
           </div>

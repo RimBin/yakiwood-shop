@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared';
+import { PageLayout } from '@/components/shared/PageLayout';
 import { fetchProducts, type Product } from '@/lib/products.supabase';
 import { useLocale, useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
@@ -166,12 +167,13 @@ export default function ProductsPage() {
     <section className="w-full bg-[#E1E1E1] min-h-screen">
       {/* Cover */}
       <PageCover>
-        <div className="flex items-start gap-[8px]">
+        <div className="flex flex-col gap-[16px]">
+          <div className="flex items-start gap-[8px]">
           <h1
             className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] text-[#161616] tracking-[-2.8px] md:tracking-[-6.4px]"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
-            {activeUsageLabel}
+            {t('title')}
           </h1>
           <p
             className="font-['DM_Sans'] font-normal text-[18px] md:text-[32px] leading-[1.1] text-[#161616] tracking-[-0.72px] md:tracking-[-1.28px]"
@@ -179,12 +181,19 @@ export default function ProductsPage() {
           >
             ({products.length})
           </p>
+          </div>
+
+          <p
+            className="font-['Outfit'] font-normal text-[12px] md:text-[14px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]"
+          >
+            {activeUsageLabel}
+          </p>
         </div>
       </PageCover>
 
       {/* Filters */}
-      <div className="w-full max-w-[1440px] mx-auto px-[16px] md:px-[40px] py-[24px]">
-        <div className="flex flex-col gap-4">
+      <PageLayout>
+        <div className="py-[24px] flex flex-col gap-4">
           <div className="w-full max-w-[520px]">
             <label className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
               {t('searchLabel')}
@@ -266,10 +275,11 @@ export default function ProductsPage() {
             ))}
           </div>
         </div>
-      </div>
+      </PageLayout>
 
       {/* Product Grid */}
-      <div className="w-full max-w-[1440px] mx-auto px-[16px] md:px-[40px] pb-[80px]">
+      <PageLayout>
+      <div className="pb-[80px]">
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#161616]"></div>
@@ -394,6 +404,7 @@ export default function ProductsPage() {
           </div>
         )}
       </div>
+      </PageLayout>
     </section>
   );
 }

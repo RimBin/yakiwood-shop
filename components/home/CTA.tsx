@@ -1,8 +1,6 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { getLocale } from 'next-intl/server';
 import { getSectionPadding, getGap } from '@/lib/design-system';
 import { assets } from '@/lib/assets';
 import { toLocalePath } from '@/i18n/paths';
@@ -10,8 +8,8 @@ import { toLocalePath } from '@/i18n/paths';
 // Local background image for CTA section
 const backgroundImage = assets.projects[1];
 
-export default function CTA() {
-  const locale = useLocale();
+export default async function CTA() {
+  const locale = await getLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
 
   return (

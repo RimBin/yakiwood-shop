@@ -1,14 +1,51 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared/PageLayout';
+import { assets } from '@/lib/assets';
 
 export default function SolutionsPage() {
   const [openAccordionIndex, setOpenAccordionIndex] = useState<number | null>(0);
   const [activeFilter, setActiveFilter] = useState('Facades');
 
-  const filters = ['Facades', 'Interior', 'Terraces', 'Fence'];
+  const applicationNav = useMemo(
+    () =>
+      [
+        { label: 'Facades', id: 'facades' },
+        { label: 'Terraces', id: 'terraces' },
+        { label: 'Interior', id: 'interior' },
+        { label: 'Fences', id: 'fences' },
+      ] as const,
+    []
+  );
+
+  const scrollToSection = (id: string, label?: string) => {
+    setActiveFilter(label ?? id);
+
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    // Keep URL shareable without triggering a hard jump.
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', `#${id}`);
+    }
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  useEffect(() => {
+    const hash = typeof window !== 'undefined' ? window.location.hash : '';
+    const id = hash?.startsWith('#') ? hash.slice(1) : '';
+    if (!id) return;
+    const exists = applicationNav.some((x) => x.id === id);
+    if (!exists) return;
+
+    // Wait a tick so layout is ready.
+    const t = window.setTimeout(() => scrollToSection(id), 0);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [applicationNav]);
 
   const products = [
     { name: 'Yakiwood Black', type: 'Larch', image: '/images/solutions/product-1.jpg' },
@@ -64,17 +101,18 @@ Do you want to give your building a distinctive and attractive appearance? Encou
 
           {/* Desktop Chips */}
           <div className="hidden lg:flex gap-[8px]">
-            {filters.map((filter) => (
+            {applicationNav.map((item) => (
               <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
+                key={item.id}
+                type="button"
+                onClick={() => scrollToSection(item.id, item.label)}
                 className={`h-[32px] px-[12px] flex items-center justify-center rounded-[100px] font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase cursor-pointer transition-all ${
-                  activeFilter === filter
+                  activeFilter === item.label
                     ? 'bg-[#161616] text-white'
                     : 'bg-transparent border border-[#BBBBBB] text-[#161616]'
                 }`}
               >
-                {filter}
+                {item.label}
               </button>
             ))}
           </div>
@@ -84,17 +122,18 @@ Do you want to give your building a distinctive and attractive appearance? Encou
       {/* Mobile Chips Below Header */}
       <div className="lg:hidden max-w-[1440px] mx-auto px-[16px] md:px-[40px] pt-[24px]">
         <div className="flex gap-[8px] flex-wrap">
-            {filters.map((filter) => (
+            {applicationNav.map((item) => (
               <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
+                key={item.id}
+                type="button"
+                onClick={() => scrollToSection(item.id, item.label)}
                 className={`h-[32px] px-[12px] flex items-center justify-center rounded-[100px] font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase cursor-pointer transition-all ${
-                  activeFilter === filter
+                  activeFilter === item.label
                     ? 'bg-[#161616] text-white'
                     : 'bg-transparent border border-[#BBBBBB] text-[#161616]'
                 }`}
               >
-                {filter}
+                {item.label}
               </button>
             ))}
         </div>
@@ -123,6 +162,120 @@ Do you want to give your building a distinctive and attractive appearance? Encou
             fill
             className="object-cover"
           />
+        </div>
+      </section>
+
+      {/* Applications Sections (anchor targets) */}
+      <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pb-[48px] lg:pb-[80px]">
+        <div className="grid gap-[48px] lg:gap-[80px]">
+          {/* Facades */}
+          <div id="facades" className="scroll-mt-[96px]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-[16px] lg:gap-[24px] items-start">
+              <div className="lg:col-span-6 grid grid-cols-2 gap-[12px]">
+                <div className="relative w-full h-[140px] md:h-[200px] lg:h-[240px] rounded-[8px] overflow-hidden">
+                  <Image src={assets.categories.facades} alt="Facades" fill className="object-cover" />
+                </div>
+                <div className="relative w-full h-[140px] md:h-[200px] lg:h-[240px] rounded-[8px] overflow-hidden">
+                  <Image src={assets.categories.facades} alt="Facades detail" fill className="object-cover" />
+                </div>
+              </div>
+
+              <div className="lg:col-span-6 lg:pl-[24px]">
+                <h3 className="font-['DM_Sans'] font-light text-[28px] lg:text-[40px] leading-none tracking-[-1.12px] lg:tracking-[-1.6px] text-[#161616]">
+                  Facades
+                </h3>
+                <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[520px]">
+                  Burnt wood facade cladding brings strong character and long-term protection against the elements.
+                </p>
+                <ul className="mt-[16px] grid gap-[8px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
+                  <li>— Weather resistant, low maintenance</li>
+                  <li>— Unique texture and deep tone</li>
+                  <li>— Natural protection through charring</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Terraces */}
+          <div id="terraces" className="scroll-mt-[96px]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-[16px] lg:gap-[24px] items-start">
+              <div className="lg:col-span-6 lg:order-2 grid grid-cols-2 gap-[12px]">
+                <div className="relative w-full h-[140px] md:h-[200px] lg:h-[240px] rounded-[8px] overflow-hidden">
+                  <Image src={assets.categories.terrace} alt="Terraces" fill className="object-cover" />
+                </div>
+                <div className="relative w-full h-[140px] md:h-[200px] lg:h-[240px] rounded-[8px] overflow-hidden">
+                  <Image src={assets.categories.terrace} alt="Terraces detail" fill className="object-cover" />
+                </div>
+              </div>
+
+              <div className="lg:col-span-6 lg:order-1">
+                <h3 className="font-['DM_Sans'] font-light text-[28px] lg:text-[40px] leading-none tracking-[-1.12px] lg:tracking-[-1.6px] text-[#161616]">
+                  Terraces
+                </h3>
+                <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[520px]">
+                  Fire-treated decking that’s built for outdoor living, with natural grip and a premium feel.
+                </p>
+                <ul className="mt-[16px] grid gap-[8px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
+                  <li>— Durable surface for high traffic</li>
+                  <li>— Natural texture and warmth</li>
+                  <li>— Designed for seasonal changes</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Interior */}
+          <div id="interior" className="scroll-mt-[96px]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-[16px] lg:gap-[24px] items-start">
+              <div className="lg:col-span-6 grid grid-cols-2 gap-[12px]">
+                <div className="relative w-full h-[140px] md:h-[200px] lg:h-[240px] rounded-[8px] overflow-hidden">
+                  <Image src={assets.categories.interior} alt="Interior" fill className="object-cover" />
+                </div>
+                <div className="relative w-full h-[140px] md:h-[200px] lg:h-[240px] rounded-[8px] overflow-hidden">
+                  <Image src={assets.categories.interior} alt="Interior detail" fill className="object-cover" />
+                </div>
+              </div>
+
+              <div className="lg:col-span-6 lg:pl-[24px]">
+                <h3 className="font-['DM_Sans'] font-light text-[28px] lg:text-[40px] leading-none tracking-[-1.12px] lg:tracking-[-1.6px] text-[#161616]">
+                  Interior
+                </h3>
+                <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[520px]">
+                  Add depth and sophistication indoors with charred wood panels and feature walls.
+                </p>
+                <ul className="mt-[16px] grid gap-[8px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
+                  <li>— Warm, modern materiality</li>
+                  <li>— Unique patterning and tone</li>
+                  <li>— Works for walls, ceilings, details</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Fences */}
+          <div id="fences" className="scroll-mt-[96px]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-[16px] lg:gap-[24px] items-start">
+              <div className="lg:col-span-6 lg:order-2">
+                <div className="relative w-full h-[220px] md:h-[320px] lg:h-[360px] rounded-[8px] overflow-hidden">
+                  <Image src={assets.categories.fence} alt="Fences" fill className="object-cover" />
+                </div>
+              </div>
+
+              <div className="lg:col-span-6 lg:order-1">
+                <h3 className="font-['DM_Sans'] font-light text-[28px] lg:text-[40px] leading-none tracking-[-1.12px] lg:tracking-[-1.6px] text-[#161616]">
+                  Fences
+                </h3>
+                <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[520px]">
+                  Privacy with style — elegant fencing that endures and elevates outdoor spaces.
+                </p>
+                <ul className="mt-[16px] grid gap-[8px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
+                  <li>— Strong, stable, and durable</li>
+                  <li>— Distinctive charred finish</li>
+                  <li>— Great for modern landscapes</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

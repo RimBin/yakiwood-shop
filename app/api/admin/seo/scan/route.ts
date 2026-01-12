@@ -34,7 +34,11 @@ export async function GET(request: NextRequest) {
 
     const origin = resolveOrigin(request)
 
-    const result = await scanSitePages({ origin })
+    const result = await scanSitePages({
+      origin,
+      concurrency: 6,
+      fetchTimeoutMs: 8_000,
+    })
 
     // Sort by path for stable UI
     result.pages.sort((a, b) => (a.path < b.path ? -1 : 1))

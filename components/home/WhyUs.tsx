@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import Image from 'next/image';
 import { getSectionPadding, getGap } from '@/lib/design-system';

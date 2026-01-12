@@ -1,0 +1,60 @@
+[
+  {
+    "name": "Homepage",
+    "url": "http://localhost:3000",
+    "metrics": {
+      "performance": 23,
+      "accessibility": 94,
+      "bestPractices": 100,
+      "seo": 83,
+      "fcp": 1461.5945,
+      "lcp": 27522.189,
+      "cls": 0.2569576856943809,
+      "tti": 30829.689,
+      "tbt": 11782.202749999997,
+      "si": 9789.263656908077
+    }
+  },
+  {
+    "name": "Products Page",
+    "url": "http://localhost:3000/produktai",
+    "metrics": {
+      "performance": 29,
+      "accessibility": 91,
+      "bestPractices": 100,
+      "seo": 83,
+      "fcp": 1661.0603,
+      "lcp": 33191.59045,
+      "cls": 0.14292473877295897,
+      "tti": 33749.632032500005,
+      "tbt": 13311.234925000002,
+      "si": 30807.353395806196
+    }
+  },
+  {
+    "name": "Product Detail",
+    "url": "http://localhost:3000/produktai/burnt-wood-plank",
+    "metrics": {
+      "performance": 31,
+      "accessibility": 94,
+      "bestPractices": 100,
+      "seo": 58,
+      "fcp": 1431.9242,
+      "lcp": 28272.8863,
+      "cls": 0.11297244970095056,
+      "tti": 28632.94461,
+      "tbt": 12815.0379,
+      "si": 39111.12384412683
+    }
+  },
+  {
+    "name": "Solutions",
+    "url": "http://localhost:3000/sprendimai",
+    "error": "Cannot read properties of undefined (reading 'toFixed')"
+  },
+  {
+    "name": "Projects",
+    "url": "http://localhost:3000/projektai",
+    "error": "Cannot read properties of undefined (reading 'toFixed')"
+  }
+]

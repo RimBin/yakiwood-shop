@@ -1098,8 +1098,8 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
   const [description, setDescription] = useState(variant?.description || '');
   const [isAvailable, setIsAvailable] = useState(variant?.is_available ?? true);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.SyntheticEvent) => {
+    e?.preventDefault?.();
     if (!name) return;
 
     onSave({
@@ -1120,7 +1120,17 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
           {variant ? t('variantModal.titleEdit') : t('variantModal.titleNew')}
         </h3>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="space-y-4"
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter') return;
+            const target = e.target as HTMLElement | null;
+            if (target?.tagName === 'TEXTAREA') return;
+            handleSubmit(e);
+          }}
+        >
           <div>
             <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
               {t('variantModal.fields.name')}
@@ -1222,13 +1232,14 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
               {t('variantModal.buttons.cancel')}
             </button>
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               className="px-4 py-2 bg-[#161616] text-white rounded-lg font-['DM_Sans'] hover:bg-[#2d2d2d]"
             >
               {t('variantModal.buttons.save')}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

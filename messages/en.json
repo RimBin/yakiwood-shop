@@ -1411,6 +1411,7 @@
     "projects": "Projects"
   },
   "productsPage": {
+    "title": "Products",
     "searchLabel": "Search",
     "searchPlaceholder": "Search for a product",
     "colorFilterLabel": "Color",

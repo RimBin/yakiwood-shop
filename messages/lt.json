@@ -1168,6 +1168,7 @@
     "projects": "Projektai"
   },
   "productsPage": {
+    "title": "Produktai",
     "searchLabel": "Paieška",
     "searchPlaceholder": "Ieškoti produkto",
     "colorFilterLabel": "Spalva",

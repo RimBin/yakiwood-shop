@@ -2,7 +2,8 @@ import 'server-only'
 
 import type { PageSEOResult } from '@/lib/seo/scanner'
 import { validatePageMetadata, type PageMetadata } from '@/lib/seo/validator'
-import getSitemap from '@/app/sitemap'
+import { seedProducts } from '@/data/seed-products'
+import { projects } from '@/data/projects'
 
 type ScanTarget = {
 	path: string
@@ -17,6 +18,78 @@ type ParsedHtmlMetadata = {
 	openGraph?: PageMetadata['openGraph']
 	twitter?: PageMetadata['twitter']
 	h1?: string
+}
+
+const DEFAULT_FETCH_TIMEOUT_MS = 10_000
+
+function getSafeFallbackPaths(): string[] {
+	const staticPaths = [
+		'/',
+		'/lt',
+		'/products',
+		'/lt/produktai',
+		'/projects',
+		'/lt/projektai',
+		'/solutions',
+		'/lt/sprendimai',
+		'/about',
+		'/lt/apie',
+		'/contact',
+		'/lt/kontaktai',
+		'/faq',
+		'/lt/duk',
+		'/configurator3d',
+		'/lt/konfiguratorius3d',
+		'/naujienos',
+	]
+
+	const productSlugs = Array.from(new Set(seedProducts.map((p) => p.slug).filter(Boolean)))
+	const productPaths = productSlugs.flatMap((slug) => [`/products/${slug}`, `/lt/produktai/${slug}`])
+
+	const projectSlugs = Array.from(new Set(projects.map((p) => p.slug).filter(Boolean)))
+	const projectPaths = projectSlugs.flatMap((slug) => [`/projects/${slug}`, `/lt/projektai/${slug}`])
+
+	return Array.from(new Set([...staticPaths, ...productPaths, ...projectPaths]))
+}
+
+async function readTextWithTimeout(res: Response, timeoutMs: number, onTimeout?: () => void): Promise<string> {
+	let timeoutHandle: NodeJS.Timeout | undefined
+	try {
+		return await Promise.race([
+			res.text(),
+			new Promise<string>((_, reject) => {
+				timeoutHandle = setTimeout(() => {
+					onTimeout?.()
+					reject(new Error(`Timed out while reading response body after ${timeoutMs}ms`))
+				}, timeoutMs)
+			}),
+		])
+	} finally {
+		if (timeoutHandle) clearTimeout(timeoutHandle)
+	}
+}
+
+async function fetchTextWithTimeout(
+	url: string,
+	options: RequestInit,
+	timeoutMs: number,
+): Promise<{ res: Response; text: string }> {
+	const controller = new AbortController()
+	const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs)
+	try {
+		const res = await fetch(url, { ...options, signal: controller.signal })
+		const text = await readTextWithTimeout(res, timeoutMs, () => {
+			try {
+				res.body?.cancel()
+			} catch {
+				// ignore
+			}
+			controller.abort()
+		})
+		return { res, text }
+	} finally {
+		clearTimeout(timeoutHandle)
+	}
 }
 
 export type SEOAutoFixSuggestion = {
@@ -178,9 +251,12 @@ async function getAllIndexablePathsFromOrigin(origin: string): Promise<string[]>
 	// Prefer parsing the actual runtime sitemap output
 	try {
 		const sitemapUrl = new URL('/sitemap.xml', origin).toString()
-		const res = await fetch(sitemapUrl, { cache: 'no-store' })
+		const { res, text: xml } = await fetchTextWithTimeout(
+			sitemapUrl,
+			{ cache: 'no-store' },
+			DEFAULT_FETCH_TIMEOUT_MS,
+		)
 		if (res.ok) {
-			const xml = await res.text()
 			const locs = Array.from(xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)).map((m) => m[1])
 			const paths = locs
 				.map((loc) => {
@@ -198,35 +274,30 @@ async function getAllIndexablePathsFromOrigin(origin: string): Promise<string[]>
 		// ignore and fallback
 	}
 
-	// Fallback: call the sitemap generator directly
-	const entries = await getSitemap()
-	const fallbackPaths = entries
-		.map((e) => {
-			try {
-				return new URL(e.url).pathname
-			} catch {
-				return null
-			}
-		})
-		.filter((p): p is string => !!p)
-
-	return Array.from(new Set(fallbackPaths))
+	// Fallback: safe local list (avoids hanging on Supabase-backed sitemap generation)
+	return getSafeFallbackPaths()
 }
 
-async function scanOne(target: ScanTarget, origin: string): Promise<{ result: PageSEOResult; parsed: ParsedHtmlMetadata }> {
+async function scanOne(
+	target: ScanTarget,
+	origin: string,
+	params: { fetchTimeoutMs: number },
+): Promise<{ result: PageSEOResult; parsed: ParsedHtmlMetadata }> {
 	const base: PageMetadata = {
 		url: target.url,
 	}
 
 	try {
-		const res = await fetch(target.url, {
-			cache: 'no-store',
-			headers: {
-				'User-Agent': 'YakiwoodSEOScanner/1.0',
+		const { res, text: html } = await fetchTextWithTimeout(
+			target.url,
+			{
+				cache: 'no-store',
+				headers: {
+					'User-Agent': 'YakiwoodSEOScanner/1.0',
+				},
 			},
-		})
-
-		const html = await res.text()
+			params.fetchTimeoutMs,
+		)
 		const parsed = extractFromHtml(html, origin)
 
 		const metadata: PageMetadata = {
@@ -303,13 +374,16 @@ export async function scanSitePages(params: {
 	origin: string
 	paths?: string[]
 	concurrency?: number
+	fetchTimeoutMs?: number
 }): Promise<{ pages: PageSEOResult[]; parsedByPath: Record<string, ParsedHtmlMetadata> }> {
-	const { origin, concurrency = 8 } = params
+	const { origin, concurrency = 8, fetchTimeoutMs = DEFAULT_FETCH_TIMEOUT_MS } = params
 	const paths =
 		params.paths && params.paths.length > 0 ? params.paths : await getAllIndexablePathsFromOrigin(origin)
 
 	const targets = buildTargetsFromPaths(origin, paths)
-	const scanned = await mapWithConcurrency(targets, concurrency, async (t) => scanOne(t, origin))
+	const scanned = await mapWithConcurrency(targets, concurrency, async (t) =>
+		scanOne(t, origin, { fetchTimeoutMs }),
+	)
 
 	const pages = scanned.map((s) => s.result)
 	const parsedByPath: Record<string, ParsedHtmlMetadata> = {}

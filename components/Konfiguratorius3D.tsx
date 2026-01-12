@@ -1,23 +1,106 @@
 "use client";
 
-import React, { Suspense, useMemo, useState, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
+import React, { Suspense, useMemo, useState, useEffect, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
+import * as THREE from 'three';
 import type { ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
 
-interface PlaceholderModelProps {
+interface ProfileModelProps {
   color: string;
+  finish: ProductProfileVariant | null;
+  autoRotate?: boolean;
 }
 
-function PlaceholderModel({ color }: PlaceholderModelProps) {
-  // Simple box until real GLTF is loaded
+function normalizeProfileHint(value: string): string {
+  return value
+    .normalize('NFD')
+    // Remove diacritics.
+    .replace(/\p{Diacritic}/gu, '')
+    .trim()
+    .toLowerCase();
+}
+
+function isHalfTaper45(finish: ProductProfileVariant | null): boolean {
+  if (!finish) return false;
+  const hint = normalizeProfileHint([finish.code, finish.name].filter(Boolean).join(' '));
   return (
-    <mesh>
-      <boxGeometry args={[2, 0.2, 1]} />
-      <meshStandardMaterial color={color} roughness={0.8} metalness={0.1} />
-    </mesh>
+    (hint.includes('taper') && hint.includes('45')) ||
+    (hint.includes('spunto') && hint.includes('45')) ||
+    (hint.includes('spon') && hint.includes('45')) ||
+    (hint.includes('half') && hint.includes('taper'))
+  );
+}
+
+function createCenteredExtrudeGeometry(shape: THREE.Shape, depth: number): THREE.ExtrudeGeometry {
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth,
+    bevelEnabled: false,
+    steps: 1,
+  });
+
+  geometry.computeBoundingBox();
+  const box = geometry.boundingBox;
+  if (box) {
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    geometry.translate(-center.x, -center.y, -center.z);
+  }
+
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function ProfileModel({ color, finish, autoRotate = true }: ProfileModelProps) {
+  const groupRef = useRef<THREE.Group | null>(null);
+
+  const geometry = useMemo(() => {
+    const widthMm = finish?.dimensions?.width;
+    const thicknessMm = finish?.dimensions?.thickness;
+
+    // Keep the model roughly in the same scale as the previous placeholder box: [2, 0.2, 1].
+    // width 120mm -> ~2 units, thickness 20mm -> ~0.2 units.
+    const widthUnits = (typeof widthMm === 'number' && widthMm > 0 ? widthMm : 120) / 60;
+    const thicknessUnits = (typeof thicknessMm === 'number' && thicknessMm > 0 ? thicknessMm : 20) / 100;
+    const depthUnits = 1;
+
+    if (isHalfTaper45(finish)) {
+      // Simple “half taper 45°” approximation:
+      // one side is a 45° chamfer (bevel length equals thickness).
+      const bevel = Math.min(thicknessUnits, widthUnits * 0.45);
+      const shape = new THREE.Shape();
+      shape.moveTo(0, 0);
+      shape.lineTo(widthUnits, 0);
+      shape.lineTo(widthUnits - bevel, thicknessUnits);
+      shape.lineTo(0, thicknessUnits);
+      shape.lineTo(0, 0);
+      return createCenteredExtrudeGeometry(shape, depthUnits);
+    }
+
+    // Fallback: simple rectangular profile.
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    shape.lineTo(widthUnits, 0);
+    shape.lineTo(widthUnits, thicknessUnits);
+    shape.lineTo(0, thicknessUnits);
+    shape.lineTo(0, 0);
+    return createCenteredExtrudeGeometry(shape, depthUnits);
+  }, [finish]);
+
+  useFrame((_, delta) => {
+    if (!autoRotate) return;
+    if (!groupRef.current) return;
+    groupRef.current.rotation.y += delta * 0.7;
+  });
+
+  return (
+    <group ref={groupRef}>
+      <mesh geometry={geometry} castShadow receiveShadow>
+        <meshStandardMaterial color={color} roughness={0.8} metalness={0.08} />
+      </mesh>
+    </group>
   );
 }
 
@@ -291,7 +374,7 @@ export default function Konfiguratorius3D({
           <ambientLight intensity={0.6} />
           <directionalLight position={[5, 5, 5]} intensity={1} />
           <Suspense fallback={null}>
-            <PlaceholderModel color={modelColor} />
+            <ProfileModel color={modelColor} finish={selectedFinish} autoRotate={true} />
           </Suspense>
           <OrbitControls 
             enablePan={true} 

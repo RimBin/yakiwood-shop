@@ -1,8 +1,6 @@
-'use client';
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { getLocale } from 'next-intl/server';
 import { getSectionPadding } from '@/lib/design-system';
 
 const steps = [
@@ -28,26 +26,9 @@ const steps = [
 	},
 ];
 
-export default function Steps() {
-	const pathname = usePathname();
-	const [cookieLocale, setCookieLocale] = useState<string | null>(null);
-
-	useEffect(() => {
-		const match = document.cookie.match(/(?:^|; )NEXT_LOCALE=([^;]+)/);
-		if (match?.[1]) setCookieLocale(decodeURIComponent(match[1]));
-	}, []);
-
-	const localeFromPath = pathname?.match(/^\/(en)(?:\/|$)/)?.[1] ?? null;
-	const pathLooksEnglish =
-		pathname?.startsWith('/products') ||
-		pathname?.startsWith('/solutions') ||
-		pathname?.startsWith('/projects') ||
-		pathname?.startsWith('/about') ||
-		pathname?.startsWith('/contact');
-
-	const isEnglishRoute = localeFromPath === 'en' || cookieLocale === 'en' || !!pathLooksEnglish;
-	const englishPrefix = localeFromPath === 'en' ? '/en' : '';
-	const shopHref = isEnglishRoute ? `${englishPrefix}/products` : '/produktai';
+export default async function Steps() {
+	const locale = await getLocale();
+	const shopHref = locale === 'en' ? '/en/products' : '/produktai';
 
 	return (
 		<section className="w-full bg-[#161616]">

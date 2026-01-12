@@ -1,9 +1,27 @@
-const lighthouse = require('lighthouse');
-const chromeLauncher = require('chrome-launcher');
 const fs = require('fs');
 const path = require('path');
 
+let cachedLighthouse;
+let cachedChromeLauncher;
+
+async function getLighthouse() {
+  if (cachedLighthouse) return cachedLighthouse;
+  const mod = await import('lighthouse');
+  cachedLighthouse = mod?.default ?? mod;
+  return cachedLighthouse;
+}
+
+async function getChromeLauncher() {
+  if (cachedChromeLauncher) return cachedChromeLauncher;
+  const mod = await import('chrome-launcher');
+  cachedChromeLauncher = mod?.default ?? mod;
+  return cachedChromeLauncher;
+}
+
 async function runLighthouse(url, config) {
+  const lighthouse = await getLighthouse();
+  const chromeLauncher = await getChromeLauncher();
+
   const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
   const options = {
     logLevel: 'info',

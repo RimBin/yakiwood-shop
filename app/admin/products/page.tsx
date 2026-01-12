@@ -4,6 +4,7 @@ import ProductsAdminClient from '@/components/admin/ProductsAdminClient';
 import { Breadcrumbs } from '@/components/ui';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
+import { PageCover, PageLayout } from '@/components/shared/PageLayout';
 
 async function getProducts() {
   const locale = (await getLocale()) as AppLocale;
@@ -57,7 +58,7 @@ export default async function AdminProductsPage() {
   const tProducts = await getTranslations({ locale, namespace: 'admin.products' });
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#E1E1E1]">
       <Breadcrumbs
         items={[
           { label: tAdmin('breadcrumb.home'), href: toLocalePath('/', locale) },
@@ -66,18 +67,25 @@ export default async function AdminProductsPage() {
         ]}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-['DM_Sans'] font-medium text-[#161616] tracking-[-0.96px]">
+      <PageCover>
+        <div className="flex flex-col gap-[12px]">
+          <h1
+            className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+            style={{ fontVariationSettings: "'opsz' 14" }}
+          >
             {tProducts('title')}
           </h1>
-          <p className="mt-2 text-[#535353] font-['DM_Sans']">
+          <p className="font-['Outfit'] font-light text-[14px] md:text-[16px] leading-[1.5] tracking-[0.14px] text-[#535353]">
             {tProducts('subtitle')}
           </p>
         </div>
+      </PageCover>
 
-        <ProductsAdminClient initialProducts={products} />
-      </div>
+      <PageLayout>
+        <div className="py-8">
+          <ProductsAdminClient initialProducts={products} />
+        </div>
+      </PageLayout>
     </div>
   );
 }
