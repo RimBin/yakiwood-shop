@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { canonicalUrl } from '@/lib/seo/canonical';
+import { applySeoOverride } from '@/lib/seo/overrides';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.faq');
@@ -11,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const canonical = canonicalUrl('/faq', currentLocale);
   
-  return {
+  const metadata: Metadata = {
     title: t('title'),
     description: t('description'),
     alternates: {
@@ -32,6 +33,8 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [getOgImage('faq')],
     },
   };
+
+  return applySeoOverride(metadata, new URL(canonical).pathname, currentLocale);
 }
 
 const faqItems = [

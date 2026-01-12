@@ -6,6 +6,7 @@ import { fetchProductBySlug } from '@/lib/products.supabase';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
 import { toLocalePath } from '@/i18n/paths';
+import { applySeoOverride } from '@/lib/seo/overrides';
 
 interface ProductPageProps {
   params: { slug: string };
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const displayDescription =
     currentLocale === 'en' && product.descriptionEn ? product.descriptionEn : product.description;
 
-  return {
+  const metadata: Metadata = {
     title: displayName,
     description: displayDescription,
     alternates: {
@@ -64,6 +65,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       images: [getProductOgImage(ogImage)],
     },
   };
+
+  return applySeoOverride(metadata, new URL(canonical).pathname, currentLocale);
 }
 
 // Main product page component (Server Component)

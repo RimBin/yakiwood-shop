@@ -20,6 +20,7 @@ export interface PageMetadata {
   title?: string;
   description?: string;
   openGraph?: {
+    url?: string;
     title?: string;
     description?: string;
     images?: Array<{ url: string; width?: number; height?: number; alt?: string }>;

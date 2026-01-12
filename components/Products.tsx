@@ -266,7 +266,7 @@ function DesktopProductCard({
       </div>
 
       <div className="w-full flex flex-col gap-[16px] relative z-10">
-        <div className="flex gap-[8px] items-center justify-center flex-wrap">
+        <div className="flex gap-[8px] items-center justify-start flex-wrap">
           {product.solutions.map((sol, idx) => (
             <div key={idx} className="bg-white/40 px-[8px] py-[10px] h-[24px] rounded-[4px] flex items-center justify-center gap-[10px]">
               <p className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">{tSolutions(sol)}</p>

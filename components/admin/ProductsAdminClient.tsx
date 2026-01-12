@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { useLocale, useTranslations } from 'next-intl';
+import { toLocalePath, type AppLocale } from '@/i18n/paths';
 
 interface Variant {
   id: string;
@@ -37,16 +39,13 @@ interface Props {
   initialProducts: Product[];
 }
 
-const USAGE_LABELS: Record<string, string> = {
-  facade: 'Fasadui',
-  terrace: 'Terasai',
-  interior: 'Interjerui',
-  fence: 'Tvoroms',
-};
-
 export default function ProductsAdminClient({ initialProducts }: Props) {
   const router = useRouter();
   const supabase = createClient();
+
+  const locale = useLocale() as AppLocale;
+  const tList = useTranslations('admin.products.list');
+  const tForm = useTranslations('admin.products.form');
   
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [searchQuery, setSearchQuery] = useState('');
@@ -119,14 +118,14 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
       router.refresh();
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Klaida trinant produktą');
+      alert(tList('errors.deleteFailed'));
     } finally {
       setIsDeleting(false);
     }
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Ar tikrai norite ištrinti ${selectedIds.size} produktų?`)) return;
+    if (!confirm(tList('bulk.deleteConfirm', { count: selectedIds.size }))) return;
     
     setIsDeleting(true);
     try {
@@ -144,7 +143,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
       router.refresh();
     } catch (error) {
       console.error('Error bulk deleting:', error);
-      alert('Klaida trinant produktus');
+      alert(tList('errors.bulkDeleteFailed'));
     } finally {
       setIsDeleting(false);
     }
@@ -167,14 +166,14 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
       router.refresh();
     } catch (error) {
       console.error('Error updating status:', error);
-      alert('Klaida keičiant būseną');
+      alert(tList('errors.statusFailed'));
     } finally {
       setIsDeleting(false);
     }
   };
 
   const handleDuplicate = async (product: Product) => {
-    const newName = `${product.name} (kopija)`;
+    const newName = locale === 'lt' ? `${product.name} (kopija)` : `${product.name} (copy)`;
     const newSlug = `${product.slug}-copy-${Date.now()}`;
     
     try {
@@ -212,10 +211,10 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         await supabase.from('product_variants').insert(variantsCopy);
       }
 
-      router.push(`/admin/products/${data.id}`);
+      router.push(toLocalePath(`/admin/products/${data.id}`, locale));
     } catch (error) {
       console.error('Error duplicating product:', error);
-      alert('Klaida dubliuojant produktą');
+      alert(tList('errors.duplicateFailed'));
     }
   };
 
@@ -226,7 +225,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         <div className="flex-1 max-w-md">
           <input
             type="text"
-            placeholder="Ieškoti produktų..."
+            placeholder={tList('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
@@ -234,10 +233,10 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         </div>
         
         <Link
-          href="/admin/products/new"
+          href={toLocalePath('/admin/products/new', locale)}
           className="px-6 py-3 bg-[#161616] text-white rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#2d2d2d] transition-colors"
         >
-          + Naujas produktas
+          {tList('newProductButton')}
         </Link>
       </div>
 
@@ -248,11 +247,11 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
         >
-          <option value="all">Visos kategorijos</option>
-          <option value="cladding">Fasadai</option>
-          <option value="decking">Lentos</option>
-          <option value="interior">Interjeras</option>
-          <option value="tiles">Plytelės</option>
+          <option value="all">{tList('filters.allCategories')}</option>
+          <option value="cladding">{tForm('options.categories.cladding')}</option>
+          <option value="decking">{tForm('options.categories.decking')}</option>
+          <option value="interior">{tForm('options.categories.interior')}</option>
+          <option value="tiles">{tForm('options.categories.tiles')}</option>
         </select>
 
         <select
@@ -260,11 +259,11 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
           onChange={(e) => setUsageFilter(e.target.value)}
           className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
         >
-          <option value="all">Visi pritaikymai</option>
-          <option value="facade">Fasadui</option>
-          <option value="terrace">Terasai</option>
-          <option value="interior">Interjerui</option>
-          <option value="fence">Tvoroms</option>
+          <option value="all">{tList('filters.allUsage')}</option>
+          <option value="facade">{tForm('options.usageTypes.facade')}</option>
+          <option value="terrace">{tForm('options.usageTypes.terrace')}</option>
+          <option value="interior">{tForm('options.usageTypes.interior')}</option>
+          <option value="fence">{tForm('options.usageTypes.fence')}</option>
         </select>
 
         <select
@@ -272,44 +271,44 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
         >
-          <option value="all">Visi statusai</option>
-          <option value="active">Aktyvūs</option>
-          <option value="inactive">Neaktyvūs</option>
+          <option value="all">{tList('filters.allStatuses')}</option>
+          <option value="active">{tList('filters.statusActivePlural')}</option>
+          <option value="inactive">{tList('filters.statusInactivePlural')}</option>
         </select>
       </div>
 
       {/* Bulk Actions */}
       {selectedIds.size > 0 && (
-        <div className="flex gap-3 items-center p-4 bg-[#EAEAEA] rounded-lg">
+        <div className="flex gap-3 items-center p-4 bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1]">
           <span className="font-['DM_Sans'] text-[#161616]">
-            Pasirinkta: {selectedIds.size}
+            {tList('bulk.selected', { count: selectedIds.size })}
           </span>
           <button
             onClick={() => handleBulkToggleStatus(true)}
             disabled={isDeleting}
             className="px-4 py-2 bg-white border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#f5f5f5] disabled:opacity-50"
           >
-            Publikuoti
+            {tList('bulk.publish')}
           </button>
           <button
             onClick={() => handleBulkToggleStatus(false)}
             disabled={isDeleting}
             className="px-4 py-2 bg-white border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#f5f5f5] disabled:opacity-50"
           >
-            Nuimti
+            {tList('bulk.unpublish')}
           </button>
           <button
             onClick={handleBulkDelete}
             disabled={isDeleting}
             className="px-4 py-2 bg-red-600 text-white rounded-lg font-['DM_Sans'] hover:bg-red-700 disabled:opacity-50"
           >
-            Ištrinti
+            {tList('bulk.delete')}
           </button>
         </div>
       )}
 
       {/* Products Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-[24px] border border-[#E1E1E1] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-[#FAFAFA] border-b border-[#E1E1E1]">
@@ -323,25 +322,25 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
                   />
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
-                  Produktas
+                  {tList('table.product')}
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
-                  Kategorija
+                  {tList('table.category')}
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
-                  Pritaikymas
+                  {tList('table.usage')}
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
-                  Kaina
+                  {tList('table.price')}
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
-                  Atsargos
+                  {tList('table.stock')}
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
-                  Statusas
+                  {tList('table.status')}
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
-                  Veiksmai
+                  {tList('table.actions')}
                 </th>
               </tr>
             </thead>
@@ -368,7 +367,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
                         />
                       ) : (
                         <div className="w-12 h-12 bg-[#EAEAEA] rounded-lg flex items-center justify-center">
-                          <span className="text-[#BBBBBB] text-xs">No img</span>
+                          <span className="text-[#BBBBBB] text-xs">{tList('table.noImage')}</span>
                         </div>
                       )}
                       <div>
@@ -383,7 +382,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
                     {product.category || '-'}
                   </td>
                   <td className="px-6 py-4 text-sm font-['DM_Sans'] text-[#535353]">
-                    {product.usage_type ? (USAGE_LABELS[product.usage_type] || product.usage_type) : '-'}
+                    {product.usage_type ? tForm(`options.usageTypes.${product.usage_type}` as any) : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm font-['DM_Sans'] font-medium text-[#161616]">
                     €{product.base_price.toFixed(2)}
@@ -397,38 +396,38 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {product.is_active ? 'Aktyvus' : 'Neaktyvus'}
+                      {product.is_active ? tList('statusBadge.active') : tList('statusBadge.inactive')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
                       <Link
-                        href={`/admin/products/${product.id}`}
+                        href={toLocalePath(`/admin/products/${product.id}`, locale)}
                         className="text-sm text-[#161616] hover:underline font-['DM_Sans']"
                       >
-                        Redaguoti
+                        {tList('rowActions.edit')}
                       </Link>
                       <span className="text-[#E1E1E1]">|</span>
                       <Link
-                        href={`/produktai/${product.slug}`}
+                        href={toLocalePath(`/products/${product.slug}`, locale)}
                         target="_blank"
                         className="text-sm text-[#535353] hover:underline font-['DM_Sans']"
                       >
-                        Peržiūra
+                        {tList('rowActions.preview')}
                       </Link>
                       <span className="text-[#E1E1E1]">|</span>
                       <button
                         onClick={() => handleDuplicate(product)}
                         className="text-sm text-[#535353] hover:underline font-['DM_Sans']"
                       >
-                        Dubliuoti
+                        {tList('rowActions.duplicate')}
                       </button>
                       <span className="text-[#E1E1E1]">|</span>
                       <button
                         onClick={() => setDeleteConfirmId(product.id)}
                         className="text-sm text-red-600 hover:underline font-['DM_Sans']"
                       >
-                        Ištrinti
+                        {tList('rowActions.delete')}
                       </button>
                     </div>
                   </td>
@@ -442,8 +441,8 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
           <div className="text-center py-12">
             <p className="text-[#535353] font-['DM_Sans']">
               {searchQuery || categoryFilter !== 'all' || statusFilter !== 'all'
-                ? 'Produktų nerasta'
-                : 'Dar nėra produktų'}
+                ? tList('empty.noneFound')
+                : tList('empty.noneYet')}
             </p>
           </div>
         )}
@@ -454,10 +453,10 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-xl font-['DM_Sans'] font-medium mb-4">
-              Patvirtinti trynimą
+              {tList('deleteModal.title')}
             </h3>
             <p className="text-[#535353] font-['DM_Sans'] mb-6">
-              Ar tikrai norite ištrinti šį produktą? Jis bus pažymėtas kaip neaktyvus.
+              {tList('deleteModal.body')}
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -465,14 +464,14 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
                 disabled={isDeleting}
                 className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#FAFAFA] disabled:opacity-50"
               >
-                Atšaukti
+                {tList('deleteModal.cancel')}
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirmId)}
                 disabled={isDeleting}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg font-['DM_Sans'] hover:bg-red-700 disabled:opacity-50"
               >
-                {isDeleting ? 'Trinamas...' : 'Ištrinti'}
+                {isDeleting ? tList('deleteModal.confirming') : tList('deleteModal.confirm')}
               </button>
             </div>
           </div>

@@ -7,6 +7,43 @@ import type { PageSEOResult } from '@/lib/seo/scanner';
 import { Breadcrumbs } from '@/components/ui';
 import { createClient } from '@/lib/supabase/client';
 
+type SeoOverrideFormState = {
+  canonicalPath: string;
+  locale: 'en' | 'lt';
+  enabled: boolean;
+  title: string;
+  description: string;
+  canonicalUrl: string;
+  robotsIndex: 'inherit' | 'index' | 'noindex';
+  robotsFollow: 'inherit' | 'follow' | 'nofollow';
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  twitterTitle: string;
+  twitterDescription: string;
+  twitterImage: string;
+};
+
+type SeoOverrideRow = {
+  id: string;
+  canonical_path: string;
+  locale: 'en' | 'lt';
+  enabled: boolean;
+  title: string | null;
+  description: string | null;
+  canonical_url: string | null;
+  robots_index: boolean | null;
+  robots_follow: boolean | null;
+  og_title: string | null;
+  og_description: string | null;
+  og_image: string | null;
+  twitter_title: string | null;
+  twitter_description: string | null;
+  twitter_image: string | null;
+  updated_by_email: string | null;
+  updated_at: string;
+};
+
 type FilterType = 'all' | 'good' | 'warning' | 'error';
 
 async function getAdminToken(): Promise<string | null> {
@@ -27,6 +64,106 @@ function downloadJson(filename: string, data: unknown) {
   URL.revokeObjectURL(url);
 }
 
+const SEO_EDITOR_ENABLED_KEY = 'admin.seo.editorEnabled';
+
+function inferLocaleFromPath(pathname: string): 'en' | 'lt' {
+  return pathname === '/lt' || pathname.startsWith('/lt/') ? 'lt' : 'en';
+}
+
+function urlPathname(urlOrPathname: string): string {
+  const raw = (urlOrPathname || '').trim();
+  if (!raw) return '';
+  try {
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      const parsed = new URL(raw);
+      return parsed.pathname || '/';
+    }
+  } catch {
+    // fall through
+  }
+  if (!raw.startsWith('/')) return `/${raw}`;
+  return raw;
+}
+
+function toNullableString(value: string): string | null {
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function robotsStateToNullable(value: SeoOverrideFormState['robotsIndex' | 'robotsFollow']): boolean | null {
+  if (value === 'inherit') return null;
+  if (value === 'index' || value === 'follow') return true;
+  return false;
+}
+
+function overrideToFormState(page: PageSEOResult, override: SeoOverrideRow | null): SeoOverrideFormState {
+  const locale = override?.locale ?? inferLocaleFromPath(page.path);
+  const canonicalPath = override?.canonical_path ?? urlPathname(page.path);
+
+  return {
+    canonicalPath,
+    locale,
+    enabled: override?.enabled ?? true,
+    title: override?.title ?? '',
+    description: override?.description ?? '',
+    canonicalUrl: override?.canonical_url ?? '',
+    robotsIndex:
+      override?.robots_index == null ? 'inherit' : override.robots_index ? 'index' : 'noindex',
+    robotsFollow:
+      override?.robots_follow == null ? 'inherit' : override.robots_follow ? 'follow' : 'nofollow',
+    ogTitle: override?.og_title ?? '',
+    ogDescription: override?.og_description ?? '',
+    ogImage: override?.og_image ?? '',
+    twitterTitle: override?.twitter_title ?? '',
+    twitterDescription: override?.twitter_description ?? '',
+    twitterImage: override?.twitter_image ?? '',
+  };
+}
+
+function applyFormOverrideToPreview(page: PageSEOResult, form: SeoOverrideFormState): PageSEOResult {
+  const resolvedUrl = form.canonicalUrl.trim() ? form.canonicalUrl.trim() : page.url;
+  const resolvedTitle = form.title.trim() ? form.title.trim() : page.title;
+  const resolvedDescription = form.description.trim() ? form.description.trim() : page.description;
+
+  const ogTitle = form.ogTitle.trim() || page.openGraph?.title || resolvedTitle;
+  const ogDescription = form.ogDescription.trim() || page.openGraph?.description || resolvedDescription;
+  const ogImageUrl = form.ogImage.trim() || (page.openGraph?.images?.[0] as any)?.url;
+
+  const twitterTitle = form.twitterTitle.trim() || (page.twitter as any)?.title || resolvedTitle;
+  const twitterDescription = form.twitterDescription.trim() || (page.twitter as any)?.description || resolvedDescription;
+  const twitterImageUrl = form.twitterImage.trim();
+
+  const nextPage: PageSEOResult = {
+    ...page,
+    title: resolvedTitle,
+    description: resolvedDescription,
+    openGraph: {
+      ...(page.openGraph ?? {}),
+      title: ogTitle,
+      description: ogDescription,
+      images: ogImageUrl
+        ? [
+            {
+              url: ogImageUrl,
+              width: 1200,
+              height: 630,
+              alt: typeof ogTitle === 'string' ? ogTitle : 'Open Graph image',
+            },
+          ]
+        : page.openGraph?.images,
+    },
+    twitter: {
+      ...(page.twitter ?? {}),
+      title: twitterTitle,
+      description: twitterDescription,
+      images: twitterImageUrl ? [twitterImageUrl] : (page.twitter as any)?.images,
+    },
+  };
+
+  nextPage.url = resolvedUrl;
+  return nextPage;
+}
+
 export default function SEOAdminClient() {
   const t = useTranslations('admin.seo');
   const tBreadcrumb = useTranslations('admin.breadcrumb');
@@ -36,6 +173,14 @@ export default function SEOAdminClient() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [selectedPage, setSelectedPage] = useState<PageSEOResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const [editorEnabled, setEditorEnabled] = useState(false);
+  const [editingPage, setEditingPage] = useState<PageSEOResult | null>(null);
+  const [overrideRow, setOverrideRow] = useState<SeoOverrideRow | null>(null);
+  const [overrideLoading, setOverrideLoading] = useState(false);
+  const [overrideSaving, setOverrideSaving] = useState(false);
+  const [overrideForm, setOverrideForm] = useState<SeoOverrideFormState | null>(null);
+  const [overrideNotice, setOverrideNotice] = useState<string | null>(null);
 
   async function loadPages() {
     setLoading(true);
@@ -67,6 +212,155 @@ export default function SEOAdminClient() {
     loadPages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SEO_EDITOR_ENABLED_KEY);
+      if (stored === '1') setEditorEnabled(true);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SEO_EDITOR_ENABLED_KEY, editorEnabled ? '1' : '0');
+    } catch {
+      // ignore
+    }
+  }, [editorEnabled]);
+
+  const openEditor = async (page: PageSEOResult) => {
+    setOverrideNotice(null);
+    setError(null);
+    setEditingPage(page);
+    setOverrideRow(null);
+    setOverrideForm(null);
+    setOverrideLoading(true);
+
+    try {
+      const token = await getAdminToken();
+      if (!token) throw new Error(t('errors.noSession'));
+
+      const locale = inferLocaleFromPath(page.path);
+      const canonicalPath = urlPathname(page.path);
+
+      const res = await fetch(
+        `/api/admin/seo/overrides?canonicalPath=${encodeURIComponent(canonicalPath)}&locale=${encodeURIComponent(locale)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || 'Failed to load override');
+
+      const row = (json?.override ?? null) as SeoOverrideRow | null;
+      setOverrideRow(row);
+      setOverrideForm(overrideToFormState(page, row));
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to load override');
+      setEditingPage(null);
+    } finally {
+      setOverrideLoading(false);
+    }
+  };
+
+  const closeEditor = () => {
+    setEditingPage(null);
+    setOverrideRow(null);
+    setOverrideForm(null);
+    setOverrideNotice(null);
+  };
+
+  const saveOverride = async () => {
+    if (!overrideForm) return;
+
+    setOverrideNotice(null);
+    setError(null);
+    setOverrideSaving(true);
+
+    try {
+      const token = await getAdminToken();
+      if (!token) throw new Error(t('errors.noSession'));
+
+      const payload = {
+        canonicalPath: overrideForm.canonicalPath,
+        locale: overrideForm.locale,
+        enabled: overrideForm.enabled,
+        title: toNullableString(overrideForm.title),
+        description: toNullableString(overrideForm.description),
+        canonicalUrl: toNullableString(overrideForm.canonicalUrl),
+        robotsIndex: robotsStateToNullable(overrideForm.robotsIndex),
+        robotsFollow: robotsStateToNullable(overrideForm.robotsFollow),
+        ogTitle: toNullableString(overrideForm.ogTitle),
+        ogDescription: toNullableString(overrideForm.ogDescription),
+        ogImage: toNullableString(overrideForm.ogImage),
+        twitterTitle: toNullableString(overrideForm.twitterTitle),
+        twitterDescription: toNullableString(overrideForm.twitterDescription),
+        twitterImage: toNullableString(overrideForm.twitterImage),
+      };
+
+      const res = await fetch('/api/admin/seo/overrides', {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || 'Failed to save override');
+
+      const saved = (json?.override ?? null) as SeoOverrideRow | null;
+      setOverrideRow(saved);
+      setOverrideNotice('Saved. Re-scan to see updated score.');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to save override');
+    } finally {
+      setOverrideSaving(false);
+    }
+  };
+
+  const deleteOverride = async () => {
+    if (!overrideForm) return;
+    if (!confirm('Delete this override?')) return;
+
+    setOverrideNotice(null);
+    setError(null);
+    setOverrideSaving(true);
+
+    try {
+      const token = await getAdminToken();
+      if (!token) throw new Error(t('errors.noSession'));
+
+      const res = await fetch(
+        `/api/admin/seo/overrides?canonicalPath=${encodeURIComponent(overrideForm.canonicalPath)}&locale=${encodeURIComponent(
+          overrideForm.locale
+        )}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || 'Failed to delete override');
+
+      setOverrideRow(null);
+      if (editingPage) setOverrideForm(overrideToFormState(editingPage, null));
+      setOverrideNotice('Override deleted.');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to delete override');
+    } finally {
+      setOverrideSaving(false);
+    }
+  };
 
   const filteredPages = pages.filter((page) => {
     if (filter === 'all') return true;
@@ -244,6 +538,18 @@ export default function SEOAdminClient() {
             </button>
 
             <button
+              onClick={() => setEditorEnabled((v) => !v)}
+              className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap border ${
+                editorEnabled
+                  ? 'bg-[#161616] text-white border-[#161616]'
+                  : 'bg-[#EAEAEA] text-[#161616] border-[#E1E1E1] hover:border-[#161616]'
+              }`}
+              title="Toggle SEO editor"
+            >
+              Editor: {editorEnabled ? 'ON' : 'OFF'}
+            </button>
+
+            <button
               onClick={loadPages}
               className="h-[48px] ml-auto px-[24px] rounded-[100px] bg-[#EAEAEA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap"
             >
@@ -302,12 +608,22 @@ export default function SEOAdminClient() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <button
-                          onClick={() => setSelectedPage(page)}
-                          className="h-[40px] px-[20px] rounded-[100px] bg-[#161616] text-white font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:bg-[#2a2a2a] transition-colors"
-                        >
-                          {t('actions.viewDetails')}
-                        </button>
+                        <div className="flex items-center justify-center gap-2">
+                          {editorEnabled && (
+                            <button
+                              onClick={() => openEditor(page)}
+                              className="h-[40px] px-[20px] rounded-[100px] bg-white text-[#161616] border border-[#E1E1E1] hover:border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-colors"
+                            >
+                              Edit
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setSelectedPage(page)}
+                            className="h-[40px] px-[20px] rounded-[100px] bg-[#161616] text-white font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:bg-[#2a2a2a] transition-colors"
+                          >
+                            {t('actions.viewDetails')}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -352,6 +668,254 @@ export default function SEOAdminClient() {
                 </div>
                 <div className="p-8">
                   <SEOPreview metadata={selectedPage} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Editor Modal */}
+          {editingPage && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50" onClick={closeEditor}>
+              <div
+                className="bg-[#EAEAEA] rounded-[24px] max-w-5xl w-full max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="sticky top-0 bg-[#EAEAEA] border-b border-[#E1E1E1] px-8 py-6 flex items-center justify-between rounded-t-[24px]">
+                  <div>
+                    <h2 className="font-['DM_Sans'] text-2xl font-light tracking-[-0.96px] text-[#161616]">Edit SEO</h2>
+                    <p className="font-['Outfit'] text-sm text-[#535353] mt-1">{editingPage.path}</p>
+                  </div>
+                  <button
+                    onClick={closeEditor}
+                    className="w-10 h-10 rounded-full bg-[#EAEAEA] hover:bg-[#E1E1E1] flex items-center justify-center transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="p-8">
+                  {overrideLoading || !overrideForm ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#161616] mx-auto mb-4" />
+                      <p className="font-['Outfit'] text-[#535353]">Loading override…</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      <div className="space-y-6">
+                        {overrideNotice && (
+                          <div className="bg-green-50 border border-green-200 text-green-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
+                            {overrideNotice}
+                          </div>
+                        )}
+
+                        <div className="bg-white rounded-[24px] border border-[#E1E1E1] p-6">
+                          <div className="flex items-center justify-between gap-4">
+                            <div>
+                              <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">
+                                Override
+                              </div>
+                              <div className="font-['Outfit'] text-xs text-[#535353] mt-1">
+                                canonical_path: {overrideForm.canonicalPath} • locale: {overrideForm.locale}
+                              </div>
+                              {overrideRow && (
+                                <div className="font-['Outfit'] text-xs text-[#535353] mt-1">
+                                  Updated: {new Date(overrideRow.updated_at).toLocaleString()} ({overrideRow.updated_by_email || 'unknown'})
+                                </div>
+                              )}
+                            </div>
+                            <label className="flex items-center gap-2 font-['Outfit'] text-sm text-[#161616]">
+                              <input
+                                type="checkbox"
+                                checked={overrideForm.enabled}
+                                onChange={(e) =>
+                                  setOverrideForm((s) =>
+                                    s ? { ...s, enabled: e.target.checked } : s
+                                  )
+                                }
+                              />
+                              Enabled
+                            </label>
+                          </div>
+                        </div>
+
+                        <div className="bg-white rounded-[24px] border border-[#E1E1E1] p-6 space-y-4">
+                          <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">Basic</div>
+
+                          <div>
+                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Title</div>
+                            <input
+                              value={overrideForm.title}
+                              onChange={(e) => setOverrideForm((s) => (s ? { ...s, title: e.target.value } : s))}
+                              placeholder={editingPage.title || ''}
+                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                            />
+                          </div>
+
+                          <div>
+                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Description</div>
+                            <textarea
+                              value={overrideForm.description}
+                              onChange={(e) => setOverrideForm((s) => (s ? { ...s, description: e.target.value } : s))}
+                              placeholder={editingPage.description || ''}
+                              className="w-full min-h-[96px] px-4 py-3 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                            />
+                          </div>
+
+                          <div>
+                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Canonical URL (optional)</div>
+                            <input
+                              value={overrideForm.canonicalUrl}
+                              onChange={(e) => setOverrideForm((s) => (s ? { ...s, canonicalUrl: e.target.value } : s))}
+                              placeholder={editingPage.url}
+                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Robots index</div>
+                              <select
+                                value={overrideForm.robotsIndex}
+                                onChange={(e) =>
+                                  setOverrideForm((s) =>
+                                    s ? { ...s, robotsIndex: e.target.value as SeoOverrideFormState['robotsIndex'] } : s
+                                  )
+                                }
+                                className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                              >
+                                <option value="inherit">Inherit</option>
+                                <option value="index">index</option>
+                                <option value="noindex">noindex</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Robots follow</div>
+                              <select
+                                value={overrideForm.robotsFollow}
+                                onChange={(e) =>
+                                  setOverrideForm((s) =>
+                                    s ? { ...s, robotsFollow: e.target.value as SeoOverrideFormState['robotsFollow'] } : s
+                                  )
+                                }
+                                className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                              >
+                                <option value="inherit">Inherit</option>
+                                <option value="follow">follow</option>
+                                <option value="nofollow">nofollow</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white rounded-[24px] border border-[#E1E1E1] p-6 space-y-4">
+                          <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">Open Graph</div>
+
+                          <div>
+                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">OG Title</div>
+                            <input
+                              value={overrideForm.ogTitle}
+                              onChange={(e) => setOverrideForm((s) => (s ? { ...s, ogTitle: e.target.value } : s))}
+                              placeholder={(editingPage.openGraph as any)?.title || editingPage.title || ''}
+                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                            />
+                          </div>
+                          <div>
+                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">OG Description</div>
+                            <textarea
+                              value={overrideForm.ogDescription}
+                              onChange={(e) => setOverrideForm((s) => (s ? { ...s, ogDescription: e.target.value } : s))}
+                              placeholder={(editingPage.openGraph as any)?.description || editingPage.description || ''}
+                              className="w-full min-h-[96px] px-4 py-3 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                            />
+                          </div>
+                          <div>
+                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">OG Image URL</div>
+                            <input
+                              value={overrideForm.ogImage}
+                              onChange={(e) => setOverrideForm((s) => (s ? { ...s, ogImage: e.target.value } : s))}
+                              placeholder={(editingPage.openGraph?.images?.[0] as any)?.url || ''}
+                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="bg-white rounded-[24px] border border-[#E1E1E1] p-6 space-y-4">
+                          <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">Twitter</div>
+
+                          <div>
+                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Twitter Title</div>
+                            <input
+                              value={overrideForm.twitterTitle}
+                              onChange={(e) => setOverrideForm((s) => (s ? { ...s, twitterTitle: e.target.value } : s))}
+                              placeholder={(editingPage.twitter as any)?.title || editingPage.title || ''}
+                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                            />
+                          </div>
+                          <div>
+                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Twitter Description</div>
+                            <textarea
+                              value={overrideForm.twitterDescription}
+                              onChange={(e) =>
+                                setOverrideForm((s) => (s ? { ...s, twitterDescription: e.target.value } : s))
+                              }
+                              placeholder={(editingPage.twitter as any)?.description || editingPage.description || ''}
+                              className="w-full min-h-[96px] px-4 py-3 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                            />
+                          </div>
+                          <div>
+                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Twitter Image URL</div>
+                            <input
+                              value={overrideForm.twitterImage}
+                              onChange={(e) => setOverrideForm((s) => (s ? { ...s, twitterImage: e.target.value } : s))}
+                              placeholder={
+                                Array.isArray((editingPage.twitter as any)?.images)
+                                  ? ((editingPage.twitter as any)?.images?.[0] as string) || ''
+                                  : ((editingPage.twitter as any)?.images as string) || ''
+                              }
+                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={saveOverride}
+                            disabled={overrideSaving}
+                            className="h-[48px] px-[24px] rounded-[100px] bg-[#161616] text-white font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:bg-[#2a2a2a] transition-colors disabled:opacity-60"
+                          >
+                            {overrideSaving ? 'Saving…' : 'Save'}
+                          </button>
+
+                          {overrideRow && (
+                            <button
+                              onClick={deleteOverride}
+                              disabled={overrideSaving}
+                              className="h-[48px] px-[24px] rounded-[100px] bg-white text-red-600 border border-red-200 hover:border-red-600 font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-colors disabled:opacity-60"
+                            >
+                              Delete override
+                            </button>
+                          )}
+
+                          <button
+                            onClick={closeEditor}
+                            className="h-[48px] ml-auto px-[24px] rounded-[100px] bg-[#EAEAEA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        <div className="font-['DM_Sans'] text-2xl font-light tracking-[-0.96px] text-[#161616]">
+                          Preview
+                        </div>
+                        <SEOPreview metadata={applyFormOverrideToPreview(editingPage, overrideForm)} />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

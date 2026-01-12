@@ -12,6 +12,9 @@ import { Breadcrumbs } from '@/components/ui';
 export default function EmailTemplatesAdmin() {
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [previewVars, setPreviewVars] = useState<Record<string, any>>({});
+  const [testEmailTo, setTestEmailTo] = useState('');
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [sendStatus, setSendStatus] = useState<null | { ok: boolean; message: string }>(null);
 
   const handlePreview = (template: EmailTemplate) => {
     setSelectedTemplate(template);
@@ -25,10 +28,49 @@ export default function EmailTemplatesAdmin() {
     alert('HTML copied to clipboard!');
   };
 
-  const handleSendTest = () => {
+  const handleSendTest = async () => {
     if (!selectedTemplate) return;
-    // TODO: Implement test email sending
-    alert('Test email functionality coming soon!');
+
+    const to = testEmailTo.trim();
+    if (!to) {
+      setSendStatus({ ok: false, message: 'Please enter a recipient email address.' });
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+      setSendStatus({ ok: false, message: 'Recipient email address looks invalid.' });
+      return;
+    }
+
+    setIsSendingTest(true);
+    setSendStatus(null);
+
+    try {
+      const subject = selectedTemplate.subject(previewVars);
+      const html = selectedTemplate.html(previewVars);
+
+      const res = await fetch('/api/admin/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          to,
+          subject: `[TEST] ${subject}`,
+          html,
+        }),
+      });
+
+      const data = (await res.json().catch(() => ({}))) as any;
+      if (!res.ok) {
+        setSendStatus({ ok: false, message: data?.error || 'Failed to send test email.' });
+        return;
+      }
+
+      setSendStatus({ ok: true, message: 'Test email queued successfully.' });
+    } catch (e: any) {
+      setSendStatus({ ok: false, message: e?.message || 'Unexpected error sending test email.' });
+    } finally {
+      setIsSendingTest(false);
+    }
   };
 
   const categories = [
@@ -137,6 +179,49 @@ export default function EmailTemplatesAdmin() {
 
                   <div className="p-[clamp(20px,3vw,32px)]">
                     <div className="mb-[24px]">
+                      <label className="block font-['Outfit'] text-[11px] font-medium text-[#535353] uppercase tracking-[0.55px] mb-[8px]">
+                        Test Recipient
+                      </label>
+                      <div className="flex flex-col sm:flex-row gap-[12px]">
+                        <input
+                          value={testEmailTo}
+                          onChange={(e) => setTestEmailTo(e.target.value)}
+                          placeholder="name@company.com"
+                          inputMode="email"
+                          className="h-[48px] w-full rounded-[100px] bg-white border-2 border-[#E1E1E1] px-[18px] font-['Outfit'] text-[14px] text-[#161616] outline-none focus:border-[#161616]"
+                          aria-label="Test email recipient"
+                        />
+                        <button
+                          onClick={handleSendTest}
+                          disabled={isSendingTest}
+                          className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-white transition-colors ${
+                            isSendingTest ? 'bg-[#535353] cursor-not-allowed' : 'bg-[#161616] hover:bg-[#535353]'
+                          }`}
+                        >
+                          {isSendingTest ? 'Sending…' : '📧 Send Test Email'}
+                        </button>
+                      </div>
+
+                      {sendStatus ? (
+                        <div
+                          className={`mt-[12px] rounded-[12px] p-[12px] font-['Outfit'] text-[12px] ${
+                            sendStatus.ok
+                              ? 'bg-green-50 text-green-800 border border-green-200'
+                              : 'bg-red-50 text-red-800 border border-red-200'
+                          }`}
+                          role="status"
+                        >
+                          {sendStatus.message}
+                          {!sendStatus.ok ? (
+                            <div className="mt-[6px] text-[11px] text-[#535353]">
+                              Note: sending requires email provider config (e.g. <code>RESEND_API_KEY</code>).
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="mb-[24px]">
                       <label className="block font-['Outfit'] text-[11px] font-medium text-[#535353] uppercase tracking-[0.55px] mb-[12px]">
                         HTML Preview
                       </label>
@@ -150,12 +235,6 @@ export default function EmailTemplatesAdmin() {
                     </div>
 
                     <div className="flex gap-[12px] flex-wrap">
-                      <button
-                        onClick={handleSendTest}
-                        className="h-[48px] px-[24px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors"
-                      >
-                        📧 Send Test Email
-                      </button>
                       <button
                         onClick={handleCopyHTML}
                         className="h-[48px] px-[24px] rounded-[100px] bg-[#E1E1E1] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#BBBBBB] transition-colors"

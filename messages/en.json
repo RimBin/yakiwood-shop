@@ -1050,6 +1050,17 @@
       "cancel": "Cancel",
       "addNewEllipsis": "Add new…"
     },
+    "productForm": {
+      "validation": {
+        "nameRequired": "Name is required",
+        "slugRequired": "Slug is required",
+        "slugFormat": "Slug may contain only lowercase letters, numbers, and hyphens",
+        "categoryRequired": "Category is required",
+        "usageRequired": "Usage is required",
+        "woodRequired": "Wood type is required",
+        "basePricePositive": "Base price must be positive"
+      }
+    },
     "posts": {
       "importSuccess": "Imported {count} posts successfully!",
       "importError": "Error importing posts. Please check the JSON format."
@@ -1167,6 +1178,216 @@
       "newProductDesc": "Create a new product with variants",
       "editProduct": "Edit Product",
       "editProductDesc": "Update product information and variants",
+      "list": {
+        "searchPlaceholder": "Search products…",
+        "newProductButton": "+ New product",
+        "filters": {
+          "allCategories": "All categories",
+          "allUsage": "All usage",
+          "allStatuses": "All statuses",
+          "statusActivePlural": "Active",
+          "statusInactivePlural": "Inactive"
+        },
+        "bulk": {
+          "selected": "Selected: {count}",
+          "publish": "Publish",
+          "unpublish": "Unpublish",
+          "delete": "Delete",
+          "deleteConfirm": "Are you sure you want to delete {count} products?"
+        },
+        "table": {
+          "product": "Product",
+          "category": "Category",
+          "usage": "Usage",
+          "price": "Price",
+          "stock": "Stock",
+          "status": "Status",
+          "actions": "Actions",
+          "noImage": "No img"
+        },
+        "rowActions": {
+          "edit": "Edit",
+          "preview": "Preview",
+          "duplicate": "Duplicate",
+          "delete": "Delete"
+        },
+        "statusBadge": {
+          "active": "Active",
+          "inactive": "Inactive"
+        },
+        "empty": {
+          "noneFound": "No products found",
+          "noneYet": "No products yet"
+        },
+        "deleteModal": {
+          "title": "Confirm deletion",
+          "body": "Are you sure you want to delete this product? It will be marked as inactive.",
+          "cancel": "Cancel",
+          "confirm": "Delete",
+          "confirming": "Deleting…"
+        },
+        "errors": {
+          "deleteFailed": "Error deleting product",
+          "bulkDeleteFailed": "Error deleting products",
+          "statusFailed": "Error updating status",
+          "duplicateFailed": "Error duplicating product"
+        }
+      },
+      "form": {
+        "sections": {
+          "photo": "Photo",
+          "photoLibrary": "Photo library",
+          "basicInfo": "Basic information",
+          "pricingInventory": "Pricing & inventory",
+          "dimensions": "Dimensions",
+          "variants": "Variants",
+          "publishing": "Publishing",
+          "urlPreview": "URL preview",
+          "quickStats": {
+            "variants": "Variants:",
+            "status": "Status:"
+          }
+        },
+        "fields": {
+          "nameLt": "Name (LT) *",
+          "nameEn": "Name (EN)",
+          "slug": "Slug *",
+          "descriptionLt": "Description (LT)",
+          "descriptionEn": "Description (EN)",
+          "usage": "Usage *",
+          "category": "Category *",
+          "woodType": "Wood type *",
+          "basePrice": "Base price (EUR) *",
+          "stockQuantity": "Stock (pcs.)",
+          "sku": "SKU",
+          "width": "Width (mm)",
+          "height": "Height (mm)",
+          "depth": "Depth (mm)",
+          "weight": "Weight (kg)",
+          "status": "Status"
+        },
+        "placeholders": {
+          "nameLt": "e.g., Burnt spruce cladding",
+          "nameEn": "e.g., Burnt Spruce Cladding",
+          "slug": "e.g., burnt-spruce-cladding",
+          "descriptionLt": "Product description in Lithuanian…",
+          "descriptionEn": "Product description in English…",
+          "selectUsage": "Select usage",
+          "selectCategory": "Select category",
+          "selectWoodType": "Select wood type",
+          "basePrice": "0.00",
+          "stockQuantity": "0",
+          "sku": "SKU-001",
+          "number": "0"
+        },
+        "validation": {
+          "nameRequired": "Name is required",
+          "slugRequired": "Slug is required",
+          "slugFormat": "Slug must contain only lowercase letters, numbers, and hyphens",
+          "categoryRequired": "Category is required",
+          "usageRequired": "Usage is required",
+          "woodRequired": "Wood type is required",
+          "basePricePositive": "Price must be a positive number"
+        },
+        "errors": {
+          "saveFailed": "Error saving product",
+          "deleteFailed": "Error deleting product"
+        },
+        "options": {
+          "categories": {
+            "cladding": "Cladding",
+            "decking": "Decking",
+            "interior": "Interior",
+            "tiles": "Tiles"
+          },
+          "woodTypes": {
+            "pine": "Pine",
+            "spruce": "Spruce",
+            "oak": "Oak",
+            "larch": "Larch"
+          },
+          "usageTypes": {
+            "facade": "Facade",
+            "terrace": "Terrace",
+            "interior": "Interior",
+            "fence": "Fence"
+          },
+          "status": {
+            "draft": "Draft",
+            "published": "Published"
+          },
+          "statusHelp": {
+            "draft": "Visible to admins only",
+            "published": "Visible to all visitors"
+          }
+        },
+        "image": {
+          "previewAlt": "Preview",
+          "noPhoto": "No photo",
+          "chooseFromLibrary": "Choose from library",
+          "hideLibrary": "Hide library",
+          "remove": "Remove"
+        },
+        "photoLibrary": {
+          "help": "Pick a previously uploaded global photo (e.g., spruce + black) from /admin/options.",
+          "wood": "Wood",
+          "color": "Color",
+          "noColors": "No colors (catalog_options)",
+          "refresh": "Refresh",
+          "refreshing": "Loading…",
+          "noneFound": "No photos found for this combination.",
+          "any": "any"
+        },
+        "variants": {
+          "add": "+ Add variant",
+          "empty": "No variants yet. Add colors or finish variants.",
+          "typeLabelColor": "Color",
+          "typeLabelFinish": "Finish",
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "variantModal": {
+          "titleNew": "New variant",
+          "titleEdit": "Edit variant",
+          "fields": {
+            "name": "Name *",
+            "type": "Type *",
+            "hex": "Color code (HEX)",
+            "priceAdjustment": "Price adjustment (EUR)",
+            "description": "Description",
+            "available": "Variant available for ordering"
+          },
+          "placeholders": {
+            "name": "e.g., Natural burnt",
+            "hex": "#161616",
+            "priceAdjustment": "0.00",
+            "description": "Additional description…"
+          },
+          "typeOptions": {
+            "color": "Color",
+            "finish": "Finish"
+          },
+          "priceHelp": "Positive adds, negative subtracts from the base price",
+          "buttons": {
+            "cancel": "Cancel",
+            "save": "Save"
+          }
+        },
+        "buttons": {
+          "saving": "Saving…",
+          "create": "Create product",
+          "save": "Save changes",
+          "cancel": "Cancel",
+          "deleteProduct": "Delete product"
+        },
+        "deleteModal": {
+          "title": "Confirm deletion",
+          "body": "Are you sure you want to permanently delete this product? This action cannot be undone.",
+          "cancel": "Cancel",
+          "confirm": "Delete",
+          "confirming": "Deleting…"
+        }
+      },
       "profile": {
         "selectPlaceholder": "Select profile",
         "addNewOption": "+ Add new profile",

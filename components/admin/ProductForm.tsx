@@ -6,26 +6,32 @@ import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { z } from 'zod';
 import { USAGE_TYPES } from '@/types/admin';
+import { useLocale, useTranslations } from 'next-intl';
+import { toLocalePath, type AppLocale } from '@/i18n/paths';
 
-// Validation schema
-const productSchema = z.object({
-  name: z.string().min(1, 'Pavadinimas privalomas'),
-  name_en: z.string().optional(),
-  slug: z.string().min(1, 'Slug privalomas').regex(/^[a-z0-9-]+$/, 'Slug turi būti tik mažosios raidės, skaičiai ir brūkšneliai'),
-  description: z.string().optional(),
-  description_en: z.string().optional(),
-  category: z.string().min(1, 'Kategorija privaloma'),
-  usage_type: z.string().min(1, 'Pritaikymas privalomas'),
-  wood_type: z.string().min(1, 'Medienos tipas privalomas'),
-  base_price: z.number().min(0, 'Kaina turi būti teigiama'),
-  status: z.enum(['draft', 'published']),
-  stock_quantity: z.number().min(0).optional(),
-  sku: z.string().optional(),
-  width: z.number().optional(),
-  height: z.number().optional(),
-  depth: z.number().optional(),
-  weight: z.number().optional(),
-});
+function createProductSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(1, t('validation.nameRequired')),
+    name_en: z.string().optional(),
+    slug: z
+      .string()
+      .min(1, t('validation.slugRequired'))
+      .regex(/^[a-z0-9-]+$/, t('validation.slugFormat')),
+    description: z.string().optional(),
+    description_en: z.string().optional(),
+    category: z.string().min(1, t('validation.categoryRequired')),
+    usage_type: z.string().min(1, t('validation.usageRequired')),
+    wood_type: z.string().min(1, t('validation.woodRequired')),
+    base_price: z.number().min(0, t('validation.basePricePositive')),
+    status: z.enum(['draft', 'published']),
+    stock_quantity: z.number().min(0).optional(),
+    sku: z.string().optional(),
+    width: z.number().optional(),
+    height: z.number().optional(),
+    depth: z.number().optional(),
+    weight: z.number().optional(),
+  });
+}
 
 interface Variant {
   id?: string;
@@ -82,6 +88,8 @@ const WOOD_TYPES = [
 export default function ProductForm({ product, mode }: Props) {
   const router = useRouter();
   const supabase = createClient();
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations('admin.products.form');
 
   // Form state
   const [name, setName] = useState(product?.name || '');
@@ -215,7 +223,9 @@ export default function ProductForm({ product, mode }: Props) {
     const normalized = (data || [])
       .map((row: any) => {
         const code = (row.value_text as string | null) ?? '';
-        const label = (row.label_lt as string | null) || (row.label_en as string | null) || code;
+        const labelLt = (row.label_lt as string | null) || undefined;
+        const labelEn = (row.label_en as string | null) || undefined;
+        const label = (locale === 'en' ? labelEn : labelLt) || labelLt || labelEn || code;
         return { code, label };
       })
       .filter((x) => x.code);
@@ -288,6 +298,7 @@ export default function ProductForm({ product, mode }: Props) {
   // Validate form
   const validateForm = (): boolean => {
     try {
+      const productSchema = createProductSchema((key: string) => t(key as any));
       productSchema.parse({
         name,
         name_en: nameEn || undefined,
@@ -426,11 +437,11 @@ export default function ProductForm({ product, mode }: Props) {
         }
       }
 
-      router.push('/admin/products');
+      router.push(toLocalePath('/admin/products', locale));
       router.refresh();
     } catch (error) {
       console.error('Error saving product:', error);
-      setSaveError(error instanceof Error ? error.message : 'Klaida išsaugant produktą');
+      setSaveError(error instanceof Error ? error.message : t('errors.saveFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -449,11 +460,11 @@ export default function ProductForm({ product, mode }: Props) {
 
       if (error) throw error;
 
-      router.push('/admin/products');
+      router.push(toLocalePath('/admin/products', locale));
       router.refresh();
     } catch (error) {
       console.error('Error deleting product:', error);
-      setSaveError('Klaida trinant produktą');
+      setSaveError(t('errors.deleteFailed'));
     } finally {
       setIsSaving(false);
       setDeleteModal(false);
@@ -490,22 +501,22 @@ export default function ProductForm({ product, mode }: Props) {
     <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Left Sidebar - Image Preview */}
       <div className="lg:col-span-1">
-        <div className="bg-white rounded-lg p-6 shadow sticky top-8">
-          <h3 className="text-lg font-['DM_Sans'] font-medium mb-4">Nuotrauka</h3>
+        <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1] sticky top-8">
+          <h3 className="text-lg font-['DM_Sans'] font-medium mb-4">{t('sections.photo')}</h3>
           
           <div className="mb-4">
             {imagePreview ? (
               <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-[#FAFAFA]">
                 <Image
                   src={imagePreview}
-                  alt="Preview"
+                  alt={t('image.previewAlt')}
                   fill
                   className="object-cover"
                 />
               </div>
             ) : (
               <div className="w-full aspect-square rounded-lg bg-[#EAEAEA] flex items-center justify-center">
-                <span className="text-[#BBBBBB] font-['DM_Sans']">Nėra nuotraukos</span>
+                <span className="text-[#BBBBBB] font-['DM_Sans']">{t('image.noPhoto')}</span>
               </div>
             )}
           </div>
@@ -523,7 +534,7 @@ export default function ProductForm({ product, mode }: Props) {
               onClick={() => setShowPhotoLibrary((v) => !v)}
               className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#FAFAFA]"
             >
-              {showPhotoLibrary ? 'Slėpti biblioteką' : 'Rinktis iš bibliotekos'}
+              {showPhotoLibrary ? t('image.hideLibrary') : t('image.chooseFromLibrary')}
             </button>
             {(imagePreview || imageUrl) ? (
               <button
@@ -531,40 +542,40 @@ export default function ProductForm({ product, mode }: Props) {
                 onClick={clearImageSelection}
                 className="px-3 py-2 border border-red-200 rounded-lg font-['DM_Sans'] text-sm text-red-700 hover:bg-red-50"
               >
-                Pašalinti
+                {t('image.remove')}
               </button>
             ) : null}
           </div>
 
           {showPhotoLibrary ? (
             <div className="mt-4 border border-[#E1E1E1] rounded-lg p-3 bg-[#FAFAFA]">
-              <p className="font-['DM_Sans'] text-sm font-medium text-[#161616]">Nuotraukų biblioteka</p>
+              <p className="font-['DM_Sans'] text-sm font-medium text-[#161616]">{t('sections.photoLibrary')}</p>
               <p className="mt-1 font-['Outfit'] text-xs text-[#535353]">
-                Čia pasirenkate jau įkeltas globalias nuotraukas (pvz. spruce + black) iš /admin/options.
+                {t('photoLibrary.help')}
               </p>
 
               <div className="mt-3 grid grid-cols-1 gap-3">
                 <div>
-                  <label className="block font-['Outfit'] text-xs text-[#535353]">Mediena</label>
+                  <label className="block font-['Outfit'] text-xs text-[#535353]">{t('photoLibrary.wood')}</label>
                   <select
                     value={libraryWoodType}
                     onChange={(e) => setLibraryWoodType(e.target.value)}
                     className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] rounded-lg font-['Outfit'] text-sm bg-white"
                   >
-                    <option value="spruce">Eglė (spruce)</option>
-                    <option value="larch">Maumedis (larch)</option>
+                    <option value="spruce">{t('options.woodTypes.spruce')} (spruce)</option>
+                    <option value="larch">{t('options.woodTypes.larch')} (larch)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-['Outfit'] text-xs text-[#535353]">Spalva</label>
+                  <label className="block font-['Outfit'] text-xs text-[#535353]">{t('photoLibrary.color')}</label>
                   <select
                     value={libraryColorCode}
                     onChange={(e) => setLibraryColorCode(e.target.value)}
                     className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] rounded-lg font-['Outfit'] text-sm bg-white"
                   >
                     {libraryColors.length === 0 ? (
-                      <option value="">Nėra spalvų (catalog_options)</option>
+                      <option value="">{t('photoLibrary.noColors')}</option>
                     ) : (
                       libraryColors.map((c) => (
                         <option key={c.code} value={c.code}>
@@ -582,7 +593,7 @@ export default function ProductForm({ product, mode }: Props) {
                     onClick={() => loadLibraryAssets()}
                     className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-white disabled:opacity-60"
                   >
-                    {libraryIsLoading ? 'Kraunama…' : 'Atnaujinti'}
+                    {libraryIsLoading ? t('photoLibrary.refreshing') : t('photoLibrary.refresh')}
                   </button>
                   {libraryError ? (
                     <span className="font-['Outfit'] text-xs text-red-700">{libraryError}</span>
@@ -590,7 +601,7 @@ export default function ProductForm({ product, mode }: Props) {
                 </div>
 
                 {libraryAssets.length === 0 ? (
-                  <p className="font-['Outfit'] text-xs text-[#7C7C7C]">Nerasta nuotraukų šiam deriniui.</p>
+                  <p className="font-['Outfit'] text-xs text-[#7C7C7C]">{t('photoLibrary.noneFound')}</p>
                 ) : (
                   <div className="grid grid-cols-3 gap-2">
                     {libraryAssets.map((a) => (
@@ -599,12 +610,12 @@ export default function ProductForm({ product, mode }: Props) {
                         type="button"
                         onClick={() => chooseLibraryImage(a.url)}
                         className="relative group border border-[#E1E1E1] rounded-lg overflow-hidden bg-white"
-                        title={a.wood_type ? `wood=${a.wood_type}` : 'wood=any'}
+                        title={a.wood_type ? `wood=${a.wood_type}` : `wood=${t('photoLibrary.any')}`}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={a.url} alt="asset" className="w-full aspect-square object-cover" />
                         <div className="absolute inset-x-0 bottom-0 bg-black/50 text-white text-[10px] px-1 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {a.wood_type ? a.wood_type : 'any'}
+                          {a.wood_type ? a.wood_type : t('photoLibrary.any')}
                         </div>
                       </button>
                     ))}
@@ -616,9 +627,9 @@ export default function ProductForm({ product, mode }: Props) {
 
           {/* Slug Preview */}
           <div className="mt-6 pt-6 border-t border-[#E1E1E1]">
-            <h4 className="text-sm font-['DM_Sans'] font-medium mb-2">URL peržiūra</h4>
+            <h4 className="text-sm font-['DM_Sans'] font-medium mb-2">{t('sections.urlPreview')}</h4>
             <p className="text-sm text-[#535353] font-['DM_Sans'] break-all">
-              /produktai/{slug || 'product-slug'}
+              {toLocalePath(`/produktai/${slug || 'product-slug'}`, locale)}
             </p>
           </div>
 
@@ -626,13 +637,13 @@ export default function ProductForm({ product, mode }: Props) {
           {mode === 'edit' && (
             <div className="mt-6 pt-6 border-t border-[#E1E1E1] space-y-2">
               <div className="flex justify-between text-sm font-['DM_Sans']">
-                <span className="text-[#535353]">Variantų:</span>
+                <span className="text-[#535353]">{t('sections.quickStats.variants')}</span>
                 <span className="font-medium">{variants.length}</span>
               </div>
               <div className="flex justify-between text-sm font-['DM_Sans']">
-                <span className="text-[#535353]">Statusas:</span>
+                <span className="text-[#535353]">{t('sections.quickStats.status')}</span>
                 <span className={`font-medium ${status === 'published' ? 'text-green-600' : 'text-gray-600'}`}>
-                  {status === 'published' ? 'Publikuotas' : 'Juodraštis'}
+                  {status === 'published' ? t('options.status.published') : t('options.status.draft')}
                 </span>
               </div>
             </div>
@@ -650,14 +661,14 @@ export default function ProductForm({ product, mode }: Props) {
         )}
 
         {/* Basic Information */}
-        <div className="bg-white rounded-lg p-6 shadow">
-          <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">Pagrindinė informacija</h3>
+        <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1]">
+          <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">{t('sections.basicInfo')}</h3>
           
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                  Pavadinimas (LT) *
+                  {t('fields.nameLt')}
                 </label>
                 <input
                   type="text"
@@ -666,28 +677,28 @@ export default function ProductForm({ product, mode }: Props) {
                   className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
                     errors.name ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
                   }`}
-                  placeholder="Pvz., Deginta eglės dailylentė"
+                  placeholder={t('placeholders.nameLt')}
                 />
                 {errors.name && <p className="text-sm text-red-600 mt-1">{errors.name}</p>}
               </div>
 
               <div>
                 <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                  Pavadinimas (EN)
+                  {t('fields.nameEn')}
                 </label>
                 <input
                   type="text"
                   value={nameEn}
                   onChange={(e) => setNameEn(e.target.value)}
                   className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                  placeholder="E.g., Burnt Spruce Cladding"
+                  placeholder={t('placeholders.nameEn')}
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                Slug *
+                  {t('fields.slug')}
               </label>
               <input
                 type="text"
@@ -696,41 +707,41 @@ export default function ProductForm({ product, mode }: Props) {
                 className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
                   errors.slug ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
                 }`}
-                placeholder="pvz-deginta-egles-dailylente"
+                placeholder={t('placeholders.slug')}
               />
               {errors.slug && <p className="text-sm text-red-600 mt-1">{errors.slug}</p>}
             </div>
 
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                Aprašymas (LT)
+                {t('fields.descriptionLt')}
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                placeholder="Produkto aprašymas lietuvių kalba..."
+                placeholder={t('placeholders.descriptionLt')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                Aprašymas (EN)
+                {t('fields.descriptionEn')}
               </label>
               <textarea
                 value={descriptionEn}
                 onChange={(e) => setDescriptionEn(e.target.value)}
                 rows={4}
                 className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                placeholder="Product description in English..."
+                placeholder={t('placeholders.descriptionEn')}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                  Pritaikymas *
+                  {t('fields.usage')}
                 </label>
                 <select
                   value={usageType}
@@ -739,10 +750,10 @@ export default function ProductForm({ product, mode }: Props) {
                     errors.usage_type ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
                   } yw-select`}
                 >
-                  <option value="">Pasirinkite pritaikyma</option>
+                  <option value="">{t('placeholders.selectUsage')}</option>
                   {USAGE_TYPES.map((usage) => (
                     <option key={usage.value} value={usage.value}>
-                      {usage.label}
+                      {t(`options.usageTypes.${usage.value}` as any)}
                     </option>
                   ))}
                 </select>
@@ -751,7 +762,7 @@ export default function ProductForm({ product, mode }: Props) {
 
               <div>
                 <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                  Kategorija *
+                  {t('fields.category')}
                 </label>
                 <select
                   value={category}
@@ -760,9 +771,11 @@ export default function ProductForm({ product, mode }: Props) {
                     errors.category ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
                   } yw-select`}
                 >
-                  <option value="">Pasirinkite kategoriją</option>
-                  {CATEGORIES.map(cat => (
-                    <option key={cat.value} value={cat.value}>{cat.label}</option>
+                  <option value="">{t('placeholders.selectCategory')}</option>
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {t(`options.categories.${cat.value}` as any)}
+                    </option>
                   ))}
                 </select>
                 {errors.category && <p className="text-sm text-red-600 mt-1">{errors.category}</p>}
@@ -770,7 +783,7 @@ export default function ProductForm({ product, mode }: Props) {
 
               <div>
                 <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                  Medienos tipas *
+                  {t('fields.woodType')}
                 </label>
                 <select
                   value={woodType}
@@ -779,9 +792,11 @@ export default function ProductForm({ product, mode }: Props) {
                     errors.wood_type ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
                   } yw-select`}
                 >
-                  <option value="">Pasirinkite medienos tipą</option>
-                  {WOOD_TYPES.map(wood => (
-                    <option key={wood.value} value={wood.value}>{wood.label}</option>
+                  <option value="">{t('placeholders.selectWoodType')}</option>
+                  {WOOD_TYPES.map((wood) => (
+                    <option key={wood.value} value={wood.value}>
+                      {t(`options.woodTypes.${wood.value}` as any)}
+                    </option>
                   ))}
                 </select>
                 {errors.wood_type && <p className="text-sm text-red-600 mt-1">{errors.wood_type}</p>}
@@ -791,13 +806,13 @@ export default function ProductForm({ product, mode }: Props) {
         </div>
 
         {/* Pricing & Inventory */}
-        <div className="bg-white rounded-lg p-6 shadow">
-          <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">Kaina ir atsargos</h3>
+        <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1]">
+          <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">{t('sections.pricingInventory')}</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                Bazinė kaina (EUR) *
+                {t('fields.basePrice')}
               </label>
               <input
                 type="number"
@@ -807,47 +822,47 @@ export default function ProductForm({ product, mode }: Props) {
                 className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
                   errors.base_price ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
                 }`}
-                placeholder="0.00"
+                placeholder={t('placeholders.basePrice')}
               />
               {errors.base_price && <p className="text-sm text-red-600 mt-1">{errors.base_price}</p>}
             </div>
 
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                Atsargos (vnt.)
+                {t('fields.stockQuantity')}
               </label>
               <input
                 type="number"
                 value={stockQuantity}
                 onChange={(e) => setStockQuantity(e.target.value)}
                 className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                placeholder="0"
+                placeholder={t('placeholders.stockQuantity')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                SKU kodas
+                {t('fields.sku')}
               </label>
               <input
                 type="text"
                 value={sku}
                 onChange={(e) => setSku(e.target.value)}
                 className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                placeholder="SKU-001"
+                placeholder={t('placeholders.sku')}
               />
             </div>
           </div>
         </div>
 
         {/* Dimensions */}
-        <div className="bg-white rounded-lg p-6 shadow">
-          <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">Matmenys</h3>
+        <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1]">
+          <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">{t('sections.dimensions')}</h3>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                Plotis (mm)
+                {t('fields.width')}
               </label>
               <input
                 type="number"
@@ -855,13 +870,13 @@ export default function ProductForm({ product, mode }: Props) {
                 value={width}
                 onChange={(e) => setWidth(e.target.value)}
                 className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                placeholder="0"
+                placeholder={t('placeholders.number')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                Aukštis (mm)
+                {t('fields.height')}
               </label>
               <input
                 type="number"
@@ -869,13 +884,13 @@ export default function ProductForm({ product, mode }: Props) {
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
                 className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                placeholder="0"
+                placeholder={t('placeholders.number')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                Gylis (mm)
+                {t('fields.depth')}
               </label>
               <input
                 type="number"
@@ -883,13 +898,13 @@ export default function ProductForm({ product, mode }: Props) {
                 value={depth}
                 onChange={(e) => setDepth(e.target.value)}
                 className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                placeholder="0"
+                placeholder={t('placeholders.number')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                Svoris (kg)
+                {t('fields.weight')}
               </label>
               <input
                 type="number"
@@ -897,16 +912,16 @@ export default function ProductForm({ product, mode }: Props) {
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                placeholder="0"
+                placeholder={t('placeholders.number')}
               />
             </div>
           </div>
         </div>
 
         {/* Variants */}
-        <div className="bg-white rounded-lg p-6 shadow">
+        <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1]">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-['DM_Sans'] font-medium">Variantai</h3>
+            <h3 className="text-lg font-['DM_Sans'] font-medium">{t('sections.variants')}</h3>
             <button
               type="button"
               onClick={() => {
@@ -915,7 +930,7 @@ export default function ProductForm({ product, mode }: Props) {
               }}
               className="px-4 py-2 bg-[#161616] text-white rounded-lg font-['DM_Sans'] text-sm hover:bg-[#2d2d2d]"
             >
-              + Pridėti variantą
+              {t('variants.add')}
             </button>
           </div>
 
@@ -933,7 +948,7 @@ export default function ProductForm({ product, mode }: Props) {
                     <div>
                       <div className="font-['DM_Sans'] font-medium">{variant.name}</div>
                       <div className="text-sm text-[#535353] font-['DM_Sans']">
-                        {variant.variant_type === 'color' ? 'Spalva' : 'Apdaila'}
+                        {variant.variant_type === 'color' ? t('variants.typeLabelColor') : t('variants.typeLabelFinish')}
                         {variant.price_adjustment && variant.price_adjustment !== 0 && (
                           <span className="ml-2">
                             {variant.price_adjustment > 0 ? '+' : ''}{variant.price_adjustment.toFixed(2)} EUR
@@ -948,14 +963,14 @@ export default function ProductForm({ product, mode }: Props) {
                       onClick={() => editVariant(variant)}
                       className="text-sm text-[#161616] hover:underline font-['DM_Sans']"
                     >
-                      Redaguoti
+                      {t('variants.edit')}
                     </button>
                     <button
                       type="button"
                       onClick={() => removeVariant(variant)}
                       className="text-sm text-red-600 hover:underline font-['DM_Sans']"
                     >
-                      Ištrinti
+                      {t('variants.delete')}
                     </button>
                   </div>
                 </div>
@@ -963,31 +978,29 @@ export default function ProductForm({ product, mode }: Props) {
             </div>
           ) : (
             <p className="text-[#535353] font-['DM_Sans'] text-center py-8">
-              Dar nėra variantų. Pridėkite spalvas ar apdailos variantus.
+              {t('variants.empty')}
             </p>
           )}
         </div>
 
         {/* Publishing Options */}
-        <div className="bg-white rounded-lg p-6 shadow">
-          <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">Publikavimas</h3>
+        <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1]">
+          <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">{t('sections.publishing')}</h3>
           
           <div>
             <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-              Statusas
+              {t('fields.status')}
             </label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as 'draft' | 'published')}
               className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] yw-select"
             >
-              <option value="draft">Juodraštis</option>
-              <option value="published">Publikuotas</option>
+              <option value="draft">{t('options.status.draft')}</option>
+              <option value="published">{t('options.status.published')}</option>
             </select>
             <p className="text-sm text-[#535353] font-['DM_Sans'] mt-2">
-              {status === 'draft' 
-                ? 'Produktas matomas tik administratoriams' 
-                : 'Produktas matomas visiems lankytojams'}
+              {status === 'draft' ? t('options.statusHelp.draft') : t('options.statusHelp.published')}
             </p>
           </div>
         </div>
@@ -1000,7 +1013,7 @@ export default function ProductForm({ product, mode }: Props) {
               disabled={isSaving}
               className="px-6 py-3 bg-[#161616] text-white rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#2d2d2d] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSaving ? 'Išsaugoma...' : mode === 'create' ? 'Sukurti produktą' : 'Išsaugoti pakeitimus'}
+              {isSaving ? t('buttons.saving') : mode === 'create' ? t('buttons.create') : t('buttons.save')}
             </button>
             
             <button
@@ -1008,7 +1021,7 @@ export default function ProductForm({ product, mode }: Props) {
               onClick={() => router.back()}
               className="px-6 py-3 border border-[#E1E1E1] rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#FAFAFA]"
             >
-              Atšaukti
+              {t('buttons.cancel')}
             </button>
           </div>
 
@@ -1018,7 +1031,7 @@ export default function ProductForm({ product, mode }: Props) {
               onClick={() => setDeleteModal(true)}
               className="px-6 py-3 border border-red-600 text-red-600 rounded-[100px] font-['DM_Sans'] font-medium hover:bg-red-50"
             >
-              Ištrinti produktą
+              {t('buttons.deleteProduct')}
             </button>
           )}
         </div>
@@ -1041,10 +1054,10 @@ export default function ProductForm({ product, mode }: Props) {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-xl font-['DM_Sans'] font-medium mb-4">
-              Patvirtinti trynimą
+              {t('deleteModal.title')}
             </h3>
             <p className="text-[#535353] font-['DM_Sans'] mb-6">
-              Ar tikrai norite visam laikui ištrinti šį produktą? Šio veiksmo negalima atšaukti.
+              {t('deleteModal.body')}
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -1052,14 +1065,14 @@ export default function ProductForm({ product, mode }: Props) {
                 disabled={isSaving}
                 className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#FAFAFA] disabled:opacity-50"
               >
-                Atšaukti
+                {t('deleteModal.cancel')}
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isSaving}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg font-['DM_Sans'] hover:bg-red-700 disabled:opacity-50"
               >
-                {isSaving ? 'Trinamas...' : 'Ištrinti'}
+                {isSaving ? t('deleteModal.confirming') : t('deleteModal.confirm')}
               </button>
             </div>
           </div>
@@ -1077,6 +1090,7 @@ interface VariantFormModalProps {
 }
 
 function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) {
+  const t = useTranslations('admin.products.form');
   const [name, setName] = useState(variant?.name || '');
   const [variantType, setVariantType] = useState<'color' | 'finish'>(variant?.variant_type || 'color');
   const [hexColor, setHexColor] = useState(variant?.hex_color || '#161616');
@@ -1103,42 +1117,42 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
         <h3 className="text-xl font-['DM_Sans'] font-medium mb-6">
-          {variant ? 'Redaguoti variantą' : 'Naujas variantas'}
+          {variant ? t('variantModal.titleEdit') : t('variantModal.titleNew')}
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-              Pavadinimas *
+              {t('variantModal.fields.name')}
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-              placeholder="Pvz., Natūrali deginta"
+              placeholder={t('variantModal.placeholders.name')}
               required
             />
           </div>
 
           <div>
             <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-              Tipas *
+              {t('variantModal.fields.type')}
             </label>
             <select
               value={variantType}
               onChange={(e) => setVariantType(e.target.value as 'color' | 'finish')}
               className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] yw-select"
             >
-              <option value="color">Spalva</option>
-              <option value="finish">Apdaila</option>
+              <option value="color">{t('variantModal.typeOptions.color')}</option>
+              <option value="finish">{t('variantModal.typeOptions.finish')}</option>
             </select>
           </div>
 
           {variantType === 'color' && (
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                Spalvos kodas (HEX)
+                {t('variantModal.fields.hex')}
               </label>
               <div className="flex gap-2">
                 <input
@@ -1152,7 +1166,7 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
                   value={hexColor}
                   onChange={(e) => setHexColor(e.target.value)}
                   className="flex-1 px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                  placeholder="#161616"
+                  placeholder={t('variantModal.placeholders.hex')}
                 />
               </div>
             </div>
@@ -1160,7 +1174,7 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
 
           <div>
             <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-              Kainos koregavimas (EUR)
+              {t('variantModal.fields.priceAdjustment')}
             </label>
             <input
               type="number"
@@ -1168,21 +1182,21 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
               value={priceAdjustment}
               onChange={(e) => setPriceAdjustment(e.target.value)}
               className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-              placeholder="0.00"
+              placeholder={t('variantModal.placeholders.priceAdjustment')}
             />
-            <p className="text-xs text-[#535353] mt-1">Teigiama reikšmė prideda, neigiama atima nuo bazinės kainos</p>
+            <p className="text-xs text-[#535353] mt-1">{t('variantModal.priceHelp')}</p>
           </div>
 
           <div>
             <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-              Aprašymas
+              {t('variantModal.fields.description')}
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
               className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-              placeholder="Papildomas aprašymas..."
+              placeholder={t('variantModal.placeholders.description')}
             />
           </div>
 
@@ -1195,7 +1209,7 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
               className="rounded"
             />
             <label htmlFor="is_available" className="text-sm font-['DM_Sans']">
-              Variantas prieinamas užsakymui
+              {t('variantModal.fields.available')}
             </label>
           </div>
 
@@ -1205,13 +1219,13 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
               onClick={onCancel}
               className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#FAFAFA]"
             >
-              Atšaukti
+              {t('variantModal.buttons.cancel')}
             </button>
             <button
               type="submit"
               className="px-4 py-2 bg-[#161616] text-white rounded-lg font-['DM_Sans'] hover:bg-[#2d2d2d]"
             >
-              Išsaugoti
+              {t('variantModal.buttons.save')}
             </button>
           </div>
         </form>

@@ -3,6 +3,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { getOgImage } from '@/lib/og-image';
 import ConfiguratorPage from '@/components/configurator/ConfiguratorPage';
 import { canonicalUrl } from '@/lib/seo/canonical';
+import { applySeoOverride } from '@/lib/seo/overrides';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.configurator3d');
@@ -10,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const canonical = canonicalUrl('/configurator3d', currentLocale);
 
-  return {
+  const metadata: Metadata = {
     title: t('title'),
     description: t('description'),
     alternates: {
@@ -31,6 +32,8 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [getOgImage('products')],
     },
   };
+
+  return applySeoOverride(metadata, new URL(canonical).pathname, currentLocale);
 }
 
 export default function Configurator3DPage() {

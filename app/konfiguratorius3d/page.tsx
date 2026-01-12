@@ -3,13 +3,14 @@ import { getTranslations } from 'next-intl/server';
 import { getOgImage } from '@/lib/og-image';
 import ConfiguratorPage from '@/components/configurator/ConfiguratorPage';
 import { canonicalUrl } from '@/lib/seo/canonical';
+import { applySeoOverride } from '@/lib/seo/overrides';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.configurator3d');
   const canonical = canonicalUrl('/configurator3d', 'lt');
   const ogImage = getOgImage('products');
 
-  return {
+  const metadata: Metadata = {
     title: t('title'),
     description: t('description'),
     alternates: {
@@ -30,6 +31,8 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [ogImage],
     },
   };
+
+  return applySeoOverride(metadata, new URL(canonical).pathname, 'lt');
 }
 
 export default function Konfiguratorius3DPage() {

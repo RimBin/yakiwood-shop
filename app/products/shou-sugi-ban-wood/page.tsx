@@ -3,6 +3,7 @@ import ConfiguratorShell from '@/components/configurator/ConfiguratorShell';
 import { getPresetRobotsMeta } from '@/components/configurator/seo';
 import { getLocale } from 'next-intl/server';
 import { toLocalePath } from '@/i18n/paths';
+import { applySeoOverride } from '@/lib/seo/overrides';
 
 const PRODUCT_SLUG = 'shou-sugi-ban-wood';
 
@@ -19,7 +20,7 @@ export async function generateMetadata({ searchParams }: ShouSugiBanProductPageP
   const productPath = toLocalePath(`/products/${PRODUCT_SLUG}`, currentLocale);
   const canonical = `https://yakiwood.lt${productPath}`;
 
-  return {
+  const metadata: Metadata = {
     title: 'Shou Sugi Ban mediena',
     description: 'Konfigūruokite Shou Sugi Ban lentas: mediena, paskirtis, spalva ir profilis. 2D peržiūra yra numatyta, 3D įjungiama pasirinkus "3D".',
     alternates: {
@@ -47,6 +48,8 @@ export async function generateMetadata({ searchParams }: ShouSugiBanProductPageP
       images: ['https://yakiwood.lt/images/ui/wood/imgSpruce.png'],
     },
   };
+
+  return applySeoOverride(metadata, new URL(canonical).pathname, currentLocale);
 }
 
 export default async function ShouSugiBanProductPage({ searchParams }: ShouSugiBanProductPageProps) {

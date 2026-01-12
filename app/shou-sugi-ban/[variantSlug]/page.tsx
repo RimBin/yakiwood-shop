@@ -5,6 +5,7 @@ import { INDEXABLE_SHOU_SUGI_BAN_VARIANT_SLUGS, isIndexableVariantSlug } from '@
 import { getLocale } from 'next-intl/server';
 import { canonicalUrl } from '@/lib/seo/canonical';
 import { getOgImage } from '@/lib/og-image';
+import { applySeoOverride } from '@/lib/seo/overrides';
 
 export async function generateStaticParams() {
   return INDEXABLE_SHOU_SUGI_BAN_VARIANT_SLUGS.map((variantSlug) => ({ variantSlug }));
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ variantSl
       ? 'Statinis SEO puslapis su pasirinkto varianto aprašymu ir nuoroda į produkto konfigūratorių.'
       : 'Static SEO landing page for a selected variant with a link to the configurator.';
 
-  return {
+  const metadata: Metadata = {
     title,
     description,
     alternates: {
@@ -50,6 +51,8 @@ export async function generateMetadata({ params }: { params: Promise<{ variantSl
       images: [getOgImage('products')],
     },
   };
+
+  return applySeoOverride(metadata, new URL(canonical).pathname, currentLocale);
 }
 
 export default async function ShouSugiBanVariantLandingPage({

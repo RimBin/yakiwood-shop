@@ -4,6 +4,7 @@ import { getProjectBySlug, getRelatedProjects, projects } from '@/data/projects'
 import { getProjectOgImage } from '@/lib/og-image';
 import { getLocale } from 'next-intl/server';
 import { toLocalePath } from '@/i18n/paths';
+import { applySeoOverride } from '@/lib/seo/overrides';
 
 interface ProjectPageProps {
   params: Promise<{
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   const projectPath = toLocalePath(`/projects/${project.slug}`, currentLocale);
   const canonical = `https://yakiwood.lt${projectPath}`;
 
-  return {
+  const metadata: Metadata = {
     title: `${project.title} - ${project.location}`,
     description: project.description,
     alternates: {
@@ -60,6 +61,8 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
       images: [getProjectOgImage(ogImage)],
     },
   };
+
+  return applySeoOverride(metadata, new URL(canonical).pathname, currentLocale);
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {

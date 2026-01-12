@@ -807,6 +807,17 @@
       "cancel": "Atšaukti",
       "addNewEllipsis": "Pridėti naują…"
     },
+    "productForm": {
+      "validation": {
+        "nameRequired": "Pavadinimas privalomas",
+        "slugRequired": "Slug privalomas",
+        "slugFormat": "Slug turi būti tik mažosios raidės, skaičiai ir brūkšneliai",
+        "categoryRequired": "Kategorija privaloma",
+        "usageRequired": "Pritaikymas privalomas",
+        "woodRequired": "Medienos tipas privalomas",
+        "basePricePositive": "Kaina turi būti teigiama"
+      }
+    },
     "posts": {
       "importSuccess": "Sėkmingai importuota įrašų: {count}",
       "importError": "Nepavyko importuoti įrašų. Patikrinkite JSON formatą."
@@ -924,6 +935,216 @@
       "newProductDesc": "Sukurkite naują produktą su variantais",
       "editProduct": "Redaguoti produktą",
       "editProductDesc": "Atnaujinkite produkto informaciją ir variantas",
+      "list": {
+        "searchPlaceholder": "Ieškoti produktų…",
+        "newProductButton": "+ Naujas produktas",
+        "filters": {
+          "allCategories": "Visos kategorijos",
+          "allUsage": "Visi pritaikymai",
+          "allStatuses": "Visi statusai",
+          "statusActivePlural": "Aktyvūs",
+          "statusInactivePlural": "Neaktyvūs"
+        },
+        "bulk": {
+          "selected": "Pasirinkta: {count}",
+          "publish": "Publikuoti",
+          "unpublish": "Nuimti",
+          "delete": "Ištrinti",
+          "deleteConfirm": "Ar tikrai norite ištrinti {count} produktų?"
+        },
+        "table": {
+          "product": "Produktas",
+          "category": "Kategorija",
+          "usage": "Pritaikymas",
+          "price": "Kaina",
+          "stock": "Atsargos",
+          "status": "Statusas",
+          "actions": "Veiksmai",
+          "noImage": "Nėra"
+        },
+        "rowActions": {
+          "edit": "Redaguoti",
+          "preview": "Peržiūra",
+          "duplicate": "Dubliuoti",
+          "delete": "Ištrinti"
+        },
+        "statusBadge": {
+          "active": "Aktyvus",
+          "inactive": "Neaktyvus"
+        },
+        "empty": {
+          "noneFound": "Produktų nerasta",
+          "noneYet": "Dar nėra produktų"
+        },
+        "deleteModal": {
+          "title": "Patvirtinti trynimą",
+          "body": "Ar tikrai norite ištrinti šį produktą? Jis bus pažymėtas kaip neaktyvus.",
+          "cancel": "Atšaukti",
+          "confirm": "Ištrinti",
+          "confirming": "Trinamas…"
+        },
+        "errors": {
+          "deleteFailed": "Klaida trinant produktą",
+          "bulkDeleteFailed": "Klaida trinant produktus",
+          "statusFailed": "Klaida keičiant būseną",
+          "duplicateFailed": "Klaida dubliuojant produktą"
+        }
+      },
+      "form": {
+        "sections": {
+          "photo": "Nuotrauka",
+          "photoLibrary": "Nuotraukų biblioteka",
+          "basicInfo": "Pagrindinė informacija",
+          "pricingInventory": "Kaina ir atsargos",
+          "dimensions": "Matmenys",
+          "variants": "Variantai",
+          "publishing": "Publikavimas",
+          "urlPreview": "URL peržiūra",
+          "quickStats": {
+            "variants": "Variantų:",
+            "status": "Statusas:"
+          }
+        },
+        "fields": {
+          "nameLt": "Pavadinimas (LT) *",
+          "nameEn": "Pavadinimas (EN)",
+          "slug": "Slug *",
+          "descriptionLt": "Aprašymas (LT)",
+          "descriptionEn": "Aprašymas (EN)",
+          "usage": "Pritaikymas *",
+          "category": "Kategorija *",
+          "woodType": "Medienos tipas *",
+          "basePrice": "Bazinė kaina (EUR) *",
+          "stockQuantity": "Atsargos (vnt.)",
+          "sku": "SKU kodas",
+          "width": "Plotis (mm)",
+          "height": "Aukštis (mm)",
+          "depth": "Gylis (mm)",
+          "weight": "Svoris (kg)",
+          "status": "Statusas"
+        },
+        "placeholders": {
+          "nameLt": "Pvz., Deginta eglės dailylentė",
+          "nameEn": "Pvz., Burnt Spruce Cladding",
+          "slug": "pvz-deginta-egles-dailylente",
+          "descriptionLt": "Produkto aprašymas lietuvių kalba…",
+          "descriptionEn": "Product description in English…",
+          "selectUsage": "Pasirinkite pritaikymą",
+          "selectCategory": "Pasirinkite kategoriją",
+          "selectWoodType": "Pasirinkite medienos tipą",
+          "basePrice": "0.00",
+          "stockQuantity": "0",
+          "sku": "SKU-001",
+          "number": "0"
+        },
+        "validation": {
+          "nameRequired": "Pavadinimas privalomas",
+          "slugRequired": "Slug privalomas",
+          "slugFormat": "Slug turi būti tik mažosios raidės, skaičiai ir brūkšneliai",
+          "categoryRequired": "Kategorija privaloma",
+          "usageRequired": "Pritaikymas privalomas",
+          "woodRequired": "Medienos tipas privalomas",
+          "basePricePositive": "Kaina turi būti teigiama"
+        },
+        "errors": {
+          "saveFailed": "Klaida išsaugant produktą",
+          "deleteFailed": "Klaida trinant produktą"
+        },
+        "options": {
+          "categories": {
+            "cladding": "Fasadai",
+            "decking": "Lentos",
+            "interior": "Interjeras",
+            "tiles": "Plytelės"
+          },
+          "woodTypes": {
+            "pine": "Pušis",
+            "spruce": "Eglė",
+            "oak": "Ąžuolas",
+            "larch": "Maumedis"
+          },
+          "usageTypes": {
+            "facade": "Fasadui",
+            "terrace": "Terasai",
+            "interior": "Interjerui",
+            "fence": "Tvoroms"
+          },
+          "status": {
+            "draft": "Juodraštis",
+            "published": "Publikuotas"
+          },
+          "statusHelp": {
+            "draft": "Produktas matomas tik administratoriams",
+            "published": "Produktas matomas visiems lankytojams"
+          }
+        },
+        "image": {
+          "previewAlt": "Peržiūra",
+          "noPhoto": "Nėra nuotraukos",
+          "chooseFromLibrary": "Rinktis iš bibliotekos",
+          "hideLibrary": "Slėpti biblioteką",
+          "remove": "Pašalinti"
+        },
+        "photoLibrary": {
+          "help": "Čia pasirenkate jau įkeltas globalias nuotraukas (pvz. spruce + black) iš /admin/options.",
+          "wood": "Mediena",
+          "color": "Spalva",
+          "noColors": "Nėra spalvų (catalog_options)",
+          "refresh": "Atnaujinti",
+          "refreshing": "Kraunama…",
+          "noneFound": "Nerasta nuotraukų šiam deriniui.",
+          "any": "bet kuri"
+        },
+        "variants": {
+          "add": "+ Pridėti variantą",
+          "empty": "Dar nėra variantų. Pridėkite spalvas ar apdailos variantus.",
+          "typeLabelColor": "Spalva",
+          "typeLabelFinish": "Apdaila",
+          "edit": "Redaguoti",
+          "delete": "Ištrinti"
+        },
+        "variantModal": {
+          "titleNew": "Naujas variantas",
+          "titleEdit": "Redaguoti variantą",
+          "fields": {
+            "name": "Pavadinimas *",
+            "type": "Tipas *",
+            "hex": "Spalvos kodas (HEX)",
+            "priceAdjustment": "Kainos koregavimas (EUR)",
+            "description": "Aprašymas",
+            "available": "Variantas prieinamas užsakymui"
+          },
+          "placeholders": {
+            "name": "Pvz., Natūrali deginta",
+            "hex": "#161616",
+            "priceAdjustment": "0.00",
+            "description": "Papildomas aprašymas…"
+          },
+          "typeOptions": {
+            "color": "Spalva",
+            "finish": "Apdaila"
+          },
+          "priceHelp": "Teigiama reikšmė prideda, neigiama atima nuo bazinės kainos",
+          "buttons": {
+            "cancel": "Atšaukti",
+            "save": "Išsaugoti"
+          }
+        },
+        "buttons": {
+          "saving": "Išsaugoma…",
+          "create": "Sukurti produktą",
+          "save": "Išsaugoti pakeitimus",
+          "cancel": "Atšaukti",
+          "deleteProduct": "Ištrinti produktą"
+        },
+        "deleteModal": {
+          "title": "Patvirtinti trynimą",
+          "body": "Ar tikrai norite visam laikui ištrinti šį produktą? Šio veiksmo negalima atšaukti.",
+          "cancel": "Atšaukti",
+          "confirm": "Ištrinti",
+          "confirming": "Trinamas…"
+        }
+      },
       "profile": {
         "selectPlaceholder": "Pasirinkite profilį",
         "addNewOption": "+ Pridėti naują profilį",
