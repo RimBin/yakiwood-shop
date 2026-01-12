@@ -143,6 +143,21 @@ export default function ProductForm({ product, mode }: Props) {
     }
   }, [name, mode, slug]);
 
+  useEffect(() => {
+    if (!supabase) return;
+    if (!showPhotoLibrary) return;
+    void loadLibraryColors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showPhotoLibrary]);
+
+  useEffect(() => {
+    if (!supabase) return;
+    if (!showPhotoLibrary) return;
+    if (!libraryColorCode) return;
+    void loadLibraryAssets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showPhotoLibrary, libraryWoodType, libraryColorCode]);
+
   if (!supabase) {
     return (
       <div className="w-full max-w-[1200px] mx-auto px-4 md:px-10 py-8">
@@ -247,21 +262,6 @@ export default function ProductForm({ product, mode }: Props) {
       setLibraryIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!supabase) return;
-    if (!showPhotoLibrary) return;
-    void loadLibraryColors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPhotoLibrary]);
-
-  useEffect(() => {
-    if (!supabase) return;
-    if (!showPhotoLibrary) return;
-    if (!libraryColorCode) return;
-    void loadLibraryAssets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPhotoLibrary, libraryWoodType, libraryColorCode]);
 
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile) return null;

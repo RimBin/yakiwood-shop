@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "node scripts/dev.js",
     "dev:unlock": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-unlock.ps1",
+    "clean:next": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue\"",
     "demo:bootstrap-users": "node scripts/bootstrap-demo-users.mjs",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
@@ -12,7 +13,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
-    "build": "next build",
+    "build": "node scripts/build.js",
     "start": "next start",
     "lint": "eslint",
     "assets:download": "python scripts/download-assets.py",

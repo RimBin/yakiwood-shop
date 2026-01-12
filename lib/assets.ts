@@ -74,6 +74,25 @@ const localAssets = {
 
   // Hero
   heroVector: '/images/hero/Vector.png',
+
+  // Finishes (preview images)
+  finishSpruceBlack: '/assets/finishes/spruce/shou-sugi-ban-spruce-black-facade-terrace-cladding.webp',
+  finishSpruceCarbon: '/assets/finishes/spruce/shou-sugi-ban-spruce-carbon-facade-terrace-cladding.webp',
+  finishSpruceCarbonLight: '/assets/finishes/spruce/shou-sugi-ban-spruce-carbon-light-facade-terrace-cladding.webp',
+  finishSpruceDarkBrown: '/assets/finishes/spruce/shou-sugi-ban-spruce-dark-brown-facade-terrace-cladding.webp',
+  finishSpruceGraphite: '/assets/finishes/spruce/shou-sugi-ban-spruce-graphite-facade-terrace-cladding.webp',
+  finishSpruceLatte: '/assets/finishes/spruce/shou-sugi-ban-spruce-latte-facade-terrace-cladding.webp',
+  finishSpruceNatural: '/assets/finishes/spruce/shou-sugi-ban-spruce-natural-facade-terrace-cladding.webp',
+  finishSpruceSilver: '/assets/finishes/spruce/shou-sugi-ban-spruce-silver-facade-terrace-cladding.webp',
+
+  finishLarchBlack: '/assets/finishes/larch/shou-sugi-ban-larch-black-facade-terrace-cladding.webp',
+  finishLarchCarbon: '/assets/finishes/larch/shou-sugi-ban-larch-carbon-facade-terrace-cladding.webp',
+  finishLarchCarbonLight: '/assets/finishes/larch/shou-sugi-ban-larch-carbon-light-facade-terrace-cladding.webp',
+  finishLarchDarkBrown: '/assets/finishes/larch/shou-sugi-ban-larch-dark-brown-facade-terrace-cladding.webp',
+  finishLarchGraphite: '/assets/finishes/larch/shou-sugi-ban-larch-graphite-facade-terrace-cladding.webp',
+  finishLarchLatte: '/assets/finishes/larch/shou-sugi-ban-larch-latte-facade-terrace-cladding.webp',
+  finishLarchNatural: '/assets/finishes/larch/shou-sugi-ban-larch-natural-facade-terrace-cladding.webp',
+  finishLarchSilver: '/assets/finishes/larch/shou-sugi-ban-larch-silver-facade-terrace-cladding.webp',
 } as const;
 
 export type AssetKey = keyof typeof localAssets;
@@ -155,4 +174,27 @@ export const assets = {
   payments: localAssets.imgPayments,
   // Expose hero vector directly
   heroVector: localAssets.heroVector,
+
+  finishes: {
+    spruce: {
+      black: localAssets.finishSpruceBlack,
+      carbon: localAssets.finishSpruceCarbon,
+      carbonLight: localAssets.finishSpruceCarbonLight,
+      darkBrown: localAssets.finishSpruceDarkBrown,
+      graphite: localAssets.finishSpruceGraphite,
+      latte: localAssets.finishSpruceLatte,
+      natural: localAssets.finishSpruceNatural,
+      silver: localAssets.finishSpruceSilver,
+    },
+    larch: {
+      black: localAssets.finishLarchBlack,
+      carbon: localAssets.finishLarchCarbon,
+      carbonLight: localAssets.finishLarchCarbonLight,
+      darkBrown: localAssets.finishLarchDarkBrown,
+      graphite: localAssets.finishLarchGraphite,
+      latte: localAssets.finishLarchLatte,
+      natural: localAssets.finishLarchNatural,
+      silver: localAssets.finishLarchSilver,
+    },
+  },
 };

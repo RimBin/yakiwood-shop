@@ -775,6 +775,20 @@
     "selectColorAria": "Select color {name}",
     "noteTitle": "Note:",
     "noteBody": "Actual color and texture may vary slightly from what you see here. Each board is unique due to the natural properties of wood.",
+
+    "pricingTitle": "Price",
+    "inputModeLabel": "Calculate by",
+    "inputModeBoards": "Boards",
+    "inputModeArea": "m²",
+    "quantityBoardsLabel": "Quantity (boards)",
+    "targetAreaLabel": "Area (m²)",
+    "roundingNotice": "Rounded up to {boards} boards ({actualArea} m²)",
+    "unitPricePerM2Label": "Price per m²",
+    "unitPricePerBoardLabel": "Price per board",
+    "totalAreaLabel": "Total area",
+    "lineTotalLabel": "Total",
+    "calculatingPrice": "Calculating price...",
+    "priceNotAvailable": "Price not available for this configuration",
     "title": "3D Product Configurator",
     "subtitle": "Customize your product",
     "color": "Color",
@@ -928,7 +942,8 @@
     "main": {
       "title": "Admin Panel",
       "subtitle": "Manage products, projects, and blog posts",
-      "loadSampleProducts": "Load Sample Products"
+      "loadSampleProducts": "Load Sample Products",
+      "sampleProductsLoaded": "{count} products loaded!"
     },
     "tabs": {
       "dashboard": "Dashboard",
@@ -941,10 +956,74 @@
       "emailTemplates": "Email Templates",
       "badgeNew": "new"
     },
+    "ui": {
+      "noFileSelected": "No file selected",
+      "add": "Add",
+      "cancel": "Cancel",
+      "addNewEllipsis": "Add new…"
+    },
+    "posts": {
+      "importSuccess": "Imported {count} posts successfully!",
+      "importError": "Error importing posts. Please check the JSON format."
+    },
+    "productsDemo": {
+      "noticeLine1": "Note: this /admin page is a demo and stores products only in this browser (localStorage).",
+      "noticeLine2": "Real products (Supabase) are created via /admin/products/new.",
+      "openProducts": "Open products",
+      "createRealProduct": "Create real product",
+      "addNewProduct": "Add New Product",
+      "fields": {
+        "name": "Product name *",
+        "slug": "Slug (URL) *",
+        "description": "Description",
+        "basePrice": "Base price (EUR) *",
+        "salePrice": "Sale price (EUR)",
+        "inStock": "In stock",
+        "usage": "Usage",
+        "wood": "Wood",
+        "profile": "Profile",
+        "color": "Color",
+        "thickness": "Thickness (mm)",
+        "width": "Width (mm)",
+        "length": "Length (mm)"
+      },
+      "placeholders": {
+        "name": "Black larch facade board",
+        "slug": "black-larch-facade-board",
+        "description": "Enter product description…",
+        "woodCustom": "Enter wood name",
+        "colorCustom": "Enter color name"
+      },
+      "usage": {
+        "facade": "Facade",
+        "terrace": "Terrace",
+        "interior": "Interior",
+        "fence": "Fence"
+      },
+      "wood": {
+        "spruce": "Spruce",
+        "larch": "Larch"
+      },
+      "colors": {
+        "natural": "Natural",
+        "carbonLight": "Carbon Light",
+        "carbonDark": "Carbon Dark",
+        "brown": "Brown",
+        "graphite": "Graphite",
+        "latte": "Latte",
+        "silver": "Silver",
+        "black": "Black"
+      }
+    },
     "seo": {
       "title": "SEO Management",
       "subtitle": "Monitor and optimize your website's search engine performance",
       "scanning": "Scanning pages...",
+      "errors": {
+        "noSession": "You must be logged in to use admin tools",
+        "scanFailed": "SEO scan failed",
+        "fixFailed": "Failed to generate fix suggestions"
+      },
       "stats": {
         "totalPages": "Total Pages",
         "averageScore": "Average Score",
@@ -967,6 +1046,8 @@
       },
       "actions": {
         "viewDetails": "View Details",
+        "rescan": "Rescan",
+        "exportFixes": "Export Fixes",
         "exportJson": "Export JSON"
       },
       "noPages": "No pages match the selected filter",

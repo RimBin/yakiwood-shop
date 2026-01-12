@@ -8,6 +8,7 @@ import { toLocalePath } from '@/i18n/paths';
 import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
 import { useCartStore } from '@/lib/cart/store';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
+import type { UsageType } from '@/lib/pricing/configuration';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -18,6 +19,15 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const addItem = useCartStore((state) => state.addItem);
+  const cartItems = useCartStore((state) => state.items);
+
+  const cartTotalAreaM2 = useMemo(() => {
+    return cartItems.reduce((sum, item) => {
+      const a = item.pricingSnapshot?.totalAreaM2;
+      if (typeof a === 'number' && Number.isFinite(a) && a > 0) return sum + a;
+      return sum;
+    }, 0);
+  }, [cartItems]);
 
   const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
   const displayDescription =
@@ -66,11 +76,24 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
   const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(colorOptions[0] || null);
   const [selectedFinish, setSelectedFinish] = useState<ProductProfileVariant | null>(profileOptions[0] || null);
-  const [selectedThicknessMm, setSelectedThicknessMm] = useState<number>(20);
+
+  const usageTypeForQuote: UsageType | undefined = useMemo(() => {
+    const v = String(product.category || '').toLowerCase();
+    if (v === 'facade' || v === 'terrace' || v === 'interior' || v === 'fence') return v;
+    return undefined;
+  }, [product.category]);
+
+  const [selectedThicknessMm, setSelectedThicknessMm] = useState<number>(() => {
+    return usageTypeForQuote === 'terrace' ? 28 : 20;
+  });
 
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
-  const [quotedUnitPrice, setQuotedUnitPrice] = useState<number | null>(null);
+  const [quotedPricing, setQuotedPricing] = useState<null | {
+    unitPricePerBoard: number;
+    unitPricePerM2: number;
+    unitAreaM2: number;
+  }>(null);
 
   useEffect(() => {
     setSelectedColor(colorOptions[0] || null);
@@ -80,13 +103,23 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     setSelectedFinish(profileOptions[0] || null);
   }, [profileOptions]);
 
-  const thicknessOptions = useMemo(
-    () => [
+  const thicknessOptions = useMemo(() => {
+    const all = [
       { valueMm: 20, label: '18/20 mm' },
       { valueMm: 28, label: '28 mm' },
-    ],
-    []
-  );
+    ];
+
+    if (usageTypeForQuote === 'terrace') return all.filter((x) => x.valueMm === 28);
+    if (usageTypeForQuote === 'facade') return all.filter((x) => x.valueMm === 20);
+    return all;
+  }, [usageTypeForQuote]);
+
+  useEffect(() => {
+    const allowed = new Set(thicknessOptions.map((x) => x.valueMm));
+    if (!allowed.has(selectedThicknessMm)) {
+      setSelectedThicknessMm(thicknessOptions[0]?.valueMm ?? 20);
+    }
+  }, [selectedThicknessMm, thicknessOptions]);
 
   const selectedThicknessLabel = useMemo(() => {
     return thicknessOptions.find((opt) => opt.valueMm === selectedThicknessMm)?.label ?? `${selectedThicknessMm} mm`;
@@ -102,30 +135,50 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     const widthMm = selectedFinish?.dimensions?.width;
     const lengthMm = selectedFinish?.dimensions?.length;
 
+    const unitPricePerBoard = quotedPricing?.unitPricePerBoard;
+    const unitPricePerM2 = quotedPricing?.unitPricePerM2;
+    const unitAreaM2 = quotedPricing?.unitAreaM2;
+
     addItem({
       id: product.id,
       name: displayName,
       slug: product.slug,
-      basePrice: typeof quotedUnitPrice === 'number' ? quotedUnitPrice : selectionPrice,
+      basePrice: typeof unitPricePerBoard === 'number' ? unitPricePerBoard : selectionPrice,
       color: selectedColor?.name,
       finish: selectedFinish?.name,
       configuration: {
+        usageType: usageTypeForQuote,
         colorVariantId: selectedColor?.id,
         profileVariantId: selectedFinish?.id,
         thicknessMm: selectedThicknessMm,
         widthMm: typeof widthMm === 'number' ? widthMm : undefined,
         lengthMm: typeof lengthMm === 'number' ? lengthMm : undefined,
       },
+      inputMode: 'boards',
+      pricingSnapshot:
+        typeof unitPricePerBoard === 'number' &&
+        typeof unitPricePerM2 === 'number' &&
+        typeof unitAreaM2 === 'number'
+          ? {
+              unitAreaM2,
+              totalAreaM2: unitAreaM2 * 1,
+              pricePerM2Used: unitPricePerM2,
+              unitPrice: unitPricePerBoard,
+              lineTotal: unitPricePerBoard * 1,
+            }
+          : undefined,
     });
   };
 
   useEffect(() => {
     const widthMm = selectedFinish?.dimensions?.width;
     const lengthMm = selectedFinish?.dimensions?.length;
+    const unitAreaM2ForThreshold =
+      typeof widthMm === 'number' && typeof lengthMm === 'number' ? (widthMm / 1000) * (lengthMm / 1000) : 0;
 
     if (!product?.id) return;
     if (typeof widthMm !== 'number' || typeof lengthMm !== 'number') {
-      setQuotedUnitPrice(null);
+      setQuotedPricing(null);
       setQuoteError(null);
       return;
     }
@@ -142,17 +195,20 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           signal: controller.signal,
           body: JSON.stringify({
             productId: product.id,
+            usageType: usageTypeForQuote,
             profileVariantId: selectedFinish?.id,
             colorVariantId: selectedColor?.id,
             thicknessMm: selectedThicknessMm,
             widthMm,
             lengthMm,
+            inputMode: 'boards',
             quantityBoards: 1,
+            cartTotalAreaM2: cartTotalAreaM2 + unitAreaM2ForThreshold,
           }),
         });
 
         if (!res.ok) {
-          setQuotedUnitPrice(null);
+          setQuotedPricing(null);
           try {
             const data = await res.json();
             setQuoteError(typeof data?.error === 'string' ? data.error : null);
@@ -163,15 +219,25 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         }
 
         const data = await res.json();
-        const unit = Number(data?.unitPricePerBoard);
-        if (Number.isFinite(unit) && unit > 0) {
-          setQuotedUnitPrice(unit);
+        const unitPricePerBoard = Number(data?.unitPricePerBoard);
+        const unitPricePerM2 = Number(data?.unitPricePerM2);
+        const quotedUnitAreaM2 = Number(data?.areaM2);
+
+        if (
+          Number.isFinite(unitPricePerBoard) &&
+          unitPricePerBoard > 0 &&
+          Number.isFinite(unitPricePerM2) &&
+          unitPricePerM2 > 0 &&
+          Number.isFinite(quotedUnitAreaM2) &&
+          quotedUnitAreaM2 > 0
+        ) {
+          setQuotedPricing({ unitPricePerBoard, unitPricePerM2, unitAreaM2: quotedUnitAreaM2 });
         } else {
-          setQuotedUnitPrice(null);
+          setQuotedPricing(null);
         }
       } catch (e: any) {
         if (e?.name === 'AbortError') return;
-        setQuotedUnitPrice(null);
+        setQuotedPricing(null);
         setQuoteError(currentLocale === 'lt' ? 'Nepavyko apskaičiuoti kainos' : 'Failed to calculate price');
       } finally {
         setQuoteLoading(false);
@@ -181,7 +247,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     run();
 
     return () => controller.abort();
-  }, [product?.id, selectedFinish?.id, selectedFinish?.dimensions?.width, selectedFinish?.dimensions?.length, selectedColor?.id, selectedThicknessMm, currentLocale]);
+  }, [product?.id, usageTypeForQuote, selectedFinish?.id, selectedFinish?.dimensions?.width, selectedFinish?.dimensions?.length, selectedColor?.id, selectedThicknessMm, cartTotalAreaM2, currentLocale]);
 
   const solutions = [
     { id: 'facade', label: t('solutions.facade') },
@@ -302,9 +368,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
                   {currentLocale === 'lt' ? 'Skaičiuojama kaina…' : 'Calculating price…'}
                 </p>
-              ) : typeof quotedUnitPrice === 'number' ? (
+              ) : typeof quotedPricing?.unitPricePerBoard === 'number' ? (
                 <p className="font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#161616] tracking-[-0.32px]">
-                  {currentLocale === 'lt' ? 'Pasirinkimo kaina:' : 'Selected price:'} {quotedUnitPrice.toFixed(2)} €
+                  {currentLocale === 'lt' ? 'Pasirinkimo kaina:' : 'Selected price:'}{' '}
+                  {quotedPricing.unitPricePerBoard.toFixed(2)} €
                 </p>
               ) : quoteError ? (
                 <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">{quoteError}</p>

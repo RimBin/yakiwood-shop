@@ -1,10 +1,11 @@
 "use client";
 
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useMemo, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import type { ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { useCartStore } from '@/lib/cart/store';
 
 interface PlaceholderModelProps {
   color: string;
@@ -48,6 +49,7 @@ export default function Konfiguratorius3D({
   canvasClassName,
 }: Konfiguratorius3DProps) {
   const t = useTranslations();
+  const locale = useLocale();
   const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(
     availableColors[0] || null
   );
@@ -55,6 +57,57 @@ export default function Konfiguratorius3D({
     availableFinishes[0] || null
   );
   const [modelColor, setModelColor] = useState('#444444');
+
+  const [inputMode, setInputMode] = useState<'boards' | 'area'>('boards');
+  const [quantityBoards, setQuantityBoards] = useState<number>(1);
+  const [targetAreaM2, setTargetAreaM2] = useState<number>(1);
+
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [quote, setQuote] = useState<null | {
+    unitPricePerM2: number;
+    areaM2: number;
+    totalAreaM2: number;
+    unitPricePerBoard: number;
+    quantityBoards: number;
+    lineTotal: number;
+    inputMode: 'boards' | 'area';
+    roundingInfo?: {
+      requestedAreaM2: number;
+      actualAreaM2: number;
+      deltaAreaM2: number;
+      rounding: 'ceil' | 'round' | 'floor';
+    };
+  }>(null);
+
+  const cartItems = useCartStore((state) => state.items);
+
+  const cartTotalAreaM2 = useMemo(() => {
+    return cartItems.reduce((sum, item) => {
+      const a = item.pricingSnapshot?.totalAreaM2;
+      if (typeof a === 'number' && Number.isFinite(a) && a > 0) return sum + a;
+      return sum;
+    }, 0);
+  }, [cartItems]);
+
+  const currency = useMemo(
+    () =>
+      new Intl.NumberFormat(locale === 'lt' ? 'lt-LT' : 'en-US', {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 2,
+      }),
+    [locale]
+  );
+
+  const numberM2 = useMemo(
+    () =>
+      new Intl.NumberFormat(locale === 'lt' ? 'lt-LT' : 'en-US', {
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2,
+      }),
+    [locale]
+  );
 
   useEffect(() => {
     if (!selectedColorId) return;
@@ -73,6 +126,139 @@ export default function Konfiguratorius3D({
       setModelColor(selectedColor.hex);
     }
   }, [selectedColor]);
+
+  // Realtime price quote for current configuration.
+  useEffect(() => {
+    const widthMm = selectedFinish?.dimensions?.width;
+    const lengthMm = selectedFinish?.dimensions?.length;
+
+    if (!productId) return;
+    if (typeof widthMm !== 'number' || typeof lengthMm !== 'number') {
+      setQuote(null);
+      setQuoteError(null);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const run = async () => {
+      setQuoteLoading(true);
+      setQuoteError(null);
+      try {
+        type QuoteRequestBody = {
+          productId: string;
+          profileVariantId?: string;
+          colorVariantId?: string;
+          widthMm: number;
+          lengthMm: number;
+          inputMode: 'boards' | 'area';
+          quantityBoards?: number;
+          targetAreaM2?: number;
+          rounding?: 'ceil' | 'round' | 'floor';
+          cartTotalAreaM2?: number;
+        };
+
+        const unitAreaM2 =
+          typeof widthMm === 'number' && typeof lengthMm === 'number'
+            ? (widthMm / 1000) * (lengthMm / 1000)
+            : 0;
+
+        const currentLineAreaM2 =
+          inputMode === 'boards'
+            ? (typeof quantityBoards === 'number' ? quantityBoards : 0) * unitAreaM2
+            : typeof targetAreaM2 === 'number' && unitAreaM2 > 0
+              ? Math.ceil(targetAreaM2 / unitAreaM2) * unitAreaM2
+              : 0;
+
+        const body: QuoteRequestBody =
+          inputMode === 'boards'
+            ? {
+                productId,
+                profileVariantId: selectedFinish?.id,
+                colorVariantId: selectedColor?.id,
+                widthMm,
+                lengthMm,
+                inputMode,
+                quantityBoards,
+                cartTotalAreaM2: cartTotalAreaM2 + currentLineAreaM2,
+              }
+            : {
+                productId,
+                profileVariantId: selectedFinish?.id,
+                colorVariantId: selectedColor?.id,
+                widthMm,
+                lengthMm,
+                inputMode,
+                targetAreaM2,
+                rounding: 'ceil',
+                cartTotalAreaM2: cartTotalAreaM2 + currentLineAreaM2,
+              };
+
+        const res = await fetch('/api/pricing/quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+          setQuote(null);
+          try {
+            const data = await res.json();
+            setQuoteError(typeof data?.error === 'string' ? data.error : t('configurator.priceNotAvailable'));
+          } catch {
+            setQuoteError(t('configurator.priceNotAvailable'));
+          }
+          return;
+        }
+
+        const data: any = await res.json();
+
+        const next = {
+          unitPricePerM2: Number(data?.unitPricePerM2),
+          areaM2: Number(data?.areaM2),
+          totalAreaM2: Number(data?.totalAreaM2),
+          unitPricePerBoard: Number(data?.unitPricePerBoard),
+          quantityBoards: Number(data?.quantityBoards),
+          lineTotal: Number(data?.lineTotal),
+          inputMode: data?.inputMode === 'area' ? 'area' : 'boards',
+          roundingInfo: data?.roundingInfo as
+            | {
+                requestedAreaM2: number;
+                actualAreaM2: number;
+                deltaAreaM2: number;
+                rounding: 'ceil' | 'round' | 'floor';
+              }
+            | undefined,
+        } as const;
+
+        if (!Number.isFinite(next.unitPricePerM2) || next.unitPricePerM2 <= 0) {
+          setQuote(null);
+          setQuoteError(t('configurator.priceNotAvailable'));
+          return;
+        }
+
+        setQuote(next);
+        setQuoteError(null);
+
+        // Keep UI values in sync with server-resolved quantity.
+        if (inputMode === 'boards') {
+          if (Number.isFinite(next.quantityBoards) && next.quantityBoards > 0 && next.quantityBoards !== quantityBoards) {
+            setQuantityBoards(next.quantityBoards);
+          }
+        }
+      } catch (e: any) {
+        if (e?.name === 'AbortError') return;
+        setQuote(null);
+        setQuoteError(t('configurator.priceNotAvailable'));
+      } finally {
+        setQuoteLoading(false);
+      }
+    };
+
+    run();
+    return () => controller.abort();
+  }, [productId, selectedFinish?.id, selectedFinish?.dimensions?.width, selectedFinish?.dimensions?.length, selectedColor?.id, inputMode, quantityBoards, targetAreaM2, cartTotalAreaM2, t]);
 
   const handleColorSelect = (color: ProductColorVariant) => {
     setSelectedColor(color);
@@ -233,6 +419,115 @@ export default function Konfiguratorius3D({
             <p className="font-['Outfit'] text-xs text-[#535353]">
               <strong>{t('configurator.noteTitle')}</strong> {t('configurator.noteBody')}
             </p>
+          </div>
+
+          {/* Pricing */}
+          <div className="p-4 bg-white rounded-lg border border-[#EAEAEA]">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="font-['DM_Sans'] text-sm font-medium text-[#161616]">{t('configurator.pricingTitle')}</h3>
+
+              <div className="flex items-center gap-2">
+                <span className="font-['Outfit'] text-xs text-[#7C7C7C]">{t('configurator.inputModeLabel')}</span>
+                <div className="flex rounded-[100px] border border-[#BBBBBB] overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInputMode('boards');
+                      if (quote?.quantityBoards) setQuantityBoards(quote.quantityBoards);
+                    }}
+                    className={`h-[28px] px-3 font-['Outfit'] text-[12px] ${
+                      inputMode === 'boards' ? 'bg-[#161616] text-white' : 'bg-white text-[#161616]'
+                    }`}
+                  >
+                    {t('configurator.inputModeBoards')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInputMode('area');
+                      if (quote?.totalAreaM2) setTargetAreaM2(Number(quote.totalAreaM2.toFixed(2)));
+                    }}
+                    className={`h-[28px] px-3 font-['Outfit'] text-[12px] ${
+                      inputMode === 'area' ? 'bg-[#161616] text-white' : 'bg-white text-[#161616]'
+                    }`}
+                  >
+                    {t('configurator.inputModeArea')}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-3">
+              {inputMode === 'boards' ? (
+                <label className="block">
+                  <span className="block font-['Outfit'] text-xs text-[#535353] mb-1">{t('configurator.quantityBoardsLabel')}</span>
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={quantityBoards}
+                    onChange={(e) => setQuantityBoards(Math.max(1, Math.round(Number(e.target.value) || 1)))}
+                    className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px] text-[#161616]"
+                  />
+                </label>
+              ) : (
+                <label className="block">
+                  <span className="block font-['Outfit'] text-xs text-[#535353] mb-1">{t('configurator.targetAreaLabel')}</span>
+                  <input
+                    type="number"
+                    min={0.01}
+                    step={0.01}
+                    value={targetAreaM2}
+                    onChange={(e) => setTargetAreaM2(Math.max(0.01, Number(e.target.value) || 0.01))}
+                    className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px] text-[#161616]"
+                  />
+                </label>
+              )}
+            </div>
+
+            {quoteLoading && (
+              <p className="mt-3 font-['Outfit'] text-xs text-[#7C7C7C]">{t('configurator.calculatingPrice')}</p>
+            )}
+
+            {quoteError && !quoteLoading && (
+              <p className="mt-3 font-['Outfit'] text-xs text-[#7C7C7C]">{quoteError}</p>
+            )}
+
+            {quote && !quoteLoading && (
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {quote.roundingInfo && quote.roundingInfo.deltaAreaM2 > 0.000001 && (
+                  <div className="sm:col-span-2">
+                    <p className="font-['Outfit'] text-xs text-[#7C7C7C]">
+                      ~{' '}
+                      {t('configurator.roundingNotice', {
+                        boards: String(quote.quantityBoards),
+                        actualArea: numberM2.format(quote.roundingInfo.actualAreaM2),
+                      })}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between rounded-md bg-[#F9F9F9] px-3 py-2">
+                  <span className="font-['Outfit'] text-xs text-[#535353]">{t('configurator.unitPricePerM2Label')}</span>
+                  <span className="font-['Outfit'] text-xs text-[#161616]">{currency.format(quote.unitPricePerM2)}</span>
+                </div>
+
+                <div className="flex items-center justify-between rounded-md bg-[#F9F9F9] px-3 py-2">
+                  <span className="font-['Outfit'] text-xs text-[#535353]">{t('configurator.unitPricePerBoardLabel')}</span>
+                  <span className="font-['Outfit'] text-xs text-[#161616]">{currency.format(quote.unitPricePerBoard)}</span>
+                </div>
+
+                <div className="flex items-center justify-between rounded-md bg-[#F9F9F9] px-3 py-2">
+                  <span className="font-['Outfit'] text-xs text-[#535353]">{t('configurator.totalAreaLabel')}</span>
+                  <span className="font-['Outfit'] text-xs text-[#161616]">{numberM2.format(quote.totalAreaM2)} m²</span>
+                </div>
+
+                <div className="flex items-center justify-between rounded-md bg-[#F9F9F9] px-3 py-2">
+                  <span className="font-['Outfit'] text-xs text-[#535353]">{t('configurator.lineTotalLabel')}</span>
+                  <span className="font-['Outfit'] text-xs text-[#161616]">{currency.format(quote.lineTotal)}</span>
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}

@@ -11,6 +11,16 @@ export interface CartItemConfiguration {
   lengthMm?: number;
 }
 
+export type CartItemInputMode = 'boards' | 'area'
+
+export interface CartItemPricingSnapshot {
+  unitAreaM2: number
+  totalAreaM2: number
+  pricePerM2Used: number
+  unitPrice: number
+  lineTotal: number
+}
+
 export interface CartItem {
   lineId: string; // stable key: id + options + configuration
   id: string; // product id
@@ -21,6 +31,9 @@ export interface CartItem {
   color?: string;
   finish?: string;
   configuration?: CartItemConfiguration;
+  inputMode?: CartItemInputMode;
+  targetAreaM2?: number;
+  pricingSnapshot?: CartItemPricingSnapshot;
   configurationId?: string; // optional saved 3D configuration
   addedAt?: number; // timestamp for expiration check
 }
@@ -121,10 +134,26 @@ export const useCartStore = create<CartState>()(
         const lineId = createLineId(item);
         const existing = state.items.find((i) => i.lineId === lineId);
         if (existing) {
+          const addQty = item.quantity || 1
+          const nextQuantity = existing.quantity + addQty
+          const existingSnapshot = existing.pricingSnapshot
+          const incomingSnapshot = (item as CartItem).pricingSnapshot
+          const baseSnapshot = existingSnapshot ?? incomingSnapshot
+
           return {
             items: state.items.map(i => 
               i === existing 
-                ? { ...i, quantity: i.quantity + (item.quantity || 1) } 
+                ? {
+                    ...i,
+                    quantity: nextQuantity,
+                    pricingSnapshot: baseSnapshot
+                      ? {
+                          ...baseSnapshot,
+                          totalAreaM2: baseSnapshot.unitAreaM2 * nextQuantity,
+                          lineTotal: baseSnapshot.unitPrice * nextQuantity,
+                        }
+                      : undefined,
+                  }
                 : i
             )
           };
@@ -137,6 +166,13 @@ export const useCartStore = create<CartState>()(
               lineId,
               quantity: item.quantity || 1,
               addedAt: Date.now(),
+              pricingSnapshot: (item as CartItem).pricingSnapshot
+                ? {
+                    ...(item as CartItem).pricingSnapshot!,
+                    totalAreaM2: (item as CartItem).pricingSnapshot!.unitAreaM2 * (item.quantity || 1),
+                    lineTotal: (item as CartItem).pricingSnapshot!.unitPrice * (item.quantity || 1),
+                  }
+                : undefined,
             }
           ] 
         };
@@ -161,7 +197,17 @@ export const useCartStore = create<CartState>()(
 
         if (nextLineId === current.lineId) {
           return {
-            items: state.items.map((i) => (i.lineId === lineId ? { ...i, configuration: nextConfiguration } : i)),
+            items: state.items.map((i) =>
+              i.lineId === lineId
+                ? {
+                    ...i,
+                    configuration: nextConfiguration,
+                    pricingSnapshot: undefined,
+                    inputMode: undefined,
+                    targetAreaM2: undefined,
+                  }
+                : i
+            ),
           };
         }
 
@@ -176,6 +222,9 @@ export const useCartStore = create<CartState>()(
                       ...i,
                       quantity: i.quantity + current.quantity,
                       configuration: nextConfiguration,
+                      pricingSnapshot: undefined,
+                      inputMode: undefined,
+                      targetAreaM2: undefined,
                       addedAt: Math.min(i.addedAt ?? Date.now(), current.addedAt ?? Date.now()),
                     }
                   : i
@@ -190,6 +239,9 @@ export const useCartStore = create<CartState>()(
                   ...i,
                   lineId: nextLineId,
                   configuration: nextConfiguration,
+                  pricingSnapshot: undefined,
+                  inputMode: undefined,
+                  targetAreaM2: undefined,
                 }
               : i
           ),
@@ -198,7 +250,22 @@ export const useCartStore = create<CartState>()(
       
       updateQuantity: (lineId, quantity) => set((state) => ({
         items: quantity > 0
-          ? state.items.map(i => i.lineId === lineId ? { ...i, quantity } : i)
+          ? state.items.map(i => {
+              if (i.lineId !== lineId) return i
+              const nextQuantity = Math.max(1, Math.round(quantity))
+              const snap = i.pricingSnapshot
+              return {
+                ...i,
+                quantity: nextQuantity,
+                pricingSnapshot: snap
+                  ? {
+                      ...snap,
+                      totalAreaM2: snap.unitAreaM2 * nextQuantity,
+                      lineTotal: snap.unitPrice * nextQuantity,
+                    }
+                  : undefined,
+              }
+            })
           : state.items.filter(i => i.lineId !== lineId) // Remove if quantity is 0
       })),
       
@@ -208,7 +275,14 @@ export const useCartStore = create<CartState>()(
       
       clear: () => set({ items: [] }),
       
-      total: () => get().items.reduce((sum, i) => sum + i.basePrice * i.quantity, 0),
+      total: () =>
+        get().items.reduce((sum, i) => {
+          const lineTotal = i.pricingSnapshot?.lineTotal
+          if (typeof lineTotal === 'number' && Number.isFinite(lineTotal) && lineTotal >= 0) {
+            return sum + lineTotal
+          }
+          return sum + i.basePrice * i.quantity
+        }, 0),
       
       clearExpiredItems: () => set((state) => ({
         items: state.items.filter(item => !isItemExpired(item))

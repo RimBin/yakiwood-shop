@@ -6,6 +6,7 @@ import { fetchProductBySlug } from '@/lib/products.supabase';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
 import { toLocalePath } from '@/i18n/paths';
+import { getCanonicalProductPath } from '@/components/configurator/seo';
 
 interface ProductPageProps {
   params: { slug: string };
@@ -35,6 +36,13 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   return {
     title: displayName,
     description: displayDescription,
+    alternates: {
+      canonical: getCanonicalProductPath(product.slug),
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
     openGraph: {
       title: displayName,
       description: displayDescription,

@@ -2,6 +2,17 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export type UsageType = 'facade' | 'terrace' | 'interior' | 'fence'
 
+export type InputMode = 'boards' | 'area'
+
+export type AreaRoundingMode = 'ceil' | 'round' | 'floor'
+
+export type AreaRoundingInfo = {
+  requestedAreaM2: number
+  actualAreaM2: number
+  deltaAreaM2: number
+  rounding: AreaRoundingMode
+}
+
 export type ConfigurationPriceSelectors = {
   productId: string
   usageType?: UsageType
@@ -10,14 +21,20 @@ export type ConfigurationPriceSelectors = {
   thicknessOptionId?: string
   widthMm?: number
   lengthMm?: number
+  cartTotalAreaM2?: number
 }
 
 export type ConfigurationPricingResult = {
   unitPricePerM2: number
+  // Area of a single board (m²)
   areaM2: number
+  // Total line area (m²) = areaM2 * quantityBoards
+  totalAreaM2: number
   unitPricePerBoard: number
   quantityBoards: number
   lineTotal: number
+  inputMode: InputMode
+  roundingInfo?: AreaRoundingInfo
   resolvedBy: {
     matchedRowId: string
     specificity: number
@@ -41,6 +58,55 @@ export function computeAreaM2(widthMm: number, lengthMm: number): number {
   return Number.isFinite(area) && area > 0 ? area : 0
 }
 
+export function computeTotalAreaM2(widthMm: number, lengthMm: number, quantityBoards: number): number {
+  const unitArea = computeAreaM2(widthMm, lengthMm)
+  const qty = Number.isFinite(quantityBoards) ? Math.max(0, Math.round(quantityBoards)) : 0
+  return unitArea * qty
+}
+
+export function computeQuantityBoardsFromAreaM2(
+  widthMm: number,
+  lengthMm: number,
+  targetAreaM2: number,
+  rounding: AreaRoundingMode = 'ceil'
+): { quantityBoards: number; roundingInfo: AreaRoundingInfo } {
+  const unitArea = computeAreaM2(widthMm, lengthMm)
+  const requestedAreaM2 = Number.isFinite(targetAreaM2) ? Math.max(0, targetAreaM2) : 0
+
+  if (unitArea <= 0 || requestedAreaM2 <= 0) {
+    return {
+      quantityBoards: 0,
+      roundingInfo: {
+        requestedAreaM2,
+        actualAreaM2: 0,
+        deltaAreaM2: 0,
+        rounding,
+      },
+    }
+  }
+
+  const rawQty = requestedAreaM2 / unitArea
+  const quantityBoards =
+    rounding === 'floor'
+      ? Math.floor(rawQty)
+      : rounding === 'round'
+        ? Math.round(rawQty)
+        : Math.ceil(rawQty)
+
+  const actualAreaM2 = unitArea * Math.max(0, quantityBoards)
+  const deltaAreaM2 = actualAreaM2 - requestedAreaM2
+
+  return {
+    quantityBoards: Math.max(0, quantityBoards),
+    roundingInfo: {
+      requestedAreaM2,
+      actualAreaM2,
+      deltaAreaM2,
+      rounding,
+    },
+  }
+}
+
 type DbConfigurationPriceRow = {
   id: string
   unit_price_per_m2: string | number
@@ -50,6 +116,8 @@ type DbConfigurationPriceRow = {
   thickness_option_id?: string | null
   width_mm: number | null
   length_mm: number | null
+  min_cart_area_m2?: number | null
+  max_cart_area_m2?: number | null
 }
 
 function calcSpecificity(row: DbConfigurationPriceRow): number {
@@ -59,7 +127,9 @@ function calcSpecificity(row: DbConfigurationPriceRow): number {
     (row.color_variant_id ? 1 : 0) +
     (row.thickness_option_id ? 1 : 0) +
     (row.width_mm !== null ? 1 : 0) +
-    (row.length_mm !== null ? 1 : 0)
+    (row.length_mm !== null ? 1 : 0) +
+    (row.min_cart_area_m2 !== undefined && row.min_cart_area_m2 !== null ? 1 : 0) +
+    (row.max_cart_area_m2 !== undefined && row.max_cart_area_m2 !== null ? 1 : 0)
   )
 }
 
@@ -75,23 +145,27 @@ export async function resolveConfigurationUnitPricePerM2(
   const thicknessOptionId = selectors.thicknessOptionId
   const widthMm = typeof selectors.widthMm === 'number' ? selectors.widthMm : undefined
   const lengthMm = typeof selectors.lengthMm === 'number' ? selectors.lengthMm : undefined
+  const cartTotalAreaM2 =
+    typeof selectors.cartTotalAreaM2 === 'number' && Number.isFinite(selectors.cartTotalAreaM2)
+      ? selectors.cartTotalAreaM2
+      : undefined
 
   // Fetch a small candidate set; then rank in code (stable even if SQL ordering differs by NULL semantics).
-  const withThickness = await supabaseAdmin
+  const withOptionalSelectors = await supabaseAdmin
     .from('product_configuration_prices')
     .select(
-      'id,unit_price_per_m2,usage_type,profile_variant_id,color_variant_id,thickness_option_id,width_mm,length_mm'
+      'id,unit_price_per_m2,usage_type,profile_variant_id,color_variant_id,thickness_option_id,width_mm,length_mm,min_cart_area_m2,max_cart_area_m2'
     )
     .eq('product_id', productId)
     .eq('is_active', true)
 
-  const { data, error } = withThickness.error
+  const { data, error } = withOptionalSelectors.error
     ? await supabaseAdmin
         .from('product_configuration_prices')
         .select('id,unit_price_per_m2,usage_type,profile_variant_id,color_variant_id,width_mm,length_mm')
         .eq('product_id', productId)
         .eq('is_active', true)
-    : withThickness
+    : withOptionalSelectors
 
   if (error || !data) {
     console.error('Failed to fetch configuration prices', error)
@@ -120,6 +194,20 @@ export async function resolveConfigurationUnitPricePerM2(
 
     if (row.length_mm !== null && lengthMm && row.length_mm !== lengthMm) return false
     if (row.length_mm !== null && !lengthMm) return false
+
+    // Optional selector: cart total area thresholds.
+    if (row.min_cart_area_m2 !== undefined || row.max_cart_area_m2 !== undefined) {
+      const min = row.min_cart_area_m2 ?? null
+      const max = row.max_cart_area_m2 ?? null
+
+      // If DB row is scoped by thresholds but the caller didn't provide cartTotalAreaM2, treat as non-match.
+      if ((min !== null || max !== null) && cartTotalAreaM2 === undefined) return false
+
+      if (cartTotalAreaM2 !== undefined) {
+        if (typeof min === 'number' && Number.isFinite(min) && cartTotalAreaM2 < min) return false
+        if (typeof max === 'number' && Number.isFinite(max) && cartTotalAreaM2 >= max) return false
+      }
+    }
 
     return true
   })
@@ -153,15 +241,30 @@ export async function quoteConfigurationPricing(input: {
   thicknessOptionId?: string
   widthMm: number
   lengthMm: number
-  quantityBoards: number
+  quantityBoards?: number
+  inputMode?: InputMode
+  targetAreaM2?: number
+  rounding?: AreaRoundingMode
+  cartTotalAreaM2?: number
 }): Promise<ConfigurationPricingResult | null> {
-  const quantityBoards = Number(input.quantityBoards) || 0
-  if (quantityBoards <= 0) return null
-
   const widthMm = Number(input.widthMm) || 0
   const lengthMm = Number(input.lengthMm) || 0
   const areaM2 = computeAreaM2(widthMm, lengthMm)
   if (areaM2 <= 0) return null
+
+  const inputMode: InputMode = input.inputMode === 'area' ? 'area' : 'boards'
+
+  const resolvedQuantity =
+    inputMode === 'area'
+      ? computeQuantityBoardsFromAreaM2(widthMm, lengthMm, Number(input.targetAreaM2) || 0, input.rounding ?? 'ceil')
+      : null
+
+  const quantityBoards =
+    inputMode === 'area'
+      ? resolvedQuantity?.quantityBoards ?? 0
+      : Math.max(0, Math.round(Number(input.quantityBoards) || 0))
+
+  if (quantityBoards <= 0) return null
 
   const resolved = await resolveConfigurationUnitPricePerM2({
     productId: input.productId,
@@ -171,6 +274,7 @@ export async function quoteConfigurationPricing(input: {
     thicknessOptionId: input.thicknessOptionId,
     widthMm,
     lengthMm,
+    cartTotalAreaM2: input.cartTotalAreaM2,
   })
 
   if (!resolved) return null
@@ -178,13 +282,17 @@ export async function quoteConfigurationPricing(input: {
   const unitPricePerM2 = resolved.unitPricePerM2
   const unitPricePerBoard = unitPricePerM2 * areaM2
   const lineTotal = unitPricePerBoard * quantityBoards
+  const totalAreaM2 = areaM2 * quantityBoards
 
   return {
     unitPricePerM2,
     areaM2,
+    totalAreaM2,
     unitPricePerBoard,
     quantityBoards,
     lineTotal,
+    inputMode,
+    roundingInfo: inputMode === 'area' ? resolvedQuantity?.roundingInfo : undefined,
     resolvedBy: {
       matchedRowId: resolved.matchedRowId,
       specificity: resolved.specificity,

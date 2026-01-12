@@ -500,6 +500,20 @@
     "selectColorAria": "Pasirinkti spalvą {name}",
     "noteTitle": "Pastaba:",
     "noteBody": "Tikroji spalva ir tekstūra gali šiek tiek skirtis nuo čia rodomos. Kiekviena lentelė yra unikali dėl natūralios medienos savybių.",
+
+    "pricingTitle": "Kaina",
+    "inputModeLabel": "Skaičiuoti pagal",
+    "inputModeBoards": "Lentomis",
+    "inputModeArea": "m²",
+    "quantityBoardsLabel": "Kiekis (lentomis)",
+    "targetAreaLabel": "Plotas (m²)",
+    "roundingNotice": "Suapvalinta iki {boards} lentų ({actualArea} m²)",
+    "unitPricePerM2Label": "Kaina už m²",
+    "unitPricePerBoardLabel": "Kaina už 1 lentą",
+    "totalAreaLabel": "Visas plotas",
+    "lineTotalLabel": "Suma",
+    "calculatingPrice": "Skaičiuojama kaina...",
+    "priceNotAvailable": "Kaina nerasta šiai konfigūracijai",
     "pavadinimas": "3D produkto konfigūratorius",
     "paantraste": "Pritaikykite savo produktą",
     "spalva": "Spalva",
@@ -678,7 +692,8 @@
     "main": {
       "title": "Administravimo skydas",
       "subtitle": "Tvarkykite produktus, projektus ir įrašus",
-      "loadSampleProducts": "Įkelti pavyzdinius produktus"
+      "loadSampleProducts": "Įkelti pavyzdinius produktus",
+      "sampleProductsLoaded": "{count} produktai įkelti!"
     },
     "tabs": {
       "dashboard": "Skydelis",
@@ -690,6 +705,65 @@
       "seo": "SEO",
       "emailTemplates": "El. pašto šablonai",
       "badgeNew": "naujas"
+    },
+    "ui": {
+      "noFileSelected": "Nepasirinktas failas",
+      "add": "Pridėti",
+      "cancel": "Atšaukti",
+      "addNewEllipsis": "Pridėti naują…"
+    },
+    "posts": {
+      "importSuccess": "Sėkmingai importuota įrašų: {count}",
+      "importError": "Nepavyko importuoti įrašų. Patikrinkite JSON formatą."
+    },
+    "productsDemo": {
+      "noticeLine1": "Pastaba: šis /admin puslapis yra demo ir produktus saugo tik šiame naršyklės lange (localStorage).",
+      "noticeLine2": "Realūs produktai (Supabase) kuriami per /admin/products/new.",
+      "openProducts": "Atidaryti produktus",
+      "createRealProduct": "Kurti realų produktą",
+      "addNewProduct": "Pridėti produktą",
+      "fields": {
+        "name": "Produkto pavadinimas *",
+        "slug": "Slug (URL) *",
+        "description": "Aprašymas",
+        "basePrice": "Bazinė kaina (EUR) *",
+        "salePrice": "Akcijos kaina (EUR)",
+        "inStock": "Sandėlyje",
+        "usage": "Pritaikymas",
+        "wood": "Mediena",
+        "profile": "Profilis",
+        "color": "Spalva",
+        "thickness": "Storis (mm)",
+        "width": "Plotis (mm)",
+        "length": "Ilgis (mm)"
+      },
+      "placeholders": {
+        "name": "Juoda maumedžio fasado lenta",
+        "slug": "juoda-maumedzio-fasado-lenta",
+        "description": "Įveskite produkto aprašymą…",
+        "woodCustom": "Įveskite medienos pavadinimą",
+        "colorCustom": "Įveskite spalvos pavadinimą"
+      },
+      "usage": {
+        "facade": "Fasadas",
+        "terrace": "Terasa",
+        "interior": "Interjeras",
+        "fence": "Tvora"
+      },
+      "wood": {
+        "spruce": "Eglė",
+        "larch": "Maumedis"
+      },
+      "colors": {
+        "natural": "Natūrali",
+        "carbonLight": "Šviesus karbonas",
+        "carbonDark": "Tamsus karbonas",
+        "brown": "Ruda",
+        "graphite": "Grafitas",
+        "latte": "Latte",
+        "silver": "Sidabrinė",
+        "black": "Juoda"
+      }
     },
     "seo": {
       "title": "SEO Valdymas",
@@ -717,7 +791,14 @@
       },
       "actions": {
         "viewDetails": "Peržiūrėti detaliai",
-        "exportJson": "Eksportuoti JSON"
+        "exportJson": "Eksportuoti JSON",
+        "rescan": "Perskenuoti",
+        "exportFixes": "Eksportuoti taisymus"
+      },
+      "errors": {
+        "noSession": "Nėra prisijungimo sesijos",
+        "scanFailed": "Nepavyko nuskenuoti puslapių",
+        "fixFailed": "Nepavyko sugeneruoti taisymų"
       },
       "noPages": "Nėra puslapių atitinkančių pasirinktą filtrą",
       "seoScore": "SEO Balas"

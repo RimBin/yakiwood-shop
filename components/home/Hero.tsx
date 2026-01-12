@@ -6,7 +6,6 @@ import { assets } from '@/lib/assets';
 import { toLocalePath } from '@/i18n/paths';
 
 const imgProductImage = assets.projects[0];
-const mobileColors = assets.colors;
 const certifications = [assets.certifications.fsc, assets.certifications.eu, assets.certifications.epd];
 
 export default async function Hero() {
@@ -78,9 +77,13 @@ export default async function Hero() {
               </div>
             </div>
 
-            <div className="bg-white h-[48px] rounded-[100px] flex items-center justify-center w-full">
-              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">Buy now</p>
-            </div>
+            <Link
+              href={toLocalePath('/products', currentLocale)}
+              className="bg-white h-[48px] rounded-[100px] flex items-center justify-center w-full"
+              aria-label="Buy now"
+            >
+              <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">Buy now</span>
+            </Link>
           </div>
         </div>
 
@@ -161,9 +164,13 @@ export default async function Hero() {
                 </div>
               </div>
 
-              <div className="bg-white px-[40px] py-[10px] h-[48px] rounded-[100px] flex items-center justify-center gap-[10px] w-full">
-                <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] whitespace-nowrap">Buy now</p>
-              </div>
+              <Link
+                href={toLocalePath('/products', currentLocale)}
+                className="bg-white px-[40px] py-[10px] h-[48px] rounded-[100px] flex items-center justify-center gap-[10px] w-full"
+                aria-label="Buy now"
+              >
+                <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] whitespace-nowrap">Buy now</span>
+              </Link>
             </div>
           </div>
         </div>

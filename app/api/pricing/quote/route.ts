@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { quoteConfigurationPricing, type UsageType } from '@/lib/pricing/configuration'
+import { quoteConfigurationPricing, type UsageType, type InputMode, type AreaRoundingMode } from '@/lib/pricing/configuration'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
 type QuoteBody = {
@@ -11,7 +11,11 @@ type QuoteBody = {
   thicknessMm?: number
   widthMm: number
   lengthMm: number
-  quantityBoards: number
+  quantityBoards?: number
+  inputMode?: InputMode
+  targetAreaM2?: number
+  rounding?: AreaRoundingMode
+  cartTotalAreaM2?: number
 }
 
 async function resolveThicknessOptionIdFromMm(thicknessMm: number): Promise<string | null> {
@@ -41,10 +45,21 @@ export async function POST(req: NextRequest) {
 
     const widthMm = Number(body.widthMm)
     const lengthMm = Number(body.lengthMm)
-    const quantityBoards = Number(body.quantityBoards)
 
-    if (!Number.isFinite(widthMm) || !Number.isFinite(lengthMm) || !Number.isFinite(quantityBoards)) {
-      return NextResponse.json({ error: 'Neteisingi matmenys arba kiekis' }, { status: 400 })
+    const inputMode: InputMode = body.inputMode === 'area' ? 'area' : 'boards'
+    const quantityBoards = typeof body.quantityBoards === 'number' ? Number(body.quantityBoards) : NaN
+    const targetAreaM2 = typeof body.targetAreaM2 === 'number' ? Number(body.targetAreaM2) : NaN
+
+    if (!Number.isFinite(widthMm) || !Number.isFinite(lengthMm)) {
+      return NextResponse.json({ error: 'Neteisingi matmenys' }, { status: 400 })
+    }
+
+    if (inputMode === 'boards' && !Number.isFinite(quantityBoards)) {
+      return NextResponse.json({ error: 'Neteisingas kiekis' }, { status: 400 })
+    }
+
+    if (inputMode === 'area' && !Number.isFinite(targetAreaM2)) {
+      return NextResponse.json({ error: 'Neteisingas plotas' }, { status: 400 })
     }
 
     const thicknessOptionIdFromMm =
@@ -63,7 +78,11 @@ export async function POST(req: NextRequest) {
           : thicknessOptionIdFromMm ?? undefined,
       widthMm,
       lengthMm,
-      quantityBoards,
+      quantityBoards: inputMode === 'boards' ? quantityBoards : undefined,
+      inputMode,
+      targetAreaM2: inputMode === 'area' ? targetAreaM2 : undefined,
+      rounding: body.rounding,
+      cartTotalAreaM2: typeof body.cartTotalAreaM2 === 'number' ? body.cartTotalAreaM2 : undefined,
     })
 
     if (!quote) {
@@ -73,9 +92,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       unitPricePerM2: quote.unitPricePerM2,
       areaM2: quote.areaM2,
+      totalAreaM2: quote.totalAreaM2,
       unitPricePerBoard: quote.unitPricePerBoard,
       quantityBoards: quote.quantityBoards,
       lineTotal: quote.lineTotal,
+      inputMode: quote.inputMode,
+      roundingInfo: quote.roundingInfo,
       resolvedBy: quote.resolvedBy,
     })
   } catch (e: any) {

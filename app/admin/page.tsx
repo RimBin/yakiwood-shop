@@ -173,7 +173,7 @@ export default function AdminPage() {
   const [customCategory, setCustomCategory] = useState('');
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [selectedFileNames, setSelectedFileNames] = useState('No file selected');
+  const [selectedFileNames, setSelectedFileNames] = useState(() => t('ui.noFileSelected'));
   const [customCategories, setCustomCategories] = useState<string[]>([]);
 
   // Profiles (demo admin)
@@ -236,14 +236,14 @@ export default function AdminPage() {
 
   const COLOR_OPTIONS_BY_WOOD: Record<string, Array<{ value: string; label: string }>> = useMemo(() => {
     const all = [
-      { value: 'natural', label: 'Natural' },
-      { value: 'carbon-light', label: 'Carbon Light' },
-      { value: 'carbon-dark', label: 'Carbon Dark' },
-      { value: 'brown', label: 'Brown' },
-      { value: 'graphite', label: 'Graphite' },
-      { value: 'latte', label: 'Latte' },
-      { value: 'silver', label: 'Silver' },
-      { value: 'black', label: 'Black' },
+      { value: 'natural', label: t('productsDemo.colors.natural') },
+      { value: 'carbon-light', label: t('productsDemo.colors.carbonLight') },
+      { value: 'carbon-dark', label: t('productsDemo.colors.carbonDark') },
+      { value: 'brown', label: t('productsDemo.colors.brown') },
+      { value: 'graphite', label: t('productsDemo.colors.graphite') },
+      { value: 'latte', label: t('productsDemo.colors.latte') },
+      { value: 'silver', label: t('productsDemo.colors.silver') },
+      { value: 'black', label: t('productsDemo.colors.black') },
     ];
 
     const merged = Array.from(new Map([...all, ...customColors].map((c) => [c.value, c])).values());
@@ -253,7 +253,7 @@ export default function AdminPage() {
       spruce: merged,
       larch: merged,
     };
-  }, [customColors]);
+  }, [customColors, t]);
 
   const activeColorOptions = useMemo(() => {
     const key = productForm.woodType;
@@ -299,7 +299,7 @@ export default function AdminPage() {
   const [featuredImageFile, setFeaturedImageFile] = useState<string>('');
   const projectFileInputRef = useRef<HTMLInputElement | null>(null);
   const featuredImageInputRef = useRef<HTMLInputElement | null>(null);
-  const [projectSelectedFileNames, setProjectSelectedFileNames] = useState('No file selected');
+  const [projectSelectedFileNames, setProjectSelectedFileNames] = useState(() => t('ui.noFileSelected'));
 
   // Posts state
   const [posts, setPosts] = useState<Post[]>([]);
@@ -439,14 +439,14 @@ export default function AdminPage() {
     const fileInput = document.querySelector('input[type="file"]');
     if (fileInput) {
       fileInput.setAttribute('data-text', 'Choose files');
-      fileInput.setAttribute('data-no-file', 'No file selected');
+      fileInput.setAttribute('data-no-file', t('ui.noFileSelected'));
     }
   }, []);
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
-      setSelectedFileNames('No file selected');
+      setSelectedFileNames(t('ui.noFileSelected'));
       return;
     }
     const names = Array.from(files).map(f => f.name).join(', ');
@@ -744,7 +744,7 @@ export default function AdminPage() {
       quantity: 1,
     });
     setImageFiles([]);
-    setSelectedFileNames('No file selected');
+    setSelectedFileNames(t('ui.noFileSelected'));
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -810,7 +810,7 @@ export default function AdminPage() {
       quantity: 1,
     });
     setImageFiles([]);
-    setSelectedFileNames('No file selected');
+    setSelectedFileNames(t('ui.noFileSelected'));
   };
 
   const handleProductImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -874,7 +874,7 @@ export default function AdminPage() {
   const handleProjectFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
-      setProjectSelectedFileNames('No file selected');
+      setProjectSelectedFileNames(t('ui.noFileSelected'));
       return;
     }
     const names = Array.from(files).map(f => f.name).join(', ');
@@ -979,7 +979,7 @@ export default function AdminPage() {
     });
     setProjectImageFiles([]);
     setFeaturedImageFile('');
-    setProjectSelectedFileNames('No file selected');
+    setProjectSelectedFileNames(t('ui.noFileSelected'));
     if (projectFileInputRef.current) {
       projectFileInputRef.current.value = '';
     }
@@ -1048,7 +1048,7 @@ export default function AdminPage() {
     });
     setProjectImageFiles([]);
     setFeaturedImageFile('');
-    setProjectSelectedFileNames('No file selected');
+    setProjectSelectedFileNames(t('ui.noFileSelected'));
   };
 
   const handleProjectImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1190,9 +1190,9 @@ export default function AdminPage() {
         const updated = [...posts, ...importedPosts];
         setPosts(updated);
         localStorage.setItem('yakiwood_posts', JSON.stringify(updated));
-        showMessage(`Imported ${importedPosts.length} posts successfully!`);
+          showMessage(t('posts.importSuccess', { count: importedPosts.length }));
       } catch (error) {
-        showMessage('Error importing posts. Please check the JSON format.');
+          showMessage(t('posts.importError'));
       }
     };
     reader.readAsText(file);
@@ -1230,7 +1230,7 @@ export default function AdminPage() {
                   })) as Product[];
                   setProducts(seeded);
                   localStorage.setItem('yakiwood_products', JSON.stringify(seeded));
-                  showMessage('8 products loaded!');
+                  showMessage(t('main.sampleProductsLoaded', { count: seeded.length }));
                 }}
                 className="h-[48px] px-[24px] rounded-[100px] bg-green-500 font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-white hover:bg-green-600 transition-colors whitespace-nowrap"
               >
@@ -1259,8 +1259,8 @@ export default function AdminPage() {
             { key: 'posts', label: t('tabs.posts'), count: posts.length },
             { key: 'users', label: t('tabs.users') },
             { key: 'chatbot', label: t('tabs.chatbot') },
-            { key: 'seo', label: t('tabs.seo'), badge: t('tabs.badgeNew') },
-            { key: 'email-templates', label: t('tabs.emailTemplates'), badge: t('tabs.badgeNew') }
+            { key: 'seo', label: t('tabs.seo'), badge: true },
+            { key: 'email-templates', label: t('tabs.emailTemplates'), badge: true }
           ].map((tab) => {
             const isActive = 'count' in tab ? activeTab === tab.key : activeTab === tab.key;
 
@@ -1297,9 +1297,9 @@ export default function AdminPage() {
                 }`}
               >
                 {'count' in tab ? `${tab.label} (${tab.count})` : tab.label}
-                {'badge' in tab && tab.badge === 'new' && (
+                {'badge' in tab && tab.badge && (
                   <span className="ml-[8px] px-[8px] py-[2px] bg-green-500 text-white text-[10px] rounded-full">
-                    NEW
+                    {t('tabs.badgeNew').toUpperCase()}
                   </span>
                 )}
               </button>
@@ -1310,6 +1310,35 @@ export default function AdminPage() {
         {/* Products Tab */}
         {activeTab === 'products' && (
           <div className="space-y-[32px]">
+            <div className="rounded-[24px] border border-[#BBBBBB] bg-white p-[20px]">
+              <div className="flex flex-col gap-[12px] md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="font-['DM_Sans'] text-[14px] text-[#161616]">
+                    {t('productsDemo.noticeLine1')}
+                  </p>
+                  <p className="font-['Outfit'] text-[13px] text-[#535353] mt-[4px]">
+                    {t('productsDemo.noticeLine2')}
+                  </p>
+                </div>
+                <div className="flex gap-[10px]">
+                  <button
+                    type="button"
+                    onClick={() => router.push('/admin/products')}
+                    className="h-[40px] px-[16px] rounded-[100px] border border-[#161616] text-[#161616] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-[#EAEAEA]"
+                  >
+                    {t('productsDemo.openProducts')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push('/admin/products/new')}
+                    className="h-[40px] px-[16px] rounded-[100px] bg-[#161616] text-white font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-[#2d2d2d]"
+                  >
+                    {t('productsDemo.createRealProduct')}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Add Product Form - Collapsible */}
             <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(20px,3vw,32px)]">
               <button
@@ -1341,7 +1370,7 @@ export default function AdminPage() {
                 className="w-full flex items-center justify-between mb-[24px]"
               >
                 <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616]">
-                  Add New Product
+                  {t('productsDemo.addNewProduct')}
                 </h2>
                 <span className="text-[24px] text-[#161616]">{showAddProductForm ? '−' : '+'}</span>
               </button>
@@ -1350,7 +1379,7 @@ export default function AdminPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                      Product Name *
+                      {t('productsDemo.fields.name')}
                     </label>
                     <input
                       type="text"
@@ -1369,13 +1398,13 @@ export default function AdminPage() {
                         })
                       }}
                       className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
-                      placeholder="Black Larch Facade Board"
+                      placeholder={t('productsDemo.placeholders.name')}
                     />
                   </div>
 
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                      Slug (URL) *
+                      {t('productsDemo.fields.slug')}
                     </label>
                     <input
                       type="text"
@@ -1383,21 +1412,21 @@ export default function AdminPage() {
                       value={productForm.slug}
                       onChange={(e) => setProductForm({ ...productForm, slug: slugify(e.target.value) })}
                       className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
-                      placeholder="black-larch-facade-board"
+                      placeholder={t('productsDemo.placeholders.slug')}
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                    Description
+                    {t('productsDemo.fields.description')}
                   </label>
                   <textarea
                     value={productForm.description}
                     onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
                     rows={3}
                     className="w-full px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none resize-none"
-                    placeholder="Enter product description..."
+                    placeholder={t('productsDemo.placeholders.description')}
                   />
                 </div>
 
@@ -1405,7 +1434,7 @@ export default function AdminPage() {
 
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                      Base Price (EUR) *
+                      {t('productsDemo.fields.basePrice')}
                     </label>
                     <input
                       type="number"
@@ -1421,7 +1450,7 @@ export default function AdminPage() {
 
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                      Sale Price (EUR)
+                      {t('productsDemo.fields.salePrice')}
                     </label>
                     <input
                       type="number"
@@ -1443,7 +1472,7 @@ export default function AdminPage() {
                         className="w-[20px] h-[20px] cursor-pointer"
                       />
                       <span className="font-['Outfit'] text-[14px] text-[#161616]">
-                        In Stock
+                        {t('productsDemo.fields.inStock')}
                       </span>
                     </label>
                   </div>
@@ -1452,14 +1481,14 @@ export default function AdminPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px]">
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                      Usage
+                      {t('productsDemo.fields.usage')}
                     </label>
                     <div className="flex flex-wrap gap-[8px]">
                       {[
-                        { key: 'facade', label: 'Facade' },
-                        { key: 'terrace', label: 'Terrace' },
-                        { key: 'interior', label: 'Interior' },
-                        { key: 'fence', label: 'Fence' },
+                        { key: 'facade', label: t('productsDemo.usage.facade') },
+                        { key: 'terrace', label: t('productsDemo.usage.terrace') },
+                        { key: 'interior', label: t('productsDemo.usage.interior') },
+                        { key: 'fence', label: t('productsDemo.usage.fence') },
                       ].map((u) => (
                         <label
                           key={u.key}
@@ -1481,7 +1510,7 @@ export default function AdminPage() {
 
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                      Wood
+                      {t('productsDemo.fields.wood')}
                     </label>
                     <select
                       value={productForm.woodType}
@@ -1494,14 +1523,14 @@ export default function AdminPage() {
                       }}
                       className="w-full px-[16px] py-[16px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none yw-select"
                     >
-                      <option value="spruce">Spruce</option>
-                      <option value="larch">Larch</option>
+                      <option value="spruce">{t('productsDemo.wood.spruce')}</option>
+                      <option value="larch">{t('productsDemo.wood.larch')}</option>
                       {customWoods.map((w) => (
                         <option key={w.value} value={w.value}>
                           {w.label}
                         </option>
                       ))}
-                      <option value="__custom__">Add new…</option>
+                      <option value="__custom__">{t('ui.addNewEllipsis')}</option>
                     </select>
 
                     {showCustomWood && (
@@ -1511,7 +1540,7 @@ export default function AdminPage() {
                           value={customWoodLabel}
                           onChange={(e) => setCustomWoodLabel(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomWood())}
-                          placeholder="Enter wood name"
+                          placeholder={t('productsDemo.placeholders.woodCustom')}
                           className="flex-1 px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
                         />
                         <button
@@ -1519,14 +1548,14 @@ export default function AdminPage() {
                           onClick={handleAddCustomWood}
                           className="px-[16px] py-[12px] rounded-[12px] bg-[#161616] text-white font-['Outfit'] text-[12px] hover:bg-[#535353] transition-colors"
                         >
-                          Add
+                          {t('ui.add')}
                         </button>
                         <button
                           type="button"
                           onClick={() => setShowCustomWood(false)}
                           className="px-[16px] py-[12px] rounded-[12px] border border-[#BBBBBB] font-['Outfit'] text-[12px] hover:bg-[#EAEAEA] transition-colors"
                         >
-                          Cancel
+                          {t('ui.cancel')}
                         </button>
                       </div>
                     )}
@@ -1534,7 +1563,7 @@ export default function AdminPage() {
 
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                      Profile
+                      {t('productsDemo.fields.profile')}
                     </label>
                     <select
                       value={productForm.profile}
@@ -1588,7 +1617,7 @@ export default function AdminPage() {
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-[20px]">
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                      Color
+                      {t('productsDemo.fields.color')}
                     </label>
                     <select
                       value={productForm.color}
@@ -1606,7 +1635,7 @@ export default function AdminPage() {
                           {c.label}
                         </option>
                       ))}
-                      <option value="__custom__">Add new…</option>
+                      <option value="__custom__">{t('ui.addNewEllipsis')}</option>
                     </select>
 
                     {showCustomColor && (
@@ -1616,7 +1645,7 @@ export default function AdminPage() {
                           value={customColorLabel}
                           onChange={(e) => setCustomColorLabel(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomColor())}
-                          placeholder="Enter color name"
+                          placeholder={t('productsDemo.placeholders.colorCustom')}
                           className="flex-1 px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] font-['Outfit'] text-[14px] focus:border-[#161616] focus:outline-none"
                         />
                         <button
@@ -1624,14 +1653,14 @@ export default function AdminPage() {
                           onClick={handleAddCustomColor}
                           className="px-[16px] py-[12px] rounded-[12px] bg-[#161616] text-white font-['Outfit'] text-[12px] hover:bg-[#535353] transition-colors"
                         >
-                          Add
+                          {t('ui.add')}
                         </button>
                         <button
                           type="button"
                           onClick={() => setShowCustomColor(false)}
                           className="px-[16px] py-[12px] rounded-[12px] border border-[#BBBBBB] font-['Outfit'] text-[12px] hover:bg-[#EAEAEA] transition-colors"
                         >
-                          Cancel
+                          {t('ui.cancel')}
                         </button>
                       </div>
                     )}
@@ -1639,7 +1668,7 @@ export default function AdminPage() {
 
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                      Thickness (mm)
+                      {t('productsDemo.fields.thickness')}
                     </label>
                     <select
                       value={productForm.thicknessMm}
@@ -1659,7 +1688,7 @@ export default function AdminPage() {
                             {mm === 20 ? '18/20' : mm}
                           </option>
                         ))}
-                      <option value="__custom__">Add new…</option>
+                      <option value="__custom__">{t('ui.addNewEllipsis')}</option>
                     </select>
 
                     {showCustomThickness && (
@@ -1679,14 +1708,14 @@ export default function AdminPage() {
                           onClick={handleAddCustomThickness}
                           className="px-[16px] py-[12px] rounded-[12px] bg-[#161616] text-white font-['Outfit'] text-[12px] hover:bg-[#535353] transition-colors"
                         >
-                          Add
+                          {t('ui.add')}
                         </button>
                         <button
                           type="button"
                           onClick={() => setShowCustomThickness(false)}
                           className="px-[16px] py-[12px] rounded-[12px] border border-[#BBBBBB] font-['Outfit'] text-[12px] hover:bg-[#EAEAEA] transition-colors"
                         >
-                          Cancel
+                          {t('ui.cancel')}
                         </button>
                       </div>
                     )}
@@ -1694,7 +1723,7 @@ export default function AdminPage() {
 
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                      Width (mm)
+                      {t('productsDemo.fields.width')}
                     </label>
                     <select
                       value={productForm.widthMm}
@@ -1714,7 +1743,7 @@ export default function AdminPage() {
                             {mm}
                           </option>
                         ))}
-                      <option value="__custom__">Add new…</option>
+                      <option value="__custom__">{t('ui.addNewEllipsis')}</option>
                     </select>
 
                     {showCustomWidth && (
@@ -1734,14 +1763,14 @@ export default function AdminPage() {
                           onClick={handleAddCustomWidth}
                           className="px-[16px] py-[12px] rounded-[12px] bg-[#161616] text-white font-['Outfit'] text-[12px] hover:bg-[#535353] transition-colors"
                         >
-                          Add
+                          {t('ui.add')}
                         </button>
                         <button
                           type="button"
                           onClick={() => setShowCustomWidth(false)}
                           className="px-[16px] py-[12px] rounded-[12px] border border-[#BBBBBB] font-['Outfit'] text-[12px] hover:bg-[#EAEAEA] transition-colors"
                         >
-                          Cancel
+                          {t('ui.cancel')}
                         </button>
                       </div>
                     )}
@@ -1749,7 +1778,7 @@ export default function AdminPage() {
 
                   <div>
                     <label className="block font-['Outfit'] text-[14px] text-[#161616] mb-[8px]">
-                      Length (mm)
+                      {t('productsDemo.fields.length')}
                     </label>
                     <select
                       value={productForm.lengthMm}

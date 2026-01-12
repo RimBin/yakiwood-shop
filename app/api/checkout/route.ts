@@ -169,6 +169,26 @@ export async function POST(req: NextRequest) {
         })
       : resolvedItems;
 
+    const cartTotalAreaM2 = discountedItems.reduce((sum, item) => {
+      if (item.id === 'shipping') return sum;
+
+      const snapArea = (item as any)?.pricingSnapshot?.totalAreaM2;
+      if (typeof snapArea === 'number' && Number.isFinite(snapArea) && snapArea > 0) return sum + snapArea;
+
+      const cfg = item.configuration;
+      if (
+        cfg &&
+        typeof cfg.widthMm === 'number' &&
+        typeof cfg.lengthMm === 'number' &&
+        typeof item.quantity === 'number' &&
+        item.quantity > 0
+      ) {
+        return sum + (cfg.widthMm / 1000) * (cfg.lengthMm / 1000) * item.quantity;
+      }
+
+      return sum;
+    }, 0);
+
     // NOTE: Real implementation should map product IDs to Stripe Price IDs.
     // For initial scaffold we convert basePrice EUR to cents direct.
     const lineItemsResolved = await Promise.all(
@@ -198,6 +218,17 @@ export async function POST(req: NextRequest) {
           };
         }
 
+        // Prefer snapshot pricing if provided by the client/order.
+        const snapshotUnitPrice = (item as any)?.pricingSnapshot?.unitPrice;
+        if (typeof snapshotUnitPrice === 'number' && Number.isFinite(snapshotUnitPrice) && snapshotUnitPrice > 0) {
+          const discountedUnit = roleDiscount ? applyRoleDiscount(snapshotUnitPrice, roleDiscount) : snapshotUnitPrice;
+          return {
+            quantity: item.quantity,
+            unitAmountCents: Math.round(discountedUnit * 100),
+            displayName: item.name,
+          };
+        }
+
         const quote = await quoteConfigurationPricing({
           productId: item.id,
           usageType: cfg.usageType,
@@ -207,6 +238,7 @@ export async function POST(req: NextRequest) {
           widthMm: cfg.widthMm as number,
           lengthMm: cfg.lengthMm as number,
           quantityBoards: 1,
+          cartTotalAreaM2,
         });
 
         if (!quote) {
@@ -217,7 +249,9 @@ export async function POST(req: NextRequest) {
           };
         }
 
-        const unitAmountCents = Math.round(quote.unitPricePerBoard * 100);
+        const quotedUnit = quote.unitPricePerBoard;
+        const discountedUnit = roleDiscount ? applyRoleDiscount(quotedUnit, roleDiscount) : quotedUnit;
+        const unitAmountCents = Math.round(discountedUnit * 100);
         return {
           quantity: item.quantity,
           unitAmountCents,

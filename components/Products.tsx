@@ -1,34 +1,32 @@
 'use client';
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { useCartStore } from '@/lib/cart/store';
 import { assets, getAsset } from '@/lib/assets';
 
 const imgMask = getAsset('imgMask');
 
-// Product images
-const imgSpruce = assets.wood.spruce;
-const imgLarch1 = assets.wood.larch1;
-const imgLarch2 = assets.wood.larch2;
+const swatchIcons = {
+  black: assets.colorSwatches[0],
+  darkBrown: assets.colorSwatches[1],
+  carbon: assets.colorSwatches[2],
+  latte: assets.colorSwatches[3],
+  silver: assets.colorSwatches[4],
+  carbonLight: assets.colorSwatches[5],
+  graphite: assets.colorSwatches[6],
+  natural: assets.colorSwatches[7],
+} as const;
 
-// Color swatches
-const [
-  imgColor1,
-  imgColor2,
-  imgColor3,
-  imgColor4,
-  imgColor5,
-  imgColor6,
-  imgColor7,
-  imgColor8,
-] = assets.colors;
+const spruceFinishes = assets.finishes.spruce;
+const larchFinishes = assets.finishes.larch;
 
 // Product type
 type ProductData = {
   id: string;
   image: string;
-  slides: { image: string; label: string }[];
+  slides: { image: string; label: string; swatch: string }[];
   title: string;
   price: number;
   description: string;
@@ -38,30 +36,42 @@ type ProductData = {
 const products: ProductData[] = [
   {
     id: 'spruce-wood',
-    image: imgSpruce,
+    image: spruceFinishes.natural,
     slides: [
-      { image: imgSpruce, label: 'Natural' },
-      { image: imgLarch1, label: 'Silver' },
-      { image: imgLarch2, label: 'Carbon' },
+      { image: spruceFinishes.natural, label: 'Natural', swatch: swatchIcons.natural },
+      { image: spruceFinishes.silver, label: 'Silver', swatch: swatchIcons.silver },
+      { image: spruceFinishes.carbon, label: 'Carbon', swatch: swatchIcons.carbon },
+      { image: spruceFinishes.carbonLight, label: 'Carbon light', swatch: swatchIcons.carbonLight },
+      { image: spruceFinishes.graphite, label: 'Graphite', swatch: swatchIcons.graphite },
+      { image: spruceFinishes.latte, label: 'Latte', swatch: swatchIcons.latte },
+      { image: spruceFinishes.darkBrown, label: 'Dark brown', swatch: swatchIcons.darkBrown },
+      { image: spruceFinishes.black, label: 'Black', swatch: swatchIcons.black },
     ],
     title: 'Spruce wood',
     price: 89,
-    description: 'Lightweight yet strong, spruce wood offers a smooth texture and a natural, clean finish. Its versatility and durability make it an excellent choice for both interior and exterior applications.',
-    solutions: ['Facades', 'Fence', 'Terrace', 'Interior']
+    description:
+      'Lightweight yet strong, spruce wood offers a smooth texture and a natural, clean finish. Its versatility and durability make it an excellent choice for both interior and exterior applications.',
+    solutions: ['Facades', 'Fence', 'Terrace', 'Interior'],
   },
   {
     id: 'larch-wood-1',
-    image: imgLarch1,
+    image: larchFinishes.natural,
     slides: [
-      { image: imgLarch1, label: 'Silver' },
-      { image: imgLarch2, label: 'Carbon light' },
-      { image: imgSpruce, label: 'Natural' },
+      { image: larchFinishes.natural, label: 'Natural', swatch: swatchIcons.natural },
+      { image: larchFinishes.silver, label: 'Silver', swatch: swatchIcons.silver },
+      { image: larchFinishes.carbon, label: 'Carbon', swatch: swatchIcons.carbon },
+      { image: larchFinishes.carbonLight, label: 'Carbon light', swatch: swatchIcons.carbonLight },
+      { image: larchFinishes.graphite, label: 'Graphite', swatch: swatchIcons.graphite },
+      { image: larchFinishes.latte, label: 'Latte', swatch: swatchIcons.latte },
+      { image: larchFinishes.darkBrown, label: 'Dark brown', swatch: swatchIcons.darkBrown },
+      { image: larchFinishes.black, label: 'Black', swatch: swatchIcons.black },
     ],
     title: 'Larch wood',
     price: 89,
-    description: 'Lightweight yet strong, spruce wood offers a smooth texture and a natural, clean finish. Its versatility and durability make it an excellent choice for both interior and exterior applications.',
-    solutions: ['Facades', 'Fence', 'Terrace', 'Interior']
-  }
+    description:
+      'Lightweight yet strong, spruce wood offers a smooth texture and a natural, clean finish. Its versatility and durability make it an excellent choice for both interior and exterior applications.',
+    solutions: ['Facades', 'Fence', 'Terrace', 'Interior'],
+  },
 ];
 
 function SliderArrows({
@@ -123,7 +133,10 @@ function SliderArrows({
 
 // Mobile Product Card - Figma 803:13034 (303x532px)
 function MobileProductCard({ product }: { product: ProductData }) {
-  const slides = useMemo(() => (product.slides.length > 0 ? product.slides : [{ image: product.image, label: '' }]), [product]);
+  const slides = useMemo(
+    () => (product.slides.length > 0 ? product.slides : [{ image: product.image, label: '', swatch: swatchIcons.natural }]),
+    [product.slides, product.image]
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const goTo = (index: number) => {
@@ -137,19 +150,24 @@ function MobileProductCard({ product }: { product: ProductData }) {
       <div className="absolute left-0 top-0 w-[303px] h-[532px] pointer-events-none">
         <Image src={imgMask} alt="" fill className="object-cover" />
       </div>
-      
+
       {/* Product image slider - 271x260px on mobile */}
       <div className="relative w-[271px] h-[260px] shrink-0 z-10 rounded-[8px] overflow-hidden">
         <Image src={slides[currentIndex]?.image || product.image} alt={product.title} fill className="object-cover" />
-        <div className="absolute bottom-[12px] right-[12px] z-20 bg-[#161616]/75 px-[10px] py-[6px] rounded-full">
-          <span className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-white">
-            {slides[currentIndex]?.label || ''}
-          </span>
-        </div>
+
+        {!!slides[currentIndex]?.label && (
+          <div className="absolute bottom-[12px] left-[12px] z-20 flex gap-[8px] items-center">
+            {product.solutions.map((s, i) => (
+              <div key={i} className="bg-white/40 px-[8px] h-[20px] rounded-[4px] flex items-center justify-center">
+                <span className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">{s}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         <SliderArrows onPrev={() => goTo(currentIndex - 1)} onNext={() => goTo(currentIndex + 1)} />
       </div>
-      
+
       {/* Content container - 279px width */}
       <div className="w-[279px] flex flex-col gap-[16px] relative z-10">
         {/* Solution chips */}
@@ -162,7 +180,7 @@ function MobileProductCard({ product }: { product: ProductData }) {
             </div>
           ))}
         </div>
-        
+
         {/* Title & Price row */}
         <div className="flex items-center justify-between w-full">
           <p className="font-['DM_Sans'] font-normal text-[24px] leading-[1.1] tracking-[-0.96px] text-[#161616]">
@@ -172,12 +190,12 @@ function MobileProductCard({ product }: { product: ProductData }) {
             {product.price} €
           </p>
         </div>
-        
+
         {/* Description */}
         <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full">
           {product.description}
         </p>
-        
+
         {/* Colors section */}
         <div className="flex flex-col gap-[8px]">
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] text-[#161616]">Colors</p>
@@ -199,7 +217,7 @@ function MobileProductCard({ product }: { product: ProductData }) {
                 }
               >
                 <span className="relative block w-full h-full rounded-full overflow-hidden">
-                  <Image src={slide.image} alt={slide.label || product.title} fill className="object-cover" />
+                  <Image src={slide.swatch} alt={slide.label || product.title} fill className="object-cover" />
                 </span>
               </button>
             ))}
@@ -212,9 +230,10 @@ function MobileProductCard({ product }: { product: ProductData }) {
 
 // Desktop Product Card
 function DesktopProductCard({ product }: { product: ProductData }) {
-  const addItem = useCartStore(state => state.addItem);
-
-  const slides = useMemo(() => (product.slides.length > 0 ? product.slides : [{ image: product.image, label: '' }]), [product]);
+  const slides = useMemo(
+    () => (product.slides.length > 0 ? product.slides : [{ image: product.image, label: '', swatch: swatchIcons.natural }]),
+    [product.slides, product.image]
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const goTo = (index: number) => {
@@ -222,32 +241,28 @@ function DesktopProductCard({ product }: { product: ProductData }) {
     setCurrentIndex(safeIndex);
   };
 
-  const handleAddToCart = () => {
-    addItem({
-      id: product.id,
-      name: product.title,
-      slug: product.id,
-      basePrice: product.price,
-    });
-  };
-
   return (
     <div className="bg-[#eaeaea] rounded-[8px] pt-[24px] pb-[40px] px-[24px] flex-1 min-w-0 flex flex-col gap-[24px] items-center relative">
       <div className="absolute inset-0 pointer-events-none">
         <Image src={imgMask} alt="" fill className="object-cover" />
       </div>
-      
+
       <div className="relative w-full aspect-[395/311] shrink-0 z-10 rounded-[8px] overflow-hidden">
         <Image src={slides[currentIndex]?.image || product.image} alt={product.title} fill className="object-cover" />
-        <div className="absolute bottom-[12px] right-[12px] z-20 bg-[#161616]/75 px-[12px] py-[8px] rounded-full">
-          <span className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-white">
-            {slides[currentIndex]?.label || ''}
-          </span>
-        </div>
+
+        {!!slides[currentIndex]?.label && (
+          <div className="absolute bottom-[12px] left-[12px] z-20 flex gap-[8px] items-center">
+            {product.solutions.map((s, i) => (
+              <div key={i} className="bg-white/40 px-[8px] h-[20px] rounded-[4px] flex items-center justify-center">
+                <span className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">{s}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         <SliderArrows onPrev={() => goTo(currentIndex - 1)} onNext={() => goTo(currentIndex + 1)} />
       </div>
-      
+
       <div className="w-full flex flex-col gap-[16px] relative z-10">
         <div className="flex gap-[8px] items-center justify-center flex-wrap">
           {product.solutions.map((sol, idx) => (
@@ -256,16 +271,16 @@ function DesktopProductCard({ product }: { product: ProductData }) {
             </div>
           ))}
         </div>
-        
+
         <div className="flex items-start justify-between w-full leading-[1.1] font-['DM_Sans'] font-normal text-[32px] tracking-[-1.28px] text-[#161616]">
           <p className="shrink-0">{product.title}</p>
           <p className="shrink-0">{product.price} €</p>
         </div>
-        
+
         <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full">
           {product.description}
         </p>
-        
+
         <div className="flex flex-col gap-[8px]">
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] text-[#161616]">Colors</p>
           <div className="flex gap-[12px] items-center overflow-clip">
@@ -286,7 +301,7 @@ function DesktopProductCard({ product }: { product: ProductData }) {
                 }
               >
                 <span className="relative block w-full h-full rounded-full overflow-hidden">
-                  <Image src={slide.image} alt={slide.label || product.title} fill className="object-cover" />
+                  <Image src={slide.swatch} alt={slide.label || product.title} fill className="object-cover" />
                 </span>
               </button>
             ))}
@@ -298,6 +313,26 @@ function DesktopProductCard({ product }: { product: ProductData }) {
 }
 
 export default function Products() {
+  const pathname = usePathname();
+  const [cookieLocale, setCookieLocale] = useState<string | null>(null);
+
+  useEffect(() => {
+    const match = document.cookie.match(/(?:^|; )NEXT_LOCALE=([^;]+)/);
+    if (match?.[1]) setCookieLocale(decodeURIComponent(match[1]));
+  }, []);
+
+  const localeFromPath = pathname?.match(/^\/(en)(?:\/|$)/)?.[1] ?? null;
+  const pathLooksEnglish =
+    pathname?.startsWith('/products') ||
+    pathname?.startsWith('/solutions') ||
+    pathname?.startsWith('/projects') ||
+    pathname?.startsWith('/about') ||
+    pathname?.startsWith('/contact');
+
+  const isEnglishRoute = localeFromPath === 'en' || cookieLocale === 'en' || !!pathLooksEnglish;
+  const englishPrefix = localeFromPath === 'en' ? '/en' : '';
+  const shopHref = isEnglishRoute ? `${englishPrefix}/products` : '/produktai';
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -317,7 +352,7 @@ export default function Products() {
         </div>
 
         {/* Horizontal scrolling product cards - Figma 803:13033 */}
-        <div 
+        <div
           ref={scrollRef}
           className="flex gap-[8px] overflow-x-auto px-[16px] pb-[24px] scrollbar-hide"
           style={{ scrollSnapType: 'x mandatory' }}
@@ -331,11 +366,14 @@ export default function Products() {
 
         {/* GET AN OFFER Button - Mobile */}
         <div className="px-[16px] pb-[64px]">
-          <button className="w-[358px] max-w-full mx-auto block bg-[#161616] rounded-[100px] h-[48px] flex items-center justify-center">
+          <Link
+            href={shopHref}
+            className="w-[358px] max-w-full mx-auto block bg-[#161616] rounded-[100px] h-[48px] flex items-center justify-center"
+          >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
               get an offer
             </span>
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -362,11 +400,14 @@ export default function Products() {
 
         {/* View Catalog Button */}
         <div className="mt-[48px] flex justify-center">
-          <button className="bg-[#161616] px-[40px] py-[10px] h-[48px] rounded-[100px] w-[296px] flex items-center justify-center gap-[10px]">
-            <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
+          <Link
+            href={shopHref}
+            className="bg-[#161616] px-[40px] py-[10px] h-[48px] rounded-[100px] w-[296px] flex items-center justify-center gap-[10px]"
+          >
+            <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
               view catalog
-            </p>
-          </button>
+            </span>
+          </Link>
         </div>
 
         <div className="pb-[64px]" />

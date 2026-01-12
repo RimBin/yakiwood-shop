@@ -170,6 +170,11 @@ export default function CheckoutPage() {
         configuration: item.configuration,
       }));
       // 0) Lock pricing server-side (TTL quote) to avoid trusting client prices.
+      // In local/dev setups (or when explicitly enabled), allow bypass when pricing DB isn't ready.
+      const allowPricingLockBypass =
+        process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_PRICING_LOCK_OPTIONAL === 'true';
+
+      let quoteToken: string | undefined;
       const quoteRes = await fetch('/api/pricing/lock', {
         method: 'POST',
         headers: {
@@ -180,14 +185,27 @@ export default function CheckoutPage() {
         }),
       });
 
-      const quoteData = await quoteRes.json();
-      if (!quoteRes.ok) {
-        throw new Error(quoteData.error || t('errors.generic'));
-      }
+      const quoteData = await quoteRes.json().catch(() => null);
 
-      const quoteToken = quoteData?.quoteToken as string | undefined;
-      if (!quoteToken) {
-        throw new Error(t('errors.generic'));
+      if (quoteRes.ok) {
+        quoteToken = (quoteData?.quoteToken as string | undefined) || undefined;
+        if (!quoteToken) {
+          throw new Error(t('errors.generic'));
+        }
+      } else {
+        const serverErrorMessage = (quoteData as any)?.error as string | undefined;
+
+        // If pricing lock fails due to server misconfiguration, optionally continue without quote.
+        // Orders endpoint can compute totals from items when quoteToken is omitted.
+        if (allowPricingLockBypass && quoteRes.status >= 500) {
+          console.warn('Pricing lock unavailable; continuing without quote token', {
+            status: quoteRes.status,
+            error: serverErrorMessage,
+          });
+          quoteToken = undefined;
+        } else {
+          throw new Error(serverErrorMessage || t('errors.generic'));
+        }
       }
 
       // 1) Always create order first (WooCommerce-like)
