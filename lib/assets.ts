@@ -62,6 +62,16 @@ const localAssets = {
   // Payments
   imgPayments: '/assets/icons/payments.png',
 
+  // Color swatch icons (overlapping UI)
+  colorSwatchBlack: '/assets/icons/color/black-color-1.png',
+  colorSwatchBrown: '/assets/icons/color/Brown-color-1.png',
+  colorSwatchCarbon: '/assets/icons/color/Carbon-color-1.png',
+  colorSwatchLatte: '/assets/icons/color/Latte-color-1.png',
+  colorSwatchSilver: '/assets/icons/color/Silver-color-1.png',
+  colorSwatchCarbonLight: '/assets/icons/color/carbon-light-color-1.png',
+  colorSwatchGraphite: '/assets/icons/color/Graphite-color-1.png',
+  colorSwatchNatural: '/assets/icons/color/Natural (2).png',
+
   // Hero
   heroVector: '/images/hero/Vector.png',
 } as const;
@@ -120,7 +130,19 @@ export const assets = {
     warehouse: localAssets.imgIconWarehouse,
     plantSvg: localAssets.imgIconPlantSvg,
     cube: localAssets.imgIconCube,
+    colors: '/assets/icons/Colors.png',
   },
+  // Individual color swatches (for overlap UI)
+  colorSwatches: [
+    localAssets.colorSwatchBlack,
+    localAssets.colorSwatchBrown,
+    localAssets.colorSwatchCarbon,
+    localAssets.colorSwatchLatte,
+    localAssets.colorSwatchSilver,
+    localAssets.colorSwatchCarbonLight,
+    localAssets.colorSwatchGraphite,
+    localAssets.colorSwatchNatural,
+  ],
   certifications: {
     epd: localAssets.certEpd,
     fsc: localAssets.certFsc,

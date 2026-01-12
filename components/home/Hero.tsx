@@ -16,7 +16,7 @@ export default async function Hero() {
   return (
     <section className="w-full bg-[#EAEAEA] relative overflow-hidden">
       {/* Full-width hero vector background */}
-      <div className="absolute left-0 top-0 w-full h-[776px]">
+      <div className="absolute inset-0">
         <Image src={assets.heroVector} alt="" fill className="object-cover" priority />
       </div>
 
@@ -65,10 +65,14 @@ export default async function Hero() {
 
             <div className="flex flex-col gap-2">
               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] tracking-[-0.24px] text-white">Colors</p>
-              <div className="flex gap-1 items-center">
-                {mobileColors.map((src, i) => (
-                  <div key={i} className="w-[24px] h-[24px] rounded-[4px] relative overflow-hidden">
-                    <Image src={src} alt="" width={20} height={20} className="w-[20px] h-[20px] m-[2px]" />
+              <div className="flex items-center">
+                {assets.colorSwatches.map((src, i) => (
+                  <div
+                    key={src}
+                    className="-mr-[4px] w-[24px] h-[24px] relative rounded-full overflow-hidden border border-white/40"
+                    style={{ zIndex: assets.colorSwatches.length - i }}
+                  >
+                    <Image src={src} alt="" fill className="object-cover" />
                   </div>
                 ))}
               </div>
@@ -110,7 +114,7 @@ export default async function Hero() {
                 <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] whitespace-nowrap">Explore catalog</span>
               </Link>
 
-              <div className="relative h-[16px] w-[220px]">
+              <div className="relative h-[22px] w-[280px]">
                 <Image src={assets.payments} alt="Payments" fill className="object-contain" />
               </div>
             </div>
@@ -144,9 +148,15 @@ export default async function Hero() {
 
               <div className="flex flex-col gap-[8px]">
                 <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] tracking-[-0.24px] text-white w-full whitespace-pre-wrap">Colors</p>
-                <div className="flex gap-0 pl-0 pr-[4px] isolate">
-                  {assets.colors.slice(0, 6).map((src,i)=> (
-                    <div key={i} className="-mr-[4px] w-[32px] h-[32px] relative" style={{zIndex:6-i}}><Image src={src} alt="" width={33} height={33} /></div>
+                <div className="flex items-center isolate">
+                  {assets.colorSwatches.map((src, i) => (
+                    <div
+                      key={src}
+                      className="-mr-[6px] w-[32px] h-[32px] relative rounded-full overflow-hidden border border-white/40"
+                      style={{ zIndex: assets.colorSwatches.length - i }}
+                    >
+                      <Image src={src} alt="" fill className="object-cover" />
+                    </div>
                   ))}
                 </div>
               </div>
