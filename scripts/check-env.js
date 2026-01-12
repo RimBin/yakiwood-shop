@@ -270,27 +270,6 @@ const envVars = {
     category: 'Email',
   },
 
-  // reCAPTCHA (Contact form)
-  NEXT_PUBLIC_RECAPTCHA_SITE_KEY: {
-    required: 'conditional',
-    condition: 'contact-form',
-    type: 'string',
-    description: 'Google reCAPTCHA v2 site key (public, used in contact form UI)',
-    example: '6Lc... (site key from Google reCAPTCHA admin)',
-    category: 'reCAPTCHA',
-    getLink: 'https://www.google.com/recaptcha/admin',
-  },
-  RECAPTCHA_SECRET_KEY: {
-    required: 'conditional',
-    condition: 'contact-form',
-    type: 'string',
-    description: 'Google reCAPTCHA secret key (server-side verification for contact form)',
-    example: '6Lc... (secret key from Google reCAPTCHA admin)',
-    category: 'reCAPTCHA',
-    sensitive: true,
-    getLink: 'https://www.google.com/recaptcha/admin',
-  },
-
   // Analytics
   NEXT_PUBLIC_GA_MEASUREMENT_ID: {
     required: false,

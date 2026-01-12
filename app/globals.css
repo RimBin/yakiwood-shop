@@ -126,3 +126,17 @@ body {
     transform: translateX(0);
   }
 }
+
+/* Prevent accidental horizontal overflow (e.g., running/marquee rows) from enabling horizontal scroll */
+html,
+body {
+	width: 100%;
+	overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+	html,
+	body {
+		overflow-x: hidden;
+	}
+}

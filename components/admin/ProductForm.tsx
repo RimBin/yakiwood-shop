@@ -93,7 +93,10 @@ export default function ProductForm({ product, mode }: Props) {
   const [usageType, setUsageType] = useState(product?.usage_type || '');
   const [woodType, setWoodType] = useState(product?.wood_type || '');
   const [basePrice, setBasePrice] = useState(product?.base_price.toString() || '');
-  const [status, setStatus] = useState<'draft' | 'published'>(product?.is_active ? 'published' : 'draft');
+  const [status, setStatus] = useState<'draft' | 'published'>(() => {
+    if (product) return product.is_active ? 'published' : 'draft'
+    return mode === 'create' ? 'published' : 'draft'
+  });
   const [stockQuantity, setStockQuantity] = useState(product?.stock_quantity?.toString() || '');
   const [sku, setSku] = useState(product?.sku || '');
   const [width, setWidth] = useState(product?.width?.toString() || '');
