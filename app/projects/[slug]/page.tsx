@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import ProjectDetailClient from '@/components/projects/ProjectDetailClient';
 import { getProjectBySlug, getRelatedProjects, projects } from '@/data/projects';
 import { getProjectOgImage } from '@/lib/og-image';
+import { getLocale } from 'next-intl/server';
+import { toLocalePath } from '@/i18n/paths';
 
 interface ProjectPageProps {
   params: Promise<{
@@ -26,12 +28,19 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   }
 
   const ogImage = project.images?.[0] || project.featuredImage;
+  const locale = await getLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const projectPath = toLocalePath(`/projects/${project.slug}`, currentLocale);
+  const canonical = `https://yakiwood.lt${projectPath}`;
 
   return {
-    title: `${project.title} - ${project.location} | Yakiwood`,
+    title: `${project.title} - ${project.location}`,
     description: project.description,
+    alternates: {
+      canonical,
+    },
     openGraph: {
-      title: `${project.title} | Yakiwood`,
+      title: project.title,
       description: project.description,
       images: [
         {
@@ -42,7 +51,7 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
         },
       ],
       type: 'article',
-      url: `https://yakiwood.lt/projects/${project.slug}`,
+      url: canonical,
     },
     twitter: {
       card: 'summary_large_image',

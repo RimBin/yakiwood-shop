@@ -1,22 +1,34 @@
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { canonicalUrl } from '@/lib/seo/canonical';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.news');
+  const locale = await getLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const canonical = canonicalUrl('/naujienos', currentLocale);
+  const ogImage = getOgImage('projects');
   
   return {
     title: t('title'),
     description: t('description'),
+    alternates: {
+      canonical,
+    },
     openGraph: {
       title: t('ogTitle'),
       description: t('description'),
-      url: 'https://yakiwood.lt/naujienos',
-      images: [{ url: getOgImage('projects'), width: 1200, height: 630 }],
+      url: canonical,
+      type: 'website',
+      siteName: 'Yakiwood',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: t('ogTitle') }],
     },
     twitter: {
       card: 'summary_large_image',
-      images: [getOgImage('projects')],
+      title: t('ogTitle'),
+      description: t('description'),
+      images: [ogImage],
     },
   };
 }

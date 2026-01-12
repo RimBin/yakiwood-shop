@@ -10,7 +10,11 @@ import { getAsset } from './assets';
  * Uses existing content images - no need to create new ones!
  */
 export function getOgImage(page: 'home' | 'products' | 'projects' | 'solutions' | 'about' | 'contact' | 'faq'): string {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://yakiwood.lt';
+  // Keep OG URLs HTTPS so canonicals/social previews are consistent.
+  // In local dev you might have NEXT_PUBLIC_SITE_URL=http://localhost:xxxx;
+  // that would produce non-HTTPS OG URLs which our SEO validator flags.
+  const envBase = process.env.NEXT_PUBLIC_SITE_URL;
+  const baseUrl = envBase && envBase.startsWith('https://') ? envBase : 'https://yakiwood.lt';
   
   // Map pages to existing asset images
   const ogImages: Record<string, string> = {
@@ -39,7 +43,8 @@ export function getOgImage(page: 'home' | 'products' | 'projects' | 'solutions' 
  * Uses product's own image if available
  */
 export function getProductOgImage(imageUrl?: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://yakiwood.lt';
+  const envBase = process.env.NEXT_PUBLIC_SITE_URL;
+  const baseUrl = envBase && envBase.startsWith('https://') ? envBase : 'https://yakiwood.lt';
   
   if (imageUrl) {
     // If Sanity image URL or external URL, return it directly
@@ -59,7 +64,8 @@ export function getProductOgImage(imageUrl?: string): string {
  * Uses project's own image if available
  */
 export function getProjectOgImage(imageUrl?: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://yakiwood.lt';
+  const envBase = process.env.NEXT_PUBLIC_SITE_URL;
+  const baseUrl = envBase && envBase.startsWith('https://') ? envBase : 'https://yakiwood.lt';
   
   if (imageUrl) {
     // If external URL, return it directly

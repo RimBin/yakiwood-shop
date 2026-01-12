@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
 
 interface Language {
@@ -56,6 +56,7 @@ function toEnPath(pathname: string): string {
 
 export default function LanguageSwitcher() {
   const locale = useLocale();
+  const t = useTranslations('languageSwitcher');
   const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
@@ -107,7 +108,7 @@ export default function LanguageSwitcher() {
         className="group border border-[#BBBBBB] border-solid rounded-[100px] flex gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[16px] md:px-[20px] py-[10px] bg-transparent hover:bg-[#161616] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#161616] focus-visible:ring-offset-2"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        aria-label="Pasirinkti kalbą"
+        aria-label={t('toggleAria')}
       >
         <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white shrink-0">
           {currentLanguage.code}
@@ -141,7 +142,7 @@ export default function LanguageSwitcher() {
             animate-in fade-in slide-in-from-top-2 duration-200
           "
           role="listbox"
-          aria-label="Galimos kalbos"
+          aria-label={t('optionsAria')}
         >
           {languages.map((language) => {
             const isActive = language.code === locale;

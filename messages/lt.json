@@ -148,6 +148,15 @@
     "sekmadienis": "Sekmadienis"
   },
   "hero": {
+    "mainHeading": "Amžinas grožis, sustiprintas ugnies - ",
+    "brandName": "Yakiwood",
+    "description": "Atraskite deginto medienos elegancija ir ilgaamžiškumą, sukurtą naudojant senovinę japonų Shou Sugi Ban techniką.",
+    "from": "Nuo",
+    "buyNow": "Pirkti dabar",
+    "productName": "Shou sugi Ban Lentos",
+    "solutions": "Sprendimai",
+    "colors": "Spalvos",
+    "exploreCatalog": "Peržiūrėti katalogą",
     "pagrindineAntraste": "Amžinas grožis, sustiprintas ugnies - ",
     "prekesZenklas": "Yakiwood",
     "aprasymas": "Atraskite deginto medienos elegancija ir ilgaamžiškumą, sukurtą naudojant senovinę japonų Shou Sugi Ban techniką.",
@@ -157,6 +166,91 @@
     "produktoPavadinimas": "Shou sugi Ban Lentos",
     "sprendimai": "Sprendimai",
     "spalvos": "Spalvos"
+  },
+  "home": {
+    "products": {
+      "eyebrow": "Produktai",
+      "headline": {
+        "prefix": "Pasirinkite savo ",
+        "emphasis": "tobulą",
+        "suffix": " medienos apdailą"
+      },
+      "cta": {
+        "offer": "Gauti pasiūlymą",
+        "catalog": "Peržiūrėti katalogą"
+      },
+      "labels": {
+        "colors": "Spalvos"
+      },
+      "aria": {
+        "prevImage": "Ankstesnė nuotrauka",
+        "nextImage": "Kita nuotrauka",
+        "selectColor": "Pasirinkti {label} ({index}/{total})"
+      },
+      "finishes": {
+        "natural": "Natūrali",
+        "silver": "Sidabrinė",
+        "carbon": "Anglis",
+        "carbonLight": "Šviesi anglis",
+        "graphite": "Grafitas",
+        "latte": "Latte",
+        "darkBrown": "Tamsiai ruda",
+        "black": "Juoda"
+      },
+      "items": {
+        "spruce": {
+          "title": "Eglės mediena",
+          "description": "Lengva, bet tvirta eglės mediena pasižymi lygiu paviršiumi ir švaria natūralia apdaila. Dėl universalumo ir ilgaamžiškumo ji puikiai tinka tiek vidaus, tiek lauko sprendimams."
+        },
+        "larch": {
+          "title": "Maumedžio mediena",
+          "description": "Natūraliai atspari ir ilgaamžė maumedžio mediena puikiai tinka lauko sąlygoms. Tanki tekstūra ir sodrus atspalvis leidžia patikimai įrengti ilgaamžius fasadus bei paviršius."
+        }
+      }
+    }
+    ,
+    "faq": {
+      "eyebrow": "DUK",
+      "headline": {
+        "prefix": "Viskas, ką norėjote ",
+        "emphasis": "paklausti",
+        "suffix": " ir dar daugiau"
+      },
+      "items": {
+        "01": {
+          "question": "Kas yra Shou Sugi Ban?",
+          "answer": "Shou Sugi Ban – senovinė japonų technika, kai mediena apdeginama (apanglinama), kad būtų apsaugota ir išryškėtų natūrali tekstūra. Tokiu būdu mediena tampa atsparesnė aplinkos poveikiui, kenkėjams ir atmosferos sąlygoms, o paviršius įgauna išskirtinę estetiką – gilius tonus ir unikalią faktūrą."
+        },
+        "02": {
+          "question": "Kaip prižiūrėti Shou Sugi Ban medieną?",
+          "answer": "Priežiūros informacija netrukus bus papildyta."
+        },
+        "03": {
+          "question": "Kur galima naudoti degintos medienos produktus?",
+          "answer": "Pritaikymo informacija netrukus bus papildyta."
+        },
+        "04": {
+          "question": "Kaip montuojama Shou Sugi Ban mediena?",
+          "answer": "Montavimo informacija netrukus bus papildyta."
+        },
+        "05": {
+          "question": "Ar Shou Sugi Ban tinka vidaus apdailai?",
+          "answer": "Vidaus naudojimo informacija netrukus bus papildyta."
+        },
+        "06": {
+          "question": "Ar Yakisugi tinka visiems klimatams?",
+          "answer": "Informacija apie klimatą netrukus bus papildyta."
+        },
+        "07": {
+          "question": "Kokie yra standartiniai Shou Sugi Ban lentų matmenys?",
+          "answer": "Matmenų informacija netrukus bus papildyta."
+        }
+      }
+    }
+  },
+  "languageSwitcher": {
+    "toggleAria": "Pasirinkti kalbą",
+    "optionsAria": "Galimos kalbos"
   },
   "product": {
     "spalva": "Spalva",
@@ -629,12 +723,12 @@
   },
   "metadata": {
     "contact": {
-      "title": "Kontaktai",
+      "title": "Kontaktai ir konsultacija",
       "description": "Reikalinga pagalba? Palikite savo kontaktinius duomenis ir mūsų vadybininkas susisieks dėl konsultacijos.",
       "ogTitle": "Kontaktai - Yakiwood"
     },
     "about": {
-      "title": "Apie mus",
+      "title": "Apie mus ir Shou Sugi Ban",
       "description": "Sužinokite apie Yakiwood - ekspertus Shou Sugi Ban degintos medienos gamyboje Lietuvoje.",
       "ogTitle": "Apie mus - Yakiwood"
     },
@@ -654,24 +748,25 @@
       "ogTitle": "Projektai - Yakiwood"
     },
     "news": {
-      "title": "Naujienos",
+      "title": "Naujienos apie Shou Sugi Ban",
       "description": "Skaitykite naujausias naujienas apie Shou Sugi Ban, mūsų projektus ir medienos apdorojimo naujienas.",
       "ogTitle": "Naujienos - Yakiwood"
     },
     "faq": {
-      "title": "DUK",
+      "title": "DUK apie Shou Sugi Ban medieną",
       "description": "Dažnai užduodami klausimai apie Shou Sugi Ban medienos produktus, priežiūrą ir montavimą.",
       "ogTitle": "DUK - Yakiwood"
     },
     "configurator3d": {
-      "title": "3D konfiguratorius",
+      "title": "3D konfiguratorius Shou Sugi Ban",
       "description": "Konfigūruokite produktą 3D erdvėje: pasirinkite spalvą ir profilį, kad pamatytumėte rezultatą.",
       "ogTitle": "3D konfiguratorius - Yakiwood"
     },
     "home": {
       "title": "Yakiwood - Shou Sugi Ban Degintas Medis Lietuvoje",
       "description": "Aukščiausios kokybės Shou Sugi Ban degintos medienos produktai. Fasadai, interjeras, terasa - ekologiški ir ilgaamžiški sprendimai.",
-      "ogTitle": "Yakiwood - Shou Sugi Ban degintas medis"
+      "ogTitle": "Yakiwood - Shou Sugi Ban degintas medis",
+      "ogAlt": "Yakiwood - Shou Sugi Ban degintas medis"
     }
   },
   "admin": {

@@ -168,12 +168,99 @@
     "mainHeading": "Timeless beauty, enhanced by fire - ",
     "brandName": "Yakiwood",
     "description": "Discover the elegance and durability of burnt wood, crafted using the ancient Japanese Shou Sugi Ban technique.",
+    "from": "From",
     "buyNow": "Buy now",
     "shopNow": "Shop now",
     "exploreProducts": "Explore products",
+    "exploreCatalog": "Explore catalog",
     "productName": "Shou sugi Ban Planks",
     "solutions": "Solutions",
     "colors": "Colors"
+  },
+  "home": {
+    "products": {
+      "eyebrow": "Products",
+      "headline": {
+        "prefix": "Choose your ",
+        "emphasis": "perfect",
+        "suffix": " wood finish"
+      },
+      "cta": {
+        "offer": "Get an offer",
+        "catalog": "View catalog"
+      },
+      "labels": {
+        "colors": "Colors"
+      },
+      "aria": {
+        "prevImage": "Previous image",
+        "nextImage": "Next image",
+        "selectColor": "Select {label} ({index}/{total})"
+      },
+      "finishes": {
+        "natural": "Natural",
+        "silver": "Silver",
+        "carbon": "Carbon",
+        "carbonLight": "Carbon light",
+        "graphite": "Graphite",
+        "latte": "Latte",
+        "darkBrown": "Dark brown",
+        "black": "Black"
+      },
+      "items": {
+        "spruce": {
+          "title": "Spruce wood",
+          "description": "Lightweight yet strong, spruce wood offers a smooth texture and a natural, clean finish. Its versatility and durability make it an excellent choice for both interior and exterior applications."
+        },
+        "larch": {
+          "title": "Larch wood",
+          "description": "Naturally durable and resilient, larch wood is well-suited for outdoor use. Its dense grain and rich tone make it a reliable choice for long-lasting facades and surfaces."
+        }
+      }
+    }
+    ,
+    "faq": {
+      "eyebrow": "FAQ",
+      "headline": {
+        "prefix": "Everything you wanted to ",
+        "emphasis": "ask",
+        "suffix": " & more"
+      },
+      "items": {
+        "01": {
+          "question": "What is Shou Sugi Ban?",
+          "answer": "Shou Sugi Ban is an ancient Japanese technique that involves charring wood to protect and enhance its natural beauty. This traditional method originated as a way to make wood more resistant to the elements, including insects, fire, and weathering. The process creates a striking aesthetic with deep tones, unique textures, and an elegant, rustic look."
+        },
+        "02": {
+          "question": "How do I maintain Shou Sugi Ban wood?",
+          "answer": "Maintenance details are coming soon."
+        },
+        "03": {
+          "question": "Where can charred wood products be used?",
+          "answer": "Usage details are coming soon."
+        },
+        "04": {
+          "question": "How is Shou Sugi Ban installed?",
+          "answer": "Installation details are coming soon."
+        },
+        "05": {
+          "question": "Is Shou Sugi Ban suitable for interior use?",
+          "answer": "Interior usage details are coming soon."
+        },
+        "06": {
+          "question": "Is Yakisugi suitable for all climates?",
+          "answer": "Climate details are coming soon."
+        },
+        "07": {
+          "question": "What are the standard dimensions for Shou Sugi Ban planks?",
+          "answer": "Dimensions details are coming soon."
+        }
+      }
+    }
+  },
+  "languageSwitcher": {
+    "toggleAria": "Select language",
+    "optionsAria": "Available languages"
   },
   "product": {
     "color": "Color",
@@ -879,12 +966,12 @@
   },
   "metadata": {
     "contact": {
-      "title": "Contact",
+      "title": "Contact & consultation",
       "description": "Need help? Leave your contact details and our manager will get in touch for consultation.",
       "ogTitle": "Contact - Yakiwood"
     },
     "about": {
-      "title": "About Us",
+      "title": "About Yakiwood & Shou Sugi Ban",
       "description": "Learn about Yakiwood - experts in Shou Sugi Ban burnt wood production in Lithuania.",
       "ogTitle": "About Us - Yakiwood"
     },
@@ -904,24 +991,25 @@
       "ogTitle": "Projects - Yakiwood"
     },
     "news": {
-      "title": "News",
+      "title": "News about Shou Sugi Ban",
       "description": "Read the latest news about Shou Sugi Ban, our projects, and wood processing updates.",
       "ogTitle": "News - Yakiwood"
     },
     "faq": {
-      "title": "FAQ",
+      "title": "FAQ about Shou Sugi Ban burnt wood",
       "description": "Frequently asked questions about Shou Sugi Ban wood products, maintenance, and installation.",
       "ogTitle": "FAQ - Yakiwood"
     },
     "configurator3d": {
-      "title": "3D configurator",
+      "title": "3D configurator for Shou Sugi Ban",
       "description": "Configure your product in 3D: choose a color and profile to preview the result.",
       "ogTitle": "3D configurator - Yakiwood"
     },
     "home": {
       "title": "Yakiwood - Shou Sugi Ban Burnt Wood in Lithuania",
       "description": "Highest quality Shou Sugi Ban burnt wood products. Facades, interior, terrace - ecological and durable solutions.",
-      "ogTitle": "Yakiwood - Shou Sugi Ban burnt wood"
+      "ogTitle": "Yakiwood - Shou Sugi Ban burnt wood",
+      "ogAlt": "Yakiwood - Shou Sugi Ban burnt wood"
     }
   },
   "admin": {

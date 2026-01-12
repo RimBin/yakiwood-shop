@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import { useLocale, useTranslations } from 'next-intl';
+import { toLocalePath, type AppLocale } from '@/i18n/paths';
 import { assets, getAsset } from '@/lib/assets';
 
 const imgMask = getAsset('imgMask');
@@ -30,64 +31,27 @@ type ProductData = {
   title: string;
   price: number;
   description: string;
-  solutions: string[];
+  solutions: Array<'facade' | 'fence' | 'terrace' | 'interior'>;
 };
-
-const products: ProductData[] = [
-  {
-    id: 'spruce-wood',
-    image: spruceFinishes.natural,
-    slides: [
-      { image: spruceFinishes.natural, label: 'Natural', swatch: swatchIcons.natural },
-      { image: spruceFinishes.silver, label: 'Silver', swatch: swatchIcons.silver },
-      { image: spruceFinishes.carbon, label: 'Carbon', swatch: swatchIcons.carbon },
-      { image: spruceFinishes.carbonLight, label: 'Carbon light', swatch: swatchIcons.carbonLight },
-      { image: spruceFinishes.graphite, label: 'Graphite', swatch: swatchIcons.graphite },
-      { image: spruceFinishes.latte, label: 'Latte', swatch: swatchIcons.latte },
-      { image: spruceFinishes.darkBrown, label: 'Dark brown', swatch: swatchIcons.darkBrown },
-      { image: spruceFinishes.black, label: 'Black', swatch: swatchIcons.black },
-    ],
-    title: 'Spruce wood',
-    price: 89,
-    description:
-      'Lightweight yet strong, spruce wood offers a smooth texture and a natural, clean finish. Its versatility and durability make it an excellent choice for both interior and exterior applications.',
-    solutions: ['Facades', 'Fence', 'Terrace', 'Interior'],
-  },
-  {
-    id: 'larch-wood-1',
-    image: larchFinishes.natural,
-    slides: [
-      { image: larchFinishes.natural, label: 'Natural', swatch: swatchIcons.natural },
-      { image: larchFinishes.silver, label: 'Silver', swatch: swatchIcons.silver },
-      { image: larchFinishes.carbon, label: 'Carbon', swatch: swatchIcons.carbon },
-      { image: larchFinishes.carbonLight, label: 'Carbon light', swatch: swatchIcons.carbonLight },
-      { image: larchFinishes.graphite, label: 'Graphite', swatch: swatchIcons.graphite },
-      { image: larchFinishes.latte, label: 'Latte', swatch: swatchIcons.latte },
-      { image: larchFinishes.darkBrown, label: 'Dark brown', swatch: swatchIcons.darkBrown },
-      { image: larchFinishes.black, label: 'Black', swatch: swatchIcons.black },
-    ],
-    title: 'Larch wood',
-    price: 89,
-    description:
-      'Lightweight yet strong, spruce wood offers a smooth texture and a natural, clean finish. Its versatility and durability make it an excellent choice for both interior and exterior applications.',
-    solutions: ['Facades', 'Fence', 'Terrace', 'Interior'],
-  },
-];
 
 function SliderArrows({
   onPrev,
   onNext,
+  prevAriaLabel,
+  nextAriaLabel,
   className = '',
 }: {
   onPrev: () => void;
   onNext: () => void;
+  prevAriaLabel: string;
+  nextAriaLabel: string;
   className?: string;
 }) {
   return (
     <>
       <button
         type="button"
-        aria-label="Previous image"
+        aria-label={prevAriaLabel}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -108,7 +72,7 @@ function SliderArrows({
       </button>
       <button
         type="button"
-        aria-label="Next image"
+        aria-label={nextAriaLabel}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -132,7 +96,21 @@ function SliderArrows({
 }
 
 // Mobile Product Card - Figma 803:13034 (303x532px)
-function MobileProductCard({ product }: { product: ProductData }) {
+function MobileProductCard({
+  product,
+  colorsLabel,
+  selectColorAria,
+  prevImageAria,
+  nextImageAria,
+  tSolutions,
+}: {
+  product: ProductData;
+  colorsLabel: string;
+  selectColorAria: (params: { label: string; index: number; total: number }) => string;
+  prevImageAria: string;
+  nextImageAria: string;
+  tSolutions: (key: 'facade' | 'fence' | 'terrace' | 'interior') => string;
+}) {
   const slides = useMemo(
     () => (product.slides.length > 0 ? product.slides : [{ image: product.image, label: '', swatch: swatchIcons.natural }]),
     [product.slides, product.image]
@@ -156,16 +134,19 @@ function MobileProductCard({ product }: { product: ProductData }) {
         <Image src={slides[currentIndex]?.image || product.image} alt={product.title} fill className="object-cover" />
 
         {!!slides[currentIndex]?.label && (
-          <div className="absolute bottom-[12px] left-[12px] z-20 flex gap-[8px] items-center">
-            {product.solutions.map((s, i) => (
-              <div key={i} className="bg-white/40 px-[8px] h-[20px] rounded-[4px] flex items-center justify-center">
-                <span className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">{s}</span>
-              </div>
-            ))}
+          <div className="absolute bottom-[12px] right-[12px] z-20">
+            <span className="font-['Outfit'] font-medium text-[14px] leading-[1.1] tracking-[1.2px] uppercase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]">
+              {slides[currentIndex].label}
+            </span>
           </div>
         )}
 
-        <SliderArrows onPrev={() => goTo(currentIndex - 1)} onNext={() => goTo(currentIndex + 1)} />
+        <SliderArrows
+          onPrev={() => goTo(currentIndex - 1)}
+          onNext={() => goTo(currentIndex + 1)}
+          prevAriaLabel={prevImageAria}
+          nextAriaLabel={nextImageAria}
+        />
       </div>
 
       {/* Content container - 279px width */}
@@ -175,7 +156,7 @@ function MobileProductCard({ product }: { product: ProductData }) {
           {product.solutions.map((sol, idx) => (
             <div key={idx} className="bg-white/40 px-[8px] py-[10px] h-[24px] rounded-[4px] flex items-center justify-center">
               <p className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">
-                {sol}
+                  {tSolutions(sol)}
               </p>
             </div>
           ))}
@@ -198,13 +179,17 @@ function MobileProductCard({ product }: { product: ProductData }) {
 
         {/* Colors section */}
         <div className="flex flex-col gap-[8px]">
-          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] text-[#161616]">Colors</p>
+          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] text-[#161616]">{colorsLabel}</p>
           <div className="flex flex-wrap gap-[12px] items-center">
             {slides.map((slide, idx) => (
               <button
                 key={`${product.id}-thumb-${idx}`}
                 type="button"
-                aria-label={`Select ${slide.label || 'image'} (${idx + 1})`}
+                aria-label={selectColorAria({
+                  label: slide.label || product.title,
+                  index: idx + 1,
+                  total: slides.length,
+                })}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -229,7 +214,21 @@ function MobileProductCard({ product }: { product: ProductData }) {
 }
 
 // Desktop Product Card
-function DesktopProductCard({ product }: { product: ProductData }) {
+function DesktopProductCard({
+  product,
+  colorsLabel,
+  selectColorAria,
+  prevImageAria,
+  nextImageAria,
+  tSolutions,
+}: {
+  product: ProductData;
+  colorsLabel: string;
+  selectColorAria: (params: { label: string; index: number; total: number }) => string;
+  prevImageAria: string;
+  nextImageAria: string;
+  tSolutions: (key: 'facade' | 'fence' | 'terrace' | 'interior') => string;
+}) {
   const slides = useMemo(
     () => (product.slides.length > 0 ? product.slides : [{ image: product.image, label: '', swatch: swatchIcons.natural }]),
     [product.slides, product.image]
@@ -251,23 +250,26 @@ function DesktopProductCard({ product }: { product: ProductData }) {
         <Image src={slides[currentIndex]?.image || product.image} alt={product.title} fill className="object-cover" />
 
         {!!slides[currentIndex]?.label && (
-          <div className="absolute bottom-[12px] left-[12px] z-20 flex gap-[8px] items-center">
-            {product.solutions.map((s, i) => (
-              <div key={i} className="bg-white/40 px-[8px] h-[20px] rounded-[4px] flex items-center justify-center">
-                <span className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">{s}</span>
-              </div>
-            ))}
+          <div className="absolute bottom-[12px] right-[12px] z-20">
+            <span className="font-['Outfit'] font-medium text-[14px] leading-[1.1] tracking-[1.2px] uppercase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]">
+              {slides[currentIndex].label}
+            </span>
           </div>
         )}
 
-        <SliderArrows onPrev={() => goTo(currentIndex - 1)} onNext={() => goTo(currentIndex + 1)} />
+        <SliderArrows
+          onPrev={() => goTo(currentIndex - 1)}
+          onNext={() => goTo(currentIndex + 1)}
+          prevAriaLabel={prevImageAria}
+          nextAriaLabel={nextImageAria}
+        />
       </div>
 
       <div className="w-full flex flex-col gap-[16px] relative z-10">
         <div className="flex gap-[8px] items-center justify-center flex-wrap">
           {product.solutions.map((sol, idx) => (
             <div key={idx} className="bg-white/40 px-[8px] py-[10px] h-[24px] rounded-[4px] flex items-center justify-center gap-[10px]">
-              <p className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">{sol}</p>
+              <p className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">{tSolutions(sol)}</p>
             </div>
           ))}
         </div>
@@ -282,13 +284,17 @@ function DesktopProductCard({ product }: { product: ProductData }) {
         </p>
 
         <div className="flex flex-col gap-[8px]">
-          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] text-[#161616]">Colors</p>
+          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] text-[#161616]">{colorsLabel}</p>
           <div className="flex gap-[12px] items-center overflow-clip">
             {slides.map((slide, idx) => (
               <button
                 key={`${product.id}-thumb-desktop-${idx}`}
                 type="button"
-                aria-label={`Select ${slide.label || 'image'} (${idx + 1})`}
+                aria-label={selectColorAria({
+                  label: slide.label || product.title,
+                  index: idx + 1,
+                  total: slides.length,
+                })}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -313,27 +319,61 @@ function DesktopProductCard({ product }: { product: ProductData }) {
 }
 
 export default function Products() {
-  const pathname = usePathname();
-  const [cookieLocale, setCookieLocale] = useState<string | null>(null);
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations('home.products');
+  const tSolutions = useTranslations('productPage.solutions');
 
-  useEffect(() => {
-    const match = document.cookie.match(/(?:^|; )NEXT_LOCALE=([^;]+)/);
-    if (match?.[1]) setCookieLocale(decodeURIComponent(match[1]));
-  }, []);
-
-  const localeFromPath = pathname?.match(/^\/(en)(?:\/|$)/)?.[1] ?? null;
-  const pathLooksEnglish =
-    pathname?.startsWith('/products') ||
-    pathname?.startsWith('/solutions') ||
-    pathname?.startsWith('/projects') ||
-    pathname?.startsWith('/about') ||
-    pathname?.startsWith('/contact');
-
-  const isEnglishRoute = localeFromPath === 'en' || cookieLocale === 'en' || !!pathLooksEnglish;
-  const englishPrefix = localeFromPath === 'en' ? '/en' : '';
-  const shopHref = isEnglishRoute ? `${englishPrefix}/products` : '/produktai';
+  const shopHref = toLocalePath('/products', locale);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const products = useMemo<ProductData[]>(
+    () => [
+      {
+        id: 'spruce-wood',
+        image: spruceFinishes.natural,
+        slides: [
+          { image: spruceFinishes.natural, label: 'Natural', swatch: swatchIcons.natural },
+          { image: spruceFinishes.silver, label: 'Silver', swatch: swatchIcons.silver },
+          { image: spruceFinishes.carbon, label: 'Carbon', swatch: swatchIcons.carbon },
+          { image: spruceFinishes.carbonLight, label: 'Carbon light', swatch: swatchIcons.carbonLight },
+          { image: spruceFinishes.graphite, label: 'Graphite', swatch: swatchIcons.graphite },
+          { image: spruceFinishes.latte, label: 'Latte', swatch: swatchIcons.latte },
+          { image: spruceFinishes.darkBrown, label: 'Dark brown', swatch: swatchIcons.darkBrown },
+          { image: spruceFinishes.black, label: 'Black', swatch: swatchIcons.black },
+        ],
+        title: t('items.spruce.title'),
+        price: 89,
+        description: t('items.spruce.description'),
+        solutions: ['facade', 'fence', 'terrace', 'interior'],
+      },
+      {
+        id: 'larch-wood',
+        image: larchFinishes.natural,
+        slides: [
+          { image: larchFinishes.natural, label: 'Natural', swatch: swatchIcons.natural },
+          { image: larchFinishes.silver, label: 'Silver', swatch: swatchIcons.silver },
+          { image: larchFinishes.carbon, label: 'Carbon', swatch: swatchIcons.carbon },
+          { image: larchFinishes.carbonLight, label: 'Carbon light', swatch: swatchIcons.carbonLight },
+          { image: larchFinishes.graphite, label: 'Graphite', swatch: swatchIcons.graphite },
+          { image: larchFinishes.latte, label: 'Latte', swatch: swatchIcons.latte },
+          { image: larchFinishes.darkBrown, label: 'Dark brown', swatch: swatchIcons.darkBrown },
+          { image: larchFinishes.black, label: 'Black', swatch: swatchIcons.black },
+        ],
+        title: t('items.larch.title'),
+        price: 89,
+        description: t('items.larch.description'),
+        solutions: ['facade', 'fence', 'terrace', 'interior'],
+      },
+    ],
+    [t]
+  );
+
+  const colorsLabel = t('labels.colors');
+  const prevImageAria = t('aria.prevImage');
+  const nextImageAria = t('aria.nextImage');
+  const selectColorAria = ({ label, index, total }: { label: string; index: number; total: number }) =>
+    t('aria.selectColor', { label, index, total });
 
   return (
     <section className="w-full bg-[#E1E1E1]">
@@ -342,12 +382,12 @@ export default function Products() {
         {/* Title Section - Mobile */}
         <div className="px-[16px] pt-[64px] pb-[24px]">
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-            products
+            {t('eyebrow')}
           </p>
           <p className="font-['DM_Sans'] font-light text-[40px] leading-none tracking-[-1.6px] text-[#161616] w-[358px]">
-            <span>Choose your </span>
-            <span className="font-['Tiro_Tamil'] italic">perfect</span>
-            <span> wood finish</span>
+            <span>{t('headline.prefix')}</span>
+            <span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
+            <span>{t('headline.suffix')}</span>
           </p>
         </div>
 
@@ -359,7 +399,14 @@ export default function Products() {
         >
           {products.map((product, idx) => (
             <div key={idx} style={{ scrollSnapAlign: 'start' }}>
-              <MobileProductCard product={product} />
+              <MobileProductCard
+                product={product}
+                colorsLabel={colorsLabel}
+                selectColorAria={selectColorAria}
+                prevImageAria={prevImageAria}
+                nextImageAria={nextImageAria}
+                tSolutions={tSolutions}
+              />
             </div>
           ))}
         </div>
@@ -371,7 +418,7 @@ export default function Products() {
             className="w-[358px] max-w-full mx-auto block bg-[#161616] rounded-[100px] h-[48px] flex items-center justify-center"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-              get an offer
+              {t('cta.offer')}
             </span>
           </Link>
         </div>
@@ -382,19 +429,27 @@ export default function Products() {
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+14px)] */}
         <div className="relative h-[160px] text-[#161616] z-10">
           <p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase left-[0px] top-[23px]">
-            products
+            {t('eyebrow')}
           </p>
           <p className="absolute font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] left-[calc(25%+14px)] top-[0px] w-[692px]">
-            <span>Choose your </span>
-            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">perfect</span>
-            <span> wood finish</span>
+            <span>{t('headline.prefix')}</span>
+            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">{t('headline.emphasis')}</span>
+            <span>{t('headline.suffix')}</span>
           </p>
         </div>
 
         {/* Products Grid - full-width so card edges align with content edges */}
         <div className="mt-[58px] flex w-full justify-between gap-[40px]">
           {products.map((product, idx) => (
-            <DesktopProductCard key={idx} product={product} />
+            <DesktopProductCard
+              key={idx}
+              product={product}
+              colorsLabel={colorsLabel}
+              selectColorAria={selectColorAria}
+              prevImageAria={prevImageAria}
+              nextImageAria={nextImageAria}
+              tSolutions={tSolutions}
+            />
           ))}
         </div>
 
@@ -405,7 +460,7 @@ export default function Products() {
             className="bg-[#161616] px-[40px] py-[10px] h-[48px] rounded-[100px] w-[296px] flex items-center justify-center gap-[10px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-              view catalog
+              {t('cta.catalog')}
             </span>
           </Link>
         </div>

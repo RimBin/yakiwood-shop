@@ -1,15 +1,36 @@
 import type { Metadata } from 'next';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { getOgImage } from '@/lib/og-image';
+import { canonicalUrl } from '@/lib/seo/canonical';
 
-export const metadata: Metadata = {
-  title: 'Solutions - Shou Sugi Ban Applications',
-  description: 'Explore our Shou Sugi Ban wood solutions for facades, interiors, terraces, and fences. Sustainable and beautiful architectural applications.',
-  openGraph: {
-    title: 'Solutions - Yakiwood Shou Sugi Ban',
-    description: 'Explore our Shou Sugi Ban wood solutions for facades, interiors, terraces, and fences.',
-    url: 'https://yakiwood.lt/solutions',
-    images: [{ url: '/og-image-solutions.jpg', width: 1200, height: 630 }],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata.solutions');
+  const locale = await getLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const canonical = canonicalUrl('/solutions', currentLocale);
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('description'),
+      url: canonical,
+      type: 'website',
+      siteName: 'Yakiwood',
+      images: [{ url: getOgImage('solutions'), width: 1200, height: 630, alt: t('ogTitle') }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('ogTitle'),
+      description: t('description'),
+      images: [getOgImage('solutions')],
+    },
+  };
+}
 
 export default function SolutionsLayout({
   children,

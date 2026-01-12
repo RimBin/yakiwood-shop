@@ -1,14 +1,13 @@
-import type { Metadata } from 'next';
-import { getLocale, getTranslations } from 'next-intl/server';
-import { getOgImage } from '@/lib/og-image';
-import ConfiguratorPage from '@/components/configurator/ConfiguratorPage';
-import { canonicalUrl } from '@/lib/seo/canonical';
+import type { Metadata } from 'next'
+import { getLocale, getTranslations } from 'next-intl/server'
+import { getOgImage } from '@/lib/og-image'
+import { canonicalUrl } from '@/lib/seo/canonical'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('metadata.configurator3d');
-  const locale = await getLocale();
-  const currentLocale = locale === 'lt' ? 'lt' : 'en';
-  const canonical = canonicalUrl('/configurator3d', currentLocale);
+  const t = await getTranslations('metadata.products')
+  const locale = await getLocale()
+  const currentLocale = locale === 'lt' ? 'lt' : 'en'
+  const canonical = canonicalUrl('/products', currentLocale)
 
   return {
     title: t('title'),
@@ -30,9 +29,9 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t('description'),
       images: [getOgImage('products')],
     },
-  };
+  }
 }
 
-export default function Configurator3DPage() {
-  return <ConfiguratorPage />;
+export default function ProductsLayout({ children }: { children: React.ReactNode }) {
+  return children
 }

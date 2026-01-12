@@ -5,31 +5,56 @@ import Projects from '@/components/Projects';
 import FAQ from '@/components/FAQ';
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { canonicalUrl } from '@/lib/seo/canonical';
 
-export const metadata: Metadata = {
-  title: 'Yakiwood - Premium Shou Sugi Ban Burnt Wood Products',
-  description: 'Discover premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese charring technique for sustainable, durable, and beautiful wood facades and surfaces.',
-  keywords: ['Shou Sugi Ban', 'yakisugi', 'burnt wood', 'charred wood', 'wood facades', 'sustainable wood', 'Lithuania', 'Japanese technique'],
-  openGraph: {
-    title: 'Yakiwood - Premium Shou Sugi Ban Burnt Wood Products',
-    description: 'Discover premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese charring technique for sustainable, durable, and beautiful wood facades and surfaces.',
-    url: 'https://yakiwood.lt',
-    images: [
-      {
-        url: getOgImage('home'),
-        width: 1200,
-        height: 630,
-        alt: 'Yakiwood Shou Sugi Ban Products',
-      },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata.home');
+  const locale = await getLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const canonical = canonicalUrl('/', currentLocale);
+  const title = t('title');
+  const description = t('description');
+
+  return {
+    title,
+    description,
+    keywords: [
+      'Shou Sugi Ban',
+      'yakisugi',
+      'burnt wood',
+      'charred wood',
+      'wood facades',
+      'sustainable wood',
+      'Lithuania',
+      'Japanese technique',
     ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Yakiwood - Premium Shou Sugi Ban Burnt Wood Products',
-    description: 'Discover premium Shou Sugi Ban burnt wood products in Lithuania.',
-    images: [getOgImage('home')],
-  },
-};
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: 'website',
+      siteName: 'Yakiwood',
+      images: [
+        {
+          url: getOgImage('home'),
+          width: 1200,
+          height: 630,
+          alt: t('ogAlt'),
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [getOgImage('home')],
+    },
+    alternates: {
+      canonical,
+    },
+  };
+}
 
 export default function Home() {
   return (

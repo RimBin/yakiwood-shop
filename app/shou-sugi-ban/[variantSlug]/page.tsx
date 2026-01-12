@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { INDEXABLE_SHOU_SUGI_BAN_VARIANT_SLUGS, isIndexableVariantSlug } from '@/components/configurator/presetMap';
-
-const BASE_URL = 'https://yakiwood.lt';
+import { getLocale } from 'next-intl/server';
+import { canonicalUrl } from '@/lib/seo/canonical';
+import { getOgImage } from '@/lib/og-image';
 
 export async function generateStaticParams() {
   return INDEXABLE_SHOU_SUGI_BAN_VARIANT_SLUGS.map((variantSlug) => ({ variantSlug }));
@@ -11,6 +12,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ variantSlug: string }> }): Promise<Metadata> {
   const { variantSlug } = await params;
+  const locale = await getLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
 
   if (!isIndexableVariantSlug(variantSlug)) {
     return {
@@ -19,17 +22,32 @@ export async function generateMetadata({ params }: { params: Promise<{ variantSl
     };
   }
 
+  const canonical = canonicalUrl(`/shou-sugi-ban/${variantSlug}`, currentLocale);
+  const title = currentLocale === 'lt' ? `Shou Sugi Ban: ${variantSlug}` : `Shou Sugi Ban: ${variantSlug}`;
+  const description =
+    currentLocale === 'lt'
+      ? 'Statinis SEO puslapis su pasirinkto varianto aprašymu ir nuoroda į produkto konfigūratorių.'
+      : 'Static SEO landing page for a selected variant with a link to the configurator.';
+
   return {
-    title: `Shou Sugi Ban: ${variantSlug}`,
-    description: 'Statinis SEO puslapis su pasirinkto varianto aprašymu ir nuoroda į produkto konfigūratorių.',
+    title,
+    description,
     alternates: {
-      canonical: `/shou-sugi-ban/${variantSlug}`,
+      canonical,
     },
     openGraph: {
-      title: `Shou Sugi Ban: ${variantSlug}`,
-      description: 'Statinis SEO puslapis su pasirinkto varianto aprašymu ir nuoroda į produkto konfigūratorių.',
-      url: `${BASE_URL}/shou-sugi-ban/${variantSlug}`,
+      title,
+      description,
+      url: canonical,
       type: 'website',
+      siteName: 'Yakiwood',
+      images: [{ url: getOgImage('products'), width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [getOgImage('products')],
     },
   };
 }

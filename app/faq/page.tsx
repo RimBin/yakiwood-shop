@@ -2,23 +2,34 @@ import Accordion from '@/components/ui/Accordion';
 // PageCover removed per request
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { canonicalUrl } from '@/lib/seo/canonical';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.faq');
+  const locale = await getLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const canonical = canonicalUrl('/faq', currentLocale);
   
   return {
     title: t('title'),
     description: t('description'),
+    alternates: {
+      canonical,
+    },
     openGraph: {
       title: t('ogTitle'),
       description: t('description'),
-      url: 'https://yakiwood.lt/faq',
-      images: [{ url: getOgImage('about'), width: 1200, height: 630 }],
+      url: canonical,
+      type: 'website',
+      siteName: 'Yakiwood',
+      images: [{ url: getOgImage('faq'), width: 1200, height: 630, alt: t('ogTitle') }],
     },
     twitter: {
       card: 'summary_large_image',
-      images: [getOgImage('about')],
+      title: t('ogTitle'),
+      description: t('description'),
+      images: [getOgImage('faq')],
     },
   };
 }

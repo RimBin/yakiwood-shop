@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { getLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { assets } from '@/lib/assets';
 import { toLocalePath } from '@/i18n/paths';
 
@@ -11,6 +12,8 @@ const certifications = [assets.certifications.fsc, assets.certifications.eu, ass
 export default async function Hero() {
   const locale = await getLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const tHero = await getTranslations('hero');
+  const tSolutions = await getTranslations('productPage.solutions');
 
   return (
     <section className="w-full bg-[#EAEAEA] relative overflow-hidden">
@@ -23,11 +26,11 @@ export default async function Hero() {
       <div className="lg:hidden flex flex-col">
         <div className="px-4 pt-4 pb-2 flex flex-col gap-2">
           <p className="font-['DM_Sans'] font-light text-[45px] leading-none tracking-[-1.8px] text-[#161616] w-[355px] whitespace-pre-wrap">
-            {`Timeless beauty, enhanced by fire - `}
-            <span className="font-['Tiro_Tamil'] italic">Yakiwood</span>
+            {tHero('mainHeading')}
+            <span className="font-['Tiro_Tamil'] italic">{tHero('brandName')}</span>
           </p>
           <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] w-[323px]">
-            Discover the elegance and durability of burnt wood, crafted using the ancient Japanese Shou Sugi Ban technique.
+            {tHero('description')}
           </p>
         </div>
 
@@ -44,26 +47,26 @@ export default async function Hero() {
 
           <div className="absolute left-4 bottom-[35px] right-4 bg-white/10 backdrop-blur-[20px] border border-white/50 rounded-[16px] p-3 flex flex-col gap-3">
             <div className="flex items-start justify-between w-full">
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white">Shou sugi Ban Planks</p>
+              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white">{tHero('productName')}</p>
               <div className="flex gap-1 items-center text-white">
-                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">From</p>
+                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">{tHero('from')}</p>
                 <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">89 €</p>
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] tracking-[-0.24px] text-white">Solutions</p>
+              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] tracking-[-0.24px] text-white">{tHero('solutions')}</p>
               <div className="flex gap-1">
-                {['Facades', 'fence', 'terrace', 'interior'].map((label) => (
-                  <div key={label} className="bg-white/40 px-2 h-[24px] rounded-[4px] flex items-center justify-center">
-                    <p className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">{label}</p>
+                {(['facade', 'fence', 'terrace', 'interior'] as const).map((key) => (
+                  <div key={key} className="bg-white/40 px-2 h-[24px] rounded-[4px] flex items-center justify-center">
+                    <p className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">{tSolutions(key)}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] tracking-[-0.24px] text-white">Colors</p>
+              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] tracking-[-0.24px] text-white">{tHero('colors')}</p>
               <div className="flex items-center">
                 {assets.colorSwatches.map((src, i) => (
                   <div
@@ -80,9 +83,9 @@ export default async function Hero() {
             <Link
               href={toLocalePath('/products', currentLocale)}
               className="bg-white h-[48px] rounded-[100px] flex items-center justify-center w-full"
-              aria-label="Buy now"
+              aria-label={tHero('buyNow')}
             >
-              <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">Buy now</span>
+              <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">{tHero('buyNow')}</span>
             </Link>
           </div>
         </div>
@@ -101,20 +104,20 @@ export default async function Hero() {
         <div className="relative max-w-[1440px] mx-auto h-full">
           <div className="absolute left-[40px] top-[190px] flex flex-col gap-[24px] z-10">
             <p className="font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] w-[606px] whitespace-pre-wrap">
-              {`Timeless beauty, enhanced by fire - `}
-              <span className="font-['Tiro_Tamil'] italic tracking-[-1.6px]">Yakiwood</span>
+              {tHero('mainHeading')}
+              <span className="font-['Tiro_Tamil'] italic tracking-[-1.6px]">{tHero('brandName')}</span>
             </p>
 
             <div className="flex flex-col gap-[24px] overflow-clip">
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] w-[323px] whitespace-pre-wrap">
-                {`Discover the elegance and durability of burnt wood, crafted using the ancient Japanese Shou Sugi Ban technique. `}
+                {tHero('description')}
               </p>
 
               <Link
                 href={toLocalePath('/products', currentLocale)}
                 className="border border-[#161616] border-solid px-[40px] py-[10px] h-[48px] rounded-[100px] flex items-center justify-center gap-[10px] w-fit"
               >
-                <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] whitespace-nowrap">Explore catalog</span>
+                <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] whitespace-nowrap">{tHero('exploreCatalog')}</span>
               </Link>
 
               <div className="relative h-[22px] w-[280px]">
@@ -133,24 +136,24 @@ export default async function Hero() {
             </div>
 
             <div className="absolute left-[311px] top-[352px] bg-white/10 backdrop-blur-[20px] border border-white/50 border-solid rounded-[24px] p-[16px] w-[351px] flex flex-col gap-[16px]">
-              <p className="font-['DM_Sans'] font-normal text-[24px] leading-[1.1] tracking-[-0.96px] text-white w-[292px] whitespace-pre-wrap">Shou sugi Ban Planks</p>
+              <p className="font-['DM_Sans'] font-normal text-[24px] leading-[1.1] tracking-[-0.96px] text-white w-[292px] whitespace-pre-wrap">{tHero('productName')}</p>
 
               <div className="flex gap-[8px] items-center text-white">
-                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">From</p>
+                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">{tHero('from')}</p>
                 <p className="font-['DM_Sans'] font-normal text-[24px] leading-[1.1] tracking-[-0.96px]">89 €</p>
               </div>
 
               <div className="flex flex-col gap-[8px] w-full">
-                <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] tracking-[-0.24px] text-white">Solutions</p>
+                <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] tracking-[-0.24px] text-white">{tHero('solutions')}</p>
                 <div className="flex gap-[4px]">
-                  {['Facades','fence','terrace','interior'].map((label) => (
-                    <div key={label} className="bg-white/40 px-[8px] py-[10px] h-[24px] rounded-[4px] flex items-center justify-center gap-[10px]"><p className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">{label}</p></div>
+                  {(['facade', 'fence', 'terrace', 'interior'] as const).map((key) => (
+                    <div key={key} className="bg-white/40 px-[8px] py-[10px] h-[24px] rounded-[4px] flex items-center justify-center gap-[10px]"><p className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">{tSolutions(key)}</p></div>
                   ))}
                 </div>
               </div>
 
               <div className="flex flex-col gap-[8px]">
-                <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] tracking-[-0.24px] text-white w-full whitespace-pre-wrap">Colors</p>
+                <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] tracking-[-0.24px] text-white w-full whitespace-pre-wrap">{tHero('colors')}</p>
                 <div className="flex items-center isolate">
                   {assets.colorSwatches.map((src, i) => (
                     <div
@@ -167,9 +170,9 @@ export default async function Hero() {
               <Link
                 href={toLocalePath('/products', currentLocale)}
                 className="bg-white px-[40px] py-[10px] h-[48px] rounded-[100px] flex items-center justify-center gap-[10px] w-full"
-                aria-label="Buy now"
+                aria-label={tHero('buyNow')}
               >
-                <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] whitespace-nowrap">Buy now</span>
+                <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] whitespace-nowrap">{tHero('buyNow')}</span>
               </Link>
             </div>
           </div>

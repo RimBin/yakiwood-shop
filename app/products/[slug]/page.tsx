@@ -6,7 +6,6 @@ import { fetchProductBySlug } from '@/lib/products.supabase';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
 import { toLocalePath } from '@/i18n/paths';
-import { getCanonicalProductPath } from '@/components/configurator/seo';
 
 interface ProductPageProps {
   params: { slug: string };
@@ -28,6 +27,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const locale = await getLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const productPath = toLocalePath(`/products/${product.slug}`, currentLocale);
+  const canonical = `https://yakiwood.lt${productPath}`;
 
   const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
   const displayDescription =
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     title: displayName,
     description: displayDescription,
     alternates: {
-      canonical: getCanonicalProductPath(product.slug),
+      canonical,
     },
     robots: {
       index: true,
@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
         },
       ],
       type: 'website',
-      url: `https://yakiwood.lt${productPath}`,
+      url: canonical,
     },
     twitter: {
       card: 'summary_large_image',
