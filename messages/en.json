@@ -1618,6 +1618,8 @@
       "noAdminSession": "No active admin session.",
       "parseResponse": "Failed to parse server response (HTTP {status}).",
       "requestFailed": "Request failed (HTTP {status}).",
+      "supabaseNotConfigured": "Supabase is not configured (.env.local is missing NEXT_PUBLIC_SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY).",
+      "supabaseMissingTable": "Missing Supabase DB table: public.{table}. Apply SQL migrations from supabase/migrations and run in Supabase SQL Editor: select pg_notify('pgrst','reload schema');",
       "loadEventsFailed": "Failed to load events.",
       "loadFaqFailed": "Failed to load FAQ entries.",
       "importFailed": "Failed to import default FAQ.",

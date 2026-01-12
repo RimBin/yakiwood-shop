@@ -7,6 +7,13 @@ export const runtime = 'nodejs'
 
 const LocaleSchema = z.enum(['lt', 'en'])
 
+function isMissingSupabaseTableError(message: string | null | undefined): boolean {
+  const m = String(message || '').toLowerCase()
+  return m.includes('could not find the table') || (m.includes('schema cache') && m.includes('table'))
+}
+
+const FAQ_TABLE = 'chatbot_faq_entries'
+
 export async function POST(request: NextRequest) {
   try {
     await requireAdmin(request)
@@ -22,7 +29,7 @@ export async function POST(request: NextRequest) {
     const { getStaticFaqEntries } = await import('@/lib/chatbot/faq')
     const { supabaseAdmin } = await import('@/lib/supabase-admin')
     if (!supabaseAdmin) {
-      return NextResponse.json({ error: 'Supabase admin not configured' }, { status: 503 })
+      return NextResponse.json({ error: 'ERR_SUPABASE_NOT_CONFIGURED' }, { status: 503 })
     }
 
     const locales: Array<'lt' | 'en'> = localeParsed?.success ? [localeParsed.data] : ['lt', 'en']
@@ -55,11 +62,14 @@ export async function POST(request: NextRequest) {
     }
 
     const { data, error } = await supabaseAdmin
-      .from('chatbot_faq_entries')
+      .from(FAQ_TABLE)
       .upsert(upsertRows, { onConflict: 'locale,source_key' })
       .select('id')
 
     if (error) {
+      if (isMissingSupabaseTableError(error.message)) {
+        return NextResponse.json({ error: `ERR_SUPABASE_MISSING_TABLE:${FAQ_TABLE}` }, { status: 503 })
+      }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 

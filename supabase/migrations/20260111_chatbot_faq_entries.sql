@@ -1,5 +1,7 @@
 -- Chatbot FAQ entries (LT/EN) stored in Supabase
 
+create extension if not exists pgcrypto;
+
 create table if not exists public.chatbot_faq_entries (
   id uuid primary key default gen_random_uuid(),
   source_key text,

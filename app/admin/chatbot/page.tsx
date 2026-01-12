@@ -163,6 +163,15 @@ export default function AdminChatbotPage() {
   const translateApiError = useCallback((message: string | null): string | null => {
     if (!message) return null;
 
+    if (message === 'ERR_SUPABASE_NOT_CONFIGURED') {
+      return t('errors.supabaseNotConfigured');
+    }
+
+    if (message.startsWith('ERR_SUPABASE_MISSING_TABLE:')) {
+      const table = message.split(':')[1] || 'unknown';
+      return t('errors.supabaseMissingTable', { table });
+    }
+
     if (message.startsWith('ERR_PARSE_RESPONSE:')) {
       const status = Number.parseInt(message.split(':')[1] || '0', 10);
       return t('errors.parseResponse', { status: Number.isFinite(status) ? status : 0 });

@@ -1375,6 +1375,8 @@
       "noAdminSession": "Nėra aktyvios admin sesijos.",
       "parseResponse": "Nepavyko nuskaityti serverio atsakymo (HTTP {status}).",
       "requestFailed": "Užklausa nepavyko (HTTP {status}).",
+      "supabaseNotConfigured": "Supabase nesukonfigūruotas (.env.local trūksta NEXT_PUBLIC_SUPABASE_URL ir/ar SUPABASE_SERVICE_ROLE_KEY).",
+      "supabaseMissingTable": "Trūksta Supabase DB lentelės: public.{table}. Paleisk migracijas iš supabase/migrations ir Supabase SQL Editor'e įvykdyk: select pg_notify('pgrst','reload schema');",
       "loadEventsFailed": "Nepavyko užkrauti įvykių.",
       "loadFaqFailed": "Nepavyko užkrauti DUK įrašų.",
       "importFailed": "Nepavyko įkelti numatytų DUK.",

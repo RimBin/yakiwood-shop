@@ -14,8 +14,30 @@ const FALLBACK_COLORS: ProductColorVariant[] = [
 ];
 
 const FALLBACK_PROFILES: ProductProfileVariant[] = [
-  { id: 'demo-standard', name: 'Standard', description: 'Standard profile', priceModifier: 0 },
-  { id: 'demo-premium', name: 'Premium', description: 'Premium profile', priceModifier: 0 },
+  {
+    id: 'demo-half-taper-45',
+    name: 'Half taper 45°',
+    code: 'half_taper_45_deg',
+    description: 'Demo profilis (Half taper 45°)',
+    priceModifier: 0,
+    dimensions: {
+      width: 120,
+      thickness: 20,
+      length: 4000,
+    },
+  },
+  {
+    id: 'demo-rectangle',
+    name: 'Rectangle',
+    code: 'rectangle',
+    description: 'Demo profilis (stačiakampis)',
+    priceModifier: 0,
+    dimensions: {
+      width: 120,
+      thickness: 20,
+      length: 4000,
+    },
+  },
 ];
 
 export default function ConfiguratorPage() {
@@ -203,6 +225,18 @@ export default function ConfiguratorPage() {
               </a>
               {t('productsPage.emptyDescriptionSuffix')}
             </p>
+
+            <div className="mt-[20px]">
+              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">Demo 3D (pavyzdys)</p>
+              <div className="mt-[10px]">
+                <Konfiguratorius3D
+                  productId="demo"
+                  availableColors={FALLBACK_COLORS}
+                  availableFinishes={FALLBACK_PROFILES}
+                  isLoading={false}
+                />
+              </div>
+            </div>
           </div>
         )}
 
@@ -214,7 +248,6 @@ export default function ConfiguratorPage() {
               availableFinishes={availableFinishes}
               isLoading={isLoading}
             />
-
           </div>
         )}
       </PageSection>

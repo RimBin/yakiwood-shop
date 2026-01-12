@@ -47,6 +47,13 @@ type AdminFaqEntry = {
   updatedAt: string;
 };
 
+function isMissingSupabaseTableError(message: string | null | undefined): boolean {
+  const m = String(message || '').toLowerCase();
+  return m.includes('could not find the table') || (m.includes('schema cache') && m.includes('table'));
+}
+
+const FAQ_TABLE = 'chatbot_faq_entries';
+
 async function safeJson(request: NextRequest): Promise<unknown> {
   try {
     return await request.json();
@@ -70,13 +77,13 @@ export async function GET(request: NextRequest) {
 
     const { supabaseAdmin } = await import('@/lib/supabase-admin');
     if (!supabaseAdmin) {
-      return NextResponse.json({ error: 'Supabase admin not configured' }, { status: 503 })
+      return NextResponse.json({ error: 'ERR_SUPABASE_NOT_CONFIGURED' }, { status: 503 })
     }
 
     const localeValue = parsedLocale?.data ?? 'lt'
 
     const query = supabaseAdmin
-      .from('chatbot_faq_entries')
+      .from(FAQ_TABLE)
       .select('id, locale, enabled, sort_order, question, answer, keywords, suggestions, created_at, updated_at')
 
     const { data, error } = includeAllLocales
@@ -84,6 +91,9 @@ export async function GET(request: NextRequest) {
       : await query.eq('locale', localeValue).order('sort_order', { ascending: true })
 
     if (error) {
+      if (isMissingSupabaseTableError(error.message)) {
+        return NextResponse.json({ error: `ERR_SUPABASE_MISSING_TABLE:${FAQ_TABLE}` }, { status: 503 })
+      }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -122,11 +132,11 @@ export async function POST(request: NextRequest) {
 
     const { supabaseAdmin } = await import('@/lib/supabase-admin');
     if (!supabaseAdmin) {
-      return NextResponse.json({ error: 'Supabase admin not configured' }, { status: 503 })
+      return NextResponse.json({ error: 'ERR_SUPABASE_NOT_CONFIGURED' }, { status: 503 })
     }
 
     const { data, error } = await supabaseAdmin
-      .from('chatbot_faq_entries')
+      .from(FAQ_TABLE)
       .insert({
         locale: parsed.data.locale,
         enabled: parsed.data.enabled ?? true,
@@ -140,6 +150,9 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
+      if (isMissingSupabaseTableError(error.message)) {
+        return NextResponse.json({ error: `ERR_SUPABASE_MISSING_TABLE:${FAQ_TABLE}` }, { status: 503 })
+      }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -166,7 +179,7 @@ export async function PUT(request: NextRequest) {
     const { id, ...rest } = parsed.data;
     const { supabaseAdmin } = await import('@/lib/supabase-admin');
     if (!supabaseAdmin) {
-      return NextResponse.json({ error: 'Supabase admin not configured' }, { status: 503 })
+      return NextResponse.json({ error: 'ERR_SUPABASE_NOT_CONFIGURED' }, { status: 503 })
     }
 
     const patch: Record<string, unknown> = {};
@@ -178,8 +191,11 @@ export async function PUT(request: NextRequest) {
     if (Array.isArray(rest.keywords)) patch.keywords = rest.keywords;
     if (Array.isArray(rest.suggestions)) patch.suggestions = rest.suggestions;
 
-    const { error } = await supabaseAdmin.from('chatbot_faq_entries').update(patch).eq('id', id);
+    const { error } = await supabaseAdmin.from(FAQ_TABLE).update(patch).eq('id', id);
     if (error) {
+      if (isMissingSupabaseTableError(error.message)) {
+        return NextResponse.json({ error: `ERR_SUPABASE_MISSING_TABLE:${FAQ_TABLE}` }, { status: 503 })
+      }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -207,11 +223,14 @@ export async function DELETE(request: NextRequest) {
 
     const { supabaseAdmin } = await import('@/lib/supabase-admin');
     if (!supabaseAdmin) {
-      return NextResponse.json({ error: 'Supabase admin not configured' }, { status: 503 })
+      return NextResponse.json({ error: 'ERR_SUPABASE_NOT_CONFIGURED' }, { status: 503 })
     }
 
-    const { error } = await supabaseAdmin.from('chatbot_faq_entries').delete().eq('id', parsed.data);
+    const { error } = await supabaseAdmin.from(FAQ_TABLE).delete().eq('id', parsed.data);
     if (error) {
+      if (isMissingSupabaseTableError(error.message)) {
+        return NextResponse.json({ error: `ERR_SUPABASE_MISSING_TABLE:${FAQ_TABLE}` }, { status: 503 })
+      }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 

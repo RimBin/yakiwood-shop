@@ -1259,8 +1259,8 @@ export default function AdminPage() {
             { key: 'posts', label: t('tabs.posts'), count: posts.length },
             { key: 'users', label: t('tabs.users') },
             { key: 'chatbot', label: t('tabs.chatbot') },
-            { key: 'seo', label: t('tabs.seo'), badge: true },
-            { key: 'email-templates', label: t('tabs.emailTemplates'), badge: true }
+            { key: 'seo', label: t('tabs.seo') },
+            { key: 'email-templates', label: t('tabs.emailTemplates') }
           ].map((tab) => {
             const isActive = 'count' in tab ? activeTab === tab.key : activeTab === tab.key;
 

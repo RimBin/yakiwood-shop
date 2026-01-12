@@ -228,7 +228,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
             placeholder={tList('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
+            className="w-full px-4 py-2 border border-[#BBBBBB] rounded-lg font-['DM_Sans'] bg-white focus:outline-none focus:ring-2 focus:ring-[#161616]"
           />
         </div>
         
@@ -308,7 +308,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
       )}
 
       {/* Products Table */}
-      <div className="bg-white rounded-[24px] border border-[#E1E1E1] overflow-hidden">
+      <div className="bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-[#FAFAFA] border-b border-[#E1E1E1]">
