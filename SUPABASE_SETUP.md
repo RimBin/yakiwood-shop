@@ -36,6 +36,11 @@ SUPABASE_STORAGE_BUCKET=product-images
 -- Copy and paste contents of: supabase/migrations/20241122_init_schema.sql
 ```
 
+### B. Catalog options + photo library (Required for Admin Options / Product photo library)
+```sql
+-- Copy and paste contents of: supabase/migrations/20260111_catalog_options_assets_sale_thickness.sql
+```
+
 ### B. Seed Data (Optional)
 ```sql
 -- Copy and paste contents of: supabase/seed.sql

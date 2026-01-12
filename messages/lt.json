@@ -1020,6 +1020,8 @@
           "width": "Plotis (mm)",
           "height": "Aukštis (mm)",
           "depth": "Gylis (mm)",
+          "thickness": "Storis (mm)",
+          "length": "Ilgis (mm)",
           "weight": "Svoris (kg)",
           "status": "Statusas"
         },
@@ -1032,6 +1034,7 @@
           "selectUsage": "Pasirinkite pritaikymą",
           "selectCategory": "Pasirinkite kategoriją",
           "selectWoodType": "Pasirinkite medienos tipą",
+          "selectUsageFirst": "Pirma pasirinkite pritaikymą",
           "basePrice": "0.00",
           "stockQuantity": "0",
           "sku": "SKU-001",
@@ -1043,7 +1046,9 @@
           "slugFormat": "Slug turi būti tik mažosios raidės, skaičiai ir brūkšneliai",
           "categoryRequired": "Kategorija privaloma",
           "usageRequired": "Pritaikymas privalomas",
+          "usageInvalid": "Leidžiama tik: fasadas arba terasa",
           "woodRequired": "Medienos tipas privalomas",
+          "woodInvalid": "Leidžiama tik: eglė arba maumedis",
           "basePricePositive": "Kaina turi būti teigiama"
         },
         "errors": {
@@ -1090,6 +1095,9 @@
           "wood": "Mediena",
           "color": "Spalva",
           "noColors": "Nėra spalvų (catalog_options)",
+          "missingSchemaTitle": "Trūksta duomenų bazės lentelių",
+          "missingSchemaBody": "Supabase neranda `catalog_options` / `product_assets`. Paleiskite migraciją: {path} (Supabase Dashboard → SQL Editor), tada perkraukite puslapį.",
+          "missingSchemaEnvHint": "Jei migraciją jau paleidote, patikrinkite ar `.env.local` `NEXT_PUBLIC_SUPABASE_URL` rodo į tą patį Supabase projektą.",
           "refresh": "Atnaujinti",
           "refreshing": "Kraunama…",
           "noneFound": "Nerasta nuotraukų šiam deriniui.",

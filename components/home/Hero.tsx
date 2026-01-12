@@ -6,8 +6,8 @@ import { getTranslations } from 'next-intl/server';
 import { assets } from '@/lib/assets';
 import { toLocalePath } from '@/i18n/paths';
 
-const imgProductImage = assets.projects[0];
-const certifications = [assets.certifications.fsc, assets.certifications.eu, assets.certifications.epd];
+const imgProductImage = assets.heroPlank;
+const certifications = assets.certificationsList;
 
 export default async function Hero() {
   const locale = await getLocale();
@@ -16,7 +16,7 @@ export default async function Hero() {
   const tSolutions = await getTranslations('productPage.solutions');
 
   return (
-    <section className="w-full bg-[#EAEAEA] relative overflow-hidden">
+    <section className="w-full bg-[#EAEAEA] relative overflow-hidden pb-[80px] lg:pb-0">
       {/* Full-width hero vector background */}
       <div className="absolute inset-0">
         <Image src={assets.heroVector} alt="" fill className="object-cover" priority sizes="100vw" />
@@ -97,12 +97,14 @@ export default async function Hero() {
           </div>
         </div>
 
-        <div className="w-full bg-[#161616] px-4 py-2 flex items-center justify-between">
-          {certifications.map((src) => (
-            <div key={src} className="h-[28px] w-[56px] relative">
-              <Image src={src} alt="" fill className="object-contain" sizes="56px" />
-            </div>
-          ))}
+        <div className="absolute left-0 right-0 bottom-0 bg-[#161616] h-[64px] px-[16px] flex items-center z-20 overflow-x-auto lg:hidden">
+          <div className="flex items-center gap-[24px] w-max">
+            {certifications.map((src) => (
+              <div key={src} className="h-[24px] w-[96px] relative flex-shrink-0">
+                <Image src={src} alt="" fill className="object-contain" sizes="96px" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -195,13 +197,15 @@ export default async function Hero() {
         </div>
 
         {/* Fullwidth certification bar */}
-        <div className="absolute left-0 right-0 top-[800px] w-full bg-[#161616] py-[16px] flex items-center justify-center z-10">
-          <div className="flex gap-[150px] items-center">
-            {certifications.map((src) => (
-              <div key={src} className="h-[32px] w-[72px] relative">
-                <Image src={src} alt="" fill className="object-contain" sizes="72px" />
-              </div>
-            ))}
+        <div className="absolute left-0 right-0 bottom-0 w-full bg-[#161616] z-10">
+          <div className="max-w-[1440px] mx-auto px-[40px] h-[80px] flex items-center">
+            <div className="flex w-full items-center justify-between">
+              {certifications.map((src) => (
+                <div key={src} className="h-[32px] w-[120px] relative">
+                  <Image src={src} alt="" fill className="object-contain" sizes="120px" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

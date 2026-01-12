@@ -77,6 +77,13 @@ Enter SUPABASE_SERVICE_ROLE_KEY: [įklijuok Service Role Key]
 4. Spausk **"RUN"** (apačioje dešinėje)
 5. ✅ Turėtum matyti: `"Success. No rows returned"`
 
+Tada (kad veiktų parinktys + nuotraukų biblioteka admin'e):
+
+1. Atidaryk failą: `supabase\migrations\20260111_catalog_options_assets_sale_thickness.sql`
+2. **Copy** VISĄ failo turinį
+3. **Paste** į Supabase SQL Editor
+4. Spausk **"RUN"**
+
 **Kas įvyko:** Sukurtos lentelės:
 - `products` - Produktų katalogas
 - `product_variants` - Spalvos, finišai, dydžiai

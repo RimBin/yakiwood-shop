@@ -17,6 +17,13 @@ async function main() {
   // Force Webpack-based build unless the user explicitly overrides.
   const env = { ...process.env, NEXT_DISABLE_TURBOPACK: process.env.NEXT_DISABLE_TURBOPACK ?? '1' };
 
+  // Next.js may still opt into Turbopack when TURBOPACK flags are present.
+  // Explicitly unset to keep CI/local builds stable on Windows.
+  delete env.TURBOPACK;
+  delete env.NEXT_TURBOPACK;
+  delete env.NEXT_FORCE_TURBOPACK;
+  delete env.NEXT_PRIVATE_TURBOPACK;
+
   const child = spawn(process.execPath, [nextBin, 'build', ...userArgs], { stdio: 'inherit', env });
   child.on('exit', (code) => process.exit(code ?? 0));
   child.on('error', (error) => {

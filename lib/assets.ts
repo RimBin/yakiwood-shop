@@ -34,19 +34,19 @@ const localAssets = {
   imgVector37: '/images/ui/backgrounds/imgVector37.jpg',
   
   // Category images
-  imgFence: '/images/ui/categories/imgFence.jpg',
-  imgFacades: '/images/ui/categories/imgFacades.jpg',
-  imgTerrace: '/images/ui/categories/imgTerrace.jpg',
-  imgInterior: '/images/ui/categories/imgInterior.jpg',
+  imgFence: '/images/ui/categories/shou-sugi-ban-burnt-wood-fence-horizontal-yakiwood (1).webp',
+  imgFacades: '/images/ui/categories/modern-facade-shou-sugi-ban-charred-wood-yakiwood (1).webp',
+  imgTerrace: '/images/ui/categories/terrace-decking-shou-sugi-ban-burnt-wood-yakiwood (1).webp',
+  imgInterior: '/images/ui/categories/modern-office-with-shou-sugi-ban-charred-wood-wall-yakiwood.webp',
   
   // Logo & UI
   imgLogo: '/images/ui/brand/imgLogo.svg',
-  imgCart: '/icons/ui/shopping-cart-simple.svg',
+  imgCart: '/icons/ui/ShoppingCartSimple.png',
   
-  // Icons (use white PNG variants for announcement bar)
+  // Icons (white PNG variants for announcement bar)
   imgIconTruck: '/icons/ui/package.png',
-  imgIconCoins: '/icons/ui/coins.png',
-  imgIconPlant: '/icons/ui/plant.png',
+  imgIconCoins: '/icons/ui/Coins.png',
+  imgIconPlant: '/icons/ui/Plant.png',
   
   // Benefits icons from assets
   imgIconFire: '/assets/icons/FireSimple.svg',
@@ -58,6 +58,13 @@ const localAssets = {
   certEpd: '/images/ui/certifications/cert-epd.png',
   certFsc: '/images/ui/certifications/cert-fsc.png',
   certEu: '/images/ui/certifications/cert-eu.png',
+  // Additional logo files (exported from Figma) used in the hero certification bar
+  cert1: '/icons/ui/logos/Img.png',
+  cert2: '/icons/ui/logos/Img1.png',
+  cert3: '/icons/ui/logos/Img2.png',
+  cert4: '/icons/ui/logos/Img3.png',
+  cert5: '/icons/ui/logos/Img4.png',
+  cert6: '/icons/ui/logos/Img5.png',
 
   // Payments
   imgPayments: '/assets/icons/payments.png',
@@ -167,6 +174,15 @@ export const assets = {
     fsc: localAssets.certFsc,
     eu: localAssets.certEu,
   },
+  // Flattened list for hero / footer-like displays
+  certificationsList: [
+    localAssets.cert1,
+    localAssets.cert2,
+    localAssets.cert3,
+    localAssets.cert4,
+    localAssets.cert5,
+    localAssets.cert6,
+  ],
   ui: {
     logo: localAssets.imgLogo,
     cart: localAssets.imgCart,

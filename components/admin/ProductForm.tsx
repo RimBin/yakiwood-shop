@@ -9,6 +9,12 @@ import { USAGE_TYPES } from '@/types/admin';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
 
+const ALLOWED_USAGE_TYPES = ['facade', 'terrace'] as const;
+const ALLOWED_WOOD_TYPES = ['spruce', 'larch'] as const;
+
+const WIDTH_OPTIONS_MM = [95, 120, 145] as const;
+const LENGTH_OPTIONS_MM = [3000, 3300, 3600] as const;
+
 function createProductSchema(t: (key: string) => string) {
   return z.object({
     name: z.string().min(1, t('validation.nameRequired')),
@@ -19,9 +25,14 @@ function createProductSchema(t: (key: string) => string) {
       .regex(/^[a-z0-9-]+$/, t('validation.slugFormat')),
     description: z.string().optional(),
     description_en: z.string().optional(),
-    category: z.string().min(1, t('validation.categoryRequired')),
-    usage_type: z.string().min(1, t('validation.usageRequired')),
-    wood_type: z.string().min(1, t('validation.woodRequired')),
+    usage_type: z
+      .string()
+      .min(1, t('validation.usageRequired'))
+      .refine((v) => (ALLOWED_USAGE_TYPES as readonly string[]).includes(v), t('validation.usageInvalid')),
+    wood_type: z
+      .string()
+      .min(1, t('validation.woodRequired'))
+      .refine((v) => (ALLOWED_WOOD_TYPES as readonly string[]).includes(v), t('validation.woodInvalid')),
     base_price: z.number().min(0, t('validation.basePricePositive')),
     status: z.enum(['draft', 'published']),
     stock_quantity: z.number().min(0).optional(),
@@ -79,11 +90,21 @@ const CATEGORIES = [
 ];
 
 const WOOD_TYPES = [
-  { value: 'pine', label: 'Pušis' },
   { value: 'spruce', label: 'Eglė' },
-  { value: 'oak', label: 'Ąžuolas' },
   { value: 'larch', label: 'Maumedis' },
 ];
+
+const deriveCategoryFromUsage = (usageType: string) => {
+  if (usageType === 'terrace') return 'decking';
+  // default to facade/cladding
+  return 'cladding';
+};
+
+const getThicknessValueForUsage = (usageType: string) => {
+  if (usageType === 'terrace') return '28';
+  if (usageType === 'facade') return '18';
+  return '';
+};
 
 export default function ProductForm({ product, mode }: Props) {
   const router = useRouter();
@@ -91,15 +112,22 @@ export default function ProductForm({ product, mode }: Props) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations('admin.products.form');
 
+  const catalogMigrationPath = 'supabase/migrations/20260111_catalog_options_assets_sale_thickness.sql';
+
   // Form state
   const [name, setName] = useState(product?.name || '');
   const [nameEn, setNameEn] = useState(product?.name_en || '');
   const [slug, setSlug] = useState(product?.slug || '');
   const [description, setDescription] = useState(product?.description || '');
   const [descriptionEn, setDescriptionEn] = useState(product?.description_en || '');
-  const [category, setCategory] = useState(product?.category || '');
-  const [usageType, setUsageType] = useState(product?.usage_type || '');
-  const [woodType, setWoodType] = useState(product?.wood_type || '');
+  const [usageType, setUsageType] = useState(() => {
+    const initial = product?.usage_type || (mode === 'create' ? 'facade' : '');
+    return ALLOWED_USAGE_TYPES.includes(initial as any) ? initial : (mode === 'create' ? 'facade' : '');
+  });
+  const [woodType, setWoodType] = useState(() => {
+    const initial = product?.wood_type || (mode === 'create' ? 'spruce' : '');
+    return ALLOWED_WOOD_TYPES.includes(initial as any) ? initial : (mode === 'create' ? 'spruce' : '');
+  });
   const [basePrice, setBasePrice] = useState(product?.base_price.toString() || '');
   const [status, setStatus] = useState<'draft' | 'published'>(() => {
     if (product) return product.is_active ? 'published' : 'draft'
@@ -107,9 +135,13 @@ export default function ProductForm({ product, mode }: Props) {
   });
   const [stockQuantity, setStockQuantity] = useState(product?.stock_quantity?.toString() || '');
   const [sku, setSku] = useState(product?.sku || '');
-  const [width, setWidth] = useState(product?.width?.toString() || '');
-  const [height, setHeight] = useState(product?.height?.toString() || '');
-  const [depth, setDepth] = useState(product?.depth?.toString() || '');
+  const [width, setWidth] = useState(() => (product?.width?.toString() || (mode === 'create' ? String(WIDTH_OPTIONS_MM[0]) : '')));
+  const [height, setHeight] = useState(() => {
+    const existing = product?.height?.toString() || '';
+    if (existing) return existing;
+    return mode === 'create' ? getThicknessValueForUsage(product?.usage_type || 'facade') : '';
+  });
+  const [depth, setDepth] = useState(() => (product?.depth?.toString() || (mode === 'create' ? String(LENGTH_OPTIONS_MM[0]) : '')));
   const [weight, setWeight] = useState(product?.weight?.toString() || '');
   const [imageUrl, setImageUrl] = useState(product?.image_url || '');
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -125,6 +157,17 @@ export default function ProductForm({ product, mode }: Props) {
   );
   const [libraryIsLoading, setLibraryIsLoading] = useState(false);
   const [libraryError, setLibraryError] = useState<string | null>(null);
+
+  const isMissingCatalogSchemaError = (message: string | null) => {
+    if (!message) return false;
+    return (
+      /could not find the table\s+'public\.catalog_options'\s+in the schema cache/i.test(message) ||
+      /could not find the table\s+'public\.product_assets'\s+in the schema cache/i.test(message) ||
+      /relation\s+"public\.catalog_options"\s+does not exist/i.test(message) ||
+      /relation\s+"public\.product_assets"\s+does not exist/i.test(message) ||
+      /schema cache/i.test(message)
+    );
+  };
 
   // Variants state
   const [variants, setVariants] = useState<Variant[]>(product?.variants || []);
@@ -150,6 +193,20 @@ export default function ProductForm({ product, mode }: Props) {
       setSlug(generatedSlug);
     }
   }, [name, mode, slug]);
+
+  // Keep derived fields in sync
+  useEffect(() => {
+    // Ensure thickness matches usage
+    const thickness = getThicknessValueForUsage(usageType);
+    if (thickness && height !== thickness) {
+      setHeight(thickness);
+    }
+
+    // Ensure width/length defaults exist
+    if (!width) setWidth(String(WIDTH_OPTIONS_MM[0]));
+    if (!depth) setDepth(String(LENGTH_OPTIONS_MM[0]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usageType]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -305,7 +362,6 @@ export default function ProductForm({ product, mode }: Props) {
         slug,
         description: description || undefined,
         description_en: descriptionEn || undefined,
-        category,
         usage_type: usageType,
         wood_type: woodType,
         base_price: parseFloat(basePrice),
@@ -360,7 +416,7 @@ export default function ProductForm({ product, mode }: Props) {
         slug,
         description: description || null,
         description_en: descriptionEn || null,
-        category,
+        category: deriveCategoryFromUsage(usageType),
         usage_type: usageType || null,
         wood_type: woodType,
         base_price: parseFloat(basePrice),
@@ -521,12 +577,14 @@ export default function ProductForm({ product, mode }: Props) {
             )}
           </div>
 
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="w-full text-sm font-['DM_Sans'] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#161616] file:text-white hover:file:bg-[#2d2d2d]"
-          />
+          {!showPhotoLibrary ? (
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full text-sm font-['DM_Sans'] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#161616] file:text-white hover:file:bg-[#2d2d2d]"
+            />
+          ) : null}
 
           <div className="mt-3 flex items-center gap-2">
             <button
@@ -599,6 +657,20 @@ export default function ProductForm({ product, mode }: Props) {
                     <span className="font-['Outfit'] text-xs text-red-700">{libraryError}</span>
                   ) : null}
                 </div>
+
+                {isMissingCatalogSchemaError(libraryError) ? (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                    <p className="font-['DM_Sans'] text-xs font-medium text-amber-900">
+                      {t('photoLibrary.missingSchemaTitle')}
+                    </p>
+                    <p className="mt-1 font-['Outfit'] text-xs text-amber-900">
+                      {t('photoLibrary.missingSchemaBody', { path: catalogMigrationPath })}
+                    </p>
+                    <p className="mt-1 font-['Outfit'] text-xs text-amber-900">
+                      {t('photoLibrary.missingSchemaEnvHint')}
+                    </p>
+                  </div>
+                ) : null}
 
                 {libraryAssets.length === 0 ? (
                   <p className="font-['Outfit'] text-xs text-[#7C7C7C]">{t('photoLibrary.noneFound')}</p>
@@ -751,34 +823,13 @@ export default function ProductForm({ product, mode }: Props) {
                   } yw-select`}
                 >
                   <option value="">{t('placeholders.selectUsage')}</option>
-                  {USAGE_TYPES.map((usage) => (
+                  {USAGE_TYPES.filter((u) => ALLOWED_USAGE_TYPES.includes(u.value as any)).map((usage) => (
                     <option key={usage.value} value={usage.value}>
                       {t(`options.usageTypes.${usage.value}` as any)}
                     </option>
                   ))}
                 </select>
                 {errors.usage_type && <p className="text-sm text-red-600 mt-1">{errors.usage_type}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                  {t('fields.category')}
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
-                    errors.category ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
-                  } yw-select`}
-                >
-                  <option value="">{t('placeholders.selectCategory')}</option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat.value} value={cat.value}>
-                      {t(`options.categories.${cat.value}` as any)}
-                    </option>
-                  ))}
-                </select>
-                {errors.category && <p className="text-sm text-red-600 mt-1">{errors.category}</p>}
               </div>
 
               <div>
@@ -864,42 +915,54 @@ export default function ProductForm({ product, mode }: Props) {
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
                 {t('fields.width')}
               </label>
-              <input
-                type="number"
-                step="0.1"
+              <select
                 value={width}
                 onChange={(e) => setWidth(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                placeholder={t('placeholders.number')}
-              />
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-white yw-select"
+              >
+                {WIDTH_OPTIONS_MM.map((mm) => (
+                  <option key={mm} value={String(mm)}>
+                    {mm} mm
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                {t('fields.height')}
+                {t('fields.thickness')}
               </label>
-              <input
-                type="number"
-                step="0.1"
+              <select
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                placeholder={t('placeholders.number')}
-              />
+                disabled={!usageType}
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-white disabled:opacity-60 yw-select"
+              >
+                {!usageType ? (
+                  <option value="">{t('placeholders.selectUsageFirst')}</option>
+                ) : usageType === 'terrace' ? (
+                  <option value="28">28 mm</option>
+                ) : (
+                  <option value="18">18/20 mm</option>
+                )}
+              </select>
             </div>
 
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                {t('fields.depth')}
+                {t('fields.length')}
               </label>
-              <input
-                type="number"
-                step="0.1"
+              <select
                 value={depth}
                 onChange={(e) => setDepth(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                placeholder={t('placeholders.number')}
-              />
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-white yw-select"
+              >
+                {LENGTH_OPTIONS_MM.map((mm) => (
+                  <option key={mm} value={String(mm)}>
+                    {mm} mm
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>

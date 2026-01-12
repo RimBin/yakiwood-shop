@@ -15,9 +15,9 @@ type SolutionItem = {
 
 const solutions: SolutionItem[] = [
   { 
-    title: 'Fence', 
-    image: imgFence,
-    description: 'Private, elegant, and built to last – charred wood fencing that withstands every season while making a statement.'
+    title: 'Terrace', 
+    image: imgTerrace,
+    description: 'Outdoor spaces designed to endure. Our fire-treated decking offers natural texture, slip resistance, and unmatched longevity.'
   },
   { 
     title: 'Facade', 
@@ -25,9 +25,9 @@ const solutions: SolutionItem[] = [
     description: 'Turn any building into a landmark with burnt wood cladding that combines striking aesthetics with long-term protection against the elements.'
   },
   { 
-    title: 'Terrace', 
-    image: imgTerrace,
-    description: 'Outdoor spaces designed to endure. Our fire-treated decking offers natural texture, slip resistance, and unmatched longevity.'
+    title: 'Fence', 
+    image: imgFence,
+    description: 'Private, elegant, and built to last – charred wood fencing that withstands every season while making a statement.'
   },
   { 
     title: 'Interior', 
@@ -37,7 +37,7 @@ const solutions: SolutionItem[] = [
 ];
 
 export default function Solutions() {
-  const [openIndex, setOpenIndex] = useState<number>(1); // Facades open by default
+  const [openIndex, setOpenIndex] = useState<number>(0); // Terrace open by default
 
   return (
     <section className="w-full bg-[#E1E1E1]">

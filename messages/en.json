@@ -1263,6 +1263,8 @@
           "width": "Width (mm)",
           "height": "Height (mm)",
           "depth": "Depth (mm)",
+          "thickness": "Thickness (mm)",
+          "length": "Length (mm)",
           "weight": "Weight (kg)",
           "status": "Status"
         },
@@ -1275,6 +1277,7 @@
           "selectUsage": "Select usage",
           "selectCategory": "Select category",
           "selectWoodType": "Select wood type",
+          "selectUsageFirst": "Select usage first",
           "basePrice": "0.00",
           "stockQuantity": "0",
           "sku": "SKU-001",
@@ -1286,7 +1289,9 @@
           "slugFormat": "Slug must contain only lowercase letters, numbers, and hyphens",
           "categoryRequired": "Category is required",
           "usageRequired": "Usage is required",
+          "usageInvalid": "Only Facade or Terrace is allowed",
           "woodRequired": "Wood type is required",
+          "woodInvalid": "Only Spruce or Larch is allowed",
           "basePricePositive": "Price must be a positive number"
         },
         "errors": {
@@ -1333,6 +1338,9 @@
           "wood": "Wood",
           "color": "Color",
           "noColors": "No colors (catalog_options)",
+          "missingSchemaTitle": "Database tables are missing",
+          "missingSchemaBody": "Supabase can't find `catalog_options` / `product_assets`. Run this migration: {path} (Supabase Dashboard → SQL Editor), then reload the page.",
+          "missingSchemaEnvHint": "If you already ran the migration, make sure `.env.local` `NEXT_PUBLIC_SUPABASE_URL` points to the same Supabase project.",
           "refresh": "Refresh",
           "refreshing": "Loading…",
           "noneFound": "No photos found for this combination.",

@@ -1252,7 +1252,7 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <div className="flex gap-[8px] mb-[32px] overflow-x-auto pb-[8px]">
-          {[
+          {([
             { key: 'dashboard', label: t('tabs.dashboard') },
             { key: 'products', label: t('tabs.products'), count: products.length },
             { key: 'projects', label: t('tabs.projects'), count: projects.length },
@@ -1261,8 +1261,8 @@ export default function AdminPage() {
             { key: 'chatbot', label: t('tabs.chatbot') },
             { key: 'seo', label: t('tabs.seo') },
             { key: 'email-templates', label: t('tabs.emailTemplates') }
-          ].map((tab) => {
-            const isActive = 'count' in tab ? activeTab === tab.key : activeTab === tab.key;
+          ] as Array<{ key: string; label: string; count?: number; badge?: boolean }>).map((tab) => {
+            const isActive = activeTab === tab.key;
 
             return (
               <button
@@ -1296,12 +1296,12 @@ export default function AdminPage() {
                     : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#DCDCDC]'
                 }`}
               >
-                {'count' in tab ? `${tab.label} (${tab.count})` : tab.label}
-                {'badge' in tab && tab.badge && (
+                {typeof tab.count === 'number' ? `${tab.label} (${tab.count})` : tab.label}
+                {tab.badge ? (
                   <span className="ml-[8px] px-[8px] py-[2px] bg-green-500 text-white text-[10px] rounded-full">
                     {t('tabs.badgeNew').toUpperCase()}
                   </span>
-                )}
+                ) : null}
               </button>
             );
           })}
