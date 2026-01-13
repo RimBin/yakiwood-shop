@@ -5,8 +5,8 @@ import { getSectionPadding, getGap } from '@/lib/design-system';
 import { assets } from '@/lib/assets';
 import { toLocalePath } from '@/i18n/paths';
 
-// Local background image for CTA section
-const backgroundImage = assets.projects[1];
+// Shared background image for CTA section
+const backgroundImage = assets.ctaBackground;
 
 export default async function CTA() {
   const locale = await getLocale();
@@ -15,14 +15,8 @@ export default async function CTA() {
   return (
     <section className="relative w-full overflow-hidden bg-[#E1E1E1]">
       {/* Background Image with opacity and luminosity blend */}
-      <div className="absolute inset-0 opacity-[0.15] mix-blend-luminosity">
-        <Image
-          src={backgroundImage}
-          alt=""
-          fill
-          className="object-cover"
-          sizes="100vw"
-        />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] md:w-[625px] lg:w-[1099px] h-[520px] md:h-[599px] lg:h-[1053px] opacity-[0.15] mix-blend-luminosity pointer-events-none">
+        <Image src={backgroundImage} alt="" fill className="object-contain" sizes="100vw" />
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7625 ===== */}

@@ -55,9 +55,9 @@ const localAssets = {
   imgIconCube: '/assets/icons/Cube.svg',
   
   // Certifications
-  certEpd: '/images/ui/certifications/cert-epd.png',
-  certFsc: '/images/ui/certifications/cert-fsc.png',
-  certEu: '/images/ui/certifications/cert-eu.png',
+  certEpd: '/assets/footer/epd.png',
+  certFsc: '/assets/footer/fsc.png',
+  certEu: '/assets/footer/ES.png',
   // Additional logo files (exported from Figma) used in the hero certification bar
   cert1: '/icons/ui/logos/Img.png',
   cert2: '/icons/ui/logos/Img1.png',
@@ -88,7 +88,7 @@ const localAssets = {
   // Hero
   heroVector: '/images/hero/Vector.png',
   heroPlank: '/images/hero/4b7525119bfe28d75ceb0720e002c38c77eaf8d6.png',
-  ctaBackground: '/images/solutions/hero.webp',
+  ctaBackground: '/images/cta/cta-background.webp',
 
   // Finishes (preview images)
   finishSpruceBlack: '/assets/finishes/spruce/shou-sugi-ban-spruce-black-facade-terrace-cladding.webp',

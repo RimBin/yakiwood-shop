@@ -62,12 +62,11 @@ const certificates = [
   },
 ];
 
-const paymentMethods = ['Mastercard', 'Visa', 'Maestro', 'Stripe', 'PayPal'] as const;
-
 export default function Footer() {
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const cookieSettingsLabel = locale === 'lt' ? 'Slapukų nustatymai' : 'Cookie preferences';
+  const year = new Date().getFullYear();
 
   const openCookiePreferences = () => {
     window.dispatchEvent(new Event(COOKIE_CONSENT_OPEN_EVENT));
@@ -150,17 +149,16 @@ export default function Footer() {
         {/* Copyright & Payment - Mobile */}
         <div className="flex flex-col gap-[16px]">
           <p className="font-['DM_Sans'] font-medium text-[14px] leading-[1.2] tracking-[-0.56px] text-[#E1E1E1]">
-            @2025 YAKIWOOD, LLC. All rights reserved
+            @{year} YAKIWOOD, LLC. All rights reserved
           </p>
-          <div className="flex flex-wrap items-center gap-[12px] opacity-40">
-            {paymentMethods.map((label) => (
-              <span
-                key={label}
-                className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white/70"
-              >
-                {label}
-              </span>
-            ))}
+          <div className="opacity-40">
+            <Image
+              src={assets.payments}
+              alt="Payment methods"
+              width={260}
+              height={18}
+              className="h-[14px] w-auto"
+            />
           </div>
         </div>
       </div>
@@ -243,18 +241,17 @@ export default function Footer() {
           {/* Copyright & Payment - Desktop */}
           <div className="flex items-center justify-between">
             <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.64px] text-[#E1E1E1]">
-              @2025 YAKIWOOD, LLC. All rights reserved
+              @{year} YAKIWOOD, LLC. All rights reserved
             </p>
 
-            <div className="flex items-center gap-[16px] opacity-40">
-              {paymentMethods.map((label) => (
-                <span
-                  key={label}
-                  className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white/70"
-                >
-                  {label}
-                </span>
-              ))}
+            <div className="opacity-40">
+              <Image
+                src={assets.payments}
+                alt="Payment methods"
+                width={320}
+                height={22}
+                className="h-[16px] w-auto"
+              />
             </div>
           </div>
         </div>

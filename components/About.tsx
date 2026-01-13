@@ -6,6 +6,7 @@ import { useLocale } from 'next-intl';
 import { PageCover } from '@/components/shared/PageLayout';
 import { Testimonials } from '@/components/home';
 import { toLocalePath } from '@/i18n/paths';
+import { assets } from '@/lib/assets';
 
 // Local image for the about video thumbnail
 const imgVideo = '/assets/about/fire.png';
@@ -13,7 +14,7 @@ const imgTeam1 = "https://www.figma.com/api/mcp/asset/bf70d331-5e28-461f-8c66-0d
 const imgTeam2 = "https://www.figma.com/api/mcp/asset/87885949-1e42-4fa2-ac0e-c161d0979163";
 const imgTeam3 = "https://www.figma.com/api/mcp/asset/2bcc8d00-1d2e-4322-bef2-c14fa440d13a";
 const imgTeam4 = "https://www.figma.com/api/mcp/asset/db641b47-8ed9-40bc-91f0-d8baa158f56a";
-const imgCTA = "https://www.figma.com/api/mcp/asset/77b31476-e23e-4535-9de2-4ddf313eab32";
+const imgCTA = assets.ctaBackground;
 
 export default function About() {
   const locale = useLocale();
@@ -416,12 +417,12 @@ export default function About() {
       <div className="relative h-[523px] md:h-[1053px] w-full overflow-hidden bg-[#E1E1E1]">
         {/* Background image centered */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative w-[1099px] h-[1053px] opacity-[0.15] mix-blend-luminosity">
+          <div className="relative w-[520px] md:w-[625px] lg:w-[1099px] h-[520px] md:h-[599px] lg:h-[1053px] opacity-[0.15] mix-blend-luminosity">
             <Image
               src={imgCTA}
               alt="Background"
               fill
-              className="object-cover"
+              className="object-contain"
             />
           </div>
         </div>
