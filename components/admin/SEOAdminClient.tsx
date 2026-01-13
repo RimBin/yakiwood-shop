@@ -72,6 +72,43 @@ type SeoScanCache = {
   pages: PageSEOResult[];
 };
 
+type ScanProgress = {
+  total: number;
+  done: number;
+  currentPath?: string;
+};
+
+function chunkArray<T>(items: T[], size: number): T[][] {
+  if (size <= 0) return [items];
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+}
+
+async function readErrorFromResponse(res: Response): Promise<string> {
+  const fallback = `${res.status} ${res.statusText}`.trim();
+  try {
+    const clone = res.clone();
+    const json = await clone.json();
+    const msg = (json as any)?.error;
+    if (typeof msg === 'string' && msg.trim()) return msg.trim();
+  } catch {
+    // ignore
+  }
+
+  try {
+    const clone = res.clone();
+    const text = await clone.text();
+    if (text && text.trim()) return `${fallback}: ${text.trim().slice(0, 200)}`;
+  } catch {
+    // ignore
+  }
+
+  return fallback || 'Request failed';
+}
+
 function inferLocaleFromPath(pathname: string): 'en' | 'lt' {
   return pathname === '/lt' || pathname.startsWith('/lt/') ? 'lt' : 'en';
 }
@@ -176,6 +213,8 @@ export default function SEOAdminClient() {
 
   const [pages, setPages] = useState<PageSEOResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [scanProgress, setScanProgress] = useState<ScanProgress | null>(null);
+  const [hasAttemptedScan, setHasAttemptedScan] = useState(false);
   const [filter, setFilter] = useState<FilterType>('all');
   const [selectedPage, setSelectedPage] = useState<PageSEOResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -188,50 +227,121 @@ export default function SEOAdminClient() {
   const [overrideForm, setOverrideForm] = useState<SeoOverrideFormState | null>(null);
   const [overrideNotice, setOverrideNotice] = useState<string | null>(null);
 
+  const persistScanCache = (nextPages: PageSEOResult[]) => {
+    try {
+      const cache: SeoScanCache = {
+        savedAt: new Date().toISOString(),
+        pages: nextPages,
+      };
+      localStorage.setItem(SEO_SCAN_CACHE_KEY, JSON.stringify(cache));
+    } catch {
+      // ignore cache write errors
+    }
+  };
+
+  const mergePages = (existing: PageSEOResult[], incoming: PageSEOResult[]): PageSEOResult[] => {
+    const byPath = new Map<string, PageSEOResult>();
+    existing.forEach((p) => byPath.set(p.path, p));
+    incoming.forEach((p) => byPath.set(p.path, p));
+    return Array.from(byPath.values()).sort((a, b) => (a.path < b.path ? -1 : 1));
+  };
+
   async function loadPages() {
     setLoading(true);
     setError(null);
+    setScanProgress(null);
+    setHasAttemptedScan(true);
 
     try {
       const token = await getAdminToken();
       if (!token) throw new Error(t('errors.noSession'));
 
-      const controller = new AbortController();
-      const timeoutMs = 30_000;
-      const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
-
-      const res = await fetch('/api/admin/seo/scan', {
+      // 1) Get paths to scan so we can show progress.
+      const pathsRes = await fetch('/api/admin/seo/paths', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        signal: controller.signal,
-      }).finally(() => {
-        clearTimeout(timeoutHandle);
       });
-
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || t('errors.scanFailed'));
-
-      const nextPages = (json?.pages ?? []) as PageSEOResult[];
-      setPages(nextPages);
-
-      try {
-        const cache: SeoScanCache = {
-          savedAt: new Date().toISOString(),
-          pages: nextPages,
-        };
-        localStorage.setItem(SEO_SCAN_CACHE_KEY, JSON.stringify(cache));
-      } catch {
-        // ignore cache write errors
+      const pathsJson = await pathsRes.json().catch(() => null);
+      if (!pathsRes.ok) {
+        const msg = (pathsJson as any)?.error || (await readErrorFromResponse(pathsRes));
+        throw new Error(`[paths] ${msg}`);
       }
+
+      const paths = (pathsJson?.paths ?? []) as string[];
+      const total = paths.length;
+
+      if (total === 0) {
+        throw new Error(t('errors.noPaths'));
+      }
+
+      setScanProgress({ total, done: 0, currentPath: total > 0 ? paths[0] : undefined });
+
+      const batchSize = process.env.NODE_ENV !== 'production' ? 1 : 2;
+      const batches = chunkArray(paths, batchSize);
+
+      let aggregated: PageSEOResult[] = [];
+      let done = 0;
+
+      for (const batch of batches) {
+        setScanProgress({ total, done, currentPath: batch[0] });
+
+        const controller = new AbortController();
+        const timeoutMs = 120_000;
+        let didTimeout = false;
+        const timeoutHandle = setTimeout(() => {
+          didTimeout = true;
+          controller.abort();
+        }, timeoutMs);
+
+        const query = batch.map((p) => `path=${encodeURIComponent(p)}`).join('&');
+        const res = await fetch(`/api/admin/seo/scan?${query}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          signal: controller.signal,
+        }).finally(() => {
+          clearTimeout(timeoutHandle);
+        });
+
+        const json = await res.json().catch(() => null);
+        if (!res.ok) {
+          const msg = (json as any)?.error || (await readErrorFromResponse(res));
+          throw new Error(`[scan ${batch[0]}] ${msg}`);
+        }
+
+        const incoming = (json?.pages ?? []) as PageSEOResult[];
+        aggregated = mergePages(aggregated, incoming);
+        setPages(aggregated);
+        persistScanCache(aggregated);
+
+        done += batch.length;
+        setScanProgress({ total, done, currentPath: batch[0] });
+
+        if (didTimeout) {
+          throw new Error(t('errors.scanTimeout'));
+        }
+      }
+
+      setScanProgress({ total, done: total, currentPath: undefined });
     } catch (e: unknown) {
       if (e instanceof DOMException && e.name === 'AbortError') {
         setError(t('errors.scanTimeout'));
+      } else if (e instanceof TypeError && e.message === 'Failed to fetch') {
+        const suffix = scanProgress?.total
+          ? ` (${scanProgress.done}/${scanProgress.total}${scanProgress.currentPath ? `: ${scanProgress.currentPath}` : ''})`
+          : '';
+        setError(`${t('errors.scanFailed')}${suffix}`);
       } else {
-        setError(e instanceof Error ? e.message : t('errors.scanFailed'));
+        const base = e instanceof Error ? e.message : t('errors.scanFailed');
+        const suffix = scanProgress?.total
+          ? ` (${scanProgress.done}/${scanProgress.total}${scanProgress.currentPath ? `: ${scanProgress.currentPath}` : ''})`
+          : '';
+        setError(`${base}${suffix}`);
       }
     } finally {
       setLoading(false);
+      setScanProgress(null);
     }
   }
 
@@ -243,6 +353,7 @@ export default function SEOAdminClient() {
       const parsed = JSON.parse(raw) as Partial<SeoScanCache>;
       if (Array.isArray(parsed.pages)) {
         setPages(parsed.pages);
+        setHasAttemptedScan(true);
       }
     } catch {
       // ignore
@@ -455,6 +566,14 @@ export default function SEOAdminClient() {
   };
 
   if (loading) {
+    const progressText = scanProgress?.total
+      ? t('scanningProgress', {
+          current: scanProgress.currentPath || '',
+          done: scanProgress.done,
+          total: scanProgress.total,
+        })
+      : t('scanning');
+
     return (
       <>
         <Breadcrumbs
@@ -467,7 +586,7 @@ export default function SEOAdminClient() {
         <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#161616] mx-auto mb-4" />
-            <p className="font-['Outfit'] text-[#535353]">{t('scanning')}</p>
+            <p className="font-['Outfit'] text-[#535353]">{progressText}</p>
           </div>
         </div>
       </>
@@ -500,7 +619,7 @@ export default function SEOAdminClient() {
             </div>
           )}
 
-          {!error && pages.length === 0 && (
+          {!error && !hasAttemptedScan && pages.length === 0 && (
             <div className="mb-6 bg-[#EAEAEA] border border-[#E1E1E1] text-[#535353] rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
               {t('notScannedYet')}
             </div>

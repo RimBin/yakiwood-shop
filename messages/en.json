@@ -233,27 +233,27 @@
         },
         "02": {
           "question": "How do I maintain Shou Sugi Ban wood?",
-          "answer": "Maintenance details are coming soon."
+          "answer": "Shou Sugi Ban surfaces are typically low-maintenance. There’s no need for daily cleaning—an occasional gentle rinse to remove dust and dirt (as needed or seasonally) is usually enough. Avoid high-pressure washing and abrasive cleaners, as they can damage the surface texture. If the surface is oiled, refreshing the oil every ~2–5 years is typically sufficient (depending on sun exposure, rain, and facade orientation)."
         },
         "03": {
           "question": "Where can charred wood products be used?",
-          "answer": "Usage details are coming soon."
+          "answer": "Charred wood (yakisugi) is well-suited for ventilated facades, wall and ceiling cladding, decorative partitions, fences, gates, and exterior accents. Indoors it’s often used for feature walls and furniture details—choose an appropriate finish (e.g., oil or lacquer) to reduce rub-off and make cleaning easier. For outdoor use, longevity depends heavily on correct detailing: ventilation, proper fasteners, and avoiding areas where water can sit on the surface."
         },
         "04": {
           "question": "How is Shou Sugi Ban installed?",
-          "answer": "Installation details are coming soon."
+          "answer": "Shou Sugi Ban boards are most commonly installed as ventilated facade cladding on battens/framing, leaving an air gap to help moisture evaporate. Use stainless steel fasteners, follow the recommended expansion gaps, and install with correct water run-off detailing. It’s also a good idea to protect end-grain and cut edges (e.g., with oil/sealer, depending on the system). Before installation, store boards in a dry, ventilated area and pre-drill fastener points when needed to reduce the risk of splitting."
         },
         "05": {
           "question": "Is Shou Sugi Ban suitable for interior use?",
-          "answer": "Interior usage details are coming soon."
+          "answer": "Yes—Shou Sugi Ban works well indoors for feature walls, ceilings, niches, and furniture details. For interior applications we recommend an oiled finish: when properly processed and oiled, the surface does not rub off and does not shed, and it’s easy to maintain."
         },
         "06": {
           "question": "Is Yakisugi suitable for all climates?",
-          "answer": "Climate details are coming soon."
+          "answer": "Yakisugi performs well across many climates, but longevity depends on the wood species, charring/brushing intensity, chosen finish, and construction detailing. In humid/coastal conditions and on south-facing elevations (high UV exposure), finishes may need to be refreshed more often. The key is ventilated installation, good drainage/run-off detailing, and avoiding situations where water remains on the surface."
         },
         "07": {
           "question": "What are the standard dimensions for Shou Sugi Ban planks?",
-          "answer": "Dimensions details are coming soon."
+          "answer": "Typical facade board widths are 95–145 mm, with common lengths of 3–6 m (depending on the selected profile and wood species). Exact dimensions depend on your profile choice and project requirements—custom options are also possible."
         }
       }
     }
@@ -1122,9 +1122,11 @@
       "title": "SEO Management",
       "subtitle": "Monitor and optimize your website's search engine performance",
       "scanning": "Scanning pages...",
+      "scanningProgress": "Scanning: {current} ({done}/{total})...",
       "errors": {
         "noSession": "You must be logged in to use admin tools",
         "scanFailed": "SEO scan failed",
+        "noPaths": "No pages found to scan.",
         "scanTimeout": "Scanning took too long. Please try again (or reduce the number of pages).",
         "fixFailed": "Failed to generate fix suggestions"
       },
@@ -1306,7 +1308,8 @@
         },
         "errors": {
           "saveFailed": "Error saving product",
-          "deleteFailed": "Error deleting product"
+          "deleteFailed": "Error deleting product",
+          "slugEnMissing": "Your database is missing `products.slug_en`. Apply migration: {path}"
         },
         "options": {
           "categories": {

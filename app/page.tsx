@@ -8,6 +8,7 @@ import { getOgImage } from '@/lib/og-image';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { canonicalUrl } from '@/lib/seo/canonical';
 import { applySeoOverride } from '@/lib/seo/overrides';
+import { generateFAQSchema } from '@/lib/schema';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.home');
@@ -59,9 +60,21 @@ export async function generateMetadata(): Promise<Metadata> {
   return applySeoOverride(metadata, new URL(canonical).pathname, currentLocale);
 }
 
-export default function Home() {
+export default async function Home() {
+  const tFaq = await getTranslations('home.faq');
+  const faqKeys = ['01', '02', '03', '04', '05', '06', '07'] as const;
+  const faqItems = faqKeys.map((key) => ({
+    question: tFaq(`items.${key}.question`),
+    answer: tFaq(`items.${key}.answer`),
+  }));
+  const faqSchema = generateFAQSchema(faqItems);
+
   return (
     <main className="min-h-screen bg-[#E1E1E1]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <Hero />
       <WhyUs />
       <Products />

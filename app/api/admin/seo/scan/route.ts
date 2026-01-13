@@ -8,6 +8,21 @@ function jsonError(message: string, status = 400) {
 
 export const runtime = 'nodejs'
 
+function parseRequestedPaths(request: NextRequest): string[] | undefined {
+  const params = request.nextUrl.searchParams
+  const repeated = params.getAll('path').map((p) => p.trim()).filter(Boolean)
+
+  const csv = (params.get('paths') || '')
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean)
+
+  const merged = Array.from(new Set([...repeated, ...csv]))
+  if (merged.length === 0) return undefined
+
+  return merged
+}
+
 function resolveOrigin(request: NextRequest): string {
   const requestOrigin = new URL(request.url).origin
   const override = request.nextUrl.searchParams.get('origin')
@@ -34,8 +49,11 @@ export async function GET(request: NextRequest) {
 
     const origin = resolveOrigin(request)
 
+    const paths = parseRequestedPaths(request)
+
     const result = await scanSitePages({
       origin,
+      paths,
       concurrency: process.env.NODE_ENV !== 'production' ? 2 : 6,
       fetchTimeoutMs: 8_000,
     })

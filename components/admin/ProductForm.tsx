@@ -50,6 +50,51 @@ function buildLtProductSlug(usageType: string, woodType: string, finishSlug: str
   return slugify(`degintos-medienos-${typeLt}-${usageLt}-${woodLt}-${finishSlug}`);
 }
 
+function formatUnknownError(error: unknown): string {
+  if (!error) return '<no error details>';
+  if (error instanceof Error) return error.message || error.name;
+  if (typeof error === 'string') return error;
+
+  if (typeof error === 'object') {
+    const record = error as Record<string, unknown>;
+    const message = typeof record.message === 'string' ? record.message : null;
+    const code = typeof record.code === 'string' ? record.code : null;
+    const details = typeof record.details === 'string' ? record.details : null;
+    const hint = typeof record.hint === 'string' ? record.hint : null;
+
+    const parts = [
+      message,
+      code ? `code=${code}` : null,
+      details ? `details=${details}` : null,
+      hint ? `hint=${hint}` : null,
+    ].filter(Boolean);
+
+    if (parts.length > 0) return parts.join(' | ');
+
+    try {
+      const keys = Object.getOwnPropertyNames(error);
+      const picked: Record<string, unknown> = {};
+      for (const key of keys) picked[key] = (error as Record<string, unknown>)[key];
+      const json = JSON.stringify(picked);
+      return json === '{}' ? '[object]' : json;
+    } catch {
+      return '[object]';
+    }
+  }
+
+  return String(error);
+}
+
+function isMissingColumnError(message: string, column: string): boolean {
+  if (!message) return false;
+  const escaped = column.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+  return (
+    new RegExp(`could not find the '\\s*${escaped}\\s*' column`, 'i').test(message) ||
+    new RegExp(`column\\s+products\\.${escaped}\\s+does not exist`, 'i').test(message) ||
+    (new RegExp(escaped, 'i').test(message) && /schema cache/i.test(message))
+  );
+}
+
 function createProductSchema(t: (key: string) => string) {
   return z.object({
     name: z.string().min(1, t('validation.nameRequired')),
@@ -152,6 +197,7 @@ export default function ProductForm({ product, mode }: Props) {
   const t = useTranslations('admin.products.form');
 
   const catalogMigrationPath = 'supabase/migrations/20260111_catalog_options_assets_sale_thickness.sql';
+  const slugEnMigrationPath = 'supabase/migrations/20260113_add_products_slug_en.sql';
 
   // Form state
   const [name, setName] = useState(product?.name || '');
@@ -219,6 +265,7 @@ export default function ProductForm({ product, mode }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveWarning, setSaveWarning] = useState<string | null>(null);
   const [deleteModal, setDeleteModal] = useState(false);
 
   // Auto-generate LT + EN slugs from usage/wood and default finish (Natural).
@@ -441,6 +488,7 @@ export default function ProductForm({ product, mode }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveError(null);
+    setSaveWarning(null);
 
     if (!validateForm()) {
       return;
@@ -482,22 +530,37 @@ export default function ProductForm({ product, mode }: Props) {
 
       if (mode === 'create') {
         // Create new product
-        const { data, error } = await supabase
-          .from('products')
-          .insert(productData)
-          .select()
-          .single();
+        let { data, error } = await supabase.from('products').insert(productData).select().single();
 
-        if (error) throw error;
-        productId = data.id;
+        if (error) {
+          const message = formatUnknownError(error);
+          if (isMissingColumnError(message, 'slug_en')) {
+            const { slug_en, ...fallback } = productData as any;
+            const retry = await supabase.from('products').insert(fallback).select().single();
+            if (retry.error) throw retry.error;
+            data = retry.data as any;
+            setSaveWarning(t('errors.slugEnMissing', { path: slugEnMigrationPath } as any));
+          } else {
+            throw error;
+          }
+        }
+
+        productId = (data as any).id;
       } else {
         // Update existing product
-        const { error } = await supabase
-          .from('products')
-          .update(productData)
-          .eq('id', product!.id);
+        const { error } = await supabase.from('products').update(productData).eq('id', product!.id);
 
-        if (error) throw error;
+        if (error) {
+          const message = formatUnknownError(error);
+          if (isMissingColumnError(message, 'slug_en')) {
+            const { slug_en, ...fallback } = productData as any;
+            const retry = await supabase.from('products').update(fallback).eq('id', product!.id);
+            if (retry.error) throw retry.error;
+            setSaveWarning(t('errors.slugEnMissing', { path: slugEnMigrationPath } as any));
+          } else {
+            throw error;
+          }
+        }
       }
 
       // Handle variants
@@ -544,8 +607,14 @@ export default function ProductForm({ product, mode }: Props) {
       router.push(toLocalePath('/admin/products', locale));
       router.refresh();
     } catch (error) {
-      console.error('Error saving product:', error);
-      setSaveError(error instanceof Error ? error.message : t('errors.saveFailed'));
+      const message = formatUnknownError(error);
+      console.error('Error saving product:', message);
+
+      if (isMissingColumnError(message, 'slug_en')) {
+        setSaveError(t('errors.slugEnMissing', { path: slugEnMigrationPath } as any));
+      } else {
+        setSaveError(message || t('errors.saveFailed'));
+      }
     } finally {
       setIsSaving(false);
     }
@@ -784,6 +853,12 @@ export default function ProductForm({ product, mode }: Props) {
         {saveError && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-red-800 font-['DM_Sans']">{saveError}</p>
+          </div>
+        )}
+
+        {saveWarning && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <p className="text-amber-900 font-['DM_Sans']">{saveWarning}</p>
           </div>
         )}
 

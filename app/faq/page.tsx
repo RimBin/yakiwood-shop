@@ -5,6 +5,7 @@ import { getOgImage } from '@/lib/og-image';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { canonicalUrl } from '@/lib/seo/canonical';
 import { applySeoOverride } from '@/lib/seo/overrides';
+import { generateFAQSchema } from '@/lib/schema';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.faq');
@@ -37,37 +38,24 @@ export async function generateMetadata(): Promise<Metadata> {
   return applySeoOverride(metadata, new URL(canonical).pathname, currentLocale);
 }
 
-const faqItems = [
-  {
-    title: 'Kas yra Shou Sugi Ban?',
-    content: 'Shou Sugi Ban yra senovinė japonų medienos apsaugos technika, deginant ją. Šis procesas sukuria unikalų, ilgaamžį apdailos sluoksnį, kuris natūraliai atsparus ugniai, vabzdžiams ir puvimui.',
-    defaultOpen: true,
-  },
-  {
-    title: 'Kiek laiko tarnauja degintas medis?',
-    content: 'Tinkamai apdorotas Shou Sugi Ban technika medis gali tarnauti 80-100 metų ar ilgiau be reikšmingos priežiūros.',
-  },
-  {
-    title: 'Ar siunčiate į užsienį?',
-    content: 'Taip, siunčiame savo produktus visame pasaulyje. Pristatymo išlaidos ir pristatymo laikas priklauso nuo jūsų vietos. Susisiekite su mumis dėl konkrečios siuntimo kainos.',
-  },
-  {
-    title: 'Ar galiu pasirinkti spalvą?',
-    content: 'Žinoma! Siūlome įvairius degimo lygius nuo šviesaus iki gilaus juodo, taip pat galime taikyti skirtingas apdailas ir aliejus, kad pasiektume norimą išvaizdą.',
-  },
-  {
-    title: 'Kokias medienos rūšis naudojate?',
-    content: 'Dažniausiai dirbame su pušimi, maumedžiu ir kedru. Kiekviena rūšis pasižymi unikaliomis savybėmis struktūros raštų ir ilgaamžiškumo atžvilgiu.',
-  },
-  {
-    title: 'Ar siūlote montavimo paslaugas?',
-    content: 'Taip, galime rekomenduoti profesionalius montavimo partnerius jūsų regione arba pateikti išsamias montavimo gaires DIY projektams.',
-  },
-];
+export default async function FAQPage() {
+  const tFaq = await getTranslations('home.faq');
+  const faqKeys = ['01', '02', '03', '04', '05', '06', '07'] as const;
+  const faqItems = faqKeys.map((key) => ({
+    title: tFaq(`items.${key}.question`),
+    content: tFaq(`items.${key}.answer`),
+  }));
 
-export default function FAQPage() {
+  const faqSchema = generateFAQSchema(
+    faqItems.map((item) => ({ question: item.title, answer: item.content }))
+  );
+
   return (
     <main className="min-h-screen bg-[#E1E1E1]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       {/* Cover removed */}
 
       {/* FAQ Content */}

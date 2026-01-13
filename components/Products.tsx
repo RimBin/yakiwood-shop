@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
@@ -95,6 +95,20 @@ function SliderArrows({
   );
 }
 
+function usePreloadImages(urls: string[]) {
+  const uniqueUrls = useMemo(() => Array.from(new Set(urls)).filter(Boolean), [urls]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    for (const url of uniqueUrls) {
+      const img = new window.Image();
+      img.decoding = 'async';
+      img.src = url;
+    }
+  }, [uniqueUrls]);
+}
+
 // Mobile Product Card - Figma 803:13034 (303x532px)
 function MobileProductCard({
   product,
@@ -115,6 +129,9 @@ function MobileProductCard({
     () => (product.slides.length > 0 ? product.slides : [{ image: product.image, label: '', swatch: swatchIcons.natural }]),
     [product.slides, product.image]
   );
+
+  usePreloadImages(useMemo(() => slides.map((s) => s.image), [slides]));
+
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const goTo = (index: number) => {
@@ -131,7 +148,13 @@ function MobileProductCard({
 
       {/* Product image slider - 271x260px on mobile */}
       <div className="relative w-[271px] h-[260px] shrink-0 z-10 rounded-[8px] overflow-hidden">
-        <Image src={slides[currentIndex]?.image || product.image} alt={product.title} fill className="object-cover" />
+        <Image
+          src={slides[currentIndex]?.image || product.image}
+          alt={product.title}
+          fill
+          className="object-cover"
+          sizes="271px"
+        />
 
         {!!slides[currentIndex]?.label && (
           <div className="absolute bottom-[12px] right-[12px] z-20">
@@ -233,6 +256,9 @@ function DesktopProductCard({
     () => (product.slides.length > 0 ? product.slides : [{ image: product.image, label: '', swatch: swatchIcons.natural }]),
     [product.slides, product.image]
   );
+
+  usePreloadImages(useMemo(() => slides.map((s) => s.image), [slides]));
+
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const goTo = (index: number) => {
@@ -247,7 +273,13 @@ function DesktopProductCard({
       </div>
 
       <div className="relative w-full aspect-[395/311] shrink-0 z-10 rounded-[8px] overflow-hidden">
-        <Image src={slides[currentIndex]?.image || product.image} alt={product.title} fill className="object-cover" />
+        <Image
+          src={slides[currentIndex]?.image || product.image}
+          alt={product.title}
+          fill
+          className="object-cover"
+          sizes="(min-width: 1024px) 395px, 100vw"
+        />
 
         {!!slides[currentIndex]?.label && (
           <div className="absolute bottom-[12px] right-[12px] z-20">

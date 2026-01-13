@@ -282,10 +282,18 @@ async function getAllIndexablePathsFromOrigin(origin: string): Promise<string[]>
 
 			if (paths.length > 0) {
 				const unique = Array.from(new Set(paths))
-				// In dev, sitemap may include a lot of dynamic entries (Supabase-backed);
-				// scanning hundreds of pages feels like a hang and may overload the dev server.
-				const maxPaths = process.env.NODE_ENV !== 'production' ? 80 : 500
-				if (unique.length > maxPaths) return getSafeFallbackPaths()
+
+				const isDev = process.env.NODE_ENV !== 'production'
+				// If sitemap looks suspiciously small in dev, fall back to a safe list.
+				// This happens when the sitemap route is misconfigured or returns a partial response.
+				if (isDev && unique.length < 8) {
+					const fallback = getSafeFallbackPaths()
+					return fallback.slice(0, 30)
+				}
+
+				// In dev, scanning too many pages feels like a hang and may overload the dev server.
+				const maxPaths = isDev ? 30 : 500
+				if (unique.length > maxPaths) return getSafeFallbackPaths().slice(0, maxPaths)
 				return unique
 			}
 		}
@@ -294,7 +302,12 @@ async function getAllIndexablePathsFromOrigin(origin: string): Promise<string[]>
 	}
 
 	// Fallback: safe local list (avoids hanging on Supabase-backed sitemap generation)
-	return getSafeFallbackPaths()
+	const fallback = getSafeFallbackPaths()
+	return process.env.NODE_ENV !== 'production' ? fallback.slice(0, 30) : fallback
+}
+
+export async function getIndexablePaths(params: { origin: string }): Promise<string[]> {
+	return getAllIndexablePathsFromOrigin(params.origin)
 }
 
 async function scanOne(

@@ -70,6 +70,48 @@ function resolveProfileIconSrc(profile: Pick<ProductProfileVariant, 'name' | 'co
   return null;
 }
 
+const PROFILE_ICON_FALLBACK_BY_INDEX = [
+  assets.profiles.halfTaper45Deg,
+  assets.profiles.halfTaper,
+  assets.profiles.rectangle,
+  assets.profiles.rhombus,
+] as const;
+
+const FALLBACK_PROFILE_OPTIONS: Array<Pick<ProductProfileVariant, 'id' | 'name' | 'code' | 'description' | 'priceModifier'>> = [
+  {
+    id: 'fallback-profile-half-taper-45',
+    name: 'Half-taper 45°',
+    code: 'HALF_TAPER_45',
+    description: null,
+    priceModifier: 0,
+  },
+  {
+    id: 'fallback-profile-half-taper',
+    name: 'Half-taper',
+    code: 'HALF_TAPER',
+    description: null,
+    priceModifier: 0,
+  },
+  {
+    id: 'fallback-profile-rectangle',
+    name: 'Rectangle',
+    code: 'RECTANGLE',
+    description: null,
+    priceModifier: 0,
+  },
+  {
+    id: 'fallback-profile-rhombus',
+    name: 'Rhombus',
+    code: 'RHOMBUS',
+    description: null,
+    priceModifier: 0,
+  },
+];
+
+function isFallbackProfileId(id: string | undefined | null): boolean {
+  return typeof id === 'string' && id.startsWith('fallback-profile-');
+}
+
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   const t = useTranslations('productPage');
   const locale = useLocale();
@@ -111,7 +153,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   }, [product.colors, product.id]);
 
   const profileOptions = useMemo<ProductProfileVariant[]>(() => {
-    return (product.profiles || []).map((profile, index) => {
+    const mapped = (product.profiles || []).map((profile, index) => {
       const dimensionLabel = [
         profile.dimensions?.width ? `${profile.dimensions.width} mm` : null,
         profile.dimensions?.thickness ? `× ${profile.dimensions.thickness} mm` : null,
@@ -131,6 +173,20 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         priceModifier: profile.priceModifier ?? 0,
       };
     });
+
+    if (mapped.length >= 4) return mapped;
+
+    const usedIds = new Set(mapped.map((p) => p.id));
+    const padded: ProductProfileVariant[] = [...mapped];
+    for (const fallback of FALLBACK_PROFILE_OPTIONS) {
+      if (padded.length >= 4) break;
+      if (usedIds.has(fallback.id)) continue;
+      padded.push({
+        ...(fallback as unknown as ProductProfileVariant),
+      });
+    }
+
+    return padded;
   }, [product.id, product.profiles]);
 
   const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(colorOptions[0] || null);
@@ -275,7 +331,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           body: JSON.stringify({
             productId: product.id,
             usageType: usageTypeForQuote,
-            profileVariantId: selectedFinish?.id,
+            profileVariantId: isFallbackProfileId(selectedFinish?.id) ? undefined : selectedFinish?.id,
             colorVariantId: selectedColor?.id,
             thicknessMm: selectedThicknessMm,
             widthMm,
@@ -297,7 +353,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           return;
         }
 
-        const data = await res.json();
+            profileVariantId: isFallbackProfileId(selectedFinish?.id) ? undefined : selectedFinish?.id,
         const unitPricePerBoard = Number(data?.unitPricePerBoard);
         const unitPricePerM2 = Number(data?.unitPricePerM2);
         const quotedUnitAreaM2 = Number(data?.areaM2);
@@ -442,11 +498,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <p className="font-['DM_Sans'] font-normal text-[28px] lg:text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616]">
                 {effectivePrice.toFixed(0)} €
               </p>
-              {quoteLoading ? (
-                <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
-                  {currentLocale === 'lt' ? 'Skaičiuojama kaina…' : 'Calculating price…'}
-                </p>
-              ) : quoteError ? (
+              {quoteError ? (
                 <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">{quoteError}</p>
               ) : null}
             </div>
@@ -468,13 +520,20 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                     <button
                       key={width}
                       onClick={() => setSelectedWidthMm(width)}
-                      className={`h-[48px] px-[16px] flex items-center justify-center font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase transition-colors ${
+                      className={`relative h-[48px] px-[16px] flex items-center justify-center font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase transition-colors ${
                         selectedWidthMm === width
                           ? 'bg-[#161616] text-white'
                           : 'border border-[#bbbbbb] text-[#161616] hover:border-[#161616]'
                       }`}
                       aria-pressed={selectedWidthMm === width}
                     >
+                      {selectedWidthMm === width ? (
+                        <span className="absolute top-[8px] right-[8px]">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                            <path d="M10 3.5L5 8.5L2 5.5" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
+                      ) : null}
                       {width} mm
                     </button>
                   ))}
@@ -491,13 +550,20 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                     <button
                       key={length}
                       onClick={() => setSelectedLengthMm(length)}
-                      className={`h-[48px] px-[16px] flex items-center justify-center font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase transition-colors ${
+                      className={`relative h-[48px] px-[16px] flex items-center justify-center font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase transition-colors ${
                         selectedLengthMm === length
                           ? 'bg-[#161616] text-white'
                           : 'border border-[#bbbbbb] text-[#161616] hover:border-[#161616]'
                       }`}
                       aria-pressed={selectedLengthMm === length}
                     >
+                      {selectedLengthMm === length ? (
+                        <span className="absolute top-[8px] right-[8px]">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                            <path d="M10 3.5L5 8.5L2 5.5" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
+                      ) : null}
                       {length} mm
                     </button>
                   ))}
@@ -553,9 +619,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                     Profile
                   </p>
                   <div className="flex gap-[8px]">
-                    {profileOptions.slice(0, 3).map((finish) => {
+                    {profileOptions.slice(0, 4).map((finish, index) => {
                       const active = selectedFinish?.id === finish.id;
-                      const profileIconSrc = resolveProfileIconSrc(finish);
+                      const profileIconSrc = resolveProfileIconSrc(finish) ?? PROFILE_ICON_FALLBACK_BY_INDEX[index] ?? null;
                       const fallbackSrc = typeof finish.image === 'string' ? finish.image : null;
                       const canUseNextImage = (src: string) => src.startsWith('/');
 
@@ -563,12 +629,19 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                         <button
                           key={finish.id}
                           onClick={() => setSelectedFinish(finish)}
-                          className={`h-[48px] w-[83px] flex items-center justify-center transition-colors ${
+                          className={`relative h-[48px] w-[83px] flex items-center justify-center transition-colors ${
                             active ? 'bg-[#161616]' : 'border border-[#bbbbbb] hover:border-[#161616]'
                           }`}
                           title={finish.name}
                           aria-pressed={active}
                         >
+                          {active ? (
+                            <span className="absolute top-[8px] right-[8px]">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                                <path d="M10 3.5L5 8.5L2 5.5" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </span>
+                          ) : null}
                           {profileIconSrc ? (
                             <Image src={profileIconSrc} alt={finish.name} width={70} height={12} className={active ? 'invert' : ''} />
                           ) : fallbackSrc ? (

@@ -223,27 +223,27 @@
         },
         "02": {
           "question": "Kaip prižiūrėti Shou Sugi Ban medieną?",
-          "answer": "Priežiūros informacija netrukus bus papildyta."
+          "answer": "Shou Sugi Ban danga paprastai yra mažai priežiūros reikalaujanti. Kasdien nieko daryti nereikia – užtenka kartais nuplauti dulkes ir nešvarumus švelniu vandens srautu (pvz., pagal poreikį ar sezoniškai). Venkite aukšto slėgio plovimo ir abrazyvinių priemonių – jos gali pažeisti paviršiaus struktūrą. Jei paviršius alyvuotas, alyvą dažniausiai pakanka atnaujinti kas ~2–5 metus (priklausomai nuo saulės, lietaus ir fasado orientacijos)."
         },
         "03": {
           "question": "Kur galima naudoti degintos medienos produktus?",
-          "answer": "Pritaikymo informacija netrukus bus papildyta."
+          "answer": "Deginta (yakisugi) mediena puikiai tinka ventiliuojamiems fasadams, sienų ir lubų apdailai, dekoratyvinėms pertvaroms, tvoroms, vartams bei įvairiems eksterjero akcentams. Interjere ji dažnai naudojama akcentinėms sienoms ir baldų detalėms – svarbu pasirinkti tinkamą apdailą (pvz., alyvą ar laką), kad paviršius neteptų ir būtų lengviau valomas. Lauko sąlygomis geriausią ilgaamžiškumą užtikrina teisingas konstrukcinis sprendimas: ventiliacija, tinkami tvirtinimai ir apsauga nuo nuolatinio vandens užsilaikymo."
         },
         "04": {
           "question": "Kaip montuojama Shou Sugi Ban mediena?",
-          "answer": "Montavimo informacija netrukus bus papildyta."
+          "answer": "Dažniausiai Shou Sugi Ban lentos montuojamos kaip ventiliuojamo fasado dailylentės ant tašų/karkaso, paliekant oro tarpą drėgmės išgarinimui. Rekomenduojama naudoti nerūdijančio plieno tvirtinimo elementus, laikytis gamintojo nurodytų tarpų plėtimuisi ir montuoti su teisingu vandens nubėgimu. Pjūvių vietas (galus) verta papildomai apsaugoti – alyvuoti ar sandarinti pagal pasirinktą sistemą. Prieš montuojant medieną svarbu tinkamai laikyti (sausai, vėdinamai) ir, jei reikia, iš anksto pragręžti tvirtinimo vietas, kad būtų išvengta skilimų."
         },
         "05": {
           "question": "Ar Shou Sugi Ban tinka vidaus apdailai?",
-          "answer": "Vidaus naudojimo informacija netrukus bus papildyta."
+          "answer": "Taip – Shou Sugi Ban tinka interjerui (akcentinėms sienoms, luboms, nišoms, baldų detalėms). Vidaus apdailai rekomenduojame rinktis alyvuotą paviršių: teisingai apdorojus ir alyvavus, paviršius netepa ir niekas „nebyra“, o priežiūra paprasta."
         },
         "06": {
           "question": "Ar Yakisugi tinka visiems klimatams?",
-          "answer": "Informacija apie klimatą netrukus bus papildyta."
+          "answer": "Yakisugi sprendimai puikiai pasiteisina įvairiuose klimatuose, tačiau ilgaamžiškumas labiausiai priklauso nuo medienos rūšies, deginimo/šukavimo intensyvumo, pasirinktos apdailos ir konstrukcijos. Drėgname ar pajūrio klimate bei pietinėje fasado pusėje (didelė UV apkrova) apdailą gali tekti atnaujinti dažniau. Svarbiausia – ventiliuojamas montavimas, tinkamas vandens nuvedimas ir teisinga eksploatacija (kad vanduo neužsilaikytų ant paviršiaus)."
         },
         "07": {
           "question": "Kokie yra standartiniai Shou Sugi Ban lentų matmenys?",
-          "answer": "Matmenų informacija netrukus bus papildyta."
+          "answer": "Standartiniai fasadinių lentų plotiai dažniausiai yra 95–145 mm, o ilgiai – 3–6 m (priklausomai nuo profilio ir medienos rūšies). Konkrečius matmenis parenkame pagal pasirinktą profilį ir projektą – galimi ir nestandartiniai sprendimai."
         }
       }
     }
@@ -879,6 +879,7 @@
       "title": "SEO Valdymas",
       "subtitle": "Stebėkite ir optimizuokite savo svetainės paieškos sistemų našumą",
       "scanning": "Skenuojami puslapiai...",
+      "scanningProgress": "Skenuojama: {current} ({done}/{total})...",
       "stats": {
         "totalPages": "Iš viso puslapių",
         "averageScore": "Vidutinis balas",
@@ -908,6 +909,7 @@
       "errors": {
         "noSession": "Nėra prisijungimo sesijos",
         "scanFailed": "Nepavyko nuskenuoti puslapių",
+        "noPaths": "Nerasta puslapių skenavimui.",
         "scanTimeout": "Skenavimas užtruko per ilgai. Bandykite dar kartą (arba sumažinkite puslapių kiekį).",
         "fixFailed": "Nepavyko sugeneruoti taisymų"
       },
@@ -1063,7 +1065,8 @@
         },
         "errors": {
           "saveFailed": "Klaida išsaugant produktą",
-          "deleteFailed": "Klaida trinant produktą"
+          "deleteFailed": "Klaida trinant produktą",
+          "slugEnMissing": "Duomenų bazėje trūksta `products.slug_en`. Pritaikykite migraciją: {path}"
         },
         "options": {
           "categories": {
