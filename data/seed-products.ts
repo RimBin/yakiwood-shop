@@ -2,7 +2,8 @@ export const seedProducts = [
   {
     id: '1',
     name: 'Shou Sugi Ban eglė fasadui',
-    slug: 'deginta-egle-fasadui',
+    slug: 'degintos-medienos-dailylente-fasadui-egle-natural',
+    slugEn: 'shou-sugi-ban-for-facade-spruce-natural',
     description: 'Deginta eglė fasadams (Shou Sugi Ban). Kaina skaičiuojama pagal m², priklausomai nuo lentos pločio ir ilgio.',
     category: 'facade',
     woodType: 'spruce',
@@ -13,7 +14,8 @@ export const seedProducts = [
   {
     id: '2',
     name: 'Shou Sugi Ban eglė terasai',
-    slug: 'deginta-egle-terasai',
+    slug: 'degintos-medienos-terasine-lenta-terasai-egle-natural',
+    slugEn: 'shou-sugi-ban-for-terrace-spruce-natural',
     description: 'Deginta eglė terasoms (Shou Sugi Ban). Kaina skaičiuojama pagal m², priklausomai nuo lentos pločio ir ilgio.',
     category: 'terrace',
     woodType: 'spruce',
@@ -24,7 +26,8 @@ export const seedProducts = [
   {
     id: '3',
     name: 'Shou Sugi Ban maumedis fasadui',
-    slug: 'degintas-maumedis-fasadui',
+    slug: 'degintos-medienos-dailylente-fasadui-maumedis-natural',
+    slugEn: 'shou-sugi-ban-for-facade-larch-natural',
     description: 'Degintas maumedis fasadams (Shou Sugi Ban). Kaina skaičiuojama pagal m², priklausomai nuo lentos pločio ir ilgio.',
     category: 'facade',
     woodType: 'larch',
@@ -35,7 +38,8 @@ export const seedProducts = [
   {
     id: '4',
     name: 'Shou Sugi Ban maumedis terasai',
-    slug: 'degintas-maumedis-terasai',
+    slug: 'degintos-medienos-terasine-lenta-terasai-maumedis-natural',
+    slugEn: 'shou-sugi-ban-for-terrace-larch-natural',
     description: 'Degintas maumedis terasoms (Shou Sugi Ban). Kaina skaičiuojama pagal m², priklausomai nuo lentos pločio ir ilgio.',
     category: 'terrace',
     woodType: 'larch',

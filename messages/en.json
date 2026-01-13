@@ -1125,6 +1125,7 @@
       "errors": {
         "noSession": "You must be logged in to use admin tools",
         "scanFailed": "SEO scan failed",
+        "scanTimeout": "Scanning took too long. Please try again (or reduce the number of pages).",
         "fixFailed": "Failed to generate fix suggestions"
       },
       "stats": {
@@ -1153,6 +1154,7 @@
         "exportFixes": "Export Fixes",
         "exportJson": "Export JSON"
       },
+      "notScannedYet": "SEO scan has not been run yet. Click \"Rescan\" to start.",
       "noPages": "No pages match the selected filter",
       "seoScore": "SEO Score"
     },
@@ -1256,6 +1258,8 @@
           "nameLt": "Name (LT) *",
           "nameEn": "Name (EN)",
           "slug": "Slug *",
+          "slugLt": "Slug (LT) *",
+          "slugEn": "Slug (EN) *",
           "descriptionLt": "Description (LT)",
           "descriptionEn": "Description (EN)",
           "usage": "Usage *",
@@ -1276,6 +1280,8 @@
           "nameLt": "e.g., Burnt spruce cladding",
           "nameEn": "e.g., Burnt Spruce Cladding",
           "slug": "e.g., burnt-spruce-cladding",
+          "slugLt": "e.g., degintos-medienos-dailylente-fasadui-maumedis-natural",
+          "slugEn": "e.g., shou-sugi-ban-for-facade-larch-natural",
           "descriptionLt": "Product description in Lithuanian…",
           "descriptionEn": "Product description in English…",
           "selectUsage": "Select usage",

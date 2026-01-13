@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { PageCover } from '@/components/shared/PageLayout';
+import { Testimonials } from '@/components/home';
 import { toLocalePath } from '@/i18n/paths';
 
 // Local image for the about video thumbnail
@@ -408,6 +409,8 @@ export default function About() {
           </div>
         </div>
       </div>
+
+      <Testimonials />
 
       {/* CTA Section */}
       <div className="relative h-[523px] md:h-[1053px] w-full overflow-hidden bg-[#E1E1E1]">

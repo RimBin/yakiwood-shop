@@ -195,7 +195,7 @@ export default function Testimonials() {
                   </div>
 
                   <div
-                    className={`relative z-10 flex flex-col gap-[32px] p-[40px] ${
+                    className={`relative z-10 flex h-full flex-col justify-between p-[40px] ${
                       isActive ? "text-white" : "text-[#b8b8b8]"
                     }`}
                   >
@@ -203,8 +203,8 @@ export default function Testimonials() {
                       &ldquo;{testimonial.quote}&rdquo;
                     </p>
                     <p
-                      className={`font-['DM_Sans'] text-[16px] tracking-[-0.32px] ${
-                        isActive ? "text-white" : "text-[#c4c4c4]"
+                      className={`font-['DM_Sans'] font-medium text-[16px] tracking-[-0.32px] ${
+                        isActive ? "text-white" : "text-[#535353]"
                       }`}
                     >
                       &mdash; {testimonial.author}, {testimonial.role}

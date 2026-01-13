@@ -9,7 +9,8 @@ import ArrowRight from '@/components/icons/ArrowRight';
 import { toLocalePath } from '@/i18n/paths';
 import { getContainerPadding, getSectionSpacing } from '@/lib/design-system';
 
-const [imgProject1, imgProject2] = assets.projects;
+const [imgProject1] = assets.projects;
+const imgAboutVideoThumb = '/assets/about/fire.png';
 
 const partnerNames = ['RIMLT', 'BIKUVA', 'SANKA', 'METALLUM', 'Diktum', 'Sidergas', 'BAU'];
 
@@ -134,7 +135,7 @@ export default function AboutUs() {
           </div>
 
           <div className="relative w-full h-[360px] rounded-[8px] overflow-hidden">
-            <Image src={imgProject2} alt="" fill className="object-cover" />
+            <Image src={imgAboutVideoThumb} alt="" fill className="object-cover" />
             <div className="absolute inset-0 bg-black/20" />
             <div className="absolute inset-0 flex items-center justify-center">
               <button
@@ -190,7 +191,7 @@ export default function AboutUs() {
           {/* Video tile */}
           <div className="col-span-6 col-start-4">
             <div className="relative w-full h-[623px] rounded-[8px] overflow-hidden">
-              <Image src={imgProject2} alt="" fill className="object-cover" />
+              <Image src={imgAboutVideoThumb} alt="" fill className="object-cover" />
               <div className="absolute inset-0 bg-black/15" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <button

@@ -908,8 +908,10 @@
       "errors": {
         "noSession": "Nėra prisijungimo sesijos",
         "scanFailed": "Nepavyko nuskenuoti puslapių",
+        "scanTimeout": "Skenavimas užtruko per ilgai. Bandykite dar kartą (arba sumažinkite puslapių kiekį).",
         "fixFailed": "Nepavyko sugeneruoti taisymų"
       },
+      "notScannedYet": "Dar neatliktas SEO skenavimas. Spauskite \"Perskenuoti\".",
       "noPages": "Nėra puslapių atitinkančių pasirinktą filtrą",
       "seoScore": "SEO Balas"
     },
@@ -1013,6 +1015,8 @@
           "nameLt": "Pavadinimas (LT) *",
           "nameEn": "Pavadinimas (EN)",
           "slug": "Slug *",
+          "slugLt": "Slug (LT) *",
+          "slugEn": "Slug (EN) *",
           "descriptionLt": "Aprašymas (LT)",
           "descriptionEn": "Aprašymas (EN)",
           "usage": "Pritaikymas *",
@@ -1033,6 +1037,8 @@
           "nameLt": "Pvz., Deginta eglės dailylentė",
           "nameEn": "Pvz., Burnt Spruce Cladding",
           "slug": "pvz-deginta-egles-dailylente",
+          "slugLt": "pvz-degintos-medienos-dailylente-fasadui-maumedis-natural",
+          "slugEn": "pvz-shou-sugi-ban-for-facade-larch-natural",
           "descriptionLt": "Produkto aprašymas lietuvių kalba…",
           "descriptionEn": "Product description in English…",
           "selectUsage": "Pasirinkite pritaikymą",

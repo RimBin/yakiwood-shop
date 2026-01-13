@@ -15,6 +15,8 @@ const ALLOWED_WOOD_TYPES = ['spruce', 'larch'] as const;
 const WIDTH_OPTIONS_MM = [95, 120, 145] as const;
 const LENGTH_OPTIONS_MM = [3000, 3300, 3600] as const;
 
+const DEFAULT_FINISH_SLUG = 'natural';
+
 function slugify(input: string) {
   return input
     .toLowerCase()
@@ -26,11 +28,37 @@ function slugify(input: string) {
     .replace(/^-+|-+$/g, '');
 }
 
+function getDefaultFinishSlug(variants: Variant[]): string {
+  const natural = variants.find((v) => slugify(v.name) === DEFAULT_FINISH_SLUG);
+  if (natural?.name) return DEFAULT_FINISH_SLUG;
+
+  const first = variants.find((v) => v.name?.trim()) ?? null;
+  if (!first) return DEFAULT_FINISH_SLUG;
+
+  const result = slugify(first.name);
+  return result || DEFAULT_FINISH_SLUG;
+}
+
+function buildEnProductSlug(usageType: string, woodType: string, finishSlug: string): string {
+  return slugify(`shou-sugi-ban-for-${usageType}-${woodType}-${finishSlug}`);
+}
+
+function buildLtProductSlug(usageType: string, woodType: string, finishSlug: string): string {
+  const woodLt = woodType === 'larch' ? 'maumedis' : 'egle';
+  const usageLt = usageType === 'terrace' ? 'terasai' : 'fasadui';
+  const typeLt = usageType === 'terrace' ? 'terasine-lenta' : 'dailylente';
+  return slugify(`degintos-medienos-${typeLt}-${usageLt}-${woodLt}-${finishSlug}`);
+}
+
 function createProductSchema(t: (key: string) => string) {
   return z.object({
     name: z.string().min(1, t('validation.nameRequired')),
     name_en: z.string().optional(),
     slug: z
+      .string()
+      .min(1, t('validation.slugRequired'))
+      .regex(/^[a-z0-9-]+$/, t('validation.slugFormat')),
+    slug_en: z
       .string()
       .min(1, t('validation.slugRequired'))
       .regex(/^[a-z0-9-]+$/, t('validation.slugFormat')),
@@ -70,6 +98,7 @@ interface ProductData {
   name: string;
   name_en?: string;
   slug: string;
+  slug_en?: string;
   description?: string;
   description_en?: string;
   category: string;
@@ -129,6 +158,8 @@ export default function ProductForm({ product, mode }: Props) {
   const [nameEn, setNameEn] = useState(product?.name_en || '');
   const [slug, setSlug] = useState(product?.slug || '');
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
+  const [slugEn, setSlugEn] = useState((product as any)?.slug_en || '');
+  const [isSlugEnManuallyEdited, setIsSlugEnManuallyEdited] = useState(false);
   const [description, setDescription] = useState(product?.description || '');
   const [descriptionEn, setDescriptionEn] = useState(product?.description_en || '');
   const [usageType, setUsageType] = useState(() => {
@@ -190,20 +221,26 @@ export default function ProductForm({ product, mode }: Props) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteModal, setDeleteModal] = useState(false);
 
-  // Auto-generate slug from the active language name.
-  // Stops once user edits slug manually (unless they clear it).
+  // Auto-generate LT + EN slugs from usage/wood and default finish (Natural).
+  // Stops per-field once user edits it manually (unless they clear it).
   useEffect(() => {
-    if (mode !== 'create') return;
-    if (isSlugManuallyEdited) return;
+    const finish = getDefaultFinishSlug(variants);
 
-    // Only auto-generate when slug is empty; user can clear slug to re-generate.
-    if (slug) return;
+    const usageOk = ALLOWED_USAGE_TYPES.includes(usageType as any);
+    const woodOk = ALLOWED_WOOD_TYPES.includes(woodType as any);
+    if (!usageOk || !woodOk) return;
 
-    const source = nameEn?.trim() ? nameEn : name;
-    const next = slugify(source || '');
-    if (!next) return;
-    setSlug(next);
-  }, [mode, isSlugManuallyEdited, locale, name, nameEn, slug]);
+    if (!isSlugManuallyEdited) {
+      const nextLt = buildLtProductSlug(usageType, woodType, finish);
+      if (nextLt && nextLt !== slug) setSlug(nextLt);
+    }
+
+    if (!isSlugEnManuallyEdited) {
+      const nextEn = buildEnProductSlug(usageType, woodType, finish);
+      if (nextEn && nextEn !== slugEn) setSlugEn(nextEn);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usageType, woodType, variants, isSlugManuallyEdited, isSlugEnManuallyEdited, slug, slugEn]);
 
   // Keep derived fields in sync
   useEffect(() => {
@@ -371,6 +408,7 @@ export default function ProductForm({ product, mode }: Props) {
         name,
         name_en: nameEn || undefined,
         slug,
+        slug_en: slugEn,
         description: description || undefined,
         description_en: descriptionEn || undefined,
         usage_type: usageType,
@@ -424,6 +462,7 @@ export default function ProductForm({ product, mode }: Props) {
         name,
         name_en: nameEn || null,
         slug,
+        slug_en: slugEn || null,
         description: description || null,
         description_en: descriptionEn || null,
         category: deriveCategoryFromUsage(usageType),
@@ -709,9 +748,16 @@ export default function ProductForm({ product, mode }: Props) {
           {/* Slug Preview */}
           <div className="mt-6 pt-6 border-t border-[#E1E1E1]">
             <h4 className="text-sm font-['DM_Sans'] font-medium mb-2">{t('sections.urlPreview')}</h4>
-            <p className="text-sm text-[#535353] font-['DM_Sans'] break-all">
-              {toLocalePath(`/produktai/${slug || 'product-slug'}`, locale)}
-            </p>
+            <div className="space-y-1">
+              <p className="text-sm text-[#535353] font-['DM_Sans'] break-all">
+                <span className="font-medium text-[#161616]">LT:</span>{' '}
+                {toLocalePath(`/products/${slug || 'product-slug'}`, 'lt')}
+              </p>
+              <p className="text-sm text-[#535353] font-['DM_Sans'] break-all">
+                <span className="font-medium text-[#161616]">EN:</span>{' '}
+                {toLocalePath(`/products/${slugEn || 'product-slug'}`, 'en')}
+              </p>
+            </div>
           </div>
 
           {/* Quick Stats */}
@@ -777,24 +823,42 @@ export default function ProductForm({ product, mode }: Props) {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                  {t('fields.slug')}
-              </label>
-              <input
-                type="text"
-                value={slug}
-                onChange={(e) => {
-                  const next = slugify(e.target.value);
-                  setSlug(next);
-                  setIsSlugManuallyEdited(next.length > 0);
-                }}
-                className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
-                  errors.slug ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
-                }`}
-                placeholder={t('placeholders.slug')}
-              />
-              {errors.slug && <p className="text-sm text-red-600 mt-1">{errors.slug}</p>}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-['DM_Sans'] font-medium mb-2">{t('fields.slugLt')}</label>
+                <input
+                  type="text"
+                  value={slug}
+                  onChange={(e) => {
+                    const next = slugify(e.target.value);
+                    setSlug(next);
+                    setIsSlugManuallyEdited(next.length > 0);
+                  }}
+                  className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
+                    errors.slug ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
+                  }`}
+                  placeholder={t('placeholders.slugLt')}
+                />
+                {errors.slug && <p className="text-sm text-red-600 mt-1">{errors.slug}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-['DM_Sans'] font-medium mb-2">{t('fields.slugEn')}</label>
+                <input
+                  type="text"
+                  value={slugEn}
+                  onChange={(e) => {
+                    const next = slugify(e.target.value);
+                    setSlugEn(next);
+                    setIsSlugEnManuallyEdited(next.length > 0);
+                  }}
+                  className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
+                    errors.slug_en ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
+                  }`}
+                  placeholder={t('placeholders.slugEn')}
+                />
+                {errors.slug_en && <p className="text-sm text-red-600 mt-1">{errors.slug_en}</p>}
+              </div>
             </div>
 
             <div>

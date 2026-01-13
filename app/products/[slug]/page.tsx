@@ -15,7 +15,7 @@ interface ProductPageProps {
 // Generate metadata for SEO
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const resolvedParams = await params;
-  const product = await fetchProductBySlug(resolvedParams.slug);
+  const product = await fetchProductBySlug(resolvedParams.slug, { locale: 'en' });
 
   if (!product) {
     return {
@@ -27,7 +27,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const ogImage = product.images?.[0] || product.image;
   const locale = await getLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
-  const productPath = toLocalePath(`/products/${product.slug}`, currentLocale);
+  const slugForLocale = currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug;
+  const productPath = toLocalePath(`/products/${slugForLocale}`, currentLocale);
   const canonical = `https://yakiwood.lt${productPath}`;
 
   const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
@@ -72,7 +73,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 // Main product page component (Server Component)
 export default async function ProductPage({ params }: ProductPageProps) {
   const resolvedParams = await params;
-  const product = await fetchProductBySlug(resolvedParams.slug);
+  const product = await fetchProductBySlug(resolvedParams.slug, { locale: 'en' });
 
   if (!product) {
     notFound();
@@ -80,6 +81,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const locale = await getLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const slugForLocale = currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug;
 
   const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
   const displayDescription =
@@ -91,7 +93,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   // Generate structured data for SEO
   const productSchema = generateProductSchema({
     name: displayName,
-    slug: product.slug,
+    slug: slugForLocale,
     description: displayDescription ?? '',
     basePrice: offerPrice,
     image: product.image,
@@ -111,7 +113,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     },
     {
       name: displayName,
-      url: toLocalePath(`/products/${product.slug}`, currentLocale),
+      url: toLocalePath(`/products/${slugForLocale}`, currentLocale),
     },
   ]);
 

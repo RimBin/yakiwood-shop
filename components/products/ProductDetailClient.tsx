@@ -6,12 +6,68 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
 import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
+import { assets, getAsset } from '@/lib/assets';
+import type { AssetKey } from '@/lib/assets';
 import { useCartStore } from '@/lib/cart/store';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
 import type { UsageType } from '@/lib/pricing/configuration';
 
 interface ProductDetailClientProps {
   product: Product;
+}
+
+function normalizeLabel(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+const COLOR_SWATCH_MAP: Array<{ tokens: string[]; assetKey: AssetKey }> = [
+  { tokens: ['black', 'juoda'], assetKey: 'colorSwatchBlack' },
+  { tokens: ['brown', 'ruda'], assetKey: 'colorSwatchBrown' },
+  { tokens: ['carbon light', 'carbon-light', 'sviesi anglis', 'sviesi', 'light'], assetKey: 'colorSwatchCarbonLight' },
+  { tokens: ['carbon', 'anglis'], assetKey: 'colorSwatchCarbon' },
+  { tokens: ['graphite', 'grafit'], assetKey: 'colorSwatchGraphite' },
+  { tokens: ['latte'], assetKey: 'colorSwatchLatte' },
+  { tokens: ['silver', 'sidabr'], assetKey: 'colorSwatchSilver' },
+  { tokens: ['natural', 'naturali', 'natur'], assetKey: 'colorSwatchNatural' },
+];
+
+function resolveColorSwatchSrc(color: Pick<ProductColorVariant, 'name'>): string | null {
+  const label = normalizeLabel(color.name || '');
+  if (!label) return null;
+  for (const entry of COLOR_SWATCH_MAP) {
+    if (entry.tokens.some((t) => label.includes(t))) {
+      return getAsset(entry.assetKey);
+    }
+  }
+  return null;
+}
+
+function resolveProfileIconSrc(profile: Pick<ProductProfileVariant, 'name' | 'code'>): string | null {
+  const label = normalizeLabel([profile.name, profile.code].filter(Boolean).join(' '));
+  if (!label) return null;
+
+  if (label.includes('45') && (label.includes('half') || label.includes('taper') || label.includes('pus') || label.includes('spunto'))) {
+    return assets.profiles.halfTaper45Deg;
+  }
+
+  if (label.includes('half') || label.includes('taper') || label.includes('pus') || label.includes('spunto')) {
+    return assets.profiles.halfTaper;
+  }
+
+  if (label.includes('rectangle') || label.includes('staciakamp')) {
+    return assets.profiles.rectangle;
+  }
+
+  if (label.includes('rhomb') || label.includes('romb')) {
+    return assets.profiles.rhombus;
+  }
+
+  return null;
 }
 
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
@@ -41,9 +97,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     product.salePrice < product.price;
   const effectivePrice = hasSale ? product.salePrice! : product.price;
 
+  const [activeThumb, setActiveThumb] = useState(0);
   const [show3D, setShow3D] = useState(false);
   const loading3D = false;
-  const [expandedAccordion, setExpandedAccordion] = useState('aesthetics');
 
   const colorOptions = useMemo<ProductColorVariant[]>(() => {
     return (product.colors || []).map((color, index) => ({
@@ -82,6 +138,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
   const [selectedWidthMm, setSelectedWidthMm] = useState<number>(() => widthOptionsMm[0]);
   const [selectedLengthMm, setSelectedLengthMm] = useState<number>(() => lengthOptionsMm[0]);
+  const [targetAreaM2, setTargetAreaM2] = useState<number>(200);
 
   const usageTypeForQuote: UsageType | undefined = useMemo(() => {
     const v = String(product.category || '').toLowerCase();
@@ -99,6 +156,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     unitPricePerBoard: number;
     unitPricePerM2: number;
     unitAreaM2: number;
+    totalAreaM2: number;
+    quantityBoards: number;
+    lineTotal: number;
   }>(null);
 
   useEffect(() => {
@@ -141,12 +201,21 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     const unitPricePerBoard = quotedPricing?.unitPricePerBoard;
     const unitPricePerM2 = quotedPricing?.unitPricePerM2;
     const unitAreaM2 = quotedPricing?.unitAreaM2;
+    const totalAreaM2 = quotedPricing?.totalAreaM2;
+    const quantityBoards = quotedPricing?.quantityBoards;
+    const lineTotal = quotedPricing?.lineTotal;
+
+    const resolvedQuantityBoards =
+      typeof quantityBoards === 'number' && Number.isFinite(quantityBoards) && quantityBoards > 0
+        ? Math.max(1, Math.round(quantityBoards))
+        : 1;
 
     addItem({
       id: product.id,
       name: displayName,
       slug: product.slug,
       basePrice: typeof unitPricePerBoard === 'number' ? unitPricePerBoard : selectionPrice,
+      quantity: resolvedQuantityBoards,
       color: selectedColor?.name,
       finish: selectedFinish?.name,
       configuration: {
@@ -157,17 +226,23 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         widthMm: selectedWidthMm,
         lengthMm: selectedLengthMm,
       },
-      inputMode: 'boards',
+      inputMode: 'area',
+      targetAreaM2:
+        typeof targetAreaM2 === 'number' && Number.isFinite(targetAreaM2) && targetAreaM2 > 0
+          ? targetAreaM2
+          : undefined,
       pricingSnapshot:
         typeof unitPricePerBoard === 'number' &&
         typeof unitPricePerM2 === 'number' &&
-        typeof unitAreaM2 === 'number'
+        typeof unitAreaM2 === 'number' &&
+        typeof totalAreaM2 === 'number' &&
+        typeof lineTotal === 'number'
           ? {
               unitAreaM2,
-              totalAreaM2: unitAreaM2 * 1,
+              totalAreaM2,
               pricePerM2Used: unitPricePerM2,
               unitPrice: unitPricePerBoard,
-              lineTotal: unitPricePerBoard * 1,
+              lineTotal,
             }
           : undefined,
     });
@@ -176,10 +251,16 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   useEffect(() => {
     const widthMm = selectedWidthMm;
     const lengthMm = selectedLengthMm;
-    const unitAreaM2ForThreshold =
-      typeof widthMm === 'number' && typeof lengthMm === 'number' ? (widthMm / 1000) * (lengthMm / 1000) : 0;
+
+    const safeTargetAreaM2 =
+      typeof targetAreaM2 === 'number' && Number.isFinite(targetAreaM2) && targetAreaM2 > 0 ? targetAreaM2 : 0;
 
     if (!product?.id) return;
+    if (!safeTargetAreaM2) {
+      setQuotedPricing(null);
+      setQuoteError(null);
+      return;
+    }
 
     const controller = new AbortController();
 
@@ -199,9 +280,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             thicknessMm: selectedThicknessMm,
             widthMm,
             lengthMm,
-            inputMode: 'boards',
-            quantityBoards: 1,
-            cartTotalAreaM2: cartTotalAreaM2 + unitAreaM2ForThreshold,
+            inputMode: 'area',
+            targetAreaM2: safeTargetAreaM2,
+            cartTotalAreaM2: cartTotalAreaM2 + safeTargetAreaM2,
           }),
         });
 
@@ -220,6 +301,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         const unitPricePerBoard = Number(data?.unitPricePerBoard);
         const unitPricePerM2 = Number(data?.unitPricePerM2);
         const quotedUnitAreaM2 = Number(data?.areaM2);
+        const quotedTotalAreaM2 = Number(data?.totalAreaM2);
+        const quotedQuantityBoards = Number(data?.quantityBoards);
+        const quotedLineTotal = Number(data?.lineTotal);
 
         if (
           Number.isFinite(unitPricePerBoard) &&
@@ -227,9 +311,22 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           Number.isFinite(unitPricePerM2) &&
           unitPricePerM2 > 0 &&
           Number.isFinite(quotedUnitAreaM2) &&
-          quotedUnitAreaM2 > 0
+          quotedUnitAreaM2 > 0 &&
+          Number.isFinite(quotedTotalAreaM2) &&
+          quotedTotalAreaM2 > 0 &&
+          Number.isFinite(quotedQuantityBoards) &&
+          quotedQuantityBoards > 0 &&
+          Number.isFinite(quotedLineTotal) &&
+          quotedLineTotal > 0
         ) {
-          setQuotedPricing({ unitPricePerBoard, unitPricePerM2, unitAreaM2: quotedUnitAreaM2 });
+          setQuotedPricing({
+            unitPricePerBoard,
+            unitPricePerM2,
+            unitAreaM2: quotedUnitAreaM2,
+            totalAreaM2: quotedTotalAreaM2,
+            quantityBoards: quotedQuantityBoards,
+            lineTotal: quotedLineTotal,
+          });
         } else {
           setQuotedPricing(null);
         }
@@ -245,180 +342,113 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     run();
 
     return () => controller.abort();
-  }, [product?.id, usageTypeForQuote, selectedFinish?.id, selectedColor?.id, selectedThicknessMm, selectedWidthMm, selectedLengthMm, cartTotalAreaM2, currentLocale]);
+  }, [product?.id, usageTypeForQuote, selectedFinish?.id, selectedColor?.id, selectedThicknessMm, selectedWidthMm, selectedLengthMm, targetAreaM2, cartTotalAreaM2, currentLocale]);
 
-  const solutions = [
-    { id: 'facade', label: t('solutions.facade') },
-    { id: 'fence', label: t('solutions.fence') },
-    { id: 'terrace', label: t('solutions.terrace') },
-    { id: 'interior', label: t('solutions.interior') },
-  ] as const;
+  const thumbs = useMemo(() => {
+    const srcs = [product.images?.[0], product.images?.[1], product.images?.[2]].filter(Boolean) as string[];
+    if (srcs.length === 0) srcs.push(product.image);
+    return srcs;
+  }, [product.image, product.images]);
 
-  const woodTypes = [
-    { id: 'spruce', label: t('woodTypes.spruce') },
-    { id: 'larch', label: t('woodTypes.larch') },
-  ] as const;
+  const activeImage = thumbs[activeThumb] ?? product.image;
 
-  const benefits = [
-    {
-      id: 'aesthetics',
-      title: t('benefits.aesthetics.title'),
-      content: t('benefits.aesthetics.content'),
-    },
-    {
-      id: 'eco',
-      title: t('benefits.eco.title'),
-      content: t('benefits.eco.content'),
-    },
-    {
-      id: 'durability',
-      title: t('benefits.durability.title'),
-      content: t('benefits.durability.content'),
-    },
-    {
-      id: 'maintenance',
-      title: t('benefits.maintenance.title'),
-      content: t('benefits.maintenance.content'),
-    },
-  ] as const;
-
-  const contactHref = {
-    pathname: locale === 'en' ? '/contact' : '/kontaktai',
-    query: {
-      produktas: displayName,
-      spalva: selectedColor?.name ?? '',
-      profilis: selectedFinish?.name ?? '',
-      storis: selectedThicknessLabel,
-      plotis: String(selectedWidthMm),
-      ilgis: String(selectedLengthMm),
-      sprendimas: product.category ?? '',
-      perziura: show3D ? '3d' : 'foto',
-    },
-  };
+  const shopHref = toLocalePath('/products', currentLocale);
+  const homeHref = toLocalePath('/', currentLocale);
+  const contactHref = toLocalePath('/kontaktai', currentLocale);
 
   return (
-    <div className="w-full bg-[#E1E1E1] min-h-screen">
-      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[16px] lg:py-[24px]">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_520px] gap-[16px] lg:gap-[24px]">
-          {/* Media */}
-          <div className="relative w-full h-[420px] lg:h-[729px] rounded-[8px] overflow-hidden bg-[#EAEAEA]">
-            <button
-              type="button"
-              onClick={() => setShow3D((v) => !v)}
-              className="absolute z-10 top-[16px] right-[16px] h-[32px] px-[12px] rounded-[100px] border border-[#BBBBBB] bg-white/90 font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#161616]"
-              aria-label={show3D ? t('toggleShowPhotoAria') : t('toggleShow3dAria')}
-            >
-              {show3D ? t('photo') : t('view3d')}
-            </button>
+    <div className="min-h-screen bg-[#E1E1E1]">
+      {/* Breadcrumbs */}
+      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[10px] border-b border-[#bbbbbb]">
+        <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] text-[#7c7c7c]">
+          <Link href={homeHref} className="hover:text-[#161616]">
+            {currentLocale === 'lt' ? 'Pagrindinis' : 'Home'}
+          </Link>
+          {' / '}
+          <Link href={shopHref} className="hover:text-[#161616]">
+            {currentLocale === 'lt' ? 'Shop' : 'Shop'}
+          </Link>
+          {' / '}
+          <span className="text-[#161616]">{displayName}</span>
+        </p>
+      </div>
 
-            {show3D ? (
-              <div className="absolute inset-0">
-                <Konfiguratorius3D
-                  productId={product.id}
-                  availableColors={colorOptions}
-                  availableFinishes={profileOptions}
-                  selectedColorId={selectedColor?.id}
-                  selectedFinishId={selectedFinish?.id}
-                  isLoading={loading3D}
-                  mode="viewport"
-                  className="h-full"
-                  canvasClassName="h-full"
-                />
-              </div>
-            ) : (
-              <Image
-                src={product.images?.[0] ?? product.image}
-                alt={displayName}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 60vw"
-                priority
-              />
-            )}
-          </div>
-
-          {/* Controls */}
-          <div className="flex flex-col gap-[16px] lg:gap-[20px]">
-            <div className="flex items-center gap-[8px]">
-              <Link
-                href={toLocalePath('/products', currentLocale)}
-                className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] hover:text-[#161616]"
-              >
-                ← {t('back')}
-              </Link>
+      {/* Product Section */}
+      <main className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[16px] lg:py-[54px]">
+        <div className="flex flex-col lg:flex-row gap-[24px] lg:gap-[36px]">
+          {/* Left Column - Gallery */}
+          <div className="flex gap-[16px] order-2 lg:order-1">
+            {/* Thumbnails */}
+            <div className="flex lg:flex-col gap-[12px] order-2 lg:order-1">
+              {thumbs.map((thumb, index) => (
+                <button
+                  key={thumb}
+                  onClick={() => setActiveThumb(index)}
+                  className={`relative w-[60px] h-[60px] lg:w-[80px] lg:h-[80px] rounded-[4px] overflow-hidden shrink-0 ${
+                    activeThumb === index ? 'ring-2 ring-[#161616]' : ''
+                  }`}
+                  aria-label={`Thumb ${index + 1}`}
+                >
+                  <Image src={thumb} alt={`${displayName} view ${index + 1}`} fill className="object-cover" sizes="80px" />
+                </button>
+              ))}
             </div>
 
+            {/* Main Image */}
+            <div className="relative flex-1 lg:flex-none lg:w-[328px] xl:w-[500px] 2xl:w-[790px] aspect-square lg:aspect-auto lg:h-[400px] xl:h-[500px] 2xl:h-[729px] bg-[#EAEAEA] rounded-[4px] overflow-hidden order-1 lg:order-2">
+              <button
+                type="button"
+                onClick={() => setShow3D((v) => !v)}
+                className="absolute z-10 top-[16px] right-[16px] h-[32px] px-[12px] rounded-[100px] border border-[#BBBBBB] bg-white/90 font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#161616]"
+                aria-label={show3D ? t('toggleShowPhotoAria') : t('toggleShow3dAria')}
+              >
+                {show3D ? t('photo') : t('view3d')}
+              </button>
+
+              {show3D ? (
+                <div className="absolute inset-0">
+                  <Konfiguratorius3D
+                    productId={product.id}
+                    availableColors={colorOptions}
+                    availableFinishes={profileOptions}
+                    selectedColorId={selectedColor?.id}
+                    selectedFinishId={selectedFinish?.id}
+                    isLoading={loading3D}
+                    mode="viewport"
+                    className="h-full"
+                    canvasClassName="h-full"
+                  />
+                </div>
+              ) : (
+                <Image
+                  src={activeImage}
+                  alt={displayName}
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  priority
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Right Column - Product Info */}
+          <div className="flex-1 flex flex-col gap-[24px] order-1 lg:order-2">
+            {/* Title and Price */}
             <div className="flex flex-col gap-[8px]">
-              <h1 className="font-['DM_Sans'] text-[28px] lg:text-[32px] font-normal leading-[1.1] tracking-[-1.28px] text-[#161616]">
+              <h1 className="font-['DM_Sans'] font-normal text-[28px] lg:text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616]">
                 {displayName}
               </h1>
-
-              <div className="flex items-baseline gap-[10px]">
-                <p className="font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#535353] tracking-[-0.32px]">
-                  {t('fromPrice', { price: effectivePrice.toFixed(0) })}
-                </p>
-                {hasSale ? (
-                  <p className="font-['DM_Sans'] font-normal text-[14px] leading-[1.2] text-[#7C7C7C] tracking-[-0.28px] line-through">
-                    {product.price.toFixed(0)} €
-                  </p>
-                ) : null}
-              </div>
-
+              <p className="font-['DM_Sans'] font-normal text-[28px] lg:text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616]">
+                {effectivePrice.toFixed(0)} €
+              </p>
               {quoteLoading ? (
                 <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
                   {currentLocale === 'lt' ? 'Skaičiuojama kaina…' : 'Calculating price…'}
                 </p>
-              ) : typeof quotedPricing?.unitPricePerBoard === 'number' ? (
-                <p className="font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#161616] tracking-[-0.32px]">
-                  {currentLocale === 'lt' ? 'Pasirinkimo kaina:' : 'Selected price:'}{' '}
-                  {quotedPricing.unitPricePerBoard.toFixed(2)} €
-                </p>
               ) : quoteError ? (
                 <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">{quoteError}</p>
               ) : null}
-            </div>
-
-            {/* Wood type */}
-            <div className="flex flex-col gap-[8px]">
-              <div className="flex gap-[8px] flex-wrap">
-                {woodTypes.map((w) => {
-                  const active = product.woodType ? product.woodType === w.id : false;
-                  return (
-                    <button
-                      key={w.id}
-                      type="button"
-                      className={`h-[24px] px-[10px] rounded-[100px] border font-['Outfit'] text-[10px] tracking-[0.6px] uppercase transition-colors ${
-                        active ? 'bg-[#161616] border-[#161616] text-white' : 'bg-transparent border-[#BBBBBB] text-[#535353]'
-                      }`}
-                      aria-pressed={active}
-                    >
-                      {w.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Solutions */}
-            <div className="flex flex-col gap-[8px]">
-              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('solutionsLabel')}</p>
-              <div className="flex gap-[8px] flex-wrap">
-                {solutions.map((s) => {
-                  const active = product.category === s.id;
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      className={`h-[24px] px-[10px] rounded-[100px] border font-['Outfit'] text-[10px] tracking-[0.6px] uppercase transition-colors ${
-                        active ? 'bg-[#161616] border-[#161616] text-white' : 'bg-transparent border-[#BBBBBB] text-[#535353]'
-                      }`}
-                      aria-pressed={active}
-                    >
-                      {s.label}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
             {/* Description */}
@@ -426,200 +456,180 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               {displayDescription || t('descriptionFallback')}
             </p>
 
-            {/* Color Selector - New Figma Style */}
-            {colorOptions.length > 0 && (
+            {/* Variants */}
+            <div className="flex flex-col gap-[24px]">
+              {/* Width */}
               <div className="flex flex-col gap-[8px]">
-                <div className="flex gap-[4px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase">
-                  <span className="text-[#7C7C7C]">{t('colorLabelInline')}</span>
-                  <span className="text-[#161616]">{selectedColor?.name || t('selectColorPlaceholder')}</span>
-                </div>
-                <div className="flex gap-[8px] flex-wrap">
-                  {colorOptions.map((color) => (
+                <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7c7c7c]">
+                  Overall width (mm)
+                </p>
+                <div className="flex gap-[8px]">
+                  {widthOptionsMm.map((width) => (
                     <button
-                      key={color.id}
-                      onClick={() => setSelectedColor(color)}
-                      className={`relative w-[18px] h-[18px] rounded-full overflow-hidden border border-[#BBBBBB] ${
-                        selectedColor?.id === color.id ? 'ring-2 ring-[#161616] ring-offset-2' : ''
+                      key={width}
+                      onClick={() => setSelectedWidthMm(width)}
+                      className={`h-[48px] px-[16px] flex items-center justify-center font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase transition-colors ${
+                        selectedWidthMm === width
+                          ? 'bg-[#161616] text-white'
+                          : 'border border-[#bbbbbb] text-[#161616] hover:border-[#161616]'
                       }`}
-                      title={color.name}
+                      aria-pressed={selectedWidthMm === width}
                     >
-                      {color.image ? (
-                        <img src={color.image} alt={color.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div style={{ backgroundColor: color.hex }} className="w-full h-full" />
-                      )}
+                      {width} mm
                     </button>
                   ))}
                 </div>
               </div>
-            )}
 
-            {/* Finish Selector (if not in 3D mode) */}
-            {profileOptions.length > 0 && (
+              {/* Length */}
               <div className="flex flex-col gap-[8px]">
-                <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('profilesLabel')}</p>
-                <div className="flex gap-[8px] flex-wrap">
-                  {profileOptions.slice(0, 4).map((finish) => {
-                    const active = selectedFinish?.id === finish.id;
-                    return (
-                      <button
-                        key={finish.id}
-                        type="button"
-                        onClick={() => setSelectedFinish(finish)}
-                        className={`h-[40px] w-[64px] rounded-[4px] border flex items-center justify-center transition-colors ${
-                          active ? 'bg-[#161616] border-[#161616]' : 'bg-transparent border-[#BBBBBB]'
-                        }`}
-                        title={finish.name}
-                        aria-pressed={active}
-                      >
-                        <svg width="46" height="12" viewBox="0 0 70 12" fill="none" className={active ? 'stroke-white' : 'stroke-[#161616]'}>
-                          <path d="M0 11L35 0V11H70" strokeWidth="1.5" />
-                        </svg>
-                      </button>
-                    );
-                  })}
+                <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7c7c7c]">
+                  Length (mm)
+                </p>
+                <div className="flex gap-[8px]">
+                  {lengthOptionsMm.map((length) => (
+                    <button
+                      key={length}
+                      onClick={() => setSelectedLengthMm(length)}
+                      className={`h-[48px] px-[16px] flex items-center justify-center font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase transition-colors ${
+                        selectedLengthMm === length
+                          ? 'bg-[#161616] text-white'
+                          : 'border border-[#bbbbbb] text-[#161616] hover:border-[#161616]'
+                      }`}
+                      aria-pressed={selectedLengthMm === length}
+                    >
+                      {length} mm
+                    </button>
+                  ))}
                 </div>
               </div>
-            )}
 
-            {/* Thickness */}
-            <div className="flex flex-col gap-[8px]">
-              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('thicknessLabel')}</p>
-              <div className="flex gap-[8px] flex-wrap">
-                {thicknessOptions.map((opt) => {
-                  const active = selectedThicknessMm === opt.valueMm;
-                  return (
-                    <button
-                      key={opt.valueMm}
-                      type="button"
-                      onClick={() => setSelectedThicknessMm(opt.valueMm)}
-                      className={`h-[24px] px-[10px] rounded-[100px] border font-['Outfit'] text-[10px] tracking-[0.6px] uppercase transition-colors ${
-                        active
-                          ? 'bg-[#161616] border-[#161616] text-white'
-                          : 'bg-transparent border-[#BBBBBB] text-[#535353]'
-                      }`}
-                      aria-pressed={active}
-                    >
-                      {opt.label}
-                    </button>
-                  );
-                })}
+              {/* Colors */}
+              {colorOptions.length > 0 && (
+                <div className="flex flex-col gap-[8px]">
+                  <div className="flex gap-[4px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase">
+                    <span className="text-[#7C7C7C]">Color:</span>
+                    <span className="text-[#161616]">{selectedColor?.name || t('selectColorPlaceholder')}</span>
+                  </div>
+                  <div className="flex gap-[8px] flex-wrap">
+                    {colorOptions.map((color) => {
+                      const swatchSrc = resolveColorSwatchSrc(color);
+                      const isActive = selectedColor?.id === color.id;
+                      const fallbackSrc = typeof color.image === 'string' ? color.image : null;
+                      const useNextImage = (src: string) => src.startsWith('/');
+
+                      return (
+                        <button
+                          key={color.id}
+                          onClick={() => setSelectedColor(color)}
+                          className={`relative w-[18px] h-[18px] rounded-full overflow-hidden border border-[#BBBBBB] ${
+                            isActive ? 'ring-2 ring-[#161616] ring-offset-2' : ''
+                          }`}
+                          title={color.name}
+                          aria-pressed={isActive}
+                        >
+                          {swatchSrc ? (
+                            <Image src={swatchSrc} alt={color.name} fill className="object-cover" sizes="18px" />
+                          ) : fallbackSrc ? (
+                            useNextImage(fallbackSrc) ? (
+                              <Image src={fallbackSrc} alt={color.name} fill className="object-cover" sizes="18px" />
+                            ) : (
+                              <img src={fallbackSrc} alt={color.name} className="w-full h-full object-cover" />
+                            )
+                          ) : (
+                            <div style={{ backgroundColor: color.hex }} className="w-full h-full" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Profile */}
+              {profileOptions.length > 0 && (
+                <div className="flex flex-col gap-[8px]">
+                  <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7c7c7c]">
+                    Profile
+                  </p>
+                  <div className="flex gap-[8px]">
+                    {profileOptions.slice(0, 3).map((finish) => {
+                      const active = selectedFinish?.id === finish.id;
+                      const profileIconSrc = resolveProfileIconSrc(finish);
+                      const fallbackSrc = typeof finish.image === 'string' ? finish.image : null;
+                      const canUseNextImage = (src: string) => src.startsWith('/');
+
+                      return (
+                        <button
+                          key={finish.id}
+                          onClick={() => setSelectedFinish(finish)}
+                          className={`h-[48px] w-[83px] flex items-center justify-center transition-colors ${
+                            active ? 'bg-[#161616]' : 'border border-[#bbbbbb] hover:border-[#161616]'
+                          }`}
+                          title={finish.name}
+                          aria-pressed={active}
+                        >
+                          {profileIconSrc ? (
+                            <Image src={profileIconSrc} alt={finish.name} width={70} height={12} className={active ? 'invert' : ''} />
+                          ) : fallbackSrc ? (
+                            canUseNextImage(fallbackSrc) ? (
+                              <Image src={fallbackSrc} alt={finish.name} width={70} height={12} className={active ? 'invert' : ''} />
+                            ) : (
+                              <img src={fallbackSrc} alt={finish.name} className={`w-[70px] h-[12px] object-contain ${active ? 'invert' : ''}`} />
+                            )
+                          ) : (
+                            <svg width="70" height="12" viewBox="0 0 70 12" fill="none" className={active ? 'stroke-white' : 'stroke-[#161616]'}>
+                              <path d="M0 11L35 0V11H70" strokeWidth="1.5" />
+                            </svg>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Quantity */}
+              <div className="flex flex-col gap-[8px]">
+                <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7c7c7c]">
+                  Quantity m2
+                </p>
+                <div className="h-[48px] px-[16px] border border-[#bbbbbb] flex items-center max-w-[438px]">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={Number.isFinite(targetAreaM2) ? targetAreaM2 : ''}
+                    onChange={(e) => {
+                      const next = Number(e.target.value);
+                      setTargetAreaM2(Number.isFinite(next) ? next : 0);
+                    }}
+                    className="w-full font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase text-[#161616] bg-transparent outline-none"
+                    min={0}
+                    step={0.1}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Width */}
-            <div className="flex flex-col gap-[8px]">
-              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('widthLabel')}</p>
-              <div className="flex gap-[8px] flex-wrap">
-                {widthOptionsMm.map((valueMm) => {
-                  const active = selectedWidthMm === valueMm;
-                  return (
-                    <button
-                      key={valueMm}
-                      type="button"
-                      onClick={() => setSelectedWidthMm(valueMm)}
-                      className={`h-[24px] px-[10px] rounded-[100px] border font-['Outfit'] text-[10px] tracking-[0.6px] uppercase transition-colors ${
-                        active
-                          ? 'bg-[#161616] border-[#161616] text-white'
-                          : 'bg-transparent border-[#BBBBBB] text-[#535353]'
-                      }`}
-                      aria-pressed={active}
-                    >
-                      {valueMm} mm
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Length */}
-            <div className="flex flex-col gap-[8px]">
-              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('lengthLabel')}</p>
-              <div className="flex gap-[8px] flex-wrap">
-                {lengthOptionsMm.map((valueMm) => {
-                  const active = selectedLengthMm === valueMm;
-                  return (
-                    <button
-                      key={valueMm}
-                      type="button"
-                      onClick={() => setSelectedLengthMm(valueMm)}
-                      className={`h-[24px] px-[10px] rounded-[100px] border font-['Outfit'] text-[10px] tracking-[0.6px] uppercase transition-colors ${
-                        active
-                          ? 'bg-[#161616] border-[#161616] text-white'
-                          : 'bg-transparent border-[#BBBBBB] text-[#535353]'
-                      }`}
-                      aria-pressed={active}
-                    >
-                      {valueMm} mm
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Benefits */}
-            <div className="flex flex-col gap-[8px]">
-              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('benefitsLabel')}</p>
-              <div className="flex flex-col">
-                {benefits.map((item, index) => (
-                  <React.Fragment key={item.id}>
-                    {index > 0 && <div className="h-[1px] bg-[#BBBBBB]" />}
-                    <button
-                      type="button"
-                      onClick={() => setExpandedAccordion(expandedAccordion === item.id ? '' : item.id)}
-                      className="flex items-center justify-between py-[10px]"
-                    >
-                      <span className="font-['Outfit'] font-medium text-[12px] tracking-[0.6px] uppercase text-[#161616]">
-                        {item.title}
-                      </span>
-                      <div className="w-[20px] h-[20px]">
-                        {expandedAccordion === item.id ? (
-                          <svg viewBox="0 0 20 20" fill="none">
-                            <path d="M5 10H15" stroke="#161616" strokeWidth="2" strokeLinecap="round" />
-                          </svg>
-                        ) : (
-                          <svg viewBox="0 0 20 20" fill="none">
-                            <path d="M10 5V15M5 10H15" stroke="#161616" strokeWidth="2" strokeLinecap="round" />
-                          </svg>
-                        )}
-                      </div>
-                    </button>
-                    {expandedAccordion === item.id && (
-                      <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] pb-[10px] max-w-[494px]">
-                        {item.content}
-                      </p>
-                    )}
-                  </React.Fragment>
-                ))}
-                <div className="h-[1px] bg-[#BBBBBB]" />
-              </div>
-            </div>
-
-            {/* CTAs */}
-            <div className="flex flex-col gap-[8px] pt-[8px]">
+            {/* Actions */}
+            <div className="flex flex-col gap-[8px] items-center max-w-[434px]">
+              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#535353] text-center">
+                Haven't found what you're looking for?{' '}
+                <Link href={contactHref} className="text-[#161616] underline">
+                  Contact us
+                </Link>
+              </p>
               <button
                 type="button"
                 onClick={handleAddToCart}
                 className="w-full bg-[#161616] text-white h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase flex items-center justify-center hover:bg-[#2d2d2d] transition-colors"
               >
-                {currentLocale === 'lt' ? 'Į krepšelį' : 'Add to cart'}
+                Add to cart
               </button>
-              <Link
-                href={contactHref}
-                className="w-full bg-white text-[#161616] h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase flex items-center justify-center border border-[#161616] hover:bg-white transition-colors"
-              >
-                {t('ctaQuote')}
-              </Link>
-              <Link
-                href={contactHref}
-                className="w-full h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase flex items-center justify-center border border-[#161616] text-[#161616] hover:bg-white transition-colors"
-              >
-                {t('ctaContact')}
-              </Link>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

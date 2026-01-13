@@ -65,6 +65,12 @@ function downloadJson(filename: string, data: unknown) {
 }
 
 const SEO_EDITOR_ENABLED_KEY = 'admin.seo.editorEnabled';
+const SEO_SCAN_CACHE_KEY = 'admin.seo.scanCache.v1';
+
+type SeoScanCache = {
+  savedAt: string;
+  pages: PageSEOResult[];
+};
 
 function inferLocaleFromPath(pathname: string): 'en' | 'lt' {
   return pathname === '/lt' || pathname.startsWith('/lt/') ? 'lt' : 'en';
@@ -169,7 +175,7 @@ export default function SEOAdminClient() {
   const tBreadcrumb = useTranslations('admin.breadcrumb');
 
   const [pages, setPages] = useState<PageSEOResult[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<FilterType>('all');
   const [selectedPage, setSelectedPage] = useState<PageSEOResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -190,27 +196,57 @@ export default function SEOAdminClient() {
       const token = await getAdminToken();
       if (!token) throw new Error(t('errors.noSession'));
 
+      const controller = new AbortController();
+      const timeoutMs = 30_000;
+      const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
+
       const res = await fetch('/api/admin/seo/scan', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        signal: controller.signal,
+      }).finally(() => {
+        clearTimeout(timeoutHandle);
       });
 
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || t('errors.scanFailed'));
 
-      setPages((json?.pages ?? []) as PageSEOResult[]);
+      const nextPages = (json?.pages ?? []) as PageSEOResult[];
+      setPages(nextPages);
+
+      try {
+        const cache: SeoScanCache = {
+          savedAt: new Date().toISOString(),
+          pages: nextPages,
+        };
+        localStorage.setItem(SEO_SCAN_CACHE_KEY, JSON.stringify(cache));
+      } catch {
+        // ignore cache write errors
+      }
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : t('errors.scanFailed'));
-      setPages([]);
+      if (e instanceof DOMException && e.name === 'AbortError') {
+        setError(t('errors.scanTimeout'));
+      } else {
+        setError(e instanceof Error ? e.message : t('errors.scanFailed'));
+      }
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadPages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    try {
+      const raw = localStorage.getItem(SEO_SCAN_CACHE_KEY);
+      if (!raw) return;
+
+      const parsed = JSON.parse(raw) as Partial<SeoScanCache>;
+      if (Array.isArray(parsed.pages)) {
+        setPages(parsed.pages);
+      }
+    } catch {
+      // ignore
+    }
   }, []);
 
   useEffect(() => {
@@ -461,6 +497,12 @@ export default function SEOAdminClient() {
           {error && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
               {error}
+            </div>
+          )}
+
+          {!error && pages.length === 0 && (
+            <div className="mb-6 bg-[#EAEAEA] border border-[#E1E1E1] text-[#535353] rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
+              {t('notScannedYet')}
             </div>
           )}
 

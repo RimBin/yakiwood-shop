@@ -22,6 +22,18 @@ type ParsedHtmlMetadata = {
 
 const DEFAULT_FETCH_TIMEOUT_MS = 10_000
 
+function withHardTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
+	let timeoutHandle: NodeJS.Timeout | undefined
+	return Promise.race([
+		promise,
+		new Promise<T>((_, reject) => {
+			timeoutHandle = setTimeout(() => reject(new Error(message)), timeoutMs)
+		}),
+	]).finally(() => {
+		if (timeoutHandle) clearTimeout(timeoutHandle)
+	})
+}
+
 function getSafeFallbackPaths(): string[] {
 	const staticPaths = [
 		'/',
@@ -268,7 +280,14 @@ async function getAllIndexablePathsFromOrigin(origin: string): Promise<string[]>
 				})
 				.filter((p): p is string => !!p)
 
-			if (paths.length > 0) return Array.from(new Set(paths))
+			if (paths.length > 0) {
+				const unique = Array.from(new Set(paths))
+				// In dev, sitemap may include a lot of dynamic entries (Supabase-backed);
+				// scanning hundreds of pages feels like a hang and may overload the dev server.
+				const maxPaths = process.env.NODE_ENV !== 'production' ? 80 : 500
+				if (unique.length > maxPaths) return getSafeFallbackPaths()
+				return unique
+			}
 		}
 	} catch {
 		// ignore and fallback
@@ -288,15 +307,20 @@ async function scanOne(
 	}
 
 	try {
-		const { res, text: html } = await fetchTextWithTimeout(
-			target.url,
-			{
-				cache: 'no-store',
-				headers: {
-					'User-Agent': 'YakiwoodSEOScanner/1.0',
+		const hardTimeoutMs = Math.max(params.fetchTimeoutMs + 2_000, 5_000)
+		const { res, text: html } = await withHardTimeout(
+			fetchTextWithTimeout(
+				target.url,
+				{
+					cache: 'no-store',
+					headers: {
+						'User-Agent': 'YakiwoodSEOScanner/1.0',
+					},
 				},
-			},
-			params.fetchTimeoutMs,
+				params.fetchTimeoutMs,
+			),
+			hardTimeoutMs,
+			`Timed out fetching ${target.path} after ${hardTimeoutMs}ms`,
 		)
 		const parsed = extractFromHtml(html, origin)
 

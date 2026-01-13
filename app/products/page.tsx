@@ -339,11 +339,12 @@ export default function ProductsPage() {
                   product.salePrice > 0 &&
                   product.salePrice < product.price;
                 const effectivePrice = hasSale ? product.salePrice! : product.price;
+                const hrefSlug = currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug;
 
                 return (
             <Link
               key={product.id}
-              href={toLocalePath(`/products/${product.slug}`, currentLocale)}
+              href={toLocalePath(`/products/${hrefSlug}`, currentLocale)}
               data-testid="product-card"
               className="flex flex-col gap-[8px] group"
             >

@@ -231,7 +231,7 @@ export default function HomeComposite() {
             <div key={i} className={`rounded-${i===1?'[8px]':'[16px]'} p-[24px] h-[451px] w-[673px] flex flex-col justify-between ${i===1?'bg-[#161616]':'border border-[#bbbbbb] opacity-30'} relative`}>
               <img alt="review-bg" src={bg} className="absolute inset-0 w-full h-full object-cover rounded-inherit" />
               <p className={`font-['DM_Sans:Light',sans-serif] text-[32px] tracking-[-1.28px] leading-[1.2] ${i===1?'text-white':'text-[#161616]'}`}>“Sample testimonial content for pixel-perfect layout.”</p>
-              <p className={`font-['DM_Sans:Medium',sans-serif] text-[18px] tracking-[-0.36px] ${i===1?'text-white':'text-[#161616]'}`}>— Tomas K., Architect</p>
+              <p className={`font-['DM_Sans:Medium',sans-serif] text-[18px] tracking-[-0.36px] ${i===1?'text-white':'text-[#161616]'}`}>— Mindaugas P., Architect</p>
             </div>
           ))}
         </div>

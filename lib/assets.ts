@@ -79,6 +79,12 @@ const localAssets = {
   colorSwatchGraphite: '/assets/icons/color/Graphite-color-1.png',
   colorSwatchNatural: '/assets/icons/color/Natural (2).png',
 
+  // Profile cross-section icons
+  profileHalfTaper: '/assets/icons/profiles/Half-taper.svg',
+  profileHalfTaper45Deg: '/assets/icons/profiles/Half-taper-45-%C2%B0.svg',
+  profileRectangle: '/assets/icons/profiles/Rectangle%20(1).svg',
+  profileRhombus: '/assets/icons/profiles/Rhombus%20(1).svg',
+
   // Hero
   heroVector: '/images/hero/Vector.png',
   heroPlank: '/images/hero/4b7525119bfe28d75ceb0720e002c38c77eaf8d6.png',
@@ -159,6 +165,12 @@ export const assets = {
     plantSvg: localAssets.imgIconPlantSvg,
     cube: localAssets.imgIconCube,
     colors: '/assets/icons/Colors.png',
+  },
+  profiles: {
+    halfTaper: localAssets.profileHalfTaper,
+    halfTaper45Deg: localAssets.profileHalfTaper45Deg,
+    rectangle: localAssets.profileRectangle,
+    rhombus: localAssets.profileRhombus,
   },
   // Individual color swatches (for overlap UI)
   colorSwatches: [

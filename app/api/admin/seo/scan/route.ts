@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     const result = await scanSitePages({
       origin,
-      concurrency: 6,
+      concurrency: process.env.NODE_ENV !== 'production' ? 2 : 6,
       fetchTimeoutMs: 8_000,
     })
 

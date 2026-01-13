@@ -28,6 +28,7 @@ export interface ProductProfileVariant {
 export interface Product {
   id: string
   slug: string
+  slugEn?: string
   name: string
   nameEn?: string
   price: number
@@ -50,6 +51,7 @@ type DbProduct = {
   name: string
   name_en?: string | null
   slug: string
+  slug_en?: string | null
   description: string | null
   description_en?: string | null
   base_price: string | number
@@ -90,6 +92,7 @@ function transformSeedProduct(seed: (typeof seedProducts)[number]): Product {
   return {
     id: seed.id,
     slug: seed.slug,
+    slugEn: (seed as any).slugEn ?? undefined,
     name: seed.name,
     price: seed.basePrice,
     image: seed.images?.[0] ?? '/images/ui/wood/imgSpruce.png',
@@ -134,6 +137,7 @@ function transformDbProduct(db: DbProduct): Product {
   return {
     id: db.id,
     slug: db.slug,
+    slugEn: db.slug_en ?? undefined,
     name: db.name,
     nameEn: db.name_en ?? undefined,
     price: toNumber(db.base_price),
@@ -228,7 +232,12 @@ export async function fetchProducts(): Promise<Product[]> {
   return (data as unknown as DbProduct[]).map(transformDbProduct)
 }
 
-export async function fetchProductBySlug(slug: string): Promise<Product | null> {
+export async function fetchProductBySlug(
+  slug: string,
+  options?: {
+    locale?: 'en' | 'lt'
+  }
+): Promise<Product | null> {
   const supabase = createPublicClient()
 
   if (!supabase) {
@@ -236,23 +245,39 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     return seed ? transformSeedProduct(seed) : null
   }
 
-  const { data, error } = await supabase
-    .from('products')
-    .select('*, product_variants(*)')
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .single()
+  const locale = options?.locale
+  const columnsToTry = locale === 'en' ? (['slug_en', 'slug'] as const) : (['slug', 'slug_en'] as const)
 
-  if (error || !data) {
-    if (error) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('Supabase product-by-slug fetch failed:', formatSupabaseError(error))
+  for (const column of columnsToTry) {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, product_variants(*)')
+        .eq(column, slug)
+        .eq('is_active', true)
+        .maybeSingle()
+
+      if (error) {
+        // Older schemas may not have slug_en yet.
+        const message = formatSupabaseError(error)
+        if (/slug_en/i.test(message) && /does not exist|schema cache|could not find/i.test(message)) {
+          continue
+        }
+
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('Supabase product-by-slug fetch failed:', message)
+        }
+        break
       }
-    }
 
-    const seed = seedProducts.find((p) => p.slug === slug)
-    return seed ? transformSeedProduct(seed) : null
+      if (data) {
+        return transformDbProduct(data as unknown as DbProduct)
+      }
+    } catch {
+      // ignore and try next column
+    }
   }
 
-  return transformDbProduct(data as unknown as DbProduct)
+  const seed = seedProducts.find((p) => p.slug === slug)
+  return seed ? transformSeedProduct(seed) : null
 }

@@ -183,7 +183,8 @@ async function main() {
   // 2) Upsert 4 products
   const products = [
     {
-      slug: 'deginta-egle-fasadui',
+      slug: 'degintos-medienos-dailylente-fasadui-egle-natural',
+      slug_en: 'shou-sugi-ban-for-facade-spruce-natural',
       category: 'cladding',
       wood_type: 'spruce',
       base_price: 89.0,
@@ -195,7 +196,8 @@ async function main() {
       is_active: true,
     },
     {
-      slug: 'deginta-egle-terasai',
+      slug: 'degintos-medienos-terasine-lenta-terasai-egle-natural',
+      slug_en: 'shou-sugi-ban-for-terrace-spruce-natural',
       category: 'decking',
       wood_type: 'spruce',
       base_price: 79.0,
@@ -207,7 +209,8 @@ async function main() {
       is_active: true,
     },
     {
-      slug: 'degintas-maumedis-fasadui',
+      slug: 'degintos-medienos-dailylente-fasadui-maumedis-natural',
+      slug_en: 'shou-sugi-ban-for-facade-larch-natural',
       category: 'cladding',
       wood_type: 'larch',
       base_price: 89.0,
@@ -219,7 +222,8 @@ async function main() {
       is_active: true,
     },
     {
-      slug: 'degintas-maumedis-terasai',
+      slug: 'degintos-medienos-terasine-lenta-terasai-maumedis-natural',
+      slug_en: 'shou-sugi-ban-for-terrace-larch-natural',
       category: 'decking',
       wood_type: 'larch',
       base_price: 79.0,
