@@ -18,6 +18,8 @@
     "handoff": "Need a human? Contact us",
     "placeholder": "Type your question…",
     "send": "Send",
+    "clear": "Clear",
+    "typing": "Typing…",
     "errors": {
       "generic": "Couldn't reply right now. Please try again later.",
       "network": "Network error. Please try again later."
@@ -1577,7 +1579,8 @@
     "subtitle": "Manage sessions and FAQ",
     "tabs": {
       "sessions": "Sessions",
-      "faq": "FAQ"
+      "faq": "FAQ",
+      "ai": "AI"
     },
     "breadcrumbs": {
       "home": "Home",
@@ -1617,6 +1620,27 @@
       "noticeCreated": "Created.",
       "noticeDeleted": "Deleted.",
       "noticeImported": "Imported: {count} entries."
+    },
+    "ai": {
+      "title": "OpenAI (AI) settings",
+      "subtitle": "Status and configuration (read from server env)",
+      "empty": "Could not load configuration.",
+      "statusTitle": "Status",
+      "configured": "OPENAI_API_KEY",
+      "useOpenAI": "CHATBOT_USE_OPENAI",
+      "model": "OPENAI_CHAT_MODEL",
+      "minConfidence": "Min confidence (FAQ)",
+      "temperature": "Temperature",
+      "yes": "Yes",
+      "no": "No",
+      "note": "The API key is never shown in UI. Configuration is managed via .env.local and requires a server restart.",
+      "promptTitle": "System prompt",
+      "promptLt": "LT prompt",
+      "promptEn": "EN prompt",
+      "set": "Set",
+      "notSet": "Not set",
+      "defaultPrompt": "Using the default prompt (no env override).",
+      "envTitle": "Env example (.env.local)"
     },
     "form": {
       "enabled": "Enabled",

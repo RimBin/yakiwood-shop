@@ -281,7 +281,7 @@ export default function UsersAdminClient() {
 
   if (!supabase) {
     return (
-      <div className="rounded-[16px] border border-[#BBBBBB] bg-white p-[16px]">
+      <div className="rounded-[16px] border border-[#BBBBBB] bg-[#EAEAEA] p-[16px]">
         <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">{t('notConfigured.title')}</h2>
         <p className="font-['Outfit'] text-[14px] text-[#535353] mt-[8px]">{t('notConfigured.body')}</p>
       </div>
@@ -292,14 +292,14 @@ export default function UsersAdminClient() {
     <div>
 
       {error && (
-        <div className="mb-6 border border-red-200 bg-red-50 text-red-800 rounded-lg px-4 py-3 font-['DM_Sans']">
+        <div className="mb-6 border border-red-200 bg-[#EAEAEA] text-red-700 rounded-lg px-4 py-3 font-['DM_Sans']">
           {error}
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Users */}
-        <div className="bg-white border border-[#E1E1E1] rounded-xl p-6">
+        <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-xl p-6">
           <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">{t('users.title')}</h2>
 
           <div className="mt-4 overflow-auto">
@@ -328,7 +328,7 @@ export default function UsersAdminClient() {
                         <select
                           value={u.role}
                           onChange={(e) => updateRole(u.id, e.target.value)}
-                          className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white text-sm yw-select"
+                          className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] text-sm yw-select"
                         >
                           {roles.map((r) => (
                             <option key={r} value={r}>
@@ -352,25 +352,25 @@ export default function UsersAdminClient() {
                 value={newUserEmail}
                 onChange={(e) => setNewUserEmail(e.target.value)}
                 placeholder={t('create.email')}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans']"
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA]"
               />
               <input
                 type="password"
                 value={newUserPassword}
                 onChange={(e) => setNewUserPassword(e.target.value)}
                 placeholder={t('create.password')}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans']"
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA]"
               />
               <input
                 value={newUserFullName}
                 onChange={(e) => setNewUserFullName(e.target.value)}
                 placeholder={t('create.fullName')}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans']"
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA]"
               />
               <select
                 value={newUserRole}
                 onChange={(e) => setNewUserRole(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] yw-select"
               >
                 {roles.map((r) => (
                   <option key={r} value={r}>
@@ -390,12 +390,12 @@ export default function UsersAdminClient() {
         </div>
 
         {/* Discounts */}
-        <div className="bg-white border border-[#E1E1E1] rounded-xl p-6">
+        <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-xl p-6">
           <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">{t('discounts.title')}</h2>
           <p className="mt-2 font-['DM_Sans'] text-sm text-[#535353]">{t('discounts.help')}</p>
 
           <div className="mt-4 grid grid-cols-1 gap-3">
-            <div className="rounded-lg border border-[#E1E1E1] bg-[#FAFAFA] p-4">
+            <div className="rounded-lg border border-[#E1E1E1] bg-[#EAEAEA] p-4">
               <h3 className="font-['DM_Sans'] text-base font-medium text-[#161616]">{t('discounts.createRole.title')}</h3>
               <div className="mt-3 grid grid-cols-1 gap-3">
                 <label className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">
@@ -406,7 +406,7 @@ export default function UsersAdminClient() {
                     value={newRoleName}
                     onChange={(e) => setNewRoleName(e.target.value)}
                     placeholder={t('discounts.createRole.placeholder')}
-                    className="flex-1 px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white"
+                    className="flex-1 px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA]"
                   />
                   <button
                     type="button"
@@ -425,7 +425,7 @@ export default function UsersAdminClient() {
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
-              className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
+              className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] yw-select"
             >
               {roles.map((r) => (
                 <option key={r} value={r}>
@@ -442,7 +442,7 @@ export default function UsersAdminClient() {
                 <select
                   value={discountType}
                   onChange={(e) => setDiscountType(e.target.value === 'fixed' ? 'fixed' : 'percent')}
-                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
+                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] yw-select"
                 >
                   <option value="percent">{t('discounts.types.percent')}</option>
                   <option value="fixed">{t('discounts.types.fixed')}</option>
@@ -456,7 +456,7 @@ export default function UsersAdminClient() {
                   value={discountValue}
                   onChange={(e) => setDiscountValue(e.target.value)}
                   inputMode="decimal"
-                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans']"
+                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA]"
                 />
               </div>
             </div>
@@ -487,7 +487,7 @@ export default function UsersAdminClient() {
                       setCreateRoleInfo(null)
                     }}
                     placeholder={t('discounts.createRole.placeholder')}
-                    className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans']"
+                    className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA]"
                   />
 
                   <button
@@ -520,7 +520,7 @@ export default function UsersAdminClient() {
             <button
               type="button"
               onClick={loadAll}
-              className="h-[48px] px-[40px] border border-[#161616] text-[#161616] rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-white"
+              className="h-[48px] px-[40px] border border-[#161616] text-[#161616] rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-[#E1E1E1]"
             >
               {t('refresh')}
             </button>

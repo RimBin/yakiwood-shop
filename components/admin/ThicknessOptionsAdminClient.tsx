@@ -47,7 +47,7 @@ export default function ThicknessOptionsAdminClient({
 
   if (!supabase) {
     return (
-      <div className="bg-white rounded-lg p-6 shadow">
+      <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] p-6">
         <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">Supabase nesukonfigūruotas</h2>
         <p className="mt-2 font-['Outfit'] text-sm text-[#535353]">
           Reikia `NEXT_PUBLIC_SUPABASE_URL` ir `NEXT_PUBLIC_SUPABASE_ANON_KEY` `.env.local` faile.
@@ -108,7 +108,7 @@ export default function ThicknessOptionsAdminClient({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg p-6 shadow">
+      <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] p-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">Storis</h2>
@@ -138,7 +138,7 @@ export default function ThicknessOptionsAdminClient({
         </div>
 
         {error ? (
-          <div className="mt-4 border border-red-200 bg-red-50 rounded-lg p-3">
+          <div className="mt-4 border border-red-200 bg-[#E1E1E1] rounded-[12px] p-3">
             <p className="font-['Outfit'] text-sm text-red-700">{error}</p>
             <p className="mt-1 font-['Outfit'] text-xs text-red-700">
               Jei klaida apie `catalog_options`, pirmiausia pritaikykite migraciją
@@ -153,7 +153,7 @@ export default function ThicknessOptionsAdminClient({
           ) : (
             <div className="divide-y divide-[#E1E1E1] border border-[#E1E1E1] rounded-lg overflow-hidden">
               {sorted.map((opt) => (
-                <div key={opt.id} className="flex items-center justify-between px-4 py-3 bg-white">
+                <div key={opt.id} className="flex items-center justify-between px-4 py-3 bg-[#EAEAEA]">
                   <div className="flex flex-col">
                     <p className="font-['DM_Sans'] text-sm font-medium text-[#161616]">{labelForMm(opt.value_mm)}</p>
                     <p className="font-['Outfit'] text-xs text-[#7C7C7C]">
@@ -164,7 +164,7 @@ export default function ThicknessOptionsAdminClient({
                     type="button"
                     disabled={isBusy}
                     onClick={() => removeOption(opt.id)}
-                    className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#FAFAFA] disabled:opacity-60"
+                    className="px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#E1E1E1] disabled:opacity-60"
                   >
                     Trinti
                   </button>
@@ -175,7 +175,7 @@ export default function ThicknessOptionsAdminClient({
         </div>
       </div>
 
-      <div className="bg-white rounded-lg p-6 shadow">
+      <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] p-6">
         <h3 className="font-['DM_Sans'] text-lg font-medium text-[#161616]">Kaip tai naudojama</h3>
         <p className="mt-2 font-['Outfit'] text-sm text-[#535353]">
           Šie įrašai skirti kainodarai per `product_configuration_prices.thickness_option_id`.

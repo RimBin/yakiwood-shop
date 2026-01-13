@@ -241,7 +241,7 @@ export default function AdminOrdersPage() {
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-[#F5F5F5]">
+                      <thead className="bg-[#E1E1E1]">
                         <tr>
                           <th className="px-[16px] py-[12px] text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
                             Nr.
@@ -277,7 +277,7 @@ export default function AdminOrdersPage() {
                       </thead>
                       <tbody>
                         {orders.map((order) => (
-                          <tr key={order.id} className="border-t border-[#E1E1E1] hover:bg-[#F9F9F9]">
+                          <tr key={order.id} className="border-t border-[#E1E1E1] hover:bg-[#E1E1E1]">
                             <td className="px-[16px] py-[16px]">
                               <span className="font-['Outfit'] font-medium text-[13px] text-[#161616]">
                                 {order.order_number}
@@ -347,7 +347,7 @@ export default function AdminOrdersPage() {
             {/* Invoices Tab */}
             {activeTab === 'invoices' && (
               <div className="bg-[#EAEAEA] rounded-[8px] overflow-hidden">
-                <div className="flex items-center justify-between gap-[16px] px-[16px] py-[12px] bg-[#F5F5F5] border-b border-[#E1E1E1]">
+                <div className="flex items-center justify-between gap-[16px] px-[16px] py-[12px] bg-[#E1E1E1] border-b border-[#E1E1E1]">
                   <div className="font-['Outfit'] text-[12px] text-[#7C7C7C] uppercase tracking-[0.6px]">
                     Sąskaitos
                   </div>
@@ -356,7 +356,7 @@ export default function AdminOrdersPage() {
                     <select
                       value={invoiceLocale}
                       onChange={(e) => setInvoiceLocale(e.target.value as InvoiceLocale)}
-                      className="px-[12px] py-[6px] border border-[#E1E1E1] bg-white rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616] yw-select"
+                      className="px-[12px] py-[6px] border border-[#E1E1E1] bg-[#EAEAEA] rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616] yw-select"
                       aria-label="Sąskaitos PDF kalba"
                     >
                       <option value="lt">LT</option>
@@ -373,7 +373,7 @@ export default function AdminOrdersPage() {
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-[#F5F5F5]">
+                      <thead className="bg-[#E1E1E1]">
                         <tr>
                           <th className="px-[16px] py-[12px] text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
                             Nr.
@@ -400,7 +400,7 @@ export default function AdminOrdersPage() {
                       </thead>
                       <tbody>
                         {invoices.map((invoice) => (
-                          <tr key={invoice.id} className="border-t border-[#E1E1E1] hover:bg-[#F9F9F9]">
+                          <tr key={invoice.id} className="border-t border-[#E1E1E1] hover:bg-[#E1E1E1]">
                             <td className="px-[16px] py-[16px]">
                               <span className="font-['Outfit'] font-medium text-[13px] text-[#161616]">
                                 {invoice.invoice_number}
@@ -474,8 +474,8 @@ export default function AdminOrdersPage() {
       </main>
 
       <ModalOverlay isOpen={!!previewInvoice} onClose={() => setPreviewInvoice(null)}>
-        <div className="w-[min(1100px,95vw)] h-[min(85vh,900px)] bg-white rounded-[16px] overflow-hidden border border-[#E1E1E1]">
-          <div className="flex items-center justify-between gap-[12px] px-[16px] py-[12px] border-b border-[#E1E1E1] bg-[#F5F5F5]">
+        <div className="w-[min(1100px,95vw)] h-[min(85vh,900px)] bg-[#EAEAEA] rounded-[16px] overflow-hidden border border-[#E1E1E1]">
+          <div className="flex items-center justify-between gap-[12px] px-[16px] py-[12px] border-b border-[#E1E1E1] bg-[#E1E1E1]">
             <div className="min-w-0">
               <div className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#7C7C7C]">
                 PDF peržiūra
@@ -488,7 +488,7 @@ export default function AdminOrdersPage() {
               <select
                 value={invoiceLocale}
                 onChange={(e) => setInvoiceLocale(e.target.value as InvoiceLocale)}
-                className="px-[12px] py-[6px] border border-[#E1E1E1] bg-white rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616] yw-select"
+                className="px-[12px] py-[6px] border border-[#E1E1E1] bg-[#EAEAEA] rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616] yw-select"
                 aria-label="Peržiūros kalba"
               >
                 <option value="lt">LT</option>
@@ -502,7 +502,7 @@ export default function AdminOrdersPage() {
               </button>
             </div>
           </div>
-          <div className="w-full h-[calc(100%-50px)] bg-white">
+          <div className="w-full h-[calc(100%-50px)] bg-[#EAEAEA]">
             {previewInvoice && (
               <iframe
                 key={`${previewInvoice.id}:${invoiceLocale}`}

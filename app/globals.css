@@ -38,6 +38,58 @@ body {
   display: none;
 }
 
+/* Admin UI helpers (no white surfaces) */
+.yw-admin-surface {
+  background: #EAEAEA;
+  border: 1px solid #E1E1E1;
+}
+
+.yw-admin-surface-strong {
+  background: #E1E1E1;
+  border: 1px solid #BBBBBB;
+}
+
+.yw-admin-input {
+  background: #EAEAEA;
+  border: 1px solid #E1E1E1;
+  color: #161616;
+}
+
+.yw-admin-input:focus {
+  outline: none;
+  border-color: #161616;
+}
+
+.yw-admin-modal {
+  background: #EAEAEA;
+  border: 1px solid #E1E1E1;
+}
+
+/* Admin scoped theme overrides */
+.yw-admin-scope {
+  background: #EAEAEA;
+  color: #161616;
+}
+
+.yw-admin-scope .bg-white {
+  background-color: #EAEAEA;
+}
+
+.yw-admin-scope input,
+.yw-admin-scope textarea,
+.yw-admin-scope select {
+  background: #EAEAEA;
+  border-color: #E1E1E1;
+  color: #161616;
+}
+
+.yw-admin-scope input:focus,
+.yw-admin-scope textarea:focus,
+.yw-admin-scope select:focus {
+  outline: none;
+  border-color: #161616;
+}
+
 /* Brand system font declarations */
 .font-dm-sans {
   font-family: var(--font-dm-sans);

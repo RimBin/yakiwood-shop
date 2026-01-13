@@ -674,12 +674,12 @@ export default function ProductForm({ product, mode }: Props) {
     <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Left Sidebar - Image Preview */}
       <div className="lg:col-span-1">
-        <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1] sticky top-8">
+        <div className="bg-[#EAEAEA] rounded-[24px] p-6 border border-[#E1E1E1] sticky top-8">
           <h3 className="text-lg font-['DM_Sans'] font-medium mb-4">{t('sections.photo')}</h3>
           
           <div className="mb-4">
             {imagePreview ? (
-              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-[#FAFAFA]">
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-[#E1E1E1]">
                 <Image
                   src={imagePreview}
                   alt={t('image.previewAlt')}
@@ -707,7 +707,7 @@ export default function ProductForm({ product, mode }: Props) {
             <button
               type="button"
               onClick={() => setShowPhotoLibrary((v) => !v)}
-              className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#FAFAFA]"
+              className="px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#E1E1E1]"
             >
               {showPhotoLibrary ? t('image.hideLibrary') : t('image.chooseFromLibrary')}
             </button>
@@ -715,7 +715,7 @@ export default function ProductForm({ product, mode }: Props) {
               <button
                 type="button"
                 onClick={clearImageSelection}
-                className="px-3 py-2 border border-red-200 rounded-lg font-['DM_Sans'] text-sm text-red-700 hover:bg-red-50"
+                className="px-3 py-2 border border-red-200 rounded-lg font-['DM_Sans'] text-sm text-red-700 hover:bg-[#E1E1E1]"
               >
                 {t('image.remove')}
               </button>
@@ -723,7 +723,7 @@ export default function ProductForm({ product, mode }: Props) {
           </div>
 
           {showPhotoLibrary ? (
-            <div className="mt-4 border border-[#E1E1E1] rounded-lg p-3 bg-[#FAFAFA]">
+            <div className="mt-4 border border-[#E1E1E1] rounded-lg p-3 bg-[#EAEAEA]">
               <p className="font-['DM_Sans'] text-sm font-medium text-[#161616]">{t('sections.photoLibrary')}</p>
               <p className="mt-1 font-['Outfit'] text-xs text-[#535353]">
                 {t('photoLibrary.help')}
@@ -735,7 +735,7 @@ export default function ProductForm({ product, mode }: Props) {
                   <select
                     value={libraryWoodType}
                     onChange={(e) => setLibraryWoodType(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] rounded-lg font-['Outfit'] text-sm bg-white"
+                    className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] rounded-lg font-['Outfit'] text-sm bg-[#EAEAEA]"
                   >
                     <option value="spruce">{t('options.woodTypes.spruce')} (spruce)</option>
                     <option value="larch">{t('options.woodTypes.larch')} (larch)</option>
@@ -747,7 +747,7 @@ export default function ProductForm({ product, mode }: Props) {
                   <select
                     value={libraryColorCode}
                     onChange={(e) => setLibraryColorCode(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] rounded-lg font-['Outfit'] text-sm bg-white"
+                    className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] rounded-lg font-['Outfit'] text-sm bg-[#EAEAEA]"
                   >
                     {libraryColors.length === 0 ? (
                       <option value="">{t('photoLibrary.noColors')}</option>
@@ -766,7 +766,7 @@ export default function ProductForm({ product, mode }: Props) {
                     type="button"
                     disabled={libraryIsLoading || !libraryColorCode}
                     onClick={() => loadLibraryAssets()}
-                    className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-white disabled:opacity-60"
+                    className="px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#E1E1E1] disabled:opacity-60"
                   >
                     {libraryIsLoading ? t('photoLibrary.refreshing') : t('photoLibrary.refresh')}
                   </button>
@@ -776,7 +776,7 @@ export default function ProductForm({ product, mode }: Props) {
                 </div>
 
                 {isMissingCatalogSchemaError(libraryError) ? (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <div className="rounded-lg border border-amber-200 bg-[#EAEAEA] p-3">
                     <p className="font-['DM_Sans'] text-xs font-medium text-amber-900">
                       {t('photoLibrary.missingSchemaTitle')}
                     </p>
@@ -798,7 +798,7 @@ export default function ProductForm({ product, mode }: Props) {
                         key={a.id}
                         type="button"
                         onClick={() => chooseLibraryImage(a.url)}
-                        className="relative group border border-[#E1E1E1] rounded-lg overflow-hidden bg-white"
+                        className="relative group border border-[#E1E1E1] rounded-lg overflow-hidden bg-[#EAEAEA]"
                         title={a.wood_type ? `wood=${a.wood_type}` : `wood=${t('photoLibrary.any')}`}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -851,19 +851,19 @@ export default function ProductForm({ product, mode }: Props) {
       <div className="lg:col-span-2 space-y-6">
         {/* Error Message */}
         {saveError && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="bg-[#EAEAEA] border border-red-200 rounded-lg p-4">
             <p className="text-red-800 font-['DM_Sans']">{saveError}</p>
           </div>
         )}
 
         {saveWarning && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="bg-[#EAEAEA] border border-amber-200 rounded-lg p-4">
             <p className="text-amber-900 font-['DM_Sans']">{saveWarning}</p>
           </div>
         )}
 
         {/* Basic Information */}
-        <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1]">
+        <div className="bg-[#EAEAEA] rounded-[24px] p-6 border border-[#E1E1E1]">
           <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">{t('sections.basicInfo')}</h3>
           
           <div className="space-y-4">
@@ -892,7 +892,7 @@ export default function ProductForm({ product, mode }: Props) {
                   type="text"
                   value={nameEn}
                   onChange={(e) => setNameEn(e.target.value)}
-                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
+                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA]"
                   placeholder={t('placeholders.nameEn')}
                 />
               </div>
@@ -944,7 +944,7 @@ export default function ProductForm({ product, mode }: Props) {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
+                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA]"
                 placeholder={t('placeholders.descriptionLt')}
               />
             </div>
@@ -957,7 +957,7 @@ export default function ProductForm({ product, mode }: Props) {
                 value={descriptionEn}
                 onChange={(e) => setDescriptionEn(e.target.value)}
                 rows={4}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
+                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA]"
                 placeholder={t('placeholders.descriptionEn')}
               />
             </div>
@@ -1009,7 +1009,7 @@ export default function ProductForm({ product, mode }: Props) {
         </div>
 
         {/* Pricing & Inventory */}
-        <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1]">
+        <div className="bg-[#EAEAEA] rounded-[24px] p-6 border border-[#E1E1E1]">
           <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">{t('sections.pricingInventory')}</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1038,7 +1038,7 @@ export default function ProductForm({ product, mode }: Props) {
                 type="number"
                 value={stockQuantity}
                 onChange={(e) => setStockQuantity(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA]"
                 placeholder={t('placeholders.stockQuantity')}
               />
             </div>
@@ -1051,7 +1051,7 @@ export default function ProductForm({ product, mode }: Props) {
                 type="text"
                 value={sku}
                 onChange={(e) => setSku(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA]"
                 placeholder={t('placeholders.sku')}
               />
             </div>
@@ -1059,7 +1059,7 @@ export default function ProductForm({ product, mode }: Props) {
         </div>
 
         {/* Dimensions */}
-        <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1]">
+        <div className="bg-[#EAEAEA] rounded-[24px] p-6 border border-[#E1E1E1]">
           <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">{t('sections.dimensions')}</h3>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -1070,7 +1070,7 @@ export default function ProductForm({ product, mode }: Props) {
               <select
                 value={width}
                 onChange={(e) => setWidth(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-white yw-select"
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA] yw-select"
               >
                 {WIDTH_OPTIONS_MM.map((mm) => (
                   <option key={mm} value={String(mm)}>
@@ -1088,7 +1088,7 @@ export default function ProductForm({ product, mode }: Props) {
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
                 disabled={!usageType}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-white disabled:opacity-60 yw-select"
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA] disabled:opacity-60 yw-select"
               >
                 {!usageType ? (
                   <option value="">{t('placeholders.selectUsageFirst')}</option>
@@ -1107,7 +1107,7 @@ export default function ProductForm({ product, mode }: Props) {
               <select
                 value={depth}
                 onChange={(e) => setDepth(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-white yw-select"
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA] yw-select"
               >
                 {LENGTH_OPTIONS_MM.map((mm) => (
                   <option key={mm} value={String(mm)}>
@@ -1120,7 +1120,7 @@ export default function ProductForm({ product, mode }: Props) {
         </div>
 
         {/* Variants */}
-        <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1]">
+        <div className="bg-[#EAEAEA] rounded-[24px] p-6 border border-[#E1E1E1]">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-['DM_Sans'] font-medium">{t('sections.variants')}</h3>
             <button
@@ -1185,7 +1185,7 @@ export default function ProductForm({ product, mode }: Props) {
         </div>
 
         {/* Publishing Options */}
-        <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1]">
+        <div className="bg-[#EAEAEA] rounded-[24px] p-6 border border-[#E1E1E1]">
           <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">{t('sections.publishing')}</h3>
           
           <div>
@@ -1220,7 +1220,7 @@ export default function ProductForm({ product, mode }: Props) {
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-3 border border-[#E1E1E1] rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#FAFAFA]"
+              className="px-6 py-3 border border-[#E1E1E1] rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#E1E1E1]"
             >
               {t('buttons.cancel')}
             </button>
@@ -1230,7 +1230,7 @@ export default function ProductForm({ product, mode }: Props) {
             <button
               type="button"
               onClick={() => setDeleteModal(true)}
-              className="px-6 py-3 border border-red-600 text-red-600 rounded-[100px] font-['DM_Sans'] font-medium hover:bg-red-50"
+              className="px-6 py-3 border border-red-600 text-red-600 rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#E1E1E1]"
             >
               {t('buttons.deleteProduct')}
             </button>
@@ -1253,7 +1253,7 @@ export default function ProductForm({ product, mode }: Props) {
       {/* Delete Confirmation Modal */}
       {deleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-xl font-['DM_Sans'] font-medium mb-4">
               {t('deleteModal.title')}
             </h3>
@@ -1264,7 +1264,7 @@ export default function ProductForm({ product, mode }: Props) {
               <button
                 onClick={() => setDeleteModal(false)}
                 disabled={isSaving}
-                className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#FAFAFA] disabled:opacity-50"
+                className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#E1E1E1] disabled:opacity-50"
               >
                 {t('deleteModal.cancel')}
               </button>
@@ -1316,7 +1316,7 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
         <h3 className="text-xl font-['DM_Sans'] font-medium mb-6">
           {variant ? t('variantModal.titleEdit') : t('variantModal.titleNew')}
         </h3>
@@ -1428,7 +1428,7 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#FAFAFA]"
+              className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#E1E1E1]"
             >
               {t('variantModal.buttons.cancel')}
             </button>

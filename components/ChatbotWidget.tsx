@@ -19,6 +19,42 @@ type BotResponse = {
 
 type Message = { role: 'user' | 'assistant'; text: string };
 
+function historyKey(sessionId: string): string {
+  return `yakiwood_chatbot_history:${sessionId}`;
+}
+
+function safeReadHistory(sessionId: string): Message[] | null {
+  try {
+    const raw = window.localStorage.getItem(historyKey(sessionId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return null;
+
+    const messages: Message[] = parsed
+      .filter((m) => m && (m as any).role && (m as any).text)
+      .map((m): Message => {
+        const role: Message['role'] = (m as any).role === 'user' ? 'user' : 'assistant';
+        return {
+          role,
+          text: String((m as any).text),
+        };
+      })
+      .slice(-40);
+
+    return messages;
+  } catch {
+    return null;
+  }
+}
+
+function safeWriteHistory(sessionId: string, messages: Message[]) {
+  try {
+    window.localStorage.setItem(historyKey(sessionId), JSON.stringify(messages.slice(-40)));
+  } catch {
+    // ignore
+  }
+}
+
 function getOrCreateSessionId(): string {
   const key = 'yakiwood_chatbot_session';
   const existing = typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
@@ -52,8 +88,10 @@ export default function ChatbotWidget() {
   const shouldHide = hiddenOnPrefixes.some((p) => normalized === p || normalized.startsWith(`${p}/`));
 
   const [messages, setMessages] = useState<Message[]>([]);
+  const [serverSuggestions, setServerSuggestions] = useState<string[]>([]);
 
   useEffect(() => {
+    // Default welcome (used when there is no persisted history)
     setMessages([
       {
         role: 'assistant',
@@ -78,6 +116,19 @@ export default function ChatbotWidget() {
   }, [shouldHide]);
 
   useEffect(() => {
+    if (!sessionId) return;
+    const stored = safeReadHistory(sessionId);
+    if (stored && stored.length > 0) {
+      setMessages(stored);
+    }
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    safeWriteHistory(sessionId, messages);
+  }, [messages, sessionId]);
+
+  useEffect(() => {
     if (!open) return;
     const el = listRef.current;
     if (!el) return;
@@ -90,7 +141,12 @@ export default function ChatbotWidget() {
     if (!sessionId) return;
 
     setBusy(true);
-    setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
+    const historyForApi = messages
+      .filter((m) => m.text && m.text.trim().length > 0)
+      .slice(-16)
+      .map((m) => ({ role: m.role, text: m.text }));
+    const nextMessages = [...messages, { role: 'user' as const, text: trimmed }];
+    setMessages(nextMessages);
     setInput('');
 
     try {
@@ -102,6 +158,7 @@ export default function ChatbotWidget() {
           message: trimmed,
           page: pathname || '/',
           locale: locale === 'en' ? 'en' : 'lt',
+          history: historyForApi,
         }),
       });
 
@@ -115,11 +172,22 @@ export default function ChatbotWidget() {
       }
 
       setMessages((prev) => [...prev, { role: 'assistant', text: data.data!.reply }]);
+      if (Array.isArray(data.data.suggestions) && data.data.suggestions.length > 0) {
+        setServerSuggestions(data.data.suggestions.slice(0, 8));
+      }
     } catch {
       setMessages((prev) => [...prev, { role: 'assistant', text: t('errors.network') }]);
     } finally {
       setBusy(false);
     }
+  }
+
+  function clearChat() {
+    if (!sessionId) return;
+    const fresh: Message[] = [{ role: 'assistant', text: t('welcome') }];
+    setServerSuggestions([]);
+    setMessages(fresh);
+    safeWriteHistory(sessionId, fresh);
   }
 
   if (shouldHide) return null;
@@ -133,14 +201,23 @@ export default function ChatbotWidget() {
               <div className="font-['DM_Sans'] text-[14px] font-medium text-[#161616]">{t('title')}</div>
               <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('subtitle')}</div>
             </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="h-[32px] w-[32px] rounded-full border border-[#161616] text-[#161616] hover:bg-[#F5F5F5]"
-              aria-label="Uždaryti"
-            >
-              ×
-            </button>
+            <div className="flex items-center gap-[8px]">
+              <button
+                type="button"
+                onClick={clearChat}
+                className="h-[32px] px-[10px] rounded-[100px] border border-[#BBBBBB] font-['Outfit'] text-[11px] text-[#161616] hover:bg-[#F5F5F5]"
+              >
+                {t('clear')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="h-[32px] w-[32px] rounded-full border border-[#161616] text-[#161616] hover:bg-[#F5F5F5]"
+                aria-label="Uždaryti"
+              >
+                ×
+              </button>
+            </div>
           </div>
 
           <div ref={listRef} className="max-h-[360px] overflow-y-auto px-[12px] py-[12px] space-y-[10px]">
@@ -164,9 +241,17 @@ export default function ChatbotWidget() {
               </div>
             ))}
 
+            {busy && (
+              <div className="flex justify-start">
+                <div className="max-w-[85%] rounded-[16px] bg-[#F5F5F5] text-[#161616] px-[12px] py-[10px]">
+                  <p className="font-['Outfit'] text-[13px] leading-[1.4]">{t('typing')}</p>
+                </div>
+              </div>
+            )}
+
             <div className="pt-[6px]">
               <div className="flex flex-wrap gap-[8px]">
-                {suggestions.map((s) => (
+                {(serverSuggestions.length > 0 ? serverSuggestions : suggestions).map((s) => (
                   <button
                     key={s}
                     type="button"

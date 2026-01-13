@@ -47,20 +47,20 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
   const getStatusBadge = (item: InventoryWithProduct) => {
     if (item.quantity_available === 0) {
       return (
-        <span className="px-3 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full">
+        <span className="px-3 py-1 bg-[#EAEAEA] border border-red-200 text-red-700 text-sm font-medium rounded-full">
           Out of Stock
         </span>
       );
     }
     if (item.quantity_available <= item.reorder_point) {
       return (
-        <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full">
+        <span className="px-3 py-1 bg-[#EAEAEA] border border-yellow-200 text-yellow-700 text-sm font-medium rounded-full">
           Low Stock
         </span>
       );
     }
     return (
-      <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+      <span className="px-3 py-1 bg-[#EAEAEA] border border-green-200 text-green-700 text-sm font-medium rounded-full">
         In Stock
       </span>
     );
@@ -68,21 +68,21 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
 
   const SortIcon = ({ field }: { field: keyof InventoryWithProduct }) => {
     if (sortField !== field) {
-      return <span className="text-gray-400">↕</span>;
+      return <span className="text-[#7C7C7C]">↕</span>;
     }
-    return <span className="text-blue-600">{sortDirection === 'asc' ? '↑' : '↓'}</span>;
+    return <span className="text-[#161616]">{sortDirection === 'asc' ? '↑' : '↓'}</span>;
   };
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
-        <thead className="bg-gray-50 border-b">
+        <thead className="bg-[#EAEAEA] border-b border-[#E1E1E1]">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider">
               Product
             </th>
             <th 
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider cursor-pointer hover:bg-[#E1E1E1]"
               onClick={() => handleSort('sku')}
             >
               <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
               </div>
             </th>
             <th 
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider cursor-pointer hover:bg-[#E1E1E1]"
               onClick={() => handleSort('quantity_available')}
             >
               <div className="flex items-center gap-2">
@@ -98,7 +98,7 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
               </div>
             </th>
             <th 
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider cursor-pointer hover:bg-[#E1E1E1]"
               onClick={() => handleSort('quantity_reserved')}
             >
               <div className="flex items-center gap-2">
@@ -106,31 +106,31 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
               </div>
             </th>
             <th 
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider cursor-pointer hover:bg-[#E1E1E1]"
               onClick={() => handleSort('quantity_sold')}
             >
               <div className="flex items-center gap-2">
                 Sold <SortIcon field="quantity_sold" />
               </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider">
               Location
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider">
               Status
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-[#EAEAEA] divide-y divide-[#E1E1E1]">
           {sortedItems.map((item) => (
-            <tr key={item.id} className="hover:bg-gray-50">
+            <tr key={item.id} className="hover:bg-[#E1E1E1]">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center gap-3">
                   {item.product?.image_url && (
-                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#E1E1E1]">
                       <Image
                         src={item.product.image_url}
                         alt={item.product.name}
@@ -140,34 +140,34 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
                     </div>
                   )}
                   <div>
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-[#161616]">
                       {item.product?.name || 'Unknown Product'}
                     </div>
                     {item.product?.slug && (
-                      <div className="text-sm text-gray-500">{item.product.slug}</div>
+                      <div className="text-sm text-[#535353]">{item.product.slug}</div>
                     )}
                   </div>
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-mono text-gray-900">{item.sku}</div>
+                <div className="text-sm font-mono text-[#161616]">{item.sku}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-bold text-gray-900">
+                <div className="text-sm font-bold text-[#161616]">
                   {item.quantity_available}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-[#535353]">
                   Reorder: {item.reorder_point}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">{item.quantity_reserved}</div>
+                <div className="text-sm text-[#161616]">{item.quantity_reserved}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">{item.quantity_sold}</div>
+                <div className="text-sm text-[#161616]">{item.quantity_sold}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">{item.location || '-'}</div>
+                <div className="text-sm text-[#161616]">{item.location || '-'}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 {getStatusBadge(item)}

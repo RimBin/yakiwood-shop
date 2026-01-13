@@ -84,7 +84,7 @@ export default async function AdminOptionsPage() {
   const combinedError = error ?? colorError ?? colorAssetsError
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#EAEAEA]">
       <Breadcrumbs
         items={[
           { label: 'Pradžia', href: '/' },

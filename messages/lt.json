@@ -21,6 +21,8 @@
     "handoff": "Reikia žmogaus? Parašykite per Kontaktus",
     "placeholder": "Parašykite klausimą…",
     "send": "Siųsti",
+    "clear": "Išvalyti",
+    "typing": "Rašau…",
     "errors": {
       "generic": "Nepavyko atsakyti. Pabandykite vėliau.",
       "network": "Klaida. Pabandykite vėliau."
@@ -1334,7 +1336,8 @@
     "subtitle": "Valdykite sesijas ir DUK",
     "tabs": {
       "sessions": "Sesijos",
-      "faq": "DUK"
+      "faq": "DUK",
+      "ai": "AI"
     },
     "breadcrumbs": {
       "home": "Pradžia",
@@ -1374,6 +1377,27 @@
       "noticeCreated": "Sukurta.",
       "noticeDeleted": "Ištrinta.",
       "noticeImported": "Įkelta: {count} įrašų."
+    },
+    "ai": {
+      "title": "OpenAI (AI) nustatymai",
+      "subtitle": "Būsena ir konfigūracija (skaitoma iš serverio env)",
+      "empty": "Nepavyko nuskaityti konfigūracijos.",
+      "statusTitle": "Būsena",
+      "configured": "OPENAI_API_KEY",
+      "useOpenAI": "CHATBOT_USE_OPENAI",
+      "model": "OPENAI_CHAT_MODEL",
+      "minConfidence": "Min. pasitikėjimas (FAQ)",
+      "temperature": "Temperatūra",
+      "yes": "Taip",
+      "no": "Ne",
+      "note": "API raktas niekada nerodomas UI. Konfigūracija valdoma per .env.local ir reikalauja serverio restart.",
+      "promptTitle": "System prompt",
+      "promptLt": "LT prompt",
+      "promptEn": "EN prompt",
+      "set": "Nustatyta",
+      "notSet": "Nėra",
+      "defaultPrompt": "Naudojamas numatytas prompt (neperrašyta env kintamaisiais).",
+      "envTitle": "Env pavyzdys (.env.local)"
     },
     "form": {
       "enabled": "Įjungta",

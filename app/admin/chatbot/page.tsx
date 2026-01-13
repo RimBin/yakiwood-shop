@@ -51,6 +51,18 @@ type ApiResponse<T> = {
   error?: string;
 };
 
+type OpenAiStatus = {
+  configured: boolean;
+  model: string;
+  useOpenAI: boolean;
+  minConfidence: number;
+  temperature: number;
+  prompts: {
+    lt: { isSet: boolean; preview: string | null };
+    en: { isSet: boolean; preview: string | null };
+  };
+};
+
 async function getAdminToken(): Promise<string | null> {
   const supabase = createClient();
   if (!supabase) return null;
@@ -91,7 +103,7 @@ function LocaleSelector({ value, onChange }: { value: Locale; onChange: (v: Loca
         onClick={() => onChange('lt')}
         className={
           "h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] " +
-          (value === 'lt' ? 'bg-[#161616] text-white' : 'bg-white text-[#161616] hover:bg-[#F5F5F5]')
+          (value === 'lt' ? 'bg-[#161616] text-white' : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#E1E1E1]')
         }
         aria-pressed={value === 'lt'}
       >
@@ -103,7 +115,7 @@ function LocaleSelector({ value, onChange }: { value: Locale; onChange: (v: Loca
         onClick={() => onChange('en')}
         className={
           "h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] " +
-          (value === 'en' ? 'bg-[#161616] text-white' : 'bg-white text-[#161616] hover:bg-[#F5F5F5]')
+          (value === 'en' ? 'bg-[#161616] text-white' : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#E1E1E1]')
         }
         aria-pressed={value === 'en'}
       >
@@ -130,7 +142,7 @@ function TabButton({
         "h-[40px] px-[16px] rounded-[100px] border font-['Outfit'] text-[12px] uppercase tracking-[0.6px] " +
         (active
           ? 'border-[#161616] bg-[#161616] text-white'
-          : 'border-[#161616] bg-white text-[#161616] hover:bg-[#F5F5F5]')
+          : 'border-[#161616] bg-[#EAEAEA] text-[#161616] hover:bg-[#E1E1E1]')
       }
     >
       {children}
@@ -184,7 +196,7 @@ export default function AdminChatbotPage() {
     return message;
   }, [t]);
 
-  const [tab, setTab] = useState<'sessions' | 'faq'>('sessions');
+  const [tab, setTab] = useState<'sessions' | 'faq' | 'ai'>('sessions');
 
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -211,6 +223,10 @@ export default function AdminChatbotPage() {
   const [faqImporting, setFaqImporting] = useState(false);
   const [faqError, setFaqError] = useState<string | null>(null);
   const [faqNotice, setFaqNotice] = useState<string | null>(null);
+
+  const [openAiStatus, setOpenAiStatus] = useState<OpenAiStatus | null>(null);
+  const [openAiLoading, setOpenAiLoading] = useState(false);
+  const [openAiError, setOpenAiError] = useState<string | null>(null);
 
   const faqFetchedLocalesRef = useRef<Set<Locale>>(new Set());
 
@@ -295,6 +311,27 @@ export default function AdminChatbotPage() {
     },
     [fetchAdmin, t, translateApiError]
   );
+
+  const loadOpenAiStatus = useCallback(async () => {
+    setOpenAiLoading(true);
+    setOpenAiError(null);
+    try {
+      const resp = await fetchAdmin('/api/admin/chatbot-openai', { method: 'GET' });
+      const json = await safeJson<OpenAiStatus>(resp);
+      const errorMsg = translateApiError(getErrorMessageKey(resp, json.error));
+      if (errorMsg) {
+        setOpenAiError(errorMsg);
+        setOpenAiStatus(null);
+        return;
+      }
+      setOpenAiStatus(json.data ?? null);
+    } catch {
+      setOpenAiError(t('errors.requestFailed', { status: 0 }));
+      setOpenAiStatus(null);
+    } finally {
+      setOpenAiLoading(false);
+    }
+  }, [fetchAdmin, t, translateApiError]);
 
   const setDraftFromEntry = useCallback((entry: FaqEntry) => {
     setFaqDraft({
@@ -456,15 +493,20 @@ export default function AdminChatbotPage() {
   }, [faqLocale, loadFaqEntries, tab]);
 
   useEffect(() => {
+    if (tab !== 'ai') return;
+    void loadOpenAiStatus();
+  }, [loadOpenAiStatus, tab]);
+
+  useEffect(() => {
     if (!faqSelectedId) return;
     const entry = faqEntries.find((e) => e.id === faqSelectedId);
     if (entry) setDraftFromEntry(entry);
   }, [faqEntries, faqSelectedId, setDraftFromEntry]);
 
   const buttonSecondary =
-    "border border-[#161616] rounded-[100px] h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#F5F5F5]";
+    "border border-[#161616] rounded-[100px] h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#E1E1E1]";
 
-  const panelClass = 'rounded-[16px] border border-[#BBBBBB] bg-white p-[16px]';
+  const panelClass = 'rounded-[16px] border border-[#E1E1E1] bg-[#EAEAEA] p-[16px]';
 
   const roleLabel = (role: ChatEvent['role']) => {
     if (role === 'user') return t('roles.user');
@@ -482,6 +524,9 @@ export default function AdminChatbotPage() {
             </TabButton>
             <TabButton active={tab === 'faq'} onClick={() => setTab('faq')}>
               {t('tabs.faq')}
+            </TabButton>
+            <TabButton active={tab === 'ai'} onClick={() => setTab('ai')}>
+              {t('tabs.ai')}
             </TabButton>
           </div>
 
@@ -510,8 +555,8 @@ export default function AdminChatbotPage() {
                         className={
                           'w-full text-left rounded-[16px] border px-[12px] py-[10px] ' +
                           (selected === s.sessionId
-                            ? 'border-[#161616] bg-[#F5F5F5]'
-                            : 'border-[#BBBBBB] bg-white hover:bg-[#F8F8F8]')
+                            ? 'border-[#161616] bg-[#E1E1E1]'
+                            : 'border-[#E1E1E1] bg-[#EAEAEA] hover:bg-[#E1E1E1]')
                         }
                       >
                         <div className="font-['DM_Sans'] text-[12px] text-[#161616]">
@@ -543,7 +588,7 @@ export default function AdminChatbotPage() {
                           className={
                             e.role === 'user'
                               ? 'max-w-[85%] rounded-[16px] bg-[#161616] text-white px-[12px] py-[10px]'
-                              : 'max-w-[85%] rounded-[16px] bg-[#F5F5F5] text-[#161616] px-[12px] py-[10px]'
+                              : 'max-w-[85%] rounded-[16px] bg-[#E1E1E1] text-[#161616] px-[12px] py-[10px]'
                           }
                         >
                           <div className="font-['Outfit'] text-[11px] opacity-70 mb-[4px]">
@@ -559,7 +604,7 @@ export default function AdminChatbotPage() {
                 )}
               </div>
             </div>
-          ) : (
+          ) : tab === 'faq' ? (
             <div className="mt-[16px] grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-[16px]">
               <div className={panelClass}>
                 <div className="flex flex-wrap items-center justify-between gap-[10px]">
@@ -613,8 +658,8 @@ export default function AdminChatbotPage() {
                           className={
                             'w-full text-left rounded-[16px] border px-[12px] py-[10px] ' +
                             (active
-                              ? 'border-[#161616] bg-[#F5F5F5]'
-                              : 'border-[#BBBBBB] bg-white hover:bg-[#F8F8F8]')
+                              ? 'border-[#161616] bg-[#E1E1E1]'
+                              : 'border-[#E1E1E1] bg-[#EAEAEA] hover:bg-[#E1E1E1]')
                           }
                         >
                           <div className="flex items-center justify-between gap-[10px]">
@@ -767,6 +812,119 @@ export default function AdminChatbotPage() {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-[16px]">
+              <div className={panelClass}>
+                <div className="flex flex-wrap items-center justify-between gap-[10px]">
+                  <div>
+                    <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">
+                      {t('ai.title')}
+                    </h2>
+                    <p className="mt-[4px] font-['Outfit'] text-[13px] text-[#535353]">{t('ai.subtitle')}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void loadOpenAiStatus()}
+                    disabled={openAiLoading}
+                    className={buttonSecondary + (openAiLoading ? ' opacity-60 cursor-not-allowed' : '')}
+                  >
+                    {t('common.refresh')}
+                  </button>
+                </div>
+
+                {openAiError ? (
+                  <p className="mt-[12px] font-['Outfit'] text-[13px] text-red-600">{openAiError}</p>
+                ) : null}
+
+                {openAiLoading ? (
+                  <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">{t('common.loading')}</p>
+                ) : !openAiStatus ? (
+                  <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">{t('ai.empty')}</p>
+                ) : (
+                  <div className="mt-[12px] grid grid-cols-1 lg:grid-cols-2 gap-[12px]">
+                    <div className="rounded-[16px] border border-[#E1E1E1] bg-white p-[14px]">
+                      <div className="font-['DM_Sans'] text-[14px] font-medium text-[#161616]">{t('ai.statusTitle')}</div>
+                      <div className="mt-[10px] space-y-[8px] font-['Outfit'] text-[13px] text-[#161616]">
+                        <div className="flex items-center justify-between gap-[10px]">
+                          <span>{t('ai.configured')}</span>
+                          <span className={openAiStatus.configured ? 'text-[#161616]' : 'text-red-600'}>
+                            {openAiStatus.configured ? t('ai.yes') : t('ai.no')}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-[10px]">
+                          <span>{t('ai.model')}</span>
+                          <span className="font-mono text-[12px]">{openAiStatus.model}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-[10px]">
+                          <span>{t('ai.useOpenAI')}</span>
+                          <span>{openAiStatus.useOpenAI ? t('ai.yes') : t('ai.no')}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-[10px]">
+                          <span>{t('ai.minConfidence')}</span>
+                          <span>{openAiStatus.minConfidence}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-[10px]">
+                          <span>{t('ai.temperature')}</span>
+                          <span>{openAiStatus.temperature}</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-[12px] rounded-[12px] bg-[#F5F5F5] p-[12px]">
+                        <p className="font-['Outfit'] text-[12px] text-[#535353] leading-[1.4]">
+                          {t('ai.note')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-[16px] border border-[#E1E1E1] bg-white p-[14px]">
+                      <div className="font-['DM_Sans'] text-[14px] font-medium text-[#161616]">{t('ai.promptTitle')}</div>
+                      <div className="mt-[10px] space-y-[10px]">
+                        <div>
+                          <div className="flex items-center justify-between gap-[10px]">
+                            <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.promptLt')}</div>
+                            <div className="font-['Outfit'] text-[12px] text-[#535353]">
+                              {openAiStatus.prompts.lt.isSet ? t('ai.set') : t('ai.notSet')}
+                            </div>
+                          </div>
+                          <div className="mt-[6px] rounded-[12px] border border-[#E1E1E1] bg-[#FAFAFA] p-[10px]">
+                            <p className="font-['Outfit'] text-[12px] text-[#161616] whitespace-pre-line">
+                              {openAiStatus.prompts.lt.preview || t('ai.defaultPrompt')}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between gap-[10px]">
+                            <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.promptEn')}</div>
+                            <div className="font-['Outfit'] text-[12px] text-[#535353]">
+                              {openAiStatus.prompts.en.isSet ? t('ai.set') : t('ai.notSet')}
+                            </div>
+                          </div>
+                          <div className="mt-[6px] rounded-[12px] border border-[#E1E1E1] bg-[#FAFAFA] p-[10px]">
+                            <p className="font-['Outfit'] text-[12px] text-[#161616] whitespace-pre-line">
+                              {openAiStatus.prompts.en.preview || t('ai.defaultPrompt')}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-[12px] rounded-[12px] bg-[#F5F5F5] p-[12px]">
+                        <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.envTitle')}</div>
+                        <pre className="mt-[8px] overflow-auto text-[11px] leading-[1.4] bg-white border border-[#E1E1E1] rounded-[12px] p-[10px]">
+OPENAI_API_KEY=***
+OPENAI_CHAT_MODEL={openAiStatus.model}
+CHATBOT_USE_OPENAI={String(openAiStatus.useOpenAI)}
+CHATBOT_OPENAI_MIN_CONFIDENCE={String(openAiStatus.minConfidence)}
+CHATBOT_OPENAI_TEMPERATURE={String(openAiStatus.temperature)}
+CHATBOT_SYSTEM_PROMPT_LT=...
+CHATBOT_SYSTEM_PROMPT_EN=...
+                        </pre>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

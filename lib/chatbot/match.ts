@@ -39,6 +39,33 @@ export type MatchResult = {
   confidence: number; // 0..1
 };
 
+export type RankedFaqMatch = {
+  entry: FaqEntry;
+  score: number;
+  confidence: number; // 0..1
+};
+
+export function rankFaq(message: string, entries: FaqEntry[], limit = 3): RankedFaqMatch[] {
+  const tokens = tokenize(message);
+  if (tokens.length === 0) return [];
+
+  const ranked: RankedFaqMatch[] = [];
+
+  for (const entry of entries) {
+    if (entry.id === 'fallback') continue;
+    const score = scoreEntry(tokens, entry);
+    if (score <= 0) continue;
+    ranked.push({
+      entry,
+      score,
+      confidence: Math.max(0, Math.min(1, score / 4)),
+    });
+  }
+
+  ranked.sort((a, b) => b.score - a.score);
+  return ranked.slice(0, Math.max(1, limit));
+}
+
 export function matchFaq(message: string, entries: FaqEntry[]): MatchResult {
   const tokens = tokenize(message);
 

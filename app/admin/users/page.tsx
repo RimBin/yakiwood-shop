@@ -18,7 +18,7 @@ export default async function AdminUsersPage() {
       <section className="w-full bg-[#E1E1E1] min-h-screen">
         <PageLayout>
           <div className="py-[24px] md:py-[40px]">
-            <div className="rounded-[16px] border border-[#BBBBBB] bg-white p-[16px]">
+            <div className="rounded-[16px] border border-[#E1E1E1] bg-[#EAEAEA] p-[16px]">
               <p className="font-['Outfit'] text-[14px] text-[#535353]">
                 Supabase nesukonfigūruotas arba raktai neteisingi. Įrašykite tikrus
                 `NEXT_PUBLIC_SUPABASE_ANON_KEY` ir `SUPABASE_SERVICE_ROLE_KEY` į `.env.local`,

@@ -228,7 +228,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
             placeholder={tList('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border border-[#BBBBBB] rounded-lg font-['DM_Sans'] bg-white focus:outline-none focus:ring-2 focus:ring-[#161616]"
+            className="w-full px-4 py-2 border border-[#BBBBBB] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] focus:outline-none focus:ring-2 focus:ring-[#161616]"
           />
         </div>
         
@@ -245,7 +245,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
+          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] yw-select"
         >
           <option value="all">{tList('filters.allCategories')}</option>
           <option value="cladding">{tForm('options.categories.cladding')}</option>
@@ -257,7 +257,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         <select
           value={usageFilter}
           onChange={(e) => setUsageFilter(e.target.value)}
-          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
+          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] yw-select"
         >
           <option value="all">{tList('filters.allUsage')}</option>
           <option value="facade">{tForm('options.usageTypes.facade')}</option>
@@ -269,7 +269,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-white yw-select"
+          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] yw-select"
         >
           <option value="all">{tList('filters.allStatuses')}</option>
           <option value="active">{tList('filters.statusActivePlural')}</option>
@@ -286,14 +286,14 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
           <button
             onClick={() => handleBulkToggleStatus(true)}
             disabled={isDeleting}
-            className="px-4 py-2 bg-white border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#f5f5f5] disabled:opacity-50"
+            className="px-4 py-2 bg-[#EAEAEA] border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#E1E1E1] disabled:opacity-50"
           >
             {tList('bulk.publish')}
           </button>
           <button
             onClick={() => handleBulkToggleStatus(false)}
             disabled={isDeleting}
-            className="px-4 py-2 bg-white border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#f5f5f5] disabled:opacity-50"
+            className="px-4 py-2 bg-[#EAEAEA] border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#E1E1E1] disabled:opacity-50"
           >
             {tList('bulk.unpublish')}
           </button>
@@ -311,7 +311,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
       <div className="bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#FAFAFA] border-b border-[#E1E1E1]">
+            <thead className="bg-[#EAEAEA] border-b border-[#E1E1E1]">
               <tr>
                 <th className="px-6 py-4 text-left">
                   <input
@@ -346,7 +346,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
             </thead>
             <tbody className="divide-y divide-[#E1E1E1]">
               {filteredProducts.map((product) => (
-                <tr key={product.id} className="hover:bg-[#FAFAFA]">
+                <tr key={product.id} className="hover:bg-[#E1E1E1]">
                   <td className="px-6 py-4">
                     <input
                       type="checkbox"
@@ -451,7 +451,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
       {/* Delete Confirmation Modal */}
       {deleteConfirmId && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] p-6 max-w-md w-full mx-4">
             <h3 className="text-xl font-['DM_Sans'] font-medium mb-4">
               {tList('deleteModal.title')}
             </h3>
@@ -462,7 +462,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
               <button
                 onClick={() => setDeleteConfirmId(null)}
                 disabled={isDeleting}
-                className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#FAFAFA] disabled:opacity-50"
+                className="px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['DM_Sans'] hover:bg-[#E1E1E1] disabled:opacity-50"
               >
                 {tList('deleteModal.cancel')}
               </button>

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { PageCover } from '@/components/shared/PageLayout';
 import { Testimonials } from '@/components/home';
@@ -19,6 +20,25 @@ const imgCTA = assets.ctaBackground;
 export default function About() {
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const showTeamSection = false;
+
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+
+  const videoSrc = useMemo(() => {
+    // Keep in sync with homepage `components/home/AboutUs.tsx`
+    const base = 'https://www.youtube.com/embed/61yqRQ5lO88';
+    const params = new URLSearchParams({ autoplay: '1', rel: '0', modestbranding: '1' });
+    return `${base}?${params.toString()}`;
+  }, []);
+
+  useEffect(() => {
+    if (!isVideoOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsVideoOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isVideoOpen]);
 
   return (
     <div className="w-full bg-[#E1E1E1]">
@@ -31,13 +51,13 @@ export default function About() {
       </PageCover>
 
       {/* About Us Description Section */}
-      <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[24px] md:pt-[64px] lg:pt-[96px] pb-[24px] md:pb-[0px]">
-        <div className="relative lg:min-h-[456px]">
+      <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[24px] md:pt-[64px] lg:pt-[96px] pb-[24px] md:pb-[0px] lg:pb-[0px]">
+        <div className="relative lg:min-h-[560px]">
           {/* Big heading text with leading spaces to create indent - matches Figma exactly */}
           <p className="font-['DM_Sans'] font-light leading-[1] text-[#161616] lg:whitespace-pre-wrap m-0" style={{ fontSize: 'clamp(28px, 4vw, 52px)', letterSpacing: 'clamp(-1.28px, -0.04em, -2.08px)' }}>
 {`                            At Yakiwood, we are experts in the preparation of burnt wood, specializing in facades, terraces, fences, and interiors. With years of experience, we guarantee high-quality, long-lasting results using a natural, time-tested woodworking method.`}
           </p>
-          <p className="font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full lg:max-w-[309px] mt-[16px] lg:mt-0 lg:absolute lg:top-[212px] lg:left-1/2 lg:translate-x-[96px]">
+          <p className="font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full lg:max-w-[309px] mt-[32px] lg:mt-0 lg:absolute lg:bottom-0 lg:left-1/2 lg:translate-x-[96px]">
             We produce wood prepared according to the unique, time-tested Japanese wood-burning technology "Yakisugi" (or "Shou Sugi Ban"). This is the most natural way of preparing wood, giving it both a protective and aesthetic function. The traditional Japanese woodworking technology, which has been around for centuries, was introduced to protect wood from the effects of the environment. Burning shrinks the pores in the surface of the wood, making it stronger and more resistant. At the same time, it retains its properties, naturalness, pattern and colour.
           </p>
         </div>
@@ -54,11 +74,16 @@ export default function About() {
               fill
               className="object-cover"
             />
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[rgba(255,255,255,0.2)] rounded-[100px] w-[59px] h-[59px] md:w-[100px] md:h-[100px] flex items-center justify-center z-10">
-              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
+            <button
+              type="button"
+              onClick={() => setIsVideoOpen(true)}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[rgba(255,255,255,0.2)] rounded-[100px] w-[59px] h-[59px] md:w-[100px] md:h-[100px] flex items-center justify-center z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#161616]"
+              aria-label="Watch video"
+            >
+              <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
                 Watch
-              </p>
-            </div>
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -289,127 +314,131 @@ export default function About() {
         </div>
       </div>
 
-      {/* Team Section */}
-      <div className="bg-[#E1E1E1] pt-[64px] md:pt-[80px] lg:pt-[144px] pb-[64px] md:pb-[80px] lg:pb-[200px] w-full">
-        <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px]">
-          {/* Title */}
-          <div className="mb-[32px] md:mb-[48px] grid grid-cols-1 gap-[12px] lg:grid-cols-[344px_auto] lg:items-start lg:gap-0">
-            <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] lg:mt-[26px]">
-              Our teem
-            </p>
-            <h2 className="font-['DM_Sans'] font-light text-[40px] md:text-[80px] leading-none tracking-[-2px] md:tracking-[-4.4px] text-[#161616] lg:justify-self-start lg:max-w-[814px]">
-              Meet the <span className="font-['Tiro_Tamil'] italic">experts</span> behind Yakiwood
-            </h2>
+      {showTeamSection && (
+        <>
+          {/* Team Section */}
+          <div className="bg-[#E1E1E1] pt-[64px] md:pt-[80px] lg:pt-[144px] pb-[64px] md:pb-[80px] lg:pb-[200px] w-full">
+            <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px]">
+              {/* Title */}
+              <div className="mb-[32px] md:mb-[48px] grid grid-cols-1 gap-[12px] lg:grid-cols-[344px_auto] lg:items-start lg:gap-0">
+                <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] lg:mt-[26px]">
+                  Our teem
+                </p>
+                <h2 className="font-['DM_Sans'] font-light text-[40px] md:text-[80px] leading-none tracking-[-2px] md:tracking-[-4.4px] text-[#161616] lg:justify-self-start lg:max-w-[814px]">
+                  Meet the <span className="font-['Tiro_Tamil'] italic">experts</span> behind Yakiwood
+                </h2>
+              </div>
+
+              {/* Team Grid - Desktop */}
+              <div className="hidden lg:flex gap-[16px]">
+                {/* Team Member 1 */}
+                <div className="flex flex-col gap-[8px] w-[328px]">
+                  <div className="relative h-[434px] w-full overflow-hidden">
+                    <Image
+                      src={imgTeam1}
+                      alt="Team member"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
+                    Full name
+                  </p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">
+                    Director
+                  </p>
+                </div>
+
+                {/* Team Member 2 */}
+                <div className="flex flex-col gap-[8px] w-[328px]">
+                  <div className="relative h-[434px] w-full overflow-hidden">
+                    <Image
+                      src={imgTeam2}
+                      alt="Team member"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
+                    Full name
+                  </p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">
+                    Director
+                  </p>
+                </div>
+
+                {/* Team Member 3 */}
+                <div className="flex flex-col gap-[8px] w-[328px]">
+                  <div className="relative h-[434px] w-full overflow-hidden">
+                    <Image
+                      src={imgTeam3}
+                      alt="Team member"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
+                    Full name
+                  </p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">
+                    Director
+                  </p>
+                </div>
+
+                {/* Team Member 4 */}
+                <div className="flex flex-col gap-[8px] w-[328px]">
+                  <div className="relative h-[434px] w-full overflow-hidden">
+                    <Image
+                      src={imgTeam4}
+                      alt="Team member"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
+                    Full name
+                  </p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">
+                    Director
+                  </p>
+                </div>
+              </div>
+
+              {/* Team Grid - Mobile: 2 columns */}
+              <div className="lg:hidden grid grid-cols-2 gap-[16px]">
+                <div className="flex flex-col gap-[8px]">
+                  <div className="relative h-[218px] w-full overflow-hidden">
+                    <Image src={imgTeam1} alt="Team member" fill className="object-cover" />
+                  </div>
+                  <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">Full name</p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">Director</p>
+                </div>
+                <div className="flex flex-col gap-[8px]">
+                  <div className="relative h-[218px] w-full overflow-hidden">
+                    <Image src={imgTeam2} alt="Team member" fill className="object-cover" />
+                  </div>
+                  <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">Full name</p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">Director</p>
+                </div>
+                <div className="flex flex-col gap-[8px]">
+                  <div className="relative h-[218px] w-full overflow-hidden">
+                    <Image src={imgTeam3} alt="Team member" fill className="object-cover" />
+                  </div>
+                  <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">Full name</p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">Director</p>
+                </div>
+                <div className="flex flex-col gap-[8px]">
+                  <div className="relative h-[218px] w-full overflow-hidden">
+                    <Image src={imgTeam4} alt="Team member" fill className="object-cover" />
+                  </div>
+                  <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">Full name</p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">Director</p>
+                </div>
+              </div>
+            </div>
           </div>
-
-          {/* Team Grid - Desktop */}
-          <div className="hidden lg:flex gap-[16px]">
-            {/* Team Member 1 */}
-            <div className="flex flex-col gap-[8px] w-[328px]">
-              <div className="relative h-[434px] w-full overflow-hidden">
-                <Image
-                  src={imgTeam1}
-                  alt="Team member"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
-                Full name
-              </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">
-                Director
-              </p>
-            </div>
-
-            {/* Team Member 2 */}
-            <div className="flex flex-col gap-[8px] w-[328px]">
-              <div className="relative h-[434px] w-full overflow-hidden">
-                <Image
-                  src={imgTeam2}
-                  alt="Team member"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
-                Full name
-              </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">
-                Director
-              </p>
-            </div>
-
-            {/* Team Member 3 */}
-            <div className="flex flex-col gap-[8px] w-[328px]">
-              <div className="relative h-[434px] w-full overflow-hidden">
-                <Image
-                  src={imgTeam3}
-                  alt="Team member"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
-                Full name
-              </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">
-                Director
-              </p>
-            </div>
-
-            {/* Team Member 4 */}
-            <div className="flex flex-col gap-[8px] w-[328px]">
-              <div className="relative h-[434px] w-full overflow-hidden">
-                <Image
-                  src={imgTeam4}
-                  alt="Team member"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
-                Full name
-              </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">
-                Director
-              </p>
-            </div>
-          </div>
-
-          {/* Team Grid - Mobile: 2 columns */}
-          <div className="lg:hidden grid grid-cols-2 gap-[16px]">
-            <div className="flex flex-col gap-[8px]">
-              <div className="relative h-[218px] w-full overflow-hidden">
-                <Image src={imgTeam1} alt="Team member" fill className="object-cover" />
-              </div>
-              <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">Full name</p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">Director</p>
-            </div>
-            <div className="flex flex-col gap-[8px]">
-              <div className="relative h-[218px] w-full overflow-hidden">
-                <Image src={imgTeam2} alt="Team member" fill className="object-cover" />
-              </div>
-              <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">Full name</p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">Director</p>
-            </div>
-            <div className="flex flex-col gap-[8px]">
-              <div className="relative h-[218px] w-full overflow-hidden">
-                <Image src={imgTeam3} alt="Team member" fill className="object-cover" />
-              </div>
-              <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">Full name</p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">Director</p>
-            </div>
-            <div className="flex flex-col gap-[8px]">
-              <div className="relative h-[218px] w-full overflow-hidden">
-                <Image src={imgTeam4} alt="Team member" fill className="object-cover" />
-              </div>
-              <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">Full name</p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">Director</p>
-            </div>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
 
       <Testimonials />
 
@@ -450,6 +479,44 @@ export default function About() {
           </div>
         </div>
       </div>
+
+      {isVideoOpen ? (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center px-[16px]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Video"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/70"
+            onClick={() => setIsVideoOpen(false)}
+            aria-label="Close video"
+          />
+
+          <div className="relative w-full max-w-[960px] bg-black rounded-[12px] overflow-hidden shadow-2xl">
+            <div className="absolute right-[12px] top-[12px] z-10">
+              <button
+                type="button"
+                onClick={() => setIsVideoOpen(false)}
+                className="h-[36px] px-[12px] rounded-[100px] bg-white/10 text-white font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="relative w-full aspect-video">
+              <iframe
+                className="absolute inset-0 h-full w-full"
+                src={videoSrc}
+                title="YouTube video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

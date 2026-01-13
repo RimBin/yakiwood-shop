@@ -137,7 +137,7 @@ export default function EmailTemplatesAdmin() {
             {/* Preview */}
             <div className="lg:col-span-2">
               {selectedTemplate ? (
-                <div className="bg-white rounded-[24px] overflow-hidden">
+                <div className="bg-[#EAEAEA] rounded-[24px] overflow-hidden border border-[#E1E1E1]">
                   <div className="bg-[#161616] text-white p-[clamp(20px,3vw,32px)]">
                     <div className="flex items-start justify-between mb-[20px]">
                       <div className="flex-1">
@@ -146,10 +146,10 @@ export default function EmailTemplatesAdmin() {
                         </h2>
                         <p className="font-['Outfit'] text-[#E1E1E1] text-[14px]">{selectedTemplate.description}</p>
                       </div>
-                      <div className={`px-[12px] py-[4px] rounded-[100px] text-[11px] font-['Outfit'] uppercase tracking-[0.55px] ${
-                        selectedTemplate.category === 'transactional' ? 'bg-blue-100 text-blue-800' :
-                        selectedTemplate.category === 'marketing' ? 'bg-green-100 text-green-800' :
-                        'bg-purple-100 text-purple-800'
+                      <div className={`px-[12px] py-[4px] rounded-[100px] text-[11px] font-['Outfit'] uppercase tracking-[0.55px] border ${
+                        selectedTemplate.category === 'transactional' ? 'bg-[#EAEAEA] text-blue-700 border-blue-200' :
+                        selectedTemplate.category === 'marketing' ? 'bg-[#EAEAEA] text-green-700 border-green-200' :
+                        'bg-[#EAEAEA] text-purple-700 border-purple-200'
                       }`}>
                         {selectedTemplate.category}
                       </div>
@@ -175,7 +175,7 @@ export default function EmailTemplatesAdmin() {
                           onChange={(e) => setTestEmailTo(e.target.value)}
                           placeholder="name@company.com"
                           inputMode="email"
-                          className="h-[48px] w-full rounded-[100px] bg-white border-2 border-[#E1E1E1] px-[18px] font-['Outfit'] text-[14px] text-[#161616] outline-none focus:border-[#161616]"
+                          className="h-[48px] w-full rounded-[100px] bg-[#EAEAEA] border-2 border-[#E1E1E1] px-[18px] font-['Outfit'] text-[14px] text-[#161616] outline-none focus:border-[#161616]"
                           aria-label="Test email recipient"
                         />
                         <button
@@ -193,8 +193,8 @@ export default function EmailTemplatesAdmin() {
                         <div
                           className={`mt-[12px] rounded-[12px] p-[12px] font-['Outfit'] text-[12px] ${
                             sendStatus.ok
-                              ? 'bg-green-50 text-green-800 border border-green-200'
-                              : 'bg-red-50 text-red-800 border border-red-200'
+                              ? 'bg-[#EAEAEA] text-green-700 border border-green-200'
+                              : 'bg-[#EAEAEA] text-red-700 border border-red-200'
                           }`}
                           role="status"
                         >
@@ -242,7 +242,7 @@ export default function EmailTemplatesAdmin() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-white rounded-[24px] p-[clamp(40px,6vw,80px)] text-center">
+                <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[24px] p-[clamp(40px,6vw,80px)] text-center">
                   <div className="text-[#BBBBBB] text-[clamp(48px,8vw,72px)] mb-[16px]">📧</div>
                   <h3 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616] mb-[8px]">
                     Select a Template
@@ -260,7 +260,7 @@ export default function EmailTemplatesAdmin() {
             {categories.map((category) => {
               const templates = getEmailTemplatesByCategory(category.id);
               return (
-                <div key={category.id} className="bg-white rounded-[24px] p-[clamp(20px,3vw,24px)]">
+                <div key={category.id} className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[24px] p-[clamp(20px,3vw,24px)]">
                   <div className="flex items-center justify-between mb-[16px]">
                     <h3 className="font-['DM_Sans'] font-medium text-[14px] tracking-[-0.28px] text-[#161616]">
                       {category.name}

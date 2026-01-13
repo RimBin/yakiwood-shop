@@ -59,10 +59,10 @@ export function AdjustmentModal({ sku, onClose, onSuccess }: AdjustmentModalProp
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-        <div className="p-6 border-b">
+      <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] shadow-xl max-w-md w-full mx-4">
+        <div className="p-6 border-b border-[#E1E1E1]">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Adjust Inventory</h2>
+            <h2 className="font-['DM_Sans'] text-[24px] font-light tracking-[-0.96px] text-[#161616]">Adjust Inventory</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -70,41 +70,41 @@ export function AdjustmentModal({ sku, onClose, onSuccess }: AdjustmentModalProp
               ×
             </button>
           </div>
-          <p className="text-sm text-gray-600 mt-2">SKU: {sku}</p>
+          <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mt-2">SKU: {sku}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">
+            <div className="p-3 bg-[#E1E1E1] border border-red-200 text-red-800 rounded-[12px] text-sm font-['Outfit']">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mb-2">
               Adjustment Quantity *
             </label>
             <input
               type="number"
               value={quantity || ''}
               onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-[12px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616]"
               placeholder="Positive to add, negative to subtract"
               required
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="font-['Outfit'] text-[12px] text-[#535353] mt-2">
               Enter a positive number to add stock or negative to reduce stock
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mb-2">
               Reason *
             </label>
             <select
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent yw-select"
+              className="w-full px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-[12px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616] yw-select"
               required
             >
               <option value="">Select a reason</option>
@@ -120,13 +120,13 @@ export function AdjustmentModal({ sku, onClose, onSuccess }: AdjustmentModalProp
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mb-2">
               Notes
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-[12px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616]"
               placeholder="Additional details about this adjustment..."
               rows={3}
             />
@@ -136,14 +136,14 @@ export function AdjustmentModal({ sku, onClose, onSuccess }: AdjustmentModalProp
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+              className="flex-1 h-[48px] px-4 border border-[#E1E1E1] text-[#161616] bg-[#EAEAEA] rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-[#E1E1E1] transition"
               disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition disabled:opacity-50"
+              className="flex-1 h-[48px] px-4 bg-[#161616] text-white rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-[#2a2a2a] transition disabled:opacity-50"
               disabled={loading}
             >
               {loading ? 'Adjusting...' : 'Adjust Inventory'}

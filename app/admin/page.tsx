@@ -1234,7 +1234,7 @@ export default function AdminPage() {
         {/* Products Tab */}
         {activeTab === 'products' && (
           <div className="space-y-[32px]">
-            <div className="rounded-[24px] border border-[#BBBBBB] bg-white p-[20px]">
+            <div className="rounded-[24px] border border-[#E1E1E1] bg-[#EAEAEA] p-[20px]">
               <div className="flex flex-col gap-[12px] md:flex-row md:items-center md:justify-between">
                 <div>
                   <p className="font-['DM_Sans'] text-[14px] text-[#161616]">

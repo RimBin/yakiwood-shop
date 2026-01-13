@@ -558,9 +558,9 @@ export default function SEOAdminClient() {
   };
 
   const getScoreBgColor = (score: number) => {
-    if (score >= 80) return 'bg-green-50 border-green-200';
-    if (score >= 50) return 'bg-yellow-50 border-yellow-200';
-    return 'bg-red-50 border-red-200';
+    if (score >= 80) return 'bg-[#EAEAEA] border-green-400';
+    if (score >= 50) return 'bg-[#EAEAEA] border-yellow-400';
+    return 'bg-[#EAEAEA] border-red-400';
   };
 
   if (loading) {
@@ -587,7 +587,7 @@ export default function SEOAdminClient() {
       <div className="min-h-screen bg-[#E1E1E1] pt-[clamp(16px,2vw,24px)] pb-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
         <div className="max-w-[1400px] mx-auto">
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
+            <div className="mb-6 bg-[#EAEAEA] border border-red-200 text-red-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
               {error}
             </div>
           )}
@@ -746,7 +746,7 @@ export default function SEOAdminClient() {
                           {editorEnabled && (
                             <button
                               onClick={() => openEditor(page)}
-                              className="h-[40px] px-[20px] rounded-[100px] bg-white text-[#161616] border border-[#E1E1E1] hover:border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-colors"
+                              className="h-[40px] px-[20px] rounded-[100px] bg-[#EAEAEA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-colors"
                             >
                               Edit
                             </button>
@@ -839,12 +839,12 @@ export default function SEOAdminClient() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                       <div className="space-y-6">
                         {overrideNotice && (
-                          <div className="bg-green-50 border border-green-200 text-green-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
+                          <div className="bg-[#EAEAEA] border border-green-200 text-green-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
                             {overrideNotice}
                           </div>
                         )}
 
-                        <div className="bg-white rounded-[24px] border border-[#E1E1E1] p-6">
+                        <div className="bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1] p-6">
                           <div className="flex items-center justify-between gap-4">
                             <div>
                               <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">
@@ -874,7 +874,7 @@ export default function SEOAdminClient() {
                           </div>
                         </div>
 
-                        <div className="bg-white rounded-[24px] border border-[#E1E1E1] p-6 space-y-4">
+                        <div className="bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1] p-6 space-y-4">
                           <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">Basic</div>
 
                           <div>
@@ -883,7 +883,7 @@ export default function SEOAdminClient() {
                               value={overrideForm.title}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, title: e.target.value } : s))}
                               placeholder={editingPage.title || ''}
-                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
 
@@ -893,7 +893,7 @@ export default function SEOAdminClient() {
                               value={overrideForm.description}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, description: e.target.value } : s))}
                               placeholder={editingPage.description || ''}
-                              className="w-full min-h-[96px] px-4 py-3 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                              className="w-full min-h-[96px] px-4 py-3 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
 
@@ -903,7 +903,7 @@ export default function SEOAdminClient() {
                               value={overrideForm.canonicalUrl}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, canonicalUrl: e.target.value } : s))}
                               placeholder={editingPage.url}
-                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
 
@@ -917,7 +917,7 @@ export default function SEOAdminClient() {
                                     s ? { ...s, robotsIndex: e.target.value as SeoOverrideFormState['robotsIndex'] } : s
                                   )
                                 }
-                                className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                                className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                               >
                                 <option value="inherit">Inherit</option>
                                 <option value="index">index</option>
@@ -934,7 +934,7 @@ export default function SEOAdminClient() {
                                     s ? { ...s, robotsFollow: e.target.value as SeoOverrideFormState['robotsFollow'] } : s
                                   )
                                 }
-                                className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                                className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                               >
                                 <option value="inherit">Inherit</option>
                                 <option value="follow">follow</option>
@@ -944,7 +944,7 @@ export default function SEOAdminClient() {
                           </div>
                         </div>
 
-                        <div className="bg-white rounded-[24px] border border-[#E1E1E1] p-6 space-y-4">
+                        <div className="bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1] p-6 space-y-4">
                           <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">Open Graph</div>
 
                           <div>
@@ -953,7 +953,7 @@ export default function SEOAdminClient() {
                               value={overrideForm.ogTitle}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, ogTitle: e.target.value } : s))}
                               placeholder={(editingPage.openGraph as any)?.title || editingPage.title || ''}
-                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
                           <div>
@@ -962,7 +962,7 @@ export default function SEOAdminClient() {
                               value={overrideForm.ogDescription}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, ogDescription: e.target.value } : s))}
                               placeholder={(editingPage.openGraph as any)?.description || editingPage.description || ''}
-                              className="w-full min-h-[96px] px-4 py-3 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                              className="w-full min-h-[96px] px-4 py-3 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
                           <div>
@@ -971,12 +971,12 @@ export default function SEOAdminClient() {
                               value={overrideForm.ogImage}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, ogImage: e.target.value } : s))}
                               placeholder={(editingPage.openGraph?.images?.[0] as any)?.url || ''}
-                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
                         </div>
 
-                        <div className="bg-white rounded-[24px] border border-[#E1E1E1] p-6 space-y-4">
+                        <div className="bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1] p-6 space-y-4">
                           <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">Twitter</div>
 
                           <div>
@@ -985,7 +985,7 @@ export default function SEOAdminClient() {
                               value={overrideForm.twitterTitle}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, twitterTitle: e.target.value } : s))}
                               placeholder={(editingPage.twitter as any)?.title || editingPage.title || ''}
-                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
                           <div>
@@ -996,7 +996,7 @@ export default function SEOAdminClient() {
                                 setOverrideForm((s) => (s ? { ...s, twitterDescription: e.target.value } : s))
                               }
                               placeholder={(editingPage.twitter as any)?.description || editingPage.description || ''}
-                              className="w-full min-h-[96px] px-4 py-3 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                              className="w-full min-h-[96px] px-4 py-3 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
                           <div>
@@ -1009,7 +1009,7 @@ export default function SEOAdminClient() {
                                   ? ((editingPage.twitter as any)?.images?.[0] as string) || ''
                                   : ((editingPage.twitter as any)?.images as string) || ''
                               }
-                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-white font-['Outfit'] text-sm"
+                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
                         </div>
@@ -1027,7 +1027,7 @@ export default function SEOAdminClient() {
                             <button
                               onClick={deleteOverride}
                               disabled={overrideSaving}
-                              className="h-[48px] px-[24px] rounded-[100px] bg-white text-red-600 border border-red-200 hover:border-red-600 font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-colors disabled:opacity-60"
+                              className="h-[48px] px-[24px] rounded-[100px] bg-[#EAEAEA] text-red-600 border border-red-200 hover:border-red-600 font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-colors disabled:opacity-60"
                             >
                               Delete override
                             </button>

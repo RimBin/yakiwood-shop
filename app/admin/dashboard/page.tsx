@@ -343,7 +343,7 @@ export default function DashboardPage() {
               <tbody>
                 {productSales.length > 0 ? (
                   productSales.map((product, index) => (
-                    <tr key={index} className="border-b border-[#E1E1E1] hover:bg-[#FAFAFA]">
+                    <tr key={index} className="border-b border-[#E1E1E1] hover:bg-[#E1E1E1]">
                       <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616]">{index + 1}</td>
                       <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616]">{product.productName}</td>
                       <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right">{product.quantitySold} units</td>
@@ -389,7 +389,7 @@ export default function DashboardPage() {
               <tbody>
                 {recentOrders.length > 0 ? (
                   recentOrders.map((order) => (
-                    <tr key={order.id} className="border-b border-[#E1E1E1] hover:bg-[#FAFAFA]">
+                    <tr key={order.id} className="border-b border-[#E1E1E1] hover:bg-[#E1E1E1]">
                       <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616] font-medium">{order.order_number}</td>
                       <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616]">{order.customer_name}</td>
                       <td className="py-[16px] font-['Outfit'] text-[14px] text-[#535353]">
@@ -398,10 +398,10 @@ export default function DashboardPage() {
                       <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right font-medium">€{Number(order.total).toFixed(2)}</td>
                       <td className="py-[16px]">
                         <span className={`px-[12px] py-[4px] rounded-[100px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] ${
-                          order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                          order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
+                          order.status === 'completed' ? 'bg-[#EAEAEA] border border-green-200 text-green-700' :
+                          order.status === 'processing' ? 'bg-[#EAEAEA] border border-blue-200 text-blue-700' :
+                          order.status === 'pending' ? 'bg-[#EAEAEA] border border-yellow-200 text-yellow-700' :
+                          'bg-[#EAEAEA] border border-[#BBBBBB] text-[#535353]'
                         }`}>
                           {order.status}
                         </span>

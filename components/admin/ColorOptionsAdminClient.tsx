@@ -114,7 +114,7 @@ export default function ColorOptionsAdminClient({
 
   if (!supabase) {
     return (
-      <div className="bg-white rounded-lg p-6 shadow">
+      <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] p-6">
         <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">Supabase nesukonfigūruotas</h2>
         <p className="mt-2 font-['Outfit'] text-sm text-[#535353]">
           Reikia `NEXT_PUBLIC_SUPABASE_URL` ir `NEXT_PUBLIC_SUPABASE_ANON_KEY` `.env.local` faile.
@@ -327,7 +327,7 @@ export default function ColorOptionsAdminClient({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg p-6 shadow">
+      <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] p-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">Spalvų biblioteka</h2>
@@ -341,14 +341,14 @@ export default function ColorOptionsAdminClient({
             type="button"
             disabled={isBusy}
             onClick={refreshFromDb}
-            className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#FAFAFA] disabled:opacity-60"
+            className="px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#E1E1E1] disabled:opacity-60"
           >
             Atnaujinti
           </button>
         </div>
 
         {error ? (
-          <div className="mt-4 border border-red-200 bg-red-50 rounded-lg p-3">
+          <div className="mt-4 border border-red-200 bg-[#E1E1E1] rounded-[12px] p-3">
             <p className="font-['Outfit'] text-sm text-red-700">{error}</p>
             <p className="mt-1 font-['Outfit'] text-xs text-red-700">
               Jei klaida apie `catalog_options`/`product_assets`, pirmiausia pritaikykite migraciją
@@ -368,7 +368,7 @@ export default function ColorOptionsAdminClient({
                   value={newCode}
                   onChange={(e) => setNewCode(e.target.value)}
                   placeholder="black"
-                  className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] rounded-lg font-['Outfit'] text-sm"
+                  className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['Outfit'] text-sm"
                 />
               </div>
               <div>
@@ -377,7 +377,7 @@ export default function ColorOptionsAdminClient({
                   value={newHex}
                   onChange={(e) => setNewHex(e.target.value)}
                   placeholder="#161616"
-                  className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] rounded-lg font-['Outfit'] text-sm"
+                  className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['Outfit'] text-sm"
                 />
               </div>
               <div>
@@ -386,7 +386,7 @@ export default function ColorOptionsAdminClient({
                   value={newLabelLt}
                   onChange={(e) => setNewLabelLt(e.target.value)}
                   placeholder="Juoda"
-                  className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] rounded-lg font-['Outfit'] text-sm"
+                  className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['Outfit'] text-sm"
                 />
               </div>
               <div>
@@ -395,7 +395,7 @@ export default function ColorOptionsAdminClient({
                   value={newLabelEn}
                   onChange={(e) => setNewLabelEn(e.target.value)}
                   placeholder="Black"
-                  className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] rounded-lg font-['Outfit'] text-sm"
+                  className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['Outfit'] text-sm"
                 />
               </div>
             </div>
@@ -439,7 +439,7 @@ export default function ColorOptionsAdminClient({
                 const label = opt.label_lt || opt.label_en || code || '(be kodo)'
 
                 return (
-                  <div key={opt.id} className="px-4 py-4 bg-white">
+                  <div key={opt.id} className="px-4 py-4 bg-[#EAEAEA]">
                     <div className="flex items-start justify-between gap-4 flex-wrap">
                       <div className="flex items-center gap-3">
                         <div
@@ -461,7 +461,7 @@ export default function ColorOptionsAdminClient({
                           type="button"
                           disabled={isBusy}
                           onClick={() => toggleActive(opt.id, !(opt.is_active ?? true))}
-                          className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#FAFAFA] disabled:opacity-60"
+                          className="px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#E1E1E1] disabled:opacity-60"
                         >
                           {(opt.is_active ?? true) ? 'Išjungti' : 'Įjungti'}
                         </button>
@@ -469,7 +469,7 @@ export default function ColorOptionsAdminClient({
                           type="button"
                           disabled={isBusy}
                           onClick={() => removeColor(opt.id)}
-                          className="px-3 py-2 border border-red-200 rounded-lg font-['DM_Sans'] text-sm text-red-700 hover:bg-red-50 disabled:opacity-60"
+                          className="px-3 py-2 border border-red-200 bg-[#EAEAEA] rounded-lg font-['DM_Sans'] text-sm text-red-700 hover:bg-[#E1E1E1] disabled:opacity-60"
                         >
                           Trinti
                         </button>
@@ -525,7 +525,7 @@ export default function ColorOptionsAdminClient({
                                         <button
                                           type="button"
                                           onClick={() => deleteAsset(p.id)}
-                                          className="absolute top-1 right-1 w-7 h-7 rounded-full bg-white/90 border border-[#E1E1E1] text-[#161616] opacity-0 group-hover:opacity-100 transition-opacity"
+                                          className="absolute top-1 right-1 w-7 h-7 rounded-full bg-[#EAEAEA]/90 border border-[#E1E1E1] text-[#161616] opacity-0 group-hover:opacity-100 transition-opacity"
                                           title="Ištrinti"
                                         >
                                           ×

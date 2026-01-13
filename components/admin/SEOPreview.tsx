@@ -16,7 +16,7 @@ export function GoogleSearchPreview({ metadata }: SEOPreviewProps) {
   const displayUrl = metadata.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
   return (
-    <div className="border border-[#E1E1E1] rounded-[24px] p-6 bg-white">
+    <div className="border border-[#E1E1E1] rounded-[24px] p-6 bg-[#EAEAEA]">
       <div className="font-['Outfit'] text-xs text-[#535353] mb-4">Google Search Preview</div>
       <div className="max-w-[600px]">
         {/* URL breadcrumb */}
@@ -61,22 +61,22 @@ export function FacebookPreview({ metadata }: SEOPreviewProps) {
   const displayUrl = metadata.url.replace(/^https?:\/\//, '');
 
   return (
-    <div className="border border-[#E1E1E1] rounded-[24px] p-6 bg-[#FAFAFA]">
+    <div className="border border-[#E1E1E1] rounded-[24px] p-6 bg-[#EAEAEA]">
       <div className="font-['Outfit'] text-xs text-[#535353] mb-4">Facebook / Open Graph Preview</div>
-      <div className="max-w-[500px] border border-[#E1E1E1] rounded-[24px] overflow-hidden bg-[#FAFAFA] shadow-sm">
+      <div className="max-w-[500px] border border-[#E1E1E1] rounded-[24px] overflow-hidden bg-[#EAEAEA] shadow-sm">
         {/* Image */}
         {ogImage ? (
-          <div className="w-full aspect-[1.91/1] bg-[#FAFAFA] relative">
+          <div className="w-full aspect-[1.91/1] bg-[#E1E1E1] relative">
             <img src={ogImage} alt="" className="w-full h-full object-cover" />
           </div>
         ) : (
-          <div className="w-full aspect-[1.91/1] bg-[#FAFAFA] flex items-center justify-center">
+          <div className="w-full aspect-[1.91/1] bg-[#E1E1E1] flex items-center justify-center">
             <span className="font-['Outfit'] text-[#BBBBBB] text-sm">Image missing</span>
           </div>
         )}
 
         {/* Content */}
-        <div className="p-6 bg-[#FAFAFA] border-t border-[#E1E1E1]">
+        <div className="p-6 bg-[#EAEAEA] border-t border-[#E1E1E1]">
           <div className="font-['Outfit'] text-xs text-[#535353] uppercase mb-2">{displayUrl}</div>
           <div className="font-['DM_Sans'] text-base font-light tracking-[-0.48px] text-[#161616] mb-2">
             {ogTitle.length > 95 ? ogTitle.substring(0, 95) + '...' : ogTitle}
@@ -116,16 +116,16 @@ export function TwitterPreview({ metadata }: SEOPreviewProps) {
     metadata.openGraph?.images?.[0]?.url;
 
   return (
-    <div className="border border-[#E1E1E1] rounded-[24px] p-6 bg-[#FAFAFA]">
+    <div className="border border-[#E1E1E1] rounded-[24px] p-6 bg-[#EAEAEA]">
       <div className="font-['Outfit'] text-xs text-[#535353] mb-4">Twitter Card Preview</div>
-      <div className="max-w-[500px] border border-[#E1E1E1] rounded-[24px] overflow-hidden bg-[#FAFAFA] shadow-sm">
+      <div className="max-w-[500px] border border-[#E1E1E1] rounded-[24px] overflow-hidden bg-[#EAEAEA] shadow-sm">
         {/* Image */}
         {twitterImage ? (
-          <div className="w-full aspect-[2/1] bg-[#FAFAFA] relative">
+          <div className="w-full aspect-[2/1] bg-[#E1E1E1] relative">
             <img src={twitterImage} alt="" className="w-full h-full object-cover" />
           </div>
         ) : (
-          <div className="w-full aspect-[2/1] bg-[#FAFAFA] flex items-center justify-center">
+          <div className="w-full aspect-[2/1] bg-[#E1E1E1] flex items-center justify-center">
             <span className="font-['Outfit'] text-[#BBBBBB] text-sm">Image missing</span>
           </div>
         )}
@@ -160,16 +160,16 @@ export function TwitterPreview({ metadata }: SEOPreviewProps) {
 export function SEOIssuesList({ metadata }: SEOPreviewProps) {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'error': return 'text-red-600 bg-red-50 border-red-200';
-      case 'warning': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'info': return 'text-blue-600 bg-blue-50 border-blue-200';
-      default: return 'text-[#535353] bg-[#FAFAFA] border-[#E1E1E1]';
+      case 'error': return 'text-red-600 bg-[#EAEAEA] border-red-200';
+      case 'warning': return 'text-yellow-600 bg-[#EAEAEA] border-yellow-200';
+      case 'info': return 'text-blue-600 bg-[#EAEAEA] border-blue-200';
+      default: return 'text-[#535353] bg-[#EAEAEA] border-[#E1E1E1]';
     }
   };
 
   if (metadata.issues.length === 0) {
     return (
-      <div className="border border-green-200 rounded-[24px] p-6 bg-green-50">
+      <div className="border border-green-200 rounded-[24px] p-6 bg-[#EAEAEA]">
         <div className="flex items-center gap-3">
           <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -233,7 +233,7 @@ export function SEOPreview({ metadata }: SEOPreviewProps) {
   return (
     <div className="space-y-8">
       {/* Score Overview */}
-      <div className="flex items-center justify-between p-6 bg-[#FAFAFA] rounded-[24px]">
+      <div className="flex items-center justify-between p-6 bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1]">
         <div>
           <div className="font-['Outfit'] text-sm text-[#535353] mb-1">SEO Score</div>
           <div className={`font-['DM_Sans'] text-5xl font-light tracking-[-1.6px] ${getScoreColor(metadata.seoScore)}`}>

@@ -9,6 +9,71 @@ export default function SolutionsPage() {
   const [openAccordionIndex, setOpenAccordionIndex] = useState<number | null>(0);
   const [activeFilter, setActiveFilter] = useState('Facades');
 
+  const ApplicationSection = ({
+    id,
+    title,
+    description,
+    bullets,
+    images,
+    reverse = false,
+  }: {
+    id: string;
+    title: string;
+    description: string;
+    bullets: string[];
+    images: Array<{ src: string; alt: string }>;
+    reverse?: boolean;
+  }) => {
+    const isSingleImage = images.length === 1;
+
+    return (
+      <div id={id} className="scroll-mt-[96px]">
+        <div
+          className={
+            `flex flex-col lg:flex-row items-center ` +
+            (reverse ? 'lg:flex-row-reverse ' : '') +
+            'gap-[20px] md:gap-[28px] lg:gap-[120px]'
+          }
+        >
+          <div
+            className={
+              (isSingleImage ? 'grid grid-cols-1 ' : 'grid grid-cols-2 ') +
+              'gap-[12px] md:gap-[16px] lg:gap-[24px] w-full lg:w-[520px]'
+            }
+          >
+            {images.map((img) => (
+              <div
+                key={img.src}
+                className={
+                  'relative w-full overflow-hidden rounded-[24px] ' +
+                  (isSingleImage
+                    ? 'h-[220px] md:h-[320px] lg:h-[240px]'
+                    : 'h-[160px] md:h-[220px] lg:h-[240px]')
+                }
+              >
+                <Image src={img.src} alt={img.alt} fill className="object-cover" />
+              </div>
+            ))}
+          </div>
+
+          <div className="w-full lg:max-w-[420px]">
+            <h3 className="font-['DM_Sans'] font-light text-[32px] lg:text-[48px] leading-none tracking-[-1.28px] lg:tracking-[-1.92px] text-[#161616]">
+              {title}
+            </h3>
+            <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
+              {description}
+            </p>
+            <ul className="mt-[16px] grid gap-[10px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
+              {bullets.map((b) => (
+                <li key={b}>— {b}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const applicationNav = useMemo(
     () =>
       [
@@ -157,7 +222,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
         {/* Hero Image - full width */}
         <div className="relative w-full h-[200px] lg:h-[758px]">
           <Image
-            src="/images/solutions/hero.jpg"
+            src="/images/solutions/hero.webp"
             alt="Modern architecture with burnt wood cladding"
             fill
             className="object-cover"
@@ -166,116 +231,50 @@ Do you want to give your building a distinctive and attractive appearance? Encou
       </section>
 
       {/* Applications Sections (anchor targets) */}
-      <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pb-[48px] lg:pb-[80px]">
-        <div className="grid gap-[48px] lg:gap-[80px]">
-          {/* Facades */}
-          <div id="facades" className="scroll-mt-[96px]">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-[16px] lg:gap-[24px] items-start">
-              <div className="lg:col-span-6 grid grid-cols-2 gap-[12px]">
-                <div className="relative w-full h-[140px] md:h-[200px] lg:h-[240px] rounded-[8px] overflow-hidden">
-                  <Image src={assets.categories.facades} alt="Facades" fill className="object-cover" />
-                </div>
-                <div className="relative w-full h-[140px] md:h-[200px] lg:h-[240px] rounded-[8px] overflow-hidden">
-                  <Image src={assets.categories.facades} alt="Facades detail" fill className="object-cover" />
-                </div>
-              </div>
+      <section className="max-w-[1200px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[80px] lg:pt-[120px] pb-[48px] lg:pb-[140px]">
+        <div className="grid gap-[64px] lg:gap-[140px]">
+          <ApplicationSection
+            id="facades"
+            title="Facades"
+            description="Burnt wood facade cladding brings strong character and long-term protection against the elements."
+            bullets={['Weather resistant, low maintenance', 'Unique texture and deep tone', 'Natural protection through charring']}
+            images={[
+              { src: assets.projects[0], alt: 'Facades project example' },
+              { src: assets.projects[1], alt: 'Facades project detail example' },
+            ]}
+          />
 
-              <div className="lg:col-span-6 lg:pl-[24px]">
-                <h3 className="font-['DM_Sans'] font-light text-[28px] lg:text-[40px] leading-none tracking-[-1.12px] lg:tracking-[-1.6px] text-[#161616]">
-                  Facades
-                </h3>
-                <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[520px]">
-                  Burnt wood facade cladding brings strong character and long-term protection against the elements.
-                </p>
-                <ul className="mt-[16px] grid gap-[8px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-                  <li>— Weather resistant, low maintenance</li>
-                  <li>— Unique texture and deep tone</li>
-                  <li>— Natural protection through charring</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          <ApplicationSection
+            id="terraces"
+            title="Terraces"
+            description="Fire-treated decking that’s built for outdoor living, with natural grip and a premium feel."
+            bullets={['Durable surface for high traffic', 'Natural texture and warmth', 'Designed for seasonal changes']}
+            images={[
+              { src: assets.categories.terrace, alt: 'Terraces example' },
+              { src: assets.categories.terrace, alt: 'Terraces detail example' },
+            ]}
+            reverse
+          />
 
-          {/* Terraces */}
-          <div id="terraces" className="scroll-mt-[96px]">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-[16px] lg:gap-[24px] items-start">
-              <div className="lg:col-span-6 lg:order-2 grid grid-cols-2 gap-[12px]">
-                <div className="relative w-full h-[140px] md:h-[200px] lg:h-[240px] rounded-[8px] overflow-hidden">
-                  <Image src={assets.categories.terrace} alt="Terraces" fill className="object-cover" />
-                </div>
-                <div className="relative w-full h-[140px] md:h-[200px] lg:h-[240px] rounded-[8px] overflow-hidden">
-                  <Image src={assets.categories.terrace} alt="Terraces detail" fill className="object-cover" />
-                </div>
-              </div>
+          <ApplicationSection
+            id="interior"
+            title="Interior"
+            description="Add depth and sophistication indoors with charred wood panels and feature walls."
+            bullets={['Warm, modern materiality', 'Unique patterning and tone', 'Works for walls, ceilings, details']}
+            images={[
+              { src: assets.categories.interior, alt: 'Interior example' },
+              { src: assets.categories.interior, alt: 'Interior detail example' },
+            ]}
+          />
 
-              <div className="lg:col-span-6 lg:order-1">
-                <h3 className="font-['DM_Sans'] font-light text-[28px] lg:text-[40px] leading-none tracking-[-1.12px] lg:tracking-[-1.6px] text-[#161616]">
-                  Terraces
-                </h3>
-                <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[520px]">
-                  Fire-treated decking that’s built for outdoor living, with natural grip and a premium feel.
-                </p>
-                <ul className="mt-[16px] grid gap-[8px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-                  <li>— Durable surface for high traffic</li>
-                  <li>— Natural texture and warmth</li>
-                  <li>— Designed for seasonal changes</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Interior */}
-          <div id="interior" className="scroll-mt-[96px]">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-[16px] lg:gap-[24px] items-start">
-              <div className="lg:col-span-6 grid grid-cols-2 gap-[12px]">
-                <div className="relative w-full h-[140px] md:h-[200px] lg:h-[240px] rounded-[8px] overflow-hidden">
-                  <Image src={assets.categories.interior} alt="Interior" fill className="object-cover" />
-                </div>
-                <div className="relative w-full h-[140px] md:h-[200px] lg:h-[240px] rounded-[8px] overflow-hidden">
-                  <Image src={assets.categories.interior} alt="Interior detail" fill className="object-cover" />
-                </div>
-              </div>
-
-              <div className="lg:col-span-6 lg:pl-[24px]">
-                <h3 className="font-['DM_Sans'] font-light text-[28px] lg:text-[40px] leading-none tracking-[-1.12px] lg:tracking-[-1.6px] text-[#161616]">
-                  Interior
-                </h3>
-                <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[520px]">
-                  Add depth and sophistication indoors with charred wood panels and feature walls.
-                </p>
-                <ul className="mt-[16px] grid gap-[8px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-                  <li>— Warm, modern materiality</li>
-                  <li>— Unique patterning and tone</li>
-                  <li>— Works for walls, ceilings, details</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Fences */}
-          <div id="fences" className="scroll-mt-[96px]">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-[16px] lg:gap-[24px] items-start">
-              <div className="lg:col-span-6 lg:order-2">
-                <div className="relative w-full h-[220px] md:h-[320px] lg:h-[360px] rounded-[8px] overflow-hidden">
-                  <Image src={assets.categories.fence} alt="Fences" fill className="object-cover" />
-                </div>
-              </div>
-
-              <div className="lg:col-span-6 lg:order-1">
-                <h3 className="font-['DM_Sans'] font-light text-[28px] lg:text-[40px] leading-none tracking-[-1.12px] lg:tracking-[-1.6px] text-[#161616]">
-                  Fences
-                </h3>
-                <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[520px]">
-                  Privacy with style — elegant fencing that endures and elevates outdoor spaces.
-                </p>
-                <ul className="mt-[16px] grid gap-[8px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-                  <li>— Strong, stable, and durable</li>
-                  <li>— Distinctive charred finish</li>
-                  <li>— Great for modern landscapes</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          <ApplicationSection
+            id="fences"
+            title="Fences"
+            description="Privacy with style — elegant fencing that endures and elevates outdoor spaces."
+            bullets={['Strong, stable, and durable', 'Distinctive charred finish', 'Great for modern landscapes']}
+            images={[{ src: assets.categories.fence, alt: 'Fences example' }]}
+            reverse
+          />
         </div>
       </section>
 
