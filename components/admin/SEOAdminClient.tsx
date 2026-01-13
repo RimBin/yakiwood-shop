@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { SEOPreview } from '@/components/admin/SEOPreview';
 import type { PageSEOResult } from '@/lib/seo/scanner';
-import { Breadcrumbs } from '@/components/ui';
 import { createClient } from '@/lib/supabase/client';
 
 type SeoOverrideFormState = {
@@ -209,7 +208,6 @@ function applyFormOverrideToPreview(page: PageSEOResult, form: SeoOverrideFormSt
 
 export default function SEOAdminClient() {
   const t = useTranslations('admin.seo');
-  const tBreadcrumb = useTranslations('admin.breadcrumb');
 
   const [pages, setPages] = useState<PageSEOResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -575,44 +573,19 @@ export default function SEOAdminClient() {
       : t('scanning');
 
     return (
-      <>
-        <Breadcrumbs
-          items={[
-            { label: tBreadcrumb('home'), href: '/' },
-            { label: tBreadcrumb('admin'), href: '/admin' },
-            { label: tBreadcrumb('seo') },
-          ]}
-        />
-        <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#161616] mx-auto mb-4" />
-            <p className="font-['Outfit'] text-[#535353]">{progressText}</p>
-          </div>
+      <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#161616] mx-auto mb-4" />
+          <p className="font-['Outfit'] text-[#535353]">{progressText}</p>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
     <>
-      <Breadcrumbs
-        items={[
-          { label: 'Homepage', href: '/' },
-          { label: 'Admin', href: '/admin' },
-          { label: 'SEO' },
-        ]}
-      />
-
-      <div className="min-h-screen bg-[#E1E1E1] py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
+      <div className="min-h-screen bg-[#E1E1E1] pt-[clamp(16px,2vw,24px)] pb-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
         <div className="max-w-[1400px] mx-auto">
-          {/* Header */}
-          <div className="mb-[clamp(32px,4vw,48px)]">
-            <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616] mb-[8px]">
-              {t('title')}
-            </h1>
-            <p className="font-['Outfit'] font-light text-[clamp(14px,1.5vw,16px)] text-[#535353]">{t('subtitle')}</p>
-          </div>
-
           {error && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
               {error}

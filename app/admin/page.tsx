@@ -1222,8 +1222,6 @@ export default function AdminPage() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: t('breadcrumb.home'), href: '/' }, { label: t('breadcrumb.admin') }]} />
-
       <div className="bg-[#E1E1E1] pb-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
         <div className="max-w-[1400px] mx-auto">
           {/* Message */}

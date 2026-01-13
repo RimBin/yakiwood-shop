@@ -7,7 +7,6 @@ import {
   getSampleData,
   type EmailTemplate,
 } from '@/lib/email/templates';
-import { Breadcrumbs } from '@/components/ui';
 
 export default function EmailTemplatesAdmin() {
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
@@ -81,20 +80,8 @@ export default function EmailTemplatesAdmin() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: 'Homepage', href: '/' }, { label: 'Admin', href: '/admin' }, { label: 'Email Templates' }]} />
-      
-      <div className="min-h-screen bg-[#E1E1E1] py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
+      <div className="min-h-screen bg-[#E1E1E1] pb-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
         <div className="max-w-[1400px] mx-auto">
-          {/* Header */}
-          <div className="mb-[clamp(32px,4vw,48px)]">
-            <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616] mb-[8px]">
-              Email Templates
-            </h1>
-            <p className="font-['Outfit'] font-light text-[clamp(14px,1.5vw,16px)] text-[#535353]">
-              E-commerce email template management and preview
-            </p>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-[clamp(16px,2vw,24px)]">
             {/* Templates List */}
             <div className="lg:col-span-1">

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Breadcrumbs } from '@/components/ui';
 
 interface DashboardStats {
   totalOrders: number;
@@ -182,25 +181,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#EAEAEA]">
-      <Breadcrumbs
-        items={[
-          { label: 'Pradžia', href: '/' },
-          { label: 'Administravimas', href: '/admin' },
-          { label: 'Skydelis' },
-        ]}
-      />
-
       <div className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] py-[40px]">
-        {/* Header */}
-        <div className="mb-[40px]">
-          <h1 className="font-['DM_Sans'] font-light text-[48px] md:text-[64px] leading-[0.95] tracking-[-2.4px] md:tracking-[-3.2px] text-[#161616] mb-[16px]">
-            Store <span className="font-['Tiro_Tamil'] italic">Dashboard</span>
-          </h1>
-          <p className="font-['Outfit'] text-[14px] text-[#535353]">
-            {format(new Date(), 'EEEE, MMMM d, yyyy')}
-          </p>
-        </div>
-
         {/* Filters */}
         <div className="bg-[#EAEAEA] rounded-[16px] p-[24px] mb-[32px] border border-[#E1E1E1]">
           <p className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] mb-[16px]">Filters</p>
