@@ -49,16 +49,22 @@ const certificates = [
     src: assets.certifications.epd,
     alt: 'EPD certification',
     bg: 'bg-white/10',
+    mobileSize: 64,
+    desktopSize: 88,
   },
   {
     src: assets.certifications.fsc,
     alt: 'FSC certification',
     bg: 'bg-white/10',
+    mobileSize: 64,
+    desktopSize: 88,
   },
   {
     src: assets.certifications.eu,
     alt: 'EU certification',
-    bg: 'bg-white/10',
+    bg: 'bg-white',
+    mobileSize: 72,
+    desktopSize: 96,
   },
 ];
 
@@ -136,7 +142,7 @@ export default function Footer() {
               key={logo.src}
               className={`w-[80px] h-[80px] rounded-[8px] flex items-center justify-center ${logo.bg}`}
             >
-              <div className="relative w-[64px] h-[64px]">
+              <div className="relative" style={{ width: logo.mobileSize, height: logo.mobileSize }}>
                 <Image src={logo.src} alt={logo.alt} fill className="object-contain" />
               </div>
             </div>
@@ -164,7 +170,7 @@ export default function Footer() {
       </div>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] pt-[56px] pb-[32px]">
+      <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] pt-[56px] pb-0">
         <div className="flex flex-col gap-[40px]">
           <div className="flex items-start justify-between">
             {/* Navigation Columns - Desktop */}
@@ -205,11 +211,7 @@ export default function Footer() {
                     })}
 
                     {column.title === 'For Customers' && (
-                      <button
-                        type="button"
-                        onClick={openCookiePreferences}
-                        className="w-fit text-left"
-                      >
+                      <button type="button" onClick={openCookiePreferences} className="w-fit text-left">
                         <span className="font-['Outfit'] font-light text-[14px] leading-[1.3] tracking-[0.14px] text-[#E1E1E1] hover:text-white transition-colors">
                           {cookieSettingsLabel}
                         </span>
@@ -227,7 +229,7 @@ export default function Footer() {
                   key={logo.src}
                   className={`w-[104px] h-[104px] rounded-[8px] flex items-center justify-center ${logo.bg}`}
                 >
-                  <div className="relative w-[88px] h-[88px]">
+                  <div className="relative" style={{ width: logo.desktopSize, height: logo.desktopSize }}>
                     <Image src={logo.src} alt={logo.alt} fill className="object-contain" />
                   </div>
                 </div>
@@ -253,6 +255,18 @@ export default function Footer() {
                 className="h-[16px] w-auto"
               />
             </div>
+          </div>
+
+          {/* Brand image - Desktop only (content width) */}
+          <div className="w-full">
+            <Image
+              src="/assets/footer/Logotipas-baltas-half.png"
+              alt="Yakiwood"
+              width={1440}
+              height={520}
+              sizes="(min-width: 1024px) 1440px, 100vw"
+              className="w-full h-auto object-contain object-bottom"
+            />
           </div>
         </div>
       </div>

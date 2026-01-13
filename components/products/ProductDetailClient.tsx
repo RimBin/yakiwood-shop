@@ -82,28 +82,28 @@ const FALLBACK_PROFILE_OPTIONS: Array<Pick<ProductProfileVariant, 'id' | 'name' 
     id: 'fallback-profile-half-taper-45',
     name: 'Half-taper 45°',
     code: 'HALF_TAPER_45',
-    description: null,
+    description: undefined,
     priceModifier: 0,
   },
   {
     id: 'fallback-profile-half-taper',
     name: 'Half-taper',
     code: 'HALF_TAPER',
-    description: null,
+    description: undefined,
     priceModifier: 0,
   },
   {
     id: 'fallback-profile-rectangle',
     name: 'Rectangle',
     code: 'RECTANGLE',
-    description: null,
+    description: undefined,
     priceModifier: 0,
   },
   {
     id: 'fallback-profile-rhombus',
     name: 'Rhombus',
     code: 'RHOMBUS',
-    description: null,
+    description: undefined,
     priceModifier: 0,
   },
 ];
@@ -353,7 +353,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           return;
         }
 
-            profileVariantId: isFallbackProfileId(selectedFinish?.id) ? undefined : selectedFinish?.id,
+        const data = await res.json();
         const unitPricePerBoard = Number(data?.unitPricePerBoard);
         const unitPricePerM2 = Number(data?.unitPricePerM2);
         const quotedUnitAreaM2 = Number(data?.areaM2);
