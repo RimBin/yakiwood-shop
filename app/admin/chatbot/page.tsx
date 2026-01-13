@@ -54,13 +54,39 @@ type ApiResponse<T> = {
 type OpenAiStatus = {
   configured: boolean;
   model: string;
+  source: 'supabase' | 'env';
   useOpenAI: boolean;
+  openAiMode: 'always' | 'fallback' | 'off';
   minConfidence: number;
   temperature: number;
   prompts: {
     lt: { isSet: boolean; preview: string | null };
     en: { isSet: boolean; preview: string | null };
   };
+};
+
+type ChatbotSettingsDto = {
+  useOpenAI: boolean;
+  openAiMode: 'always' | 'fallback' | 'off';
+  minConfidence: number;
+  temperature: number;
+  systemPromptLt: string;
+  systemPromptEn: string;
+  source: 'supabase' | 'env';
+};
+
+type FineTuneStatus = {
+  id: string;
+  status: string;
+  model: string;
+  fineTunedModel: string | null;
+  createdAt: number | null;
+};
+
+type MigrationSqlDto = {
+  name: string;
+  file?: string;
+  sql: string;
 };
 
 async function getAdminToken(): Promise<string | null> {
@@ -196,7 +222,7 @@ export default function AdminChatbotPage() {
     return message;
   }, [t]);
 
-  const [tab, setTab] = useState<'sessions' | 'faq' | 'ai'>('sessions');
+  const [tab, setTab] = useState<'sessions' | 'faq' | 'ai' | 'training'>('sessions');
 
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -222,11 +248,31 @@ export default function AdminChatbotPage() {
   const [faqDeleting, setFaqDeleting] = useState(false);
   const [faqImporting, setFaqImporting] = useState(false);
   const [faqError, setFaqError] = useState<string | null>(null);
+  const [faqErrorCode, setFaqErrorCode] = useState<string | null>(null);
   const [faqNotice, setFaqNotice] = useState<string | null>(null);
 
   const [openAiStatus, setOpenAiStatus] = useState<OpenAiStatus | null>(null);
   const [openAiLoading, setOpenAiLoading] = useState(false);
   const [openAiError, setOpenAiError] = useState<string | null>(null);
+
+  const [settings, setSettings] = useState<ChatbotSettingsDto | null>(null);
+  const [settingsDraft, setSettingsDraft] = useState<ChatbotSettingsDto | null>(null);
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [settingsErrorCode, setSettingsErrorCode] = useState<string | null>(null);
+  const [settingsNotice, setSettingsNotice] = useState<string | null>(null);
+
+  const [dbHelpBusy, setDbHelpBusy] = useState(false);
+  const [dbHelpNotice, setDbHelpNotice] = useState<string | null>(null);
+
+  const [trainingLocale, setTrainingLocale] = useState<'lt' | 'en' | 'all'>('all');
+  const [trainingBaseModel, setTrainingBaseModel] = useState<string>('gpt-4o-mini');
+  const [fineTuneJobId, setFineTuneJobId] = useState<string>('');
+  const [fineTuneStatus, setFineTuneStatus] = useState<FineTuneStatus | null>(null);
+  const [trainingLoading, setTrainingLoading] = useState(false);
+  const [trainingStarting, setTrainingStarting] = useState(false);
+  const [trainingError, setTrainingError] = useState<string | null>(null);
 
   const faqFetchedLocalesRef = useRef<Set<Locale>>(new Set());
 
@@ -288,21 +334,26 @@ export default function AdminChatbotPage() {
     async (locale: Locale) => {
       setFaqLoading(true);
       setFaqError(null);
+      setFaqErrorCode(null);
       setFaqNotice(null);
       try {
         const resp = await fetchAdmin(`/api/admin/chatbot-faq?locale=${encodeURIComponent(locale)}`, {
           method: 'GET',
         });
         const json = await safeJson<FaqEntry[]>(resp);
-        const errorMsg = translateApiError(getErrorMessageKey(resp, json.error));
+        const rawError = getErrorMessageKey(resp, json.error);
+        setFaqErrorCode(rawError);
+        const errorMsg = translateApiError(rawError);
         if (errorMsg) {
           setFaqError(errorMsg);
           setFaqEntries([]);
           return;
         }
+        setFaqErrorCode(null);
         setFaqEntries((json.data || []).slice().sort((a, b) => a.order - b.order));
       } catch {
         setFaqError(t('errors.loadFaqFailed'));
+        setFaqErrorCode('ERR_CLIENT_EXCEPTION');
         setFaqEntries([]);
       } finally {
         faqFetchedLocalesRef.current.add(locale);
@@ -332,6 +383,222 @@ export default function AdminChatbotPage() {
       setOpenAiLoading(false);
     }
   }, [fetchAdmin, t, translateApiError]);
+
+  const loadChatbotSettings = useCallback(async () => {
+    setSettingsLoading(true);
+    setSettingsError(null);
+    setSettingsErrorCode(null);
+    setSettingsNotice(null);
+    try {
+      const resp = await fetchAdmin('/api/admin/chatbot-settings', { method: 'GET' });
+      const json = await safeJson<ChatbotSettingsDto>(resp);
+      const rawError = getErrorMessageKey(resp, (json as any).error);
+      setSettingsErrorCode(rawError);
+      const errorMsg = translateApiError(rawError);
+      if (errorMsg) {
+        setSettingsError(errorMsg);
+        setSettings(null);
+        setSettingsDraft(null);
+        return;
+      }
+      const dto = (json as any).data as ChatbotSettingsDto | undefined;
+      if (!dto) {
+        setSettings(null);
+        setSettingsDraft(null);
+        return;
+      }
+      setSettingsErrorCode(null);
+      setSettings(dto);
+      setSettingsDraft(dto);
+    } catch {
+      setSettingsError(t('errors.requestFailed', { status: 0 }));
+      setSettingsErrorCode('ERR_CLIENT_EXCEPTION');
+    } finally {
+      setSettingsLoading(false);
+    }
+  }, [fetchAdmin, t, translateApiError]);
+
+  const copyToClipboard = useCallback(async (text: string) => {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      // Fallback
+    }
+
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', 'true');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand('copy');
+    } finally {
+      ta.remove();
+    }
+  }, []);
+
+  const copyMigrationSql = useCallback(
+    async (name: 'chatbot_faq_entries' | 'chatbot_settings' | 'reload-schema') => {
+      setDbHelpBusy(true);
+      setDbHelpNotice(null);
+      try {
+        const resp = await fetchAdmin(`/api/admin/chatbot-migrations?name=${encodeURIComponent(name)}`, {
+          method: 'GET',
+        });
+        const json = await safeJson<MigrationSqlDto>(resp);
+        const errorMsg = translateApiError(getErrorMessageKey(resp, (json as any).error));
+        if (errorMsg) {
+          setDbHelpNotice(t('dbSetup.copyFailed'));
+          return;
+        }
+        const sql = (json as any).data?.sql as string | undefined;
+        if (!sql) {
+          setDbHelpNotice(t('dbSetup.copyFailed'));
+          return;
+        }
+        await copyToClipboard(sql);
+        setDbHelpNotice(t('dbSetup.copied'));
+      } catch {
+        setDbHelpNotice(t('dbSetup.copyFailed'));
+      } finally {
+        setDbHelpBusy(false);
+      }
+    },
+    [copyToClipboard, fetchAdmin, t, translateApiError]
+  );
+
+  const saveChatbotSettings = useCallback(async () => {
+    if (!settingsDraft) return;
+    setSettingsSaving(true);
+    setSettingsError(null);
+    setSettingsNotice(null);
+    try {
+      const resp = await fetchAdmin('/api/admin/chatbot-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          useOpenAI: settingsDraft.useOpenAI,
+          openAiMode: settingsDraft.openAiMode,
+          minConfidence: settingsDraft.minConfidence,
+          temperature: settingsDraft.temperature,
+          systemPromptLt: settingsDraft.systemPromptLt,
+          systemPromptEn: settingsDraft.systemPromptEn,
+        }),
+      });
+
+      const json = await safeJson<{ ok: true }>(resp);
+      const errorMsg = translateApiError(getErrorMessageKey(resp, (json as any).error));
+      if (errorMsg) {
+        setSettingsError(errorMsg);
+        return;
+      }
+
+      setSettingsNotice(t('ai.noticeSaved'));
+      await Promise.all([loadOpenAiStatus(), loadChatbotSettings()]);
+    } catch {
+      setSettingsError(t('errors.saveFailed'));
+    } finally {
+      setSettingsSaving(false);
+    }
+  }, [loadChatbotSettings, loadOpenAiStatus, settingsDraft, t, translateApiError, fetchAdmin]);
+
+  const downloadTrainingData = useCallback(async () => {
+    setTrainingLoading(true);
+    setTrainingError(null);
+    try {
+      const resp = await fetchAdmin(
+        `/api/admin/chatbot-training?action=export&locale=${encodeURIComponent(trainingLocale)}`,
+        { method: 'GET' }
+      );
+      if (!resp.ok) {
+        const json = await safeJson<{ error?: string }>(resp);
+        const errorMsg = translateApiError(getErrorMessageKey(resp, (json as any).error));
+        setTrainingError(errorMsg || t('errors.requestFailed', { status: resp.status }));
+        return;
+      }
+      const text = await resp.text();
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `yakiwood-chatbot-training-${trainingLocale}.jsonl`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setTrainingError(t('errors.requestFailed', { status: 0 }));
+    } finally {
+      setTrainingLoading(false);
+    }
+  }, [fetchAdmin, t, trainingLocale, translateApiError]);
+
+  const refreshFineTuneStatus = useCallback(
+    async (jobId: string) => {
+      if (!jobId) return;
+      setTrainingLoading(true);
+      setTrainingError(null);
+      try {
+        const resp = await fetchAdmin(
+          `/api/admin/chatbot-training?action=status&jobId=${encodeURIComponent(jobId)}`,
+          { method: 'GET' }
+        );
+        const json = await safeJson<FineTuneStatus>(resp);
+        const errorMsg = translateApiError(getErrorMessageKey(resp, (json as any).error));
+        if (errorMsg) {
+          setTrainingError(errorMsg);
+          return;
+        }
+        setFineTuneStatus((json as any).data ?? null);
+      } catch {
+        setTrainingError(t('errors.requestFailed', { status: 0 }));
+      } finally {
+        setTrainingLoading(false);
+      }
+    },
+    [fetchAdmin, t, translateApiError]
+  );
+
+  const startFineTune = useCallback(async () => {
+    setTrainingStarting(true);
+    setTrainingError(null);
+    try {
+      const resp = await fetchAdmin('/api/admin/chatbot-training', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locale: trainingLocale, baseModel: trainingBaseModel }),
+      });
+      const json = await safeJson<{ jobId: string; status: string }>(resp);
+      const errorMsg = translateApiError(getErrorMessageKey(resp, (json as any).error));
+      if (errorMsg) {
+        setTrainingError(errorMsg);
+        return;
+      }
+
+      const jobId = (json as any).data?.jobId as string | undefined;
+      if (jobId) {
+        setFineTuneJobId(jobId);
+        try {
+          window.localStorage.setItem('yakiwood_chatbot_finetune_job', jobId);
+        } catch {
+          // ignore
+        }
+        await refreshFineTuneStatus(jobId);
+      }
+    } catch {
+      setTrainingError(t('errors.requestFailed', { status: 0 }));
+    } finally {
+      setTrainingStarting(false);
+    }
+  }, [fetchAdmin, refreshFineTuneStatus, t, trainingBaseModel, trainingLocale, translateApiError]);
 
   const setDraftFromEntry = useCallback((entry: FaqEntry) => {
     setFaqDraft({
@@ -495,7 +762,24 @@ export default function AdminChatbotPage() {
   useEffect(() => {
     if (tab !== 'ai') return;
     void loadOpenAiStatus();
-  }, [loadOpenAiStatus, tab]);
+    void loadChatbotSettings();
+  }, [loadChatbotSettings, loadOpenAiStatus, tab]);
+
+  useEffect(() => {
+    if (tab !== 'training') return;
+    try {
+      const stored = window.localStorage.getItem('yakiwood_chatbot_finetune_job') || '';
+      if (stored && !fineTuneJobId) setFineTuneJobId(stored);
+    } catch {
+      // ignore
+    }
+  }, [fineTuneJobId, tab]);
+
+  useEffect(() => {
+    if (tab !== 'training') return;
+    if (!fineTuneJobId) return;
+    void refreshFineTuneStatus(fineTuneJobId);
+  }, [fineTuneJobId, refreshFineTuneStatus, tab]);
 
   useEffect(() => {
     if (!faqSelectedId) return;
@@ -527,6 +811,9 @@ export default function AdminChatbotPage() {
             </TabButton>
             <TabButton active={tab === 'ai'} onClick={() => setTab('ai')}>
               {t('tabs.ai')}
+            </TabButton>
+            <TabButton active={tab === 'training'} onClick={() => setTab('training')}>
+              {t('tabs.training')}
             </TabButton>
           </div>
 
@@ -624,6 +911,42 @@ export default function AdminChatbotPage() {
                     </button>
                   </div>
                 </div>
+
+                {faqErrorCode?.startsWith('ERR_SUPABASE_MISSING_TABLE:') ? (
+                  <div className="mt-[12px] rounded-[16px] border border-[#BBBBBB] bg-[#E1E1E1] p-[12px]">
+                    <div className="font-['DM_Sans'] text-[13px] font-medium text-[#161616]">{t('dbSetup.title')}</div>
+                    <div className="mt-[6px] font-['Outfit'] text-[12px] text-[#535353]">{t('dbSetup.subtitle')}</div>
+                    <div className="mt-[10px] flex flex-wrap items-center gap-[10px]">
+                      <button
+                        type="button"
+                        onClick={() => void copyMigrationSql('chatbot_faq_entries')}
+                        disabled={dbHelpBusy}
+                        className={buttonSecondary + (dbHelpBusy ? ' opacity-60 cursor-not-allowed' : '')}
+                      >
+                        {t('dbSetup.copyFaq')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void copyMigrationSql('chatbot_settings')}
+                        disabled={dbHelpBusy}
+                        className={buttonSecondary + (dbHelpBusy ? ' opacity-60 cursor-not-allowed' : '')}
+                      >
+                        {t('dbSetup.copySettings')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void copyMigrationSql('reload-schema')}
+                        disabled={dbHelpBusy}
+                        className={buttonSecondary + (dbHelpBusy ? ' opacity-60 cursor-not-allowed' : '')}
+                      >
+                        {t('dbSetup.copyReload')}
+                      </button>
+                    </div>
+                    {dbHelpNotice ? (
+                      <div className="mt-[8px] font-['Outfit'] text-[12px] text-[#161616]">{dbHelpNotice}</div>
+                    ) : null}
+                  </div>
+                ) : null}
 
                 {faqError ? <p className="mt-[12px] font-['Outfit'] text-[13px] text-red-600">{faqError}</p> : null}
 
@@ -814,7 +1137,7 @@ export default function AdminChatbotPage() {
                 </form>
               </div>
             </div>
-          ) : (
+          ) : tab === 'ai' ? (
             <div className="mt-[16px]">
               <div className={panelClass}>
                 <div className="flex flex-wrap items-center justify-between gap-[10px]">
@@ -834,11 +1157,39 @@ export default function AdminChatbotPage() {
                   </button>
                 </div>
 
+                {settingsErrorCode?.startsWith('ERR_SUPABASE_MISSING_TABLE:') ? (
+                  <div className="mt-[12px] rounded-[16px] border border-[#BBBBBB] bg-[#E1E1E1] p-[12px]">
+                    <div className="font-['DM_Sans'] text-[13px] font-medium text-[#161616]">{t('dbSetup.title')}</div>
+                    <div className="mt-[6px] font-['Outfit'] text-[12px] text-[#535353]">{t('dbSetup.subtitle')}</div>
+                    <div className="mt-[10px] flex flex-wrap items-center gap-[10px]">
+                      <button
+                        type="button"
+                        onClick={() => void copyMigrationSql('chatbot_settings')}
+                        disabled={dbHelpBusy}
+                        className={buttonSecondary + (dbHelpBusy ? ' opacity-60 cursor-not-allowed' : '')}
+                      >
+                        {t('dbSetup.copySettings')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void copyMigrationSql('reload-schema')}
+                        disabled={dbHelpBusy}
+                        className={buttonSecondary + (dbHelpBusy ? ' opacity-60 cursor-not-allowed' : '')}
+                      >
+                        {t('dbSetup.copyReload')}
+                      </button>
+                    </div>
+                    {dbHelpNotice ? (
+                      <div className="mt-[8px] font-['Outfit'] text-[12px] text-[#161616]">{dbHelpNotice}</div>
+                    ) : null}
+                  </div>
+                ) : null}
+
                 {openAiError ? (
                   <p className="mt-[12px] font-['Outfit'] text-[13px] text-red-600">{openAiError}</p>
                 ) : null}
 
-                {openAiLoading ? (
+                {openAiLoading || settingsLoading ? (
                   <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">{t('common.loading')}</p>
                 ) : !openAiStatus ? (
                   <p className="mt-[12px] font-['Outfit'] text-[13px] text-[#535353]">{t('ai.empty')}</p>
@@ -862,12 +1213,20 @@ export default function AdminChatbotPage() {
                           <span>{openAiStatus.useOpenAI ? t('ai.yes') : t('ai.no')}</span>
                         </div>
                         <div className="flex items-center justify-between gap-[10px]">
+                          <span>{t('ai.openAiMode')}</span>
+                          <span className="font-mono text-[12px]">{openAiStatus.openAiMode}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-[10px]">
                           <span>{t('ai.minConfidence')}</span>
                           <span>{openAiStatus.minConfidence}</span>
                         </div>
                         <div className="flex items-center justify-between gap-[10px]">
                           <span>{t('ai.temperature')}</span>
                           <span>{openAiStatus.temperature}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-[10px]">
+                          <span>{t('ai.source')}</span>
+                          <span className="font-mono text-[12px]">{openAiStatus.source}</span>
                         </div>
                       </div>
 
@@ -879,36 +1238,115 @@ export default function AdminChatbotPage() {
                     </div>
 
                     <div className="rounded-[16px] border border-[#E1E1E1] bg-white p-[14px]">
-                      <div className="font-['DM_Sans'] text-[14px] font-medium text-[#161616]">{t('ai.promptTitle')}</div>
-                      <div className="mt-[10px] space-y-[10px]">
-                        <div>
-                          <div className="flex items-center justify-between gap-[10px]">
-                            <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.promptLt')}</div>
-                            <div className="font-['Outfit'] text-[12px] text-[#535353]">
-                              {openAiStatus.prompts.lt.isSet ? t('ai.set') : t('ai.notSet')}
-                            </div>
-                          </div>
-                          <div className="mt-[6px] rounded-[12px] border border-[#E1E1E1] bg-[#FAFAFA] p-[10px]">
-                            <p className="font-['Outfit'] text-[12px] text-[#161616] whitespace-pre-line">
-                              {openAiStatus.prompts.lt.preview || t('ai.defaultPrompt')}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center justify-between gap-[10px]">
-                            <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.promptEn')}</div>
-                            <div className="font-['Outfit'] text-[12px] text-[#535353]">
-                              {openAiStatus.prompts.en.isSet ? t('ai.set') : t('ai.notSet')}
-                            </div>
-                          </div>
-                          <div className="mt-[6px] rounded-[12px] border border-[#E1E1E1] bg-[#FAFAFA] p-[10px]">
-                            <p className="font-['Outfit'] text-[12px] text-[#161616] whitespace-pre-line">
-                              {openAiStatus.prompts.en.preview || t('ai.defaultPrompt')}
-                            </p>
-                          </div>
-                        </div>
+                      <div className="flex items-center justify-between gap-[10px]">
+                        <div className="font-['DM_Sans'] text-[14px] font-medium text-[#161616]">{t('ai.settingsTitle')}</div>
+                        <button
+                          type="button"
+                          onClick={() => void saveChatbotSettings()}
+                          disabled={settingsSaving || !settingsDraft}
+                          className={
+                            buttonSecondary +
+                            (settingsSaving || !settingsDraft ? ' opacity-60 cursor-not-allowed' : '')
+                          }
+                        >
+                          {settingsSaving ? t('common.saving') : t('common.save')}
+                        </button>
                       </div>
+
+                      {settingsNotice ? (
+                        <p className="mt-[10px] font-['Outfit'] text-[13px] text-[#161616]">{settingsNotice}</p>
+                      ) : null}
+                      {settingsError ? (
+                        <p className="mt-[10px] font-['Outfit'] text-[13px] text-red-600">{settingsError}</p>
+                      ) : null}
+
+                      {settingsDraft ? (
+                        <div className="mt-[10px] space-y-[10px]">
+                          <label className="flex items-center justify-between gap-[10px]">
+                            <span className="font-['Outfit'] text-[13px] text-[#161616]">{t('ai.useOpenAI')}</span>
+                            <input
+                              type="checkbox"
+                              checked={settingsDraft.useOpenAI}
+                              onChange={(e) =>
+                                setSettingsDraft((d) => (d ? { ...d, useOpenAI: e.target.checked } : d))
+                              }
+                              className="h-[16px] w-[16px] accent-[#161616]"
+                            />
+                          </label>
+
+                          <div className="flex items-center justify-between gap-[10px]">
+                            <span className="font-['Outfit'] text-[13px] text-[#161616]">{t('ai.openAiMode')}</span>
+                            <select
+                              value={settingsDraft.openAiMode}
+                              onChange={(e) =>
+                                setSettingsDraft((d) => (d ? { ...d, openAiMode: e.target.value as any } : d))
+                              }
+                              className="h-[36px] rounded-[12px] border border-[#BBBBBB] px-[10px] font-['Outfit'] text-[13px] text-[#161616]"
+                            >
+                              <option value="always">always</option>
+                              <option value="fallback">fallback</option>
+                              <option value="off">off</option>
+                            </select>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-[10px]">
+                            <div>
+                              <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.minConfidence')}</div>
+                              <input
+                                type="number"
+                                min={0}
+                                max={1}
+                                step={0.01}
+                                value={settingsDraft.minConfidence}
+                                onChange={(e) =>
+                                  setSettingsDraft((d) =>
+                                    d ? { ...d, minConfidence: Number(e.target.value || 0) } : d
+                                  )
+                                }
+                                className="mt-[6px] h-[36px] w-full rounded-[12px] border border-[#BBBBBB] px-[10px] font-['Outfit'] text-[13px] text-[#161616]"
+                              />
+                            </div>
+                            <div>
+                              <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.temperature')}</div>
+                              <input
+                                type="number"
+                                min={0}
+                                max={2}
+                                step={0.05}
+                                value={settingsDraft.temperature}
+                                onChange={(e) =>
+                                  setSettingsDraft((d) =>
+                                    d ? { ...d, temperature: Number(e.target.value || 0) } : d
+                                  )
+                                }
+                                className="mt-[6px] h-[36px] w-full rounded-[12px] border border-[#BBBBBB] px-[10px] font-['Outfit'] text-[13px] text-[#161616]"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.promptLt')}</div>
+                            <textarea
+                              value={settingsDraft.systemPromptLt}
+                              onChange={(e) =>
+                                setSettingsDraft((d) => (d ? { ...d, systemPromptLt: e.target.value } : d))
+                              }
+                              className="mt-[6px] min-h-[120px] w-full rounded-[12px] border border-[#BBBBBB] px-[10px] py-[8px] font-['Outfit'] text-[13px] text-[#161616]"
+                            />
+                          </div>
+
+                          <div>
+                            <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.promptEn')}</div>
+                            <textarea
+                              value={settingsDraft.systemPromptEn}
+                              onChange={(e) =>
+                                setSettingsDraft((d) => (d ? { ...d, systemPromptEn: e.target.value } : d))
+                              }
+                              className="mt-[6px] min-h-[120px] w-full rounded-[12px] border border-[#BBBBBB] px-[10px] py-[8px] font-['Outfit'] text-[13px] text-[#161616]"
+                            />
+                          </div>
+                        </div>
+                      ) : null}
 
                       <div className="mt-[12px] rounded-[12px] bg-[#F5F5F5] p-[12px]">
                         <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.envTitle')}</div>
@@ -916,6 +1354,7 @@ export default function AdminChatbotPage() {
 OPENAI_API_KEY=***
 OPENAI_CHAT_MODEL={openAiStatus.model}
 CHATBOT_USE_OPENAI={String(openAiStatus.useOpenAI)}
+CHATBOT_OPENAI_MODE={String(openAiStatus.openAiMode)}
 CHATBOT_OPENAI_MIN_CONFIDENCE={String(openAiStatus.minConfidence)}
 CHATBOT_OPENAI_TEMPERATURE={String(openAiStatus.temperature)}
 CHATBOT_SYSTEM_PROMPT_LT=...
@@ -925,6 +1364,133 @@ CHATBOT_SYSTEM_PROMPT_EN=...
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-[16px]">
+              <div className={panelClass}>
+                <div className="flex flex-wrap items-center justify-between gap-[10px]">
+                  <div>
+                    <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">{t('training.title')}</h2>
+                    <p className="mt-[4px] font-['Outfit'] text-[13px] text-[#535353]">{t('training.subtitle')}</p>
+                  </div>
+                  <div className="flex items-center gap-[10px]">
+                    <button
+                      type="button"
+                      onClick={() => void downloadTrainingData()}
+                      disabled={trainingLoading}
+                      className={buttonSecondary + (trainingLoading ? ' opacity-60 cursor-not-allowed' : '')}
+                    >
+                      {t('training.exportJsonl')}
+                    </button>
+                  </div>
+                </div>
+
+                {trainingError ? (
+                  <p className="mt-[12px] font-['Outfit'] text-[13px] text-red-600">{trainingError}</p>
+                ) : null}
+
+                <div className="mt-[12px] grid grid-cols-1 lg:grid-cols-2 gap-[12px]">
+                  <div className="rounded-[16px] border border-[#E1E1E1] bg-white p-[14px]">
+                    <div className="font-['DM_Sans'] text-[14px] font-medium text-[#161616]">{t('training.exportTitle')}</div>
+                    <p className="mt-[6px] font-['Outfit'] text-[12px] text-[#535353] leading-[1.4]">
+                      {t('training.exportNote')}
+                    </p>
+
+                    <div className="mt-[12px] flex items-center justify-between gap-[10px]">
+                      <span className="font-['Outfit'] text-[13px] text-[#161616]">{t('training.locale')}</span>
+                      <select
+                        value={trainingLocale}
+                        onChange={(e) => setTrainingLocale(e.target.value as any)}
+                        className="h-[36px] rounded-[12px] border border-[#BBBBBB] px-[10px] font-['Outfit'] text-[13px] text-[#161616]"
+                      >
+                        <option value="all">LT + EN</option>
+                        <option value="lt">LT</option>
+                        <option value="en">EN</option>
+                      </select>
+                    </div>
+
+                    <div className="mt-[12px]">
+                      <button
+                        type="button"
+                        onClick={() => void downloadTrainingData()}
+                        disabled={trainingLoading}
+                        className={buttonSecondary + (trainingLoading ? ' opacity-60 cursor-not-allowed' : '')}
+                      >
+                        {trainingLoading ? t('common.loading') : t('training.exportJsonl')}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[16px] border border-[#E1E1E1] bg-white p-[14px]">
+                    <div className="font-['DM_Sans'] text-[14px] font-medium text-[#161616]">{t('training.fineTuneTitle')}</div>
+                    <p className="mt-[6px] font-['Outfit'] text-[12px] text-[#535353] leading-[1.4]">
+                      {t('training.fineTuneNote')}
+                    </p>
+
+                    <div className="mt-[12px]">
+                      <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('training.baseModel')}</div>
+                      <input
+                        value={trainingBaseModel}
+                        onChange={(e) => setTrainingBaseModel(e.target.value)}
+                        className="mt-[6px] h-[36px] w-full rounded-[12px] border border-[#BBBBBB] px-[10px] font-['Outfit'] text-[13px] text-[#161616]"
+                        placeholder="gpt-4o-mini"
+                      />
+                    </div>
+
+                    <div className="mt-[12px] flex flex-wrap items-center gap-[10px]">
+                      <button
+                        type="button"
+                        onClick={() => void startFineTune()}
+                        disabled={trainingStarting}
+                        className={buttonSecondary + (trainingStarting ? ' opacity-60 cursor-not-allowed' : '')}
+                      >
+                        {trainingStarting ? t('training.starting') : t('training.startFineTune')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void refreshFineTuneStatus(fineTuneJobId)}
+                        disabled={!fineTuneJobId || trainingLoading}
+                        className={
+                          buttonSecondary +
+                          (!fineTuneJobId || trainingLoading ? ' opacity-60 cursor-not-allowed' : '')
+                        }
+                      >
+                        {t('training.refreshStatus')}
+                      </button>
+                    </div>
+
+                    <div className="mt-[12px]">
+                      <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('training.jobId')}</div>
+                      <input
+                        value={fineTuneJobId}
+                        onChange={(e) => setFineTuneJobId(e.target.value)}
+                        className="mt-[6px] h-[36px] w-full rounded-[12px] border border-[#BBBBBB] px-[10px] font-mono text-[12px] text-[#161616]"
+                        placeholder="ftjob_..."
+                      />
+                    </div>
+
+                    {fineTuneStatus ? (
+                      <div className="mt-[12px] rounded-[12px] bg-[#F5F5F5] p-[12px]">
+                        <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('training.status')}</div>
+                        <div className="mt-[8px] space-y-[6px] font-['Outfit'] text-[13px] text-[#161616]">
+                          <div className="flex items-center justify-between gap-[10px]">
+                            <span>{t('training.statusValue')}</span>
+                            <span className="font-mono text-[12px]">{fineTuneStatus.status}</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-[10px]">
+                            <span>{t('training.baseModel')}</span>
+                            <span className="font-mono text-[12px]">{fineTuneStatus.model}</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-[10px]">
+                            <span>{t('training.fineTunedModel')}</span>
+                            <span className="font-mono text-[12px]">{fineTuneStatus.fineTunedModel || '-'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
               </div>
             </div>
           )}

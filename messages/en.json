@@ -10,30 +10,34 @@
     "home": "Home"
   },
   "chatbot": {
-    "button": "Help",
-    "title": "Help (FAQ)",
-    "subtitle": "Quick answers to common questions",
-    "welcome": "Hi! I can help with common questions (pricing, lead time, delivery, maintenance, samples). Ask your question.",
+    "button": "Chat",
+    "title": "Chat with Yakiwood",
+    "subtitle": "Ask about products, projects, or a quote",
+    "welcome": "Hi! I'm the Yakiwood assistant. Ask about products, pricing, lead times, or your project and I'll help.",
     "note": "Note: please do not share sensitive personal data (e.g., personal ID). This chat may be used to improve support.",
     "handoff": "Need a human? Contact us",
-    "placeholder": "Type your question…",
+    "placeholder": "Type your message...",
     "send": "Send",
     "clear": "Clear",
-    "typing": "Typing…",
+    "typing": "Typing...",
+    "aria": {
+      "open": "Open chat",
+      "close": "Close chat"
+    },
     "errors": {
       "generic": "Couldn't reply right now. Please try again later.",
       "network": "Network error. Please try again later."
     },
     "suggestions": {
-      "price": "How much does it cost?",
-      "delivery": "Do you deliver across Lithuania?",
+      "price": "I need a quote for a project",
+      "delivery": "What are delivery options?",
       "createRole": {
         "title": "Create new role",
         "label": "New role",
         "placeholder": "e.g. partner",
         "button": "Create role"
       },
-      "productionTime": "How long is production?",
+      "productionTime": "What's the production lead time?",
       "maintenance": "How do I maintain the surface?",
       "samples": "Can I get samples?"
     }
@@ -1576,11 +1580,12 @@
   },
   "adminChatbot": {
     "title": "Chatbot",
-    "subtitle": "Manage sessions and FAQ",
+    "subtitle": "Manage conversations, knowledge base, and GPT training",
     "tabs": {
       "sessions": "Sessions",
-      "faq": "FAQ",
-      "ai": "AI"
+      "faq": "Knowledge base",
+      "ai": "AI",
+      "training": "Training"
     },
     "breadcrumbs": {
       "home": "Home",
@@ -1609,7 +1614,7 @@
       "eventsCount": "{count} events"
     },
     "faq": {
-      "title": "Chatbot FAQ",
+      "title": "Knowledge base (Q&A)",
       "empty": "No entries yet.",
       "importDefaults": "Import default questions",
       "importing": "Importing...",
@@ -1622,25 +1627,48 @@
       "noticeImported": "Imported: {count} entries."
     },
     "ai": {
-      "title": "OpenAI (AI) settings",
-      "subtitle": "Status and configuration (read from server env)",
+      "title": "GPT / OpenAI settings",
+      "subtitle": "Status and managed settings",
       "empty": "Could not load configuration.",
       "statusTitle": "Status",
       "configured": "OPENAI_API_KEY",
       "useOpenAI": "CHATBOT_USE_OPENAI",
+      "openAiMode": "CHATBOT_OPENAI_MODE",
       "model": "OPENAI_CHAT_MODEL",
-      "minConfidence": "Min confidence (FAQ)",
+      "minConfidence": "Min confidence (fallback)",
       "temperature": "Temperature",
+      "source": "Source",
       "yes": "Yes",
       "no": "No",
-      "note": "The API key is never shown in UI. Configuration is managed via .env.local and requires a server restart.",
-      "promptTitle": "System prompt",
+      "note": "The API key is never shown in UI. OPENAI_API_KEY is managed via .env.local; other settings can be managed in Admin (if Supabase is configured).",
+      "settingsTitle": "Settings",
+      "noticeSaved": "Saved.",
+      "promptTitle": "Training prompt",
       "promptLt": "LT prompt",
       "promptEn": "EN prompt",
       "set": "Set",
       "notSet": "Not set",
       "defaultPrompt": "Using the default prompt (no env override).",
       "envTitle": "Env example (.env.local)"
+    },
+
+    "training": {
+      "title": "GPT training",
+      "subtitle": "Export knowledge base to fine-tune format and (optionally) start a fine-tune",
+      "exportTitle": "Export data",
+      "exportNote": "Generates a JSONL file from knowledge base entries (question → answer).",
+      "exportJsonl": "Export JSONL",
+      "locale": "Language",
+      "fineTuneTitle": "Fine-tune (optional)",
+      "fineTuneNote": "Fine-tune from admin UI is disabled by default (cost control). Enable CHATBOT_ENABLE_FINE_TUNE_ADMIN=true.",
+      "baseModel": "Base model",
+      "startFineTune": "Start fine-tune",
+      "starting": "Starting...",
+      "refreshStatus": "Refresh status",
+      "jobId": "Job ID",
+      "status": "Status",
+      "statusValue": "Status",
+      "fineTunedModel": "Fine-tuned model"
     },
     "form": {
       "enabled": "Enabled",
@@ -1666,8 +1694,8 @@
       "supabaseNotConfigured": "Supabase is not configured (.env.local is missing NEXT_PUBLIC_SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY).",
       "supabaseMissingTable": "Missing Supabase DB table: public.{table}. Apply SQL migrations from supabase/migrations and run in Supabase SQL Editor: select pg_notify('pgrst','reload schema');",
       "loadEventsFailed": "Failed to load events.",
-      "loadFaqFailed": "Failed to load FAQ entries.",
-      "importFailed": "Failed to import default FAQ.",
+      "loadFaqFailed": "Failed to load knowledge base entries.",
+      "importFailed": "Failed to import default knowledge base.",
       "saveFailed": "Failed to save.",
       "deleteFailed": "Failed to delete.",
       "questionRequired": "Question is required.",
@@ -1675,3 +1703,4 @@
     }
   }
 }
+

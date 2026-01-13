@@ -112,7 +112,7 @@ export default function ProjectsPage() {
       </div>
 
       {/* Pagination + Load More */}
-      <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px]">
+      <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px] pb-[120px]">
         {/* Pagination */}
         <div className="flex items-center justify-center gap-[8px] mt-[80px]">
           {/* Left Arrow */}
@@ -154,12 +154,7 @@ export default function ProjectsPage() {
           </button>
         </div>
 
-        {/* Load More Button */}
-        <div className="flex justify-center mt-[24px] pb-[120px]">
-          <button className="bg-[#161616] h-[48px] px-[40px] py-[10px] rounded-[100px] flex items-center justify-center font-['Outfit'] font-normal text-white text-[12px] tracking-[0.6px] uppercase hover:opacity-90 transition-opacity">
-            Load more
-          </button>
-        </div>
+
       </div>
     </section>
   );

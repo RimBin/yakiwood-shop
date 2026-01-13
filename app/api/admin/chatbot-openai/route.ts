@@ -1,14 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { requireAdmin, AdminAuthError } from '@/lib/supabase/admin'
+import { getChatbotSettings } from '@/lib/chatbot/settings'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-
-function getEnvBool(name: string, defaultValue = false): boolean {
-  const v = (process.env[name] || '').trim().toLowerCase()
-  if (!v) return defaultValue
-  return v === '1' || v === 'true' || v === 'yes' || v === 'on'
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,18 +11,11 @@ export async function GET(request: NextRequest) {
 
     const configured = Boolean(process.env.OPENAI_API_KEY)
     const model = process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini'
-    const useOpenAI = getEnvBool('CHATBOT_USE_OPENAI', true)
 
-    const minConfidence = Number.isFinite(Number(process.env.CHATBOT_OPENAI_MIN_CONFIDENCE))
-      ? Number(process.env.CHATBOT_OPENAI_MIN_CONFIDENCE)
-      : 0.75
+    const { settings, source } = await getChatbotSettings()
 
-    const temperature = Number.isFinite(Number(process.env.CHATBOT_OPENAI_TEMPERATURE))
-      ? Number(process.env.CHATBOT_OPENAI_TEMPERATURE)
-      : 0.2
-
-    const promptLt = (process.env.CHATBOT_SYSTEM_PROMPT_LT || '').trim()
-    const promptEn = (process.env.CHATBOT_SYSTEM_PROMPT_EN || '').trim()
+    const promptLt = settings.systemPromptLt
+    const promptEn = settings.systemPromptEn
 
     const preview = (value: string) => {
       const v = value.replace(/\s+/g, ' ').trim()
@@ -40,9 +28,11 @@ export async function GET(request: NextRequest) {
       data: {
         configured,
         model,
-        useOpenAI,
-        minConfidence,
-        temperature,
+        source,
+        useOpenAI: settings.useOpenAI,
+        openAiMode: settings.openAiMode,
+        minConfidence: settings.minConfidence,
+        temperature: settings.temperature,
         prompts: {
           lt: {
             isSet: Boolean(promptLt),

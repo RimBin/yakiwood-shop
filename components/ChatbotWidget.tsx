@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { toLocalePath } from '@/i18n/paths';
 
 type BotResponse = {
   ok: boolean;
@@ -73,6 +74,7 @@ export default function ChatbotWidget() {
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations('chatbot');
+  const currentLocale = locale === 'en' ? 'en' : 'lt';
   const [open, setOpen] = useState(false);
   const [sessionId, setSessionId] = useState<string>('');
   const [input, setInput] = useState('');
@@ -157,7 +159,7 @@ export default function ChatbotWidget() {
           sessionId,
           message: trimmed,
           page: pathname || '/',
-          locale: locale === 'en' ? 'en' : 'lt',
+          locale: currentLocale,
           history: historyForApi,
         }),
       });
@@ -213,9 +215,9 @@ export default function ChatbotWidget() {
                 type="button"
                 onClick={() => setOpen(false)}
                 className="h-[32px] w-[32px] rounded-full border border-[#161616] text-[#161616] hover:bg-[#F5F5F5]"
-                aria-label="Uždaryti"
+                aria-label={t('aria.close')}
               >
-                ×
+                X
               </button>
             </div>
           </div>
@@ -267,7 +269,7 @@ export default function ChatbotWidget() {
 
             <div className="pt-[8px]">
               <Link
-                href="/kontaktai"
+                href={toLocalePath('/kontaktai', currentLocale)}
                 className="inline-block font-['Outfit'] text-[12px] underline underline-offset-2 text-[#161616] hover:opacity-80"
               >
                 {t('handoff')}
@@ -304,7 +306,7 @@ export default function ChatbotWidget() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="h-[52px] rounded-[100px] bg-[#161616] text-white px-[16px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] shadow-lg hover:opacity-90"
-        aria-label="Atidaryti pagalbą"
+        aria-label={t('aria.open')}
       >
         {t('button')}
       </button>

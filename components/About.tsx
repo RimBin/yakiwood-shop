@@ -461,11 +461,11 @@ export default function About() {
           </p>
           <div className="flex flex-col md:flex-row gap-[16px] items-center">
             <Link
-              href={toLocalePath('/kontaktai', currentLocale)}
+              href={toLocalePath('/products', currentLocale)}
               className="bg-[#161616] rounded-[100px] px-[40px] py-[10px] h-[48px] flex items-center justify-center"
             >
               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                get an offer
+                shop now
               </p>
             </Link>
             <Link

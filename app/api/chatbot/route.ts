@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { matchFaq, rankFaq } from '@/lib/chatbot/match';
 import { getFaqEntries } from '@/lib/chatbot/faq';
 import { appendEvent } from '@/lib/chatbot/storage';
+import { getChatbotSettings } from '@/lib/chatbot/settings';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -23,26 +24,10 @@ const PayloadSchema = z.object({
     .optional(),
 });
 
-function getEnvBool(name: string, defaultValue = false): boolean {
-  const v = (process.env[name] || '').trim().toLowerCase();
-  if (!v) return defaultValue;
-  return v === '1' || v === 'true' || v === 'yes' || v === 'on';
-}
-
-function getLocaleSystemPrompt(locale: 'lt' | 'en'): string {
-  const lt =
-    process.env.CHATBOT_SYSTEM_PROMPT_LT ||
-    'Tu esi Yakiwood pagalbos asistentas. Atsakyk aiškiai ir trumpai. Jei trūksta informacijos – užduok 1-2 patikslinančius klausimus. Jei reikia individualaus pasiūlymo, nukreipk į Kontaktus.';
-  const en =
-    process.env.CHATBOT_SYSTEM_PROMPT_EN ||
-    'You are a Yakiwood support assistant. Answer clearly and concisely. If information is missing, ask 1–2 clarifying questions. For custom quotes, direct the user to Contact.';
-  return locale === 'en' ? en : lt;
-}
-
 function buildFaqContextBlock(ranked: { entry: { question: string; answer: string } }[]): string {
   if (!ranked.length) return '';
   const lines: string[] = [];
-  lines.push('FAQ context (use when relevant):');
+  lines.push('Knowledge base context (use when relevant):');
   for (const r of ranked) {
     const q = String(r.entry.question || '').slice(0, 300);
     const a = String(r.entry.answer || '').slice(0, 900);
@@ -59,30 +44,29 @@ async function replyWithOpenAI(args: {
   history: Array<{ role: 'user' | 'assistant'; text: string }>;
   page: string | null;
   faqRanked: Array<{ entry: { question: string; answer: string } }>;
+  systemPrompt: string;
+  model: string;
+  temperature: number;
 }): Promise<{ reply: string; model: string } | null> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return null;
 
-  const useOpenAI = getEnvBool('CHATBOT_USE_OPENAI', true);
-  if (!useOpenAI) return null;
-
   const OpenAI = (await import('openai')).default;
   const client = new OpenAI({ apiKey });
 
-  const model = process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
-  const temperature = Number.isFinite(Number(process.env.CHATBOT_OPENAI_TEMPERATURE))
-    ? Number(process.env.CHATBOT_OPENAI_TEMPERATURE)
-    : 0.2;
+  const model = args.model;
+  const temperature = args.temperature;
 
-  const systemPrompt = getLocaleSystemPrompt(args.locale);
+  const systemPrompt = args.systemPrompt;
   const faqBlock = buildFaqContextBlock(args.faqRanked);
   const pageLine = args.page ? `Current page: ${args.page}` : '';
 
+  const contactPath = args.locale === 'en' ? '/contact' : '/kontaktai';
   const system = [
     systemPrompt,
     'Rules:',
     '- Do not ask for or store sensitive personal data.',
-    '- If unsure, suggest contacting us via /kontaktai.',
+    `- If unsure, suggest contacting us via ${contactPath}.`,
     faqBlock,
     pageLine,
   ]
@@ -131,6 +115,10 @@ function getRateLimiterStore(): Map<string, RateLimitEntry> {
   return g.__chatbotRateLimit;
 }
 
+function getRateLimitMessage(locale: 'lt' | 'en') {
+  return locale === 'en' ? 'Too many requests. Please try again later.' : 'Per daug uzklausu. Pabandykite veliau.';
+}
+
 function checkRateLimit(key: string, now: number) {
   // 30 requests / 5 minutes per IP+session
   const limit = 30;
@@ -173,11 +161,13 @@ export async function POST(request: Request) {
   const history = Array.isArray(parsed.data.history) ? parsed.data.history : [];
   const localeValue: 'lt' | 'en' = locale === 'en' ? 'en' : 'lt';
 
+  const { settings } = await getChatbotSettings();
+
   const rateKey = `${ip}:${sessionId}`;
   const rate = checkRateLimit(rateKey, now);
   if (!rate.ok) {
     return NextResponse.json(
-      { ok: false, error: 'Per daug užklausų. Pabandykite vėliau.' },
+      { ok: false, error: getRateLimitMessage(localeValue) },
       { status: 429, headers: { 'Retry-After': String(rate.retryAfterSeconds) } }
     );
   }
@@ -193,23 +183,29 @@ export async function POST(request: Request) {
   const ranked = rankFaq(message, entries, 3);
   const { entry, confidence } = matchFaq(message, entries);
 
-  const minConfidence = Number.isFinite(Number(process.env.CHATBOT_OPENAI_MIN_CONFIDENCE))
-    ? Number(process.env.CHATBOT_OPENAI_MIN_CONFIDENCE)
-    : 0.75;
+  const apiKeyConfigured = Boolean(process.env.OPENAI_API_KEY);
+  const canUseOpenAi = apiKeyConfigured && settings.useOpenAI && settings.openAiMode !== 'off';
+  const shouldUseOpenAi =
+    canUseOpenAi && (settings.openAiMode === 'always' || confidence < settings.minConfidence);
 
-  const shouldUseOpenAI = Boolean(process.env.OPENAI_API_KEY) && confidence < minConfidence;
-
-  const openAiResult = shouldUseOpenAI
+  const openAiResult = shouldUseOpenAi
     ? await replyWithOpenAI({
         locale: localeValue,
         message,
         history,
         page: page ?? null,
         faqRanked: ranked,
+        systemPrompt: localeValue === 'en' ? settings.systemPromptEn : settings.systemPromptLt,
+        model: process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini',
+        temperature: settings.temperature,
       })
     : null;
 
   const reply = openAiResult?.reply ?? entry.answer;
+  const handoff =
+    localeValue === 'en'
+      ? { label: 'Contact', href: '/contact' }
+      : { label: 'Kontaktai', href: '/kontaktai' };
 
   await appendEvent({
     sessionId,
@@ -220,6 +216,7 @@ export async function POST(request: Request) {
       confidence,
       openai: Boolean(openAiResult),
       openaiModel: openAiResult?.model ?? null,
+      openaiMode: settings.openAiMode,
     },
   });
 
@@ -230,7 +227,7 @@ export async function POST(request: Request) {
       faqId: entry.id,
       confidence,
       suggestions: entry.suggestions ?? [],
-      handoff: { label: 'Kontaktai', href: '/kontaktai' },
+      handoff,
     },
   });
 }

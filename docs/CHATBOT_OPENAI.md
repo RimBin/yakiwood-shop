@@ -1,6 +1,6 @@
 # Chatbot + OpenAI
 
-This project’s public chatbot (`/api/chatbot`) can optionally use OpenAI to generate conversational replies, while still grounding on your FAQ entries.
+This project’s public chatbot (`/api/chatbot`) can optionally use OpenAI to generate conversational replies, while grounding on your knowledge base (Q/A entries).
 
 ## Enable
 
@@ -10,7 +10,7 @@ Add to `.env.local`:
 OPENAI_API_KEY=your_key_here
 ```
 
-That’s it — when configured, the API will use OpenAI for *low-confidence* FAQ matches.
+That’s it — when configured, the API can run in one of three modes (see below).
 
 ## Optional tuning (recommended)
 
@@ -21,7 +21,13 @@ OPENAI_CHAT_MODEL=gpt-4o-mini
 # Turn OpenAI mode on/off (default: true if OPENAI_API_KEY exists)
 CHATBOT_USE_OPENAI=true
 
-# When FAQ confidence is below this value, OpenAI is used (default: 0.75)
+# OpenAI mode:
+# - always: always use OpenAI (default)
+# - fallback: use knowledge-base answer when confidence is high, otherwise OpenAI
+# - off: disable OpenAI usage
+CHATBOT_OPENAI_MODE=always
+
+# When in fallback mode, OpenAI is used if confidence is below this value (default: 0.75)
 CHATBOT_OPENAI_MIN_CONFIDENCE=0.75
 
 # Sampling temperature (default: 0.2)
@@ -33,8 +39,17 @@ CHATBOT_SYSTEM_PROMPT_EN=You are a Yakiwood support assistant...
 ```
 
 Tips:
-- If you want OpenAI to answer **almost always**, set `CHATBOT_OPENAI_MIN_CONFIDENCE=1.01`.
-- If you want **FAQ-only** answers, unset `OPENAI_API_KEY` or set `CHATBOT_USE_OPENAI=false`.
+- If you want **OpenAI always**, set `CHATBOT_OPENAI_MODE=always`.
+- If you want **knowledge-base only**, set `CHATBOT_OPENAI_MODE=off` or `CHATBOT_USE_OPENAI=false`.
+- If you want **hybrid**, set `CHATBOT_OPENAI_MODE=fallback` and tweak `CHATBOT_OPENAI_MIN_CONFIDENCE`.
+
+## Admin-managed settings (optional)
+
+If Supabase is configured, admins can manage non-secret settings (prompts, mode, temperature) via:
+
+- `/admin/chatbot` → `AI` tab
+
+This stores settings in Supabase (`public.chatbot_settings`). The API key (`OPENAI_API_KEY`) still stays in `.env.local`.
 
 ## Admin status endpoint
 

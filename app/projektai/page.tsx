@@ -117,7 +117,7 @@ export default function ProjectsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-center gap-[8px] mt-[80px]">
+        <div className="flex items-center justify-center gap-[8px] mt-[80px] pb-[120px]">
           {/* Left Arrow */}
           <button
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
@@ -157,12 +157,7 @@ export default function ProjectsPage() {
           </button>
         </div>
 
-        {/* Load More Button */}
-        <div className="flex justify-center mt-[24px] pb-[120px]">
-          <button className="bg-[#161616] h-[48px] px-[40px] py-[10px] rounded-[100px] flex items-center justify-center font-['Outfit'] font-normal text-white text-[12px] tracking-[0.6px] uppercase hover:opacity-90 transition-opacity">
-            Load more
-          </button>
-        </div>
+
       </div>
     </section>
   );

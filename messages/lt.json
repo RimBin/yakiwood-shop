@@ -13,32 +13,36 @@
     "pavadinimas": "apie mus"
   },
   "chatbot": {
-    "button": "Pagalba",
-    "title": "Pagalba (DUK)",
-    "subtitle": "Atsakymai pagal dažniausius klausimus",
-    "welcome": "Sveiki! Aš galiu padėti su dažniausiais klausimais (kaina, terminai, pristatymas, priežiūra, pavyzdžiai). Parašykite klausimą.",
+    "button": "Pokalbis",
+    "title": "Pokalbis su Yakiwood",
+    "subtitle": "Klauskite apie produktus, projektus ar pasiūlymą",
+    "welcome": "Sveiki! Esu Yakiwood asistentas. Klauskite apie produktus, kainas, terminus ar projektą — padėsiu.",
     "note": "Pastaba: nerašykite jautrios informacijos (pvz., asmens kodo). Pokalbis gali būti naudojamas aptarnavimui gerinti.",
-    "handoff": "Reikia žmogaus? Parašykite per Kontaktus",
-    "placeholder": "Parašykite klausimą…",
+    "handoff": "Reikia žmogaus? Susisiekime per Kontaktus",
+    "placeholder": "Parašykite žinutę...",
     "send": "Siųsti",
     "clear": "Išvalyti",
-    "typing": "Rašau…",
+    "typing": "Rašau...",
+    "aria": {
+      "open": "Atidaryti pokalbį",
+      "close": "Uždaryti pokalbį"
+    },
     "errors": {
       "generic": "Nepavyko atsakyti. Pabandykite vėliau.",
       "network": "Klaida. Pabandykite vėliau."
     },
     "suggestions": {
-      "price": "Kiek kainuoja?",
-      "delivery": "Ar pristatote visoje Lietuvoje?",
+      "price": "Noriu pasiūlymo projektui",
+      "delivery": "Kokie pristatymo variantai?",
       "createRole": {
         "title": "Sukurti naują rolę",
         "label": "Nauja rolė",
         "placeholder": "pvz. partneris",
         "button": "Sukurti rolę"
       },
-      "productionTime": "Kiek laiko trunka gamyba?",
+      "productionTime": "Kiek trunka gamyba?",
       "maintenance": "Kaip prižiūrėti paviršių?",
-      "samples": "Ar galima gauti pavyzdžių?"
+      "samples": "Ar galite atsiųsti pavyzdžių?"
     }
   },
   "account": {
@@ -1333,11 +1337,12 @@
   },
   "adminChatbot": {
     "title": "Chatbot",
-    "subtitle": "Valdykite sesijas ir DUK",
+    "subtitle": "Valdykite pokalbius, žinių bazę ir GPT mokymą",
     "tabs": {
       "sessions": "Sesijos",
-      "faq": "DUK",
-      "ai": "AI"
+      "faq": "Žinių bazė",
+      "ai": "AI",
+      "training": "Mokymas"
     },
     "breadcrumbs": {
       "home": "Pradžia",
@@ -1366,7 +1371,7 @@
       "eventsCount": "{count} įvyk."
     },
     "faq": {
-      "title": "Chatbot DUK",
+      "title": "Žinių bazė (Klausimai ir atsakymai)",
       "empty": "Kol kas nėra įrašų.",
       "importDefaults": "Įkelti numatytus klausimus",
       "importing": "Įkeliama...",
@@ -1379,25 +1384,48 @@
       "noticeImported": "Įkelta: {count} įrašų."
     },
     "ai": {
-      "title": "OpenAI (AI) nustatymai",
-      "subtitle": "Būsena ir konfigūracija (skaitoma iš serverio env)",
+      "title": "GPT / OpenAI nustatymai",
+      "subtitle": "Būsena ir valdomi nustatymai",
       "empty": "Nepavyko nuskaityti konfigūracijos.",
       "statusTitle": "Būsena",
       "configured": "OPENAI_API_KEY",
       "useOpenAI": "CHATBOT_USE_OPENAI",
+      "openAiMode": "CHATBOT_OPENAI_MODE",
       "model": "OPENAI_CHAT_MODEL",
-      "minConfidence": "Min. pasitikėjimas (FAQ)",
+      "minConfidence": "Min. pasitikėjimas (fallback)",
       "temperature": "Temperatūra",
+      "source": "Šaltinis",
       "yes": "Taip",
       "no": "Ne",
-      "note": "API raktas niekada nerodomas UI. Konfigūracija valdoma per .env.local ir reikalauja serverio restart.",
-      "promptTitle": "System prompt",
+      "note": "API raktas niekada nerodomas UI. OPENAI_API_KEY valdoma per .env.local; kiti nustatymai gali būti valdomi per Admin (jei sukonfigūruotas Supabase).",
+      "settingsTitle": "Nustatymai",
+      "noticeSaved": "Išsaugota.",
+      "promptTitle": "Mokymo promptas",
       "promptLt": "LT prompt",
       "promptEn": "EN prompt",
       "set": "Nustatyta",
       "notSet": "Nėra",
       "defaultPrompt": "Naudojamas numatytas prompt (neperrašyta env kintamaisiais).",
       "envTitle": "Env pavyzdys (.env.local)"
+    },
+
+    "training": {
+      "title": "GPT mokymas",
+      "subtitle": "Eksportuokite žinių bazę į fine-tune formatą ir (pasirinktinai) paleiskite fine-tune",
+      "exportTitle": "Duomenų eksportas",
+      "exportNote": "Sugeneruoja JSONL failą iš žinių bazės įrašų (klausimas → atsakymas).",
+      "exportJsonl": "Eksportuoti JSONL",
+      "locale": "Kalba",
+      "fineTuneTitle": "Fine-tune (pasirinktinai)",
+      "fineTuneNote": "Fine-tune paleidimas per admin UI yra išjungtas pagal nutylėjimą (dėl kaštų). Įjunkite CHATBOT_ENABLE_FINE_TUNE_ADMIN=true.",
+      "baseModel": "Bazinis modelis",
+      "startFineTune": "Pradėti fine-tune",
+      "starting": "Paleidžiama...",
+      "refreshStatus": "Atnaujinti būseną",
+      "jobId": "Job ID",
+      "status": "Būsena",
+      "statusValue": "Status",
+      "fineTunedModel": "Fine-tuned model"
     },
     "form": {
       "enabled": "Įjungta",
@@ -1423,8 +1451,8 @@
       "supabaseNotConfigured": "Supabase nesukonfigūruotas (.env.local trūksta NEXT_PUBLIC_SUPABASE_URL ir/ar SUPABASE_SERVICE_ROLE_KEY).",
       "supabaseMissingTable": "Trūksta Supabase DB lentelės: public.{table}. Paleisk migracijas iš supabase/migrations ir Supabase SQL Editor'e įvykdyk: select pg_notify('pgrst','reload schema');",
       "loadEventsFailed": "Nepavyko užkrauti įvykių.",
-      "loadFaqFailed": "Nepavyko užkrauti DUK įrašų.",
-      "importFailed": "Nepavyko įkelti numatytų DUK.",
+      "loadFaqFailed": "Nepavyko užkrauti žinių bazės įrašų.",
+      "importFailed": "Nepavyko įkelti numatytų klausimų.",
       "saveFailed": "Nepavyko išsaugoti.",
       "deleteFailed": "Nepavyko ištrinti.",
       "questionRequired": "Klausimas yra privalomas.",
