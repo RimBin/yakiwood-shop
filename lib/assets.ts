@@ -81,6 +81,8 @@ const localAssets = {
 
   // Hero
   heroVector: '/images/hero/Vector.png',
+  heroPlank: '/images/hero/4b7525119bfe28d75ceb0720e002c38c77eaf8d6.png',
+  ctaBackground: '/images/solutions/hero.webp',
 
   // Finishes (preview images)
   finishSpruceBlack: '/assets/finishes/spruce/shou-sugi-ban-spruce-black-facade-terrace-cladding.webp',
@@ -188,8 +190,10 @@ export const assets = {
     cart: localAssets.imgCart,
   },
   payments: localAssets.imgPayments,
-  // Expose hero vector directly
+  // Hero assets
   heroVector: localAssets.heroVector,
+  heroPlank: localAssets.heroPlank,
+  ctaBackground: localAssets.ctaBackground,
 
   finishes: {
     spruce: {

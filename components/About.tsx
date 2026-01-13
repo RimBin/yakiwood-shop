@@ -6,8 +6,8 @@ import { useLocale } from 'next-intl';
 import { PageCover } from '@/components/shared/PageLayout';
 import { toLocalePath } from '@/i18n/paths';
 
-// Image assets from Figma
-const imgVideo = "https://www.figma.com/api/mcp/asset/477aa6a4-49f3-44f4-8e9a-ebf0bfe0cd06";
+// Local image for the about video thumbnail
+const imgVideo = '/assets/about/fire.png';
 const imgTeam1 = "https://www.figma.com/api/mcp/asset/bf70d331-5e28-461f-8c66-0da654728647";
 const imgTeam2 = "https://www.figma.com/api/mcp/asset/87885949-1e42-4fa2-ac0e-c161d0979163";
 const imgTeam3 = "https://www.figma.com/api/mcp/asset/2bcc8d00-1d2e-4322-bef2-c14fa440d13a";

@@ -21,6 +21,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const addItem = useCartStore((state) => state.addItem);
   const cartItems = useCartStore((state) => state.items);
 
+  const widthOptionsMm = useMemo(() => [95, 120, 145] as const, []);
+  const lengthOptionsMm = useMemo(() => [3000, 3300, 3600] as const, []);
+
   const cartTotalAreaM2 = useMemo(() => {
     return cartItems.reduce((sum, item) => {
       const a = item.pricingSnapshot?.totalAreaM2;
@@ -77,6 +80,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(colorOptions[0] || null);
   const [selectedFinish, setSelectedFinish] = useState<ProductProfileVariant | null>(profileOptions[0] || null);
 
+  const [selectedWidthMm, setSelectedWidthMm] = useState<number>(() => widthOptionsMm[0]);
+  const [selectedLengthMm, setSelectedLengthMm] = useState<number>(() => lengthOptionsMm[0]);
+
   const usageTypeForQuote: UsageType | undefined = useMemo(() => {
     const v = String(product.category || '').toLowerCase();
     if (v === 'facade' || v === 'terrace' || v === 'interior' || v === 'fence') return v;
@@ -132,9 +138,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   }, [effectivePrice, selectedColor?.priceModifier, selectedFinish?.priceModifier]);
 
   const handleAddToCart = () => {
-    const widthMm = selectedFinish?.dimensions?.width;
-    const lengthMm = selectedFinish?.dimensions?.length;
-
     const unitPricePerBoard = quotedPricing?.unitPricePerBoard;
     const unitPricePerM2 = quotedPricing?.unitPricePerM2;
     const unitAreaM2 = quotedPricing?.unitAreaM2;
@@ -151,8 +154,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         colorVariantId: selectedColor?.id,
         profileVariantId: selectedFinish?.id,
         thicknessMm: selectedThicknessMm,
-        widthMm: typeof widthMm === 'number' ? widthMm : undefined,
-        lengthMm: typeof lengthMm === 'number' ? lengthMm : undefined,
+        widthMm: selectedWidthMm,
+        lengthMm: selectedLengthMm,
       },
       inputMode: 'boards',
       pricingSnapshot:
@@ -171,17 +174,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   };
 
   useEffect(() => {
-    const widthMm = selectedFinish?.dimensions?.width;
-    const lengthMm = selectedFinish?.dimensions?.length;
+    const widthMm = selectedWidthMm;
+    const lengthMm = selectedLengthMm;
     const unitAreaM2ForThreshold =
       typeof widthMm === 'number' && typeof lengthMm === 'number' ? (widthMm / 1000) * (lengthMm / 1000) : 0;
 
     if (!product?.id) return;
-    if (typeof widthMm !== 'number' || typeof lengthMm !== 'number') {
-      setQuotedPricing(null);
-      setQuoteError(null);
-      return;
-    }
 
     const controller = new AbortController();
 
@@ -247,7 +245,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     run();
 
     return () => controller.abort();
-  }, [product?.id, usageTypeForQuote, selectedFinish?.id, selectedFinish?.dimensions?.width, selectedFinish?.dimensions?.length, selectedColor?.id, selectedThicknessMm, cartTotalAreaM2, currentLocale]);
+  }, [product?.id, usageTypeForQuote, selectedFinish?.id, selectedColor?.id, selectedThicknessMm, selectedWidthMm, selectedLengthMm, cartTotalAreaM2, currentLocale]);
 
   const solutions = [
     { id: 'facade', label: t('solutions.facade') },
@@ -291,6 +289,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       spalva: selectedColor?.name ?? '',
       profilis: selectedFinish?.name ?? '',
       storis: selectedThicknessLabel,
+      plotis: String(selectedWidthMm),
+      ilgis: String(selectedLengthMm),
       sprendimas: product.category ?? '',
       perziura: show3D ? '3d' : 'foto',
     },
@@ -484,9 +484,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
             {/* Thickness */}
             <div className="flex flex-col gap-[8px]">
-              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">
-                {currentLocale === 'lt' ? 'Storis' : 'Thickness'}
-              </p>
+              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('thicknessLabel')}</p>
               <div className="flex gap-[8px] flex-wrap">
                 {thicknessOptions.map((opt) => {
                   const active = selectedThicknessMm === opt.valueMm;
@@ -503,6 +501,56 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                       aria-pressed={active}
                     >
                       {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Width */}
+            <div className="flex flex-col gap-[8px]">
+              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('widthLabel')}</p>
+              <div className="flex gap-[8px] flex-wrap">
+                {widthOptionsMm.map((valueMm) => {
+                  const active = selectedWidthMm === valueMm;
+                  return (
+                    <button
+                      key={valueMm}
+                      type="button"
+                      onClick={() => setSelectedWidthMm(valueMm)}
+                      className={`h-[24px] px-[10px] rounded-[100px] border font-['Outfit'] text-[10px] tracking-[0.6px] uppercase transition-colors ${
+                        active
+                          ? 'bg-[#161616] border-[#161616] text-white'
+                          : 'bg-transparent border-[#BBBBBB] text-[#535353]'
+                      }`}
+                      aria-pressed={active}
+                    >
+                      {valueMm} mm
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Length */}
+            <div className="flex flex-col gap-[8px]">
+              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">{t('lengthLabel')}</p>
+              <div className="flex gap-[8px] flex-wrap">
+                {lengthOptionsMm.map((valueMm) => {
+                  const active = selectedLengthMm === valueMm;
+                  return (
+                    <button
+                      key={valueMm}
+                      type="button"
+                      onClick={() => setSelectedLengthMm(valueMm)}
+                      className={`h-[24px] px-[10px] rounded-[100px] border font-['Outfit'] text-[10px] tracking-[0.6px] uppercase transition-colors ${
+                        active
+                          ? 'bg-[#161616] border-[#161616] text-white'
+                          : 'bg-transparent border-[#BBBBBB] text-[#535353]'
+                      }`}
+                      aria-pressed={active}
+                    >
+                      {valueMm} mm
                     </button>
                   );
                 })}

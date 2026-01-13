@@ -277,8 +277,10 @@ export default function HomeComposite() {
       </div>
 
       {/* CTA */}
-      <div className="absolute left-1/2 top-[9903px] translate-x-[-50%] w-[1440px]" data-name="CTA">
-        <p className="absolute left-1/2 top-[113px] -translate-x-1/2 font-['DM_Sans:Light',sans-serif] text-[128px] leading-[0.95] tracking-[-6.4px] text-center text-[#161616]">Ready to <span className="font-['Tiro_Tamil:Italic',sans-serif] italic">build</span> with fire?</p>
+      <div className="absolute left-1/2 top-[9903px] translate-x-[-50%] w-[1440px]" data-name="CTA">        {/* Background image (shared with Solutions CTA) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[625px] lg:w-[1099px] h-[599px] lg:h-[1053px] opacity-15 mix-blend-luminosity pointer-events-none">
+          <Image src={assets.ctaBackground} alt="" fill className="object-contain" />
+        </div>        <p className="absolute left-1/2 top-[113px] -translate-x-1/2 font-['DM_Sans:Light',sans-serif] text-[128px] leading-[0.95] tracking-[-6.4px] text-center text-[#161616]">Ready to <span className="font-['Tiro_Tamil:Italic',sans-serif] italic">build</span> with fire?</p>
         <div className="absolute left-1/2 top-[423px] -translate-x-1/2 flex gap-[16px]">
           <div className="border border-[#161616] rounded-[100px] h-[48px] px-[40px] flex items-center"><span className="font-['Outfit:Regular',sans-serif] text-[12px] tracking-[0.6px] uppercase text-[#161616]">get in touch</span></div>
           <div className="bg-[#161616] rounded-[100px] h-[48px] px-[40px] flex items-center"><span className="font-['Outfit:Regular',sans-serif] text-[12px] tracking-[0.6px] uppercase text-white">Choose wood</span></div>

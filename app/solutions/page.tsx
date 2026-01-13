@@ -373,7 +373,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
         {/* Background Image */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[625px] lg:w-[1099px] h-[599px] lg:h-[1053px] opacity-15 mix-blend-luminosity pointer-events-none">
           <Image
-            src="/images/solutions/cta-background.jpg"
+            src={assets.ctaBackground}
             alt=""
             fill
             className="object-contain"

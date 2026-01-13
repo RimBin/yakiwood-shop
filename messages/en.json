@@ -300,11 +300,15 @@
     "applications": "Applications"
   },
   "productPage": {
+    "fromPrice": "From {price} €/m²",
     "back": "Back",
     "photo": "Photo",
     "view3d": "3D",
     "toggleShowPhotoAria": "Show photo",
     "toggleShow3dAria": "Show 3D view",
+    "thicknessLabel": "Thickness",
+    "widthLabel": "Width",
+    "lengthLabel": "Length",
     "solutionsLabel": "Solutions",
     "profilesLabel": "Profiles",
     "benefitsLabel": "Benefits",
@@ -1447,7 +1451,7 @@
     "emptyDescriptionPrefix": "Products will be added soon. If you have any questions,",
     "emptyContactLink": "contact us",
     "emptyDescriptionSuffix": ".",
-    "fromPrice": "From {price} €",
+    "fromPrice": "From {price} €/m²",
     "loadMore": "Show more"
   },
   "productDetail": {

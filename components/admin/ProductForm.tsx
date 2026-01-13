@@ -15,6 +15,17 @@ const ALLOWED_WOOD_TYPES = ['spruce', 'larch'] as const;
 const WIDTH_OPTIONS_MM = [95, 120, 145] as const;
 const LENGTH_OPTIONS_MM = [3000, 3300, 3600] as const;
 
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 function createProductSchema(t: (key: string) => string) {
   return z.object({
     name: z.string().min(1, t('validation.nameRequired')),
@@ -40,7 +51,6 @@ function createProductSchema(t: (key: string) => string) {
     width: z.number().optional(),
     height: z.number().optional(),
     depth: z.number().optional(),
-    weight: z.number().optional(),
   });
 }
 
@@ -118,6 +128,7 @@ export default function ProductForm({ product, mode }: Props) {
   const [name, setName] = useState(product?.name || '');
   const [nameEn, setNameEn] = useState(product?.name_en || '');
   const [slug, setSlug] = useState(product?.slug || '');
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
   const [description, setDescription] = useState(product?.description || '');
   const [descriptionEn, setDescriptionEn] = useState(product?.description_en || '');
   const [usageType, setUsageType] = useState(() => {
@@ -142,7 +153,6 @@ export default function ProductForm({ product, mode }: Props) {
     return mode === 'create' ? getThicknessValueForUsage(product?.usage_type || 'facade') : '';
   });
   const [depth, setDepth] = useState(() => (product?.depth?.toString() || (mode === 'create' ? String(LENGTH_OPTIONS_MM[0]) : '')));
-  const [weight, setWeight] = useState(product?.weight?.toString() || '');
   const [imageUrl, setImageUrl] = useState(product?.image_url || '');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(product?.image_url || null);
@@ -180,19 +190,20 @@ export default function ProductForm({ product, mode }: Props) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteModal, setDeleteModal] = useState(false);
 
-  // Auto-generate slug from name
+  // Auto-generate slug from the active language name.
+  // Stops once user edits slug manually (unless they clear it).
   useEffect(() => {
-    if (mode === 'create' && name && !slug) {
-      const generatedSlug = name
-        .toLowerCase()
-        .normalize('NFKD')
-        .replace(/[^\w\s-]/g, '')
-        .trim()
-        .replace(/[\s_-]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-      setSlug(generatedSlug);
-    }
-  }, [name, mode, slug]);
+    if (mode !== 'create') return;
+    if (isSlugManuallyEdited) return;
+
+    // Only auto-generate when slug is empty; user can clear slug to re-generate.
+    if (slug) return;
+
+    const source = nameEn?.trim() ? nameEn : name;
+    const next = slugify(source || '');
+    if (!next) return;
+    setSlug(next);
+  }, [mode, isSlugManuallyEdited, locale, name, nameEn, slug]);
 
   // Keep derived fields in sync
   useEffect(() => {
@@ -371,7 +382,6 @@ export default function ProductForm({ product, mode }: Props) {
         width: width ? parseFloat(width) : undefined,
         height: height ? parseFloat(height) : undefined,
         depth: depth ? parseFloat(depth) : undefined,
-        weight: weight ? parseFloat(weight) : undefined,
       });
       setErrors({});
       return true;
@@ -426,7 +436,6 @@ export default function ProductForm({ product, mode }: Props) {
         width: width ? parseFloat(width) : null,
         height: height ? parseFloat(height) : null,
         depth: depth ? parseFloat(depth) : null,
-        weight: weight ? parseFloat(weight) : null,
         image_url: finalImageUrl,
       };
 
@@ -775,7 +784,11 @@ export default function ProductForm({ product, mode }: Props) {
               <input
                 type="text"
                 value={slug}
-                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
+                onChange={(e) => {
+                  const next = slugify(e.target.value);
+                  setSlug(next);
+                  setIsSlugManuallyEdited(next.length > 0);
+                }}
                 className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
                   errors.slug ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
                 }`}
@@ -910,7 +923,7 @@ export default function ProductForm({ product, mode }: Props) {
         <div className="bg-white rounded-[24px] p-6 border border-[#E1E1E1]">
           <h3 className="text-lg font-['DM_Sans'] font-medium mb-6">{t('sections.dimensions')}</h3>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
                 {t('fields.width')}
@@ -963,20 +976,6 @@ export default function ProductForm({ product, mode }: Props) {
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
-                {t('fields.weight')}
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
-                placeholder={t('placeholders.number')}
-              />
             </div>
           </div>
         </div>

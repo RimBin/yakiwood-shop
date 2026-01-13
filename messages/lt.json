@@ -290,11 +290,15 @@
     "pritaikymas": "Pritaikymas"
   },
   "productPage": {
+    "fromPrice": "Nuo {price} €/m²",
     "back": "Atgal",
     "photo": "Foto",
     "view3d": "3D",
     "toggleShowPhotoAria": "Rodyti nuotrauką",
     "toggleShow3dAria": "Rodyti 3D vaizdą",
+    "thicknessLabel": "Storis",
+    "widthLabel": "Plotis",
+    "lengthLabel": "Ilgis",
     "solutionsLabel": "Sprendimai",
     "profilesLabel": "Profiliai",
     "benefitsLabel": "Privalumai",
@@ -1204,7 +1208,7 @@
     "emptyDescriptionPrefix": "Produktai bus pridėti netrukus. Jei turite klausimų,",
     "emptyContactLink": "susisiekite",
     "emptyDescriptionSuffix": ".",
-    "fromPrice": "Nuo {price} €",
+    "fromPrice": "Nuo {price} €/m²",
     "loadMore": "Rodyti daugiau"
   },
   "productDetail": {
