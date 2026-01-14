@@ -45,6 +45,20 @@
       "samples": "Ar galite atsiųsti pavyzdžių?"
     }
   },
+  "blog": {
+    "title": "Įrašai",
+    "subtitle": "Įžvalgos apie Shou Sugi Ban, dizaino patarimai ir praktinės gairės.",
+    "readMore": "Skaityti daugiau",
+    "readTime": "{minutes} min. skaitymo",
+    "empty": "Straipsnių dar nėra.",
+    "back": "Grįžti į įrašus",
+    "related": "Susiję straipsniai",
+    "ctaTitle": "Pasiruošę",
+    "ctaHighlight": "kurti",
+    "ctaSubtitle": "Papasakokite apie projektą – paruošime pasiūlymą.",
+    "ctaPrimary": "Gauti pasiūlymą",
+    "ctaSecondary": "Peržiūrėti produktus"
+  },
   "account": {
     "title": "Paskyra",
     "accountDetails": "PASKYROS DUOMENYS",
@@ -215,6 +229,11 @@
       }
     }
     ,
+    "blog": {
+      "title": "Įrašai apie Shou Sugi Ban",
+      "description": "Skaitykite straipsnius apie degintą medieną, dizaino sprendimus, priežiūrą ir projektų planavimą.",
+      "ogTitle": "Įrašai - Yakiwood"
+    },
     "faq": {
       "eyebrow": "DUK",
       "headline": {
@@ -829,8 +848,80 @@
       }
     },
     "posts": {
-      "importSuccess": "Sėkmingai importuota įrašų: {count}",
-      "importError": "Nepavyko importuoti įrašų. Patikrinkite JSON formatą."
+      "title": "?ra?ai",
+      "subtitle": "Kurkite ir tvarkykite tinklara??io straipsnius LT/EN",
+      "new": "Naujas ?ra?as",
+      "save": "I?saugoti",
+      "delete": "I?trinti",
+      "noticeSaved": "I?saugota.",
+      "noticeDeleted": "I?trinta.",
+      "listTitle": "?ra?ai ({count})",
+      "empty": "?ra?? dar n?ra.",
+      "untitled": "Be pavadinimo",
+      "editorTitle": "Redaguoti ?ra??",
+      "addSection": "Prid?ti skyri?",
+      "removeSection": "Pa?alinti skyri?",
+      "sectionsEmpty": "Skyri? dar n?ra.",
+      "status": {
+        "published": "Publikuota",
+        "draft": "Juodra?tis"
+      },
+      "fields": {
+        "titleLt": "Pavadinimas (LT)",
+        "titleEn": "Pavadinimas (EN)",
+        "slugLt": "Slug (LT)",
+        "slugEn": "Slug (EN)",
+        "excerptLt": "Trumpas apra?ymas (LT)",
+        "excerptEn": "Trumpas apra?ymas (EN)",
+        "summaryLt": "??anga (LT)",
+        "summaryEn": "??anga (EN)",
+        "bodyLt": "Tekstas (LT)",
+        "bodyEn": "Tekstas (EN)",
+        "sections": "Skyriai",
+        "sectionHeadingLt": "Skyriaus antra?t? (LT)",
+        "sectionHeadingEn": "Skyriaus antra?t? (EN)",
+        "sectionBodyLt": "Skyriaus tekstas (LT)",
+        "sectionBodyEn": "Skyriaus tekstas (EN)",
+        "calloutLt": "Citata (LT)",
+        "calloutEn": "Citata (EN)",
+        "closingLt": "Pabaiga (LT)",
+        "closingEn": "Pabaiga (EN)",
+        "categoryLt": "Kategorija (LT)",
+        "categoryEn": "Kategorija (EN)",
+        "author": "Autorius",
+        "date": "Data",
+        "readTime": "Skaitymo laikas (min.)",
+        "published": "Publikuota"
+      },
+      "placeholders": {
+        "titleLt": "pvz., Degintos medienos menas",
+        "titleEn": "e.g., The art of burning",
+        "slugLt": "pvz., deginta-mediena-fasadui",
+        "slugEn": "e.g., charred-wood-facades",
+        "excerptLt": "Trumpa santrauka lietuvi?kai",
+        "excerptEn": "Short summary in English",
+        "summaryLt": "??anginis paragrafas lietuvi?kai",
+        "summaryEn": "Intro paragraph in English",
+        "bodyLt": "Atskirti pastraipas tu??ia eilute",
+        "bodyEn": "Separate paragraphs with a blank line",
+        "hero": "Nuotraukos URL arba ?kelkite",
+        "imageUrl": "?klijuokite nuotraukos URL"
+      },
+      "images": {
+        "hero": "Pagrindin? nuotrauka",
+        "gallery": "Galerijos nuotraukos",
+        "feature": "Papildomos nuotraukos",
+        "upload": "?kelti",
+        "addUrl": "Prid?ti URL"
+      },
+      "errors": {
+        "titleLtRequired": "Reikalingas lietuvi?kas pavadinimas.",
+        "titleEnRequired": "Reikalingas angli?kas pavadinimas.",
+        "slugLtRequired": "Reikalingas lietuvi?kas slug.",
+        "slugEnRequired": "Reikalingas angli?kas slug."
+      },
+      "importSuccess": "S?kmingai importuota ?ra??: {count}",
+      "importError": "Nepavyko importuoti ?ra??. Patikrinkite JSON format?."
     },
     "productsDemo": {
       "noticeLine1": "Pastaba: šis /admin puslapis yra demo ir produktus saugo tik šiame naršyklės lange (localStorage).",
@@ -1426,6 +1517,16 @@
       "status": "Būsena",
       "statusValue": "Status",
       "fineTunedModel": "Fine-tuned model"
+    },
+
+    "dbSetup": {
+      "title": "Duomenų bazės paruošimas",
+      "subtitle": "Jei trūksta lentelių, įklijuokite SQL į Supabase SQL Editor, tada vykdykite schema reload.",
+      "copyFaq": "Kopijuoti FAQ lentelės SQL",
+      "copySettings": "Kopijuoti settings SQL",
+      "copyReload": "Kopijuoti reload schema",
+      "copied": "SQL nukopijuotas.",
+      "copyFailed": "Nepavyko nukopijuoti SQL."
     },
     "form": {
       "enabled": "Įjungta",

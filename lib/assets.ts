@@ -183,6 +183,17 @@ export const assets = {
     localAssets.colorSwatchGraphite,
     localAssets.colorSwatchNatural,
   ],
+  // Color swatch mapping for product detail pages
+  colorSwatchMap: [
+    { tokens: ['black', 'juoda'], assetKey: 'colorSwatchBlack' as const },
+    { tokens: ['brown', 'ruda'], assetKey: 'colorSwatchBrown' as const },
+    { tokens: ['carbon light', 'carbon-light', 'sviesi anglis', 'sviesi', 'light'], assetKey: 'colorSwatchCarbonLight' as const },
+    { tokens: ['carbon', 'anglis'], assetKey: 'colorSwatchCarbon' as const },
+    { tokens: ['graphite', 'grafit'], assetKey: 'colorSwatchGraphite' as const },
+    { tokens: ['latte'], assetKey: 'colorSwatchLatte' as const },
+    { tokens: ['silver', 'sidabr'], assetKey: 'colorSwatchSilver' as const },
+    { tokens: ['natural', 'naturali', 'natur'], assetKey: 'colorSwatchNatural' as const },
+  ],
   certifications: {
     epd: localAssets.certEpd,
     fsc: localAssets.certFsc,

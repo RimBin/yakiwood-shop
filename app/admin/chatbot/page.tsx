@@ -343,6 +343,11 @@ export default function AdminChatbotPage() {
         const json = await safeJson<FaqEntry[]>(resp);
         const rawError = getErrorMessageKey(resp, json.error);
         setFaqErrorCode(rawError);
+        if (rawError?.startsWith('ERR_SUPABASE_MISSING_TABLE:')) {
+          setFaqError(null);
+          setFaqEntries([]);
+          return;
+        }
         const errorMsg = translateApiError(rawError);
         if (errorMsg) {
           setFaqError(errorMsg);
@@ -394,6 +399,12 @@ export default function AdminChatbotPage() {
       const json = await safeJson<ChatbotSettingsDto>(resp);
       const rawError = getErrorMessageKey(resp, (json as any).error);
       setSettingsErrorCode(rawError);
+      if (rawError?.startsWith('ERR_SUPABASE_MISSING_TABLE:')) {
+        setSettingsError(null);
+        setSettings(null);
+        setSettingsDraft(null);
+        return;
+      }
       const errorMsg = translateApiError(rawError);
       if (errorMsg) {
         setSettingsError(errorMsg);
@@ -790,6 +801,9 @@ export default function AdminChatbotPage() {
   const buttonSecondary =
     "border border-[#161616] rounded-[100px] h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#E1E1E1]";
 
+  const isFaqTableMissing = faqErrorCode === 'ERR_SUPABASE_MISSING_TABLE:chatbot_faq_entries';
+  const isSettingsTableMissing = settingsErrorCode === 'ERR_SUPABASE_MISSING_TABLE:chatbot_settings';
+
   const panelClass = 'rounded-[16px] border border-[#E1E1E1] bg-[#EAEAEA] p-[16px]';
 
   const roleLabel = (role: ChatEvent['role']) => {
@@ -901,12 +915,20 @@ export default function AdminChatbotPage() {
                     <button
                       type="button"
                       onClick={() => void loadFaqEntries(faqLocale)}
-                      disabled={faqLoading}
-                      className={buttonSecondary + (faqLoading ? ' opacity-60 cursor-not-allowed' : '')}
+                      disabled={faqLoading || isFaqTableMissing}
+                      className={
+                        buttonSecondary +
+                        (faqLoading || isFaqTableMissing ? ' opacity-60 cursor-not-allowed' : '')
+                      }
                     >
                       {t('common.refresh')}
                     </button>
-                    <button type="button" onClick={() => newFaqDraft(faqLocale)} className={buttonSecondary}>
+                    <button
+                      type="button"
+                      onClick={() => newFaqDraft(faqLocale)}
+                      disabled={isFaqTableMissing}
+                      className={buttonSecondary + (isFaqTableMissing ? ' opacity-60 cursor-not-allowed' : '')}
+                    >
                       {t('common.new')}
                     </button>
                   </div>
@@ -959,10 +981,10 @@ export default function AdminChatbotPage() {
                       <button
                         type="button"
                         onClick={() => void importDefaultFaq(faqLocale)}
-                        disabled={faqImporting || faqLoading}
+                        disabled={faqImporting || faqLoading || isFaqTableMissing}
                         className={
                           buttonSecondary +
-                          (faqImporting || faqLoading ? ' opacity-60 cursor-not-allowed' : '')
+                          (faqImporting || faqLoading || isFaqTableMissing ? ' opacity-60 cursor-not-allowed' : '')
                         }
                       >
                         {faqImporting ? t('faq.importing') : t('faq.importDefaults')}
@@ -1011,18 +1033,23 @@ export default function AdminChatbotPage() {
                     <button
                       type="button"
                       onClick={() => void saveFaq()}
-                      disabled={faqSaving || faqDeleting}
-                      className={buttonSecondary + (faqSaving || faqDeleting ? ' opacity-60 cursor-not-allowed' : '')}
+                      disabled={faqSaving || faqDeleting || isFaqTableMissing}
+                      className={
+                        buttonSecondary +
+                        (faqSaving || faqDeleting || isFaqTableMissing ? ' opacity-60 cursor-not-allowed' : '')
+                      }
                     >
                       {faqSaving ? t('common.saving') : t('common.save')}
                     </button>
                     <button
                       type="button"
                       onClick={() => void deleteFaq()}
-                      disabled={!faqDraft.id || faqDeleting || faqSaving}
+                      disabled={!faqDraft.id || faqDeleting || faqSaving || isFaqTableMissing}
                       className={
                         buttonSecondary +
-                        (!faqDraft.id || faqDeleting || faqSaving ? ' opacity-60 cursor-not-allowed' : '')
+                        (!faqDraft.id || faqDeleting || faqSaving || isFaqTableMissing
+                          ? ' opacity-60 cursor-not-allowed'
+                          : '')
                       }
                     >
                       {faqDeleting ? t('common.deleting') : t('common.delete')}
@@ -1243,10 +1270,12 @@ export default function AdminChatbotPage() {
                         <button
                           type="button"
                           onClick={() => void saveChatbotSettings()}
-                          disabled={settingsSaving || !settingsDraft}
+                          disabled={settingsSaving || !settingsDraft || isSettingsTableMissing}
                           className={
                             buttonSecondary +
-                            (settingsSaving || !settingsDraft ? ' opacity-60 cursor-not-allowed' : '')
+                            (settingsSaving || !settingsDraft || isSettingsTableMissing
+                              ? ' opacity-60 cursor-not-allowed'
+                              : '')
                           }
                         >
                           {settingsSaving ? t('common.saving') : t('common.save')}

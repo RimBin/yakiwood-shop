@@ -299,11 +299,17 @@ export default function AdminPage() {
     subtitle: '',
     slug: '',
     location: '',
+    titleEn: '',
+    subtitleEn: '',
+    slugEn: '',
+    locationEn: '',
     images: '',
     featuredImage: '',
     productsUsed: '',
     description: '',
     fullDescription: '',
+    descriptionEn: '',
+    fullDescriptionEn: '',
     category: 'residential',
     featured: false,
   });
@@ -914,7 +920,24 @@ export default function AdminPage() {
       .map(p => ({ name: p.trim(), slug: slugify(p.trim()) }))
       .filter(p => p.name);
     const safeSlug = projectForm.slug?.trim() ? projectForm.slug : slugify(projectForm.title);
+    const safeSlugEn = projectForm.slugEn?.trim()
+      ? projectForm.slugEn
+      : slugify(projectForm.titleEn?.trim() ? projectForm.titleEn : projectForm.title);
     const featuredImg = featuredImageFile || projectForm.featuredImage || (allImages.length > 0 ? allImages[0] : undefined);
+
+    const ltTitle = projectForm.title;
+    const ltSubtitle = projectForm.subtitle || undefined;
+    const ltLocation = projectForm.location;
+    const ltDescription = projectForm.description;
+    const ltFullDescription = projectForm.fullDescription || undefined;
+
+    const enTitle = projectForm.titleEn?.trim() ? projectForm.titleEn : ltTitle;
+    const enSubtitle = projectForm.subtitleEn?.trim() ? projectForm.subtitleEn : ltSubtitle;
+    const enLocation = projectForm.locationEn?.trim() ? projectForm.locationEn : ltLocation;
+    const enDescription = projectForm.descriptionEn?.trim() ? projectForm.descriptionEn : ltDescription;
+    const enFullDescription = projectForm.fullDescriptionEn?.trim()
+      ? projectForm.fullDescriptionEn
+      : ltFullDescription;
     
     if (editingProjectId) {
       // Edit existing project
@@ -922,15 +945,36 @@ export default function AdminPage() {
         if (project.id === editingProjectId) {
           return {
             ...project,
-            title: projectForm.title,
-            subtitle: projectForm.subtitle || undefined,
+            title: ltTitle,
+            subtitle: ltSubtitle,
             slug: safeSlug,
-            location: projectForm.location,
+            location: ltLocation,
             images: allImages.length > 0 ? allImages : project.images,
             featuredImage: featuredImg,
             productsUsed: productsArray,
-            description: projectForm.description,
-            fullDescription: projectForm.fullDescription,
+            description: ltDescription,
+            fullDescription: ltFullDescription,
+            i18n: {
+              ...(project.i18n ?? {}),
+              lt: {
+                ...(project.i18n?.lt ?? {}),
+                title: ltTitle,
+                subtitle: ltSubtitle,
+                slug: safeSlug,
+                location: ltLocation,
+                description: ltDescription,
+                fullDescription: ltFullDescription,
+              },
+              en: {
+                ...(project.i18n?.en ?? {}),
+                title: enTitle,
+                subtitle: enSubtitle,
+                slug: safeSlugEn,
+                location: enLocation,
+                description: enDescription,
+                fullDescription: enFullDescription,
+              },
+            },
             category: projectForm.category as 'residential' | 'commercial',
             featured: projectForm.featured,
           };
@@ -959,6 +1003,24 @@ export default function AdminPage() {
         images: allImages.length > 0 ? allImages : projectForm.images.split(',').map(url => url.trim()).filter(Boolean),
         featuredImage: featuredImg,
         productsUsed: productsArray,
+        i18n: {
+          lt: {
+            title: ltTitle,
+            subtitle: ltSubtitle,
+            slug: safeSlug,
+            location: ltLocation,
+            description: ltDescription,
+            fullDescription: ltFullDescription,
+          },
+          en: {
+            title: enTitle,
+            subtitle: enSubtitle,
+            slug: safeSlugEn,
+            location: enLocation,
+            description: enDescription,
+            fullDescription: enFullDescription,
+          },
+        },
       };
       
       const updated = [...projects, newProject];
@@ -981,11 +1043,17 @@ export default function AdminPage() {
       subtitle: '',
       slug: '',
       location: '',
+      titleEn: '',
+      subtitleEn: '',
+      slugEn: '',
+      locationEn: '',
       images: '',
       featuredImage: '',
       productsUsed: '',
       description: '',
       fullDescription: '',
+      descriptionEn: '',
+      fullDescriptionEn: '',
       category: 'residential',
       featured: false,
     });
@@ -1018,18 +1086,35 @@ export default function AdminPage() {
     
     setShowAddForm(false);
     setEditingProjectId(project.id);
+
+    const lt = project.i18n?.lt ?? {};
+    const en = project.i18n?.en ?? {};
+
+    const baseTitle = project.title;
+    const baseSubtitle = project.subtitle || '';
+    const baseSlug = project.slug;
+    const baseLocation = project.location;
+    const baseDescription = project.description;
+    const baseFullDescription = project.fullDescription || '';
+
     setProjectForm({
-      title: project.title,
-      subtitle: project.subtitle || '',
-      slug: project.slug,
-      location: project.location,
+      title: (typeof lt.title === 'string' && lt.title.trim()) ? lt.title : baseTitle,
+      subtitle: (typeof lt.subtitle === 'string' && lt.subtitle.trim()) ? lt.subtitle : baseSubtitle,
+      slug: (typeof lt.slug === 'string' && lt.slug.trim()) ? lt.slug : baseSlug,
+      location: (typeof lt.location === 'string' && lt.location.trim()) ? lt.location : baseLocation,
+      titleEn: (typeof en.title === 'string' && en.title.trim()) ? en.title : baseTitle,
+      subtitleEn: (typeof en.subtitle === 'string' && en.subtitle.trim()) ? en.subtitle : baseSubtitle,
+      slugEn: (typeof en.slug === 'string' && en.slug.trim()) ? en.slug : baseSlug,
+      locationEn: (typeof en.location === 'string' && en.location.trim()) ? en.location : baseLocation,
       images: '',
       featuredImage: project.featuredImage || '',
       productsUsed: Array.isArray(project.productsUsed) 
         ? project.productsUsed.map(p => typeof p === 'string' ? p : p.name).join(', ')
         : project.productsUsed || '',
-      description: project.description,
-      fullDescription: project.fullDescription || '',
+      description: (typeof lt.description === 'string' && lt.description.trim()) ? lt.description : baseDescription,
+      fullDescription: (typeof lt.fullDescription === 'string' && lt.fullDescription.trim()) ? lt.fullDescription : baseFullDescription,
+      descriptionEn: (typeof en.description === 'string' && en.description.trim()) ? en.description : baseDescription,
+      fullDescriptionEn: (typeof en.fullDescription === 'string' && en.fullDescription.trim()) ? en.fullDescription : baseFullDescription,
       category: project.category || 'residential',
       featured: project.featured || false,
     });
@@ -1050,11 +1135,17 @@ export default function AdminPage() {
       subtitle: '',
       slug: '',
       location: '',
+      titleEn: '',
+      subtitleEn: '',
+      slugEn: '',
+      locationEn: '',
       images: '',
       featuredImage: '',
       productsUsed: '',
       description: '',
       fullDescription: '',
+      descriptionEn: '',
+      fullDescriptionEn: '',
       category: 'residential',
       featured: false,
     });

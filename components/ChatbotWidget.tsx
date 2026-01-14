@@ -80,6 +80,8 @@ export default function ChatbotWidget() {
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const hiddenOnPrefixes = useMemo(
     () => ['/studio', '/login', '/register', '/forgot-password', '/reset-password'],
@@ -136,6 +138,21 @@ export default function ChatbotWidget() {
     if (!el) return;
     el.scrollTop = el.scrollHeight;
   }, [open, messages]);
+
+  useEffect(() => {
+    if (!open) return;
+    const id = window.setTimeout(() => inputRef.current?.focus(), 50);
+    return () => window.clearTimeout(id);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [open]);
 
   async function send(text: string) {
     const trimmed = text.trim();
@@ -196,9 +213,28 @@ export default function ChatbotWidget() {
 
   return (
     <div className="fixed bottom-[18px] right-[18px] z-50">
-      {open && (
-        <div className="mb-[12px] w-[320px] sm:w-[360px] rounded-[24px] border border-[#BBBBBB] bg-white shadow-lg overflow-hidden">
-          <div className="flex items-center justify-between px-[16px] py-[12px] border-b border-[#E1E1E1]">
+      {open ? (
+        <div
+          className="fixed inset-0 z-50 sm:inset-auto sm:static"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('title')}
+          onMouseDown={(e) => {
+            if (!panelRef.current) return;
+            if (e.target instanceof Node && !panelRef.current.contains(e.target)) setOpen(false);
+          }}
+        >
+          <div className="absolute inset-0 bg-black/20 sm:hidden" />
+          <div
+            ref={panelRef}
+            className={
+              'absolute bottom-[18px] right-[18px] sm:static ' +
+              'w-[calc(100vw-36px)] max-w-[420px] sm:w-[360px] ' +
+              'rounded-[24px] border border-[#BBBBBB] bg-white shadow-lg overflow-hidden ' +
+              'max-h-[calc(100vh-36px)] sm:max-h-[560px]'
+            }
+          >
+            <div className="flex items-center justify-between px-[16px] py-[12px] border-b border-[#E1E1E1]">
             <div>
               <div className="font-['DM_Sans'] text-[14px] font-medium text-[#161616]">{t('title')}</div>
               <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('subtitle')}</div>
@@ -214,15 +250,27 @@ export default function ChatbotWidget() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="h-[32px] w-[32px] rounded-full border border-[#161616] text-[#161616] hover:bg-[#F5F5F5]"
+                className="h-[32px] w-[32px] rounded-full border border-[#161616] text-[#161616] hover:bg-[#F5F5F5] grid place-items-center"
                 aria-label={t('aria.close')}
               >
-                X
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M1 1L13 13M13 1L1 13"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </button>
             </div>
           </div>
 
-          <div ref={listRef} className="max-h-[360px] overflow-y-auto px-[12px] py-[12px] space-y-[10px]">
+          <div
+            ref={listRef}
+            className="overflow-y-auto px-[12px] py-[12px] space-y-[10px]"
+            style={{ maxHeight: 'calc(100vh - 18px - 18px - 56px - 64px)' }}
+            aria-live="polite"
+          >
             <div className="rounded-[16px] bg-[#F5F5F5] px-[12px] py-[10px]">
               <p className="font-['Outfit'] text-[12px] text-[#535353] leading-[1.4]">
                 {t('note')}
@@ -285,6 +333,7 @@ export default function ChatbotWidget() {
             className="border-t border-[#E1E1E1] p-[12px] flex gap-[8px]"
           >
             <input
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={t('placeholder')}
@@ -299,8 +348,9 @@ export default function ChatbotWidget() {
               {t('send')}
             </button>
           </form>
+          </div>
         </div>
-      )}
+      ) : null}
 
       <button
         type="button"

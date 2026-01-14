@@ -52,6 +52,7 @@ function getActiveTabFromUrl(pathname: string, tabParam: string | null): AdminTa
   const p = stripLocalePrefix(pathname);
 
   if (p.startsWith('/admin/products')) return 'products';
+  if (p.startsWith('/admin/posts')) return 'posts';
   if (p.startsWith('/admin/users')) return 'users';
   if (p.startsWith('/admin/chatbot')) return 'chatbot';
   if (p.startsWith('/admin/seo')) return 'seo';
@@ -194,7 +195,7 @@ export default function AdminPanelHeader() {
       {
         key: 'posts',
         label: t('tabs.posts'),
-        href: `${pathPrefix}/admin?tab=posts`,
+        href: `${pathPrefix}/admin/posts`,
         count: counts.posts,
       },
       { key: 'users', label: t('tabs.users'), href: `${pathPrefix}/admin/users` },

@@ -14,6 +14,7 @@ const navColumns = [
       { label: 'About us', href: '/about' },
       { label: 'Contacts', href: '/contact' },
       { label: 'Projects', href: '/projects' },
+      { label: 'Blog', href: '/blog' },
     ],
   },
   {

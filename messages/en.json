@@ -42,6 +42,20 @@
       "samples": "Can I get samples?"
     }
   },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Insights on Shou Sugi Ban, design tips, and practical guidance.",
+    "readMore": "Read more",
+    "readTime": "{minutes} min read",
+    "empty": "No articles yet.",
+    "back": "Back to blog",
+    "related": "Related articles",
+    "ctaTitle": "Ready to",
+    "ctaHighlight": "build",
+    "ctaSubtitle": "Tell us about your project and we will prepare a tailored offer.",
+    "ctaPrimary": "Get an offer",
+    "ctaSecondary": "View products"
+  },
   "common": {
     "cart": "Cart",
     "search": "Search",
@@ -1005,6 +1019,11 @@
       "description": "Read the latest news about Shou Sugi Ban, our projects, and wood processing updates.",
       "ogTitle": "News - Yakiwood"
     },
+    "blog": {
+      "title": "Blog - Shou Sugi Ban insights",
+      "description": "Read articles about charred wood, design choices, maintenance, and project planning.",
+      "ogTitle": "Blog - Yakiwood"
+    },
     "faq": {
       "title": "FAQ about Shou Sugi Ban burnt wood",
       "description": "Frequently asked questions about Shou Sugi Ban wood products, maintenance, and installation.",
@@ -1072,6 +1091,78 @@
       }
     },
     "posts": {
+      "title": "Posts",
+      "subtitle": "Create and manage blog articles in LT/EN",
+      "new": "New post",
+      "save": "Save",
+      "delete": "Delete",
+      "noticeSaved": "Saved.",
+      "noticeDeleted": "Deleted.",
+      "listTitle": "Posts ({count})",
+      "empty": "No posts yet.",
+      "untitled": "Untitled",
+      "editorTitle": "Edit post",
+      "addSection": "Add section",
+      "removeSection": "Remove section",
+      "sectionsEmpty": "No sections yet.",
+      "status": {
+        "published": "Published",
+        "draft": "Draft"
+      },
+      "fields": {
+        "titleLt": "Title (LT)",
+        "titleEn": "Title (EN)",
+        "slugLt": "Slug (LT)",
+        "slugEn": "Slug (EN)",
+        "excerptLt": "Excerpt (LT)",
+        "excerptEn": "Excerpt (EN)",
+        "summaryLt": "Summary (LT)",
+        "summaryEn": "Summary (EN)",
+        "bodyLt": "Body (LT)",
+        "bodyEn": "Body (EN)",
+        "sections": "Sections",
+        "sectionHeadingLt": "Section heading (LT)",
+        "sectionHeadingEn": "Section heading (EN)",
+        "sectionBodyLt": "Section text (LT)",
+        "sectionBodyEn": "Section text (EN)",
+        "calloutLt": "Callout (LT)",
+        "calloutEn": "Callout (EN)",
+        "closingLt": "Closing (LT)",
+        "closingEn": "Closing (EN)",
+        "categoryLt": "Category (LT)",
+        "categoryEn": "Category (EN)",
+        "author": "Author",
+        "date": "Publish date",
+        "readTime": "Read time (min)",
+        "published": "Published"
+      },
+      "placeholders": {
+        "titleLt": "e.g., The art of burning",
+        "titleEn": "e.g., The art of burning",
+        "slugLt": "e.g., deginta-mediena-fasadui",
+        "slugEn": "e.g., charred-wood-facades",
+        "excerptLt": "Short summary in Lithuanian",
+        "excerptEn": "Short summary in English",
+        "summaryLt": "Intro paragraph in Lithuanian",
+        "summaryEn": "Intro paragraph in English",
+        "bodyLt": "Paragraphs separated by a blank line",
+        "bodyEn": "Paragraphs separated by a blank line",
+        "hero": "Image URL or upload",
+        "imageUrl": "Paste image URL"
+      },
+      "images": {
+        "hero": "Hero image",
+        "gallery": "Gallery images",
+        "feature": "Feature images",
+        "upload": "Upload",
+        "addUrl": "Add URL"
+      },
+      "errors": {
+        "titleLtRequired": "Lithuanian title is required.",
+        "titleEnRequired": "English title is required.",
+        "slugLtRequired": "Lithuanian slug is required.",
+        "slugEnRequired": "English slug is required."
+      },
       "importSuccess": "Imported {count} posts successfully!",
       "importError": "Error importing posts. Please check the JSON format."
     },
@@ -1669,6 +1760,16 @@
       "status": "Status",
       "statusValue": "Status",
       "fineTunedModel": "Fine-tuned model"
+    },
+
+    "dbSetup": {
+      "title": "Database setup",
+      "subtitle": "If tables are missing, paste the SQL into Supabase SQL Editor, then reload the schema.",
+      "copyFaq": "Copy FAQ table SQL",
+      "copySettings": "Copy settings SQL",
+      "copyReload": "Copy reload schema",
+      "copied": "SQL copied.",
+      "copyFailed": "Failed to copy SQL."
     },
     "form": {
       "enabled": "Enabled",

@@ -25,16 +25,8 @@ function normalizeLabel(value: string): string {
     .replace(/\s+/g, ' ');
 }
 
-const COLOR_SWATCH_MAP: Array<{ tokens: string[]; assetKey: AssetKey }> = [
-  { tokens: ['black', 'juoda'], assetKey: 'colorSwatchBlack' },
-  { tokens: ['brown', 'ruda'], assetKey: 'colorSwatchBrown' },
-  { tokens: ['carbon light', 'carbon-light', 'sviesi anglis', 'sviesi', 'light'], assetKey: 'colorSwatchCarbonLight' },
-  { tokens: ['carbon', 'anglis'], assetKey: 'colorSwatchCarbon' },
-  { tokens: ['graphite', 'grafit'], assetKey: 'colorSwatchGraphite' },
-  { tokens: ['latte'], assetKey: 'colorSwatchLatte' },
-  { tokens: ['silver', 'sidabr'], assetKey: 'colorSwatchSilver' },
-  { tokens: ['natural', 'naturali', 'natur'], assetKey: 'colorSwatchNatural' },
-];
+// Use the centralized color swatch mapping from assets
+const COLOR_SWATCH_MAP = assets.colorSwatchMap;
 
 function resolveColorSwatchSrc(color: Pick<ProductColorVariant, 'name'>): string | null {
   const label = normalizeLabel(color.name || '');
@@ -588,14 +580,14 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                         <button
                           key={color.id}
                           onClick={() => setSelectedColor(color)}
-                          className={`relative w-[18px] h-[18px] rounded-full overflow-hidden border border-[#BBBBBB] ${
+                          className={`relative w-[32px] h-[32px] rounded-full overflow-hidden border border-[#BBBBBB] ${
                             isActive ? 'ring-2 ring-[#161616] ring-offset-2' : ''
                           }`}
                           title={color.name}
                           aria-pressed={isActive}
                         >
                           {swatchSrc ? (
-                            <Image src={swatchSrc} alt={color.name} fill className="object-cover" sizes="18px" />
+                            <Image src={swatchSrc} alt={color.name} fill className="object-cover" sizes="32px" />
                           ) : fallbackSrc ? (
                             useNextImage(fallbackSrc) ? (
                               <Image src={fallbackSrc} alt={color.name} fill className="object-cover" sizes="18px" />
