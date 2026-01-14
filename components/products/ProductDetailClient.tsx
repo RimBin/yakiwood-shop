@@ -574,7 +574,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                       const swatchSrc = resolveColorSwatchSrc(color);
                       const isActive = selectedColor?.id === color.id;
                       const fallbackSrc = typeof color.image === 'string' ? color.image : null;
-                      const useNextImage = (src: string) => src.startsWith('/');
+                      const canUseNextImage = (src: string) => src.startsWith('/');
 
                       return (
                         <button
@@ -589,7 +589,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                           {swatchSrc ? (
                             <Image src={swatchSrc} alt={color.name} fill className="object-cover" sizes="32px" />
                           ) : fallbackSrc ? (
-                            useNextImage(fallbackSrc) ? (
+                            canUseNextImage(fallbackSrc) ? (
                               <Image src={fallbackSrc} alt={color.name} fill className="object-cover" sizes="18px" />
                             ) : (
                               <img src={fallbackSrc} alt={color.name} className="w-full h-full object-cover" />

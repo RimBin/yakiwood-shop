@@ -1,10 +1,23 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
+import { useCartStore } from '@/lib/cart/store';
+
+type BotAction =
+  | {
+      type: 'open_product';
+      label: string;
+      href: string;
+    }
+  | {
+      type: 'add_to_cart';
+      label: string;
+      item: { id: string; name: string; slug: string; basePrice: number; quantity?: number };
+    };
 
 type BotResponse = {
   ok: boolean;
@@ -13,6 +26,7 @@ type BotResponse = {
     faqId: string;
     confidence: number;
     suggestions: string[];
+    actions?: BotAction[];
     handoff: { label: string; href: string };
   };
   error?: string;
@@ -76,6 +90,7 @@ function getOrCreateSessionId(): string {
 
 export default function ChatbotWidget() {
   const pathname = usePathname();
+  const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('chatbot');
   const currentLocale = locale === 'en' ? 'en' : 'lt';
@@ -83,6 +98,7 @@ export default function ChatbotWidget() {
   const [sessionId, setSessionId] = useState<string>('');
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
+  const addItem = useCartStore((s) => s.addItem);
   const listRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -97,7 +113,7 @@ export default function ChatbotWidget() {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [serverSuggestions, setServerSuggestions] = useState<string[]>([]);
-  const [actionsOpen, setActionsOpen] = useState(false);
+  const [serverActions, setServerActions] = useState<BotAction[]>([]);
 
   useEffect(() => {
     // Default welcome (used when there is no persisted history)
@@ -159,13 +175,9 @@ export default function ChatbotWidget() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [open]);
 
-  useEffect(() => {
-    if (!open) setActionsOpen(false);
-  }, [open]);
-
   const visibleSuggestions = useMemo(() => {
     const next = serverSuggestions.length > 0 ? serverSuggestions : suggestions;
-    return next.slice(0, 8);
+    return next.slice(0, 10);
   }, [serverSuggestions, suggestions]);
 
   async function send(text: string) {
@@ -174,6 +186,7 @@ export default function ChatbotWidget() {
     if (!sessionId) return;
 
     setBusy(true);
+    setServerActions([]);
     const historyForApi = messages
       .filter((m) => m.text && m.text.trim().length > 0)
       .slice(-16)
@@ -208,6 +221,9 @@ export default function ChatbotWidget() {
       if (Array.isArray(data.data.suggestions) && data.data.suggestions.length > 0) {
         setServerSuggestions(data.data.suggestions.slice(0, 8));
       }
+      if (Array.isArray(data.data.actions) && data.data.actions.length > 0) {
+        setServerActions(data.data.actions.slice(0, 4));
+      }
     } catch {
       setMessages((prev) => [...prev, { role: 'assistant', text: t('errors.network') }]);
     } finally {
@@ -219,8 +235,38 @@ export default function ChatbotWidget() {
     if (!sessionId) return;
     const fresh: Message[] = [{ role: 'assistant', text: t('welcome') }];
     setServerSuggestions([]);
+    setServerActions([]);
     setMessages(fresh);
     safeWriteHistory(sessionId, fresh);
+  }
+
+  function runAction(action: BotAction) {
+    if (busy) return;
+    if (action.type === 'open_product') {
+      const href = toLocalePath(action.href, currentLocale);
+      router.push(href);
+      setOpen(false);
+      return;
+    }
+
+    if (action.type === 'add_to_cart') {
+      const qty = typeof action.item.quantity === 'number' && action.item.quantity > 0 ? action.item.quantity : 1;
+      addItem({
+        id: action.item.id,
+        name: action.item.name,
+        slug: action.item.slug,
+        basePrice: action.item.basePrice,
+        quantity: qty,
+      });
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          text: currentLocale === 'en' ? 'Added to cart.' : 'Įdėjau į krepšelį.',
+        },
+      ]);
+      return;
+    }
   }
 
   if (shouldHide) return null;
@@ -245,7 +291,7 @@ export default function ChatbotWidget() {
               'absolute bottom-[18px] right-[18px] sm:static ' +
               'w-[calc(100vw-36px)] max-w-[420px] sm:w-[380px] ' +
               'rounded-[28px] border border-[#E1E1E1] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.22)] overflow-hidden ' +
-              'h-[calc(100vh-36px)] sm:h-auto sm:max-h-[640px] '
+              'h-[calc(100vh-36px)] sm:h-[680px] '
             }
           >
             <div className="flex h-full flex-col sm:max-h-[640px]">
@@ -302,11 +348,7 @@ export default function ChatbotWidget() {
               </div>
 
               <div ref={listRef} className="flex-1 overflow-y-auto bg-[#FAFAFA] px-[12px] py-[12px]" aria-live="polite">
-                <div className="rounded-[18px] bg-white px-[12px] py-[10px] ring-1 ring-black/5 shadow-[0_1px_0_rgba(0,0,0,0.03)]">
-                  <p className="font-['Outfit'] text-[12px] text-[#535353] leading-[1.45]">{t('note')}</p>
-                </div>
-
-                <div className="mt-[12px] space-y-[10px]">
+                <div className="space-y-[10px]">
                   {messages.map((m, idx) => {
                     const prev = idx > 0 ? messages[idx - 1] : null;
                     const startsBlock = !prev || prev.role !== m.role;
@@ -369,50 +411,36 @@ export default function ChatbotWidget() {
                   )}
                 </div>
 
-                <div className="mt-[12px]">
-                  <div className="flex gap-[8px] overflow-x-auto pb-[2px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    {visibleSuggestions.map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => send(s)}
-                        disabled={busy}
-                        className="shrink-0 rounded-[999px] bg-white px-[12px] py-[8px] ring-1 ring-black/5 font-['Outfit'] text-[12px] text-[#161616] hover:bg-[#F5F5F5] disabled:opacity-60"
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-[10px]">
-                  <Link
-                    href={toLocalePath('/kontaktai', currentLocale)}
-                    className="inline-flex items-center gap-[8px] font-['Outfit'] text-[12px] text-[#161616] hover:opacity-80"
-                  >
-                    <span className="underline underline-offset-2">{t('handoff')}</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M7 17L17 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                      <path d="M9 7H17V15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </Link>
-                </div>
-              </div>
-
-              <div className="relative border-t border-[#EAEAEA] bg-white p-[12px]">
-                {actionsOpen && (
-                  <div className="absolute bottom-[66px] left-[12px] right-[12px] rounded-[20px] bg-white p-[12px] ring-1 ring-black/5 shadow-[0_18px_60px_rgba(0,0,0,0.18)]">
-                    <div className="flex flex-wrap gap-[8px]">
-                      {visibleSuggestions.slice(0, 6).map((s) => (
+                {visibleSuggestions.length > 0 && (
+                  <div className="mt-[12px]">
+                    {serverActions.length > 0 && (
+                      <div className="mb-[10px] flex flex-wrap gap-[8px]">
+                        {serverActions.map((a, idx) => (
+                          <button
+                            key={`${a.type}:${idx}`}
+                            type="button"
+                            onClick={() => runAction(a)}
+                            disabled={busy}
+                            className={cx(
+                              'rounded-[999px] px-[14px] py-[10px] ring-1 ring-black/5 font-[\'Outfit\'] text-[12px] shadow-sm disabled:opacity-60',
+                              a.type === 'add_to_cart'
+                                ? 'bg-[#161616] text-white hover:opacity-90'
+                                : 'bg-white text-[#161616] hover:bg-[#F5F5F5]'
+                            )}
+                          >
+                            {a.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-[8px]">
+                      {visibleSuggestions.map((s) => (
                         <button
-                          key={`action_${s}`}
+                          key={s}
                           type="button"
-                          onClick={() => {
-                            setActionsOpen(false);
-                            void send(s);
-                          }}
+                          onClick={() => send(s)}
                           disabled={busy}
-                          className="rounded-[999px] bg-[#FAFAFA] px-[12px] py-[8px] ring-1 ring-black/5 font-['Outfit'] text-[12px] text-[#161616] hover:bg-[#F5F5F5] disabled:opacity-60"
+                          className="w-full text-left rounded-[16px] bg-white px-[12px] py-[10px] ring-1 ring-black/5 font-['Outfit'] text-[12px] text-[#161616] hover:bg-[#F5F5F5] disabled:opacity-60"
                         >
                           {s}
                         </button>
@@ -420,7 +448,9 @@ export default function ChatbotWidget() {
                     </div>
                   </div>
                 )}
+              </div>
 
+              <div className="relative border-t border-[#EAEAEA] bg-white p-[12px]">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -428,19 +458,6 @@ export default function ChatbotWidget() {
                   }}
                   className="flex items-end gap-[10px]"
                 >
-                  <button
-                    type="button"
-                    onClick={() => setActionsOpen((v) => !v)}
-                    className="h-[42px] w-[42px] rounded-full bg-[#FAFAFA] ring-1 ring-black/5 grid place-items-center hover:bg-[#F5F5F5]"
-                    aria-label={t('clear')}
-                    aria-pressed={actionsOpen}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M12 5V19" stroke="#161616" strokeWidth="1.8" strokeLinecap="round" />
-                      <path d="M5 12H19" stroke="#161616" strokeWidth="1.8" strokeLinecap="round" />
-                    </svg>
-                  </button>
-
                   <div className="flex-1 rounded-[999px] bg-[#FAFAFA] ring-1 ring-black/5 px-[14px] py-[10px]">
                     <input
                       ref={inputRef}
@@ -474,23 +491,25 @@ export default function ChatbotWidget() {
         </div>
       ) : null}
 
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="h-[56px] w-[56px] rounded-full bg-[#161616] text-white shadow-[0_18px_55px_rgba(0,0,0,0.28)] hover:opacity-90 grid place-items-center"
-        aria-label={t('aria.open')}
-      >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path
-            d="M7 18L4 21V6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V16C20 17.1046 19.1046 18 18 18H7Z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-          />
-          <path d="M8 8H16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-          <path d="M8 12H14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        </svg>
-      </button>
+      {!open && (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="h-[56px] w-[56px] rounded-full bg-[#161616] text-white shadow-[0_18px_55px_rgba(0,0,0,0.28)] hover:opacity-90 grid place-items-center"
+          aria-label={t('aria.open')}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path
+              d="M7 18L4 21V6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V16C20 17.1046 19.1046 18 18 18H7Z"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinejoin="round"
+            />
+            <path d="M8 8H16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            <path d="M8 12H14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

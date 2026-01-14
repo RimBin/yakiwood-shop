@@ -65,3 +65,8 @@ export function hasAnalyticsConsent(): boolean {
   const consent = getConsentFromDocumentCookie();
   return Boolean(consent?.analytics);
 }
+
+export function hasMarketingConsent(): boolean {
+  const consent = getConsentFromDocumentCookie();
+  return Boolean(consent?.marketing);
+}

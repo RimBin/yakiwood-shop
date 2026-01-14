@@ -1,10 +1,11 @@
 import { Metadata } from 'next';
 import ProjectDetailClient from '@/components/projects/ProjectDetailClient';
-import { getProjectBySlug, getRelatedProjects, projects } from '@/data/projects';
+import { projects } from '@/data/projects';
 import { getProjectOgImage } from '@/lib/og-image';
 import { getLocale } from 'next-intl/server';
 import { toLocalePath } from '@/i18n/paths';
 import { applySeoOverride } from '@/lib/seo/overrides';
+import { findProjectBySlug, getProjectDescription, getProjectLocation, getProjectSlug, getProjectTitle, normalizeProjectLocale } from '@/lib/projects/i18n';
 
 interface ProjectPageProps {
   params: Promise<{
@@ -14,13 +15,15 @@ interface ProjectPageProps {
 
 export async function generateStaticParams() {
   return projects.map((project) => ({
-    slug: project.slug,
+    slug: getProjectSlug(project, 'en'),
   }));
 }
 
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const locale = await getLocale();
+  const currentLocale = normalizeProjectLocale(locale);
+  const project = findProjectBySlug(projects, slug, currentLocale);
 
   if (!project) {
     return {
@@ -28,27 +31,30 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
     };
   }
 
+  const title = getProjectTitle(project, currentLocale);
+  const location = getProjectLocation(project, currentLocale);
+  const description = getProjectDescription(project, currentLocale);
+  const localizedSlug = getProjectSlug(project, currentLocale);
+
   const ogImage = project.images?.[0] || project.featuredImage;
-  const locale = await getLocale();
-  const currentLocale = locale === 'lt' ? 'lt' : 'en';
-  const projectPath = toLocalePath(`/projects/${project.slug}`, currentLocale);
+  const projectPath = toLocalePath(`/projects/${localizedSlug}`, currentLocale);
   const canonical = `https://yakiwood.lt${projectPath}`;
 
   const metadata: Metadata = {
-    title: `${project.title} - ${project.location}`,
-    description: project.description,
+    title: `${title} - ${location}`,
+    description,
     alternates: {
       canonical,
     },
     openGraph: {
-      title: project.title,
-      description: project.description,
+      title,
+      description,
       images: [
         {
           url: getProjectOgImage(ogImage),
           width: 1200,
           height: 630,
-          alt: project.title,
+          alt: title,
         },
       ],
       type: 'article',
@@ -56,8 +62,8 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
     },
     twitter: {
       card: 'summary_large_image',
-      title: project.title,
-      description: project.description,
+      title,
+      description,
       images: [getProjectOgImage(ogImage)],
     },
   };

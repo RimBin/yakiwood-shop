@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useCartStore } from '@/lib/cart/store';
+import { calculateShippingEur } from '@/lib/shipping/policy';
+import { savePendingPurchase, trackBeginCheckout } from '@/lib/analytics';
 import ModalOverlay from '@/components/modals/ModalOverlay';
 import LoginModal from '@/components/modals/LoginModal';
 import RegisterModal from '@/components/modals/RegisterModal';
@@ -150,7 +152,7 @@ export default function CheckoutPage() {
 
   // Calculate totals
   const subtotal = items.reduce((sum, item) => sum + item.basePrice * item.quantity, 0);
-  const shipping = subtotal > 500 ? 0 : 15;
+  const shipping = calculateShippingEur(subtotal);
   const total = subtotal + shipping;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -243,6 +245,45 @@ export default function CheckoutPage() {
       if (!orderId) {
         throw new Error(t('errors.orderIdMissing'));
       }
+
+      const itemsForAnalytics = shipping > 0
+        ? [
+            ...productItems,
+            {
+              id: 'shipping',
+              name: t('summary.shipping'),
+              slug: 'shipping',
+              basePrice: shipping,
+              quantity: 1,
+            },
+          ]
+        : productItems;
+
+      trackBeginCheckout(
+        itemsForAnalytics.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.basePrice,
+          quantity: item.quantity,
+          variant: [(item as any).color, (item as any).finish].filter(Boolean).join(' / ') || undefined,
+        })),
+        total
+      );
+
+      savePendingPurchase({
+        id: orderId,
+        provider: paymentMethod === 'paysera' ? 'paysera' : paymentMethod === 'paypal' ? 'paypal' : 'stripe',
+        orderId,
+        total,
+        currency: 'EUR',
+        items: itemsForAnalytics.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.basePrice,
+          quantity: item.quantity,
+          variant: [(item as any).color, (item as any).finish].filter(Boolean).join(' / ') || undefined,
+        })),
+      });
 
       // 2) If Stripe/cards selected, create Stripe Checkout Session and redirect
       if (paymentMethod === 'stripe' || paymentMethod === 'cards') {

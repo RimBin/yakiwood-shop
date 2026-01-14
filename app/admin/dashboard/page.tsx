@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import Link from 'next/link';
+import { AdminBody, AdminCard, AdminKicker, AdminLabel, AdminSectionTitle, AdminSelect, AdminStack } from '@/components/admin/ui/AdminUI';
 
 interface DashboardStats {
   totalOrders: number;
@@ -158,72 +160,72 @@ export default function DashboardPage() {
   };
 
   const StatCard = ({ title, value, subtitle, icon }: { title: string; value: string | number; subtitle?: string; icon?: string }) => (
-    <div className="bg-[#EAEAEA] rounded-[16px] p-[24px] border border-[#E1E1E1]">
+    <AdminCard className="p-[24px]">
       <div className="flex items-center justify-between mb-[8px]">
         <p className="font-['Outfit'] text-[14px] text-[#535353] uppercase tracking-[0.7px]">{title}</p>
         {icon && <span className="text-[24px]">{icon}</span>}
       </div>
       <p className="font-['DM_Sans'] text-[36px] font-light text-[#161616] tracking-[-1.44px]">{value}</p>
       {subtitle && <p className="font-['Outfit'] text-[12px] text-[#BBBBBB] mt-[4px]">{subtitle}</p>}
-    </div>
+    </AdminCard>
   );
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#EAEAEA] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-[48px] h-[48px] border-4 border-[#E1E1E1] border-t-[#161616] rounded-full animate-spin mx-auto mb-[16px]"></div>
-          <p className="font-['Outfit'] text-[14px] text-[#535353]">Loading...</p>
-        </div>
-      </div>
+      <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+        <AdminCard className="flex items-center justify-center py-[80px]">
+          <div className="text-center">
+            <div className="w-[48px] h-[48px] border-4 border-[#E1E1E1] border-t-[#161616] rounded-full animate-spin mx-auto mb-[16px]"></div>
+            <p className="font-['Outfit'] text-[14px] text-[#535353]">Loading...</p>
+          </div>
+        </AdminCard>
+      </AdminBody>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#EAEAEA]">
-      <div className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] py-[40px]">
+    <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+      <AdminStack>
         {/* Filters */}
-        <div className="bg-[#EAEAEA] rounded-[16px] p-[24px] mb-[32px] border border-[#E1E1E1]">
-          <p className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] mb-[16px]">Filters</p>
+        <AdminCard>
+          <AdminKicker className="mb-[16px]">Filters</AdminKicker>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
             {/* Date filter */}
             <div>
-              <label className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px] block">Time Period</label>
-              <select
+              <AdminLabel className="mb-[6px]">Time Period</AdminLabel>
+              <AdminSelect
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="w-full px-[16px] py-[12px] border border-[#E1E1E1] rounded-[8px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616] yw-select"
               >
                 <option value="all">All Time</option>
                 <option value="today">Today</option>
                 <option value="week">Last Week</option>
                 <option value="month">Last Month</option>
-              </select>
+              </AdminSelect>
             </div>
 
             {/* Status filter */}
             <div>
-              <label className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px] block">Status</label>
-              <select
+              <AdminLabel className="mb-[6px]">Status</AdminLabel>
+              <AdminSelect
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-[16px] py-[12px] border border-[#E1E1E1] rounded-[8px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616] yw-select"
               >
                 <option value="all">All Orders</option>
                 <option value="pending">Pending</option>
                 <option value="processing">Processing</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
-              </select>
+              </AdminSelect>
             </div>
           </div>
-        </div>
+        </AdminCard>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px] mb-[32px]">
-          <a
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px]">
+          <Link
             href="/admin/orders"
-            className="bg-[#161616] text-white rounded-[16px] p-[24px] hover:bg-[#2a2a2a] transition-colors"
+            className="bg-[#161616] text-white rounded-[24px] p-[24px] hover:bg-[#2a2a2a] transition-colors"
           >
             <div className="flex items-center justify-between mb-[12px]">
               <span className="text-[32px]">📦</span>
@@ -231,11 +233,11 @@ export default function DashboardPage() {
             </div>
             <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px]">Manage Orders</p>
             <p className="font-['Outfit'] text-[12px] opacity-60 mt-[4px]">View & update order status</p>
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/admin/inventory"
-            className="bg-[#161616] text-white rounded-[16px] p-[24px] hover:bg-[#2a2a2a] transition-colors"
+            className="bg-[#161616] text-white rounded-[24px] p-[24px] hover:bg-[#2a2a2a] transition-colors"
           >
             <div className="flex items-center justify-between mb-[12px]">
               <span className="text-[32px]">📋</span>
@@ -243,11 +245,11 @@ export default function DashboardPage() {
             </div>
             <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px]">Inventory</p>
             <p className="font-['Outfit'] text-[12px] opacity-60 mt-[4px]">Manage stock levels</p>
-          </a>
+          </Link>
 
-          <a
-            href="/admin?tab=products"
-            className="bg-[#EAEAEA] rounded-[16px] p-[24px] border border-[#E1E1E1] hover:border-[#161616] transition-colors"
+          <Link
+            href="/admin/products"
+            className="bg-[#EAEAEA] rounded-[24px] p-[24px] border border-[#E1E1E1] hover:border-[#161616] transition-colors"
           >
             <div className="flex items-center justify-between mb-[12px]">
               <span className="text-[32px]">🛍️</span>
@@ -255,11 +257,11 @@ export default function DashboardPage() {
             </div>
             <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px] text-[#161616]">Products</p>
             <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">Add & edit products</p>
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/admin?tab=projects"
-            className="bg-[#EAEAEA] rounded-[16px] p-[24px] border border-[#E1E1E1] hover:border-[#161616] transition-colors"
+            className="bg-[#EAEAEA] rounded-[24px] p-[24px] border border-[#E1E1E1] hover:border-[#161616] transition-colors"
           >
             <div className="flex items-center justify-between mb-[12px]">
               <span className="text-[32px]">🏗️</span>
@@ -267,11 +269,11 @@ export default function DashboardPage() {
             </div>
             <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px] text-[#161616]">Projects</p>
             <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">Showcase portfolio</p>
-          </a>
+          </Link>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px] mb-[32px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px]">
           <StatCard
             title="Today's Orders"
             value={stats.todayOrders}
@@ -299,7 +301,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Product & Inventory Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px] mb-[32px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px]">
           <StatCard
             title="Products"
             value={stats.totalProducts}
@@ -326,10 +328,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Top Products */}
-        <div className="bg-[#EAEAEA] rounded-[16px] p-[24px] mb-[32px] border border-[#E1E1E1]">
-          <h2 className="font-['DM_Sans'] text-[24px] font-light text-[#161616] tracking-[-0.96px] mb-[24px]">
-            Top Products
-          </h2>
+        <AdminCard className="p-0 overflow-hidden">
+          <div className="p-[24px] border-b border-[#E1E1E1]">
+            <AdminSectionTitle className="text-[24px] tracking-[-0.96px]">Top Products</AdminSectionTitle>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -360,20 +362,18 @@ export default function DashboardPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </AdminCard>
 
         {/* Recent Orders */}
-        <div className="bg-[#EAEAEA] rounded-[16px] p-[24px] border border-[#E1E1E1]">
-          <div className="flex items-center justify-between mb-[24px]">
-            <h2 className="font-['DM_Sans'] text-[24px] font-light text-[#161616] tracking-[-0.96px]">
-              Recent Orders
-            </h2>
-            <a
+        <AdminCard className="p-0 overflow-hidden">
+          <div className="p-[24px] border-b border-[#E1E1E1] flex items-center justify-between">
+            <AdminSectionTitle className="text-[24px] tracking-[-0.96px]">Recent Orders</AdminSectionTitle>
+            <Link
               href="/admin/orders"
               className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] hover:text-[#161616] transition-colors"
             >
               All Orders →
-            </a>
+            </Link>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -418,8 +418,8 @@ export default function DashboardPage() {
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
-    </div>
+        </AdminCard>
+      </AdminStack>
+    </AdminBody>
   );
 }

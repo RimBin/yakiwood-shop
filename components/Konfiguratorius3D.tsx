@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import type { ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
+import { trackEvent } from '@/lib/analytics';
 
 interface ProfileModelProps {
   color: string;
@@ -210,6 +211,14 @@ export default function Konfiguratorius3D({
     }
   }, [selectedColor]);
 
+  useEffect(() => {
+    if (!productId) return;
+    trackEvent('configurator_view', {
+      product_id: productId,
+      mode,
+    });
+  }, [productId, mode]);
+
   // Realtime price quote for current configuration.
   useEffect(() => {
     const widthMm = selectedFinish?.dimensions?.width;
@@ -346,11 +355,25 @@ export default function Konfiguratorius3D({
   const handleColorSelect = (color: ProductColorVariant) => {
     setSelectedColor(color);
     onColorChange?.(color);
+
+    trackEvent('configurator_select_color', {
+      product_id: productId,
+      color_id: color.id,
+      color_name: color.name,
+      price_modifier: color.priceModifier ?? 0,
+    });
   };
 
   const handleFinishSelect = (finish: ProductProfileVariant) => {
     setSelectedFinish(finish);
     onFinishChange?.(finish);
+
+    trackEvent('configurator_select_finish', {
+      product_id: productId,
+      finish_id: finish.id,
+      finish_name: finish.name,
+      price_modifier: finish.priceModifier ?? 0,
+    });
   };
 
   return (
@@ -517,6 +540,11 @@ export default function Konfiguratorius3D({
                     onClick={() => {
                       setInputMode('boards');
                       if (quote?.quantityBoards) setQuantityBoards(quote.quantityBoards);
+
+                      trackEvent('configurator_input_mode_change', {
+                        product_id: productId,
+                        input_mode: 'boards',
+                      });
                     }}
                     className={`h-[28px] px-3 font-['Outfit'] text-[12px] ${
                       inputMode === 'boards' ? 'bg-[#161616] text-white' : 'bg-white text-[#161616]'
@@ -529,6 +557,11 @@ export default function Konfiguratorius3D({
                     onClick={() => {
                       setInputMode('area');
                       if (quote?.totalAreaM2) setTargetAreaM2(Number(quote.totalAreaM2.toFixed(2)));
+
+                      trackEvent('configurator_input_mode_change', {
+                        product_id: productId,
+                        input_mode: 'area',
+                      });
                     }}
                     className={`h-[28px] px-3 font-['Outfit'] text-[12px] ${
                       inputMode === 'area' ? 'bg-[#161616] text-white' : 'bg-white text-[#161616]'

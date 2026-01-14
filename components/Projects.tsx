@@ -9,6 +9,7 @@ import { projects as projectsData } from '@/data/projects';
 import type { Project } from '@/types/project';
 import { useLocale } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
+import { getProjectLocation, getProjectSlug, getProjectTitle, normalizeProjectLocale } from '@/lib/projects/i18n';
 
 const [imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6] = assets.projects;
 
@@ -75,9 +76,15 @@ function getProjectHref(basePath: string, project?: Partial<Project> | null): st
   return basePath;
 }
 
+function getProjectHrefLocalized(basePath: string, project: Partial<Project> | null | undefined, locale: 'lt' | 'en'): string {
+  const slug = getProjectSlug(project as Project, locale);
+  if (slug) return `${basePath}/${slug}`;
+  return basePath;
+}
+
 export default function Projects() {
   const locale = useLocale();
-  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const currentLocale = normalizeProjectLocale(locale);
   const basePath = toLocalePath('/projects', currentLocale);
 
   const [projects, setProjects] = useState<Project[]>(projectsData);
@@ -123,84 +130,96 @@ export default function Projects() {
         {/* Projects Grid - Mobile: Complex masonry-like layout from Figma */}
         <div className="px-[16px] md:px-[32px] pb-[24px] md:pb-[40px]">
           {/* Row 1: Big card (267x268px + text) */}
-          <Link href={getProjectHref(basePath, featuredProjects[0])} className="flex flex-col gap-[8px] mb-[16px]">
+          <Link
+            href={getProjectHrefLocalized(basePath, featuredProjects[0], currentLocale)}
+            className="flex flex-col gap-[8px] mb-[16px]"
+          >
             <div className="h-[268px] w-[267px] rounded-[8px] relative overflow-hidden">
               <Image
                 src={getProjectCardImage(featuredProjects[0]) || fallbackImages[0]}
-                alt={featuredProjects[0]?.title || 'Project'}
+                alt={getProjectTitle(featuredProjects[0], currentLocale) || 'Project'}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="flex flex-col gap-[8px] text-[#161616]">
               <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
-                {featuredProjects[0]?.title || 'Project title'}
+                {getProjectTitle(featuredProjects[0], currentLocale) || 'Project title'}
               </p>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
-                {featuredProjects[0]?.location || 'Location'}
+                {getProjectLocation(featuredProjects[0], currentLocale) || 'Location'}
               </p>
             </div>
           </Link>
 
           {/* Row 2: Middle card (230x176px) - right aligned */}
           <div className="flex justify-end mb-[16px]">
-            <Link href={getProjectHref(basePath, featuredProjects[1])} className="flex flex-col gap-[8px]">
+            <Link
+              href={getProjectHrefLocalized(basePath, featuredProjects[1], currentLocale)}
+              className="flex flex-col gap-[8px]"
+            >
               <div className="h-[176px] w-[230px] rounded-[8px] relative overflow-hidden">
                 <Image
                   src={getProjectCardImage(featuredProjects[1]) || fallbackImages[1]}
-                  alt={featuredProjects[1]?.title || 'Project'}
+                  alt={getProjectTitle(featuredProjects[1], currentLocale) || 'Project'}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="flex flex-col gap-[8px] text-[#161616] w-[230px]">
                 <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
-                  {featuredProjects[1]?.title || 'Project title'}
+                  {getProjectTitle(featuredProjects[1], currentLocale) || 'Project title'}
                 </p>
                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
-                  {featuredProjects[1]?.location || 'Location'}
+                  {getProjectLocation(featuredProjects[1], currentLocale) || 'Location'}
                 </p>
               </div>
             </Link>
           </div>
 
           {/* Row 3: Large card (328x330px) - full width */}
-          <Link href={getProjectHref(basePath, featuredProjects[2])} className="flex flex-col gap-[8px] mb-[16px]">
+          <Link
+            href={getProjectHrefLocalized(basePath, featuredProjects[2], currentLocale)}
+            className="flex flex-col gap-[8px] mb-[16px]"
+          >
             <div className="h-[330px] w-[328px] rounded-[8px] relative overflow-hidden">
               <Image
                 src={getProjectCardImage(featuredProjects[2]) || fallbackImages[2]}
-                alt={featuredProjects[2]?.title || 'Project'}
+                alt={getProjectTitle(featuredProjects[2], currentLocale) || 'Project'}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="flex flex-col gap-[8px] text-[#161616]">
               <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
-                {featuredProjects[2]?.title || 'Project title'}
+                {getProjectTitle(featuredProjects[2], currentLocale) || 'Project title'}
               </p>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
-                {featuredProjects[2]?.location || 'Location'}
+                {getProjectLocation(featuredProjects[2], currentLocale) || 'Location'}
               </p>
             </div>
           </Link>
 
           {/* Row 4: Small card centered (175x177px) */}
           <div className="flex justify-center mb-[16px]">
-            <Link href={getProjectHref(basePath, featuredProjects[3])} className="flex flex-col gap-[8px]">
+            <Link
+              href={getProjectHrefLocalized(basePath, featuredProjects[3], currentLocale)}
+              className="flex flex-col gap-[8px]"
+            >
               <div className="h-[177px] w-[175px] rounded-[8px] relative overflow-hidden">
                 <Image
                   src={getProjectCardImage(featuredProjects[3]) || fallbackImages[3]}
-                  alt={featuredProjects[3]?.title || 'Project'}
+                  alt={getProjectTitle(featuredProjects[3], currentLocale) || 'Project'}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="flex flex-col gap-[8px] text-[#161616] w-[175px]">
                 <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
-                  {featuredProjects[3]?.title || 'Project title'}
+                  {getProjectTitle(featuredProjects[3], currentLocale) || 'Project title'}
                 </p>
                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
-                  {featuredProjects[3]?.location || 'Location'}
+                  {getProjectLocation(featuredProjects[3], currentLocale) || 'Location'}
                 </p>
               </div>
             </Link>
@@ -213,42 +232,48 @@ export default function Projects() {
 
           {/* Row 5: Middle card right aligned (230x176px) */}
           <div className="flex justify-end mb-[16px]">
-            <Link href={getProjectHref(basePath, featuredProjects[4])} className="flex flex-col gap-[8px]">
+            <Link
+              href={getProjectHrefLocalized(basePath, featuredProjects[4], currentLocale)}
+              className="flex flex-col gap-[8px]"
+            >
               <div className="h-[176px] w-[230px] rounded-[8px] relative overflow-hidden">
                 <Image
                   src={getProjectCardImage(featuredProjects[4]) || fallbackImages[5]}
-                  alt={featuredProjects[4]?.title || 'Project'}
+                  alt={getProjectTitle(featuredProjects[4], currentLocale) || 'Project'}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="flex flex-col gap-[8px] text-[#161616] w-[230px]">
                 <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
-                  {featuredProjects[4]?.title || 'Project title'}
+                  {getProjectTitle(featuredProjects[4], currentLocale) || 'Project title'}
                 </p>
                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
-                  {featuredProjects[4]?.location || 'Location'}
+                  {getProjectLocation(featuredProjects[4], currentLocale) || 'Location'}
                 </p>
               </div>
             </Link>
           </div>
 
           {/* Row 6: Large card (328x330px) */}
-          <Link href={getProjectHref(basePath, featuredProjects[5])} className="flex flex-col gap-[8px] mb-[24px]">
+          <Link
+            href={getProjectHrefLocalized(basePath, featuredProjects[5], currentLocale)}
+            className="flex flex-col gap-[8px] mb-[24px]"
+          >
             <div className="h-[330px] w-[328px] rounded-[8px] relative overflow-hidden">
               <Image
                 src={getProjectCardImage(featuredProjects[5]) || fallbackImages[4]}
-                alt={featuredProjects[5]?.title || 'Project'}
+                alt={getProjectTitle(featuredProjects[5], currentLocale) || 'Project'}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="flex flex-col gap-[8px] text-[#161616]">
               <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
-                {featuredProjects[5]?.title || 'Project title'}
+                {getProjectTitle(featuredProjects[5], currentLocale) || 'Project title'}
               </p>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
-                {featuredProjects[5]?.location || 'Location'}
+                {getProjectLocation(featuredProjects[5], currentLocale) || 'Location'}
               </p>
             </div>
           </Link>
@@ -288,7 +313,11 @@ export default function Projects() {
         {/* Desktop Grid */}
         <div className="grid grid-cols-3 gap-[32px]">
           {featuredProjects.map((project, idx) => (
-            <Link key={idx} href={getProjectHref(basePath, project)} className="flex flex-col gap-[8px]">
+            <Link
+              key={idx}
+              href={getProjectHrefLocalized(basePath, project, currentLocale)}
+              className="flex flex-col gap-[8px]"
+            >
               <div
                 className={`relative w-full overflow-hidden rounded-[12px] ${(() => {
                   const row = Math.floor(idx / 3);
@@ -299,17 +328,17 @@ export default function Projects() {
               >
                 <Image
                   src={getProjectCardImage(project) || fallbackImages[idx % fallbackImages.length]}
-                  alt={project?.title || 'Project'}
+                  alt={getProjectTitle(project, currentLocale) || 'Project'}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="flex flex-col gap-[4px]">
                 <p className="font-['DM_Sans'] text-[18px] font-medium tracking-[-0.36px] text-[#161616]">
-                  {project?.title || 'Project title'}
+                  {getProjectTitle(project, currentLocale) || 'Project title'}
                 </p>
                 <p className="font-['Outfit'] text-[14px] font-light tracking-[0.14px] text-[#535353]">
-                  {project?.location || 'Location'}
+                  {getProjectLocation(project, currentLocale) || 'Location'}
                 </p>
               </div>
             </Link>

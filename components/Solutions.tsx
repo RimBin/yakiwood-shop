@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import ArrowRight from '@/components/icons/ArrowRight';
+import Link from 'next/link';
+import { useLocale } from 'next-intl';
+import { toLocalePath } from '@/i18n/paths';
 import { PageCover } from '@/components/shared/PageLayout';
 import { assets } from '@/lib/assets';
 const { fence: imgFence, facades: imgFacades, terrace: imgTerrace, interior: imgInterior } = assets.categories;
@@ -38,6 +41,15 @@ const solutions: SolutionItem[] = [
 
 export default function Solutions() {
   const [openIndex, setOpenIndex] = useState<number>(0); // Terrace open by default
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
+  const anchorMap: Record<string, string> = {
+    Terrace: 'terraces',
+    Facade: 'facades',
+    Fence: 'fences',
+    Interior: 'interior',
+  };
 
   return (
     <section className="w-full bg-[#E1E1E1]">
@@ -75,10 +87,15 @@ export default function Solutions() {
                       {solution.description}
                     </p>
                     <div className="flex gap-[8px] items-center h-[24px]">
-                      <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                        FIND OUT MORE
-                      </p>
-                      <ArrowRight color="#FFFFFF" />
+                      <Link
+                        href={toLocalePath(`/solutions#${anchorMap[solution.title]}`, currentLocale)}
+                        className="flex items-center gap-[8px]"
+                      >
+                        <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
+                          FIND OUT MORE
+                        </p>
+                        <ArrowRight color="#FFFFFF" />
+                      </Link>
                     </div>
                   </div>
                 )}
@@ -164,8 +181,13 @@ export default function Solutions() {
                           {solution.description}
                         </p>
                         <div className="flex gap-[16px] items-center">
-                          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">FIND OUT MORE</p>
-                          <ArrowRight color="#FFFFFF" />
+                          <Link
+                            href={toLocalePath(`/solutions#${anchorMap[solution.title]}`, currentLocale)}
+                            className="flex items-center gap-[8px]"
+                          >
+                            <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">FIND OUT MORE</p>
+                            <ArrowRight color="#FFFFFF" />
+                          </Link>
                         </div>
                       </div>
                     )}

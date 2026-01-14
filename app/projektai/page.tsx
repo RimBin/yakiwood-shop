@@ -5,6 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { projects as projectsData } from '@/data/projects';
 import { PageCover } from '@/components/shared/PageLayout';
+import { useLocale } from 'next-intl';
+import { toLocalePath } from '@/i18n/paths';
+import { getProjectLocation, getProjectSlug, getProjectTitle, normalizeProjectLocale } from '@/lib/projects/i18n';
 
 const PROJECTS_STORAGE_KEY = 'yakiwood_projects';
 
@@ -41,6 +44,10 @@ async function readProjectsFromIdb(): Promise<unknown[] | null> {
 }
 
 export default function ProjectsPage() {
+  const locale = useLocale();
+  const currentLocale = normalizeProjectLocale(locale);
+  const basePath = toLocalePath('/projects', currentLocale);
+
   const [projects, setProjects] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
@@ -68,16 +75,16 @@ export default function ProjectsPage() {
         image:
           project.featuredImage ||
           (Array.isArray(project.images) ? project.images[0] : project.images),
-        title: project.title,
-        location: project.location,
-        slug: project.slug,
+        title: getProjectTitle(project, currentLocale),
+        location: getProjectLocation(project, currentLocale),
+        slug: getProjectSlug(project, currentLocale),
       }));
 
       setProjects(displayProjects);
     };
 
     void run();
-  }, []);
+  }, [currentLocale]);
 
   const totalPages = Math.ceil(projects.length / itemsPerPage);
 
@@ -100,7 +107,7 @@ export default function ProjectsPage() {
       <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px] pt-[64px]">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[32px]">
           {currentProjects.map((project, idx) => (
-            <Link key={project.id} href={`/projektai/${project.slug}`} className="flex flex-col gap-[8px]">
+            <Link key={project.id} href={`${basePath}/${project.slug}`} className="flex flex-col gap-[8px]">
               <div className={`relative w-full overflow-hidden rounded-[12px] ${idx % 2 === 0 ? 'h-[520px]' : 'h-[330px]'}`}>
                 <Image src={project.image} alt={project.title} fill className="object-cover" />
               </div>

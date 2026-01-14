@@ -5,7 +5,17 @@ import { InventoryTable } from '@/components/admin/InventoryTable';
 import { RestockModal } from '@/components/admin/RestockModal';
 import { AdjustmentModal } from '@/components/admin/AdjustmentModal';
 import type { InventoryWithProduct, InventoryStats, InventoryFilters } from '@/lib/inventory/types';
-import { Breadcrumbs } from '@/components/ui';
+import {
+  AdminBody,
+  AdminButton,
+  AdminCard,
+  AdminInput,
+  AdminKicker,
+  AdminLabel,
+  AdminSectionTitle,
+  AdminSelect,
+  AdminStack,
+} from '@/components/admin/ui/AdminUI';
 
 export default function InventoryPage() {
   const [items, setItems] = useState<InventoryWithProduct[]>([]);
@@ -99,165 +109,153 @@ export default function InventoryPage() {
   };
 
   return (
-    <>
-      <Breadcrumbs
-        items={[
-          { label: 'Homepage', href: '/' },
-          { label: 'Admin', href: '/admin' },
-          { label: 'Inventory' },
-        ]}
-      />
-
-      <div className="p-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Inventory Management</h1>
-        <p className="text-gray-600">Track and manage product inventory levels</p>
-      </div>
-
-      {/* Stats Cards */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-[#EAEAEA] p-6 rounded-lg shadow">
-            <div className="text-sm text-gray-600 mb-1">Total Items</div>
-            <div className="text-3xl font-bold">{stats.total_items}</div>
+    <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+      <AdminStack>
+        <div>
+          <AdminKicker>Atsargos</AdminKicker>
+          <div className="mt-[8px]">
+            <AdminSectionTitle>Atsargų valdymas</AdminSectionTitle>
           </div>
-          <div className="bg-[#EAEAEA] p-6 rounded-lg shadow">
-            <div className="text-sm text-gray-600 mb-1">In Stock</div>
-            <div className={`text-3xl font-bold ${getStatusColor(stats.in_stock)}`}>
-              {stats.in_stock}
+          <p className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353]">
+            Sekite ir valdykite produktų atsargų lygius
+          </p>
+        </div>
+
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-[clamp(12px,2vw,16px)]">
+            <AdminCard>
+              <AdminKicker>Bendras kiekis</AdminKicker>
+              <div className="mt-[8px] font-['DM_Sans'] font-light text-[32px] tracking-[-1.28px] text-[#161616]">
+                {stats.total_items}
+              </div>
+            </AdminCard>
+            <AdminCard>
+              <AdminKicker>Turime</AdminKicker>
+              <div className={`mt-[8px] font-['DM_Sans'] font-light text-[32px] tracking-[-1.28px] ${getStatusColor(stats.in_stock)}`}>
+                {stats.in_stock}
+              </div>
+            </AdminCard>
+            <AdminCard>
+              <AdminKicker>Mažai</AdminKicker>
+              <div className="mt-[8px] font-['DM_Sans'] font-light text-[32px] tracking-[-1.28px] text-yellow-600">
+                {stats.low_stock}
+              </div>
+            </AdminCard>
+            <AdminCard>
+              <AdminKicker>Nėra</AdminKicker>
+              <div className="mt-[8px] font-['DM_Sans'] font-light text-[32px] tracking-[-1.28px] text-red-600">
+                {stats.out_of_stock}
+              </div>
+            </AdminCard>
+          </div>
+        )}
+
+        <AdminCard>
+          <div className="flex flex-col md:flex-row gap-[12px]">
+            <div className="flex-1">
+              <AdminLabel className="mb-[6px]">Paieška</AdminLabel>
+              <AdminInput
+                type="text"
+                placeholder="Ieškoti pagal SKU arba vietą..."
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <AdminLabel className="mb-[6px]">Statusas</AdminLabel>
+              <AdminSelect
+                value={filters.status}
+                onChange={(e) => setFilters({ ...filters, status: e.target.value as InventoryFilters['status'] })}
+              >
+                <option value="all">Visi</option>
+                <option value="in_stock">Turime</option>
+                <option value="low_stock">Mažai</option>
+                <option value="out_of_stock">Nėra</option>
+              </AdminSelect>
+            </div>
+
+            <div className="flex items-end gap-[12px]">
+              <AdminButton onClick={() => setShowRestockModal(true)}>
+                Greitas papildymas
+              </AdminButton>
+              <AdminButton variant="secondary" onClick={handleExportCSV}>
+                Eksportuoti CSV
+              </AdminButton>
             </div>
           </div>
-          <div className="bg-[#EAEAEA] p-6 rounded-lg shadow">
-            <div className="text-sm text-gray-600 mb-1">Low Stock</div>
-            <div className="text-3xl font-bold text-yellow-600">{stats.low_stock}</div>
-          </div>
-          <div className="bg-[#EAEAEA] p-6 rounded-lg shadow">
-            <div className="text-sm text-gray-600 mb-1">Out of Stock</div>
-            <div className="text-3xl font-bold text-red-600">{stats.out_of_stock}</div>
-          </div>
-        </div>
-      )}
+        </AdminCard>
 
-      {/* Filters and Actions */}
-      <div className="bg-[#EAEAEA] p-6 rounded-lg shadow mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Search by SKU or location..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            />
-          </div>
+        <AdminCard className="p-0 overflow-hidden">
+          {loading ? (
+            <div className="p-[64px] text-center">
+              <div className="font-['Outfit'] text-[14px] text-[#7C7C7C]">Kraunama...</div>
+            </div>
+          ) : items.length === 0 ? (
+            <div className="p-[64px] text-center">
+              <div className="font-['Outfit'] text-[14px] text-[#7C7C7C]">Nerasta atsargų įrašų</div>
+            </div>
+          ) : (
+            <>
+              <InventoryTable items={items} onRestock={handleRestock} onAdjust={handleAdjust} onRefresh={fetchInventory} />
 
-          {/* Status Filter */}
-          <select
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent yw-select"
-            value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value as InventoryFilters['status'] })}
-          >
-            <option value="all">All Status</option>
-            <option value="in_stock">In Stock</option>
-            <option value="low_stock">Low Stock</option>
-            <option value="out_of_stock">Out of Stock</option>
-          </select>
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-[8px] p-[16px] border-t border-[#E1E1E1]">
+                  <AdminButton
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    Ankstesnis
+                  </AdminButton>
+                  <span className="px-[12px] font-['Outfit'] text-[12px] text-[#535353]">
+                    {page} / {totalPages}
+                  </span>
+                  <AdminButton
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                  >
+                    Kitas
+                  </AdminButton>
+                </div>
+              )}
+            </>
+          )}
+        </AdminCard>
 
-          {/* Actions */}
-          <button
-            onClick={() => setShowRestockModal(true)}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          >
-            Quick Restock
-          </button>
-          <button
-            onClick={handleExportCSV}
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
-          >
-            Export CSV
-          </button>
-        </div>
-      </div>
-
-      {/* Inventory Table */}
-      <div className="bg-[#EAEAEA] rounded-lg shadow">
-        {loading ? (
-          <div className="p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Loading inventory...</p>
-          </div>
-        ) : items.length === 0 ? (
-          <div className="p-12 text-center text-gray-600">
-            No inventory items found
-          </div>
-        ) : (
-          <>
-            <InventoryTable
-              items={items}
-              onRestock={handleRestock}
-              onAdjust={handleAdjust}
-              onRefresh={fetchInventory}
-            />
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 p-6 border-t">
-                <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#E1E1E1]"
-                >
-                  Previous
-                </button>
-                <span className="px-4 py-2">
-                  Page {page} of {totalPages}
-                </span>
-                <button
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#E1E1E1]"
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </>
+        {showRestockModal && (
+          <RestockModal
+            sku={selectedSku}
+            onClose={() => {
+              setShowRestockModal(false);
+              setSelectedSku(null);
+            }}
+            onSuccess={() => {
+              fetchInventory();
+              setShowRestockModal(false);
+              setSelectedSku(null);
+            }}
+          />
         )}
-      </div>
 
-      {/* Modals */}
-      {showRestockModal && (
-        <RestockModal
-          sku={selectedSku}
-          onClose={() => {
-            setShowRestockModal(false);
-            setSelectedSku(null);
-          }}
-          onSuccess={() => {
-            fetchInventory();
-            setShowRestockModal(false);
-            setSelectedSku(null);
-          }}
-        />
-      )}
-
-      {showAdjustmentModal && selectedSku && (
-        <AdjustmentModal
-          sku={selectedSku}
-          onClose={() => {
-            setShowAdjustmentModal(false);
-            setSelectedSku(null);
-          }}
-          onSuccess={() => {
-            fetchInventory();
-            setShowAdjustmentModal(false);
-            setSelectedSku(null);
-          }}
-        />
-      )}
-      </div>
-    </>
+        {showAdjustmentModal && selectedSku && (
+          <AdjustmentModal
+            sku={selectedSku}
+            onClose={() => {
+              setShowAdjustmentModal(false);
+              setSelectedSku(null);
+            }}
+            onSuccess={() => {
+              fetchInventory();
+              setShowAdjustmentModal(false);
+              setSelectedSku(null);
+            }}
+          />
+        )}
+      </AdminStack>
+    </AdminBody>
   );
 }

@@ -3,6 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
+import { projects as projectsData } from '@/data/projects';
+import type { Project } from '@/types/project';
+import { findProjectBySlug, getProjectSlug, normalizeProjectLocale } from '@/lib/projects/i18n';
 
 interface Language {
   code: string;
@@ -28,6 +31,70 @@ const enToLt: PrefixMap = [
 ];
 
 const ltToEn: PrefixMap = enToLt.map(({ from, to }) => ({ from: to, to: from }));
+
+const PROJECTS_STORAGE_KEY = 'yakiwood_projects';
+
+function openProjectsDb(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('yakiwood-admin', 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains('kv')) {
+        db.createObjectStore('kv', { keyPath: 'key' });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error ?? new Error('Failed to open IndexedDB'));
+  });
+}
+
+async function readProjectsFromBrowserStorage(): Promise<Project[]> {
+  if (typeof window === 'undefined') return projectsData;
+
+  try {
+    const db = await openProjectsDb();
+    const fromIdb = await new Promise<unknown | null>((resolve, reject) => {
+      const tx = db.transaction('kv', 'readonly');
+      const store = tx.objectStore('kv');
+      const req = store.get(PROJECTS_STORAGE_KEY);
+      req.onsuccess = () => {
+        const row = req.result as { key: string; value: unknown } | undefined;
+        resolve(row?.value ?? null);
+      };
+      req.onerror = () => reject(req.error ?? new Error('IndexedDB get failed'));
+    });
+    if (Array.isArray(fromIdb)) return fromIdb as Project[];
+  } catch {
+    // ignore
+  }
+
+  try {
+    const legacy = window.localStorage.getItem(PROJECTS_STORAGE_KEY);
+    const parsed = legacy ? (JSON.parse(legacy) as unknown) : null;
+    return Array.isArray(parsed) ? (parsed as Project[]) : projectsData;
+  } catch {
+    return projectsData;
+  }
+}
+
+function stripQueryAndHash(pathname: string): string {
+  return pathname.split('?')[0].split('#')[0];
+}
+
+function extractProjectSlugFromPath(pathname: string): string | null {
+  const p = stripQueryAndHash(pathname);
+
+  const ltPrefix = '/lt/projektai/';
+  if (p.startsWith(ltPrefix)) return p.slice(ltPrefix.length).split('/')[0] || null;
+
+  const ltLegacy = '/projektai/';
+  if (p.startsWith(ltLegacy)) return p.slice(ltLegacy.length).split('/')[0] || null;
+
+  const enPrefix = '/projects/';
+  if (p.startsWith(enPrefix)) return p.slice(enPrefix.length).split('/')[0] || null;
+
+  return null;
+}
 
 function replaceLeadingPath(pathname: string, mapping: PrefixMap): string {
   for (const { from, to } of mapping) {
@@ -89,11 +156,27 @@ export default function LanguageSwitcher() {
     return () => document.removeEventListener('keydown', handleEscape);
   }, []);
 
-  const handleLanguageChange = (newLocale: string) => {
+  const handleLanguageChange = async (newLocale: string) => {
     // Store preference in cookie (expires in 1 year)
     document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=31536000;SameSite=Lax`;
 
-    const newPath = newLocale === 'lt' ? toLtPath(pathname) : toEnPath(pathname);
+    const fromLocale = normalizeProjectLocale(locale);
+    const targetLocale = normalizeProjectLocale(newLocale);
+
+    // Default: just map route prefixes
+    let newPath = newLocale === 'lt' ? toLtPath(pathname) : toEnPath(pathname);
+
+    // Special-case: project detail routes need slug translation too
+    const currentProjectSlug = extractProjectSlugFromPath(pathname);
+    if (currentProjectSlug) {
+      const projects = await readProjectsFromBrowserStorage();
+      const project = findProjectBySlug(projects, currentProjectSlug, fromLocale);
+      if (project) {
+        const translatedSlug = getProjectSlug(project, targetLocale);
+        const targetBase = targetLocale === 'lt' ? '/lt/projektai' : '/projects';
+        newPath = `${targetBase}/${translatedSlug}`;
+      }
+    }
 
     setIsOpen(false);
     router.push(newPath);

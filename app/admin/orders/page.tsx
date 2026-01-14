@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Breadcrumbs } from '@/components/ui';
 import ModalOverlay from '@/components/modals/ModalOverlay';
+import { AdminBody, AdminButton, AdminCard, AdminSelect, AdminStack, AdminSubTabs } from '@/components/admin/ui/AdminUI';
 
 type InvoiceLocale = 'lt' | 'en';
 
@@ -177,66 +177,28 @@ export default function AdminOrdersPage() {
   };
 
   return (
-    <>
-      <Breadcrumbs
-        items={[
-          { label: 'Pradžia', href: '/' },
-          { label: 'Administravimas', href: '/admin' },
-          { label: 'Užsakymai' },
-        ]}
-      />
-
-      <main className="min-h-screen bg-[#EAEAEA] py-[40px] px-[20px]">
-        <div className="max-w-[1400px] mx-auto">
-        <div className="mb-[40px]">
-          <h1 className="font-['DM_Sans'] font-light text-[36px] md:text-[48px] leading-none tracking-tight text-[#161616] mb-[16px]">
-            Užsakymai ir sąskaitos
-          </h1>
-          <p className="font-['Outfit'] text-[14px] text-[#535353]">
-            Administruokite užsakymus ir sąskaitas vienoje vietoje
-          </p>
-        </div>
-
-        {/* Tabs */}
-        <div className="mb-[32px] flex gap-[8px] border-b border-[#E1E1E1]">
-          <button
-            onClick={() => setActiveTab('orders')}
-            className={`px-[24px] py-[12px] font-['Outfit'] text-[14px] uppercase tracking-[0.6px] transition-colors ${
-              activeTab === 'orders'
-                ? 'border-b-2 border-[#161616] text-[#161616]'
-                : 'text-[#7C7C7C] hover:text-[#161616]'
-            }`}
-          >
-            Užsakymai
-          </button>
-          <button
-            onClick={() => setActiveTab('invoices')}
-            className={`px-[24px] py-[12px] font-['Outfit'] text-[14px] uppercase tracking-[0.6px] transition-colors ${
-              activeTab === 'invoices'
-                ? 'border-b-2 border-[#161616] text-[#161616]'
-                : 'text-[#7C7C7C] hover:text-[#161616]'
-            }`}
-          >
-            Sąskaitos
-          </button>
-        </div>
+    <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+      <AdminStack>
+        <AdminSubTabs
+          value={activeTab}
+          onChange={setActiveTab}
+          tabs={[
+            { value: 'orders', label: 'Užsakymai' },
+            { value: 'invoices', label: 'Sąskaitos' },
+          ]}
+        />
 
         {loading ? (
-          <div className="text-center py-[100px]">
-            <div className="font-['Outfit'] text-[16px] text-[#7C7C7C]">
-              Kraunama...
-            </div>
-          </div>
+          <AdminCard className="text-center py-[64px]">
+            <div className="font-['Outfit'] text-[14px] text-[#7C7C7C]">Kraunama...</div>
+          </AdminCard>
         ) : (
           <>
-            {/* Orders Tab */}
-            {activeTab === 'orders' && (
-              <div className="bg-[#EAEAEA] rounded-[8px] overflow-hidden">
+            {activeTab === 'orders' ? (
+              <AdminCard className="p-0 overflow-hidden">
                 {orders.length === 0 ? (
                   <div className="p-[40px] text-center">
-                    <p className="font-['Outfit'] text-[14px] text-[#7C7C7C]">
-                      Kol kas užsakymų nėra
-                    </p>
+                    <p className="font-['Outfit'] text-[14px] text-[#7C7C7C]">Kol kas užsakymų nėra</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -324,16 +286,16 @@ export default function AdminOrdersPage() {
                               </span>
                             </td>
                             <td className="px-[16px] py-[16px] text-center">
-                              <select
+                              <AdminSelect
                                 value={order.status}
                                 onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                className="px-[12px] py-[6px] border border-[#E1E1E1] rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616] yw-select"
+                                className="h-[36px] px-[12px] text-[12px]"
                               >
                                 <option value="pending">Laukiama</option>
                                 <option value="processing">Vykdoma</option>
                                 <option value="completed">Įvykdyta</option>
                                 <option value="cancelled">Atšaukta</option>
-                              </select>
+                              </AdminSelect>
                             </td>
                           </tr>
                         ))}
@@ -341,27 +303,27 @@ export default function AdminOrdersPage() {
                     </table>
                   </div>
                 )}
-              </div>
-            )}
+              </AdminCard>
+            ) : null}
 
             {/* Invoices Tab */}
-            {activeTab === 'invoices' && (
-              <div className="bg-[#EAEAEA] rounded-[8px] overflow-hidden">
+            {activeTab === 'invoices' ? (
+              <AdminCard className="p-0 overflow-hidden">
                 <div className="flex items-center justify-between gap-[16px] px-[16px] py-[12px] bg-[#E1E1E1] border-b border-[#E1E1E1]">
                   <div className="font-['Outfit'] text-[12px] text-[#7C7C7C] uppercase tracking-[0.6px]">
                     Sąskaitos
                   </div>
                   <div className="flex items-center gap-[8px]">
                     <span className="font-['Outfit'] text-[12px] text-[#7C7C7C]">Kalba:</span>
-                    <select
+                    <AdminSelect
                       value={invoiceLocale}
                       onChange={(e) => setInvoiceLocale(e.target.value as InvoiceLocale)}
-                      className="px-[12px] py-[6px] border border-[#E1E1E1] bg-[#EAEAEA] rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616] yw-select"
+                      className="h-[36px] px-[12px] text-[12px]"
                       aria-label="Sąskaitos PDF kalba"
                     >
                       <option value="lt">LT</option>
                       <option value="en">EN</option>
-                    </select>
+                    </AdminSelect>
                   </div>
                 </div>
                 {invoices.length === 0 ? (
@@ -433,30 +395,35 @@ export default function AdminOrdersPage() {
                             </td>
                             <td className="px-[16px] py-[16px] text-center">
                               <div className="flex gap-[8px] justify-center">
-                                <button
+                                <AdminButton
+                                  size="sm"
+                                  variant="outline"
                                   onClick={() =>
                                     setPreviewInvoice({ id: invoice.id, invoiceNumber: invoice.invoice_number })
                                   }
-                                  className="px-[12px] py-[6px] border border-[#161616] text-[#161616] rounded-[4px] font-['Outfit'] text-[11px] uppercase tracking-[0.6px] hover:bg-[#161616] hover:text-white transition-colors"
+                                  className="h-[32px] px-[12px] text-[11px]"
                                   title="Peržiūrėti PDF"
                                 >
                                   Peržiūra
-                                </button>
-                                <button
+                                </AdminButton>
+                                <AdminButton
+                                  size="sm"
                                   onClick={() => handleDownloadInvoice(invoice.id, invoice.invoice_number)}
-                                  className="px-[12px] py-[6px] bg-[#161616] text-white rounded-[4px] font-['Outfit'] text-[11px] uppercase tracking-[0.6px] hover:bg-[#535353] transition-colors"
+                                  className="h-[32px] px-[12px] text-[11px]"
                                   title="Atsisiųsti PDF"
                                 >
                                   PDF
-                                </button>
+                                </AdminButton>
                                 {invoice.buyer_email && (
-                                  <button
+                                  <AdminButton
+                                    size="sm"
+                                    variant="outline"
                                     onClick={() => handleResendInvoice(invoice.id)}
-                                    className="px-[12px] py-[6px] border border-[#161616] text-[#161616] rounded-[4px] font-['Outfit'] text-[11px] uppercase tracking-[0.6px] hover:bg-[#161616] hover:text-white transition-colors"
+                                    className="h-[32px] px-[12px] text-[11px]"
                                     title="Išsiųsti el. paštu"
                                   >
                                     Siųsti
-                                  </button>
+                                  </AdminButton>
                                 )}
                               </div>
                             </td>
@@ -466,15 +433,14 @@ export default function AdminOrdersPage() {
                     </table>
                   </div>
                 )}
-              </div>
-            )}
+              </AdminCard>
+            ) : null}
           </>
         )}
-        </div>
-      </main>
+      </AdminStack>
 
       <ModalOverlay isOpen={!!previewInvoice} onClose={() => setPreviewInvoice(null)}>
-        <div className="w-[min(1100px,95vw)] h-[min(85vh,900px)] bg-[#EAEAEA] rounded-[16px] overflow-hidden border border-[#E1E1E1]">
+        <div className="w-[min(1100px,95vw)] h-[min(85vh,900px)] bg-[#EAEAEA] rounded-[24px] overflow-hidden border border-[#E1E1E1]">
           <div className="flex items-center justify-between gap-[12px] px-[16px] py-[12px] border-b border-[#E1E1E1] bg-[#E1E1E1]">
             <div className="min-w-0">
               <div className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#7C7C7C]">
@@ -485,21 +451,18 @@ export default function AdminOrdersPage() {
               </div>
             </div>
             <div className="flex items-center gap-[8px]">
-              <select
+              <AdminSelect
                 value={invoiceLocale}
                 onChange={(e) => setInvoiceLocale(e.target.value as InvoiceLocale)}
-                className="px-[12px] py-[6px] border border-[#E1E1E1] bg-[#EAEAEA] rounded-[4px] font-['Outfit'] text-[12px] focus:outline-none focus:border-[#161616] yw-select"
+                className="h-[36px] px-[12px] text-[12px]"
                 aria-label="Peržiūros kalba"
               >
                 <option value="lt">LT</option>
                 <option value="en">EN</option>
-              </select>
-              <button
-                onClick={() => setPreviewInvoice(null)}
-                className="px-[12px] py-[6px] border border-[#161616] text-[#161616] rounded-[4px] font-['Outfit'] text-[11px] uppercase tracking-[0.6px] hover:bg-[#161616] hover:text-white transition-colors"
-              >
+              </AdminSelect>
+              <AdminButton size="sm" variant="outline" onClick={() => setPreviewInvoice(null)} className="h-[36px]">
                 Uždaryti
-              </button>
+              </AdminButton>
             </div>
           </div>
           <div className="w-full h-[calc(100%-50px)] bg-[#EAEAEA]">
@@ -514,6 +477,6 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       </ModalOverlay>
-    </>
+    </AdminBody>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AdminBody, AdminButton, AdminCard, AdminInput, AdminLabel, AdminStack } from '@/components/admin/ui/AdminUI';
 import {
   EMAIL_TEMPLATES,
   getEmailTemplatesByCategory,
@@ -79,13 +80,12 @@ export default function EmailTemplatesAdmin() {
   ];
 
   return (
-    <>
-      <div className="min-h-screen bg-[#E1E1E1] pb-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-[clamp(16px,2vw,24px)]">
+    <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+      <AdminStack>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-[clamp(16px,2vw,24px)]">
             {/* Templates List */}
             <div className="lg:col-span-1">
-              <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(20px,3vw,32px)]">
+              <AdminCard>
                 <div className="mb-[24px]">
                   <h2 className="font-['Outfit'] text-[11px] font-medium text-[#535353] uppercase tracking-[0.55px]">
                     Available Templates ({EMAIL_TEMPLATES.length})
@@ -109,10 +109,10 @@ export default function EmailTemplatesAdmin() {
                           <button
                             key={template.id}
                             onClick={() => handlePreview(template)}
-                            className={`w-full text-left p-[16px] rounded-[12px] transition-colors ${
+                            className={`w-full text-left p-[16px] rounded-[16px] border transition-colors ${
                               selectedTemplate?.id === template.id
-                                ? 'bg-[#161616] text-white'
-                                : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#E1E1E1]'
+                                ? 'bg-[#161616] text-white border-[#161616]'
+                                : 'bg-white text-[#161616] border-[#E1E1E1] hover:bg-[#E1E1E1]'
                             }`}
                           >
                             <div className="font-['DM_Sans'] font-medium text-[14px] mb-[4px] tracking-[-0.28px]">
@@ -131,7 +131,7 @@ export default function EmailTemplatesAdmin() {
                     </div>
                   );
                 })}
-              </div>
+              </AdminCard>
             </div>
 
             {/* Preview */}
@@ -166,27 +166,19 @@ export default function EmailTemplatesAdmin() {
 
                   <div className="p-[clamp(20px,3vw,32px)]">
                     <div className="mb-[24px]">
-                      <label className="block font-['Outfit'] text-[11px] font-medium text-[#535353] uppercase tracking-[0.55px] mb-[8px]">
-                        Test Recipient
-                      </label>
+                      <AdminLabel className="mb-[8px]">Test Recipient</AdminLabel>
                       <div className="flex flex-col sm:flex-row gap-[12px]">
-                        <input
+                        <AdminInput
                           value={testEmailTo}
                           onChange={(e) => setTestEmailTo(e.target.value)}
                           placeholder="name@company.com"
                           inputMode="email"
-                          className="h-[48px] w-full rounded-[100px] bg-[#EAEAEA] border-2 border-[#E1E1E1] px-[18px] font-['Outfit'] text-[14px] text-[#161616] outline-none focus:border-[#161616]"
+                          className="h-[48px]"
                           aria-label="Test email recipient"
                         />
-                        <button
-                          onClick={handleSendTest}
-                          disabled={isSendingTest}
-                          className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-white transition-colors ${
-                            isSendingTest ? 'bg-[#535353] cursor-not-allowed' : 'bg-[#161616] hover:bg-[#535353]'
-                          }`}
-                        >
-                          {isSendingTest ? 'Sending…' : '📧 Send Test Email'}
-                        </button>
+                        <AdminButton onClick={handleSendTest} disabled={isSendingTest}>
+                          {isSendingTest ? 'Sending…' : 'Send Test Email'}
+                        </AdminButton>
                       </div>
 
                       {sendStatus ? (
@@ -209,9 +201,7 @@ export default function EmailTemplatesAdmin() {
                     </div>
 
                     <div className="mb-[24px]">
-                      <label className="block font-['Outfit'] text-[11px] font-medium text-[#535353] uppercase tracking-[0.55px] mb-[12px]">
-                        HTML Preview
-                      </label>
+                      <AdminLabel className="mb-[12px]">HTML Preview</AdminLabel>
                       <div className="border-2 border-[#E1E1E1] rounded-[12px] overflow-hidden">
                         <iframe
                           srcDoc={selectedTemplate.html(previewVars)}
@@ -222,16 +212,13 @@ export default function EmailTemplatesAdmin() {
                     </div>
 
                     <div className="flex gap-[12px] flex-wrap">
-                      <button
-                        onClick={handleCopyHTML}
-                        className="h-[48px] px-[24px] rounded-[100px] bg-[#E1E1E1] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#BBBBBB] transition-colors"
-                      >
-                        📋 Copy HTML
-                      </button>
+                      <AdminButton variant="secondary" onClick={handleCopyHTML}>
+                        Copy HTML
+                      </AdminButton>
                     </div>
 
                     {/* Template Variables */}
-                    <div className="mt-[24px] p-[20px] bg-[#EAEAEA] rounded-[12px]">
+                    <div className="mt-[24px] p-[20px] bg-[#EAEAEA] rounded-[16px] border border-[#E1E1E1]">
                       <h4 className="font-['Outfit'] text-[11px] font-medium text-[#535353] uppercase tracking-[0.55px] mb-[12px]">
                         Sample Data
                       </h4>
@@ -242,25 +229,23 @@ export default function EmailTemplatesAdmin() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[24px] p-[clamp(40px,6vw,80px)] text-center">
+                <AdminCard className="text-center p-[clamp(40px,6vw,80px)]">
                   <div className="text-[#BBBBBB] text-[clamp(48px,8vw,72px)] mb-[16px]">📧</div>
                   <h3 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616] mb-[8px]">
                     Select a Template
                   </h3>
-                  <p className="font-['Outfit'] text-[14px] text-[#535353]">
-                    Choose an email template from the list to preview
-                  </p>
-                </div>
+                  <p className="font-['Outfit'] text-[14px] text-[#535353]">Choose an email template from the list to preview</p>
+                </AdminCard>
               )}
             </div>
-          </div>
+      </div>
 
-          {/* Stats */}
-          <div className="mt-[clamp(24px,3vw,32px)] grid grid-cols-1 md:grid-cols-3 gap-[clamp(16px,2vw,24px)]">
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[clamp(16px,2vw,24px)]">
             {categories.map((category) => {
               const templates = getEmailTemplatesByCategory(category.id);
               return (
-                <div key={category.id} className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[24px] p-[clamp(20px,3vw,24px)]">
+                <AdminCard key={category.id} className="p-[clamp(20px,3vw,24px)]">
                   <div className="flex items-center justify-between mb-[16px]">
                     <h3 className="font-['DM_Sans'] font-medium text-[14px] tracking-[-0.28px] text-[#161616]">
                       {category.name}
@@ -276,12 +261,11 @@ export default function EmailTemplatesAdmin() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </AdminCard>
               );
             })}
-          </div>
-        </div>
       </div>
-    </>
+      </AdminStack>
+    </AdminBody>
   );
 }

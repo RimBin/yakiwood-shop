@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Project } from '@/types/project';
 import { useLocale } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
+import { getProjectLocation, getProjectSlug, getProjectTitle, normalizeProjectLocale } from '@/lib/projects/i18n';
 
 interface RelatedProjectsProps {
   projects: Project[];
@@ -16,7 +17,7 @@ export default function RelatedProjects({ projects, basePath = '/projects' }: Re
   const locale = useLocale();
   if (projects.length === 0) return null;
 
-  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const currentLocale = normalizeProjectLocale(locale);
   const resolvedBasePath = toLocalePath(basePath, currentLocale);
   const labels =
     locale === 'lt'
@@ -58,16 +59,20 @@ export default function RelatedProjects({ projects, basePath = '/projects' }: Re
             const imageSrc = project.featuredImage || project.images?.[0];
             if (!imageSrc) return null;
 
+            const title = getProjectTitle(project, currentLocale);
+            const projectSlug = getProjectSlug(project, currentLocale);
+            const location = getProjectLocation(project, currentLocale);
+
             return (
               <Link
                 key={project.id}
-                href={`${resolvedBasePath}/${project.slug}`}
+                href={`${resolvedBasePath}/${projectSlug}`}
                 className="group flex flex-col gap-2"
               >
                 <div className={`relative ${height} w-full rounded-lg overflow-hidden`}>
                   <Image
                     src={imageSrc}
-                    alt={project.title}
+                    alt={title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 1024px) 100vw, 33vw"
@@ -75,10 +80,10 @@ export default function RelatedProjects({ projects, basePath = '/projects' }: Re
                 </div>
                 <div className="flex flex-col gap-2">
                   <p className="font-['DM_Sans'] font-medium text-lg leading-[1.2] tracking-[-0.36px] text-[#161616]">
-                    {project.title}
+                    {title}
                   </p>
                   <p className="font-['Outfit'] font-normal text-sm uppercase tracking-[0.42px] text-[#535353]">
-                    {project.location}
+                    {location}
                   </p>
                 </div>
               </Link>
@@ -92,16 +97,20 @@ export default function RelatedProjects({ projects, basePath = '/projects' }: Re
             const imageSrc = project.featuredImage || project.images?.[0];
             if (!imageSrc) return null;
 
+            const title = getProjectTitle(project, currentLocale);
+            const projectSlug = getProjectSlug(project, currentLocale);
+            const location = getProjectLocation(project, currentLocale);
+
             return (
               <Link
                 key={project.id}
-                href={`${resolvedBasePath}/${project.slug}`}
+                href={`${resolvedBasePath}/${projectSlug}`}
                 className="group flex flex-col gap-2"
               >
                 <div className="relative h-[230px] w-full rounded overflow-hidden">
                   <Image
                     src={imageSrc}
-                    alt={project.title}
+                    alt={title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 768px) 100vw, 358px"
@@ -109,10 +118,10 @@ export default function RelatedProjects({ projects, basePath = '/projects' }: Re
                 </div>
                 <div className="flex flex-col gap-2">
                   <p className="font-['DM_Sans'] font-medium text-lg leading-[1.1] tracking-[0.18px] text-[#161616]">
-                    {project.title}
+                    {title}
                   </p>
                   <p className="font-['DM_Sans'] font-normal text-sm leading-[1.1] tracking-[0.42px] text-[rgba(0,0,0,0.7)]">
-                    {project.location}
+                    {location}
                   </p>
                 </div>
               </Link>
@@ -123,7 +132,7 @@ export default function RelatedProjects({ projects, basePath = '/projects' }: Re
         {/* View All Button - Mobile */}
         <div className="flex lg:hidden items-center justify-center">
           <Link
-            href={basePath}
+            href={resolvedBasePath}
             className="flex items-center gap-2 font-['Outfit'] font-normal text-xs uppercase tracking-[0.6px] text-[#161616] py-2"
           >
             {labels.viewAll}

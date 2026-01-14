@@ -1,6 +1,7 @@
 ﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import SEOAdminClient from '@/components/admin/SEOAdminClient'
+import { AdminBody, AdminCard } from '@/components/admin/ui/AdminUI'
 
 async function requireAdminPage() {
   const supabase = await createClient()
@@ -24,5 +25,11 @@ async function requireAdminPage() {
 
 export default async function SEOAdminPage() {
   await requireAdminPage()
-  return <SEOAdminClient />
+  return (
+    <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+      <AdminCard>
+        <SEOAdminClient />
+      </AdminCard>
+    </AdminBody>
+  )
 }

@@ -5,6 +5,13 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
+import {
+  clearPendingPurchase,
+  isPurchaseTracked,
+  loadPendingPurchase,
+  markPurchaseTracked,
+  trackPurchase,
+} from '@/lib/analytics';
 import { toLocalePath } from '@/i18n/paths';
 
 export default function OrderConfirmationPage() {
@@ -48,6 +55,15 @@ export default function OrderConfirmationPage() {
           }
 
           clearCart()
+
+          const key = paypalOrderId || orderId || ''
+          const pending = loadPendingPurchase()
+          if (key && !isPurchaseTracked(key) && pending) {
+            trackPurchase(key, pending.total, pending.items)
+            markPurchaseTracked(key)
+            clearPendingPurchase()
+          }
+
           setLoading(false)
           return
         } catch (e: any) {
@@ -66,6 +82,15 @@ export default function OrderConfirmationPage() {
         }
 
         clearCart()
+
+        const key = orderId
+        const pending = loadPendingPurchase()
+        if (key && !isPurchaseTracked(key) && pending) {
+          trackPurchase(key, pending.total, pending.items)
+          markPurchaseTracked(key)
+          clearPendingPurchase()
+        }
+
         setLoading(false)
         return
       }
@@ -78,6 +103,15 @@ export default function OrderConfirmationPage() {
       }
 
       clearCart()
+
+      const key = sessionId
+      const pending = loadPendingPurchase()
+      if (key && !isPurchaseTracked(key) && pending) {
+        trackPurchase(key, pending.total, pending.items)
+        markPurchaseTracked(key)
+        clearPendingPurchase()
+      }
+
       setLoading(false)
     }
 

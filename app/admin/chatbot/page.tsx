@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { PageLayout } from '@/components/shared/PageLayout';
 import { createClient } from '@/lib/supabase/client';
+import { AdminBody, AdminButton, AdminInput, AdminSelect, AdminTextarea, AdminSubTabs } from '@/components/admin/ui/AdminUI';
 
 type SessionSummary = {
   sessionId: string;
@@ -123,56 +123,14 @@ function getErrorMessageKey(resp: Response, bodyError?: string) {
 
 function LocaleSelector({ value, onChange }: { value: Locale; onChange: (v: Locale) => void }) {
   return (
-    <div className="inline-flex rounded-[100px] border border-[#161616] overflow-hidden">
-      <button
-        type="button"
-        onClick={() => onChange('lt')}
-        className={
-          "h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] " +
-          (value === 'lt' ? 'bg-[#161616] text-white' : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#E1E1E1]')
-        }
-        aria-pressed={value === 'lt'}
-      >
+    <div className="flex gap-[8px]">
+      <AdminButton size="sm" variant={value === 'lt' ? 'primary' : 'outline'} onClick={() => onChange('lt')}>
         LT
-      </button>
-      <div className="w-[1px] bg-[#161616] opacity-20" />
-      <button
-        type="button"
-        onClick={() => onChange('en')}
-        className={
-          "h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] " +
-          (value === 'en' ? 'bg-[#161616] text-white' : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#E1E1E1]')
-        }
-        aria-pressed={value === 'en'}
-      >
+      </AdminButton>
+      <AdminButton size="sm" variant={value === 'en' ? 'primary' : 'outline'} onClick={() => onChange('en')}>
         EN
-      </button>
+      </AdminButton>
     </div>
-  );
-}
-
-function TabButton({
-  active,
-  children,
-  onClick,
-}: {
-  active: boolean;
-  children: React.ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={
-        "h-[40px] px-[16px] rounded-[100px] border font-['Outfit'] text-[12px] uppercase tracking-[0.6px] " +
-        (active
-          ? 'border-[#161616] bg-[#161616] text-white'
-          : 'border-[#161616] bg-[#EAEAEA] text-[#161616] hover:bg-[#E1E1E1]')
-      }
-    >
-      {children}
-    </button>
   );
 }
 
@@ -798,13 +756,10 @@ export default function AdminChatbotPage() {
     if (entry) setDraftFromEntry(entry);
   }, [faqEntries, faqSelectedId, setDraftFromEntry]);
 
-  const buttonSecondary =
-    "border border-[#161616] rounded-[100px] h-[36px] px-[14px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#E1E1E1]";
-
   const isFaqTableMissing = faqErrorCode === 'ERR_SUPABASE_MISSING_TABLE:chatbot_faq_entries';
   const isSettingsTableMissing = settingsErrorCode === 'ERR_SUPABASE_MISSING_TABLE:chatbot_settings';
 
-  const panelClass = 'rounded-[16px] border border-[#E1E1E1] bg-[#EAEAEA] p-[16px]';
+  const panelClass = 'rounded-[24px] border border-[#E1E1E1] bg-[#EAEAEA] p-[clamp(20px,3vw,32px)]';
 
   const roleLabel = (role: ChatEvent['role']) => {
     if (role === 'user') return t('roles.user');
@@ -813,32 +768,27 @@ export default function AdminChatbotPage() {
   };
 
   return (
-    <section className="w-full bg-[#E1E1E1] min-h-screen">
-      <PageLayout>
-        <div className="py-[24px] md:py-[40px]">
-          <div className="flex flex-wrap items-center gap-[10px]">
-            <TabButton active={tab === 'sessions'} onClick={() => setTab('sessions')}>
-              {t('tabs.sessions')}
-            </TabButton>
-            <TabButton active={tab === 'faq'} onClick={() => setTab('faq')}>
-              {t('tabs.faq')}
-            </TabButton>
-            <TabButton active={tab === 'ai'} onClick={() => setTab('ai')}>
-              {t('tabs.ai')}
-            </TabButton>
-            <TabButton active={tab === 'training'} onClick={() => setTab('training')}>
-              {t('tabs.training')}
-            </TabButton>
-          </div>
+    <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+      <div className="py-[24px] md:py-[40px]">
+          <AdminSubTabs
+            value={tab}
+            onChange={setTab}
+            tabs={[
+              { value: 'sessions', label: t('tabs.sessions') },
+              { value: 'faq', label: t('tabs.faq') },
+              { value: 'ai', label: t('tabs.ai') },
+              { value: 'training', label: t('tabs.training') },
+            ]}
+          />
 
           {tab === 'sessions' ? (
             <div className="mt-[16px] grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-[16px]">
               <div className={panelClass}>
                 <div className="flex items-center justify-between">
                   <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">{t('sessions.title')}</h2>
-                  <button onClick={() => void loadSessions()} className={buttonSecondary}>
+                  <AdminButton size="sm" variant="outline" onClick={() => void loadSessions()}>
                     {t('common.refresh')}
-                  </button>
+                  </AdminButton>
                 </div>
 
                 {sessionsError ? (
@@ -912,25 +862,22 @@ export default function AdminChatbotPage() {
                   <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">{t('faq.title')}</h2>
                   <div className="flex items-center gap-[10px]">
                     <LocaleSelector value={faqLocale} onChange={setFaqLocale} />
-                    <button
-                      type="button"
+                    <AdminButton
+                      size="sm"
+                      variant="outline"
                       onClick={() => void loadFaqEntries(faqLocale)}
                       disabled={faqLoading || isFaqTableMissing}
-                      className={
-                        buttonSecondary +
-                        (faqLoading || isFaqTableMissing ? ' opacity-60 cursor-not-allowed' : '')
-                      }
                     >
                       {t('common.refresh')}
-                    </button>
-                    <button
-                      type="button"
+                    </AdminButton>
+                    <AdminButton
+                      size="sm"
+                      variant="outline"
                       onClick={() => newFaqDraft(faqLocale)}
                       disabled={isFaqTableMissing}
-                      className={buttonSecondary + (isFaqTableMissing ? ' opacity-60 cursor-not-allowed' : '')}
                     >
                       {t('common.new')}
-                    </button>
+                    </AdminButton>
                   </div>
                 </div>
 
@@ -939,30 +886,30 @@ export default function AdminChatbotPage() {
                     <div className="font-['DM_Sans'] text-[13px] font-medium text-[#161616]">{t('dbSetup.title')}</div>
                     <div className="mt-[6px] font-['Outfit'] text-[12px] text-[#535353]">{t('dbSetup.subtitle')}</div>
                     <div className="mt-[10px] flex flex-wrap items-center gap-[10px]">
-                      <button
-                        type="button"
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
                         onClick={() => void copyMigrationSql('chatbot_faq_entries')}
                         disabled={dbHelpBusy}
-                        className={buttonSecondary + (dbHelpBusy ? ' opacity-60 cursor-not-allowed' : '')}
                       >
                         {t('dbSetup.copyFaq')}
-                      </button>
-                      <button
-                        type="button"
+                      </AdminButton>
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
                         onClick={() => void copyMigrationSql('chatbot_settings')}
                         disabled={dbHelpBusy}
-                        className={buttonSecondary + (dbHelpBusy ? ' opacity-60 cursor-not-allowed' : '')}
                       >
                         {t('dbSetup.copySettings')}
-                      </button>
-                      <button
-                        type="button"
+                      </AdminButton>
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
                         onClick={() => void copyMigrationSql('reload-schema')}
                         disabled={dbHelpBusy}
-                        className={buttonSecondary + (dbHelpBusy ? ' opacity-60 cursor-not-allowed' : '')}
                       >
                         {t('dbSetup.copyReload')}
-                      </button>
+                      </AdminButton>
                     </div>
                     {dbHelpNotice ? (
                       <div className="mt-[8px] font-['Outfit'] text-[12px] text-[#161616]">{dbHelpNotice}</div>
@@ -978,17 +925,14 @@ export default function AdminChatbotPage() {
                   <div className="mt-[12px]">
                     <p className="font-['Outfit'] text-[13px] text-[#535353]">{t('faq.empty')}</p>
                     <div className="mt-[10px] flex flex-wrap items-center gap-[10px]">
-                      <button
-                        type="button"
+                      <AdminButton
+                        size="sm"
+                        variant="primary"
                         onClick={() => void importDefaultFaq(faqLocale)}
                         disabled={faqImporting || faqLoading || isFaqTableMissing}
-                        className={
-                          buttonSecondary +
-                          (faqImporting || faqLoading || isFaqTableMissing ? ' opacity-60 cursor-not-allowed' : '')
-                        }
                       >
                         {faqImporting ? t('faq.importing') : t('faq.importDefaults')}
-                      </button>
+                      </AdminButton>
                     </div>
                   </div>
                 ) : (
@@ -1030,30 +974,22 @@ export default function AdminChatbotPage() {
                 <div className="flex flex-wrap items-center justify-between gap-[10px]">
                   <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">{t('faq.editTitle')}</h2>
                   <div className="flex items-center gap-[10px]">
-                    <button
-                      type="button"
+                    <AdminButton
+                      size="sm"
+                      variant="primary"
                       onClick={() => void saveFaq()}
                       disabled={faqSaving || faqDeleting || isFaqTableMissing}
-                      className={
-                        buttonSecondary +
-                        (faqSaving || faqDeleting || isFaqTableMissing ? ' opacity-60 cursor-not-allowed' : '')
-                      }
                     >
                       {faqSaving ? t('common.saving') : t('common.save')}
-                    </button>
-                    <button
-                      type="button"
+                    </AdminButton>
+                    <AdminButton
+                      size="sm"
+                      variant="danger"
                       onClick={() => void deleteFaq()}
                       disabled={!faqDraft.id || faqDeleting || faqSaving || isFaqTableMissing}
-                      className={
-                        buttonSecondary +
-                        (!faqDraft.id || faqDeleting || faqSaving || isFaqTableMissing
-                          ? ' opacity-60 cursor-not-allowed'
-                          : '')
-                      }
                     >
                       {faqDeleting ? t('common.deleting') : t('common.delete')}
-                    </button>
+                    </AdminButton>
                   </div>
                 </div>
 
@@ -1082,13 +1018,13 @@ export default function AdminChatbotPage() {
 
                     <div className="flex items-center gap-[10px]">
                       <label className="font-['Outfit'] text-[13px] text-[#161616]">{t('form.order')}</label>
-                      <input
+                      <AdminInput
                         type="number"
                         value={faqDraft.order}
                         onChange={(e) =>
                           setFaqDraft((d) => ({ ...d, order: Number.parseInt(e.target.value || '0', 10) }))
                         }
-                        className="h-[36px] w-[120px] rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px] text-[#161616]"
+                        className="w-[120px] h-[40px]"
                       />
                     </div>
 
@@ -1108,43 +1044,40 @@ export default function AdminChatbotPage() {
                     <label className="block font-['Outfit'] text-[13px] text-[#161616] mb-[6px]">
                       {t('form.question')}
                     </label>
-                    <input
+                    <AdminInput
                       type="text"
                       value={faqDraft.question}
                       onChange={(e) => setFaqDraft((d) => ({ ...d, question: e.target.value }))}
-                      className="h-[40px] w-full rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px] text-[#161616]"
                       placeholder={t('form.placeholders.question')}
                     />
                   </div>
 
                   <div>
                     <label className="block font-['Outfit'] text-[13px] text-[#161616] mb-[6px]">{t('form.answer')}</label>
-                    <textarea
+                    <AdminTextarea
                       value={faqDraft.answer}
                       onChange={(e) => setFaqDraft((d) => ({ ...d, answer: e.target.value }))}
-                      className="min-h-[180px] w-full rounded-[12px] border border-[#BBBBBB] px-[12px] py-[10px] font-['Outfit'] text-[13px] text-[#161616]"
+                      className="min-h-[180px]"
                       placeholder={t('form.placeholders.answer')}
                     />
                   </div>
 
                   <div>
                     <label className="block font-['Outfit'] text-[13px] text-[#161616] mb-[6px]">{t('form.keywords')}</label>
-                    <input
+                    <AdminInput
                       type="text"
                       value={faqDraft.keywordsText}
                       onChange={(e) => setFaqDraft((d) => ({ ...d, keywordsText: e.target.value }))}
-                      className="h-[40px] w-full rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px] text-[#161616]"
                       placeholder={t('form.placeholders.keywords')}
                     />
                   </div>
 
                   <div>
                     <label className="block font-['Outfit'] text-[13px] text-[#161616] mb-[6px]">{t('form.suggestions')}</label>
-                    <input
+                    <AdminInput
                       type="text"
                       value={faqDraft.suggestionsText}
                       onChange={(e) => setFaqDraft((d) => ({ ...d, suggestionsText: e.target.value }))}
-                      className="h-[40px] w-full rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px] text-[#161616]"
                       placeholder={t('form.placeholders.suggestions')}
                     />
                   </div>
@@ -1153,13 +1086,14 @@ export default function AdminChatbotPage() {
                     <p className="font-['Outfit'] text-[12px] text-[#535353]">
                       {faqDraft.id ? t('form.id', { id: faqDraft.id }) : t('form.newEntry')}
                     </p>
-                    <button
+                    <AdminButton
                       type="submit"
                       disabled={faqSaving || faqDeleting}
-                      className={buttonSecondary + (faqSaving || faqDeleting ? ' opacity-60 cursor-not-allowed' : '')}
+                      size="sm"
+                      variant="primary"
                     >
                       {faqSaving ? t('common.saving') : t('common.save')}
-                    </button>
+                    </AdminButton>
                   </div>
                 </form>
               </div>
@@ -1174,14 +1108,9 @@ export default function AdminChatbotPage() {
                     </h2>
                     <p className="mt-[4px] font-['Outfit'] text-[13px] text-[#535353]">{t('ai.subtitle')}</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => void loadOpenAiStatus()}
-                    disabled={openAiLoading}
-                    className={buttonSecondary + (openAiLoading ? ' opacity-60 cursor-not-allowed' : '')}
-                  >
+                  <AdminButton size="sm" variant="outline" onClick={() => void loadOpenAiStatus()} disabled={openAiLoading}>
                     {t('common.refresh')}
-                  </button>
+                  </AdminButton>
                 </div>
 
                 {settingsErrorCode?.startsWith('ERR_SUPABASE_MISSING_TABLE:') ? (
@@ -1189,22 +1118,22 @@ export default function AdminChatbotPage() {
                     <div className="font-['DM_Sans'] text-[13px] font-medium text-[#161616]">{t('dbSetup.title')}</div>
                     <div className="mt-[6px] font-['Outfit'] text-[12px] text-[#535353]">{t('dbSetup.subtitle')}</div>
                     <div className="mt-[10px] flex flex-wrap items-center gap-[10px]">
-                      <button
-                        type="button"
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
                         onClick={() => void copyMigrationSql('chatbot_settings')}
                         disabled={dbHelpBusy}
-                        className={buttonSecondary + (dbHelpBusy ? ' opacity-60 cursor-not-allowed' : '')}
                       >
                         {t('dbSetup.copySettings')}
-                      </button>
-                      <button
-                        type="button"
+                      </AdminButton>
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
                         onClick={() => void copyMigrationSql('reload-schema')}
                         disabled={dbHelpBusy}
-                        className={buttonSecondary + (dbHelpBusy ? ' opacity-60 cursor-not-allowed' : '')}
                       >
                         {t('dbSetup.copyReload')}
-                      </button>
+                      </AdminButton>
                     </div>
                     {dbHelpNotice ? (
                       <div className="mt-[8px] font-['Outfit'] text-[12px] text-[#161616]">{dbHelpNotice}</div>
@@ -1267,19 +1196,14 @@ export default function AdminChatbotPage() {
                     <div className="rounded-[16px] border border-[#E1E1E1] bg-white p-[14px]">
                       <div className="flex items-center justify-between gap-[10px]">
                         <div className="font-['DM_Sans'] text-[14px] font-medium text-[#161616]">{t('ai.settingsTitle')}</div>
-                        <button
-                          type="button"
+                        <AdminButton
+                          size="sm"
+                          variant="primary"
                           onClick={() => void saveChatbotSettings()}
                           disabled={settingsSaving || !settingsDraft || isSettingsTableMissing}
-                          className={
-                            buttonSecondary +
-                            (settingsSaving || !settingsDraft || isSettingsTableMissing
-                              ? ' opacity-60 cursor-not-allowed'
-                              : '')
-                          }
                         >
                           {settingsSaving ? t('common.saving') : t('common.save')}
-                        </button>
+                        </AdminButton>
                       </div>
 
                       {settingsNotice ? (
@@ -1305,23 +1229,23 @@ export default function AdminChatbotPage() {
 
                           <div className="flex items-center justify-between gap-[10px]">
                             <span className="font-['Outfit'] text-[13px] text-[#161616]">{t('ai.openAiMode')}</span>
-                            <select
+                            <AdminSelect
                               value={settingsDraft.openAiMode}
                               onChange={(e) =>
                                 setSettingsDraft((d) => (d ? { ...d, openAiMode: e.target.value as any } : d))
                               }
-                              className="h-[36px] rounded-[12px] border border-[#BBBBBB] px-[10px] font-['Outfit'] text-[13px] text-[#161616]"
+                              className="w-[220px]"
                             >
                               <option value="always">always</option>
                               <option value="fallback">fallback</option>
                               <option value="off">off</option>
-                            </select>
+                            </AdminSelect>
                           </div>
 
                           <div className="grid grid-cols-2 gap-[10px]">
                             <div>
                               <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.minConfidence')}</div>
-                              <input
+                              <AdminInput
                                 type="number"
                                 min={0}
                                 max={1}
@@ -1332,12 +1256,12 @@ export default function AdminChatbotPage() {
                                     d ? { ...d, minConfidence: Number(e.target.value || 0) } : d
                                   )
                                 }
-                                className="mt-[6px] h-[36px] w-full rounded-[12px] border border-[#BBBBBB] px-[10px] font-['Outfit'] text-[13px] text-[#161616]"
+                                className="mt-[6px] h-[40px]"
                               />
                             </div>
                             <div>
                               <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.temperature')}</div>
-                              <input
+                              <AdminInput
                                 type="number"
                                 min={0}
                                 max={2}
@@ -1348,30 +1272,30 @@ export default function AdminChatbotPage() {
                                     d ? { ...d, temperature: Number(e.target.value || 0) } : d
                                   )
                                 }
-                                className="mt-[6px] h-[36px] w-full rounded-[12px] border border-[#BBBBBB] px-[10px] font-['Outfit'] text-[13px] text-[#161616]"
+                                className="mt-[6px] h-[40px]"
                               />
                             </div>
                           </div>
 
                           <div>
                             <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.promptLt')}</div>
-                            <textarea
+                            <AdminTextarea
                               value={settingsDraft.systemPromptLt}
                               onChange={(e) =>
                                 setSettingsDraft((d) => (d ? { ...d, systemPromptLt: e.target.value } : d))
                               }
-                              className="mt-[6px] min-h-[120px] w-full rounded-[12px] border border-[#BBBBBB] px-[10px] py-[8px] font-['Outfit'] text-[13px] text-[#161616]"
+                              className="mt-[6px] min-h-[120px]"
                             />
                           </div>
 
                           <div>
                             <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('ai.promptEn')}</div>
-                            <textarea
+                            <AdminTextarea
                               value={settingsDraft.systemPromptEn}
                               onChange={(e) =>
                                 setSettingsDraft((d) => (d ? { ...d, systemPromptEn: e.target.value } : d))
                               }
-                              className="mt-[6px] min-h-[120px] w-full rounded-[12px] border border-[#BBBBBB] px-[10px] py-[8px] font-['Outfit'] text-[13px] text-[#161616]"
+                              className="mt-[6px] min-h-[120px]"
                             />
                           </div>
                         </div>
@@ -1404,14 +1328,14 @@ CHATBOT_SYSTEM_PROMPT_EN=...
                     <p className="mt-[4px] font-['Outfit'] text-[13px] text-[#535353]">{t('training.subtitle')}</p>
                   </div>
                   <div className="flex items-center gap-[10px]">
-                    <button
-                      type="button"
+                    <AdminButton
+                      size="sm"
+                      variant="outline"
                       onClick={() => void downloadTrainingData()}
                       disabled={trainingLoading}
-                      className={buttonSecondary + (trainingLoading ? ' opacity-60 cursor-not-allowed' : '')}
                     >
                       {t('training.exportJsonl')}
-                    </button>
+                    </AdminButton>
                   </div>
                 </div>
 
@@ -1428,26 +1352,26 @@ CHATBOT_SYSTEM_PROMPT_EN=...
 
                     <div className="mt-[12px] flex items-center justify-between gap-[10px]">
                       <span className="font-['Outfit'] text-[13px] text-[#161616]">{t('training.locale')}</span>
-                      <select
+                      <AdminSelect
                         value={trainingLocale}
                         onChange={(e) => setTrainingLocale(e.target.value as any)}
-                        className="h-[36px] rounded-[12px] border border-[#BBBBBB] px-[10px] font-['Outfit'] text-[13px] text-[#161616]"
+                        className="w-[200px]"
                       >
                         <option value="all">LT + EN</option>
                         <option value="lt">LT</option>
                         <option value="en">EN</option>
-                      </select>
+                      </AdminSelect>
                     </div>
 
                     <div className="mt-[12px]">
-                      <button
-                        type="button"
+                      <AdminButton
+                        size="sm"
+                        variant="primary"
                         onClick={() => void downloadTrainingData()}
                         disabled={trainingLoading}
-                        className={buttonSecondary + (trainingLoading ? ' opacity-60 cursor-not-allowed' : '')}
                       >
                         {trainingLoading ? t('common.loading') : t('training.exportJsonl')}
-                      </button>
+                      </AdminButton>
                     </div>
                   </div>
 
@@ -1459,42 +1383,39 @@ CHATBOT_SYSTEM_PROMPT_EN=...
 
                     <div className="mt-[12px]">
                       <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('training.baseModel')}</div>
-                      <input
+                      <AdminInput
                         value={trainingBaseModel}
                         onChange={(e) => setTrainingBaseModel(e.target.value)}
-                        className="mt-[6px] h-[36px] w-full rounded-[12px] border border-[#BBBBBB] px-[10px] font-['Outfit'] text-[13px] text-[#161616]"
+                        className="mt-[6px] h-[40px]"
                         placeholder="gpt-4o-mini"
                       />
                     </div>
 
                     <div className="mt-[12px] flex flex-wrap items-center gap-[10px]">
-                      <button
-                        type="button"
+                      <AdminButton
+                        size="sm"
+                        variant="primary"
                         onClick={() => void startFineTune()}
                         disabled={trainingStarting}
-                        className={buttonSecondary + (trainingStarting ? ' opacity-60 cursor-not-allowed' : '')}
                       >
                         {trainingStarting ? t('training.starting') : t('training.startFineTune')}
-                      </button>
-                      <button
-                        type="button"
+                      </AdminButton>
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
                         onClick={() => void refreshFineTuneStatus(fineTuneJobId)}
                         disabled={!fineTuneJobId || trainingLoading}
-                        className={
-                          buttonSecondary +
-                          (!fineTuneJobId || trainingLoading ? ' opacity-60 cursor-not-allowed' : '')
-                        }
                       >
                         {t('training.refreshStatus')}
-                      </button>
+                      </AdminButton>
                     </div>
 
                     <div className="mt-[12px]">
                       <div className="font-['Outfit'] text-[12px] text-[#535353]">{t('training.jobId')}</div>
-                      <input
+                      <AdminInput
                         value={fineTuneJobId}
                         onChange={(e) => setFineTuneJobId(e.target.value)}
-                        className="mt-[6px] h-[36px] w-full rounded-[12px] border border-[#BBBBBB] px-[10px] font-mono text-[12px] text-[#161616]"
+                        className="mt-[6px] h-[40px] font-mono text-[12px]"
                         placeholder="ftjob_..."
                       />
                     </div>
@@ -1523,8 +1444,7 @@ CHATBOT_SYSTEM_PROMPT_EN=...
               </div>
             </div>
           )}
-        </div>
-      </PageLayout>
-    </section>
+      </div>
+    </AdminBody>
   );
 }

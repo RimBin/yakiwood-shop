@@ -530,7 +530,9 @@ export default function ProductForm({ product, mode }: Props) {
 
       if (mode === 'create') {
         // Create new product
-        let { data, error } = await supabase.from('products').insert(productData).select().single();
+        let data: any = null;
+        const { data: initialData, error } = await supabase.from('products').insert(productData).select().single();
+        data = initialData as any;
 
         if (error) {
           const message = formatUnknownError(error);

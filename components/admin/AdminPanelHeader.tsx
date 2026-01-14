@@ -11,6 +11,9 @@ type AdminTabKey =
   | 'products'
   | 'projects'
   | 'posts'
+  | 'orders'
+  | 'inventory'
+  | 'options'
   | 'users'
   | 'chatbot'
   | 'seo'
@@ -24,6 +27,48 @@ type HeaderTab = {
   href: string;
   count?: number;
 };
+
+let adminDbPromise: Promise<IDBDatabase> | null = null;
+
+function openAdminDb(): Promise<IDBDatabase> {
+  if (typeof window === 'undefined') {
+    return Promise.reject(new Error('IndexedDB is not available during SSR'));
+  }
+  if (adminDbPromise) return adminDbPromise;
+
+  adminDbPromise = new Promise((resolve, reject) => {
+    const request = indexedDB.open('yakiwood-admin', 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains('kv')) {
+        db.createObjectStore('kv', { keyPath: 'key' });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error ?? new Error('Failed to open IndexedDB'));
+  });
+
+  return adminDbPromise;
+}
+
+async function safeIdbArrayCount(key: string): Promise<number | undefined> {
+  try {
+    const db = await openAdminDb();
+    const value = await new Promise<unknown | null>((resolve, reject) => {
+      const tx = db.transaction('kv', 'readonly');
+      const store = tx.objectStore('kv');
+      const req = store.get(key);
+      req.onsuccess = () => {
+        const row = req.result as { key: string; value: unknown } | undefined;
+        resolve(row?.value ?? null);
+      };
+      req.onerror = () => reject(req.error ?? new Error('IndexedDB get failed'));
+    });
+    return Array.isArray(value) ? value.length : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 function safeParseArrayCount(value: string | null): number | undefined {
   if (!value) return undefined;
@@ -52,7 +97,11 @@ function getActiveTabFromUrl(pathname: string, tabParam: string | null): AdminTa
   const p = stripLocalePrefix(pathname);
 
   if (p.startsWith('/admin/products')) return 'products';
+  if (p.startsWith('/admin/projects')) return 'projects';
   if (p.startsWith('/admin/posts')) return 'posts';
+  if (p.startsWith('/admin/orders')) return 'orders';
+  if (p.startsWith('/admin/inventory')) return 'inventory';
+  if (p.startsWith('/admin/options')) return 'options';
   if (p.startsWith('/admin/users')) return 'users';
   if (p.startsWith('/admin/chatbot')) return 'chatbot';
   if (p.startsWith('/admin/seo')) return 'seo';
@@ -91,18 +140,31 @@ export default function AdminPanelHeader() {
     // We read from localStorage to keep it fast and avoid SSR coupling.
     if (typeof window === 'undefined') return;
 
-    const nextCounts: TabCounts = {
-      products: safeParseArrayCount(localStorage.getItem('yakiwood_products')),
-      projects: safeParseArrayCount(localStorage.getItem('yakiwood_projects')),
-      posts: safeParseArrayCount(localStorage.getItem('yakiwood_posts')),
+    let cancelled = false;
+
+    const run = async () => {
+      const nextProjects =
+        safeParseArrayCount(localStorage.getItem('yakiwood_projects')) ?? (await safeIdbArrayCount('yakiwood_projects'));
+
+      const nextCounts: TabCounts = {
+        products: safeParseArrayCount(localStorage.getItem('yakiwood_products')),
+        projects: nextProjects,
+        posts: safeParseArrayCount(localStorage.getItem('yakiwood_posts')),
+      };
+
+      if (cancelled) return;
+      setCounts((prev) => {
+        // Avoid re-render loops if nothing changed.
+        const keys: Array<keyof TabCounts> = ['products', 'projects', 'posts'];
+        const changed = keys.some((k) => prev[k] !== nextCounts[k]);
+        return changed ? nextCounts : prev;
+      });
     };
 
-    setCounts((prev) => {
-      // Avoid re-render loops if nothing changed.
-      const keys: Array<keyof TabCounts> = ['products', 'projects', 'posts'];
-      const changed = keys.some((k) => prev[k] !== nextCounts[k]);
-      return changed ? nextCounts : prev;
-    });
+    void run();
+    return () => {
+      cancelled = true;
+    };
   }, [pathname]);
 
   const pageTitle = useMemo(() => {
@@ -118,6 +180,9 @@ export default function AdminPanelHeader() {
     if (activeTab === 'dashboard') return t('breadcrumb.dashboard');
     if (activeTab === 'projects') return t('breadcrumb.projects');
     if (activeTab === 'posts') return t('breadcrumb.posts');
+    if (activeTab === 'orders') return t('breadcrumb.orders');
+    if (activeTab === 'inventory') return t('breadcrumb.inventory');
+    if (activeTab === 'options') return t('breadcrumb.options');
     if (activeTab === 'seo') return t('breadcrumb.seo');
     if (activeTab === 'email-templates') return t('breadcrumb.emailTemplates');
 
@@ -134,6 +199,9 @@ export default function AdminPanelHeader() {
     if (activeTab === 'products') return t('productsDemo.noticeLine2');
     if (activeTab === 'projects') return t('main.subtitle');
     if (activeTab === 'posts') return t('main.subtitle');
+    if (activeTab === 'orders') return t('main.subtitle');
+    if (activeTab === 'inventory') return t('main.subtitle');
+    if (activeTab === 'options') return t('main.subtitle');
     if (activeTab === 'users') return t('main.subtitle');
     if (activeTab === 'chatbot') return t('main.subtitle');
     if (activeTab === 'seo') return t('main.subtitle');
@@ -161,6 +229,9 @@ export default function AdminPanelHeader() {
     else if (activeTab === 'products') items.push({ label: t('breadcrumb.products') });
     else if (activeTab === 'projects') items.push({ label: t('breadcrumb.projects') });
     else if (activeTab === 'posts') items.push({ label: t('breadcrumb.posts') });
+    else if (activeTab === 'orders') items.push({ label: t('breadcrumb.orders') });
+    else if (activeTab === 'inventory') items.push({ label: t('breadcrumb.inventory') });
+    else if (activeTab === 'options') items.push({ label: t('breadcrumb.options') });
     else if (activeTab === 'seo') items.push({ label: t('breadcrumb.seo') });
     else if (activeTab === 'email-templates') items.push({ label: t('breadcrumb.emailTemplates') });
     else if (activeTab === 'users') items.push({ label: t('tabs.users') });
@@ -189,7 +260,7 @@ export default function AdminPanelHeader() {
       {
         key: 'projects',
         label: t('tabs.projects'),
-        href: `${pathPrefix}/admin?tab=projects`,
+        href: `${pathPrefix}/admin/projects`,
         count: counts.projects,
       },
       {
@@ -198,6 +269,9 @@ export default function AdminPanelHeader() {
         href: `${pathPrefix}/admin/posts`,
         count: counts.posts,
       },
+      { key: 'orders', label: t('tabs.orders'), href: `${pathPrefix}/admin/orders` },
+      { key: 'inventory', label: t('tabs.inventory'), href: `${pathPrefix}/admin/inventory` },
+      { key: 'options', label: t('tabs.options'), href: `${pathPrefix}/admin/options` },
       { key: 'users', label: t('tabs.users'), href: `${pathPrefix}/admin/users` },
       { key: 'chatbot', label: t('tabs.chatbot'), href: `${pathPrefix}/admin/chatbot` },
       { key: 'seo', label: t('tabs.seo'), href: `${pathPrefix}/admin/seo` },
@@ -214,7 +288,7 @@ export default function AdminPanelHeader() {
       </div>
 
       <div className="bg-[#E1E1E1] pt-[clamp(28px,4vw,56px)] px-[clamp(16px,3vw,40px)]">
-        <div className="max-w-[1400px] mx-auto">
+        <div className="max-w-[1440px] mx-auto">
           <div className="mb-[clamp(24px,3vw,40px)]">
             <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616]">
               {pageTitle}

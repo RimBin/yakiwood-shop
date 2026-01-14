@@ -1,12 +1,12 @@
-import { PageLayout } from '@/components/shared/PageLayout';
 import PostsAdminClient from '@/components/admin/PostsAdminClient';
+import { AdminBody, AdminCard } from '@/components/admin/ui/AdminUI';
 
 export default function AdminPostsPage() {
   return (
-    <section className="w-full bg-[#E1E1E1] min-h-screen">
-      <PageLayout>
+    <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+      <AdminCard>
         <PostsAdminClient />
-      </PageLayout>
-    </section>
+      </AdminCard>
+    </AdminBody>
   );
 }

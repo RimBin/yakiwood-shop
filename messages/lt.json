@@ -811,6 +811,7 @@
       "emailTemplates": "El. pašto šablonai",
       "orders": "Užsakymai",
       "inventory": "Atsargos",
+      "options": "Parinktys",
       "new": "Naujas",
       "edit": "Redaguoti"
     },
@@ -825,6 +826,9 @@
       "products": "Produktai",
       "projects": "Projektai",
       "posts": "Įrašai",
+      "orders": "Užsakymai",
+      "inventory": "Atsargos",
+      "options": "Parinktys",
       "users": "Vartotojai",
       "chatbot": "Chatbot",
       "seo": "SEO",
@@ -836,6 +840,16 @@
       "add": "Pridėti",
       "cancel": "Atšaukti",
       "addNewEllipsis": "Pridėti naują…"
+    },
+    "projects": {
+      "actions": {
+        "addProject": "Pridėti projektą",
+        "import": "Importuoti",
+        "export": "Eksportuoti",
+        "edit": "Redaguoti",
+        "delete": "Ištrinti",
+        "save": "Išsaugoti"
+      }
     },
     "productForm": {
       "validation": {

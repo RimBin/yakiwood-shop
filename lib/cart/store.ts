@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import { trackAddToCart, trackRemoveFromCart } from '@/lib/analytics'
 
 export interface CartItemConfiguration {
   usageType?: string;
@@ -130,11 +131,25 @@ export const useCartStore = create<CartState>()(
       items: [],
       isHydrated: false,
       
-      addItem: (item) => set((state) => {
-        const lineId = createLineId(item);
-        const existing = state.items.find((i) => i.lineId === lineId);
+      addItem: (item) => {
+        const addQty = item.quantity || 1
+        const variant = [item.color, item.finish].filter(Boolean).join(' / ') || undefined
+        const unitPrice = typeof (item as CartItem).pricingSnapshot?.unitPrice === 'number'
+          ? (item as CartItem).pricingSnapshot!.unitPrice
+          : item.basePrice
+
+        trackAddToCart({
+          id: item.id,
+          name: item.name,
+          price: unitPrice,
+          quantity: addQty,
+          variant,
+        })
+
+        set((state) => {
+          const lineId = createLineId(item);
+          const existing = state.items.find((i) => i.lineId === lineId);
         if (existing) {
-          const addQty = item.quantity || 1
           const nextQuantity = existing.quantity + addQty
           const existingSnapshot = existing.pricingSnapshot
           const incomingSnapshot = (item as CartItem).pricingSnapshot
@@ -176,7 +191,8 @@ export const useCartStore = create<CartState>()(
             }
           ] 
         };
-      }),
+        })
+      },
 
       updateItemConfiguration: (lineId, patch) => set((state) => {
         const current = state.items.find((i) => i.lineId === lineId);
@@ -248,16 +264,34 @@ export const useCartStore = create<CartState>()(
         };
       }),
       
-      updateQuantity: (lineId, quantity) => set((state) => ({
-        items: quantity > 0
-          ? state.items.map(i => {
-              if (i.lineId !== lineId) return i
-              const nextQuantity = Math.max(1, Math.round(quantity))
-              const snap = i.pricingSnapshot
-              return {
-                ...i,
-                quantity: nextQuantity,
-                pricingSnapshot: snap
+      updateQuantity: (lineId, quantity) => {
+        const current = get().items.find((i) => i.lineId === lineId)
+        if (current) {
+          const nextQuantity = Math.max(0, Math.round(quantity))
+          const delta = nextQuantity - current.quantity
+          const variant = [current.color, current.finish].filter(Boolean).join(' / ') || undefined
+          const unitPrice = typeof current.pricingSnapshot?.unitPrice === 'number'
+            ? current.pricingSnapshot.unitPrice
+            : current.basePrice
+
+          if (delta > 0) {
+            trackAddToCart({ id: current.id, name: current.name, price: unitPrice, quantity: delta, variant })
+          }
+          if (delta < 0) {
+            trackRemoveFromCart({ id: current.id, name: current.name, price: unitPrice, quantity: Math.abs(delta), variant })
+          }
+        }
+
+        set((state) => ({
+          items: quantity > 0
+            ? state.items.map(i => {
+                if (i.lineId !== lineId) return i
+                const nextQuantity = Math.max(1, Math.round(quantity))
+                const snap = i.pricingSnapshot
+                return {
+                  ...i,
+                  quantity: nextQuantity,
+                  pricingSnapshot: snap
                   ? {
                       ...snap,
                       totalAreaM2: snap.unitAreaM2 * nextQuantity,
@@ -267,11 +301,22 @@ export const useCartStore = create<CartState>()(
               }
             })
           : state.items.filter(i => i.lineId !== lineId) // Remove if quantity is 0
-      })),
+        }))
+      },
       
-      removeItem: (lineId) => set((state) => ({ 
-        items: state.items.filter(i => i.lineId !== lineId) 
-      })),
+      removeItem: (lineId) => {
+        const current = get().items.find((i) => i.lineId === lineId)
+        if (current) {
+          const variant = [current.color, current.finish].filter(Boolean).join(' / ') || undefined
+          const unitPrice = typeof current.pricingSnapshot?.unitPrice === 'number'
+            ? current.pricingSnapshot.unitPrice
+            : current.basePrice
+          trackRemoveFromCart({ id: current.id, name: current.name, price: unitPrice, quantity: current.quantity, variant })
+        }
+        set((state) => ({
+          items: state.items.filter(i => i.lineId !== lineId)
+        }))
+      },
       
       clear: () => set({ items: [] }),
       

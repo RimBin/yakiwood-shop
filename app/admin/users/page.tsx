@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import UsersAdminClient from '@/components/admin/UsersAdminClient'
-import { PageLayout } from '@/components/shared/PageLayout'
+import { AdminBody, AdminCard } from '@/components/admin/ui/AdminUI'
 
 function looksLikeJwt(value: string | undefined): boolean {
   if (!value) return false
@@ -15,19 +15,15 @@ export default async function AdminUsersPage() {
   // If Supabase keys are placeholders, SSR auth will never work.
   if (!looksLikeJwt(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) {
     return (
-      <section className="w-full bg-[#E1E1E1] min-h-screen">
-        <PageLayout>
-          <div className="py-[24px] md:py-[40px]">
-            <div className="rounded-[16px] border border-[#E1E1E1] bg-[#EAEAEA] p-[16px]">
-              <p className="font-['Outfit'] text-[14px] text-[#535353]">
-                Supabase nesukonfigūruotas arba raktai neteisingi. Įrašykite tikrus
-                `NEXT_PUBLIC_SUPABASE_ANON_KEY` ir `SUPABASE_SERVICE_ROLE_KEY` į `.env.local`,
-                tada paleiskite `npm run demo:bootstrap-users`.
-              </p>
-            </div>
-          </div>
-        </PageLayout>
-      </section>
+      <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+        <AdminCard>
+          <p className="font-['Outfit'] text-[14px] text-[#535353]">
+            Supabase nesukonfigūruotas arba raktai neteisingi. Įrašykite tikrus
+            `NEXT_PUBLIC_SUPABASE_ANON_KEY` ir `SUPABASE_SERVICE_ROLE_KEY` į `.env.local`,
+            tada paleiskite `npm run demo:bootstrap-users`.
+          </p>
+        </AdminCard>
+      </AdminBody>
     )
   }
 
@@ -51,12 +47,10 @@ export default async function AdminUsersPage() {
   }
 
   return (
-    <section className="w-full bg-[#E1E1E1] min-h-screen">
-      <PageLayout>
-        <div className="py-[24px] md:py-[40px]">
-          <UsersAdminClient />
-        </div>
-      </PageLayout>
-    </section>
+    <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+      <AdminCard>
+        <UsersAdminClient />
+      </AdminCard>
+    </AdminBody>
   )
 }

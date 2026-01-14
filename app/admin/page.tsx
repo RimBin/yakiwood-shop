@@ -7,6 +7,7 @@ import { projects as defaultProjects } from "@/data/projects";
 import { Project } from "@/types/project";
 import Image from "next/image";
 import { Breadcrumbs } from "@/components/ui";
+import { AdminBody, AdminStack } from '@/components/admin/ui/AdminUI';
 
 interface Product {
   id: string;
@@ -151,13 +152,19 @@ export default function AdminPage() {
   const tabParam = searchParams.get('tab');
 
   useEffect(() => {
-    if (tabParam === 'projects' || tabParam === 'posts') {
-      setActiveTab(tabParam as ActiveTab);
+    // Legacy query-param tabs: keep old URLs working, but route to the new pages.
+    if (tabParam === 'projects') {
+      router.replace('/admin/projects');
       return;
     }
+    if (tabParam === 'posts') {
+      router.replace('/admin/posts');
+      return;
+    }
+
     // Default demo tab for /admin
     setActiveTab('products');
-  }, [tabParam]);
+  }, [router, tabParam]);
 
   // Products state
   const [products, setProducts] = useState<Product[]>([]);
@@ -1312,15 +1319,14 @@ export default function AdminPage() {
   };
 
   return (
-    <>
-      <div className="bg-[#E1E1E1] pb-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
-        <div className="max-w-[1400px] mx-auto">
-          {/* Message */}
-          {message && (
-            <div className="bg-[#161616] text-white px-[24px] py-[16px] rounded-[24px] mb-[32px] font-['Outfit'] text-[14px]">
-              {message}
-            </div>
-          )}
+    <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+      <AdminStack>
+        {/* Message */}
+        {message && (
+          <div className="bg-[#161616] text-white px-[24px] py-[16px] rounded-[24px] font-['Outfit'] text-[14px]">
+            {message}
+          </div>
+        )}
 
         {/* Products Tab */}
         {activeTab === 'products' && (
@@ -2168,11 +2174,17 @@ export default function AdminPage() {
                       subtitle: '',
                       slug: '',
                       location: '',
+                      titleEn: '',
+                      subtitleEn: '',
+                      slugEn: '',
+                      locationEn: '',
                       images: '',
                       featuredImage: '',
                       productsUsed: '',
                       description: '',
                       fullDescription: '',
+                      descriptionEn: '',
+                      fullDescriptionEn: '',
                       category: 'residential',
                       featured: false,
                     });
@@ -2836,8 +2848,7 @@ export default function AdminPage() {
         )}
 
         {/* Projects Tab - Due to character limit, rest of tabs omitted but follow same pattern */}
-        </div>
-      </div>
-    </>
+      </AdminStack>
+    </AdminBody>
   );
 }

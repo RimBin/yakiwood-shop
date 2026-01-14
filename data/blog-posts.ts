@@ -902,6 +902,19 @@ export function normalizeStoredPosts(raw: unknown): BlogPost[] | null {
       if (!base) continue;
       const slugBase = typeof record.slug === 'string' ? record.slug : base;
 
+      const categoryValue = (() => {
+        const c = record.category as unknown;
+        if (typeof c === 'string') return { lt: c, en: c };
+        if (c && typeof c === 'object') {
+          const obj = c as Record<string, unknown>;
+          return {
+            lt: typeof obj.lt === 'string' ? obj.lt : '',
+            en: typeof obj.en === 'string' ? obj.en : '',
+          };
+        }
+        return { lt: '', en: '' };
+      })();
+
       normalized.push({
         id: record.id || `legacy_${base.toLowerCase().replace(/\s+/g, '-')}`,
         slug: { lt: String(slugBase), en: String(slugBase) },
@@ -920,7 +933,7 @@ export function normalizeStoredPosts(raw: unknown): BlogPost[] | null {
         featureImages: [],
         author: record.author || 'Yakiwood',
         date: record.date || new Date().toISOString().slice(0, 10),
-        category: { lt: record.category || '', en: record.category || '' },
+        category: categoryValue,
         published: typeof record.published === 'boolean' ? record.published : true,
         readTimeMinutes: 4,
       });

@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import ProductsAdminClient from '@/components/admin/ProductsAdminClient';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
-import { PageLayout } from '@/components/shared/PageLayout';
+import { AdminBody, AdminCard } from '@/components/admin/ui/AdminUI';
 
 async function getProducts() {
   const locale = (await getLocale()) as AppLocale;
@@ -54,12 +54,10 @@ export default async function AdminProductsPage() {
 
   const locale = (await getLocale()) as AppLocale;
   return (
-    <div className="min-h-screen bg-[#E1E1E1]">
-      <PageLayout>
-        <div className="py-8">
-          <ProductsAdminClient initialProducts={products} />
-        </div>
-      </PageLayout>
-    </div>
+    <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+      <AdminCard>
+        <ProductsAdminClient initialProducts={products} />
+      </AdminCard>
+    </AdminBody>
   );
 }

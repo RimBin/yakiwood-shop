@@ -9,6 +9,15 @@ import RelatedProjects from '@/components/projects/RelatedProjects';
 import { projects as projectsData } from '@/data/projects';
 import type { Project } from '@/types/project';
 import { toLocalePath } from '@/i18n/paths';
+import {
+  findProjectBySlug,
+  getProjectDescription,
+  getProjectFullDescription,
+  getProjectLocation,
+  getProjectSubtitle,
+  getProjectTitle,
+  normalizeProjectLocale,
+} from '@/lib/projects/i18n';
 
 const PROJECTS_STORAGE_KEY = 'yakiwood_projects';
 
@@ -68,7 +77,7 @@ export default function ProjectDetailClient({
   };
 }) {
   const locale = useLocale();
-  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const currentLocale = normalizeProjectLocale(locale);
   const resolvedBasePath = toLocalePath(basePath, currentLocale);
   const [projects, setProjects] = useState<Project[]>(projectsData);
 
@@ -84,10 +93,13 @@ export default function ProjectDetailClient({
     };
   }, []);
 
-  const project = useMemo(() => projects.find((p) => p.slug === slug), [projects, slug]);
+  const project = useMemo(
+    () => findProjectBySlug(projects, slug, currentLocale),
+    [projects, slug, currentLocale]
+  );
   const relatedProjects = useMemo(
-    () => projects.filter((p) => p.slug !== slug).slice(0, 3),
-    [projects, slug]
+    () => (project ? projects.filter((p) => p.id !== project.id).slice(0, 3) : []),
+    [projects, project]
   );
 
   if (!project) {
@@ -111,13 +123,19 @@ export default function ProjectDetailClient({
     );
   }
 
+  const title = getProjectTitle(project, currentLocale);
+  const subtitle = getProjectSubtitle(project, currentLocale);
+  const location = getProjectLocation(project, currentLocale);
+  const description = getProjectDescription(project, currentLocale);
+  const fullDescription = getProjectFullDescription(project, currentLocale);
+
   return (
     <main className="min-h-screen bg-[#E1E1E1]">
       <Breadcrumbs
         items={[
           { label: labels.home, href: toLocalePath('/', currentLocale) },
           { label: labels.projects, href: resolvedBasePath },
-          { label: project.title },
+          { label: title },
         ]}
       />
 
@@ -125,22 +143,22 @@ export default function ProjectDetailClient({
       <div className="w-full py-8 lg:py-12">
         <div className="max-w-[1440px] mx-auto px-4 lg:px-10">
           <h1 className="font-['DM_Sans'] font-light text-[40px] lg:text-[80px] leading-none tracking-[-1.6px] lg:tracking-[-4.4px] text-[#161616]">
-            {project.title}
+            {title}
           </h1>
         </div>
       </div>
 
       {/* Gallery */}
       <div className="w-full mb-8 lg:mb-12">
-        <ProjectGallery images={project.images} title={project.title} />
+        <ProjectGallery images={project.images} title={title} />
       </div>
 
       {/* Project Information */}
       <div className="w-full mb-8 lg:mb-12">
         <ProjectInfo
-          title={project.title}
-          subtitle={project.subtitle}
-          location={project.location}
+          title={title}
+          subtitle={subtitle}
+          location={location}
           productsUsed={project.productsUsed}
         />
       </div>
@@ -149,8 +167,8 @@ export default function ProjectDetailClient({
       <div className="w-full mb-16 lg:mb-24">
         <div className="max-w-[671px] mx-auto px-4 lg:px-0">
           <div className="font-['Outfit'] font-light text-sm leading-[1.2] tracking-[0.14px] text-[#161616] space-y-2.5">
-            <p>{project.description}</p>
-            {project.fullDescription && <p>{project.fullDescription}</p>}
+            <p>{description}</p>
+            {fullDescription && <p>{fullDescription}</p>}
           </div>
         </div>
       </div>

@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Breadcrumbs } from '@/components/ui'
 import ThicknessOptionsAdminClient from '../../../components/admin/ThicknessOptionsAdminClient'
 import ColorOptionsAdminClient from '../../../components/admin/ColorOptionsAdminClient'
+import { AdminBody, AdminCard, AdminKicker, AdminSectionTitle, AdminStack } from '@/components/admin/ui/AdminUI'
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -84,34 +84,26 @@ export default async function AdminOptionsPage() {
   const combinedError = error ?? colorError ?? colorAssetsError
 
   return (
-    <div className="min-h-screen bg-[#EAEAEA]">
-      <Breadcrumbs
-        items={[
-          { label: 'Pradžia', href: '/' },
-          { label: 'Administravimas', href: '/admin' },
-          { label: 'Parinktys' },
-        ]}
-      />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-['DM_Sans'] font-medium text-[#161616] tracking-[-0.96px]">
-            Parinkčių valdymas
-          </h1>
-          <p className="mt-2 text-[#535353] font-['DM_Sans']">
-            Valdykite globalias pasirinkimų reikšmes (kol kas: storis).
+    <AdminBody className="pt-[clamp(16px,2vw,24px)]">
+      <AdminStack>
+        <div>
+          <AdminKicker>Parinktys</AdminKicker>
+          <div className="mt-[8px]">
+            <AdminSectionTitle>Parinkčių valdymas</AdminSectionTitle>
+          </div>
+          <p className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353]">
+            Valdykite globalias pasirinkimų reikšmes.
           </p>
         </div>
 
-        <div className="space-y-8">
+        <AdminCard>
           <ThicknessOptionsAdminClient initialOptions={options} initialError={combinedError} />
-          <ColorOptionsAdminClient
-            initialOptions={colorOptions}
-            initialAssets={colorAssets}
-            initialError={combinedError}
-          />
-        </div>
-      </div>
-    </div>
+        </AdminCard>
+
+        <AdminCard>
+          <ColorOptionsAdminClient initialOptions={colorOptions} initialAssets={colorAssets} initialError={combinedError} />
+        </AdminCard>
+      </AdminStack>
+    </AdminBody>
   )
 }

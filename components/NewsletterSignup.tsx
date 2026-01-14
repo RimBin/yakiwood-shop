@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { trackEvent } from '@/lib/analytics';
 
 interface NewsletterSignupProps {
   variant?: 'inline' | 'modal' | 'footer';
@@ -28,6 +29,11 @@ export default function NewsletterSignup({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
+
+    trackEvent('newsletter_subscribe_attempt', {
+      source: variant,
+      has_name: Boolean(name?.trim()),
+    });
 
     // Validation
     if (!email || !validateEmail(email)) {
@@ -59,17 +65,31 @@ export default function NewsletterSignup({
       const data = await response.json();
 
       if (response.ok && data.success) {
+        trackEvent('sign_up', {
+          method: 'newsletter',
+          source: variant,
+        });
+
         setMessage({ type: 'success', text: 'Sėkmingai užsiprenumeravote naujienas!' });
         setEmail('');
         setName('');
         setConsent(false);
       } else {
+        trackEvent('newsletter_subscribe_error', {
+          source: variant,
+          status: response.status,
+        });
+
         setMessage({ 
           type: 'error', 
           text: data.error || 'Įvyko klaida. Bandykite dar kartą.' 
         });
       }
     } catch (error) {
+      trackEvent('newsletter_subscribe_error', {
+        source: variant,
+        status: 'network_error',
+      });
       setMessage({ type: 'error', text: 'Įvyko klaida. Bandykite dar kartą.' });
     } finally {
       setLoading(false);

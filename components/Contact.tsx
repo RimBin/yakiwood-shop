@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { PageCover } from '@/components/shared/PageLayout';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { trackEvent } from '@/lib/analytics';
 
 export default function Contact() {
   const t = useTranslations('contact');
@@ -26,6 +27,11 @@ export default function Contact() {
     
     setIsSubmitting(true);
 
+    trackEvent('contact_submit_attempt', {
+      method: 'contact_form',
+      has_phone: Boolean(formData.phone?.trim()),
+    });
+
     try {
       setError(null);
 
@@ -42,16 +48,28 @@ export default function Contact() {
       });
 
       if (!res.ok) {
+        trackEvent('contact_submit_error', {
+          method: 'contact_form',
+          status: res.status,
+        });
         setError(t('messageError'));
         setIsSubmitting(false);
         return;
       }
+
+      trackEvent('generate_lead', {
+        method: 'contact_form',
+      });
 
       setSubmitted(true);
       setFormData({ fullName: '', email: '', phone: '', company: '' });
       setConsent(false);
       startedAtRef.current = Date.now();
     } catch {
+      trackEvent('contact_submit_error', {
+        method: 'contact_form',
+        status: 'network_error',
+      });
       setError(t('messageError'));
     } finally {
       setIsSubmitting(false);

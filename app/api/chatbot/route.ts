@@ -4,6 +4,15 @@ import { matchFaq, rankFaq } from '@/lib/chatbot/match';
 import { getFaqEntries } from '@/lib/chatbot/faq';
 import { appendEvent } from '@/lib/chatbot/storage';
 import { getChatbotSettings } from '@/lib/chatbot/settings';
+import {
+  buildCatalogContextBlock,
+  buildDeliveryContextBlock,
+  buildDynamicSuggestions,
+  getLiveCatalog,
+  matchProductFromMessage,
+  productPathForLocale,
+  tryReplyWithLiveSiteData,
+} from '@/lib/chatbot/site-context';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -44,6 +53,8 @@ async function replyWithOpenAI(args: {
   history: Array<{ role: 'user' | 'assistant'; text: string }>;
   page: string | null;
   faqRanked: Array<{ entry: { question: string; answer: string } }>;
+  catalogBlock: string;
+  deliveryBlock: string;
   systemPrompt: string;
   model: string;
   temperature: number;
@@ -59,6 +70,8 @@ async function replyWithOpenAI(args: {
 
   const systemPrompt = args.systemPrompt;
   const faqBlock = buildFaqContextBlock(args.faqRanked);
+  const catalogBlock = args.catalogBlock;
+  const deliveryBlock = args.deliveryBlock;
   const pageLine = args.page ? `Current page: ${args.page}` : '';
 
   const contactPath = args.locale === 'en' ? '/contact' : '/kontaktai';
@@ -67,6 +80,8 @@ async function replyWithOpenAI(args: {
     'Rules:',
     '- Do not ask for or store sensitive personal data.',
     `- If unsure, suggest contacting us via ${contactPath}.`,
+    deliveryBlock,
+    catalogBlock,
     faqBlock,
     pageLine,
   ]
@@ -163,6 +178,24 @@ export async function POST(request: Request) {
 
   const { settings } = await getChatbotSettings();
 
+  // Live site context: products + delivery rules.
+  // This ensures the bot stays up-to-date when catalog or prices change.
+  let products: Awaited<ReturnType<typeof getLiveCatalog>> = [];
+  try {
+    products = await getLiveCatalog(localeValue);
+  } catch {
+    products = [];
+  }
+  const catalogBlock = buildCatalogContextBlock(products, localeValue);
+  const deliveryBlock = buildDeliveryContextBlock(localeValue);
+  const dynamicSuggestions = buildDynamicSuggestions(products, localeValue);
+
+  const matchedProduct = matchProductFromMessage({
+    locale: localeValue,
+    message,
+    products,
+  });
+
   const rateKey = `${ip}:${sessionId}`;
   const rate = checkRateLimit(rateKey, now);
   if (!rate.ok) {
@@ -195,13 +228,21 @@ export async function POST(request: Request) {
         history,
         page: page ?? null,
         faqRanked: ranked,
+        catalogBlock,
+        deliveryBlock,
         systemPrompt: localeValue === 'en' ? settings.systemPromptEn : settings.systemPromptLt,
         model: process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini',
         temperature: settings.temperature,
       })
     : null;
 
-  const reply = openAiResult?.reply ?? entry.answer;
+  const liveReply = tryReplyWithLiveSiteData({
+    locale: localeValue,
+    message,
+    products,
+  });
+
+  const reply = openAiResult?.reply ?? liveReply ?? entry.answer;
   const handoff =
     localeValue === 'en'
       ? { label: 'Contact', href: '/contact' }
@@ -220,13 +261,48 @@ export async function POST(request: Request) {
     },
   });
 
+  const actions = matchedProduct
+    ? (() => {
+        const href = productPathForLocale(matchedProduct, localeValue);
+        const slugForLocale =
+          localeValue === 'en'
+            ? (matchedProduct.slugEn ?? matchedProduct.slug)
+            : matchedProduct.slug;
+        const effectivePrice =
+          typeof matchedProduct.salePrice === 'number' && matchedProduct.salePrice > 0
+            ? matchedProduct.salePrice
+            : matchedProduct.price;
+        return [
+          {
+            type: 'add_to_cart',
+            label: localeValue === 'en' ? 'Add to cart' : 'Į krepšelį',
+            item: {
+              id: matchedProduct.id,
+              name: localeValue === 'en' ? (matchedProduct.nameEn ?? matchedProduct.name) : matchedProduct.name,
+              slug: slugForLocale,
+              basePrice: Number.isFinite(effectivePrice) ? effectivePrice : 0,
+              quantity: 1,
+            },
+          },
+          {
+            type: 'open_product',
+            label: localeValue === 'en' ? 'Open product' : 'Atidaryti prekę',
+            href,
+          },
+        ];
+      })()
+    : [];
+
   return NextResponse.json({
     ok: true,
     data: {
       reply,
       faqId: entry.id,
       confidence,
-      suggestions: entry.suggestions ?? [],
+      suggestions: Array.from(
+        new Set([...(dynamicSuggestions ?? []), ...((entry.suggestions ?? []) as string[])])
+      ).slice(0, 10),
+      actions,
       handoff,
     },
   });

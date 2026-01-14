@@ -46,6 +46,72 @@
 			],
 			"isBackground": false,
 			"problemMatcher": []
+		},
+		{
+			"label": "kill-node-next",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"taskkill /F /IM node.exe /T 2>$null; taskkill /F /IM npm.exe /T 2>$null; taskkill /F /IM next.exe /T 2>$null; Write-Output \"killed\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "clean-next",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$p=\"C:\\Users\\rimvy\\yakiwood-website\\.next\"; if (Test-Path $p) { Remove-Item -Recurse -Force $p -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 200; if (Test-Path $p) { Remove-Item -Recurse -Force $p -ErrorAction SilentlyContinue } }; if (Test-Path $p) { Write-Output \".next still exists\"; exit 1 } else { Write-Output \".next removed\" }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "clean-next-verbose",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$p=\"C:\\Users\\rimvy\\yakiwood-website\\.next\"; if (!(Test-Path $p)) { Write-Output \".next does not exist\"; exit 0 }; try { Remove-Item -Recurse -Force $p -ErrorAction Stop } catch { Write-Output (\"remove failed: \" + $_.Exception.Message) }; Start-Sleep -Milliseconds 300; if (Test-Path $p) { Write-Output \".next still exists\"; Get-ChildItem -LiteralPath $p -Recurse -Force -ErrorAction SilentlyContinue | Select-Object -First 30 | ForEach-Object { $_.FullName }; exit 1 } else { Write-Output \".next removed\" }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "list-node-next-procs",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-Process node,npm,next -ErrorAction SilentlyContinue | Select-Object Name,Id,Path | Format-Table -AutoSize | Out-String -Width 200"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "tasklist-node-next",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"tasklist | findstr /I /C:\"node.exe\" /C:\"npm.exe\" /C:\"next.exe\"; exit 0"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "next-build-direct",
+			"type": "shell",
+			"command": "npx",
+			"args": [
+				"next",
+				"build"
+			],
+			"isBackground": false,
+			"group": "build"
 		}
 	]
 }

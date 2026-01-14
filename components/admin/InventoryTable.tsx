@@ -78,11 +78,11 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
       <table className="w-full">
         <thead className="bg-[#EAEAEA] border-b border-[#E1E1E1]">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider">
+            <th className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
               Product
             </th>
             <th 
-              className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider cursor-pointer hover:bg-[#E1E1E1]"
+              className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C] cursor-pointer hover:bg-[#E1E1E1]"
               onClick={() => handleSort('sku')}
             >
               <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
               </div>
             </th>
             <th 
-              className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider cursor-pointer hover:bg-[#E1E1E1]"
+              className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C] cursor-pointer hover:bg-[#E1E1E1]"
               onClick={() => handleSort('quantity_available')}
             >
               <div className="flex items-center gap-2">
@@ -98,7 +98,7 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
               </div>
             </th>
             <th 
-              className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider cursor-pointer hover:bg-[#E1E1E1]"
+              className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C] cursor-pointer hover:bg-[#E1E1E1]"
               onClick={() => handleSort('quantity_reserved')}
             >
               <div className="flex items-center gap-2">
@@ -106,20 +106,20 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
               </div>
             </th>
             <th 
-              className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider cursor-pointer hover:bg-[#E1E1E1]"
+              className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C] cursor-pointer hover:bg-[#E1E1E1]"
               onClick={() => handleSort('quantity_sold')}
             >
               <div className="flex items-center gap-2">
                 Sold <SortIcon field="quantity_sold" />
               </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider">
+            <th className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
               Location
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider">
+            <th className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
               Status
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-[#535353] uppercase tracking-wider">
+            <th className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
               Actions
             </th>
           </tr>
@@ -172,21 +172,21 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
               <td className="px-6 py-4 whitespace-nowrap">
                 {getStatusBadge(item)}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
+              <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex gap-2">
                   <button
                     onClick={() => onRestock(item.sku)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                    className="h-[36px] px-[14px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-white hover:bg-[#535353] transition-colors"
                     title="Restock"
                   >
-                    ↑ Restock
+                    Papildyti
                   </button>
                   <button
                     onClick={() => onAdjust(item.sku)}
-                    className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
+                    className="h-[36px] px-[14px] rounded-[100px] bg-[#E1E1E1] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#BBBBBB] transition-colors"
                     title="Adjust"
                   >
-                    ± Adjust
+                    Koreguoti
                   </button>
                 </div>
               </td>
