@@ -49,6 +49,10 @@ export default function Header() {
       label: t(locale === 'lt' ? 'nav.projektai' : 'nav.projects'),
     },
     {
+      href: toLocalePath('/blog', currentLocale),
+      label: t(locale === 'lt' ? 'nav.straipsniai' : 'nav.blog'),
+    },
+    {
       href: toLocalePath('/configurator3d', currentLocale),
       label: t(locale === 'lt' ? 'nav.konfiguratorius3d' : 'nav.configurator3d'),
     },

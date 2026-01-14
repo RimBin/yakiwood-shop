@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
@@ -15,6 +15,11 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const t = useTranslations();
 
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
+  const blogLink = {
+    href: toLocalePath('/blog', currentLocale),
+    label: t(locale === 'lt' ? 'nav.straipsniai' : 'nav.blog'),
+  };
 
   const configuratorLink = {
     href: toLocalePath('/configurator3d', currentLocale),
@@ -92,6 +97,14 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               onClick={onClose}
             >
               Projects
+            </Link>
+
+            <Link
+              href={blogLink.href}
+              className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
+              onClick={onClose}
+            >
+              {blogLink.label}
             </Link>
 
             <Link

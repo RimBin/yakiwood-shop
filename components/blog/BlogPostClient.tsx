@@ -79,8 +79,10 @@ export default function BlogPostClient({
         .filter((item) => item.published);
 
       const merged = new Map<string, LocalizedBlogPost>();
-      for (const item of [initialPost, ...initialRelated]) merged.set(item.id, item);
       for (const item of localized) merged.set(item.id, item);
+      for (const item of [initialPost, ...initialRelated]) {
+        if (!merged.has(item.id)) merged.set(item.id, item);
+      }
 
       const all = sortPosts(Array.from(merged.values()));
       const current =
