@@ -83,11 +83,15 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
 
       {posts.length ? (
         <>
-          <div className="mt-[24px] md:mt-[32px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[20px] gap-y-[26px]">
-            {visiblePosts.map((post) => (
-              <article key={post.id} className="overflow-hidden">
+          <div className="mt-[24px] md:mt-[32px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[repeat(4,328px)] xl:justify-between gap-x-[16px] gap-y-[16px]">
+            {visiblePosts.map((post, index) => {
+              const tall = index % 2 === 1;
+              const imageHeight = tall ? 'h-[320px] md:h-[448px]' : 'h-[220px] md:h-[305px]';
+
+              return (
+                <article key={post.id} className="overflow-hidden xl:w-[328px]">
                 <Link href={toLocalePath(`/blog/${post.slug}`, locale)} className="block">
-                  <div className="relative w-full aspect-[3/2] overflow-hidden bg-[#D9D9D9]">
+                  <div className={`relative w-full ${imageHeight} overflow-hidden bg-[#D9D9D9]`}>
                     <BlogImage src={post.heroImage} alt={post.title} />
                   </div>
                   <div className="bg-white px-[12px] py-[10px]">
@@ -97,7 +101,8 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
                   </div>
                 </Link>
               </article>
-            ))}
+              );
+            })}
           </div>
 
           {totalPages > 1 && (

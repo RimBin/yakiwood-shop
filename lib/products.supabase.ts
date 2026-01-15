@@ -108,7 +108,7 @@ function transformSeedProduct(seed: (typeof seedProducts)[number]): Product {
   }
 }
 
-function transformDbProduct(db: DbProduct): Product {
+export function transformDbProduct(db: DbProduct): Product {
   const variants = Array.isArray(db.product_variants) ? db.product_variants : []
 
   const slug = db.slug
@@ -272,6 +272,39 @@ export async function fetchProducts(options?: FetchProductsOptions): Promise<Pro
   }
 
   const mode = options?.mode ?? 'active'
+
+  // In the browser, prefer the server API for stock-item listing so it can use
+  // the service role key (and avoid requiring public RLS changes).
+  if (typeof window !== 'undefined' && mode === 'stock-items') {
+    try {
+      const res = await fetch('/api/products?mode=stock-items', {
+        headers: {
+          accept: 'application/json',
+        },
+      })
+
+      if (res.ok) {
+        const json = (await res.json()) as unknown
+        if (Array.isArray(json)) {
+          return (json as unknown as DbProduct[]).map(transformDbProduct)
+        }
+      } else if (res.status === 503) {
+        try {
+          const payload = (await res.json()) as { error?: string }
+          if (payload?.error) {
+            throw new Error(payload.error)
+          }
+        } catch {
+          throw new Error('Stock-item products are not available in the current environment.')
+        }
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        throw err
+      }
+      // fall back to direct Supabase query
+    }
+  }
 
   let query = supabase
     .from('products')

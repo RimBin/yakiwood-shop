@@ -2,11 +2,12 @@
 import { notFound } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { generateBreadcrumbSchema, generateProductSchema } from '@/lib/seo/structured-data';
-import { fetchProductBySlug } from '@/lib/products.supabase';
+import { fetchProductBySlug, transformDbProduct } from '@/lib/products.supabase';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
 import { toLocalePath } from '@/i18n/paths';
 import { applySeoOverride } from '@/lib/seo/overrides';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 interface ProductPageProps {
   params: { slug: string };
@@ -15,7 +16,22 @@ interface ProductPageProps {
 // Generate metadata for SEO
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const resolvedParams = await params;
-  const product = await fetchProductBySlug(resolvedParams.slug, { locale: 'en' });
+  let product = await fetchProductBySlug(resolvedParams.slug, { locale: 'en' });
+
+  if (!product && resolvedParams.slug.includes('--') && supabaseAdmin) {
+    const columnsToTry = ['slug_en', 'slug'] as const;
+    for (const column of columnsToTry) {
+      const { data, error } = await supabaseAdmin
+        .from('products')
+        .select('*, product_variants(*)')
+        .eq(column, resolvedParams.slug)
+        .maybeSingle();
+      if (!error && data) {
+        product = transformDbProduct(data as any);
+        break;
+      }
+    }
+  }
 
   if (!product) {
     return {
@@ -73,7 +89,22 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 // Main product page component (Server Component)
 export default async function ProductPage({ params }: ProductPageProps) {
   const resolvedParams = await params;
-  const product = await fetchProductBySlug(resolvedParams.slug, { locale: 'en' });
+  let product = await fetchProductBySlug(resolvedParams.slug, { locale: 'en' });
+
+  if (!product && resolvedParams.slug.includes('--') && supabaseAdmin) {
+    const columnsToTry = ['slug_en', 'slug'] as const;
+    for (const column of columnsToTry) {
+      const { data, error } = await supabaseAdmin
+        .from('products')
+        .select('*, product_variants(*)')
+        .eq(column, resolvedParams.slug)
+        .maybeSingle();
+      if (!error && data) {
+        product = transformDbProduct(data as any);
+        break;
+      }
+    }
+  }
 
   if (!product) {
     notFound();

@@ -2,11 +2,12 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { generateBreadcrumbSchema, generateProductSchema } from '@/lib/seo/structured-data';
-import { fetchProductBySlug } from '@/lib/products.supabase';
+import { fetchProductBySlug, transformDbProduct } from '@/lib/products.supabase';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
 import { toLocalePath } from '@/i18n/paths';
 import { applySeoOverride } from '@/lib/seo/overrides';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 interface ProductPageProps {
 	params: { slug: string };
@@ -14,7 +15,22 @@ interface ProductPageProps {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
 	const resolvedParams = await params;
-	const product = await fetchProductBySlug(resolvedParams.slug, { locale: 'lt' });
+	let product = await fetchProductBySlug(resolvedParams.slug, { locale: 'lt' });
+
+	if (!product && resolvedParams.slug.includes('--') && supabaseAdmin) {
+		const columnsToTry = ['slug', 'slug_en'] as const;
+		for (const column of columnsToTry) {
+			const { data, error } = await supabaseAdmin
+				.from('products')
+				.select('*, product_variants(*)')
+				.eq(column, resolvedParams.slug)
+				.maybeSingle();
+			if (!error && data) {
+				product = transformDbProduct(data as any);
+				break;
+			}
+		}
+	}
 
 	if (!product) {
 		return {
@@ -71,7 +87,22 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProduktasPage({ params }: ProductPageProps) {
 	const resolvedParams = await params;
-	const product = await fetchProductBySlug(resolvedParams.slug, { locale: 'lt' });
+	let product = await fetchProductBySlug(resolvedParams.slug, { locale: 'lt' });
+
+	if (!product && resolvedParams.slug.includes('--') && supabaseAdmin) {
+		const columnsToTry = ['slug', 'slug_en'] as const;
+		for (const column of columnsToTry) {
+			const { data, error } = await supabaseAdmin
+				.from('products')
+				.select('*, product_variants(*)')
+				.eq(column, resolvedParams.slug)
+				.maybeSingle();
+			if (!error && data) {
+				product = transformDbProduct(data as any);
+				break;
+			}
+		}
+	}
 
 	if (!product) {
 		notFound();

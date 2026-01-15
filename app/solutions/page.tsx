@@ -31,16 +31,25 @@ export default function SolutionsPage() {
       : (isSingleImage ? 'grid grid-cols-1 ' : 'grid grid-cols-2 ') +
         'gap-[12px] md:gap-[16px] lg:gap-[24px] w-full lg:w-[520px]';
     const imageHeightClass = isFacades
-      ? 'h-[180px] md:h-[240px] lg:h-[280px]'
+      ? 'h-[180px] md:h-[240px] lg:h-[300px]'
       : isSingleImage
         ? 'h-[220px] md:h-[320px] lg:h-[240px]'
         : 'h-[160px] md:h-[220px] lg:h-[240px]';
+    const titleClass = isFacades
+      ? "font-['DM_Sans'] font-light text-[40px] leading-none tracking-[-1.6px] text-[#161616]"
+      : "font-['DM_Sans'] font-light text-[32px] lg:text-[48px] leading-none tracking-[-1.28px] lg:tracking-[-1.92px] text-[#161616]";
+    const descriptionClass = isFacades
+      ? "mt-[12px] font-['Outfit'] font-light text-[12px] leading-[1.35] tracking-[0.12px] text-[#535353]"
+      : "mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]";
+    const listClass = isFacades
+      ? "mt-[16px] grid gap-[12px] font-['Outfit'] font-light text-[12px] leading-[1.35] tracking-[0.12px] text-[#535353]"
+      : "mt-[16px] grid gap-[10px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]";
 
     return (
-      <div id={id} className={`scroll-mt-[96px] ${isFacades ? 'py-[40px] lg:py-[80px]' : ''}`}>
+      <div id={id} className={`scroll-mt-[96px] ${isFacades ? 'py-[48px] lg:py-[96px]' : ''}`}>
         <div
           className={
-            `flex flex-col lg:flex-row items-center ` +
+            `flex flex-col lg:flex-row ${isFacades ? 'items-start' : 'items-center'} ` +
             (reverse ? 'lg:flex-row-reverse ' : '') +
             'gap-[20px] md:gap-[28px] lg:gap-[120px]'
           }
@@ -49,21 +58,24 @@ export default function SolutionsPage() {
             {images.map((img, idx) => (
               <div
                 key={`${img.src}-${idx}`}
-                className={`relative w-full overflow-hidden rounded-[24px] ${imageHeightClass}`}
+                className={
+                  `relative w-full overflow-hidden ${isFacades ? 'rounded-[16px]' : 'rounded-[24px]'} ${imageHeightClass}` +
+                  (isFacades && idx === 1 ? ' lg:mt-[12px]' : '')
+                }
               >
                 <Image src={img.src} alt={img.alt} fill className="object-cover" />
               </div>
             ))}
           </div>
 
-          <div className="w-full lg:max-w-[420px]">
-            <h3 className="font-['DM_Sans'] font-light text-[32px] lg:text-[48px] leading-none tracking-[-1.28px] lg:tracking-[-1.92px] text-[#161616]">
+          <div className={`w-full ${isFacades ? 'lg:max-w-[360px]' : 'lg:max-w-[420px]'}`}>
+            <h3 className={titleClass}>
               {title}
             </h3>
-            <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
+            <p className={descriptionClass}>
               {description}
             </p>
-            <ul className="mt-[16px] grid gap-[10px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
+            <ul className={listClass}>
               {bullets.map((b) => (
                 <li key={b}>— {b}</li>
               ))}
@@ -236,8 +248,8 @@ Do you want to give your building a distinctive and attractive appearance? Encou
           <ApplicationSection
             id="facades"
             title="Facades"
-            description="Burnt wood facade cladding brings strong character and long-term protection against the elements."
-            bullets={['Weather resistant, low maintenance', 'Unique texture and deep tone', 'Natural protection through charring']}
+            description="For ventilated cladding, charred larch or spruce offers excellent weather resistance and a timeless, matte finish. Recommended thickness: 18/20 mm."
+            bullets={['Moisture & UV resistant', 'Certifications: EPD, FSC']}
             images={[
               { src: assets.projects[0], alt: 'Facades project example' },
               { src: assets.projects[1], alt: 'Facades project detail example' },
