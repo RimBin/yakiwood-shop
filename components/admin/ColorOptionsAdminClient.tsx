@@ -3,6 +3,7 @@
 import {useMemo, useRef, useState} from 'react'
 import {useRouter} from 'next/navigation'
 import {createClient} from '@/lib/supabase/client'
+import {AdminButton, AdminInput, AdminLabel, AdminSectionTitle, AdminStack} from '@/components/admin/ui/AdminUI'
 
 type ColorOptionRow = {
   id: string
@@ -114,9 +115,9 @@ export default function ColorOptionsAdminClient({
 
   if (!supabase) {
     return (
-      <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] p-6">
-        <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">Supabase nesukonfigūruotas</h2>
-        <p className="mt-2 font-['Outfit'] text-sm text-[#535353]">
+      <div>
+        <AdminSectionTitle>Supabase nesukonfigūruotas</AdminSectionTitle>
+        <p className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353]">
           Reikia `NEXT_PUBLIC_SUPABASE_URL` ir `NEXT_PUBLIC_SUPABASE_ANON_KEY` `.env.local` faile.
         </p>
       </div>
@@ -326,164 +327,137 @@ export default function ColorOptionsAdminClient({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] p-6">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">Spalvų biblioteka</h2>
-            <p className="mt-1 font-['Outfit'] text-sm text-[#535353]">
+    <AdminStack>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <AdminSectionTitle>Spalvų biblioteka</AdminSectionTitle>
+          <p className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353]">
               Čia sukuriate spalvas ir galite įkelti nuotraukas (rašoma į `product_assets` su `product_id = NULL`).
               Jei norite pvz. „spruce + black“ atskiros foto, įkelkite su pasirinkta mediena.
             </p>
-          </div>
-
-          <button
-            type="button"
-            disabled={isBusy}
-            onClick={refreshFromDb}
-            className="px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#E1E1E1] disabled:opacity-60"
-          >
-            Atnaujinti
-          </button>
         </div>
 
-        {error ? (
-          <div className="mt-4 border border-red-200 bg-[#E1E1E1] rounded-[12px] p-3">
-            <p className="font-['Outfit'] text-sm text-red-700">{error}</p>
-            <p className="mt-1 font-['Outfit'] text-xs text-red-700">
-              Jei klaida apie `catalog_options`/`product_assets`, pirmiausia pritaikykite migraciją
-              `supabase/migrations/20260111_catalog_options_assets_sale_thickness.sql`.
-            </p>
-          </div>
-        ) : null}
+        <AdminButton type="button" variant="outline" size="sm" disabled={isBusy} onClick={refreshFromDb}>
+          Atnaujinti
+        </AdminButton>
+      </div>
 
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="border border-[#E1E1E1] rounded-lg p-4">
-            <h3 className="font-['DM_Sans'] text-base font-medium text-[#161616]">Pridėti spalvą</h3>
+      {error ? (
+        <div className="border border-red-200 bg-[#EAEAEA] rounded-[16px] px-[16px] py-[12px]">
+          <p className="font-['Outfit'] text-[13px] text-red-700">{error}</p>
+          <p className="mt-[4px] font-['Outfit'] text-[12px] text-red-700">
+            Jei klaida apie `catalog_options`/`product_assets`, pirmiausia pritaikykite migraciją
+            `supabase/migrations/20260111_catalog_options_assets_sale_thickness.sql`.
+          </p>
+        </div>
+      ) : null}
 
-            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label className="block font-['Outfit'] text-xs text-[#535353]">Kodas (value_text)</label>
-                <input
-                  value={newCode}
-                  onChange={(e) => setNewCode(e.target.value)}
-                  placeholder="black"
-                  className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['Outfit'] text-sm"
-                />
-              </div>
-              <div>
-                <label className="block font-['Outfit'] text-xs text-[#535353]">Hex (nebūtina)</label>
-                <input
-                  value={newHex}
-                  onChange={(e) => setNewHex(e.target.value)}
-                  placeholder="#161616"
-                  className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['Outfit'] text-sm"
-                />
-              </div>
-              <div>
-                <label className="block font-['Outfit'] text-xs text-[#535353]">Pavadinimas LT</label>
-                <input
-                  value={newLabelLt}
-                  onChange={(e) => setNewLabelLt(e.target.value)}
-                  placeholder="Juoda"
-                  className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['Outfit'] text-sm"
-                />
-              </div>
-              <div>
-                <label className="block font-['Outfit'] text-xs text-[#535353]">Pavadinimas EN</label>
-                <input
-                  value={newLabelEn}
-                  onChange={(e) => setNewLabelEn(e.target.value)}
-                  placeholder="Black"
-                  className="mt-1 w-full px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['Outfit'] text-sm"
-                />
-              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-[clamp(16px,2vw,24px)]">
+        <div className="border border-[#E1E1E1] rounded-[16px] p-[clamp(16px,2vw,20px)]">
+          <div className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">Pridėti spalvą</div>
+
+          <div className="mt-[12px] grid grid-cols-1 md:grid-cols-2 gap-[12px]">
+            <div>
+              <AdminLabel className="mb-[6px]">Kodas (value_text)</AdminLabel>
+              <AdminInput value={newCode} onChange={(e) => setNewCode(e.target.value)} placeholder="black" />
             </div>
-
-            <button
-              type="button"
-              disabled={isBusy}
-              onClick={addColor}
-              className="mt-3 px-4 py-2 bg-[#161616] text-white rounded-lg font-['DM_Sans'] text-sm disabled:opacity-60"
-            >
-              + Pridėti
-            </button>
+            <div>
+              <AdminLabel className="mb-[6px]">Hex (nebūtina)</AdminLabel>
+              <AdminInput value={newHex} onChange={(e) => setNewHex(e.target.value)} placeholder="#161616" />
+            </div>
+            <div>
+              <AdminLabel className="mb-[6px]">Pavadinimas LT</AdminLabel>
+              <AdminInput value={newLabelLt} onChange={(e) => setNewLabelLt(e.target.value)} placeholder="Juoda" />
+            </div>
+            <div>
+              <AdminLabel className="mb-[6px]">Pavadinimas EN</AdminLabel>
+              <AdminInput value={newLabelEn} onChange={(e) => setNewLabelEn(e.target.value)} placeholder="Black" />
+            </div>
           </div>
 
-          <div className="border border-[#E1E1E1] rounded-lg p-4">
-            <h3 className="font-['DM_Sans'] text-base font-medium text-[#161616]">Kaip naudoti</h3>
-            <ul className="mt-2 font-['Outfit'] text-sm text-[#535353] list-disc pl-5 space-y-1">
+          <div className="mt-[12px]">
+            <AdminButton type="button" disabled={isBusy} onClick={addColor}>
+              + Pridėti
+            </AdminButton>
+          </div>
+        </div>
+
+        <div className="border border-[#E1E1E1] rounded-[16px] p-[clamp(16px,2vw,20px)]">
+          <div className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">Kaip naudoti</div>
+          <ul className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353] list-disc pl-5 space-y-1">
               <li>Spalvos kodas (pvz. <code>black</code>) turi sutapti su tuo, ką siunčiate į kainodarą/konfigūraciją.</li>
               <li>Nuotraukos įkeliamos į Supabase Storage bucket <code>product-images</code>.</li>
               <li>Ryšys saugomas DB lentelėje <code>product_assets</code> per <code>color_code</code> ir (jei reikia) <code>wood_type</code>.</li>
             </ul>
-          </div>
         </div>
+      </div>
 
-        <div className="mt-6">
-          {sorted.length === 0 ? (
-            <p className="font-['Outfit'] text-sm text-[#535353]">Nėra įvestų spalvų.</p>
-          ) : (
-            <div className="divide-y divide-[#E1E1E1] border border-[#E1E1E1] rounded-lg overflow-hidden">
-              {sorted.map((opt) => {
-                const code = opt.value_text ?? ''
-                const hex = opt.hex_color ?? ''
-                const photos = code ? assetsByColor.get(code) ?? [] : []
-                const byWood = new Map<string | null, ColorAssetRow[]>()
-                for (const p of photos) {
-                  const wt = p.wood_type ?? null
-                  const list = byWood.get(wt) ?? []
-                  list.push(p)
-                  byWood.set(wt, list)
-                }
-                const label = opt.label_lt || opt.label_en || code || '(be kodo)'
+      <div>
+        {sorted.length === 0 ? (
+          <p className="font-['Outfit'] text-[14px] text-[#535353]">Nėra įvestų spalvų.</p>
+        ) : (
+          <div className="divide-y divide-[#E1E1E1] border border-[#E1E1E1] rounded-[16px] overflow-hidden">
+            {sorted.map((opt) => {
+              const code = opt.value_text ?? ''
+              const hex = opt.hex_color ?? ''
+              const photos = code ? assetsByColor.get(code) ?? [] : []
+              const byWood = new Map<string | null, ColorAssetRow[]>()
+              for (const p of photos) {
+                const wt = p.wood_type ?? null
+                const list = byWood.get(wt) ?? []
+                list.push(p)
+                byWood.set(wt, list)
+              }
+              const label = opt.label_lt || opt.label_en || code || '(be kodo)'
 
-                return (
-                  <div key={opt.id} className="px-4 py-4 bg-[#EAEAEA]">
-                    <div className="flex items-start justify-between gap-4 flex-wrap">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-8 h-8 rounded-full border border-[#E1E1E1]"
-                          style={{backgroundColor: isValidHex(hex) ? hex : '#EAEAEA'}}
-                          title={hex || undefined}
-                        />
-                        <div>
-                          <p className="font-['DM_Sans'] text-sm font-medium text-[#161616]">{label}</p>
-                          <p className="font-['Outfit'] text-xs text-[#7C7C7C]">
-                            code: <span className="font-mono">{code || '-'}</span> • aktyvus:{' '}
-                            {(opt.is_active ?? true) ? 'taip' : 'ne'}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          disabled={isBusy}
-                          onClick={() => toggleActive(opt.id, !(opt.is_active ?? true))}
-                          className="px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#E1E1E1] disabled:opacity-60"
-                        >
-                          {(opt.is_active ?? true) ? 'Išjungti' : 'Įjungti'}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={isBusy}
-                          onClick={() => removeColor(opt.id)}
-                          className="px-3 py-2 border border-red-200 bg-[#EAEAEA] rounded-lg font-['DM_Sans'] text-sm text-red-700 hover:bg-[#E1E1E1] disabled:opacity-60"
-                        >
-                          Trinti
-                        </button>
+              return (
+                <div key={opt.id} className="px-[16px] py-[16px]">
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-8 h-8 rounded-full border border-[#E1E1E1]"
+                        style={{backgroundColor: isValidHex(hex) ? hex : '#EAEAEA'}}
+                        title={hex || undefined}
+                      />
+                      <div>
+                        <p className="font-['DM_Sans'] text-[14px] font-medium text-[#161616]">{label}</p>
+                        <p className="font-['Outfit'] text-[12px] text-[#7C7C7C]">
+                          code: <span className="font-mono">{code || '-'}</span> • aktyvus:{' '}
+                          {(opt.is_active ?? true) ? 'taip' : 'ne'}
+                        </p>
                       </div>
                     </div>
 
-                    {code ? (
-                      <div className="mt-4">
-                        <div className="space-y-4">
-                          {woodTypeOptions.map((wt) => {
-                            const key = `${code}::${wt.value ?? 'any'}`
-                            const list = byWood.get(wt.value) ?? []
-                            return (
-                              <div key={key} className="border border-[#E1E1E1] rounded-lg p-3">
+                    <div className="flex gap-2">
+                      <AdminButton
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={isBusy}
+                        onClick={() => toggleActive(opt.id, !(opt.is_active ?? true))}
+                      >
+                        {(opt.is_active ?? true) ? 'Išjungti' : 'Įjungti'}
+                      </AdminButton>
+                      <AdminButton
+                        type="button"
+                        variant="danger"
+                        size="sm"
+                        disabled={isBusy}
+                        onClick={() => removeColor(opt.id)}
+                      >
+                        Trinti
+                      </AdminButton>
+                    </div>
+                  </div>
+
+                  {code ? (
+                    <div className="mt-4">
+                      <div className="space-y-4">
+                        {woodTypeOptions.map((wt) => {
+                          const key = `${code}::${wt.value ?? 'any'}`
+                          const list = byWood.get(wt.value) ?? []
+                          return (
+                            <div key={key} className="border border-[#E1E1E1] rounded-lg p-3">
                                 <div className="flex items-center justify-between gap-3 flex-wrap">
                                   <p className="font-['Outfit'] text-sm text-[#535353]">
                                     Nuotraukos ({wt.label}) • {list.length}
@@ -499,19 +473,19 @@ export default function ColorOptionsAdminClient({
                                       className="hidden"
                                       onChange={(e) => uploadColorPhotos(code, wt.value, e.target.files)}
                                     />
-                                    <button
+                                    <AdminButton
                                       type="button"
+                                      size="sm"
                                       disabled={isBusy}
                                       onClick={() => fileInputsByKey.current[key]?.click()}
-                                      className="px-4 py-2 bg-[#161616] text-white rounded-lg font-['DM_Sans'] text-sm disabled:opacity-60"
                                     >
                                       + Įkelti
-                                    </button>
+                                    </AdminButton>
                                   </div>
                                 </div>
 
                                 {list.length === 0 ? (
-                                  <p className="mt-2 font-['Outfit'] text-xs text-[#7C7C7C]">Dar nėra įkeltų nuotraukų.</p>
+                                  <p className="mt-2 font-['Outfit'] text-[12px] text-[#7C7C7C]">Dar nėra įkeltų nuotraukų.</p>
                                 ) : (
                                   <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                                     {list.map((p) => (
@@ -534,21 +508,20 @@ export default function ColorOptionsAdminClient({
                                     ))}
                                   </div>
                                 )}
-                              </div>
-                            )
-                          })}
-                        </div>
+                            </div>
+                          )
+                        })}
                       </div>
-                    ) : (
-                      <p className="mt-3 font-['Outfit'] text-xs text-[#7C7C7C]">Pirmiausia nustatykite `value_text` (spalvos kodą).</p>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
+                    </div>
+                  ) : (
+                    <p className="mt-3 font-['Outfit'] text-[12px] text-[#7C7C7C]">Pirmiausia nustatykite `value_text` (spalvos kodą).</p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
-    </div>
+    </AdminStack>
   )
 }

@@ -199,9 +199,11 @@ export function tryReplyWithLiveSiteData(args: {
     msg.includes('apmok') ||
     msg.includes('atsiskaity') ||
     msg.includes('payment') ||
-    msg.includes('paysera') ||
     msg.includes('stripe') ||
     msg.includes('paypal') ||
+    msg.includes('apple pay') ||
+    msg.includes('google pay') ||
+    msg.includes('wallet') ||
     msg.includes('bank')
 
   const isReturns =
@@ -254,9 +256,9 @@ export function tryReplyWithLiveSiteData(args: {
 
   if (isPayment) {
     if (args.locale === 'en') {
-      return 'Payment methods: card (Stripe), Paysera bank payments, and PayPal (when available). You can choose the payment method at checkout. More: /policies'
+      return 'Payment methods (UK): card via Stripe (incl. Apple Pay / Google Pay where supported) and PayPal (when available). You can choose the payment method at checkout. More: /policies'
     }
-    return 'Apmokėjimas: kortele (Stripe), Paysera bankiniai mokėjimai ir (kai aktyvuota) PayPal. Mokėjimo būdą pasirinksite atsiskaitymo metu. Daugiau: /policies'
+    return 'Apmokėjimas (JK): kortele per Stripe (kai palaikoma – Apple Pay / Google Pay) ir (kai aktyvuota) PayPal. Mokėjimo būdą pasirinksite atsiskaitymo metu. Daugiau: /policies'
   }
 
   if (isReturns) {

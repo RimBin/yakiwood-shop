@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Product } from '@/lib/products.supabase';
 import { useTranslations } from 'next-intl';
+import { trackSelectItem } from '@/lib/analytics';
 
 interface ProductCardProps {
   product: Product;
@@ -24,7 +25,18 @@ export default function ProductCard({ product, href }: ProductCardProps) {
   }, [product.category, t]);
 
   return (
-    <Link href={linkHref} className="group block">
+    <Link
+      href={linkHref}
+      className="group block"
+      onClick={() => {
+        trackSelectItem({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          category: product.category,
+        });
+      }}
+    >
       <div className="relative aspect-square bg-[#EAEAEA] rounded-[24px] overflow-hidden mb-4 group-hover:shadow-lg transition-shadow">
         <Image
           src={product.image || '/images/ui/wood/imgSpruce.png'}

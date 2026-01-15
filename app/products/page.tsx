@@ -10,11 +10,15 @@ import { useLocale, useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { applyRoleDiscount, type RoleDiscount } from '@/lib/pricing/roleDiscounts';
 import { toLocalePath } from '@/i18n/paths';
+import { trackEvent, trackSearch, trackSelectItem } from '@/lib/analytics';
 
 export default function ProductsPage() {
   const t = useTranslations('productsPage');
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
+  const PAGE_SIZE = 24;
+
   const [activeUsage, setActiveUsage] = useState<'all' | string>('all');
   const [activeWood, setActiveWood] = useState<'all' | string>('all');
   const [activeColor, setActiveColor] = useState<'all' | string>('all');
@@ -24,11 +28,16 @@ export default function ProductsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  const [hasTrackedListView, setHasTrackedListView] = useState(false);
+
   useEffect(() => {
     async function loadProducts() {
       try {
-        console.log('Loading products from Sanity...');
-        const products = await fetchProducts();
+        console.log('Loading products from Supabase...');
+        // Show stock-item (variation) products as separate cards.
+        const products = await fetchProducts({ mode: 'stock-items' });
         console.log('Products loaded:', products.length);
 
         // Apply role discount for authenticated users.
@@ -89,6 +98,11 @@ export default function ProductsPage() {
 
     loadProducts();
   }, []);
+
+  useEffect(() => {
+    // Reset pagination whenever filters/search change.
+    setVisibleCount(PAGE_SIZE);
+  }, [PAGE_SIZE, activeUsage, activeWood, activeColor, activeProfile, searchQuery]);
 
   const usageFilters = useMemo(
     () => [
@@ -161,7 +175,54 @@ export default function ProductsPage() {
     return matchesUsage && matchesWood && matchesColor && matchesProfile && matchesQuery;
   });
 
+  const shownProducts = products.slice(0, visibleCount);
+
   const activeUsageLabel = usageFilters.find((filter) => filter.id === activeUsage)?.label ?? usageFilters[0].label;
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (error) return;
+    if (hasTrackedListView) return;
+
+    trackEvent('view_item_list', {
+      item_list_id: 'products',
+      item_list_name: currentLocale === 'lt' ? 'Produktai' : 'Products',
+      filters: {
+        usage: activeUsage,
+        wood: activeWood,
+        color: activeColor,
+        profile: activeProfile,
+      },
+      shown_items_count: shownProducts.length,
+    });
+
+    setHasTrackedListView(true);
+  }, [
+    activeColor,
+    activeProfile,
+    activeUsage,
+    activeWood,
+    currentLocale,
+    error,
+    hasTrackedListView,
+    isLoading,
+    shownProducts.length,
+  ]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (error) return;
+
+    trackEvent('filter_products', {
+      filters: {
+        usage: activeUsage,
+        wood: activeWood,
+        color: activeColor,
+        profile: activeProfile,
+      },
+      shown_items_count: shownProducts.length,
+    });
+  }, [activeColor, activeProfile, activeUsage, activeWood, error, isLoading, shownProducts.length]);
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
@@ -201,6 +262,12 @@ export default function ProductsPage() {
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter') return;
+                const q = searchQuery.trim();
+                if (!q) return;
+                trackSearch(q, products.length);
+              }}
               placeholder={t('searchPlaceholder')}
               className="w-full h-[40px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
             />
@@ -331,7 +398,7 @@ export default function ProductsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-[16px] md:gap-x-[19px] gap-y-[40px] md:gap-y-[56px]">
-            {products.map((product) => (
+            {shownProducts.map((product, idx) => (
               (() => {
                 const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
                 const hasSale =
@@ -347,6 +414,15 @@ export default function ProductsPage() {
               href={toLocalePath(`/products/${hrefSlug}`, currentLocale)}
               data-testid="product-card"
               className="flex flex-col gap-[8px] group"
+              onClick={() => {
+                trackSelectItem({
+                  id: product.id,
+                  name: displayName,
+                  price: effectivePrice,
+                  category: product.category,
+                  position: idx + 1,
+                });
+              }}
             >
               <div className="relative w-full h-[250px] border border-[#161616] border-opacity-30 overflow-hidden">
                 <Image
@@ -397,9 +473,12 @@ export default function ProductsPage() {
         )}
 
         {/* Load More Button - only show if there are products */}
-        {!isLoading && products.length > 0 && (
+        {!isLoading && shownProducts.length < products.length && (
           <div className="flex justify-center mt-[64px]">
-            <button className="h-[48px] px-[40px] py-[10px] bg-[#161616] text-white rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:opacity-90 transition-opacity">
+            <button
+              onClick={() => setVisibleCount((c) => Math.min(c + PAGE_SIZE, products.length))}
+              className="h-[48px] px-[40px] py-[10px] bg-[#161616] text-white rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:opacity-90 transition-opacity"
+            >
               {t('loadMore')}
             </button>
           </div>

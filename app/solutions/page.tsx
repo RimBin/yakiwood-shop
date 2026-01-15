@@ -25,9 +25,19 @@ export default function SolutionsPage() {
     reverse?: boolean;
   }) => {
     const isSingleImage = images.length === 1;
+    const isFacades = id === 'facades';
+    const imageGridClass = isFacades
+      ? 'grid grid-cols-2 lg:grid-cols-[240px_320px] gap-[12px] md:gap-[16px] lg:gap-[24px] w-full lg:w-[584px]'
+      : (isSingleImage ? 'grid grid-cols-1 ' : 'grid grid-cols-2 ') +
+        'gap-[12px] md:gap-[16px] lg:gap-[24px] w-full lg:w-[520px]';
+    const imageHeightClass = isFacades
+      ? 'h-[180px] md:h-[240px] lg:h-[280px]'
+      : isSingleImage
+        ? 'h-[220px] md:h-[320px] lg:h-[240px]'
+        : 'h-[160px] md:h-[220px] lg:h-[240px]';
 
     return (
-      <div id={id} className="scroll-mt-[96px]">
+      <div id={id} className={`scroll-mt-[96px] ${isFacades ? 'py-[40px] lg:py-[80px]' : ''}`}>
         <div
           className={
             `flex flex-col lg:flex-row items-center ` +
@@ -35,21 +45,11 @@ export default function SolutionsPage() {
             'gap-[20px] md:gap-[28px] lg:gap-[120px]'
           }
         >
-          <div
-            className={
-              (isSingleImage ? 'grid grid-cols-1 ' : 'grid grid-cols-2 ') +
-              'gap-[12px] md:gap-[16px] lg:gap-[24px] w-full lg:w-[520px]'
-            }
-          >
-            {images.map((img) => (
+          <div className={imageGridClass}>
+            {images.map((img, idx) => (
               <div
-                key={img.src}
-                className={
-                  'relative w-full overflow-hidden rounded-[24px] ' +
-                  (isSingleImage
-                    ? 'h-[220px] md:h-[320px] lg:h-[240px]'
-                    : 'h-[160px] md:h-[220px] lg:h-[240px]')
-                }
+                key={`${img.src}-${idx}`}
+                className={`relative w-full overflow-hidden rounded-[24px] ${imageHeightClass}`}
               >
                 <Image src={img.src} alt={img.alt} fill className="object-cover" />
               </div>

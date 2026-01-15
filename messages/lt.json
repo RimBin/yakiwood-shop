@@ -762,7 +762,7 @@
     },
     "about": {
       "title": "Apie mus ir Shou Sugi Ban",
-      "description": "Sužinokite apie Yakiwood - ekspertus Shou Sugi Ban degintos medienos gamyboje Lietuvoje.",
+      "description": "Sužinokite apie Yakiwood - ekspertus Shou Sugi Ban degintos medienos gamyboje (pristatymas į Jungtinę Karalystę).",
       "ogTitle": "Apie mus - Yakiwood"
     },
     "products": {
@@ -801,8 +801,8 @@
       "ogTitle": "3D konfiguratorius - Yakiwood"
     },
     "home": {
-      "title": "Yakiwood - Shou Sugi Ban Degintas Medis Lietuvoje",
-      "description": "Aukščiausios kokybės Shou Sugi Ban degintos medienos produktai. Fasadai, interjeras, terasa - ekologiški ir ilgaamžiški sprendimai.",
+      "title": "Yakiwood - Shou Sugi Ban Degintas Medis Jungtinėje Karalystėje",
+      "description": "Aukščiausios kokybės Shou Sugi Ban degintos medienos produktai (pristatymas į JK). Fasadai, interjeras, terasa - ekologiški ir ilgaamžiški sprendimai.",
       "ogTitle": "Yakiwood - Shou Sugi Ban degintas medis",
       "ogAlt": "Yakiwood - Shou Sugi Ban degintas medis"
     }
@@ -848,6 +848,72 @@
       "add": "Pridėti",
       "cancel": "Atšaukti",
       "addNewEllipsis": "Pridėti naują…"
+    },
+    "dashboard": {
+      "filters": {
+        "title": "Filtrai",
+        "timePeriod": "Laikotarpis",
+        "status": "Statusas",
+        "allTime": "Visas laikotarpis",
+        "today": "Šiandien",
+        "lastWeek": "Praėjusi savaitė",
+        "lastMonth": "Praėjęs mėnuo",
+        "allOrders": "Visi užsakymai"
+      },
+      "quickActions": {
+        "manageOrders": "Tvarkyti užsakymus",
+        "manageOrdersSubtitle": "Peržiūrėti ir keisti užsakymo būseną",
+        "inventory": "Atsargos",
+        "inventorySubtitle": "Valdyti sandėlio likučius",
+        "products": "Produktai",
+        "productsSubtitle": "Pridėti ir redaguoti produktus",
+        "projects": "Projektai",
+        "projectsSubtitle": "Rodyti portfolio"
+      },
+      "stats": {
+        "todayOrders": "Šiandienos užsakymai",
+        "totalOrders": "Viso užsakymų",
+        "totalOrdersSubtitle": "{currency}{revenue} pajamų",
+        "pending": "Laukia",
+        "pendingSubtitle": "laukia apdorojimo",
+        "completed": "Įvykdyta",
+        "completedSubtitle": "sėkmingai",
+        "products": "Produktai",
+        "productsSubtitle": "kataloge",
+        "lowStock": "Mažos atsargos",
+        "lowStockSubtitle": "< 10 vnt.",
+        "avgOrder": "Vid. užsakymas",
+        "conversion": "Konversija",
+        "conversionSubtitle": "įvykdyta"
+      },
+      "topProducts": {
+        "title": "Populiariausi produktai",
+        "empty": "Nėra pardavimų duomenų",
+        "table": {
+          "product": "Produktas",
+          "sold": "Parduota",
+          "revenue": "Pajamos"
+        }
+      },
+      "recentOrders": {
+        "title": "Naujausi užsakymai",
+        "allOrders": "Visi užsakymai",
+        "empty": "Nėra užsakymų",
+        "table": {
+          "order": "Užsakymas",
+          "customer": "Klientas",
+          "date": "Data",
+          "total": "Suma",
+          "status": "Statusas"
+        }
+      },
+      "orderStatus": {
+        "pending": "Laukia",
+        "processing": "Vykdoma",
+        "completed": "Įvykdyta",
+        "cancelled": "Atšaukta"
+      },
+      "units": "vnt."
     },
     "projects": {
       "actions": {
@@ -1065,7 +1131,7 @@
       "editProductDesc": "Atnaujinkite produkto informaciją ir variantas",
       "list": {
         "searchPlaceholder": "Ieškoti produktų…",
-        "newProductButton": "+ Naujas produktas",
+        "newProductButton": "Sukurti naują prekę",
         "filters": {
           "allCategories": "Visos kategorijos",
           "allUsage": "Visi pritaikymai",

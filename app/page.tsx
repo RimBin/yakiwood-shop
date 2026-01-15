@@ -28,7 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
       'charred wood',
       'wood facades',
       'sustainable wood',
-      'Lithuania',
+      'United Kingdom',
+      'UK',
       'Japanese technique',
     ],
     openGraph: {

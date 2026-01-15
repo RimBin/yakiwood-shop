@@ -38,6 +38,9 @@ async function getProducts() {
       variants:product_variants(*)
     `
     )
+    // Hide generated stock-item products (slug contains "--") from the main products admin list.
+    // These are managed via the Inventory page instead.
+    .not('slug', 'like', '%--%')
     .order('created_at', { ascending: false });
 
   if (error) {

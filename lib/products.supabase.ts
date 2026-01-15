@@ -46,6 +46,10 @@ export interface Product {
   inStock?: boolean
 }
 
+type FetchProductsOptions = {
+  mode?: 'active' | 'stock-items' | 'all'
+}
+
 type DbProduct = {
   id: string
   name: string
@@ -107,6 +111,9 @@ function transformSeedProduct(seed: (typeof seedProducts)[number]): Product {
 function transformDbProduct(db: DbProduct): Product {
   const variants = Array.isArray(db.product_variants) ? db.product_variants : []
 
+  const slug = db.slug
+  const isStockItem = !!slug && slug.includes('--') && (db.is_active === false || db.is_active === null)
+
   const colors: ProductColorVariant[] = variants
     .filter((v) => v.variant_type === 'color')
     .map((v) => ({
@@ -131,6 +138,26 @@ function transformDbProduct(db: DbProduct): Product {
       image: v.image_url ?? v.texture_url ?? undefined,
     }))
 
+  const parsedStock = isStockItem ? parseStockItemSlug(slug) : null
+  const stockColors: ProductColorVariant[] = parsedStock
+    ? [
+        {
+          id: `stock-color:${parsedStock.color}`,
+          name: humanizeSlugToken(parsedStock.color),
+        },
+      ]
+    : []
+
+  const stockProfiles: ProductProfileVariant[] = parsedStock
+    ? [
+        {
+          id: `stock-profile:${parsedStock.profile}`,
+          name: humanizeSlugToken(parsedStock.profile),
+          code: parsedStock.profile,
+        },
+      ]
+    : []
+
   const image = db.image_url || '/images/ui/wood/imgSpruce.png'
   const usage = db.usage_type || db.category || 'facade'
 
@@ -153,10 +180,38 @@ function transformDbProduct(db: DbProduct): Product {
     woodType: db.wood_type ?? undefined,
     description: db.description ?? undefined,
     descriptionEn: db.description_en ?? undefined,
-    colors: colors.length ? colors : undefined,
-    profiles: profiles.length ? profiles : undefined,
+    colors: colors.length ? colors : stockColors.length ? stockColors : undefined,
+    profiles: profiles.length ? profiles : stockProfiles.length ? stockProfiles : undefined,
     inStock,
   }
+}
+
+function humanizeSlugToken(token: string): string {
+  const safe = token.trim().replace(/[_\s]+/g, '-')
+  return safe
+    .split('-')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+}
+
+function parseStockItemSlug(
+  slug: string
+):
+  | {
+      baseSlug: string
+      profile: string
+      color: string
+      size: string
+    }
+  | null {
+  // Stock-item slugs are generated like:
+  //   <baseSlug>--<profile>--<color>--<width>x<length>
+  const parts = slug.split('--')
+  if (parts.length < 4) return null
+  const [baseSlug, profile, color, size] = parts
+  if (!baseSlug || !profile || !color || !size) return null
+  return { baseSlug, profile, color, size }
 }
 
 function formatSupabaseError(error: unknown): string {
@@ -209,18 +264,27 @@ function formatSupabaseError(error: unknown): string {
   return String(error)
 }
 
-export async function fetchProducts(): Promise<Product[]> {
+export async function fetchProducts(options?: FetchProductsOptions): Promise<Product[]> {
   const supabase = createPublicClient()
 
   if (!supabase) {
     return seedProducts.map(transformSeedProduct)
   }
 
-  const { data, error } = await supabase
+  const mode = options?.mode ?? 'active'
+
+  let query = supabase
     .from('products')
     .select('*, product_variants(*)')
-    .eq('is_active', true)
     .order('created_at', { ascending: false })
+
+  if (mode === 'active') {
+    query = query.eq('is_active', true)
+  } else if (mode === 'stock-items') {
+    query = query.eq('is_active', false).ilike('slug', '%--%')
+  }
+
+  const { data, error } = await query
 
   if (error) {
     // Expected in local/demo environments when DB/RLS/schema isn't ready.
@@ -253,6 +317,8 @@ export async function fetchProductBySlug(
   const locale = options?.locale
   const columnsToTry = locale === 'en' ? (['slug_en', 'slug'] as const) : (['slug', 'slug_en'] as const)
 
+  const allowInactive = slug.includes('--')
+
   for (const column of columnsToTry) {
     try {
       const { data, error } = await supabase
@@ -261,6 +327,20 @@ export async function fetchProductBySlug(
         .eq(column, slug)
         .eq('is_active', true)
         .maybeSingle()
+
+      if (allowInactive && !error && !data) {
+        // For stock-item pages, we need to be able to resolve inactive rows.
+        // NOTE: This still depends on RLS policies permitting select.
+        const fallback = await supabase
+          .from('products')
+          .select('*, product_variants(*)')
+          .eq(column, slug)
+          .maybeSingle()
+
+        if (!fallback.error && fallback.data) {
+          return transformDbProduct(fallback.data as unknown as DbProduct)
+        }
+      }
 
       if (error) {
         // Older schemas may not have slug_en yet.

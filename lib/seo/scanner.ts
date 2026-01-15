@@ -424,7 +424,7 @@ function getMockTitle(path: string): string {
 
 function getMockDescription(path: string): string {
   const descriptions: Record<string, string> = {
-    '/': 'Discover premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese charring technique for sustainable, durable, and beautiful wood facades and surfaces.',
+    '/': 'Discover premium Shou Sugi Ban burnt wood products delivered across the UK. Traditional Japanese charring technique for sustainable, durable, and beautiful wood facades and surfaces.',
     '/produktai': 'Browse our collection of premium Shou Sugi Ban burnt wood products. Facades, panels, decking, and custom solutions with various finishes and colors.',
     '/sprendimai': 'Explore our Shou Sugi Ban wood solutions for facades, interiors, terraces, and fences. Sustainable and beautiful architectural applications.',
     '/projektai': 'View our portfolio of completed Shou Sugi Ban projects. Get inspired by real-world applications of burnt wood in architecture and design.',
@@ -438,6 +438,6 @@ function getMockDescription(path: string): string {
     '/products/[slug]': 'View detailed information about this Shou Sugi Ban product including specifications, pricing, and ordering options.',
     '/projektai/[slug]': 'Explore this Shou Sugi Ban project showcase with photos, specifications, and implementation details.',
   };
-  return descriptions[path] || 'Yakiwood - Premium Shou Sugi Ban burnt wood products in Lithuania.';
+  return descriptions[path] || 'Yakiwood - Premium Shou Sugi Ban burnt wood products delivered across the UK.';
 }
 

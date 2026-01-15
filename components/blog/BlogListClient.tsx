@@ -20,15 +20,6 @@ function sortPosts(posts: LocalizedBlogPost[]) {
   return posts.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
-function getMasonryAspect(index: number): string {
-  // Pattern tuned to create a masonry feel similar to the design mock.
-  // Using different aspect ratios gives a more editorial grid.
-  const pattern = ['aspect-[4/3]', 'aspect-[3/4]', 'aspect-[1/1]', 'aspect-[16/9]', 'aspect-[4/5]', 'aspect-[2/3]'] as const;
-  // Keep mobile simple (consistent aspect), enable variation from tablet+.
-  const tabletUp = pattern[index % pattern.length];
-  return `aspect-[4/3] md:${tabletUp}`;
-}
-
 function BlogImage({ src, alt }: { src: string; alt: string }) {
   if (!src) return null;
   if (isDataUrl(src)) {
@@ -84,7 +75,7 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
   return (
     <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px] pb-[120px]">
       <div className="pt-[28px] md:pt-[44px]">
-        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[72px] leading-[0.95] tracking-[-2.8px] md:tracking-[-3.2px] text-[#161616]">
+        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[96px] leading-[0.95] tracking-[-2.8px] md:tracking-[-4px] text-[#161616]">
           {t('title')}
         </h1>
         <div className="mt-[20px] h-px w-full bg-[#161616]/30" />
@@ -92,17 +83,14 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
 
       {posts.length ? (
         <>
-          <div className="mt-[24px] md:mt-[32px] columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-x-[20px]">
-            {visiblePosts.map((post, index) => (
-              <article key={post.id} className="mb-[20px] break-inside-avoid">
-                <Link
-                  href={toLocalePath(`/blog/${post.slug}`, locale)}
-                  className="block"
-                >
-                  <div className={`relative w-full ${getMasonryAspect(startIndex + index)} overflow-hidden bg-[#D9D9D9]`}>
+          <div className="mt-[24px] md:mt-[32px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[20px] gap-y-[26px]">
+            {visiblePosts.map((post) => (
+              <article key={post.id} className="overflow-hidden">
+                <Link href={toLocalePath(`/blog/${post.slug}`, locale)} className="block">
+                  <div className="relative w-full aspect-[3/2] overflow-hidden bg-[#D9D9D9]">
                     <BlogImage src={post.heroImage} alt={post.title} />
                   </div>
-                  <div className="bg-white px-[10px] py-[10px]">
+                  <div className="bg-white px-[12px] py-[10px]">
                     <div className="font-['DM_Sans'] text-[12px] leading-[1.35] text-[#161616]">
                       {post.title}
                     </div>

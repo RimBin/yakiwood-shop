@@ -79,7 +79,7 @@ export function generateOrganizationSchema(): OrganizationSchema {
     url: BASE_URL,
     logo: `${BASE_URL}/images/yakiwood-logo.png`,
     description:
-      'Yakiwood - aukščiausios kokybės deginta mediena Lietuvoje. Shou Sugi Ban technologija fasadams, terasoms ir interjerui.',
+      'Yakiwood - aukščiausios kokybės deginta mediena. Shou Sugi Ban technologija fasadams, terasoms ir interjerui (pristatymas į Jungtinę Karalystę).',
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Vilnius',

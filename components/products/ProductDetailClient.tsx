@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
@@ -9,6 +9,7 @@ import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/
 import { assets, getAsset } from '@/lib/assets';
 import type { AssetKey } from '@/lib/assets';
 import { useCartStore } from '@/lib/cart/store';
+import { trackEvent, trackProductView } from '@/lib/analytics';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
 import type { UsageType } from '@/lib/pricing/configuration';
 
@@ -131,9 +132,25 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     product.salePrice < product.price;
   const effectivePrice = hasSale ? product.salePrice! : product.price;
 
+  const trackedProductIdRef = useRef<string | null>(null);
+
   const [activeThumb, setActiveThumb] = useState(0);
   const [show3D, setShow3D] = useState(false);
   const loading3D = false;
+
+  useEffect(() => {
+    if (!product?.id) return;
+    if (trackedProductIdRef.current === product.id) return;
+
+    trackProductView({
+      id: product.id,
+      name: displayName,
+      price: effectivePrice,
+      category: product.category,
+    });
+
+    trackedProductIdRef.current = product.id;
+  }, [displayName, effectivePrice, product?.category, product?.id]);
 
   const colorOptions = useMemo<ProductColorVariant[]>(() => {
     return (product.colors || []).map((color, index) => ({
@@ -435,7 +452,16 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             <div className="relative flex-1 lg:flex-none lg:w-[328px] xl:w-[500px] 2xl:w-[790px] aspect-square lg:aspect-auto lg:h-[400px] xl:h-[500px] 2xl:h-[729px] bg-[#EAEAEA] rounded-[4px] overflow-hidden order-1 lg:order-2">
               <button
                 type="button"
-                onClick={() => setShow3D((v) => !v)}
+                onClick={() =>
+                  setShow3D((v) => {
+                    const next = !v;
+                    trackEvent('toggle_product_3d_view', {
+                      product_id: product.id,
+                      enabled: next,
+                    });
+                    return next;
+                  })
+                }
                 className="absolute z-10 top-[16px] right-[16px] h-[32px] px-[12px] rounded-[100px] border border-[#BBBBBB] bg-white/90 font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#161616]"
                 aria-label={show3D ? t('toggleShowPhotoAria') : t('toggleShow3dAria')}
               >

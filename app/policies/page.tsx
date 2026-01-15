@@ -26,7 +26,7 @@ export default function PoliciesPage() {
                 Standard Delivery
               </h3>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                Standard delivery takes 5-7 business days within Lithuania and 10-15 business days internationally.
+                Standard delivery takes 3-5 business days within the UK.
               </p>
             </div>
             <div>
@@ -42,7 +42,7 @@ export default function PoliciesPage() {
                 Shipping Costs
               </h3>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                Shipping costs are calculated based on order weight, dimensions, and destination. Free shipping is available for orders over €500 within Lithuania.
+                Shipping costs are calculated based on order weight, dimensions, and destination. Free shipping is available for orders over €500 within the UK (mainland).
               </p>
             </div>
           </div>
@@ -62,7 +62,7 @@ export default function PoliciesPage() {
                 Accepted Payment Methods
               </h3>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                We accept Visa, Mastercard, Maestro, PayPal, and bank transfers.
+                We accept Visa, Mastercard, Apple Pay / Google Pay (via Stripe), PayPal, and bank transfers (on request).
               </p>
             </div>
             <div>

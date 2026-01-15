@@ -42,8 +42,8 @@ export const metadata: Metadata = {
     template: '%s | Yakiwood',
     default: 'Yakiwood - Shou Sugi Ban Burnt Wood Specialists',
   },
-  description: 'Premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
-  keywords: ['Shou Sugi Ban', 'burnt wood', 'yakisugi', 'charred wood', 'wood facades', 'sustainable wood', 'Lithuania'],
+  description: 'Premium Shou Sugi Ban burnt wood products delivered across the UK. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
+  keywords: ['Shou Sugi Ban', 'burnt wood', 'yakisugi', 'charred wood', 'wood facades', 'sustainable wood', 'United Kingdom', 'UK'],
   authors: [{ name: 'Yakiwood' }],
   creator: 'Yakiwood',
   publisher: 'Yakiwood',
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     url: 'https://yakiwood.lt',
     siteName: 'Yakiwood',
     title: 'Yakiwood - Shou Sugi Ban Burnt Wood Specialists',
-    description: 'Premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
+    description: 'Premium Shou Sugi Ban burnt wood products delivered across the UK. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
     images: [
       {
         url: getOgImage('home'),
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Yakiwood - Shou Sugi Ban Burnt Wood Specialists',
-    description: 'Premium Shou Sugi Ban burnt wood products in Lithuania.',
+    description: 'Premium Shou Sugi Ban burnt wood products delivered across the UK.',
     images: [getOgImage('home')],
     creator: '@yakiwood',
   },
@@ -103,7 +103,6 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const messages = await getMessages();
   const locale = await getLocale();
-  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
   // JSON-LD structured data for Organization
   const organizationSchema = {
@@ -112,7 +111,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     name: 'Yakiwood',
     url: 'https://yakiwood.lt',
     logo: 'https://yakiwood.lt/icon.svg',
-    description: 'Premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
+    description: 'Premium Shou Sugi Ban burnt wood products delivered across the UK. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'Customer Service',
@@ -139,17 +138,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased bg-[#e1e1e1]`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <GoogleAnalytics />
-          {gtmId ? (
-            <noscript>
-              <iframe
-                src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
-                height="0"
-                width="0"
-                style={{ display: 'none', visibility: 'hidden' }}
-                title="gtm"
-              />
-            </noscript>
-          ) : null}
           <AuthWrapper>
             {children}
             <ChatbotLoader />

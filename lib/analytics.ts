@@ -13,11 +13,16 @@ export type AnalyticsEvent =
   | 'begin_checkout'
   | 'purchase'
   | 'view_item'
+  | 'view_item_list'
   | 'search'
   | 'select_item'
+  | 'scroll_depth'
+  | 'page_not_found'
   | 'generate_lead'
   | 'sign_up'
   | (string & {});
+
+import { hasAnalyticsConsent } from '@/lib/cookies/consent';
 
 // Check if gtag is available
 declare global {
@@ -47,6 +52,16 @@ function pushToDataLayer(payload: Record<string, any>): void {
  * @param params - Additional event parameters
  */
 export function trackEvent(event: AnalyticsEvent, params?: Record<string, any>): void {
+  // Only emit analytics events when the user has granted analytics consent.
+  if (typeof window !== 'undefined') {
+    if (!hasAnalyticsConsent()) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Analytics][blocked:no-consent]', event, params);
+      }
+      return;
+    }
+  }
+
   if (typeof window !== 'undefined') {
     // GTM/GA4 via dataLayer
     if (window.dataLayer) {

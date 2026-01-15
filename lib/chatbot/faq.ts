@@ -9,10 +9,10 @@ export type FaqEntry = {
 const FAQ_ENTRIES_LT: FaqEntry[] = [
   {
     id: 'delivery',
-    question: 'Ar pristatote visoje Lietuvoje?',
+    question: 'Ar pristatote Jungtinėje Karalystėje (JK)?',
     answer:
-      'Taip, pristatome visoje Lietuvoje. Pristatymo kaina ir terminas priklauso nuo kiekio ir lokacijos. Parašykite, kur pristatyti ir kokio kiekio reikia – pateiksime tikslų pasiūlymą.',
-    keywords: ['pristatymas', 'siuntimas', 'kurjeris', 'terminas', 'kaina', 'lietuva', 'miestas'],
+      'Taip, pristatome visoje Jungtinėje Karalystėje (JK). Pristatymo kaina ir terminas priklauso nuo kiekio ir lokacijos. Parašykite, kur pristatyti ir kokio kiekio reikia – pateiksime tikslų pasiūlymą.',
+    keywords: ['pristatymas', 'siuntimas', 'kurjeris', 'terminas', 'kaina', 'jk', 'jungtine karalyste', 'uk', 'miestas'],
     suggestions: ['Kiek kainuoja pristatymas?', 'Kiek laiko trunka gamyba?'],
   },
   {
@@ -92,10 +92,10 @@ const FAQ_ENTRIES_LT: FaqEntry[] = [
 const FAQ_ENTRIES_EN: FaqEntry[] = [
   {
     id: 'delivery',
-    question: 'Do you deliver across Lithuania?',
+    question: 'Do you deliver across the UK?',
     answer:
-      'Yes, we deliver across Lithuania. Delivery cost and lead time depend on quantity and location. Tell us where to deliver and the required amount and we’ll provide an exact quote.',
-    keywords: ['delivery', 'shipping', 'courier', 'lead', 'time', 'price', 'lithuania', 'city'],
+      'Yes, we deliver across the UK. Delivery cost and lead time depend on quantity and location. Tell us where to deliver and the required amount and we’ll provide an exact quote.',
+    keywords: ['delivery', 'shipping', 'courier', 'lead', 'time', 'price', 'uk', 'united kingdom', 'city'],
     suggestions: ['How much is delivery?', 'How long is production?'],
   },
   {

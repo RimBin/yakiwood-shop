@@ -13,7 +13,7 @@ function slugifyToken(input: string): string {
 }
 
 function toSkuChunk(input: string): string {
-  const v = slugifyToken(input)
+  const v = slugifyToken(input).replace(/-/g, '')
   return v ? v.toUpperCase() : 'UNKNOWN'
 }
 

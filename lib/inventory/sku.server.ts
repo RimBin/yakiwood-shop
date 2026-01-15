@@ -32,11 +32,34 @@ async function loadProduct(productId: string, ctx: InventorySkuResolveContext): 
   if (cached) return cached
   if (!supabaseAdmin) return null
 
-  const { data, error } = await supabaseAdmin
+  // Newer schemas include `usage_type`, older ones may not.
+  const primary = await supabaseAdmin
     .from('products')
     .select('id, wood_type, usage_type')
     .eq('id', productId)
     .maybeSingle()
+
+  let data = primary.data
+  let error = primary.error
+
+  if (error) {
+    const msg = String((error as any)?.message || error)
+    const maybeMissing =
+      msg.includes('schema cache') ||
+      msg.includes('does not exist') ||
+      msg.includes("could not find the '") ||
+      msg.includes('usage_type')
+
+    if (maybeMissing) {
+      const fallback = await supabaseAdmin
+        .from('products')
+        .select('id, wood_type')
+        .eq('id', productId)
+        .maybeSingle()
+      data = fallback.data as any
+      error = fallback.error
+    }
+  }
 
   if (error || !data) return null
   const row = data as unknown as DbProduct

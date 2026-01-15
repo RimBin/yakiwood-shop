@@ -107,7 +107,7 @@ export function generateLocalBusinessSchema() {
     '@type': 'LocalBusiness',
     name: 'Yakiwood',
     description:
-      'Premium Shou Sugi Ban burnt wood products in Lithuania. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
+      'Premium Shou Sugi Ban burnt wood products delivered across the UK. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
     url: 'https://yakiwood.lt',
     telephone: '+370-XXX-XXXXX', // Add real phone number
     email: 'info@yakiwood.lt',

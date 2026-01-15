@@ -122,6 +122,7 @@ function getActiveTabFromUrl(pathname: string, tabParam: string | null): AdminTa
 
 export default function AdminPanelHeader() {
   const t = useTranslations('admin');
+  const tProductsList = useTranslations('admin.products.list');
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -280,6 +281,9 @@ export default function AdminPanelHeader() {
     [t, counts, pathPrefix]
   );
 
+  const newProductHref = useMemo(() => `${pathPrefix}/admin/products/new`, [pathPrefix]);
+  const showNewProductButton = activeTab === 'products' && normalizedPath !== '/admin/products/new';
+
   return (
     <>
       {/* Full-width breadcrumb bar */}
@@ -299,27 +303,32 @@ export default function AdminPanelHeader() {
           </div>
 
           <div className="flex gap-[8px] overflow-x-auto pb-[8px]">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.key;
-              const label =
-                typeof tab.count === 'number' ? `${tab.label} (${tab.count})` : tab.label;
+            <div className="flex flex-col gap-[12px] sm:flex-row sm:items-center sm:justify-between w-full">
+              <div className="flex gap-[8px] overflow-x-auto pb-[8px]">
+                {tabs.map((tab) => {
+                  const isActive = activeTab === tab.key;
+                  const label = typeof tab.count === 'number' ? `${tab.label} (${tab.count})` : tab.label;
 
-              return (
-                <Link
-                  key={tab.key}
-                  href={tab.href}
-                  className={
-                    `h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap inline-flex items-center ` +
-                    (isActive
-                      ? 'bg-[#161616] text-white'
-                      : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#DCDCDC]')
-                  }
-                  aria-current={isActive ? 'page' : undefined}
-                >
-                  {label}
-                </Link>
-              );
-            })}
+                  return (
+                    <Link
+                      key={tab.key}
+                      href={tab.href}
+                      className={
+                        `h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap inline-flex items-center ` +
+                        (isActive
+                          ? 'bg-[#161616] text-white'
+                          : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#DCDCDC]')
+                      }
+                      aria-current={isActive ? 'page' : undefined}
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Top "Create product" button removed per design request. */}
+            </div>
           </div>
 
           <div className="h-[24px]" />

@@ -3,6 +3,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import {
+  AdminButton,
+  AdminInput,
+  AdminLabel,
+  AdminSectionTitle,
+  AdminSelect,
+  AdminStack,
+} from '@/components/admin/ui/AdminUI'
 
 type AdminUserRow = {
   id: string
@@ -281,26 +289,25 @@ export default function UsersAdminClient() {
 
   if (!supabase) {
     return (
-      <div className="rounded-[16px] border border-[#BBBBBB] bg-[#EAEAEA] p-[16px]">
-        <h2 className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">{t('notConfigured.title')}</h2>
-        <p className="font-['Outfit'] text-[14px] text-[#535353] mt-[8px]">{t('notConfigured.body')}</p>
+      <div>
+        <AdminSectionTitle>{t('notConfigured.title')}</AdminSectionTitle>
+        <p className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353]">{t('notConfigured.body')}</p>
       </div>
     )
   }
 
   return (
-    <div>
-
+    <AdminStack>
       {error && (
-        <div className="mb-6 border border-red-200 bg-[#EAEAEA] text-red-700 rounded-lg px-4 py-3 font-['DM_Sans']">
+        <div className="border border-red-200 bg-[#EAEAEA] text-red-700 rounded-[16px] px-[16px] py-[12px] font-['Outfit'] text-[13px]">
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-[clamp(16px,2vw,24px)]">
         {/* Users */}
-        <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-xl p-6">
-          <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">{t('users.title')}</h2>
+        <div className="border border-[#E1E1E1] rounded-[24px] p-[clamp(16px,2vw,24px)] bg-[#EAEAEA]">
+          <AdminSectionTitle>{t('users.title')}</AdminSectionTitle>
 
           <div className="mt-4 overflow-auto">
             <table className="w-full text-left border-collapse">
@@ -325,17 +332,15 @@ export default function UsersAdminClient() {
                     <tr key={u.id} className="border-b border-[#F0F0F0]">
                       <td className="py-3 pr-3 font-['DM_Sans'] text-[#161616] text-sm">{u.email || '-'}</td>
                       <td className="py-3 pr-3">
-                        <select
-                          value={u.role}
-                          onChange={(e) => updateRole(u.id, e.target.value)}
-                          className="px-3 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] text-sm yw-select"
-                        >
+                        <div className="min-w-[180px]">
+                          <AdminSelect value={u.role} onChange={(e) => updateRole(u.id, e.target.value)}>
                           {roles.map((r) => (
                             <option key={r} value={r}>
                               {r}
                             </option>
                           ))}
-                        </select>
+                          </AdminSelect>
+                        </div>
                       </td>
                       <td className="py-3 font-['DM_Sans'] text-sm text-[#535353]">{t('users.autoSave')}</td>
                     </tr>
@@ -346,117 +351,74 @@ export default function UsersAdminClient() {
           </div>
 
           <div className="mt-6 pt-6 border-t border-[#E1E1E1]">
-            <h3 className="font-['DM_Sans'] text-lg font-medium text-[#161616]">{t('create.title')}</h3>
+            <div className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">{t('create.title')}</div>
             <div className="mt-4 grid grid-cols-1 gap-3">
-              <input
+              <AdminInput
                 value={newUserEmail}
                 onChange={(e) => setNewUserEmail(e.target.value)}
                 placeholder={t('create.email')}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA]"
               />
-              <input
+              <AdminInput
                 type="password"
                 value={newUserPassword}
                 onChange={(e) => setNewUserPassword(e.target.value)}
                 placeholder={t('create.password')}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA]"
               />
-              <input
+              <AdminInput
                 value={newUserFullName}
                 onChange={(e) => setNewUserFullName(e.target.value)}
                 placeholder={t('create.fullName')}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA]"
               />
-              <select
-                value={newUserRole}
-                onChange={(e) => setNewUserRole(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] yw-select"
-              >
+              <AdminSelect value={newUserRole} onChange={(e) => setNewUserRole(e.target.value)}>
                 {roles.map((r) => (
                   <option key={r} value={r}>
                     {r}
                   </option>
                 ))}
-              </select>
-              <button
-                type="button"
-                onClick={createUser}
-                className="h-[48px] px-[40px] bg-[#161616] text-white rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:opacity-90"
-              >
+              </AdminSelect>
+              <AdminButton onClick={createUser}>
                 {t('create.submit')}
-              </button>
+              </AdminButton>
             </div>
           </div>
         </div>
 
         {/* Discounts */}
-        <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-xl p-6">
-          <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">{t('discounts.title')}</h2>
-          <p className="mt-2 font-['DM_Sans'] text-sm text-[#535353]">{t('discounts.help')}</p>
+        <div className="border border-[#E1E1E1] rounded-[24px] p-[clamp(16px,2vw,24px)] bg-[#EAEAEA]">
+          <AdminSectionTitle>{t('discounts.title')}</AdminSectionTitle>
+          <p className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353]">{t('discounts.help')}</p>
 
           <div className="mt-4 grid grid-cols-1 gap-3">
-            <div className="rounded-lg border border-[#E1E1E1] bg-[#EAEAEA] p-4">
-              <h3 className="font-['DM_Sans'] text-base font-medium text-[#161616]">{t('discounts.createRole.title')}</h3>
-              <div className="mt-3 grid grid-cols-1 gap-3">
-                <label className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">
-                  {t('discounts.createRole.label')}
-                </label>
-                <div className="flex gap-3">
-                  <input
-                    value={newRoleName}
-                    onChange={(e) => setNewRoleName(e.target.value)}
-                    placeholder={t('discounts.createRole.placeholder')}
-                    className="flex-1 px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA]"
-                  />
-                  <button
-                    type="button"
-                    onClick={createRole}
-                    className="h-[40px] px-5 bg-[#161616] text-white rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:opacity-90"
-                  >
-                    {t('discounts.createRole.button')}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <label className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">
-              {t('discounts.role')}
-            </label>
-            <select
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
-              className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] yw-select"
-            >
+            <div>
+              <AdminLabel className="mb-[6px]">{t('discounts.role')}</AdminLabel>
+              <AdminSelect value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)}>
               {roles.map((r) => (
                 <option key={r} value={r}>
                   {r}
                 </option>
               ))}
-            </select>
+              </AdminSelect>
+            </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mb-2">
-                  {t('discounts.type')}
-                </label>
-                <select
+                <AdminLabel className="mb-[6px]">{t('discounts.type')}</AdminLabel>
+                <AdminSelect
                   value={discountType}
                   onChange={(e) => setDiscountType(e.target.value === 'fixed' ? 'fixed' : 'percent')}
-                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] yw-select"
                 >
                   <option value="percent">{t('discounts.types.percent')}</option>
                   <option value="fixed">{t('discounts.types.fixed')}</option>
-                </select>
+                </AdminSelect>
               </div>
               <div>
-                <label className="block font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mb-2">
+                <AdminLabel className="mb-[6px]">
                   {discountType === 'percent' ? t('discounts.valuePercent') : t('discounts.valueFixed')}
-                </label>
-                <input
+                </AdminLabel>
+                <AdminInput
                   value={discountValue}
                   onChange={(e) => setDiscountValue(e.target.value)}
                   inputMode="decimal"
-                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA]"
                 />
               </div>
             </div>
@@ -471,15 +433,13 @@ export default function UsersAdminClient() {
             </label>
 
             <div className="mt-3 pt-4 border-t border-[#E1E1E1]">
-              <h3 className="font-['DM_Sans'] text-lg font-medium text-[#161616]">{t('discounts.createRole.title')}</h3>
+              <div className="font-['DM_Sans'] text-[18px] font-medium text-[#161616]">{t('discounts.createRole.title')}</div>
 
               <div className="mt-3 grid grid-cols-1 gap-3">
-                <label className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">
-                  {t('discounts.createRole.label')}
-                </label>
+                <AdminLabel>{t('discounts.createRole.label')}</AdminLabel>
 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <input
+                  <AdminInput
                     value={newRoleName}
                     onChange={(e) => {
                       setNewRoleName(e.target.value)
@@ -487,17 +447,16 @@ export default function UsersAdminClient() {
                       setCreateRoleInfo(null)
                     }}
                     placeholder={t('discounts.createRole.placeholder')}
-                    className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA]"
                   />
 
-                  <button
+                  <AdminButton
                     type="button"
+                    size="md"
                     onClick={createRole}
                     disabled={isCreatingRole || !isValidRoleName(normalizeRoleName(newRoleName))}
-                    className="h-[48px] px-[40px] bg-[#161616] text-white rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {t('discounts.createRole.button')}
-                  </button>
+                  </AdminButton>
                 </div>
 
                 {createRoleError && (
@@ -509,24 +468,16 @@ export default function UsersAdminClient() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={saveDiscount}
-              className="h-[48px] px-[40px] bg-[#161616] text-white rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:opacity-90"
-            >
+            <AdminButton type="button" onClick={saveDiscount}>
               {t('discounts.save')}
-            </button>
+            </AdminButton>
 
-            <button
-              type="button"
-              onClick={loadAll}
-              className="h-[48px] px-[40px] border border-[#161616] text-[#161616] rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-[#E1E1E1]"
-            >
+            <AdminButton type="button" variant="outline" onClick={loadAll}>
               {t('refresh')}
-            </button>
+            </AdminButton>
           </div>
         </div>
       </div>
-    </div>
+    </AdminStack>
   )
 }

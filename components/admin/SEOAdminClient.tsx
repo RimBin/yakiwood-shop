@@ -5,6 +5,14 @@ import { useTranslations } from 'next-intl';
 import { SEOPreview } from '@/components/admin/SEOPreview';
 import type { PageSEOResult } from '@/lib/seo/scanner';
 import { createClient } from '@/lib/supabase/client';
+import {
+  AdminButton,
+  AdminInput,
+  AdminLabel,
+  AdminSelect,
+  AdminStack,
+  AdminTextarea,
+} from '@/components/admin/ui/AdminUI';
 
 type SeoOverrideFormState = {
   canonicalPath: string;
@@ -573,8 +581,8 @@ export default function SEOAdminClient() {
       : t('scanning');
 
     return (
-      <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center py-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
-        <div className="text-center">
+      <div className="py-[clamp(24px,3vw,32px)]">
+        <div className="text-center py-[clamp(32px,5vw,64px)]">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#161616] mx-auto mb-4" />
           <p className="font-['Outfit'] text-[#535353]">{progressText}</p>
         </div>
@@ -584,22 +592,21 @@ export default function SEOAdminClient() {
 
   return (
     <>
-      <div className="min-h-screen bg-[#E1E1E1] pt-[clamp(16px,2vw,24px)] pb-[clamp(32px,5vw,64px)] px-[clamp(16px,3vw,40px)]">
-        <div className="max-w-[1400px] mx-auto">
+      <AdminStack>
           {error && (
-            <div className="mb-6 bg-[#EAEAEA] border border-red-200 text-red-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
+            <div className="bg-[#EAEAEA] border border-red-200 text-red-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
               {error}
             </div>
           )}
 
           {!error && !hasAttemptedScan && pages.length === 0 && (
-            <div className="mb-6 bg-[#EAEAEA] border border-[#E1E1E1] text-[#535353] rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
+            <div className="bg-[#EAEAEA] border border-[#E1E1E1] text-[#535353] rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
               {t('notScannedYet')}
             </div>
           )}
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[clamp(16px,2vw,24px)] mb-[clamp(24px,3vw,32px)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[clamp(16px,2vw,24px)]">
             <div className="bg-[#EAEAEA] rounded-[24px] p-[clamp(16px,2vw,24px)] border border-[#E1E1E1]">
               <div className="font-['Outfit'] text-[12px] text-[#535353] mb-[8px]">{t('stats.totalPages')}</div>
               <div className="font-['DM_Sans'] font-light text-[clamp(32px,4vw,48px)] leading-none tracking-[clamp(-1px,-0.025em,-1.44px)] text-[#161616]">
@@ -629,78 +636,69 @@ export default function SEOAdminClient() {
           </div>
 
           {/* Filters */}
-          <div className="flex gap-[8px] mb-[32px] overflow-x-auto pb-[8px]">
-            <button
+          <div className="flex gap-[8px] overflow-x-auto pb-[8px]">
+            <AdminButton
+              size="md"
+              variant={filter === 'all' ? 'primary' : 'outline'}
               onClick={() => setFilter('all')}
-              className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap ${
-                filter === 'all'
-                  ? 'bg-[#161616] text-white'
-                  : 'bg-[#EAEAEA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616]'
-              }`}
             >
               {t('filters.all')} ({stats.total})
-            </button>
-            <button
-              onClick={() => setFilter('good')}
-              className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap ${
+            </AdminButton>
+            <AdminButton
+              size="md"
+              variant={filter === 'good' ? 'primary' : 'outline'}
+              className={
                 filter === 'good'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-[#EAEAEA] text-green-600 border border-green-200 hover:border-green-600'
-              }`}
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'text-green-600 border-green-200 hover:border-green-600'
+              }
+              onClick={() => setFilter('good')}
             >
               {t('filters.good')} ({stats.good})
-            </button>
-            <button
-              onClick={() => setFilter('warning')}
-              className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap ${
+            </AdminButton>
+            <AdminButton
+              size="md"
+              variant={filter === 'warning' ? 'primary' : 'outline'}
+              className={
                 filter === 'warning'
-                  ? 'bg-yellow-600 text-white'
-                  : 'bg-[#EAEAEA] text-yellow-600 border border-yellow-200 hover:border-yellow-600'
-              }`}
+                  ? 'bg-yellow-600 hover:bg-yellow-700'
+                  : 'text-yellow-600 border-yellow-200 hover:border-yellow-600'
+              }
+              onClick={() => setFilter('warning')}
             >
               {t('filters.warning')} ({stats.warning})
-            </button>
-            <button
-              onClick={() => setFilter('error')}
-              className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap ${
+            </AdminButton>
+            <AdminButton
+              size="md"
+              variant={filter === 'error' ? 'primary' : 'outline'}
+              className={
                 filter === 'error'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-[#EAEAEA] text-red-600 border border-red-200 hover:border-red-600'
-              }`}
+                  ? 'bg-red-600 hover:bg-red-700'
+                  : 'text-red-600 border-red-200 hover:border-red-600'
+              }
+              onClick={() => setFilter('error')}
             >
               {t('filters.errors')} ({stats.error})
-            </button>
+            </AdminButton>
 
-            <button
+            <AdminButton
+              size="md"
+              variant={editorEnabled ? 'primary' : 'outline'}
               onClick={() => setEditorEnabled((v) => !v)}
-              className={`h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap border ${
-                editorEnabled
-                  ? 'bg-[#161616] text-white border-[#161616]'
-                  : 'bg-[#EAEAEA] text-[#161616] border-[#E1E1E1] hover:border-[#161616]'
-              }`}
               title="Toggle SEO editor"
             >
               Editor: {editorEnabled ? 'ON' : 'OFF'}
-            </button>
+            </AdminButton>
 
-            <button
-              onClick={loadPages}
-              className="h-[48px] ml-auto px-[24px] rounded-[100px] bg-[#EAEAEA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap"
-            >
+            <AdminButton size="md" variant="outline" className="ml-auto" onClick={loadPages}>
               {t('actions.rescan')}
-            </button>
-            <button
-              onClick={handleExportFixes}
-              className="h-[48px] px-[24px] rounded-[100px] bg-[#EAEAEA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap"
-            >
+            </AdminButton>
+            <AdminButton size="md" variant="outline" onClick={handleExportFixes}>
               {t('actions.exportFixes')}
-            </button>
-            <button
-              onClick={handleExportJSON}
-              className="h-[48px] px-[24px] rounded-[100px] bg-[#EAEAEA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap"
-            >
+            </AdminButton>
+            <AdminButton size="md" variant="outline" onClick={handleExportJSON}>
               {t('actions.exportJson')}
-            </button>
+            </AdminButton>
           </div>
 
           {/* Pages Table */}
@@ -744,19 +742,13 @@ export default function SEOAdminClient() {
                       <td className="px-6 py-4 text-center">
                         <div className="flex items-center justify-center gap-2">
                           {editorEnabled && (
-                            <button
-                              onClick={() => openEditor(page)}
-                              className="h-[40px] px-[20px] rounded-[100px] bg-[#EAEAEA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-colors"
-                            >
+                            <AdminButton size="sm" variant="outline" onClick={() => openEditor(page)}>
                               Edit
-                            </button>
+                            </AdminButton>
                           )}
-                          <button
-                            onClick={() => setSelectedPage(page)}
-                            className="h-[40px] px-[20px] rounded-[100px] bg-[#161616] text-white font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:bg-[#2a2a2a] transition-colors"
-                          >
+                          <AdminButton size="sm" variant="primary" onClick={() => setSelectedPage(page)}>
                             {t('actions.viewDetails')}
-                          </button>
+                          </AdminButton>
                         </div>
                       </td>
                     </tr>
@@ -878,68 +870,63 @@ export default function SEOAdminClient() {
                           <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">Basic</div>
 
                           <div>
-                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Title</div>
-                            <input
+                            <AdminLabel className="mb-[6px]">Title</AdminLabel>
+                            <AdminInput
                               value={overrideForm.title}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, title: e.target.value } : s))}
                               placeholder={editingPage.title || ''}
-                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
 
                           <div>
-                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Description</div>
-                            <textarea
+                            <AdminLabel className="mb-[6px]">Description</AdminLabel>
+                            <AdminTextarea
                               value={overrideForm.description}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, description: e.target.value } : s))}
                               placeholder={editingPage.description || ''}
-                              className="w-full min-h-[96px] px-4 py-3 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
 
                           <div>
-                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Canonical URL (optional)</div>
-                            <input
+                            <AdminLabel className="mb-[6px]">Canonical URL (optional)</AdminLabel>
+                            <AdminInput
                               value={overrideForm.canonicalUrl}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, canonicalUrl: e.target.value } : s))}
                               placeholder={editingPage.url}
-                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Robots index</div>
-                              <select
+                              <AdminLabel className="mb-[6px]">Robots index</AdminLabel>
+                              <AdminSelect
                                 value={overrideForm.robotsIndex}
                                 onChange={(e) =>
                                   setOverrideForm((s) =>
                                     s ? { ...s, robotsIndex: e.target.value as SeoOverrideFormState['robotsIndex'] } : s
                                   )
                                 }
-                                className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                               >
                                 <option value="inherit">Inherit</option>
                                 <option value="index">index</option>
                                 <option value="noindex">noindex</option>
-                              </select>
+                              </AdminSelect>
                             </div>
 
                             <div>
-                              <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Robots follow</div>
-                              <select
+                              <AdminLabel className="mb-[6px]">Robots follow</AdminLabel>
+                              <AdminSelect
                                 value={overrideForm.robotsFollow}
                                 onChange={(e) =>
                                   setOverrideForm((s) =>
                                     s ? { ...s, robotsFollow: e.target.value as SeoOverrideFormState['robotsFollow'] } : s
                                   )
                                 }
-                                className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                               >
                                 <option value="inherit">Inherit</option>
                                 <option value="follow">follow</option>
                                 <option value="nofollow">nofollow</option>
-                              </select>
+                              </AdminSelect>
                             </div>
                           </div>
                         </div>
@@ -948,30 +935,27 @@ export default function SEOAdminClient() {
                           <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">Open Graph</div>
 
                           <div>
-                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">OG Title</div>
-                            <input
+                            <AdminLabel className="mb-[6px]">OG Title</AdminLabel>
+                            <AdminInput
                               value={overrideForm.ogTitle}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, ogTitle: e.target.value } : s))}
                               placeholder={(editingPage.openGraph as any)?.title || editingPage.title || ''}
-                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
                           <div>
-                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">OG Description</div>
-                            <textarea
+                            <AdminLabel className="mb-[6px]">OG Description</AdminLabel>
+                            <AdminTextarea
                               value={overrideForm.ogDescription}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, ogDescription: e.target.value } : s))}
                               placeholder={(editingPage.openGraph as any)?.description || editingPage.description || ''}
-                              className="w-full min-h-[96px] px-4 py-3 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
                           <div>
-                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">OG Image URL</div>
-                            <input
+                            <AdminLabel className="mb-[6px]">OG Image URL</AdminLabel>
+                            <AdminInput
                               value={overrideForm.ogImage}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, ogImage: e.target.value } : s))}
                               placeholder={(editingPage.openGraph?.images?.[0] as any)?.url || ''}
-                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
                         </div>
@@ -980,28 +964,26 @@ export default function SEOAdminClient() {
                           <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">Twitter</div>
 
                           <div>
-                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Twitter Title</div>
-                            <input
+                            <AdminLabel className="mb-[6px]">Twitter Title</AdminLabel>
+                            <AdminInput
                               value={overrideForm.twitterTitle}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, twitterTitle: e.target.value } : s))}
                               placeholder={(editingPage.twitter as any)?.title || editingPage.title || ''}
-                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
                           <div>
-                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Twitter Description</div>
-                            <textarea
+                            <AdminLabel className="mb-[6px]">Twitter Description</AdminLabel>
+                            <AdminTextarea
                               value={overrideForm.twitterDescription}
                               onChange={(e) =>
                                 setOverrideForm((s) => (s ? { ...s, twitterDescription: e.target.value } : s))
                               }
                               placeholder={(editingPage.twitter as any)?.description || editingPage.description || ''}
-                              className="w-full min-h-[96px] px-4 py-3 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
                           <div>
-                            <div className="font-['Outfit'] text-xs text-[#535353] mb-2">Twitter Image URL</div>
-                            <input
+                            <AdminLabel className="mb-[6px]">Twitter Image URL</AdminLabel>
+                            <AdminInput
                               value={overrideForm.twitterImage}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, twitterImage: e.target.value } : s))}
                               placeholder={
@@ -1009,36 +991,24 @@ export default function SEOAdminClient() {
                                   ? ((editingPage.twitter as any)?.images?.[0] as string) || ''
                                   : ((editingPage.twitter as any)?.images as string) || ''
                               }
-                              className="w-full h-[44px] px-4 rounded-[12px] border border-[#E1E1E1] bg-[#EAEAEA] font-['Outfit'] text-sm"
                             />
                           </div>
                         </div>
 
                         <div className="flex items-center gap-3">
-                          <button
-                            onClick={saveOverride}
-                            disabled={overrideSaving}
-                            className="h-[48px] px-[24px] rounded-[100px] bg-[#161616] text-white font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:bg-[#2a2a2a] transition-colors disabled:opacity-60"
-                          >
+                          <AdminButton onClick={saveOverride} disabled={overrideSaving}>
                             {overrideSaving ? 'Saving…' : 'Save'}
-                          </button>
+                          </AdminButton>
 
                           {overrideRow && (
-                            <button
-                              onClick={deleteOverride}
-                              disabled={overrideSaving}
-                              className="h-[48px] px-[24px] rounded-[100px] bg-[#EAEAEA] text-red-600 border border-red-200 hover:border-red-600 font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-colors disabled:opacity-60"
-                            >
+                            <AdminButton variant="danger" onClick={deleteOverride} disabled={overrideSaving}>
                               Delete override
-                            </button>
+                            </AdminButton>
                           )}
 
-                          <button
-                            onClick={closeEditor}
-                            className="h-[48px] ml-auto px-[24px] rounded-[100px] bg-[#EAEAEA] text-[#161616] border border-[#E1E1E1] hover:border-[#161616] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap"
-                          >
+                          <AdminButton variant="outline" className="ml-auto" onClick={closeEditor}>
                             Close
-                          </button>
+                          </AdminButton>
                         </div>
                       </div>
 
@@ -1054,8 +1024,7 @@ export default function SEOAdminClient() {
               </div>
             </div>
           )}
-        </div>
-      </div>
+      </AdminStack>
     </>
   );
 }

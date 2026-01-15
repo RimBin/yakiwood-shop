@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { AdminBody, AdminCard, AdminKicker, AdminLabel, AdminSectionTitle, AdminSelect, AdminStack } from '@/components/admin/ui/AdminUI';
 
 interface DashboardStats {
@@ -44,6 +45,9 @@ interface ProductSales {
 }
 
 export default function DashboardPage() {
+  const t = useTranslations('admin.dashboard');
+  const tCommon = useTranslations('common');
+
   const [stats, setStats] = useState<DashboardStats>({
     totalOrders: 0,
     totalRevenue: 0,
@@ -159,6 +163,14 @@ export default function DashboardPage() {
     return filtered;
   };
 
+  const getOrderStatusLabel = (status: string) => {
+    if (status === 'pending') return t('orderStatus.pending');
+    if (status === 'processing') return t('orderStatus.processing');
+    if (status === 'completed') return t('orderStatus.completed');
+    if (status === 'cancelled') return t('orderStatus.cancelled');
+    return status;
+  };
+
   const StatCard = ({ title, value, subtitle, icon }: { title: string; value: string | number; subtitle?: string; icon?: string }) => (
     <AdminCard className="p-[24px]">
       <div className="flex items-center justify-between mb-[8px]">
@@ -176,7 +188,7 @@ export default function DashboardPage() {
         <AdminCard className="flex items-center justify-center py-[80px]">
           <div className="text-center">
             <div className="w-[48px] h-[48px] border-4 border-[#E1E1E1] border-t-[#161616] rounded-full animate-spin mx-auto mb-[16px]"></div>
-            <p className="font-['Outfit'] text-[14px] text-[#535353]">Loading...</p>
+            <p className="font-['Outfit'] text-[14px] text-[#535353]">{tCommon('kraunasi')}</p>
           </div>
         </AdminCard>
       </AdminBody>
@@ -188,34 +200,34 @@ export default function DashboardPage() {
       <AdminStack>
         {/* Filters */}
         <AdminCard>
-          <AdminKicker className="mb-[16px]">Filters</AdminKicker>
+          <AdminKicker className="mb-[16px]">{t('filters.title')}</AdminKicker>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
             {/* Date filter */}
             <div>
-              <AdminLabel className="mb-[6px]">Time Period</AdminLabel>
+              <AdminLabel className="mb-[6px]">{t('filters.timePeriod')}</AdminLabel>
               <AdminSelect
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
               >
-                <option value="all">All Time</option>
-                <option value="today">Today</option>
-                <option value="week">Last Week</option>
-                <option value="month">Last Month</option>
+                <option value="all">{t('filters.allTime')}</option>
+                <option value="today">{t('filters.today')}</option>
+                <option value="week">{t('filters.lastWeek')}</option>
+                <option value="month">{t('filters.lastMonth')}</option>
               </AdminSelect>
             </div>
 
             {/* Status filter */}
             <div>
-              <AdminLabel className="mb-[6px]">Status</AdminLabel>
+              <AdminLabel className="mb-[6px]">{t('filters.status')}</AdminLabel>
               <AdminSelect
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-                <option value="all">All Orders</option>
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="all">{t('filters.allOrders')}</option>
+                <option value="pending">{t('orderStatus.pending')}</option>
+                <option value="processing">{t('orderStatus.processing')}</option>
+                <option value="completed">{t('orderStatus.completed')}</option>
+                <option value="cancelled">{t('orderStatus.cancelled')}</option>
               </AdminSelect>
             </div>
           </div>
@@ -231,8 +243,8 @@ export default function DashboardPage() {
               <span className="text-[32px]">📦</span>
               <span className="text-[14px] opacity-60">→</span>
             </div>
-            <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px]">Manage Orders</p>
-            <p className="font-['Outfit'] text-[12px] opacity-60 mt-[4px]">View & update order status</p>
+            <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px]">{t('quickActions.manageOrders')}</p>
+            <p className="font-['Outfit'] text-[12px] opacity-60 mt-[4px]">{t('quickActions.manageOrdersSubtitle')}</p>
           </Link>
 
           <Link
@@ -243,8 +255,8 @@ export default function DashboardPage() {
               <span className="text-[32px]">📋</span>
               <span className="text-[14px] opacity-60">→</span>
             </div>
-            <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px]">Inventory</p>
-            <p className="font-['Outfit'] text-[12px] opacity-60 mt-[4px]">Manage stock levels</p>
+            <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px]">{t('quickActions.inventory')}</p>
+            <p className="font-['Outfit'] text-[12px] opacity-60 mt-[4px]">{t('quickActions.inventorySubtitle')}</p>
           </Link>
 
           <Link
@@ -255,8 +267,8 @@ export default function DashboardPage() {
               <span className="text-[32px]">🛍️</span>
               <span className="text-[14px] text-[#535353]">→</span>
             </div>
-            <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px] text-[#161616]">Products</p>
-            <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">Add & edit products</p>
+            <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px] text-[#161616]">{t('quickActions.products')}</p>
+            <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">{t('quickActions.productsSubtitle')}</p>
           </Link>
 
           <Link
@@ -267,35 +279,35 @@ export default function DashboardPage() {
               <span className="text-[32px]">🏗️</span>
               <span className="text-[14px] text-[#535353]">→</span>
             </div>
-            <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px] text-[#161616]">Projects</p>
-            <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">Showcase portfolio</p>
+            <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px] text-[#161616]">{t('quickActions.projects')}</p>
+            <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">{t('quickActions.projectsSubtitle')}</p>
           </Link>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px]">
           <StatCard
-            title="Today's Orders"
+            title={t('stats.todayOrders')}
             value={stats.todayOrders}
-            subtitle={`€${stats.todayRevenue.toFixed(2)}`}
+            subtitle={`${tCommon('valiuta')}${stats.todayRevenue.toFixed(2)}`}
             icon="📦"
           />
           <StatCard
-            title="Total Orders"
+            title={t('stats.totalOrders')}
             value={stats.totalOrders}
-            subtitle={`€${stats.totalRevenue.toFixed(2)} revenue`}
+            subtitle={t('stats.totalOrdersSubtitle', { revenue: stats.totalRevenue.toFixed(2), currency: tCommon('valiuta') })}
             icon="🛒"
           />
           <StatCard
-            title="Pending"
+            title={t('stats.pending')}
             value={stats.pendingOrders}
-            subtitle="need processing"
+            subtitle={t('stats.pendingSubtitle')}
             icon="⏳"
           />
           <StatCard
-            title="Completed"
+            title={t('stats.completed')}
             value={stats.completedOrders}
-            subtitle="successfully"
+            subtitle={t('stats.completedSubtitle')}
             icon="✅"
           />
         </div>
@@ -303,26 +315,26 @@ export default function DashboardPage() {
         {/* Product & Inventory Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px]">
           <StatCard
-            title="Products"
+            title={t('stats.products')}
             value={stats.totalProducts}
-            subtitle="in catalog"
+            subtitle={t('stats.productsSubtitle')}
             icon="📋"
           />
           <StatCard
-            title="Low Stock"
+            title={t('stats.lowStock')}
             value={stats.lowStockProducts}
-            subtitle="< 10 units"
+            subtitle={t('stats.lowStockSubtitle')}
             icon="⚠️"
           />
           <StatCard
-            title="Avg. Order"
+            title={t('stats.avgOrder')}
             value={`€${stats.totalOrders > 0 ? (stats.totalRevenue / stats.totalOrders).toFixed(2) : 0}`}
             icon="💰"
           />
           <StatCard
-            title="Conversion"
+            title={t('stats.conversion')}
             value={`${stats.totalOrders > 0 ? ((stats.completedOrders / stats.totalOrders) * 100).toFixed(1) : 0}%`}
-            subtitle="completed"
+            subtitle={t('stats.conversionSubtitle')}
             icon="📈"
           />
         </div>
@@ -330,16 +342,16 @@ export default function DashboardPage() {
         {/* Top Products */}
         <AdminCard className="p-0 overflow-hidden">
           <div className="p-[24px] border-b border-[#E1E1E1]">
-            <AdminSectionTitle className="text-[24px] tracking-[-0.96px]">Top Products</AdminSectionTitle>
+            <AdminSectionTitle className="text-[24px] tracking-[-0.96px]">{t('topProducts.title')}</AdminSectionTitle>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#E1E1E1]">
                   <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">#</th>
-                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">Product</th>
-                  <th className="text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">Sold</th>
-                  <th className="text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">Revenue</th>
+                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('topProducts.table.product')}</th>
+                  <th className="text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('topProducts.table.sold')}</th>
+                  <th className="text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('topProducts.table.revenue')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -348,14 +360,14 @@ export default function DashboardPage() {
                     <tr key={index} className="border-b border-[#E1E1E1] hover:bg-[#E1E1E1]">
                       <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616]">{index + 1}</td>
                       <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616]">{product.productName}</td>
-                      <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right">{product.quantitySold} units</td>
+                      <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right">{product.quantitySold} {t('units')}</td>
                       <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right font-medium">€{product.revenue.toFixed(2)}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
                     <td colSpan={4} className="py-[32px] text-center font-['Outfit'] text-[14px] text-[#BBBBBB]">
-                      No sales data
+                      {t('topProducts.empty')}
                     </td>
                   </tr>
                 )}
@@ -367,23 +379,23 @@ export default function DashboardPage() {
         {/* Recent Orders */}
         <AdminCard className="p-0 overflow-hidden">
           <div className="p-[24px] border-b border-[#E1E1E1] flex items-center justify-between">
-            <AdminSectionTitle className="text-[24px] tracking-[-0.96px]">Recent Orders</AdminSectionTitle>
+            <AdminSectionTitle className="text-[24px] tracking-[-0.96px]">{t('recentOrders.title')}</AdminSectionTitle>
             <Link
               href="/admin/orders"
               className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] hover:text-[#161616] transition-colors"
             >
-              All Orders →
+              {t('recentOrders.allOrders')} →
             </Link>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#E1E1E1]">
-                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">Order</th>
-                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">Customer</th>
-                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">Date</th>
-                  <th className="text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">Total</th>
-                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">Status</th>
+                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.order')}</th>
+                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.customer')}</th>
+                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.date')}</th>
+                  <th className="text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.total')}</th>
+                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.status')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -403,7 +415,7 @@ export default function DashboardPage() {
                           order.status === 'pending' ? 'bg-[#EAEAEA] border border-yellow-200 text-yellow-700' :
                           'bg-[#EAEAEA] border border-[#BBBBBB] text-[#535353]'
                         }`}>
-                          {order.status}
+                          {getOrderStatusLabel(order.status)}
                         </span>
                       </td>
                     </tr>
@@ -411,7 +423,7 @@ export default function DashboardPage() {
                 ) : (
                   <tr>
                     <td colSpan={5} className="py-[32px] text-center font-['Outfit'] text-[14px] text-[#BBBBBB]">
-                      No orders
+                      {t('recentOrders.empty')}
                     </td>
                   </tr>
                 )}

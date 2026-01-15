@@ -59,7 +59,7 @@ function finishImageUrl(woodType, colorCode) {
 }
 
 function skuChunk(input) {
-  const v = toSlug(String(input || ''))
+  const v = toSlug(String(input || '')).replace(/-/g, '')
   return v ? v.toUpperCase() : 'UNKNOWN'
 }
 
@@ -137,23 +137,64 @@ async function upsertCatalogOption(supabase, row) {
 
 async function upsertProductBySlug(supabase, row) {
   const slug = row.slug
-  const { data: existing, error: findError } = await supabase
-    .from('products')
-    .select('id')
-    .eq('slug', slug)
-    .maybeSingle()
 
-  if (findError) throw new Error(`Failed to lookup product (${slug}): ${findError.message}`)
+  const safeUpsert = async (payload) => {
+    const { data: existing, error: findError } = await supabase
+      .from('products')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle()
 
-  if (existing?.id) {
-    const { error: updateError } = await supabase.from('products').update(row).eq('id', existing.id)
-    if (updateError) throw new Error(`Failed to update product (${slug}): ${updateError.message}`)
-    return existing.id
+    if (findError) throw new Error(`Failed to lookup product (${slug}): ${findError.message}`)
+
+    if (existing?.id) {
+      const { error: updateError } = await supabase.from('products').update(payload).eq('id', existing.id)
+      if (updateError) throw new Error(`Failed to update product (${slug}): ${updateError.message}`)
+      return existing.id
+    }
+
+    const { data: inserted, error: insertError } = await supabase.from('products').insert(payload).select('id').single()
+    if (insertError) throw new Error(`Failed to insert product (${slug}): ${insertError.message}`)
+    return inserted.id
   }
 
-  const { data: inserted, error: insertError } = await supabase.from('products').insert(row).select('id').single()
-  if (insertError) throw new Error(`Failed to insert product (${slug}): ${insertError.message}`)
-  return inserted.id
+  try {
+    return await safeUpsert(row)
+  } catch (error) {
+    const msg = String(error?.message || error || '')
+    const maybeMissing =
+      msg.includes('schema cache') ||
+      msg.includes('does not exist') ||
+      msg.includes("could not find the '") ||
+      msg.includes('column ') ||
+      msg.includes('unknown column')
+
+    if (!maybeMissing) throw error
+
+    const payload = { ...row }
+    delete payload.slug_en
+    delete payload.name_en
+    delete payload.description_en
+    delete payload.sale_price
+    delete payload.usage_type
+
+    try {
+      return await safeUpsert(payload)
+    } catch {
+      // Final fallback: only the oldest baseline columns.
+      const minimal = {
+        name: payload.name,
+        slug: payload.slug,
+        description: payload.description ?? null,
+        base_price: payload.base_price,
+        wood_type: payload.wood_type,
+        category: payload.category,
+        image_url: payload.image_url ?? null,
+        is_active: payload.is_active ?? true,
+      }
+      return await safeUpsert(minimal)
+    }
+  }
 }
 
 async function replaceProductVariants(supabase, productId, variantType, rows) {
@@ -474,10 +515,56 @@ async function main() {
 
   const colorCodes = (colors ?? [])
     .filter((c) => typeof c.value_text === 'string' && c.value_text.trim())
-    .map((c) => c.value_text.trim())
+    .map((c) => ({
+      code: c.value_text.trim(),
+      label_lt: typeof c.label_lt === 'string' && c.label_lt.trim() ? c.label_lt.trim() : null,
+      label_en: typeof c.label_en === 'string' && c.label_en.trim() ? c.label_en.trim() : null,
+    }))
+
+  // 5a) Create size/color/profile-specific products (hidden from storefront) so they can be tracked as separate "prekes".
+  const sizeProductIdBySlug = new Map()
+
+  const getOrCreateSizeProduct = async (baseProduct, profile, color, widthMm, lengthMm, thicknessMm) => {
+    const slug = `${baseProduct.slug}--${profile.code}--${toSlug(color.code)}--${widthMm}x${lengthMm}`
+    const cached = sizeProductIdBySlug.get(slug)
+    if (cached) return cached
+
+    const colorLt = color.label_lt ?? color.code
+    const colorEn = color.label_en ?? color.code
+
+    const name = `${baseProduct.name} · ${profile.label_lt} · ${colorLt} · ${widthMm}x${lengthMm} mm`
+    const nameEn = `${baseProduct.name_en ?? baseProduct.name} · ${profile.label_en} · ${colorEn} · ${widthMm}x${lengthMm} mm`
+
+    const description = baseProduct.description
+      ? `${baseProduct.description} (${widthMm}×${lengthMm} mm)`
+      : `${widthMm}×${lengthMm} mm`
+
+    const descriptionEn = baseProduct.description_en
+      ? `${baseProduct.description_en} (${widthMm}×${lengthMm} mm)`
+      : `${widthMm}×${lengthMm} mm`
+
+    const row = {
+      slug,
+      slug_en: baseProduct.slug_en ? `${baseProduct.slug_en}--${profile.code}--${toSlug(color.code)}--${widthMm}x${lengthMm}` : null,
+      category: baseProduct.category,
+      usage_type: baseProduct.usage_type,
+      wood_type: baseProduct.wood_type,
+      base_price: baseProduct.base_price,
+      name,
+      name_en: nameEn,
+      description,
+      description_en: descriptionEn,
+      image_url: finishImageUrl(baseProduct.wood_type, color.code),
+      // Keep hidden from the storefront; these are stock-keeping products.
+      is_active: false,
+    }
+
+    const id = await upsertProductBySlug(supabase, row)
+    sizeProductIdBySlug.set(slug, id)
+    return id
+  }
 
   for (const p of products) {
-    const productId = idBySlug.get(p.slug)
     const usageType = p.usage_type === 'terrace' ? 'terrace' : 'facade'
     const thicknessMm = usageType === 'terrace' ? 28 : 20
     const woodType = p.wood_type
@@ -485,17 +572,18 @@ async function main() {
     const profiles = profileByUsage[usageType] || []
 
     for (const profile of profiles) {
-      for (const colorCode of colorCodes) {
+      for (const color of colorCodes) {
         for (const width of widthOptionsMm) {
           for (const length of lengthOptionsMm) {
+            const sizeProductId = await getOrCreateSizeProduct(p, profile, color, width, length, thicknessMm)
             inventoryRows.push({
-              product_id: productId,
+              product_id: sizeProductId,
               variant_id: null,
               sku: buildInventorySku({
                 usageType,
                 woodType,
                 profile: profile.code,
-                color: colorCode,
+                color: color.code,
                 widthMm: width,
                 lengthMm: length,
                 thicknessMm,
