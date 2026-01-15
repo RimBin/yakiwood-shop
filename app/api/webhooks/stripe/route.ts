@@ -11,6 +11,7 @@ import {
   generateOrderNumber 
 } from '@/lib/supabase-admin';
 import { InventoryManager } from '@/lib/inventory/manager';
+import { createInventorySkuResolveContext, resolveInventorySkuForCartItem } from '@/lib/inventory/sku.server';
 import type { ReservationItem } from '@/lib/inventory/types';
 import type { InvoiceGenerateRequest } from '@/types/invoice';
 import { sendOrderConfirmation } from '@/lib/email';
@@ -157,20 +158,37 @@ export async function POST(req: NextRequest) {
 
       // Best-effort inventory update (does not break webhook on failure)
       try {
-        const reservationItems: ReservationItem[] = items
-          .filter((item: any) => {
-            if (item?.id === 'shipping' || item?.slug === 'shipping') return false;
-            return typeof item?.slug === 'string' && item.slug.trim().length > 0;
-          })
-          .map((item: any) => {
+        const ctx = createInventorySkuResolveContext();
+
+        const reservationItems: ReservationItem[] = (await Promise.all(
+          items
+            .filter((item: any) => {
+              if (item?.id === 'shipping' || item?.slug === 'shipping') return false
+              return typeof item?.slug === 'string' && item.slug.trim().length > 0
+            })
+            .map(async (item: any) => {
+            const resolved = await resolveInventorySkuForCartItem(
+              {
+                id: String(item.id || ''),
+                color: typeof item.color === 'string' ? item.color : undefined,
+                finish: typeof item.finish === 'string' ? item.finish : undefined,
+                configuration: item && typeof item.configuration === 'object' && item.configuration !== null ? item.configuration : undefined,
+              },
+              ctx
+            );
+
             const option = (item.color || item.finish || 'default').toString();
+            const fallbackSku = typeof item.slug === 'string' && item.slug.trim().length > 0
+              ? `${String(item.slug).toUpperCase()}-${option.toUpperCase()}`
+              : option.toUpperCase();
+
             return {
               product_id: String(item.id || ''),
-              sku: `${String(item.slug).toUpperCase()}-${option.toUpperCase()}`,
+              sku: resolved || fallbackSku,
               quantity: Number(item.quantity) || 0,
             };
-          })
-          .filter((item) => item.quantity > 0);
+            })
+        )).filter((item) => item.quantity > 0);
 
         if (reservationItems.length > 0) {
           await InventoryManager.reserveStock(reservationItems, order.id);

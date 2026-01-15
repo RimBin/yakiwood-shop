@@ -4,7 +4,7 @@ export interface ProductVariant {
   id?: string;
   product_id?: string;
   name: string;
-  variant_type: 'color' | 'finish';
+  variant_type: 'color' | 'finish' | 'profile';
   hex_color?: string;
   price_adjustment?: number;
   description?: string;

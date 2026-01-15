@@ -216,10 +216,16 @@ export async function POST(request: Request) {
   const ranked = rankFaq(message, entries, 3);
   const { entry, confidence } = matchFaq(message, entries);
 
+  const liveReply = tryReplyWithLiveSiteData({
+    locale: localeValue,
+    message,
+    products,
+  });
+
   const apiKeyConfigured = Boolean(process.env.OPENAI_API_KEY);
   const canUseOpenAi = apiKeyConfigured && settings.useOpenAI && settings.openAiMode !== 'off';
   const shouldUseOpenAi =
-    canUseOpenAi && (settings.openAiMode === 'always' || confidence < settings.minConfidence);
+    canUseOpenAi && !liveReply && (settings.openAiMode === 'always' || confidence < settings.minConfidence);
 
   const openAiResult = shouldUseOpenAi
     ? await replyWithOpenAI({
@@ -236,13 +242,7 @@ export async function POST(request: Request) {
       })
     : null;
 
-  const liveReply = tryReplyWithLiveSiteData({
-    locale: localeValue,
-    message,
-    products,
-  });
-
-  const reply = openAiResult?.reply ?? liveReply ?? entry.answer;
+  const reply = liveReply ?? openAiResult?.reply ?? entry.answer;
   const handoff =
     localeValue === 'en'
       ? { label: 'Contact', href: '/contact' }

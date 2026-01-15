@@ -13,8 +13,8 @@
   "chatbot": {
     "button": "Chat",
     "title": "Chat with Yakiwood",
-    "subtitle": "Ask about products, projects, or a quote",
-    "welcome": "Hi! I'm the Yakiwood assistant. Ask about products, pricing, lead times, or your project and I'll help.",
+    "subtitle": "Ask about products, pricing, delivery, or your order",
+    "welcome": "Hi! I'm the Yakiwood assistant. I can help with products, exact prices, delivery, and ordering.",
     "note": "Note: please do not share sensitive personal data (e.g., personal ID). This chat may be used to improve support.",
     "handoff": "Need a human? Contact us",
     "placeholder": "Type your message...",
@@ -30,17 +30,20 @@
       "network": "Network error. Please try again later."
     },
     "suggestions": {
-      "price": "I need a quote for a project",
-      "delivery": "What are delivery options?",
+      "price": "Show products / pricing",
+      "delivery": "Delivery price and timeline",
+      "payment": "Payment methods",
+      "returns": "Returns and warranty",
+      "cart": "How does the cart work?",
       "createRole": {
         "title": "Create new role",
         "label": "New role",
         "placeholder": "e.g. partner",
         "button": "Create role"
       },
-      "productionTime": "What's the production lead time?",
+      "productionTime": "When will my order arrive?",
       "maintenance": "How do I maintain the surface?",
-      "samples": "Can I get samples?"
+      "samples": "Contact support"
     }
   },
   "blog": {
@@ -1475,6 +1478,7 @@
           "empty": "No variants yet. Add colors or finish variants.",
           "typeLabelColor": "Color",
           "typeLabelFinish": "Finish",
+          "typeLabelProfile": "Profile",
           "edit": "Edit",
           "delete": "Delete"
         },
@@ -1497,7 +1501,8 @@
           },
           "typeOptions": {
             "color": "Color",
-            "finish": "Finish"
+            "finish": "Finish",
+            "profile": "Profile"
           },
           "priceHelp": "Positive adds, negative subtracts from the base price",
           "buttons": {

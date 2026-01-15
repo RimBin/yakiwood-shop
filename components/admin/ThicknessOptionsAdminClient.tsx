@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { AdminButton, AdminKicker, AdminSectionTitle, AdminStack } from '@/components/admin/ui/AdminUI'
 
 type ThicknessOptionRow = {
   id: string
@@ -47,9 +48,12 @@ export default function ThicknessOptionsAdminClient({
 
   if (!supabase) {
     return (
-      <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] p-6">
-        <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">Supabase nesukonfigūruotas</h2>
-        <p className="mt-2 font-['Outfit'] text-sm text-[#535353]">
+      <div>
+        <AdminKicker>Storis</AdminKicker>
+        <div className="mt-[8px]">
+          <AdminSectionTitle>Supabase nesukonfigūruotas</AdminSectionTitle>
+        </div>
+        <p className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353]">
           Reikia `NEXT_PUBLIC_SUPABASE_URL` ir `NEXT_PUBLIC_SUPABASE_ANON_KEY` `.env.local` faile.
         </p>
       </div>
@@ -107,67 +111,53 @@ export default function ThicknessOptionsAdminClient({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] p-6">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
+    <AdminStack>
+      <div>
+        <AdminKicker>Storis</AdminKicker>
+        <div className="mt-[8px] flex items-start justify-between gap-[12px] flex-wrap">
           <div>
-            <h2 className="font-['DM_Sans'] text-xl font-medium text-[#161616]">Storis</h2>
-            <p className="mt-1 font-['Outfit'] text-sm text-[#535353]">
+            <AdminSectionTitle>Storio pasirinkimai</AdminSectionTitle>
+            <p className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353]">
               Leidžiami pasirinkimai: <strong>18/20</strong> ir <strong>28</strong>.
             </p>
           </div>
 
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={isBusy}
-              onClick={() => ensureOption(20)}
-              className="px-4 py-2 bg-[#161616] text-white rounded-lg font-['DM_Sans'] text-sm disabled:opacity-60"
-            >
+          <div className="flex gap-[8px]">
+            <AdminButton size="sm" disabled={isBusy} onClick={() => ensureOption(20)}>
               + 18/20
-            </button>
-            <button
-              type="button"
-              disabled={isBusy}
-              onClick={() => ensureOption(28)}
-              className="px-4 py-2 bg-[#161616] text-white rounded-lg font-['DM_Sans'] text-sm disabled:opacity-60"
-            >
+            </AdminButton>
+            <AdminButton size="sm" disabled={isBusy} onClick={() => ensureOption(28)}>
               + 28
-            </button>
+            </AdminButton>
           </div>
         </div>
 
         {error ? (
-          <div className="mt-4 border border-red-200 bg-[#E1E1E1] rounded-[12px] p-3">
-            <p className="font-['Outfit'] text-sm text-red-700">{error}</p>
-            <p className="mt-1 font-['Outfit'] text-xs text-red-700">
+          <div className="mt-[16px] border border-red-200 bg-[#EAEAEA] rounded-[16px] p-[12px]">
+            <p className="font-['Outfit'] text-[13px] text-red-700">{error}</p>
+            <p className="mt-[6px] font-['Outfit'] text-[12px] text-red-700">
               Jei klaida apie `catalog_options`, pirmiausia pritaikykite migraciją
               `supabase/migrations/20260111_catalog_options_assets_sale_thickness.sql`.
             </p>
           </div>
         ) : null}
 
-        <div className="mt-6">
+        <div className="mt-[16px]">
           {sorted.length === 0 ? (
-            <p className="font-['Outfit'] text-sm text-[#535353]">Nėra įvestų storio pasirinkimų.</p>
+            <p className="font-['Outfit'] text-[14px] text-[#535353]">Nėra įvestų storio pasirinkimų.</p>
           ) : (
-            <div className="divide-y divide-[#E1E1E1] border border-[#E1E1E1] rounded-lg overflow-hidden">
+            <div className="divide-y divide-[#E1E1E1] border border-[#E1E1E1] rounded-[16px] overflow-hidden">
               {sorted.map((opt) => (
-                <div key={opt.id} className="flex items-center justify-between px-4 py-3 bg-[#EAEAEA]">
-                  <div className="flex flex-col">
-                    <p className="font-['DM_Sans'] text-sm font-medium text-[#161616]">{labelForMm(opt.value_mm)}</p>
-                    <p className="font-['Outfit'] text-xs text-[#7C7C7C]">
+                <div key={opt.id} className="flex items-center justify-between gap-[12px] px-[16px] py-[12px] bg-[#EAEAEA]">
+                  <div className="min-w-0">
+                    <p className="font-['DM_Sans'] text-[14px] font-medium text-[#161616]">{labelForMm(opt.value_mm)}</p>
+                    <p className="mt-[2px] font-['Outfit'] text-[12px] text-[#7C7C7C]">
                       id: {opt.id.slice(0, 8)}… • aktyvus: {(opt.is_active ?? true) ? 'taip' : 'ne'}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    disabled={isBusy}
-                    onClick={() => removeOption(opt.id)}
-                    className="px-3 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['DM_Sans'] text-sm text-[#161616] hover:bg-[#E1E1E1] disabled:opacity-60"
-                  >
+                  <AdminButton variant="danger" size="sm" disabled={isBusy} onClick={() => removeOption(opt.id)}>
                     Trinti
-                  </button>
+                  </AdminButton>
                 </div>
               ))}
             </div>
@@ -175,13 +165,16 @@ export default function ThicknessOptionsAdminClient({
         </div>
       </div>
 
-      <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] p-6">
-        <h3 className="font-['DM_Sans'] text-lg font-medium text-[#161616]">Kaip tai naudojama</h3>
-        <p className="mt-2 font-['Outfit'] text-sm text-[#535353]">
+      <div>
+        <AdminKicker>Pastaba</AdminKicker>
+        <div className="mt-[8px]">
+          <AdminSectionTitle>Kaip tai naudojama</AdminSectionTitle>
+        </div>
+        <p className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353]">
           Šie įrašai skirti kainodarai per `product_configuration_prices.thickness_option_id`.
           Kitas žingsnis – pridėti storio pasirinkimą į konfigūratorių/krepšelį ir perduoti į kainos skaičiavimą.
         </p>
       </div>
-    </div>
+    </AdminStack>
   )
 }

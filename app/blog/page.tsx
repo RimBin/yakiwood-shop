@@ -46,7 +46,7 @@ export default async function BlogPage() {
   const initialPosts = getBlogPosts(currentLocale).filter((post) => post.published);
 
   return (
-    <main className="bg-[#E1E1E1] min-h-screen">
+    <main className="bg-[#EAEAEA] min-h-screen">
       <BlogListClient initialPosts={initialPosts} />
     </main>
   );

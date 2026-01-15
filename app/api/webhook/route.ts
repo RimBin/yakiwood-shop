@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@/lib/supabase/server';
 import { InventoryManager } from '@/lib/inventory/manager';
+import { createInventorySkuResolveContext, resolveInventorySkuForCartItem } from '@/lib/inventory/sku.server';
 import type { ReservationItem } from '@/lib/inventory/types';
 
 // Types for Stripe event data
@@ -13,11 +14,19 @@ interface CheckoutSessionMetadata {
 interface CartItem {
   id: string;
   name: string;
-  slug: string;
+  slug?: string;
   quantity: number;
   basePrice: number;
   color?: string;
   finish?: string;
+  configuration?: {
+    usageType?: string;
+    profileVariantId?: string;
+    colorVariantId?: string;
+    thicknessMm?: number;
+    widthMm?: number;
+    lengthMm?: number;
+  };
 }
 
 // Initialize Stripe with error handling for missing env var
@@ -178,12 +187,21 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   // Reserve stock for the order
   if (cartItems.length > 0) {
     try {
-      // Convert cart items to reservation format
-      const reservationItems: ReservationItem[] = cartItems.map(item => ({
-        product_id: item.id,
-        sku: `${item.slug.toUpperCase()}-${(item.color || 'default').toUpperCase()}`,
-        quantity: item.quantity,
-      }));
+      const ctx = createInventorySkuResolveContext();
+
+      const reservationItems: ReservationItem[] = (await Promise.all(
+        cartItems.map(async (item) => {
+          const resolved = await resolveInventorySkuForCartItem(item, ctx);
+          const fallbackOption = String(item.color || item.finish || 'default');
+          const fallbackSku = item.slug ? `${item.slug.toUpperCase()}-${fallbackOption.toUpperCase()}` : fallbackOption.toUpperCase();
+
+          return {
+            product_id: item.id,
+            sku: resolved || fallbackSku,
+            quantity: item.quantity,
+          };
+        })
+      )).filter((item) => item.quantity > 0);
 
       await InventoryManager.reserveStock(reservationItems, order.id);
       console.log('Stock reserved for order:', order.id);

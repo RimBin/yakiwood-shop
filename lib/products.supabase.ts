@@ -117,11 +117,16 @@ function transformDbProduct(db: DbProduct): Product {
       priceModifier: v.price_adjustment === null ? undefined : toNumber(v.price_adjustment),
     }))
 
-  const profiles: ProductProfileVariant[] = variants
-    .filter((v) => v.variant_type === 'finish' || v.variant_type === 'profile')
+  const hasExplicitProfiles = variants.some((v) => v.variant_type === 'profile')
+  const profileSource = hasExplicitProfiles
+    ? variants.filter((v) => v.variant_type === 'profile')
+    : variants.filter((v) => v.variant_type === 'finish' || v.variant_type === 'profile')
+
+  const profiles: ProductProfileVariant[] = profileSource
     .map((v) => ({
       id: v.id,
       name: v.label_lt ?? v.name,
+      code: v.name,
       priceModifier: v.price_adjustment === null ? undefined : toNumber(v.price_adjustment),
       image: v.image_url ?? v.texture_url ?? undefined,
     }))

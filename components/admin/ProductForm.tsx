@@ -29,10 +29,14 @@ function slugify(input: string) {
 }
 
 function getDefaultFinishSlug(variants: Variant[]): string {
-  const natural = variants.find((v) => slugify(v.name) === DEFAULT_FINISH_SLUG);
+  const withoutProfiles = variants.filter((v) => v.variant_type !== 'profile')
+  const finishes = withoutProfiles.filter((v) => v.variant_type === 'finish')
+  const candidates = finishes.length > 0 ? finishes : withoutProfiles
+
+  const natural = candidates.find((v) => slugify(v.name) === DEFAULT_FINISH_SLUG);
   if (natural?.name) return DEFAULT_FINISH_SLUG;
 
-  const first = variants.find((v) => v.name?.trim()) ?? null;
+  const first = candidates.find((v) => v.name?.trim()) ?? null;
   if (!first) return DEFAULT_FINISH_SLUG;
 
   const result = slugify(first.name);
@@ -130,7 +134,7 @@ function createProductSchema(t: (key: string) => string) {
 interface Variant {
   id?: string;
   name: string;
-  variant_type: 'color' | 'finish';
+  variant_type: 'color' | 'finish' | 'profile';
   hex_color?: string;
   price_adjustment?: number;
   description?: string;
@@ -1151,7 +1155,11 @@ export default function ProductForm({ product, mode }: Props) {
                     <div>
                       <div className="font-['DM_Sans'] font-medium">{variant.name}</div>
                       <div className="text-sm text-[#535353] font-['DM_Sans']">
-                        {variant.variant_type === 'color' ? t('variants.typeLabelColor') : t('variants.typeLabelFinish')}
+                        {variant.variant_type === 'color'
+                          ? t('variants.typeLabelColor')
+                          : variant.variant_type === 'profile'
+                            ? t('variants.typeLabelProfile')
+                            : t('variants.typeLabelFinish')}
                         {variant.price_adjustment && variant.price_adjustment !== 0 && (
                           <span className="ml-2">
                             {variant.price_adjustment > 0 ? '+' : ''}{variant.price_adjustment.toFixed(2)} EUR
@@ -1295,7 +1303,7 @@ interface VariantFormModalProps {
 function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) {
   const t = useTranslations('admin.products.form');
   const [name, setName] = useState(variant?.name || '');
-  const [variantType, setVariantType] = useState<'color' | 'finish'>(variant?.variant_type || 'color');
+  const [variantType, setVariantType] = useState<'color' | 'finish' | 'profile'>(variant?.variant_type || 'color');
   const [hexColor, setHexColor] = useState(variant?.hex_color || '#161616');
   const [priceAdjustment, setPriceAdjustment] = useState(variant?.price_adjustment?.toString() || '0');
   const [description, setDescription] = useState(variant?.description || '');
@@ -1354,11 +1362,12 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
             </label>
             <select
               value={variantType}
-              onChange={(e) => setVariantType(e.target.value as 'color' | 'finish')}
+              onChange={(e) => setVariantType(e.target.value as 'color' | 'finish' | 'profile')}
               className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] yw-select"
             >
               <option value="color">{t('variantModal.typeOptions.color')}</option>
               <option value="finish">{t('variantModal.typeOptions.finish')}</option>
+              <option value="profile">{t('variantModal.typeOptions.profile')}</option>
             </select>
           </div>
 

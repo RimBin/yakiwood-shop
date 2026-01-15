@@ -166,19 +166,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       };
     });
 
-    if (mapped.length >= 4) return mapped;
-
-    const usedIds = new Set(mapped.map((p) => p.id));
-    const padded: ProductProfileVariant[] = [...mapped];
-    for (const fallback of FALLBACK_PROFILE_OPTIONS) {
-      if (padded.length >= 4) break;
-      if (usedIds.has(fallback.id)) continue;
-      padded.push({
-        ...(fallback as unknown as ProductProfileVariant),
-      });
-    }
-
-    return padded;
+    if (mapped.length > 0) return mapped;
+    return FALLBACK_PROFILE_OPTIONS.map((fallback) => ({ ...(fallback as unknown as ProductProfileVariant) }));
   }, [product.id, product.profiles]);
 
   const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(colorOptions[0] || null);

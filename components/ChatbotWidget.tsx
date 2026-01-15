@@ -129,6 +129,9 @@ export default function ChatbotWidget() {
     return [
       t('suggestions.price'),
       t('suggestions.delivery'),
+      t('suggestions.payment'),
+      t('suggestions.returns'),
+      t('suggestions.cart'),
       t('suggestions.productionTime'),
       t('suggestions.maintenance'),
       t('suggestions.samples'),

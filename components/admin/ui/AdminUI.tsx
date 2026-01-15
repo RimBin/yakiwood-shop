@@ -7,6 +7,8 @@ import type {
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from 'react'
+import type { LinkProps } from 'next/link'
+import Link from 'next/link'
 
 type ClassValue = string | undefined | null | false
 
@@ -141,6 +143,37 @@ export function AdminButton({
         className
       )}
     />
+  )
+}
+
+export function AdminButtonLink({
+  variant = 'primary',
+  size = 'md',
+  className,
+  href,
+  children,
+  ...props
+}: Omit<LinkProps, 'href'> &
+  React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+    href: LinkProps['href']
+    variant?: AdminButtonVariant
+    size?: AdminButtonSize
+    className?: string
+    children: ReactNode
+  }) {
+  return (
+    <Link
+      href={href}
+      className={cx(
+        "rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-colors whitespace-nowrap inline-flex items-center justify-center",
+        buttonSizeClass[size],
+        buttonVariantClass[variant],
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </Link>
   )
 }
 

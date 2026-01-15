@@ -58,6 +58,59 @@ function finishImageUrl(woodType, colorCode) {
   return `/assets/finishes/${wood}/shou-sugi-ban-${wood}-${code}-facade-terrace-cladding.webp`
 }
 
+function skuChunk(input) {
+  const v = toSlug(String(input || ''))
+  return v ? v.toUpperCase() : 'UNKNOWN'
+}
+
+function usageSkuCode(usageType) {
+  const v = toSlug(String(usageType || ''))
+  if (v === 'facade') return 'FAC'
+  if (v === 'terrace') return 'TER'
+  if (v === 'interior') return 'INT'
+  if (v === 'fence') return 'FEN'
+  return skuChunk(v)
+}
+
+function woodSkuCode(woodType) {
+  const v = toSlug(String(woodType || ''))
+  if (v === 'spruce') return 'SP'
+  if (v === 'larch') return 'LA'
+  return skuChunk(v)
+}
+
+function profileSkuCode(profileCodeOrLabel) {
+  const v = toSlug(String(profileCodeOrLabel || ''))
+  if (!v) return 'NOPROFILE'
+  if (v.includes('rect') || v.includes('staciakamp')) return 'RECT'
+  if (v.includes('rhomb') || v.includes('romb')) return 'RHOM'
+  if ((v.includes('half') || v.includes('taper') || v.includes('spunto') || v.includes('pus')) && v.includes('45'))
+    return 'HALF45'
+  if (v.includes('half') || v.includes('taper') || v.includes('spunto') || v.includes('pus')) return 'HALF'
+  return skuChunk(v)
+}
+
+function colorSkuCode(colorCodeOrLabel) {
+  const v = toSlug(String(colorCodeOrLabel || ''))
+  if (!v) return 'NOCOLOR'
+  return skuChunk(v)
+}
+
+function buildInventorySku({ usageType, woodType, profile, color, widthMm, lengthMm, thicknessMm }) {
+  const usage = usageSkuCode(usageType)
+  const wood = woodSkuCode(woodType)
+  const profileCode = profileSkuCode(profile)
+  const colorCode = colorSkuCode(color)
+  const width = Number.isFinite(widthMm) && widthMm > 0 ? Math.round(widthMm) : null
+  const length = Number.isFinite(lengthMm) && lengthMm > 0 ? Math.round(lengthMm) : null
+  const thickness = Number.isFinite(thicknessMm) && thicknessMm > 0 ? Math.round(thicknessMm) : null
+
+  const size = width !== null && length !== null ? `${width}X${length}` : 'NOSIZE'
+  const thick = thickness !== null ? `T${thickness}` : null
+
+  return ['YW', usage, wood, profileCode, colorCode, size, thick].filter(Boolean).join('-')
+}
+
 async function upsertCatalogOption(supabase, row) {
   const optionType = row.option_type
   const valueMm = typeof row.value_mm === 'number' ? row.value_mm : null
@@ -101,6 +154,54 @@ async function upsertProductBySlug(supabase, row) {
   const { data: inserted, error: insertError } = await supabase.from('products').insert(row).select('id').single()
   if (insertError) throw new Error(`Failed to insert product (${slug}): ${insertError.message}`)
   return inserted.id
+}
+
+async function replaceProductVariants(supabase, productId, variantType, rows) {
+  const { error: delErr } = await supabase
+    .from('product_variants')
+    .delete()
+    .eq('product_id', productId)
+    .eq('variant_type', variantType)
+
+  if (delErr) throw new Error(`Failed to delete existing ${variantType} variants: ${delErr.message}`)
+  if (!rows.length) return
+
+  const { error: insErr } = await supabase.from('product_variants').insert(rows)
+  if (!insErr) return
+
+  const msg = String(insErr.message || insErr)
+
+  // Older schema may not have label_lt/label_en/value_mm/image_url columns.
+  if (
+    msg.includes('label_lt') ||
+    msg.includes('label_en') ||
+    msg.includes('value_mm') ||
+    msg.includes('image_url') ||
+    msg.includes('schema cache')
+  ) {
+    const fallback = rows.map((row) => {
+      const { label_lt, label_en, value_mm, image_url, ...rest } = row
+      return rest
+    })
+    const { error: retryErr } = await supabase.from('product_variants').insert(fallback)
+    if (retryErr) throw new Error(`Failed to insert fallback variants: ${retryErr.message}`)
+    return
+  }
+
+  throw new Error(`Failed to insert variants: ${msg}`)
+}
+
+async function insertInventorySkus(supabase, rows) {
+  if (!rows.length) return
+  const { error } = await supabase.from('inventory_items').upsert(rows, { onConflict: 'sku', ignoreDuplicates: true })
+  if (!error) return
+
+  const msg = String(error.message || error)
+  if (msg.includes('inventory_items') && (msg.includes('does not exist') || msg.includes('schema cache'))) {
+    console.warn(`Inventory seeding skipped: ${msg}`)
+    return
+  }
+  throw new Error(`Failed to upsert inventory items: ${msg}`)
 }
 
 async function main() {
@@ -186,6 +287,7 @@ async function main() {
       slug: 'degintos-medienos-dailylente-fasadui-egle-natural',
       slug_en: 'shou-sugi-ban-for-facade-spruce-natural',
       category: 'cladding',
+      usage_type: 'facade',
       wood_type: 'spruce',
       base_price: 89.0,
       name: 'Shou Sugi Ban eglė fasadui',
@@ -199,6 +301,7 @@ async function main() {
       slug: 'degintos-medienos-terasine-lenta-terasai-egle-natural',
       slug_en: 'shou-sugi-ban-for-terrace-spruce-natural',
       category: 'decking',
+      usage_type: 'terrace',
       wood_type: 'spruce',
       base_price: 79.0,
       name: 'Shou Sugi Ban eglė terasai',
@@ -212,6 +315,7 @@ async function main() {
       slug: 'degintos-medienos-dailylente-fasadui-maumedis-natural',
       slug_en: 'shou-sugi-ban-for-facade-larch-natural',
       category: 'cladding',
+      usage_type: 'facade',
       wood_type: 'larch',
       base_price: 89.0,
       name: 'Shou Sugi Ban maumedis fasadui',
@@ -225,6 +329,7 @@ async function main() {
       slug: 'degintos-medienos-terasine-lenta-terasai-maumedis-natural',
       slug_en: 'shou-sugi-ban-for-terrace-larch-natural',
       category: 'decking',
+      usage_type: 'terrace',
       wood_type: 'larch',
       base_price: 79.0,
       name: 'Shou Sugi Ban maumedis terasai',
@@ -254,16 +359,6 @@ async function main() {
 
   for (const p of products) {
     const productId = idBySlug.get(p.slug)
-    const wood = p.wood_type
-
-    // Replace only color variants for this product to keep things deterministic.
-    const { error: delErr } = await supabase
-      .from('product_variants')
-      .delete()
-      .eq('product_id', productId)
-      .eq('variant_type', 'color')
-
-    if (delErr) throw new Error(`Failed to delete existing color variants for ${p.slug}: ${delErr.message}`)
 
     const rows = (colors ?? [])
       .filter((c) => typeof c.value_text === 'string' && c.value_text.trim())
@@ -273,6 +368,8 @@ async function main() {
           product_id: productId,
           name: code,
           variant_type: 'color',
+          label_lt: c.label_lt ?? null,
+          label_en: c.label_en ?? null,
           hex_color: c.hex_color ?? null,
           price_adjustment: 0,
           is_available: true,
@@ -280,10 +377,56 @@ async function main() {
         }
       })
 
-    if (rows.length) {
-      const { error: insErr } = await supabase.from('product_variants').insert(rows)
-      if (insErr) throw new Error(`Failed to insert color variants for ${p.slug}: ${insErr.message}`)
-    }
+    await replaceProductVariants(supabase, productId, 'color', rows)
+  }
+
+  // 3b) Ensure profile variants exist per product.
+  // Terrace: only rectangle. Facade: the remaining three (no rectangle).
+  const profileByUsage = {
+    terrace: [
+      {
+        code: 'rectangle',
+        label_lt: 'Stačiakampis',
+        label_en: 'Rectangle',
+      },
+    ],
+    facade: [
+      {
+        code: 'half-taper-45',
+        label_lt: 'Pusiau spuntuotas 45°',
+        label_en: 'Half-taper 45°',
+      },
+      {
+        code: 'half-taper',
+        label_lt: 'Pusiau spuntuotas',
+        label_en: 'Half-taper',
+      },
+      {
+        code: 'rhombus',
+        label_lt: 'Rombas',
+        label_en: 'Rhombus',
+      },
+    ],
+  }
+
+  for (const p of products) {
+    const productId = idBySlug.get(p.slug)
+    const usageType = p.usage_type === 'terrace' ? 'terrace' : 'facade'
+    const profiles = profileByUsage[usageType] || []
+
+    const rows = profiles.map((profile) => ({
+      product_id: productId,
+      name: profile.code,
+      variant_type: 'profile',
+      label_lt: profile.label_lt,
+      label_en: profile.label_en,
+      hex_color: null,
+      price_adjustment: 0,
+      is_available: true,
+      texture_url: null,
+    }))
+
+    await replaceProductVariants(supabase, productId, 'profile', rows)
   }
 
   // 4) Create configuration pricing matrix rows for all width×length combinations
@@ -323,6 +466,54 @@ async function main() {
         throw new Error(`Failed to insert pricing rows for ${p.slug}: ${msg}`)
       }
     }
+  }
+
+  // 5) Create inventory SKUs for every (profile x color x width x length) configuration.
+  // These become separate stock items in `inventory_items`.
+  const inventoryRows = []
+
+  const colorCodes = (colors ?? [])
+    .filter((c) => typeof c.value_text === 'string' && c.value_text.trim())
+    .map((c) => c.value_text.trim())
+
+  for (const p of products) {
+    const productId = idBySlug.get(p.slug)
+    const usageType = p.usage_type === 'terrace' ? 'terrace' : 'facade'
+    const thicknessMm = usageType === 'terrace' ? 28 : 20
+    const woodType = p.wood_type
+
+    const profiles = profileByUsage[usageType] || []
+
+    for (const profile of profiles) {
+      for (const colorCode of colorCodes) {
+        for (const width of widthOptionsMm) {
+          for (const length of lengthOptionsMm) {
+            inventoryRows.push({
+              product_id: productId,
+              variant_id: null,
+              sku: buildInventorySku({
+                usageType,
+                woodType,
+                profile: profile.code,
+                color: colorCode,
+                widthMm: width,
+                lengthMm: length,
+                thicknessMm,
+              }),
+              quantity_available: 0,
+              reorder_point: 10,
+              reorder_quantity: 50,
+              location: null,
+            })
+          }
+        }
+      }
+    }
+  }
+
+  const CHUNK = 250
+  for (let i = 0; i < inventoryRows.length; i += CHUNK) {
+    await insertInventorySkus(supabase, inventoryRows.slice(i, i + CHUNK))
   }
 
   console.log('Seeded fixed products + pricing successfully.')

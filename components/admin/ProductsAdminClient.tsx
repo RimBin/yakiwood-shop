@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
+import { AdminButton, AdminButtonLink, AdminInput, AdminSelect, AdminStack } from '@/components/admin/ui/AdminUI';
 
 interface Variant {
   id: string;
@@ -72,12 +73,10 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
 
   if (!supabase) {
     return (
-      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8">
-        <h1 className="font-['DM_Sans'] text-2xl font-medium text-[#161616]">
-          Supabase is not configured
-        </h1>
-        <p className="font-['Outfit'] text-sm text-[#535353] mt-2">
-          Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local`.
+      <div>
+        <p className="font-['Outfit'] text-[14px] text-[#535353]">
+          Supabase is not configured. Set `NEXT_PUBLIC_SUPABASE_URL` and
+          `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local`.
         </p>
       </div>
     );
@@ -219,91 +218,69 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
   };
 
   return (
-    <div className="space-y-6">
+    <AdminStack>
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <div className="flex-1 max-w-md">
-          <input
+          <AdminInput
             type="text"
             placeholder={tList('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border border-[#BBBBBB] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] focus:outline-none focus:ring-2 focus:ring-[#161616]"
           />
         </div>
-        
-        <Link
-          href={toLocalePath('/admin/products/new', locale)}
-          className="px-6 py-3 bg-[#161616] text-white rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#2d2d2d] transition-colors"
-        >
+
+        <AdminButtonLink href={toLocalePath('/admin/products/new', locale)}>
           {tList('newProductButton')}
-        </Link>
+        </AdminButtonLink>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4">
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] yw-select"
-        >
+        <div className="min-w-[220px]">
+        <AdminSelect value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
           <option value="all">{tList('filters.allCategories')}</option>
           <option value="cladding">{tForm('options.categories.cladding')}</option>
           <option value="decking">{tForm('options.categories.decking')}</option>
           <option value="interior">{tForm('options.categories.interior')}</option>
           <option value="tiles">{tForm('options.categories.tiles')}</option>
-        </select>
+        </AdminSelect>
+        </div>
 
-        <select
-          value={usageFilter}
-          onChange={(e) => setUsageFilter(e.target.value)}
-          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] yw-select"
-        >
+        <div className="min-w-[220px]">
+        <AdminSelect value={usageFilter} onChange={(e) => setUsageFilter(e.target.value)}>
           <option value="all">{tList('filters.allUsage')}</option>
           <option value="facade">{tForm('options.usageTypes.facade')}</option>
           <option value="terrace">{tForm('options.usageTypes.terrace')}</option>
           <option value="interior">{tForm('options.usageTypes.interior')}</option>
           <option value="fence">{tForm('options.usageTypes.fence')}</option>
-        </select>
+        </AdminSelect>
+        </div>
 
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] bg-[#EAEAEA] yw-select"
-        >
+        <div className="min-w-[220px]">
+        <AdminSelect value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           <option value="all">{tList('filters.allStatuses')}</option>
           <option value="active">{tList('filters.statusActivePlural')}</option>
           <option value="inactive">{tList('filters.statusInactivePlural')}</option>
-        </select>
+        </AdminSelect>
+        </div>
       </div>
 
       {/* Bulk Actions */}
       {selectedIds.size > 0 && (
         <div className="flex gap-3 items-center p-4 bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1]">
-          <span className="font-['DM_Sans'] text-[#161616]">
+          <span className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616]">
             {tList('bulk.selected', { count: selectedIds.size })}
           </span>
-          <button
-            onClick={() => handleBulkToggleStatus(true)}
-            disabled={isDeleting}
-            className="px-4 py-2 bg-[#EAEAEA] border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#E1E1E1] disabled:opacity-50"
-          >
+          <AdminButton variant="outline" size="sm" onClick={() => handleBulkToggleStatus(true)} disabled={isDeleting}>
             {tList('bulk.publish')}
-          </button>
-          <button
-            onClick={() => handleBulkToggleStatus(false)}
-            disabled={isDeleting}
-            className="px-4 py-2 bg-[#EAEAEA] border border-[#E1E1E1] rounded-lg font-['DM_Sans'] hover:bg-[#E1E1E1] disabled:opacity-50"
-          >
+          </AdminButton>
+          <AdminButton variant="outline" size="sm" onClick={() => handleBulkToggleStatus(false)} disabled={isDeleting}>
             {tList('bulk.unpublish')}
-          </button>
-          <button
-            onClick={handleBulkDelete}
-            disabled={isDeleting}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg font-['DM_Sans'] hover:bg-red-700 disabled:opacity-50"
-          >
+          </AdminButton>
+          <AdminButton variant="danger" size="sm" onClick={handleBulkDelete} disabled={isDeleting}>
             {tList('bulk.delete')}
-          </button>
+          </AdminButton>
         </div>
       )}
 
@@ -459,24 +436,16 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
               {tList('deleteModal.body')}
             </p>
             <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setDeleteConfirmId(null)}
-                disabled={isDeleting}
-                className="px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-lg font-['DM_Sans'] hover:bg-[#E1E1E1] disabled:opacity-50"
-              >
+              <AdminButton variant="outline" size="sm" onClick={() => setDeleteConfirmId(null)} disabled={isDeleting}>
                 {tList('deleteModal.cancel')}
-              </button>
-              <button
-                onClick={() => handleDelete(deleteConfirmId)}
-                disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg font-['DM_Sans'] hover:bg-red-700 disabled:opacity-50"
-              >
+              </AdminButton>
+              <AdminButton variant="danger" size="sm" onClick={() => handleDelete(deleteConfirmId)} disabled={isDeleting}>
                 {isDeleting ? tList('deleteModal.confirming') : tList('deleteModal.confirm')}
-              </button>
+              </AdminButton>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </AdminStack>
   );
 }
