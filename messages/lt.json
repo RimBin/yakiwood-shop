@@ -50,12 +50,12 @@
     }
   },
   "blog": {
-    "title": "Įrašai",
+    "title": "Straipsniai",
     "subtitle": "Įžvalgos apie Shou Sugi Ban, dizaino patarimai ir praktinės gairės.",
     "readMore": "Skaityti daugiau",
     "readTime": "{minutes} min. skaitymo",
     "empty": "Straipsnių dar nėra.",
-    "back": "Grįžti į įrašus",
+    "back": "Grįžti į straipsnius",
     "related": "Susiję straipsniai",
     "ctaTitle": "Pasiruošę",
     "ctaHighlight": "kurti",
@@ -234,9 +234,9 @@
     }
     ,
     "blog": {
-      "title": "Įrašai apie Shou Sugi Ban",
+      "title": "Straipsniai apie Shou Sugi Ban",
       "description": "Skaitykite straipsnius apie degintą medieną, dizaino sprendimus, priežiūrą ir projektų planavimą.",
-      "ogTitle": "Įrašai - Yakiwood"
+      "ogTitle": "Straipsniai - Yakiwood"
     },
     "faq": {
       "eyebrow": "DUK",

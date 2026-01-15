@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { applySeoOverride } from '@/lib/seo/overrides';
 import { canonicalUrl } from '@/lib/seo/canonical';
@@ -58,6 +58,15 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 export default async function BlogPostPageLt({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const locale = await getLocale();
+
+  if (locale !== 'lt') {
+    const match = blogPosts.find((post) => post.slug.lt === slug);
+    if (match) {
+      redirect(`/blog/${match.slug.en}`);
+    }
+    redirect('/blog');
+  }
+
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const post = getBlogPostBySlug(slug, currentLocale);
 

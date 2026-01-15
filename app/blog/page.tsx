@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { applySeoOverride } from '@/lib/seo/overrides';
 import { canonicalUrl } from '@/lib/seo/canonical';
@@ -42,6 +43,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function BlogPage() {
   const locale = await getLocale();
+  if (locale === 'lt') {
+    redirect('/lt/irasai');
+  }
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const initialPosts = getBlogPosts(currentLocale).filter((post) => post.published);
 

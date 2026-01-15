@@ -94,8 +94,8 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
                   <div className={`relative w-full ${imageHeight} overflow-hidden bg-[#D9D9D9]`}>
                     <BlogImage src={post.heroImage} alt={post.title} />
                   </div>
-                  <div className="bg-white px-[12px] py-[10px]">
-                    <div className="font-['DM_Sans'] text-[12px] leading-[1.35] text-[#161616]">
+                  <div className="px-[12px] py-[10px]">
+                    <div className="font-['DM_Sans'] text-[18px] leading-[1.25] text-[#161616]">
                       {post.title}
                     </div>
                   </div>
