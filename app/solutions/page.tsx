@@ -2,12 +2,17 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { PageCover } from '@/components/shared/PageLayout';
 import { assets } from '@/lib/assets';
+import { useLocale } from 'next-intl';
+import { toLocalePath } from '@/i18n/paths';
 
 export default function SolutionsPage() {
   const [openAccordionIndex, setOpenAccordionIndex] = useState<number | null>(0);
   const [activeFilter, setActiveFilter] = useState('Facades');
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
 
   const ApplicationSection = ({
     id,
@@ -255,6 +260,106 @@ Do you want to give your building a distinctive and attractive appearance? Encou
               { src: assets.projects[1], alt: 'Facades project detail example' },
             ]}
           />
+
+          {/* Modern Facades Section (extra block under Facades) */}
+          <div className="relative overflow-hidden rounded-[24px] border border-[#BBBBBB] bg-[#EAEAEA]">
+            {/* subtle background */}
+            <div className="absolute inset-0 opacity-[0.06] mix-blend-multiply pointer-events-none">
+              <Image src={assets.ctaBackground} alt="" fill className="object-cover" />
+            </div>
+
+            <div className="relative p-[16px] md:p-[24px] lg:p-[40px]">
+              <div className="grid gap-[24px] lg:grid-cols-[420px_1fr] lg:gap-[48px] items-start">
+                <div>
+                  <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
+                    Facades / Quick spec
+                  </p>
+
+                  <h4 className="mt-[16px] font-['DM_Sans'] font-light text-[36px] md:text-[44px] leading-none tracking-[-1.6px] text-[#161616]">
+                    Designed to{' '}
+                    <span className="font-['Tiro_Tamil'] italic tracking-[-1.0px]">last</span>
+                    {' '}outside
+                  </h4>
+
+                  <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
+                    A modern, ventilated facade system with charred wood cladding — built for the Baltic climate, minimal maintenance, and a clean architectural finish.
+                  </p>
+
+                  <div className="mt-[20px] grid gap-[10px]">
+                    {[
+                      { label: 'Thickness', value: '18/20 mm' },
+                      { label: 'Wood', value: 'Larch / Spruce' },
+                      { label: 'Finish', value: 'Matte, UV stable' },
+                    ].map((row) => (
+                      <div
+                        key={row.label}
+                        className="flex items-center justify-between rounded-[16px] border border-[#BBBBBB] bg-white/60 px-[16px] py-[12px]"
+                      >
+                        <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
+                          {row.label}
+                        </p>
+                        <p className="font-['DM_Sans'] font-medium text-[14px] leading-[1.1] tracking-[-0.28px] text-[#161616]">
+                          {row.value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-[24px] flex flex-col sm:flex-row gap-[12px]">
+                    <Link
+                      href={toLocalePath('/kontaktai', currentLocale)}
+                      className="bg-[#161616] h-[48px] px-[40px] rounded-[100px] flex items-center justify-center"
+                    >
+                      <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
+                        get an offer
+                      </span>
+                    </Link>
+
+                    <Link
+                      href={toLocalePath('/projects', currentLocale)}
+                      className="border border-[#161616] h-[48px] px-[40px] rounded-[100px] flex items-center justify-center hover:bg-[#161616] hover:text-white transition-colors"
+                    >
+                      <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
+                        see projects
+                      </span>
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="grid gap-[12px] md:gap-[16px] lg:gap-[24px]">
+                  <div className="grid grid-cols-2 gap-[12px] md:gap-[16px] lg:gap-[24px]">
+                    <div className="relative overflow-hidden rounded-[24px] h-[220px] md:h-[280px] lg:h-[320px]">
+                      <Image src={assets.projects[2]} alt="Facade project detail" fill className="object-cover" />
+                    </div>
+                    <div className="relative overflow-hidden rounded-[24px] h-[220px] md:h-[280px] lg:h-[320px]">
+                      <Image src={assets.categories.facades} alt="Charred wood facade" fill className="object-cover" />
+                    </div>
+                  </div>
+
+                  <div className="relative overflow-hidden rounded-[24px] h-[180px] md:h-[220px] lg:h-[240px]">
+                    <Image src={assets.projects[3]} alt="Facade board texture" fill className="object-cover" />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-[12px] md:gap-[16px] lg:gap-[24px]">
+                    {[
+                      { k: 'EPD', desc: 'Environmental Product Declaration' },
+                      { k: 'FSC', desc: 'Responsible forestry' },
+                      { k: 'UV', desc: 'Fade resistance' },
+                    ].map((b) => (
+                      <div key={b.k} className="rounded-[24px] border border-[#BBBBBB] bg-white/60 p-[14px]">
+                        <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.1] tracking-[-0.36px] text-[#161616]">
+                          {b.k}
+                        </p>
+                        <p className="mt-[6px] font-['Outfit'] font-light text-[12px] leading-[1.3] tracking-[0.12px] text-[#535353]">
+                          {b.desc}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <ApplicationSection
             id="terraces"

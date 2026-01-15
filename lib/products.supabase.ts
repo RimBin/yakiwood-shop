@@ -195,6 +195,44 @@ function humanizeSlugToken(token: string): string {
     .join(' ')
 }
 
+const COLOR_LABELS: Record<string, { lt: string; en: string }> = {
+  black: { lt: 'Juoda', en: 'Black' },
+  silver: { lt: 'Sidabrinė', en: 'Silver' },
+  graphite: { lt: 'Grafitas', en: 'Graphite' },
+  latte: { lt: 'Latte', en: 'Latte' },
+  carbon: { lt: 'Anglis', en: 'Carbon' },
+  'carbon-light': { lt: 'Šviesi anglis', en: 'Carbon Light' },
+  'carbon-dark': { lt: 'Tamsi anglis', en: 'Carbon Dark' },
+  brown: { lt: 'Ruda', en: 'Brown' },
+  'dark-brown': { lt: 'Tamsiai ruda', en: 'Dark Brown' },
+}
+
+function normalizeColorKey(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[_\s]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+export function localizeColorLabel(input: string, locale: 'lt' | 'en'): string {
+  const normalized = normalizeColorKey(input)
+  if (!normalized) return input
+
+  const direct = COLOR_LABELS[normalized]
+  if (direct) return direct[locale]
+
+  const parts = normalized.split('-').filter(Boolean)
+  if (parts.length > 1) {
+    const mapped = parts.map((part) => COLOR_LABELS[part]?.[locale] ?? humanizeSlugToken(part))
+    return mapped.join(' ')
+  }
+
+  return humanizeSlugToken(normalized)
+}
+
 function parseStockItemSlug(
   slug: string
 ):

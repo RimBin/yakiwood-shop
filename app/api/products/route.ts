@@ -10,37 +10,62 @@ export async function GET(request: Request) {
     // Prefer service-role (bypasses RLS) when available.
     const supabase = supabaseAdmin ?? (await createClient())
 
-    // Only expose the columns needed for storefront listing/detail.
-    let query = supabase
-      .from('products')
-      .select(
-        [
-          'id',
-          'name',
-          'name_en',
-          'slug',
-          'slug_en',
-          'description',
-          'description_en',
-          'base_price',
-          'sale_price',
-          'wood_type',
-          'category',
-          'usage_type',
-          'image_url',
-          'is_active',
-          'product_variants(*)',
-        ].join(',')
-      )
-      .order('created_at', { ascending: false })
+    const fullColumns = [
+      'id',
+      'name',
+      'name_en',
+      'slug',
+      'slug_en',
+      'description',
+      'description_en',
+      'base_price',
+      'sale_price',
+      'wood_type',
+      'category',
+      'usage_type',
+      'image_url',
+      'is_active',
+      'product_variants(*)',
+    ]
 
-    if (mode === 'active') {
-      query = query.eq('is_active', true)
-    } else if (mode === 'stock-items') {
-      query = query.ilike('slug', '%--%')
+    const fallbackColumns = [
+      'id',
+      'name',
+      'slug',
+      'description',
+      'base_price',
+      'wood_type',
+      'category',
+      'image_url',
+      'is_active',
+      'product_variants(*)',
+    ]
+
+    const buildQuery = (columns: string[]) => {
+      let query = supabase
+        .from('products')
+        .select(columns.join(','))
+        .order('created_at', { ascending: false })
+
+      if (mode === 'active') {
+        query = query.eq('is_active', true)
+      } else if (mode === 'stock-items') {
+        query = query.ilike('slug', '%--%')
+      }
+
+      return query
     }
 
-    const { data: products, error } = await query
+    let { data: products, error } = await buildQuery(fullColumns)
+
+    if (error) {
+      const message = String((error as { message?: string })?.message || error)
+      if (/slug_en|name_en|description_en|sale_price|usage_type|schema cache|does not exist/i.test(message)) {
+        const retry = await buildQuery(fallbackColumns)
+        products = retry.data
+        error = retry.error
+      }
+    }
 
     if (error) {
       console.error('Supabase error:', error)

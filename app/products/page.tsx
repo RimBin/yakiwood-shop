@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared';
 import { PageLayout } from '@/components/shared/PageLayout';
-import { fetchProducts, type Product } from '@/lib/products.supabase';
+import { fetchProducts, localizeColorLabel, type Product } from '@/lib/products.supabase';
 import { useLocale, useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { applyRoleDiscount, type RoleDiscount } from '@/lib/pricing/roleDiscounts';
@@ -147,8 +147,13 @@ export default function ProductsPage() {
         if (color?.name) set.add(color.name);
       }
     }
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [allProducts]);
+    return Array.from(set)
+      .sort((a, b) => a.localeCompare(b))
+      .map((value) => ({
+        value,
+        label: localizeColorLabel(value, currentLocale),
+      }));
+  }, [allProducts, currentLocale]);
 
   const profileOptions = useMemo(() => {
     const set = new Set<string>();
@@ -284,9 +289,9 @@ export default function ProductsPage() {
                 className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white yw-select"
               >
                 <option value="all">{t('colorFilterAll')}</option>
-                {colorOptions.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
+                {colorOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
@@ -400,7 +405,33 @@ export default function ProductsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-[16px] md:gap-x-[19px] gap-y-[40px] md:gap-y-[56px]">
             {shownProducts.map((product, idx) => (
               (() => {
+                const normalizeColorKey = (input: string) =>
+                  input
+                    .trim()
+                    .toLowerCase()
+                    .replace(/[_\s]+/g, '-')
+                    .replace(/[^a-z0-9-]/g, '')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+
                 const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
+                const localizedDisplayName = (() => {
+                  if (!product.slug.includes('--')) return displayName;
+                  const colorName = product.colors?.[0]?.name ?? '';
+                  if (!colorName) return displayName;
+                  const localizedColor = localizeColorLabel(colorName, currentLocale);
+                  const targetKey = normalizeColorKey(colorName);
+
+                  if (!targetKey || localizedColor === colorName) return displayName;
+
+                  const parts = displayName.split('·').map((part) => part.trim());
+                  const replaced = parts.map((part) => {
+                    const partKey = normalizeColorKey(part);
+                    return partKey === targetKey ? localizedColor : part;
+                  });
+
+                  return replaced.join(' · ');
+                })();
                 const hasSale =
                   typeof product.salePrice === 'number' &&
                   product.salePrice > 0 &&
@@ -417,7 +448,7 @@ export default function ProductsPage() {
               onClick={() => {
                 trackSelectItem({
                   id: product.id,
-                  name: displayName,
+                  name: localizedDisplayName,
                   price: effectivePrice,
                   category: product.category,
                   position: idx + 1,
@@ -437,7 +468,7 @@ export default function ProductsPage() {
                 className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] text-[#161616] tracking-[-0.36px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                {displayName}
+                {localizedDisplayName}
               </p>
               {(product.category || product.woodType) && (
                 <p

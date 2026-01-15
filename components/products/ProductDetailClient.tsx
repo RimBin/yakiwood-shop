@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
 import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
+import { localizeColorLabel } from '@/lib/products.supabase';
 import { assets, getAsset } from '@/lib/assets';
 import type { AssetKey } from '@/lib/assets';
 import { useCartStore } from '@/lib/cart/store';
@@ -24,6 +25,33 @@ function normalizeLabel(value: string): string {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, ' ');
+}
+
+function normalizeColorKey(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[_\s]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function localizeStockItemName(name: string, colorName: string, locale: 'lt' | 'en'): string {
+  if (!name || !colorName) return name;
+  const localizedColor = localizeColorLabel(colorName, locale);
+  if (!localizedColor || localizedColor === colorName) return name;
+
+  const targetKey = normalizeColorKey(colorName);
+  if (!targetKey) return name;
+
+  const parts = name.split('·').map((part) => part.trim());
+  const replaced = parts.map((part) => {
+    const partKey = normalizeColorKey(part);
+    return partKey === targetKey ? localizedColor : part;
+  });
+
+  return replaced.join(' · ');
 }
 
 // Use the centralized color swatch mapping from assets
@@ -124,6 +152,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   }, [cartItems]);
 
   const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
+  const localizedDisplayName = product.slug.includes('--')
+    ? localizeStockItemName(displayName, product.colors?.[0]?.name ?? '', currentLocale)
+    : displayName;
   const displayDescription =
     currentLocale === 'en' && product.descriptionEn ? product.descriptionEn : product.description;
   const hasSale =
@@ -144,22 +175,23 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
     trackProductView({
       id: product.id,
-      name: displayName,
+      name: localizedDisplayName,
       price: effectivePrice,
       category: product.category,
     });
 
     trackedProductIdRef.current = product.id;
-  }, [displayName, effectivePrice, product?.category, product?.id]);
+  }, [effectivePrice, localizedDisplayName, product?.category, product?.id]);
 
   const colorOptions = useMemo<ProductColorVariant[]>(() => {
     return (product.colors || []).map((color, index) => ({
       ...color,
       id: color.id || `${product.id}-color-${index}`,
+      name: color.name ? localizeColorLabel(color.name, currentLocale) : color.name,
       hex: color.hex || '#444444',
       priceModifier: color.priceModifier ?? 0,
     }));
-  }, [product.colors, product.id]);
+  }, [product.colors, product.id, currentLocale]);
 
   const profileOptions = useMemo<ProductProfileVariant[]>(() => {
     const mapped = (product.profiles || []).map((profile, index) => {
@@ -266,7 +298,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
     addItem({
       id: product.id,
-      name: displayName,
+      name: localizedDisplayName,
       slug: product.slug,
       basePrice: typeof unitPricePerBoard === 'number' ? unitPricePerBoard : selectionPrice,
       quantity: resolvedQuantityBoards,
@@ -423,7 +455,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             {currentLocale === 'lt' ? 'Shop' : 'Shop'}
           </Link>
           {' / '}
-          <span className="text-[#161616]">{displayName}</span>
+          <span className="text-[#161616]">{localizedDisplayName}</span>
         </p>
       </div>
 
@@ -443,7 +475,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   }`}
                   aria-label={`Thumb ${index + 1}`}
                 >
-                  <Image src={thumb} alt={`${displayName} view ${index + 1}`} fill className="object-cover" sizes="80px" />
+                  <Image src={thumb} alt={`${localizedDisplayName} view ${index + 1}`} fill className="object-cover" sizes="80px" />
                 </button>
               ))}
             </div>
@@ -485,7 +517,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               ) : (
                 <Image
                   src={activeImage}
-                  alt={displayName}
+                  alt={localizedDisplayName}
                   fill
                   className="object-contain"
                   sizes="(max-width: 1024px) 100vw, 60vw"
@@ -500,7 +532,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             {/* Title and Price */}
             <div className="flex flex-col gap-[8px]">
               <h1 className="font-['DM_Sans'] font-normal text-[28px] lg:text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616]">
-                {displayName}
+                {localizedDisplayName}
               </h1>
               <p className="font-['DM_Sans'] font-normal text-[28px] lg:text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616]">
                 {effectivePrice.toFixed(0)} €
