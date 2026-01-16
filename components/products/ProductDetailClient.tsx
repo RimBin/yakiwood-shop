@@ -45,6 +45,16 @@ function parseStockItemSlug(slug: string) {
   return { baseSlug, profile, color, size };
 }
 
+function parseSizeToken(size: string | undefined | null): { widthMm: number; lengthMm: number } | null {
+  if (!size) return null;
+  const match = String(size).trim().match(/(\d+)\s*[x×]\s*(\d+)/i);
+  if (!match) return null;
+  const widthMm = Number(match[1]);
+  const lengthMm = Number(match[2]);
+  if (!Number.isFinite(widthMm) || !Number.isFinite(lengthMm) || widthMm <= 0 || lengthMm <= 0) return null;
+  return { widthMm, lengthMm };
+}
+
 function formatSizeLabel(value: string): string {
   if (!value) return value;
   return `${value.replace(/x/gi, '×')} mm`;
@@ -182,6 +192,16 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const [show3D, setShow3D] = useState(false);
   const loading3D = false;
 
+  const stockPreset = useMemo(() => {
+    const parsed = parseStockItemSlug(product.slug);
+    if (!parsed) return null;
+    return {
+      profileToken: parsed.profile,
+      colorToken: parsed.color,
+      size: parseSizeToken(parsed.size),
+    };
+  }, [product.slug]);
+
   useEffect(() => {
     if (!product?.id) return;
     if (trackedProductIdRef.current === product.id) return;
@@ -239,6 +259,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const [selectedLengthMm, setSelectedLengthMm] = useState<number>(() => lengthOptionsMm[0]);
   const [targetAreaM2, setTargetAreaM2] = useState<number>(200);
 
+  const selectionInitializedForProductIdRef = useRef<string | null>(null);
+
   const usageTypeForQuote: UsageType | undefined = useMemo(() => {
     const v = String(product.category || '').toLowerCase();
     if (v === 'cladding') return 'facade';
@@ -264,12 +286,58 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   }>(null);
 
   useEffect(() => {
-    setSelectedColor(colorOptions[0] || null);
-  }, [colorOptions]);
+    if (!product?.id) return;
+    if (selectionInitializedForProductIdRef.current === product.id) return;
+
+    // Initialize once per product (including stock-item presets).
+    const presetColorKey = stockPreset?.colorToken ? normalizeColorKey(stockPreset.colorToken) : null;
+    const presetProfileKey = stockPreset?.profileToken ? normalizeLabel(stockPreset.profileToken) : null;
+
+    const initialColor =
+      presetColorKey && colorOptions.length
+        ? colorOptions.find((c) => normalizeColorKey(c.name || '').includes(presetColorKey)) ?? null
+        : null;
+
+    const initialFinish =
+      presetProfileKey && profileOptions.length
+        ? profileOptions.find((p) => {
+            const hay = normalizeLabel([p.code, p.name].filter(Boolean).join(' '));
+            return hay.includes(presetProfileKey);
+          }) ?? null
+        : null;
+
+    setSelectedColor(initialColor ?? colorOptions[0] ?? null);
+    setSelectedFinish(initialFinish ?? profileOptions[0] ?? null);
+
+    const presetSize = stockPreset?.size;
+    if (presetSize) {
+      if (widthOptionsMm.includes(presetSize.widthMm as any)) setSelectedWidthMm(presetSize.widthMm);
+      if (lengthOptionsMm.includes(presetSize.lengthMm as any)) setSelectedLengthMm(presetSize.lengthMm);
+    }
+
+    selectionInitializedForProductIdRef.current = product.id;
+  }, [product?.id, stockPreset, colorOptions, profileOptions, widthOptionsMm, lengthOptionsMm]);
 
   useEffect(() => {
-    setSelectedFinish(profileOptions[0] || null);
-  }, [profileOptions]);
+    // Keep a valid selection if the options list changes.
+    if (!selectedColor) {
+      setSelectedColor(colorOptions[0] ?? null);
+      return;
+    }
+    if (!colorOptions.some((c) => c.id === selectedColor.id)) {
+      setSelectedColor(colorOptions[0] ?? null);
+    }
+  }, [colorOptions, selectedColor]);
+
+  useEffect(() => {
+    if (!selectedFinish) {
+      setSelectedFinish(profileOptions[0] ?? null);
+      return;
+    }
+    if (!profileOptions.some((p) => p.id === selectedFinish.id)) {
+      setSelectedFinish(profileOptions[0] ?? null);
+    }
+  }, [profileOptions, selectedFinish]);
 
   const thicknessOptions = useMemo(() => {
     const all = [
@@ -673,8 +741,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7c7c7c]">
                     Profile
                   </p>
-                  <div className="flex gap-[8px]">
-                    {profileOptions.slice(0, 4).map((finish, index) => {
+                  <div className="flex gap-[8px] flex-wrap">
+                    {profileOptions.map((finish, index) => {
                       const active = selectedFinish?.id === finish.id;
                       const profileIconSrc = resolveProfileIconSrc(finish) ?? PROFILE_ICON_FALLBACK_BY_INDEX[index] ?? null;
                       const fallbackSrc = typeof finish.image === 'string' ? finish.image : null;

@@ -390,6 +390,29 @@ export async function fetchProductBySlug(
 
   const allowInactive = slug.includes('--')
 
+  const enrichWithBaseProduct = async (stockProduct: Product): Promise<Product> => {
+    if (!allowInactive) return stockProduct
+
+    const parsed = parseStockItemSlug(stockProduct.slug)
+    if (!parsed?.baseSlug || parsed.baseSlug.includes('--')) return stockProduct
+
+    const base = await fetchProductBySlug(parsed.baseSlug, options)
+    if (!base) return stockProduct
+
+    return {
+      ...stockProduct,
+      // Keep stock item identity (slug/name/price), but expose full choice sets.
+      colors: base.colors ?? stockProduct.colors,
+      profiles: base.profiles ?? stockProduct.profiles,
+      images: base.images?.length ? base.images : stockProduct.images,
+      image: stockProduct.image || base.image,
+      description: stockProduct.description ?? base.description,
+      descriptionEn: stockProduct.descriptionEn ?? base.descriptionEn,
+      woodType: stockProduct.woodType ?? base.woodType,
+      category: stockProduct.category || base.category,
+    }
+  }
+
   for (const column of columnsToTry) {
     try {
       const { data, error } = await supabase
@@ -409,7 +432,8 @@ export async function fetchProductBySlug(
           .maybeSingle()
 
         if (!fallback.error && fallback.data) {
-          return transformDbProduct(fallback.data as unknown as DbProduct)
+          const stockProduct = transformDbProduct(fallback.data as unknown as DbProduct)
+          return enrichWithBaseProduct(stockProduct)
         }
       }
 
@@ -427,7 +451,8 @@ export async function fetchProductBySlug(
       }
 
       if (data) {
-        return transformDbProduct(data as unknown as DbProduct)
+        const product = transformDbProduct(data as unknown as DbProduct)
+        return enrichWithBaseProduct(product)
       }
     } catch {
       // ignore and try next column

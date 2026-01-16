@@ -463,51 +463,163 @@ export default function ProductsPage() {
     );
   };
 
-  const products = allProducts.filter((product) => {
-    const matchesUsage =
-      selectedUsage.length === 0 || (product.category ? selectedUsage.includes(product.category) : false);
-    const matchesWood =
-      selectedWood.length === 0 || (product.woodType ? selectedWood.includes(product.woodType) : false);
+  const filteredProducts = useMemo(() => {
+    return allProducts.filter((product) => {
+      const matchesUsage =
+        selectedUsage.length === 0 ||
+        (product.category ? selectedUsage.includes(product.category) : false);
+      const matchesWood =
+        selectedWood.length === 0 ||
+        (product.woodType ? selectedWood.includes(product.woodType) : false);
 
-    const normalizedColors = (product.colors ?? [])
-      .map((c) => normalizeToken(c?.name ?? ''))
-      .filter(Boolean);
-    const matchesColor =
-      selectedColor.length === 0 ||
-      selectedColor.some((value) => normalizedColors.includes(normalizeToken(value)));
+      const normalizedColors = (product.colors ?? [])
+        .map((c) => normalizeToken(c?.name ?? ''))
+        .filter(Boolean);
+      const matchesColor =
+        selectedColor.length === 0 ||
+        selectedColor.some((value) => normalizedColors.includes(normalizeToken(value)));
 
-    const normalizedProfiles = (product.profiles ?? [])
-      .map((p) => normalizeToken(p?.name ?? ''))
-      .filter(Boolean);
-    const matchesProfile =
-      selectedProfile.length === 0 ||
-      selectedProfile.some((value) => normalizedProfiles.includes(normalizeToken(value)));
+      const normalizedProfiles = (product.profiles ?? [])
+        .map((p) => normalizeToken(p?.name ?? ''))
+        .filter(Boolean);
+      const matchesProfile =
+        selectedProfile.length === 0 ||
+        selectedProfile.some((value) => normalizedProfiles.includes(normalizeToken(value)));
 
-    const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
-    const dims = parsed?.size ? parseSizeDimensions(parsed.size) : null;
-    const matchesWidth =
-      selectedWidth.length === 0 ||
-      (dims?.width ? selectedWidth.includes(dims.width) : false);
-    const matchesLength =
-      selectedLength.length === 0 ||
-      (dims?.length ? selectedLength.includes(dims.length) : false);
+      const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
+      const dims = parsed?.size ? parseSizeDimensions(parsed.size) : null;
+      const matchesWidth =
+        selectedWidth.length === 0 || (dims?.width ? selectedWidth.includes(dims.width) : false);
+      const matchesLength =
+        selectedLength.length === 0 || (dims?.length ? selectedLength.includes(dims.length) : false);
 
-    const q = searchQuery.trim().toLowerCase();
-    const displayName = formatProductDisplayName(product).toLowerCase();
-    const matchesQuery = q.length === 0 || displayName.includes(q);
+      const q = searchQuery.trim().toLowerCase();
+      const displayName = formatProductDisplayName(product).toLowerCase();
+      const matchesQuery = q.length === 0 || displayName.includes(q);
 
-    return (
-      matchesUsage &&
-      matchesWood &&
-      matchesColor &&
-      matchesProfile &&
-      matchesWidth &&
-      matchesLength &&
-      matchesQuery
-    );
-  });
+      return (
+        matchesUsage &&
+        matchesWood &&
+        matchesColor &&
+        matchesProfile &&
+        matchesWidth &&
+        matchesLength &&
+        matchesQuery
+      );
+    });
+  }, [
+    allProducts,
+    formatProductDisplayName,
+    searchQuery,
+    selectedColor,
+    selectedLength,
+    selectedProfile,
+    selectedUsage,
+    selectedWidth,
+    selectedWood,
+  ]);
 
-  const shownProducts = products.slice(0, visibleCount);
+  const isDefaultListing =
+    selectedUsage.length === 0 &&
+    selectedWood.length === 0 &&
+    selectedColor.length === 0 &&
+    selectedProfile.length === 0 &&
+    selectedWidth.length === 0 &&
+    selectedLength.length === 0 &&
+    searchQuery.trim().length === 0;
+
+  const orderedProducts = useMemo(() => {
+    if (!isDefaultListing) return filteredProducts;
+
+    const colorOrder = [
+      'black',
+      'carbon-light',
+      'carbon',
+      'dark-brown',
+      'graphite',
+      'latte',
+      'natural',
+      'silver',
+    ] as const;
+
+    const getWoodKey = (product: Product) => normalizeToken(product.woodType ?? '') || 'unknown';
+
+    const getColorKey = (product: Product) => {
+      const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
+      const rawColor = product.colors?.[0]?.name ?? parsed?.color ?? '';
+      return normalizeToken(rawColor) || 'unknown';
+    };
+
+    const byGroup = new Map<string, { wood: string; color: string; items: Product[] }>();
+    for (const product of filteredProducts) {
+      const wood = getWoodKey(product);
+      const color = getColorKey(product);
+      const key = `${wood}:${color}`;
+      const existing = byGroup.get(key);
+      if (existing) existing.items.push(product);
+      else byGroup.set(key, { wood, color, items: [product] });
+    }
+
+    const result: Product[] = [];
+
+    // 1) Ensure the first rows contain a clear mix: 8 colors for spruce and 8 for larch.
+    for (const color of colorOrder) {
+      for (const wood of ['spruce', 'larch'] as const) {
+        const group = byGroup.get(`${wood}:${color}`);
+        if (group?.items.length) {
+          result.push(group.items.shift()!);
+        }
+      }
+    }
+
+    // 2) Fill the rest round-robin, avoiding repeating the same wood/color in a row when possible.
+    let lastWood: string | null = result.at(-1)?.woodType ? normalizeToken(result.at(-1)!.woodType!) : null;
+    let lastColor: string | null = (() => {
+      const last = result.at(-1);
+      if (!last) return null;
+      const parsed = last.slug.includes('--') ? parseStockItemSlug(last.slug) : null;
+      const rawColor = last.colors?.[0]?.name ?? parsed?.color ?? '';
+      return normalizeToken(rawColor) || null;
+    })();
+
+    const groups = Array.from(byGroup.values()).filter((g) => g.items.length > 0);
+
+    const colorRank = new Map<string, number>(colorOrder.map((c, idx) => [c, idx]));
+    groups.sort((a, b) => {
+      const ra = colorRank.get(a.color) ?? 999;
+      const rb = colorRank.get(b.color) ?? 999;
+      if (ra !== rb) return ra - rb;
+      return a.wood.localeCompare(b.wood);
+    });
+
+    while (result.length < filteredProducts.length) {
+      const pickIndex = (() => {
+        const idxStrict = groups.findIndex((g) =>
+          g.items.length > 0 && g.wood !== lastWood && g.color !== lastColor
+        );
+        if (idxStrict !== -1) return idxStrict;
+
+        const idxColor = groups.findIndex((g) => g.items.length > 0 && g.color !== lastColor);
+        if (idxColor !== -1) return idxColor;
+
+        const idxAny = groups.findIndex((g) => g.items.length > 0);
+        return idxAny;
+      })();
+
+      if (pickIndex === -1) break;
+      const group = groups[pickIndex]!;
+      const next = group.items.shift();
+      if (!next) continue;
+
+      result.push(next);
+      lastWood = group.wood;
+      lastColor = group.color;
+    }
+
+    return result;
+  }, [filteredProducts, isDefaultListing]);
+
+  const shownProducts = orderedProducts.slice(0, visibleCount);
 
   const activeUsageLabel =
     selectedUsage.length > 0
@@ -594,7 +706,7 @@ export default function ProductsPage() {
             className="font-['DM_Sans'] font-normal text-[18px] md:text-[32px] leading-[1.1] text-[#161616] tracking-[-0.72px] md:tracking-[-1.28px]"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
-            ({products.length})
+            ({orderedProducts.length})
           </p>
           </div>
 
@@ -642,7 +754,7 @@ export default function ProductsPage() {
                   if (e.key !== 'Enter') return;
                   const q = searchQuery.trim();
                   if (!q) return;
-                  trackSearch(q, products.length);
+                  trackSearch(q, orderedProducts.length);
                 }}
                 placeholder={t('searchPlaceholder')}
                 className="w-full h-[40px] pl-[42px] pr-[16px] rounded-[100px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-[#EAEAEA]"
@@ -734,7 +846,7 @@ export default function ProductsPage() {
               {t('retry')}
             </button>
           </div>
-        ) : products.length === 0 ? (
+        ) : orderedProducts.length === 0 ? (
           <div className="text-center py-20">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-[#EAEAEA] rounded-full mb-4">
               <svg className="w-8 h-8 text-[#BBBBBB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -829,10 +941,10 @@ export default function ProductsPage() {
         )}
 
         {/* Load More Button - only show if there are products */}
-        {!isLoading && shownProducts.length < products.length && (
+        {!isLoading && shownProducts.length < orderedProducts.length && (
           <div className="flex justify-center mt-[64px]">
             <button
-              onClick={() => setVisibleCount((c) => Math.min(c + PAGE_SIZE, products.length))}
+              onClick={() => setVisibleCount((c) => Math.min(c + PAGE_SIZE, orderedProducts.length))}
               className="h-[48px] px-[40px] py-[10px] bg-[#161616] text-white rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase hover:opacity-90 transition-opacity"
             >
               {t('loadMore')}
