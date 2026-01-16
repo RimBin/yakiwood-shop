@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
+import { toLocalePath, type AppLocale } from '@/i18n/paths';
 
 interface ProductCardProps {
   id: string;
@@ -28,9 +30,12 @@ export default function ProductCard({
   selectedColorIndex = 1,
   className = '',
 }: ProductCardProps) {
+  const locale = useLocale();
+  const currentLocale: AppLocale = locale === 'lt' ? 'lt' : 'en';
+
   return (
     <Link 
-      href={`/products/${slug}`}
+      href={toLocalePath(`/products/${slug}`, currentLocale)}
       className={`bg-[#eaeaea] rounded-[8px] flex flex-col gap-[24px] items-center pt-[24px] pb-[40px] px-[24px] relative group hover:shadow-lg transition-shadow ${className}`}
     >
       {/* Product Image */}

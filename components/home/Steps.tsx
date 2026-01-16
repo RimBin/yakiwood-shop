@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { getLocale } from 'next-intl/server';
 import { getSectionPadding } from '@/lib/design-system';
+import { toLocalePath, type AppLocale } from '@/i18n/paths';
 
 const steps = [
 	{
@@ -28,7 +29,8 @@ const steps = [
 
 export default async function Steps() {
 	const locale = await getLocale();
-	const shopHref = locale === 'en' ? '/en/products' : '/produktai';
+	const currentLocale: AppLocale = locale === 'lt' ? 'lt' : 'en';
+	const shopHref = toLocalePath('/products', currentLocale);
 
 	return (
 		<section className="w-full bg-[#161616]">

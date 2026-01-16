@@ -1,15 +1,20 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { getLocale } from 'next-intl/server';
 import type { Product } from '@/lib/products.supabase';
+import { toLocalePath, type AppLocale } from '@/i18n/paths';
 
 interface RelatedProductsProps {
   products: Product[];
 }
 
-export default function RelatedProducts({ products }: RelatedProductsProps) {
+export default async function RelatedProducts({ products }: RelatedProductsProps) {
   if (!products || products.length === 0) {
     return null;
   }
+
+  const locale = await getLocale();
+  const currentLocale: AppLocale = locale === 'lt' ? 'lt' : 'en';
 
   return (
     <section className="w-full py-12">
@@ -19,7 +24,11 @@ export default function RelatedProducts({ products }: RelatedProductsProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {products.map((product) => (
-          <Link key={product.id} href={`/produktai/${product.slug}`} className="group block">
+          <Link
+            key={product.id}
+            href={toLocalePath(`/products/${currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug}`, currentLocale)}
+            className="group block"
+          >
             <div className="relative aspect-square bg-[#EAEAEA] rounded-[24px] overflow-hidden mb-4 group-hover:shadow-lg transition-shadow">
               <Image
                 src={product.image || '/images/ui/wood/imgSpruce.png'}

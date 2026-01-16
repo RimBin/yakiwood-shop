@@ -225,7 +225,13 @@ function MobileProductCard({
                 }
               >
                 <span className="relative block w-full h-full rounded-full overflow-hidden">
-                  <Image src={slide.swatch} alt={slide.label || product.title} fill className="object-cover" />
+                  <Image
+                    src={slide.image}
+                    alt={slide.label || product.title}
+                    fill
+                    sizes="32px"
+                    className="object-cover"
+                  />
                 </span>
               </button>
             ))}
@@ -317,7 +323,7 @@ function DesktopProductCard({
 
         <div className="flex flex-col gap-[8px]">
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] text-[#161616]">{colorsLabel}</p>
-          <div className="flex gap-[12px] items-center overflow-clip">
+          <div className="flex flex-wrap gap-[12px] items-center">
             {slides.map((slide, idx) => (
               <button
                 key={`${product.id}-thumb-desktop-${idx}`}
@@ -334,12 +340,18 @@ function DesktopProductCard({
                 }}
                 className={
                   idx === currentIndex
-                    ? 'w-[40px] h-[40px] rounded-full bg-white p-[4px]'
-                    : 'w-[40px] h-[40px] rounded-full'
+                    ? 'w-[32px] h-[32px] rounded-full bg-white p-[4px]'
+                    : 'w-[32px] h-[32px] rounded-full'
                 }
               >
                 <span className="relative block w-full h-full rounded-full overflow-hidden">
-                  <Image src={slide.swatch} alt={slide.label || product.title} fill className="object-cover" />
+                  <Image
+                    src={slide.image}
+                    alt={slide.label || product.title}
+                    fill
+                    sizes="32px"
+                    className="object-cover"
+                  />
                 </span>
               </button>
             ))}

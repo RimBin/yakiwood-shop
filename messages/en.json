@@ -343,9 +343,12 @@
     "ctaContact": "Contact",
     "solutions": {
       "facade": "Facades",
+      "cladding": "Cladding",
       "fence": "Fence",
       "terrace": "Terrace",
-      "interior": "Interior"
+      "decking": "Decking",
+      "interior": "Interior",
+      "tiles": "Tiles"
     },
     "woodTypes": {
       "spruce": "Spruce",
@@ -1556,6 +1559,9 @@
     "filtersColor": "Color",
     "filtersProfile": "Profile",
     "filtersSize": "Size",
+    "filtersWidth": "Width",
+    "filtersLength": "Length",
+    "filtersAny": "All",
     "filtersAll": "All products",
     "filtersEmpty": "No options",
     "colorFilterLabel": "Color",

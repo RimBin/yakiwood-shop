@@ -131,6 +131,7 @@ function isFallbackProfileId(id: string | undefined | null): boolean {
 
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   const t = useTranslations('productPage');
+  const tBreadcrumbs = useTranslations('breadcrumbs');
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const addItem = useCartStore((state) => state.addItem);
@@ -151,8 +152,15 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const localizedDisplayName = (() => {
     if (!product.slug.includes('--')) return displayName;
     const parsed = parseStockItemSlug(product.slug);
-    const usageLabel = product.category ? t(`solutions.${product.category}`) : '';
-    const woodLabel = product.woodType ? t(`woodTypes.${product.woodType}`) : '';
+    const categoryKey = typeof product.category === 'string' ? product.category.trim().toLowerCase() : '';
+    const usageKey = categoryKey ? `solutions.${categoryKey}` : null;
+    const usageLabelRaw = usageKey && t.has(usageKey) ? t(usageKey) : '';
+    const usageLabel = typeof usageLabelRaw === 'string' && usageLabelRaw.startsWith('productPage.') ? '' : usageLabelRaw;
+
+    const woodTypeKey = typeof product.woodType === 'string' ? product.woodType.trim().toLowerCase() : '';
+    const woodKey = woodTypeKey ? `woodTypes.${woodTypeKey}` : null;
+    const woodLabelRaw = woodKey && t.has(woodKey) ? t(woodKey) : '';
+    const woodLabel = typeof woodLabelRaw === 'string' && woodLabelRaw.startsWith('productPage.') ? '' : woodLabelRaw;
     const colorName = product.colors?.[0]?.name ?? parsed?.color ?? '';
     const colorLabel = colorName ? localizeColorLabel(colorName, currentLocale) : '';
     const sizeLabel = parsed?.size ? formatSizeLabel(parsed.size) : '';
@@ -233,6 +241,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
   const usageTypeForQuote: UsageType | undefined = useMemo(() => {
     const v = String(product.category || '').toLowerCase();
+    if (v === 'cladding') return 'facade';
+    if (v === 'decking') return 'terrace';
+    if (v === 'tiles') return 'interior';
     if (v === 'facade' || v === 'terrace' || v === 'interior' || v === 'fence') return v;
     return undefined;
   }, [product.category]);
@@ -453,11 +464,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[10px] border-b border-[#bbbbbb]">
         <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] text-[#7c7c7c]">
           <Link href={homeHref} className="hover:text-[#161616]">
-            {currentLocale === 'lt' ? 'Pagrindinis' : 'Home'}
+            {tBreadcrumbs('home')}
           </Link>
           {' / '}
           <Link href={shopHref} className="hover:text-[#161616]">
-            {currentLocale === 'lt' ? 'Shop' : 'Shop'}
+            {tBreadcrumbs('products')}
           </Link>
           {' / '}
           <span className="text-[#161616]">{localizedDisplayName}</span>

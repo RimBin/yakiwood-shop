@@ -25,10 +25,10 @@ interface FilterSidebarProps {
 const CATEGORIES = ['Lentos', 'Plytelės', 'Fasadai', 'Interjeras'];
 const WOOD_TYPES = ['Eglė', 'Maumedis'];
 const COLORS = [
-  { name: 'Juoda', hex: '#161616' },
-  { name: 'Ruda', hex: '#8B4513' },
-  { name: 'Pilka', hex: '#808080' },
-  { name: 'Natūrali', hex: '#D2B48C' },
+  { name: 'Black', hex: '#161616' },
+  { name: 'Brown', hex: '#8B4513' },
+  { name: 'Grey', hex: '#808080' },
+  { name: 'Natural', hex: '#D2B48C' },
 ];
 const FINISHES = ['Matinė', 'Blizgi', 'Natūrali'];
 

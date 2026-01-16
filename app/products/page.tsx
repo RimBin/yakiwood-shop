@@ -1,6 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared';
@@ -11,6 +20,153 @@ import { createClient } from '@/lib/supabase/client';
 import { applyRoleDiscount, type RoleDiscount } from '@/lib/pricing/roleDiscounts';
 import { toLocalePath } from '@/i18n/paths';
 import { trackEvent, trackSearch, trackSelectItem } from '@/lib/analytics';
+
+type DropdownOption = { value: string; label: string };
+
+function FilterDropdown({
+  id,
+  label,
+  options,
+  selected,
+  onToggle,
+  allLabel,
+  emptyLabel,
+  openId,
+  setOpenId,
+}: {
+  id: string;
+  label: string;
+  options: DropdownOption[];
+  selected: string[];
+  onToggle: (value: string) => void;
+  allLabel: string;
+  emptyLabel: string;
+  openId: string | null;
+  setOpenId: (value: string | null) => void;
+}) {
+  const isOpen = openId === id;
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
+
+  const selectedLabels = useMemo(
+    () => options.filter((o) => selected.includes(o.value)).map((o) => o.label),
+    [options, selected]
+  );
+
+  const summaryValue = selectedLabels.length > 0 ? selectedLabels.join(', ') : allLabel;
+
+  const updatePosition = useCallback(() => {
+    const el = buttonRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const minWidth = Math.max(220, rect.width);
+    const left = Math.min(rect.left, Math.max(8, window.innerWidth - minWidth - 8));
+    const top = rect.bottom + 8;
+    setPos({ top, left, width: minWidth });
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    updatePosition();
+
+    const onResizeOrScroll = () => updatePosition();
+    window.addEventListener('resize', onResizeOrScroll);
+    window.addEventListener('scroll', onResizeOrScroll, true);
+    return () => {
+      window.removeEventListener('resize', onResizeOrScroll);
+      window.removeEventListener('scroll', onResizeOrScroll, true);
+    };
+  }, [isOpen, updatePosition]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (buttonRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+      setOpenId(null);
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenId(null);
+    };
+
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isOpen, setOpenId]);
+
+  return (
+    <div className="relative shrink-0">
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => setOpenId(isOpen ? null : id)}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+        className="h-[40px] px-[14px] rounded-[100px] border border-[#BBBBBB] font-['Outfit'] text-[12px] tracking-[0.6px] flex items-center gap-[8px] max-w-[220px] select-none"
+      >
+        <span className="flex min-w-0 items-center gap-[8px]">
+          <span className="shrink-0">{label}:</span>
+          <span className="min-w-0 truncate text-[#535353]">{summaryValue}</span>
+        </span>
+        <svg
+          className={`ml-auto shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M6 9l6 6 6-6"
+            stroke="#161616"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+
+      {isOpen && pos
+        ? createPortal(
+            <div
+              ref={menuRef}
+              className="z-50 max-h-[260px] overflow-auto rounded-[24px] border border-[#BBBBBB] bg-[#EAEAEA] p-[14px] shadow-lg"
+              style={{ position: 'fixed', top: pos.top, left: pos.left, minWidth: pos.width }}
+              role="dialog"
+              aria-label={label}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              {options.length === 0 ? (
+                <p className="text-[12px] text-[#7C7C7C]">{emptyLabel}</p>
+              ) : (
+                <div className="flex flex-col gap-[8px]">
+                  {options.map((option) => (
+                    <label key={option.value} className="flex items-center gap-[8px] text-[13px]">
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(option.value)}
+                        onChange={() => onToggle(option.value)}
+                        className="accent-[#161616]"
+                      />
+                      <span>{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>,
+            document.body
+          )
+        : null}
+    </div>
+  );
+}
 
 export default function ProductsPage() {
   const t = useTranslations('productsPage');
@@ -23,13 +179,16 @@ export default function ProductsPage() {
   const [selectedWood, setSelectedWood] = useState<string[]>([]);
   const [selectedColor, setSelectedColor] = useState<string[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string[]>([]);
-  const [selectedSize, setSelectedSize] = useState<string[]>([]);
+  const [selectedWidth, setSelectedWidth] = useState<string[]>([]);
+  const [selectedLength, setSelectedLength] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  const [openFilterId, setOpenFilterId] = useState<string | null>(null);
 
   const [hasTrackedListView, setHasTrackedListView] = useState(false);
 
@@ -109,7 +268,8 @@ export default function ProductsPage() {
     selectedWood,
     selectedColor,
     selectedProfile,
-    selectedSize,
+    selectedWidth,
+    selectedLength,
     searchQuery,
   ]);
 
@@ -170,6 +330,19 @@ export default function ProductsPage() {
     return `${normalized} mm`;
   };
 
+  const parseSizeDimensions = (value: string) => {
+    const match = value.trim().match(/^(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)$/i);
+    if (!match) return null;
+    const width = match[1]!.replace(',', '.');
+    const length = match[2]!.replace(',', '.');
+    return { width, length };
+  };
+
+  const formatDimensionLabel = (value: string) => {
+    if (!value) return value;
+    return `${value} mm`;
+  };
+
   const formatProductDisplayName = (product: Product) => {
     const baseName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
     if (!product.slug.includes('--')) return baseName;
@@ -219,18 +392,27 @@ export default function ProductsPage() {
   }, [allProducts]);
 
   const sizeOptions = useMemo(() => {
-    const set = new Set<string>();
+    const widths = new Set<string>();
+    const lengths = new Set<string>();
+
     for (const product of allProducts) {
       if (!product.slug.includes('--')) continue;
       const parsed = parseStockItemSlug(product.slug);
-      if (parsed?.size) set.add(parsed.size);
+      if (!parsed?.size) continue;
+      const dims = parseSizeDimensions(parsed.size);
+      if (!dims) continue;
+      widths.add(dims.width);
+      lengths.add(dims.length);
     }
-    return Array.from(set)
-      .sort((a, b) => a.localeCompare(b))
-      .map((value) => ({
-        value,
-        label: formatSizeLabel(value),
-      }));
+
+    return {
+      widths: Array.from(widths)
+        .sort((a, b) => Number(a) - Number(b))
+        .map((value) => ({ value, label: formatDimensionLabel(value) })),
+      lengths: Array.from(lengths)
+        .sort((a, b) => Number(a) - Number(b))
+        .map((value) => ({ value, label: formatDimensionLabel(value) })),
+    };
   }, [allProducts]);
 
   const usageOptions = useMemo(
@@ -249,50 +431,25 @@ export default function ProductsPage() {
   );
 
   const renderDropdown = (
+    id: string,
     label: string,
     options: Array<{ value: string; label: string }>,
     selected: string[],
-    onToggle: (value: string) => void
+    onToggle: (value: string) => void,
+    allLabel?: string
   ) => {
-    const selectedLabels = options
-      .filter((option) => selected.includes(option.value))
-      .map((option) => option.label);
-    const toLower = (text: string) =>
-      text.toLocaleLowerCase(currentLocale === 'lt' ? 'lt' : 'en');
-
-    const summaryText =
-      selectedLabels.length > 0
-        ? `${toLower(label)}: ${selectedLabels.map(toLower).join(', ')}`
-        : `${toLower(label)}: ${toLower(t('filtersAll'))}`;
-
     return (
-      <details className="group relative">
-        <summary className="list-none cursor-pointer select-none h-[40px] px-[14px] rounded-[100px] border border-[#BBBBBB] font-['Outfit'] text-[12px] tracking-[0.6px] flex items-center gap-[8px]">
-          <span className="truncate max-w-[220px]">{summaryText}</span>
-          <span className="ml-auto text-[12px] leading-none transition-transform group-open:rotate-180">
-            V
-          </span>
-        </summary>
-        <div className="absolute z-20 mt-[8px] min-w-[220px] max-h-[260px] overflow-auto rounded-[12px] border border-[#E1E1E1] bg-white p-[12px] shadow-lg">
-          {options.length === 0 ? (
-            <p className="text-[12px] text-[#7C7C7C]">{t('filtersEmpty')}</p>
-          ) : (
-            <div className="flex flex-col gap-[8px]">
-              {options.map((option) => (
-                <label key={option.value} className="flex items-center gap-[8px] text-[13px]">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(option.value)}
-                    onChange={() => onToggle(option.value)}
-                    className="accent-[#161616]"
-                  />
-                  <span>{option.label}</span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-      </details>
+      <FilterDropdown
+        id={id}
+        label={label}
+        options={options}
+        selected={selected}
+        onToggle={onToggle}
+        allLabel={allLabel ?? t('filtersAll')}
+        emptyLabel={t('filtersEmpty')}
+        openId={openFilterId}
+        setOpenId={setOpenFilterId}
+      />
     );
   };
 
@@ -327,15 +484,27 @@ export default function ProductsPage() {
       selectedProfile.some((value) => normalizedProfiles.includes(normalizeToken(value)));
 
     const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
-    const matchesSize =
-      selectedSize.length === 0 ||
-      (parsed?.size ? selectedSize.includes(parsed.size) : false);
+    const dims = parsed?.size ? parseSizeDimensions(parsed.size) : null;
+    const matchesWidth =
+      selectedWidth.length === 0 ||
+      (dims?.width ? selectedWidth.includes(dims.width) : false);
+    const matchesLength =
+      selectedLength.length === 0 ||
+      (dims?.length ? selectedLength.includes(dims.length) : false);
 
     const q = searchQuery.trim().toLowerCase();
     const displayName = formatProductDisplayName(product).toLowerCase();
     const matchesQuery = q.length === 0 || displayName.includes(q);
 
-    return matchesUsage && matchesWood && matchesColor && matchesProfile && matchesSize && matchesQuery;
+    return (
+      matchesUsage &&
+      matchesWood &&
+      matchesColor &&
+      matchesProfile &&
+      matchesWidth &&
+      matchesLength &&
+      matchesQuery
+    );
   });
 
   const shownProducts = products.slice(0, visibleCount);
@@ -361,7 +530,8 @@ export default function ProductsPage() {
         wood: selectedWood,
         color: selectedColor,
         profile: selectedProfile,
-        size: selectedSize,
+        width: selectedWidth,
+        length: selectedLength,
       },
       shown_items_count: shownProducts.length,
     });
@@ -372,7 +542,8 @@ export default function ProductsPage() {
     selectedProfile,
     selectedUsage,
     selectedWood,
-    selectedSize,
+    selectedWidth,
+    selectedLength,
     currentLocale,
     error,
     hasTrackedListView,
@@ -390,7 +561,8 @@ export default function ProductsPage() {
         wood: selectedWood,
         color: selectedColor,
         profile: selectedProfile,
-        size: selectedSize,
+        width: selectedWidth,
+        length: selectedLength,
       },
       shown_items_count: shownProducts.length,
     });
@@ -399,7 +571,8 @@ export default function ProductsPage() {
     selectedProfile,
     selectedUsage,
     selectedWood,
-    selectedSize,
+    selectedWidth,
+    selectedLength,
     error,
     isLoading,
     shownProducts.length,
@@ -436,39 +609,92 @@ export default function ProductsPage() {
       {/* Filters */}
       <PageLayout>
         <div className="py-[24px] flex flex-col gap-4">
-          <div className="w-full max-w-[520px]">
-            <label className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-              {t('searchLabel')}
-            </label>
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key !== 'Enter') return;
-                const q = searchQuery.trim();
-                if (!q) return;
-                trackSearch(q, products.length);
-              }}
-              placeholder={t('searchPlaceholder')}
-              className="w-full h-[40px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white"
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-[12px]">
-            {renderDropdown(t('filtersUsage'), usageOptions, selectedUsage, (value) =>
-              toggleFilterValue(selectedUsage, value, setSelectedUsage)
+          <div className="flex flex-nowrap items-center gap-[12px] overflow-x-auto pb-[6px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="relative flex-[1_1_220px] min-w-[220px] max-w-[520px]">
+              <label className="sr-only">{t('searchLabel')}</label>
+              <svg
+                className="absolute left-[14px] top-1/2 -translate-y-1/2"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"
+                  stroke="#161616"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M21 21l-4.35-4.35"
+                  stroke="#161616"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter') return;
+                  const q = searchQuery.trim();
+                  if (!q) return;
+                  trackSearch(q, products.length);
+                }}
+                placeholder={t('searchPlaceholder')}
+                className="w-full h-[40px] pl-[42px] pr-[16px] rounded-[100px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-[#EAEAEA]"
+              />
+            </div>
+            {renderDropdown(
+              'usage',
+              t('filtersUsage'),
+              usageOptions,
+              selectedUsage,
+              (value) => toggleFilterValue(selectedUsage, value, setSelectedUsage),
+              t('usageFilters.all')
             )}
-            {renderDropdown(t('filtersWood'), woodOptions, selectedWood, (value) =>
-              toggleFilterValue(selectedWood, value, setSelectedWood)
+            {renderDropdown(
+              'wood',
+              t('filtersWood'),
+              woodOptions,
+              selectedWood,
+              (value) => toggleFilterValue(selectedWood, value, setSelectedWood),
+              t('woodFilters.all')
             )}
-            {renderDropdown(t('filtersColor'), colorOptions, selectedColor, (value) =>
-              toggleFilterValue(selectedColor, value, setSelectedColor)
+            {renderDropdown(
+              'color',
+              t('filtersColor'),
+              colorOptions,
+              selectedColor,
+              (value) => toggleFilterValue(selectedColor, value, setSelectedColor),
+              t('colorFilterAll')
             )}
-            {renderDropdown(t('filtersProfile'), profileDropdownOptions, selectedProfile, (value) =>
-              toggleFilterValue(selectedProfile, value, setSelectedProfile)
+            {renderDropdown(
+              'profile',
+              t('filtersProfile'),
+              profileDropdownOptions,
+              selectedProfile,
+              (value) => toggleFilterValue(selectedProfile, value, setSelectedProfile),
+              t('profileFilterAll')
             )}
-            {renderDropdown(t('filtersSize'), sizeOptions, selectedSize, (value) =>
-              toggleFilterValue(selectedSize, value, setSelectedSize)
+            {renderDropdown(
+              'width',
+              t('filtersWidth'),
+              sizeOptions.widths,
+              selectedWidth,
+              (value) => toggleFilterValue(selectedWidth, value, setSelectedWidth),
+              t('filtersAny')
+            )}
+            {renderDropdown(
+              'length',
+              t('filtersLength'),
+              sizeOptions.lengths,
+              selectedLength,
+              (value) => toggleFilterValue(selectedLength, value, setSelectedLength),
+              t('filtersAny')
             )}
           </div>
         </div>

@@ -212,14 +212,14 @@
         "selectColor": "Pasirinkti {label} ({index}/{total})"
       },
       "finishes": {
-        "natural": "Natūrali",
-        "silver": "Sidabrinė",
-        "carbon": "Anglis",
-        "carbonLight": "Šviesi anglis",
-        "graphite": "Grafitas",
+        "natural": "Natural",
+        "silver": "Silver",
+        "carbon": "Carbon",
+        "carbonLight": "Carbon Light",
+        "graphite": "Graphite",
         "latte": "Latte",
-        "darkBrown": "Tamsiai ruda",
-        "black": "Juoda"
+        "darkBrown": "Dark Brown",
+        "black": "Black"
       },
       "items": {
         "spruce": {
@@ -338,9 +338,12 @@
     "ctaContact": "Susisiekti",
     "solutions": {
       "facade": "Fasadai",
+      "cladding": "Fasadai",
       "fence": "Tvora",
       "terrace": "Terasa",
-      "interior": "Interjeras"
+      "decking": "Lentos",
+      "interior": "Interjeras",
+      "tiles": "Plytelės"
     },
     "woodTypes": {
       "spruce": "Eglė",
@@ -1051,14 +1054,14 @@
         "larch": "Maumedis"
       },
       "colors": {
-        "natural": "Natūrali",
-        "carbonLight": "Šviesus karbonas",
-        "carbonDark": "Tamsus karbonas",
-        "brown": "Ruda",
-        "graphite": "Grafitas",
+        "natural": "Natural",
+        "carbonLight": "Carbon Light",
+        "carbonDark": "Carbon Dark",
+        "brown": "Brown",
+        "graphite": "Graphite",
         "latte": "Latte",
-        "silver": "Sidabrinė",
-        "black": "Juoda"
+        "silver": "Silver",
+        "black": "Black"
       }
     },
     "seo": {
@@ -1385,6 +1388,9 @@
     "filtersColor": "Spalva",
     "filtersProfile": "Profilis",
     "filtersSize": "Išmatavimai",
+    "filtersWidth": "Plotis",
+    "filtersLength": "Ilgis",
+    "filtersAny": "Visi",
     "filtersAll": "Visi produktai",
     "filtersEmpty": "Nėra pasirinkimų",
     "colorFilterLabel": "Spalva",

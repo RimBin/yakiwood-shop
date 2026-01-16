@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
 import { useCartStore } from '@/lib/cart/store';
@@ -114,6 +113,7 @@ export default function ChatbotWidget() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [serverSuggestions, setServerSuggestions] = useState<string[]>([]);
   const [serverActions, setServerActions] = useState<BotAction[]>([]);
+  const [serverHandoff, setServerHandoff] = useState<{ label: string; href: string } | null>(null);
 
   useEffect(() => {
     // Default welcome (used when there is no persisted history)
@@ -137,6 +137,15 @@ export default function ChatbotWidget() {
       t('suggestions.samples'),
     ];
   }, [t]);
+
+  const handoff = useMemo(() => {
+    return (
+      serverHandoff ??
+      (currentLocale === 'en'
+        ? { label: 'Contact', href: '/contact' }
+        : { label: 'Kontaktai', href: '/kontaktai' })
+    );
+  }, [currentLocale, serverHandoff]);
 
   useEffect(() => {
     if (shouldHide) return;
@@ -227,6 +236,9 @@ export default function ChatbotWidget() {
       if (Array.isArray(data.data.actions) && data.data.actions.length > 0) {
         setServerActions(data.data.actions.slice(0, 4));
       }
+      if (data.data.handoff && typeof data.data.handoff.href === 'string') {
+        setServerHandoff(data.data.handoff);
+      }
     } catch {
       setMessages((prev) => [...prev, { role: 'assistant', text: t('errors.network') }]);
     } finally {
@@ -239,8 +251,15 @@ export default function ChatbotWidget() {
     const fresh: Message[] = [{ role: 'assistant', text: t('welcome') }];
     setServerSuggestions([]);
     setServerActions([]);
+    setServerHandoff(null);
     setMessages(fresh);
     safeWriteHistory(sessionId, fresh);
+  }
+
+  function openHandoff() {
+    // API already returns the correct locale-specific contact path.
+    router.push(handoff.href);
+    setOpen(false);
   }
 
   function runAction(action: BotAction) {
@@ -324,6 +343,13 @@ export default function ChatbotWidget() {
                   </div>
 
                   <div className="flex items-center gap-[6px]">
+                    <button
+                      type="button"
+                      onClick={openHandoff}
+                      className="h-[34px] px-[10px] rounded-[999px] bg-white/10 text-white ring-1 ring-white/15 font-['Outfit'] text-[11px] hover:bg-white/15"
+                    >
+                      {handoff.label}
+                    </button>
                     <button
                       type="button"
                       onClick={clearChat}
@@ -441,7 +467,15 @@ export default function ChatbotWidget() {
                         <button
                           key={s}
                           type="button"
-                          onClick={() => send(s)}
+                          onClick={() => {
+                            // Built-in "chat with human" handoff.
+                            // Reuse the existing translated suggestion label (EN: "Contact support").
+                            if (s === t('suggestions.samples')) {
+                              openHandoff();
+                              return;
+                            }
+                            void send(s);
+                          }}
                           disabled={busy}
                           className="w-full text-left rounded-[16px] bg-white px-[12px] py-[10px] ring-1 ring-black/5 font-['Outfit'] text-[12px] text-[#161616] hover:bg-[#F5F5F5] disabled:opacity-60"
                         >
@@ -488,6 +522,14 @@ export default function ChatbotWidget() {
                     </svg>
                   </button>
                 </form>
+
+                <button
+                  type="button"
+                  onClick={openHandoff}
+                  className="mt-[10px] w-full text-left font-['Outfit'] text-[12px] text-[#535353] hover:text-[#161616]"
+                >
+                  <span className="underline underline-offset-4">{t('handoff')}</span>
+                </button>
               </div>
             </div>
           </div>

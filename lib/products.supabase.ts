@@ -118,7 +118,7 @@ export function transformDbProduct(db: DbProduct): Product {
     .filter((v) => v.variant_type === 'color')
     .map((v) => ({
       id: v.id,
-      name: v.label_lt ?? v.name,
+      name: v.label_en ?? v.name,
       hex: v.hex_color ?? undefined,
       image: v.image_url ?? v.texture_url ?? undefined,
       priceModifier: v.price_adjustment === null ? undefined : toNumber(v.price_adjustment),
@@ -196,15 +196,15 @@ function humanizeSlugToken(token: string): string {
 }
 
 const COLOR_LABELS: Record<string, { lt: string; en: string }> = {
-  black: { lt: 'Juoda', en: 'Black' },
-  silver: { lt: 'Sidabrinė', en: 'Silver' },
-  graphite: { lt: 'Grafitas', en: 'Graphite' },
+  black: { lt: 'Black', en: 'Black' },
+  silver: { lt: 'Silver', en: 'Silver' },
+  graphite: { lt: 'Graphite', en: 'Graphite' },
   latte: { lt: 'Latte', en: 'Latte' },
-  carbon: { lt: 'Anglis', en: 'Carbon' },
-  'carbon-light': { lt: 'Šviesi anglis', en: 'Carbon Light' },
-  'carbon-dark': { lt: 'Tamsi anglis', en: 'Carbon Dark' },
-  brown: { lt: 'Ruda', en: 'Brown' },
-  'dark-brown': { lt: 'Tamsiai ruda', en: 'Dark Brown' },
+  carbon: { lt: 'Carbon', en: 'Carbon' },
+  'carbon-light': { lt: 'Carbon Light', en: 'Carbon Light' },
+  'carbon-dark': { lt: 'Carbon Dark', en: 'Carbon Dark' },
+  brown: { lt: 'Brown', en: 'Brown' },
+  'dark-brown': { lt: 'Dark Brown', en: 'Dark Brown' },
 }
 
 function normalizeColorKey(input: string): string {
