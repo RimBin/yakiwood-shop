@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared';
@@ -19,10 +19,11 @@ export default function ProductsPage() {
 
   const PAGE_SIZE = 24;
 
-  const [activeUsage, setActiveUsage] = useState<'all' | string>('all');
-  const [activeWood, setActiveWood] = useState<'all' | string>('all');
-  const [activeColor, setActiveColor] = useState<'all' | string>('all');
-  const [activeProfile, setActiveProfile] = useState<'all' | string>('all');
+  const [selectedUsage, setSelectedUsage] = useState<string[]>([]);
+  const [selectedWood, setSelectedWood] = useState<string[]>([]);
+  const [selectedColor, setSelectedColor] = useState<string[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState<string[]>([]);
+  const [selectedSize, setSelectedSize] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -102,11 +103,18 @@ export default function ProductsPage() {
   useEffect(() => {
     // Reset pagination whenever filters/search change.
     setVisibleCount(PAGE_SIZE);
-  }, [PAGE_SIZE, activeUsage, activeWood, activeColor, activeProfile, searchQuery]);
+  }, [
+    PAGE_SIZE,
+    selectedUsage,
+    selectedWood,
+    selectedColor,
+    selectedProfile,
+    selectedSize,
+    searchQuery,
+  ]);
 
   const usageFilters = useMemo(
     () => [
-      { id: 'all', label: t('usageFilters.all') },
       { id: 'facade', label: t('usageFilters.facade') },
       { id: 'terrace', label: t('usageFilters.terrace') },
       { id: 'interior', label: t('usageFilters.interior') },
@@ -117,7 +125,6 @@ export default function ProductsPage() {
 
   const woodFilters = useMemo(
     () => [
-      { id: 'all', label: t('woodFilters.all') },
       { id: 'spruce', label: t('woodFilters.spruce') },
       { id: 'larch', label: t('woodFilters.larch') },
     ],
@@ -139,6 +146,52 @@ export default function ProductsPage() {
       larch: t('woodFilters.larch'),
     };
   }, [t]);
+
+  const normalizeToken = (value: string) =>
+    value
+      .trim()
+      .toLowerCase()
+      .replace(/[_\s]+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+
+  const parseStockItemSlug = (slug: string) => {
+    const parts = slug.split('--');
+    if (parts.length < 4) return null;
+    const [baseSlug, profile, color, size] = parts;
+    if (!baseSlug || !profile || !color || !size) return null;
+    return { baseSlug, profile, color, size };
+  };
+
+  const formatSizeLabel = (value: string) => {
+    if (!value) return value;
+    const normalized = value.replace(/x/gi, '×');
+    return `${normalized} mm`;
+  };
+
+  const formatProductDisplayName = (product: Product) => {
+    const baseName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
+    if (!product.slug.includes('--')) return baseName;
+
+    const parsed = parseStockItemSlug(product.slug);
+    const colorName = product.colors?.[0]?.name ?? parsed?.color ?? '';
+    const usageLabel = product.category ? usageLabels[product.category] ?? product.category : '';
+    const woodLabel = product.woodType ? woodLabels[product.woodType] ?? product.woodType : '';
+    const colorLabel = colorName ? localizeColorLabel(colorName, currentLocale) : '';
+    const sizeLabel = parsed?.size ? formatSizeLabel(parsed.size) : '';
+
+    const parts = [
+      'Shou Sugi Ban',
+      usageLabel,
+      woodLabel,
+      colorLabel,
+      sizeLabel,
+    ].filter(Boolean);
+
+    if (parts.length === 0) return baseName;
+    return parts.join(' · ');
+  };
 
   const colorOptions = useMemo(() => {
     const set = new Set<string>();
@@ -165,24 +218,135 @@ export default function ProductsPage() {
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [allProducts]);
 
+  const sizeOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const product of allProducts) {
+      if (!product.slug.includes('--')) continue;
+      const parsed = parseStockItemSlug(product.slug);
+      if (parsed?.size) set.add(parsed.size);
+    }
+    return Array.from(set)
+      .sort((a, b) => a.localeCompare(b))
+      .map((value) => ({
+        value,
+        label: formatSizeLabel(value),
+      }));
+  }, [allProducts]);
+
+  const usageOptions = useMemo(
+    () => usageFilters.map((filter) => ({ value: filter.id, label: filter.label })),
+    [usageFilters]
+  );
+
+  const woodOptions = useMemo(
+    () => woodFilters.map((filter) => ({ value: filter.id, label: filter.label })),
+    [woodFilters]
+  );
+
+  const profileDropdownOptions = useMemo(
+    () => profileOptions.map((value) => ({ value, label: value })),
+    [profileOptions]
+  );
+
+  const renderDropdown = (
+    label: string,
+    options: Array<{ value: string; label: string }>,
+    selected: string[],
+    onToggle: (value: string) => void
+  ) => {
+    const selectedLabels = options
+      .filter((option) => selected.includes(option.value))
+      .map((option) => option.label);
+    const toLower = (text: string) =>
+      text.toLocaleLowerCase(currentLocale === 'lt' ? 'lt' : 'en');
+
+    const summaryText =
+      selectedLabels.length > 0
+        ? `${toLower(label)}: ${selectedLabels.map(toLower).join(', ')}`
+        : `${toLower(label)}: ${toLower(t('filtersAll'))}`;
+
+    return (
+      <details className="group relative">
+        <summary className="list-none cursor-pointer select-none h-[40px] px-[14px] rounded-[100px] border border-[#BBBBBB] font-['Outfit'] text-[12px] tracking-[0.6px] flex items-center gap-[8px]">
+          <span className="truncate max-w-[220px]">{summaryText}</span>
+          <span className="ml-auto text-[12px] leading-none transition-transform group-open:rotate-180">
+            V
+          </span>
+        </summary>
+        <div className="absolute z-20 mt-[8px] min-w-[220px] max-h-[260px] overflow-auto rounded-[12px] border border-[#E1E1E1] bg-white p-[12px] shadow-lg">
+          {options.length === 0 ? (
+            <p className="text-[12px] text-[#7C7C7C]">{t('filtersEmpty')}</p>
+          ) : (
+            <div className="flex flex-col gap-[8px]">
+              {options.map((option) => (
+                <label key={option.value} className="flex items-center gap-[8px] text-[13px]">
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(option.value)}
+                    onChange={() => onToggle(option.value)}
+                    className="accent-[#161616]"
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+      </details>
+    );
+  };
+
+  const toggleFilterValue = (
+    list: string[],
+    value: string,
+    setter: Dispatch<SetStateAction<string[]>>
+  ) => {
+    setter((prev) =>
+      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
+    );
+  };
+
   const products = allProducts.filter((product) => {
-    const matchesUsage = activeUsage === 'all' || product.category === activeUsage;
-    const matchesWood = activeWood === 'all' || product.woodType === activeWood;
+    const matchesUsage =
+      selectedUsage.length === 0 || (product.category ? selectedUsage.includes(product.category) : false);
+    const matchesWood =
+      selectedWood.length === 0 || (product.woodType ? selectedWood.includes(product.woodType) : false);
+
+    const normalizedColors = (product.colors ?? [])
+      .map((c) => normalizeToken(c?.name ?? ''))
+      .filter(Boolean);
     const matchesColor =
-      activeColor === 'all' ||
-      (product.colors ?? []).some((c) => (c?.name ?? '').toLowerCase() === activeColor.toLowerCase());
+      selectedColor.length === 0 ||
+      selectedColor.some((value) => normalizedColors.includes(normalizeToken(value)));
+
+    const normalizedProfiles = (product.profiles ?? [])
+      .map((p) => normalizeToken(p?.name ?? ''))
+      .filter(Boolean);
     const matchesProfile =
-      activeProfile === 'all' ||
-      (product.profiles ?? []).some((p) => (p?.name ?? '').toLowerCase() === activeProfile.toLowerCase());
+      selectedProfile.length === 0 ||
+      selectedProfile.some((value) => normalizedProfiles.includes(normalizeToken(value)));
+
+    const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
+    const matchesSize =
+      selectedSize.length === 0 ||
+      (parsed?.size ? selectedSize.includes(parsed.size) : false);
+
     const q = searchQuery.trim().toLowerCase();
-    const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
-    const matchesQuery = q.length === 0 || displayName.toLowerCase().includes(q);
-    return matchesUsage && matchesWood && matchesColor && matchesProfile && matchesQuery;
+    const displayName = formatProductDisplayName(product).toLowerCase();
+    const matchesQuery = q.length === 0 || displayName.includes(q);
+
+    return matchesUsage && matchesWood && matchesColor && matchesProfile && matchesSize && matchesQuery;
   });
 
   const shownProducts = products.slice(0, visibleCount);
 
-  const activeUsageLabel = usageFilters.find((filter) => filter.id === activeUsage)?.label ?? usageFilters[0].label;
+  const activeUsageLabel =
+    selectedUsage.length > 0
+      ? usageFilters
+          .filter((filter) => selectedUsage.includes(filter.id))
+          .map((filter) => filter.label)
+          .join(', ')
+      : t('filtersAll');
 
   useEffect(() => {
     if (isLoading) return;
@@ -193,20 +357,22 @@ export default function ProductsPage() {
       item_list_id: 'products',
       item_list_name: currentLocale === 'lt' ? 'Produktai' : 'Products',
       filters: {
-        usage: activeUsage,
-        wood: activeWood,
-        color: activeColor,
-        profile: activeProfile,
+        usage: selectedUsage,
+        wood: selectedWood,
+        color: selectedColor,
+        profile: selectedProfile,
+        size: selectedSize,
       },
       shown_items_count: shownProducts.length,
     });
 
     setHasTrackedListView(true);
   }, [
-    activeColor,
-    activeProfile,
-    activeUsage,
-    activeWood,
+    selectedColor,
+    selectedProfile,
+    selectedUsage,
+    selectedWood,
+    selectedSize,
     currentLocale,
     error,
     hasTrackedListView,
@@ -220,14 +386,24 @@ export default function ProductsPage() {
 
     trackEvent('filter_products', {
       filters: {
-        usage: activeUsage,
-        wood: activeWood,
-        color: activeColor,
-        profile: activeProfile,
+        usage: selectedUsage,
+        wood: selectedWood,
+        color: selectedColor,
+        profile: selectedProfile,
+        size: selectedSize,
       },
       shown_items_count: shownProducts.length,
     });
-  }, [activeColor, activeProfile, activeUsage, activeWood, error, isLoading, shownProducts.length]);
+  }, [
+    selectedColor,
+    selectedProfile,
+    selectedUsage,
+    selectedWood,
+    selectedSize,
+    error,
+    isLoading,
+    shownProducts.length,
+  ]);
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
@@ -278,73 +454,22 @@ export default function ProductsPage() {
             />
           </div>
 
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="w-full md:max-w-[360px]">
-              <label className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                {t('colorFilterLabel')}
-              </label>
-              <select
-                value={activeColor}
-                onChange={(e) => setActiveColor(e.target.value)}
-                className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white yw-select"
-              >
-                <option value="all">{t('colorFilterAll')}</option>
-                {colorOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="w-full md:max-w-[360px]">
-              <label className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                {t('profileFilterLabel')}
-              </label>
-              <select
-                value={activeProfile}
-                onChange={(e) => setActiveProfile(e.target.value)}
-                className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white yw-select"
-              >
-                <option value="all">{t('profileFilterAll')}</option>
-                {profileOptions.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="flex gap-[8px] items-center flex-wrap">
-            {usageFilters.map((filter) => (
-              <button
-                key={filter.id}
-                onClick={() => setActiveUsage(filter.id)}
-                className={`h-[32px] px-[12px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase leading-[1.3] transition-colors ${
-                  activeUsage === filter.id
-                    ? 'bg-[#161616] text-white'
-                    : 'border border-[#BBBBBB] bg-transparent text-[#161616] hover:border-[#161616]'
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-[8px] items-center flex-wrap">
-            {woodFilters.map((filter) => (
-              <button
-                key={filter.id}
-                onClick={() => setActiveWood(filter.id)}
-                className={`h-[28px] px-[12px] rounded-[100px] font-['Outfit'] text-[11px] tracking-[0.5px] uppercase leading-[1.3] transition-colors ${
-                  activeWood === filter.id
-                    ? 'bg-[#161616] text-white'
-                    : 'border border-[#BBBBBB] bg-transparent text-[#161616] hover:border-[#161616]'
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-[12px]">
+            {renderDropdown(t('filtersUsage'), usageOptions, selectedUsage, (value) =>
+              toggleFilterValue(selectedUsage, value, setSelectedUsage)
+            )}
+            {renderDropdown(t('filtersWood'), woodOptions, selectedWood, (value) =>
+              toggleFilterValue(selectedWood, value, setSelectedWood)
+            )}
+            {renderDropdown(t('filtersColor'), colorOptions, selectedColor, (value) =>
+              toggleFilterValue(selectedColor, value, setSelectedColor)
+            )}
+            {renderDropdown(t('filtersProfile'), profileDropdownOptions, selectedProfile, (value) =>
+              toggleFilterValue(selectedProfile, value, setSelectedProfile)
+            )}
+            {renderDropdown(t('filtersSize'), sizeOptions, selectedSize, (value) =>
+              toggleFilterValue(selectedSize, value, setSelectedSize)
+            )}
           </div>
         </div>
       </PageLayout>
@@ -405,33 +530,7 @@ export default function ProductsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-[16px] md:gap-x-[19px] gap-y-[40px] md:gap-y-[56px]">
             {shownProducts.map((product, idx) => (
               (() => {
-                const normalizeColorKey = (input: string) =>
-                  input
-                    .trim()
-                    .toLowerCase()
-                    .replace(/[_\s]+/g, '-')
-                    .replace(/[^a-z0-9-]/g, '')
-                    .replace(/-+/g, '-')
-                    .replace(/^-|-$/g, '');
-
-                const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
-                const localizedDisplayName = (() => {
-                  if (!product.slug.includes('--')) return displayName;
-                  const colorName = product.colors?.[0]?.name ?? '';
-                  if (!colorName) return displayName;
-                  const localizedColor = localizeColorLabel(colorName, currentLocale);
-                  const targetKey = normalizeColorKey(colorName);
-
-                  if (!targetKey || localizedColor === colorName) return displayName;
-
-                  const parts = displayName.split('·').map((part) => part.trim());
-                  const replaced = parts.map((part) => {
-                    const partKey = normalizeColorKey(part);
-                    return partKey === targetKey ? localizedColor : part;
-                  });
-
-                  return replaced.join(' · ');
-                })();
+                const localizedDisplayName = formatProductDisplayName(product);
                 const hasSale =
                   typeof product.salePrice === 'number' &&
                   product.salePrice > 0 &&

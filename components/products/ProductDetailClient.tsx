@@ -37,21 +37,17 @@ function normalizeColorKey(value: string): string {
     .replace(/^-|-$/g, '');
 }
 
-function localizeStockItemName(name: string, colorName: string, locale: 'lt' | 'en'): string {
-  if (!name || !colorName) return name;
-  const localizedColor = localizeColorLabel(colorName, locale);
-  if (!localizedColor || localizedColor === colorName) return name;
+function parseStockItemSlug(slug: string) {
+  const parts = slug.split('--');
+  if (parts.length < 4) return null;
+  const [baseSlug, profile, color, size] = parts;
+  if (!baseSlug || !profile || !color || !size) return null;
+  return { baseSlug, profile, color, size };
+}
 
-  const targetKey = normalizeColorKey(colorName);
-  if (!targetKey) return name;
-
-  const parts = name.split('·').map((part) => part.trim());
-  const replaced = parts.map((part) => {
-    const partKey = normalizeColorKey(part);
-    return partKey === targetKey ? localizedColor : part;
-  });
-
-  return replaced.join(' · ');
+function formatSizeLabel(value: string): string {
+  if (!value) return value;
+  return `${value.replace(/x/gi, '×')} mm`;
 }
 
 // Use the centralized color swatch mapping from assets
@@ -152,9 +148,18 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   }, [cartItems]);
 
   const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
-  const localizedDisplayName = product.slug.includes('--')
-    ? localizeStockItemName(displayName, product.colors?.[0]?.name ?? '', currentLocale)
-    : displayName;
+  const localizedDisplayName = (() => {
+    if (!product.slug.includes('--')) return displayName;
+    const parsed = parseStockItemSlug(product.slug);
+    const usageLabel = product.category ? t(`solutions.${product.category}`) : '';
+    const woodLabel = product.woodType ? t(`woodTypes.${product.woodType}`) : '';
+    const colorName = product.colors?.[0]?.name ?? parsed?.color ?? '';
+    const colorLabel = colorName ? localizeColorLabel(colorName, currentLocale) : '';
+    const sizeLabel = parsed?.size ? formatSizeLabel(parsed.size) : '';
+
+    const parts = ['Shou Sugi Ban', usageLabel, woodLabel, colorLabel, sizeLabel].filter(Boolean);
+    return parts.length > 0 ? parts.join(' · ') : displayName;
+  })();
   const displayDescription =
     currentLocale === 'en' && product.descriptionEn ? product.descriptionEn : product.description;
   const hasSale =

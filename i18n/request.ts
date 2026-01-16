@@ -6,7 +6,7 @@ export default getRequestConfig(async ({requestLocale}) => {
   const requested = await requestLocale;
   const locale = requested && supported.includes(requested as (typeof supported)[number])
     ? (requested as (typeof supported)[number])
-    : 'lt';
+    : 'en';
 
   let messages;
   try {

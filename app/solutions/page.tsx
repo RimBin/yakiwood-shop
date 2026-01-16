@@ -14,6 +14,231 @@ export default function SolutionsPage() {
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
 
+  const ModernApplicationCard = ({
+    type,
+  }: {
+    type: 'facades' | 'terraces' | 'interior' | 'fences';
+  }) => {
+    const dataByType = {
+        facades: {
+          bgColor: '#EAEAEA',
+          overlayOpacity: 0.06,
+          eyebrow: 'Facades / Quick spec',
+          title: {
+            prefix: 'Designed to',
+            italic: 'last',
+            suffix: 'outside',
+          },
+          description:
+            'A modern, ventilated facade system with charred wood cladding — built for the Baltic climate, minimal maintenance, and a clean architectural finish.',
+          specs: [
+            { label: 'Thickness', value: '18/20 mm' },
+            { label: 'Wood', value: 'Larch / Spruce' },
+            { label: 'Finish', value: 'Matte, UV stable' },
+          ],
+          primaryCta: { href: '/kontaktai', label: 'get an offer' },
+          secondaryCta: { href: '/projects', label: 'see projects' },
+          images: {
+            topLeft: { src: assets.projects[2], alt: 'Facade project detail' },
+            topRight: { src: assets.categories.facades, alt: 'Charred wood facade' },
+            wide: { src: assets.projects[3], alt: 'Facade board texture' },
+          },
+          badges: [
+            { k: 'EPD', desc: 'Environmental Product Declaration' },
+            { k: 'FSC', desc: 'Responsible forestry' },
+            { k: 'UV', desc: 'Fade resistance' },
+          ],
+        },
+        terraces: {
+          bgColor: '#EFECE7',
+          overlayOpacity: 0.05,
+          eyebrow: 'Terraces / Quick spec',
+          title: {
+            prefix: 'Made for',
+            italic: 'comfort',
+            suffix: 'outdoors',
+          },
+          description:
+            'Fire-treated decking with natural grip and a refined texture. Built to handle seasonal changes while staying beautiful underfoot.',
+          specs: [
+            { label: 'Use', value: 'Decking / terraces' },
+            { label: 'Feel', value: 'Natural texture, stable' },
+            { label: 'Care', value: 'Low maintenance' },
+          ],
+          primaryCta: { href: '/kontaktai', label: 'get an offer' },
+          secondaryCta: { href: '/products', label: 'view products' },
+          images: {
+            topLeft: { src: assets.categories.terrace, alt: 'Terrace decking' },
+            topRight: { src: assets.projects[4], alt: 'Terrace project' },
+            wide: { src: assets.projects[5], alt: 'Decking detail' },
+          },
+          badges: [
+            { k: 'GRIP', desc: 'Confident footing' },
+            { k: 'DRAIN', desc: 'Ventilated system' },
+            { k: 'SEASON', desc: 'Weather-ready' },
+          ],
+        },
+        interior: {
+          bgColor: '#E9ECEF',
+          overlayOpacity: 0.05,
+          eyebrow: 'Interior / Quick spec',
+          title: {
+            prefix: 'Bring',
+            italic: 'depth',
+            suffix: 'inside',
+          },
+          description:
+            'Charred wood panels for modern interiors — warmth, contrast, and texture for feature walls, ceilings, and details.',
+          specs: [
+            { label: 'Applications', value: 'Walls / ceilings' },
+            { label: 'Look', value: 'Rich texture, matte' },
+            { label: 'Design', value: 'Custom patterns' },
+          ],
+          primaryCta: { href: '/kontaktai', label: 'get an offer' },
+          secondaryCta: { href: '/projects', label: 'see interiors' },
+          images: {
+            topLeft: { src: assets.categories.interior, alt: 'Interior wall panels' },
+            topRight: { src: assets.projects[1], alt: 'Interior project detail' },
+            wide: { src: assets.projects[0], alt: 'Panel texture detail' },
+          },
+          badges: [
+            { k: 'TEXT', desc: 'Tactile surface' },
+            { k: 'WARM', desc: 'Natural ambience' },
+            { k: 'DETAIL', desc: 'Architectural finish' },
+          ],
+        },
+        fences: {
+          bgColor: '#EAEDE7',
+          overlayOpacity: 0.05,
+          eyebrow: 'Fences / Quick spec',
+          title: {
+            prefix: 'Privacy with',
+            italic: 'style',
+            suffix: 'built in',
+          },
+          description:
+            'Charred wood fencing that stays stable, looks premium, and withstands the elements — for clean lines and long-term durability.',
+          specs: [
+            { label: 'Purpose', value: 'Privacy / boundaries' },
+            { label: 'Build', value: 'Strong & stable' },
+            { label: 'Finish', value: 'Distinct charred look' },
+          ],
+          primaryCta: { href: '/kontaktai', label: 'get an offer' },
+          secondaryCta: { href: '/projects', label: 'see fences' },
+          images: {
+            topLeft: { src: assets.categories.fence, alt: 'Charred wood fence' },
+            topRight: { src: assets.projects[3], alt: 'Fence project' },
+            wide: { src: assets.projects[2], alt: 'Fence detail' },
+          },
+          badges: [
+            { k: 'LONG', desc: 'Built to endure' },
+            { k: 'CLEAN', desc: 'Minimal silhouette' },
+            { k: 'CARE', desc: 'Low upkeep' },
+          ],
+        },
+      };
+
+    const data = dataByType[type];
+
+    return (
+      <div
+        className="relative overflow-hidden rounded-[24px] border border-[#BBBBBB]"
+        style={{ backgroundColor: data.bgColor }}
+      >
+        <div
+          className="absolute inset-0 mix-blend-multiply pointer-events-none"
+          style={{ opacity: data.overlayOpacity }}
+        >
+          <Image src={assets.ctaBackground} alt="" fill className="object-cover" />
+        </div>
+
+        <div className="relative p-[16px] md:p-[24px] lg:p-[40px]">
+          <div className="grid gap-[24px] lg:grid-cols-[420px_1fr] lg:gap-[48px] items-start">
+            <div>
+              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
+                {data.eyebrow}
+              </p>
+
+              <h4 className="mt-[16px] font-['DM_Sans'] font-light text-[36px] md:text-[44px] leading-none tracking-[-1.6px] text-[#161616]">
+                {data.title.prefix}{' '}
+                <span className="font-['Tiro_Tamil'] italic tracking-[-1.0px]">{data.title.italic}</span>{' '}
+                {data.title.suffix}
+              </h4>
+
+              <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
+                {data.description}
+              </p>
+
+              <div className="mt-[20px] grid gap-[10px]">
+                {data.specs.map((row) => (
+                  <div
+                    key={row.label}
+                    className="flex items-center justify-between rounded-[16px] border border-[#BBBBBB] bg-white/60 px-[16px] py-[12px]"
+                  >
+                    <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
+                      {row.label}
+                    </p>
+                    <p className="font-['DM_Sans'] font-medium text-[14px] leading-[1.1] tracking-[-0.28px] text-[#161616]">
+                      {row.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-[24px] flex flex-col sm:flex-row gap-[12px]">
+                <Link
+                  href={toLocalePath(data.primaryCta.href, currentLocale)}
+                  className="bg-[#161616] h-[48px] px-[40px] rounded-[100px] flex items-center justify-center"
+                >
+                  <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
+                    {data.primaryCta.label}
+                  </span>
+                </Link>
+
+                <Link
+                  href={toLocalePath(data.secondaryCta.href, currentLocale)}
+                  className="group border border-[#161616] h-[48px] px-[40px] rounded-[100px] flex items-center justify-center hover:bg-[#161616] transition-colors"
+                >
+                  <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white transition-colors">
+                    {data.secondaryCta.label}
+                  </span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid gap-[12px] md:gap-[16px] lg:gap-[24px]">
+              <div className="grid grid-cols-2 gap-[12px] md:gap-[16px] lg:gap-[24px]">
+                <div className="relative overflow-hidden rounded-[24px] h-[220px] md:h-[280px] lg:h-[320px]">
+                  <Image src={data.images.topLeft.src} alt={data.images.topLeft.alt} fill className="object-cover" />
+                </div>
+                <div className="relative overflow-hidden rounded-[24px] h-[220px] md:h-[280px] lg:h-[320px]">
+                  <Image src={data.images.topRight.src} alt={data.images.topRight.alt} fill className="object-cover" />
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-[24px] h-[180px] md:h-[220px] lg:h-[240px]">
+                <Image src={data.images.wide.src} alt={data.images.wide.alt} fill className="object-cover" />
+              </div>
+
+              <div className="grid grid-cols-3 gap-[12px] md:gap-[16px] lg:gap-[24px]">
+                {data.badges.map((b) => (
+                  <div key={b.k} className="rounded-[24px] border border-[#BBBBBB] bg-white/60 p-[14px]">
+                    <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.1] tracking-[-0.36px] text-[#161616]">
+                      {b.k}
+                    </p>
+                    <p className="mt-[6px] font-['Outfit'] font-light text-[12px] leading-[1.3] tracking-[0.12px] text-[#535353]">
+                      {b.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const ApplicationSection = ({
     id,
     title,
@@ -248,150 +473,62 @@ Do you want to give your building a distinctive and attractive appearance? Encou
       </section>
 
       {/* Applications Sections (anchor targets) */}
-      <section className="max-w-[1200px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[80px] lg:pt-[120px] pb-[48px] lg:pb-[140px]">
+      <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[80px] lg:pt-[120px] pb-[48px] lg:pb-[140px]">
         <div className="grid gap-[64px] lg:gap-[140px]">
-          <ApplicationSection
-            id="facades"
-            title="Facades"
-            description="For ventilated cladding, charred larch or spruce offers excellent weather resistance and a timeless, matte finish. Recommended thickness: 18/20 mm."
-            bullets={['Moisture & UV resistant', 'Certifications: EPD, FSC']}
-            images={[
-              { src: assets.projects[0], alt: 'Facades project example' },
-              { src: assets.projects[1], alt: 'Facades project detail example' },
-            ]}
-          />
-
-          {/* Modern Facades Section (extra block under Facades) */}
-          <div className="relative overflow-hidden rounded-[24px] border border-[#BBBBBB] bg-[#EAEAEA]">
-            {/* subtle background */}
-            <div className="absolute inset-0 opacity-[0.06] mix-blend-multiply pointer-events-none">
-              <Image src={assets.ctaBackground} alt="" fill className="object-cover" />
-            </div>
-
-            <div className="relative p-[16px] md:p-[24px] lg:p-[40px]">
-              <div className="grid gap-[24px] lg:grid-cols-[420px_1fr] lg:gap-[48px] items-start">
-                <div>
-                  <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
-                    Facades / Quick spec
-                  </p>
-
-                  <h4 className="mt-[16px] font-['DM_Sans'] font-light text-[36px] md:text-[44px] leading-none tracking-[-1.6px] text-[#161616]">
-                    Designed to{' '}
-                    <span className="font-['Tiro_Tamil'] italic tracking-[-1.0px]">last</span>
-                    {' '}outside
-                  </h4>
-
-                  <p className="mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-                    A modern, ventilated facade system with charred wood cladding — built for the Baltic climate, minimal maintenance, and a clean architectural finish.
-                  </p>
-
-                  <div className="mt-[20px] grid gap-[10px]">
-                    {[
-                      { label: 'Thickness', value: '18/20 mm' },
-                      { label: 'Wood', value: 'Larch / Spruce' },
-                      { label: 'Finish', value: 'Matte, UV stable' },
-                    ].map((row) => (
-                      <div
-                        key={row.label}
-                        className="flex items-center justify-between rounded-[16px] border border-[#BBBBBB] bg-white/60 px-[16px] py-[12px]"
-                      >
-                        <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
-                          {row.label}
-                        </p>
-                        <p className="font-['DM_Sans'] font-medium text-[14px] leading-[1.1] tracking-[-0.28px] text-[#161616]">
-                          {row.value}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-[24px] flex flex-col sm:flex-row gap-[12px]">
-                    <Link
-                      href={toLocalePath('/kontaktai', currentLocale)}
-                      className="bg-[#161616] h-[48px] px-[40px] rounded-[100px] flex items-center justify-center"
-                    >
-                      <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                        get an offer
-                      </span>
-                    </Link>
-
-                    <Link
-                      href={toLocalePath('/projects', currentLocale)}
-                      className="border border-[#161616] h-[48px] px-[40px] rounded-[100px] flex items-center justify-center hover:bg-[#161616] hover:text-white transition-colors"
-                    >
-                      <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-                        see projects
-                      </span>
-                    </Link>
-                  </div>
-                </div>
-
-                <div className="grid gap-[12px] md:gap-[16px] lg:gap-[24px]">
-                  <div className="grid grid-cols-2 gap-[12px] md:gap-[16px] lg:gap-[24px]">
-                    <div className="relative overflow-hidden rounded-[24px] h-[220px] md:h-[280px] lg:h-[320px]">
-                      <Image src={assets.projects[2]} alt="Facade project detail" fill className="object-cover" />
-                    </div>
-                    <div className="relative overflow-hidden rounded-[24px] h-[220px] md:h-[280px] lg:h-[320px]">
-                      <Image src={assets.categories.facades} alt="Charred wood facade" fill className="object-cover" />
-                    </div>
-                  </div>
-
-                  <div className="relative overflow-hidden rounded-[24px] h-[180px] md:h-[220px] lg:h-[240px]">
-                    <Image src={assets.projects[3]} alt="Facade board texture" fill className="object-cover" />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-[12px] md:gap-[16px] lg:gap-[24px]">
-                    {[
-                      { k: 'EPD', desc: 'Environmental Product Declaration' },
-                      { k: 'FSC', desc: 'Responsible forestry' },
-                      { k: 'UV', desc: 'Fade resistance' },
-                    ].map((b) => (
-                      <div key={b.k} className="rounded-[24px] border border-[#BBBBBB] bg-white/60 p-[14px]">
-                        <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.1] tracking-[-0.36px] text-[#161616]">
-                          {b.k}
-                        </p>
-                        <p className="mt-[6px] font-['Outfit'] font-light text-[12px] leading-[1.3] tracking-[0.12px] text-[#535353]">
-                          {b.desc}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="grid gap-[24px] lg:gap-[32px]">
+            <ApplicationSection
+              id="facades"
+              title="Facades"
+              description="For ventilated cladding, charred larch or spruce offers excellent weather resistance and a timeless, matte finish. Recommended thickness: 18/20 mm."
+              bullets={['Moisture & UV resistant', 'Certifications: EPD, FSC']}
+              images={[
+                { src: assets.projects[0], alt: 'Facades project example' },
+                { src: assets.projects[1], alt: 'Facades project detail example' },
+              ]}
+            />
+            <ModernApplicationCard type="facades" />
           </div>
 
-          <ApplicationSection
-            id="terraces"
-            title="Terraces"
-            description="Fire-treated decking that’s built for outdoor living, with natural grip and a premium feel."
-            bullets={['Durable surface for high traffic', 'Natural texture and warmth', 'Designed for seasonal changes']}
-            images={[
-              { src: assets.categories.terrace, alt: 'Terraces example' },
-              { src: assets.categories.terrace, alt: 'Terraces detail example' },
-            ]}
-            reverse
-          />
+          <div className="grid gap-[24px] lg:gap-[32px]">
+            <ApplicationSection
+              id="terraces"
+              title="Terraces"
+              description="Fire-treated decking that’s built for outdoor living, with natural grip and a premium feel."
+              bullets={['Durable surface for high traffic', 'Natural texture and warmth', 'Designed for seasonal changes']}
+              images={[
+                { src: assets.categories.terrace, alt: 'Terraces example' },
+                { src: assets.categories.terrace, alt: 'Terraces detail example' },
+              ]}
+              reverse
+            />
+            <ModernApplicationCard type="terraces" />
+          </div>
 
-          <ApplicationSection
-            id="interior"
-            title="Interior"
-            description="Add depth and sophistication indoors with charred wood panels and feature walls."
-            bullets={['Warm, modern materiality', 'Unique patterning and tone', 'Works for walls, ceilings, details']}
-            images={[
-              { src: assets.categories.interior, alt: 'Interior example' },
-              { src: assets.categories.interior, alt: 'Interior detail example' },
-            ]}
-          />
+          <div className="grid gap-[24px] lg:gap-[32px]">
+            <ApplicationSection
+              id="interior"
+              title="Interior"
+              description="Add depth and sophistication indoors with charred wood panels and feature walls."
+              bullets={['Warm, modern materiality', 'Unique patterning and tone', 'Works for walls, ceilings, details']}
+              images={[
+                { src: assets.categories.interior, alt: 'Interior example' },
+                { src: assets.categories.interior, alt: 'Interior detail example' },
+              ]}
+            />
+            <ModernApplicationCard type="interior" />
+          </div>
 
-          <ApplicationSection
-            id="fences"
-            title="Fences"
-            description="Privacy with style — elegant fencing that endures and elevates outdoor spaces."
-            bullets={['Strong, stable, and durable', 'Distinctive charred finish', 'Great for modern landscapes']}
-            images={[{ src: assets.categories.fence, alt: 'Fences example' }]}
-            reverse
-          />
+          <div className="grid gap-[24px] lg:gap-[32px]">
+            <ApplicationSection
+              id="fences"
+              title="Fences"
+              description="Privacy with style — elegant fencing that endures and elevates outdoor spaces."
+              bullets={['Strong, stable, and durable', 'Distinctive charred finish', 'Great for modern landscapes']}
+              images={[{ src: assets.categories.fence, alt: 'Fences example' }]}
+              reverse
+            />
+            <ModernApplicationCard type="fences" />
+          </div>
         </div>
       </section>
 

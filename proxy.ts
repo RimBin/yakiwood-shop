@@ -10,6 +10,17 @@ const PUBLIC_FILE = /\.[^/]+$/
 
 type PrefixMap = Array<{ from: string; to: string }>
 
+const enToLt: PrefixMap = [
+  { from: '/about', to: '/apie' },
+  { from: '/contact', to: '/kontaktai' },
+  { from: '/faq', to: '/duk' },
+  { from: '/products', to: '/produktai' },
+  { from: '/solutions', to: '/sprendimai' },
+  { from: '/projects', to: '/projektai' },
+  { from: '/configurator3d', to: '/konfiguratorius3d' },
+  { from: '/blog', to: '/irasai' },
+]
+
 const ltToEn: PrefixMap = [
   { from: '/apie', to: '/about' },
   { from: '/kontaktai', to: '/contact' },
@@ -18,6 +29,7 @@ const ltToEn: PrefixMap = [
   { from: '/sprendimai', to: '/solutions' },
   { from: '/projektai', to: '/projects' },
   { from: '/konfiguratorius3d', to: '/configurator3d' },
+  { from: '/irasai', to: '/blog' },
 ]
 
 function replaceLeadingPath(pathname: string, mapping: PrefixMap): string {
@@ -163,6 +175,18 @@ export async function proxy(request: NextRequest) {
     const internalUrl = request.nextUrl.clone()
 
     const withoutPrefix = pathname === '/lt' ? '/' : pathname.slice(3)
+
+    // Prevent mixed URLs like /lt/products; canonical LT uses Lithuanian slugs.
+    const canonicalLt = replaceLeadingPath(withoutPrefix, enToLt)
+    if (canonicalLt !== withoutPrefix) {
+      const url = request.nextUrl.clone()
+      url.pathname = canonicalLt === '/' ? '/lt' : `/lt${canonicalLt}`
+      const redirectResponse = NextResponse.redirect(url, 301)
+      applyCookies(redirectResponse, intlResponse)
+      applyCookies(redirectResponse, supabaseResponse)
+      return redirectResponse
+    }
+
     const mapped = replaceLeadingPath(withoutPrefix, ltToEn)
     internalUrl.pathname = mapped
 
