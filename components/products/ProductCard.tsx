@@ -4,7 +4,8 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Product } from '@/lib/products.supabase';
-import { useTranslations } from 'next-intl';
+import { localizeColorLabel } from '@/lib/products.supabase';
+import { useLocale, useTranslations } from 'next-intl';
 import { trackSelectItem } from '@/lib/analytics';
 
 interface ProductCardProps {
@@ -14,7 +15,18 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, href }: ProductCardProps) {
   const t = useTranslations();
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const linkHref = href || `/produktai/${product.slug}`;
+  const attributeLabel = useMemo(() => {
+    if (!product.slug.includes('--')) return '';
+    const parts = product.slug.split('--');
+    if (parts.length < 4) return '';
+    const [, profile, color, size] = parts;
+    const colorLabel = color ? localizeColorLabel(color, currentLocale) : '';
+    const sizeLabel = size ? `${size.replace(/x/gi, '×')} mm` : '';
+    return [profile, colorLabel, sizeLabel].filter(Boolean).join(' · ');
+  }, [product.slug, currentLocale]);
   const usageLabel = useMemo(() => {
     if (!product.category) return undefined;
     const labels: Record<string, string> = {
@@ -69,6 +81,11 @@ export default function ProductCard({ product, href }: ProductCardProps) {
       <h3 className="font-['DM_Sans'] font-medium text-[#161616] mb-1 group-hover:text-[#535353] transition-colors">
         {product.name}
       </h3>
+      {attributeLabel ? (
+        <p className="font-['Outfit'] text-xs text-[#7C7C7C] mb-1 uppercase tracking-[0.6px]">
+          {attributeLabel}
+        </p>
+      ) : null}
       
       {product.description && (
         <p className="font-['Outfit'] text-sm text-[#7C7C7C] mb-2 line-clamp-2">

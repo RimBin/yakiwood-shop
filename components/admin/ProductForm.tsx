@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
@@ -15,8 +15,6 @@ const ALLOWED_WOOD_TYPES = ['spruce', 'larch'] as const;
 const WIDTH_OPTIONS_MM = [95, 120, 145] as const;
 const LENGTH_OPTIONS_MM = [3000, 3300, 3600] as const;
 
-const DEFAULT_FINISH_SLUG = 'natural';
-
 function slugify(input: string) {
   return input
     .toLowerCase()
@@ -28,30 +26,28 @@ function slugify(input: string) {
     .replace(/^-+|-+$/g, '');
 }
 
-function getDefaultFinishSlug(variants: Variant[]): string {
-  const withoutProfiles = variants.filter((v) => v.variant_type !== 'profile')
-  const finishes = withoutProfiles.filter((v) => v.variant_type === 'finish')
-  const candidates = finishes.length > 0 ? finishes : withoutProfiles
-
-  const natural = candidates.find((v) => slugify(v.name) === DEFAULT_FINISH_SLUG);
-  if (natural?.name) return DEFAULT_FINISH_SLUG;
-
-  const first = candidates.find((v) => v.name?.trim()) ?? null;
-  if (!first) return DEFAULT_FINISH_SLUG;
-
-  const result = slugify(first.name);
-  return result || DEFAULT_FINISH_SLUG;
+function buildLtProductName(usageType: string, woodType: string): string {
+  const usageLt = usageType === 'terrace' ? 'Terasinė lenta' : 'Fasadinė dailylentė';
+  const woodLt = woodType === 'larch' ? 'Maumedis' : 'Eglė';
+  return `${usageLt} / ${woodLt}`;
 }
 
-function buildEnProductSlug(usageType: string, woodType: string, finishSlug: string): string {
-  return slugify(`shou-sugi-ban-for-${usageType}-${woodType}-${finishSlug}`);
+function buildEnProductName(usageType: string, woodType: string): string {
+  const usageEn = usageType === 'terrace' ? 'Terrace board' : 'Facade cladding';
+  const woodEn = woodType === 'larch' ? 'Larch' : 'Spruce';
+  return `${usageEn} / ${woodEn}`;
 }
 
-function buildLtProductSlug(usageType: string, woodType: string, finishSlug: string): string {
-  const woodLt = woodType === 'larch' ? 'maumedis' : 'egle';
-  const usageLt = usageType === 'terrace' ? 'terasai' : 'fasadui';
-  const typeLt = usageType === 'terrace' ? 'terasine-lenta' : 'dailylente';
-  return slugify(`degintos-medienos-${typeLt}-${usageLt}-${woodLt}-${finishSlug}`);
+function buildEnProductSlug(usageType: string, woodType: string): string {
+  return slugify(buildEnProductName(usageType, woodType));
+}
+
+function buildLtProductSlug(usageType: string, woodType: string): string {
+  return slugify(buildLtProductName(usageType, woodType));
+}
+
+function buildStockItemSlug(baseSlug: string, profile: string, color: string, width: number, length: number): string {
+  return `${baseSlug}--${slugify(profile)}--${slugify(color)}--${width}x${length}`;
 }
 
 function formatUnknownError(error: unknown): string {
@@ -142,6 +138,18 @@ interface Variant {
   tempId?: string;
 }
 
+interface VariantDraft {
+  id: string;
+  profile: string;
+  color: string;
+  widthMm: number;
+  lengthMm: number;
+  price: string;
+  imageUrl: string;
+  sku: string;
+  slug: string;
+}
+
 interface ProductData {
   id?: string;
   name: string;
@@ -205,7 +213,9 @@ export default function ProductForm({ product, mode }: Props) {
 
   // Form state
   const [name, setName] = useState(product?.name || '');
+  const [isNameManuallyEdited, setIsNameManuallyEdited] = useState(mode === 'edit');
   const [nameEn, setNameEn] = useState(product?.name_en || '');
+  const [isNameEnManuallyEdited, setIsNameEnManuallyEdited] = useState(mode === 'edit');
   const [slug, setSlug] = useState(product?.slug || '');
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
   const [slugEn, setSlugEn] = useState((product as any)?.slug_en || '');
@@ -265,33 +275,116 @@ export default function ProductForm({ product, mode }: Props) {
   const [showVariantForm, setShowVariantForm] = useState(false);
   const [editingVariant, setEditingVariant] = useState<Variant | null>(null);
 
+  const colorVariantOptions = useMemo(() => {
+    const names = variants
+      .filter((v) => v.variant_type === 'color')
+      .map((v) => v.name)
+      .filter((v) => !!v?.trim());
+    return Array.from(new Set(names));
+  }, [variants]);
+
+  const profileVariantOptions = useMemo(() => {
+    const names = variants
+      .filter((v) => v.variant_type === 'profile' || v.variant_type === 'finish')
+      .map((v) => v.name)
+      .filter((v) => !!v?.trim());
+    return Array.from(new Set(names));
+  }, [variants]);
+
+  const allowedProfileOptions = useMemo(() => {
+    if (usageType === 'terrace') return profileVariantOptions.slice(0, 1);
+    if (usageType === 'facade' && profileVariantOptions.length > 1) return profileVariantOptions.slice(1);
+    return profileVariantOptions;
+  }, [profileVariantOptions, usageType]);
+
+  const [selectedVariantColors, setSelectedVariantColors] = useState<string[]>([]);
+  const [selectedVariantProfiles, setSelectedVariantProfiles] = useState<string[]>([]);
+  const [selectedVariantWidths, setSelectedVariantWidths] = useState<number[]>([]);
+  const [selectedVariantLengths, setSelectedVariantLengths] = useState<number[]>([]);
+  const [variantColorImages, setVariantColorImages] = useState<Record<string, string>>({});
+  const [variantDrafts, setVariantDrafts] = useState<VariantDraft[]>([]);
+  const [variantGeneratorError, setVariantGeneratorError] = useState<string | null>(null);
+  const [isCreatingVariants, setIsCreatingVariants] = useState(false);
+
+  useEffect(() => {
+    if (selectedVariantColors.length === 0 && colorVariantOptions.length > 0) {
+      setSelectedVariantColors(colorVariantOptions);
+    }
+  }, [colorVariantOptions, selectedVariantColors.length]);
+
+  useEffect(() => {
+    if (colorVariantOptions.length === 0) return;
+    setVariantColorImages((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const color of colorVariantOptions) {
+        if (next[color] === undefined) {
+          next[color] = imageUrl || '';
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [colorVariantOptions, imageUrl]);
+
+  useEffect(() => {
+    if (selectedVariantProfiles.length === 0 && allowedProfileOptions.length > 0) {
+      setSelectedVariantProfiles(allowedProfileOptions);
+    }
+  }, [allowedProfileOptions, selectedVariantProfiles.length]);
+
+  useEffect(() => {
+    if (selectedVariantProfiles.length === 0) return;
+    const allowed = new Set(allowedProfileOptions);
+    const next = selectedVariantProfiles.filter((p) => allowed.has(p));
+    if (next.length === selectedVariantProfiles.length) return;
+    setSelectedVariantProfiles(next.length > 0 ? next : allowedProfileOptions);
+  }, [allowedProfileOptions, selectedVariantProfiles]);
+
+  useEffect(() => {
+    if (selectedVariantWidths.length === 0) setSelectedVariantWidths([...WIDTH_OPTIONS_MM]);
+  }, [selectedVariantWidths.length]);
+
+  useEffect(() => {
+    if (selectedVariantLengths.length === 0) setSelectedVariantLengths([...LENGTH_OPTIONS_MM]);
+  }, [selectedVariantLengths.length]);
+
   // UI state
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveWarning, setSaveWarning] = useState<string | null>(null);
   const [deleteModal, setDeleteModal] = useState(false);
+  const lockBaseFields = true;
 
-  // Auto-generate LT + EN slugs from usage/wood and default finish (Natural).
+  // Auto-generate LT + EN names/slugs from usage + wood.
   // Stops per-field once user edits it manually (unless they clear it).
   useEffect(() => {
-    const finish = getDefaultFinishSlug(variants);
-
     const usageOk = ALLOWED_USAGE_TYPES.includes(usageType as any);
     const woodOk = ALLOWED_WOOD_TYPES.includes(woodType as any);
     if (!usageOk || !woodOk) return;
 
+    if (!isNameManuallyEdited) {
+      const nextName = buildLtProductName(usageType, woodType);
+      if (nextName && nextName !== name) setName(nextName);
+    }
+
+    if (!isNameEnManuallyEdited) {
+      const nextNameEn = buildEnProductName(usageType, woodType);
+      if (nextNameEn && nextNameEn !== nameEn) setNameEn(nextNameEn);
+    }
+
     if (!isSlugManuallyEdited) {
-      const nextLt = buildLtProductSlug(usageType, woodType, finish);
+      const nextLt = buildLtProductSlug(usageType, woodType);
       if (nextLt && nextLt !== slug) setSlug(nextLt);
     }
 
     if (!isSlugEnManuallyEdited) {
-      const nextEn = buildEnProductSlug(usageType, woodType, finish);
+      const nextEn = buildEnProductSlug(usageType, woodType);
       if (nextEn && nextEn !== slugEn) setSlugEn(nextEn);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usageType, woodType, variants, isSlugManuallyEdited, isSlugEnManuallyEdited, slug, slugEn]);
+  }, [usageType, woodType, variants, isSlugManuallyEdited, isSlugEnManuallyEdited, isNameManuallyEdited, isNameEnManuallyEdited, slug, slugEn, name, nameEn]);
 
   // Keep derived fields in sync
   useEffect(() => {
@@ -676,6 +769,151 @@ export default function ProductForm({ product, mode }: Props) {
     setShowVariantForm(true);
   };
 
+  const toggleStringSelection = (
+    value: string,
+    list: string[],
+    setter: (next: string[]) => void
+  ) => {
+    setter(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+  };
+
+  const toggleNumberSelection = (
+    value: number,
+    list: number[],
+    setter: (next: number[]) => void
+  ) => {
+    setter(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+  };
+
+  const generateVariantDrafts = () => {
+    setVariantGeneratorError(null);
+
+    if (!product?.id) {
+      setVariantGeneratorError('Pirma išsaugokite bazinę prekę, tada generuokite variacijas.');
+      return;
+    }
+
+    if (selectedVariantColors.length === 0 || selectedVariantProfiles.length === 0) {
+      setVariantGeneratorError('Pasirinkite bent vieną spalvą ir profilį.');
+      return;
+    }
+
+    const baseSlug = slug || product.slug || '';
+    if (!baseSlug) {
+      setVariantGeneratorError('Nėra bazinio slug.');
+      return;
+    }
+
+    const basePriceValue = Number.parseFloat(basePrice || '0') || 0;
+    const drafts: VariantDraft[] = [];
+
+    for (const profile of selectedVariantProfiles) {
+      for (const color of selectedVariantColors) {
+        for (const widthMm of selectedVariantWidths) {
+          for (const lengthMm of selectedVariantLengths) {
+            const slugValue = buildStockItemSlug(baseSlug, profile, color, widthMm, lengthMm);
+            const colorImage = variantColorImages[color] ?? imageUrl ?? '';
+            drafts.push({
+              id: slugValue,
+              profile,
+              color,
+              widthMm,
+              lengthMm,
+              price: basePriceValue ? String(basePriceValue) : '',
+              imageUrl: colorImage,
+              sku: '',
+              slug: slugValue,
+            });
+          }
+        }
+      }
+    }
+
+    setVariantDrafts(drafts);
+  };
+
+  const updateVariantDraft = (id: string, patch: Partial<VariantDraft>) => {
+    setVariantDrafts((prev) =>
+      prev.map((draft) => (draft.id === id ? { ...draft, ...patch } : draft))
+    );
+  };
+
+  const updateColorImage = (color: string, value: string) => {
+    setVariantColorImages((prev) => ({ ...prev, [color]: value }));
+    setVariantDrafts((prev) =>
+      prev.map((draft) => (draft.color === color ? { ...draft, imageUrl: value } : draft))
+    );
+  };
+
+  const handleCreateVariants = async () => {
+    setVariantGeneratorError(null);
+    if (!product?.id) {
+      setVariantGeneratorError('Pirma išsaugokite bazinę prekę.');
+      return;
+    }
+    if (variantDrafts.length === 0) {
+      setVariantGeneratorError('Nėra sugeneruotų variacijų.');
+      return;
+    }
+
+    setIsCreatingVariants(true);
+    try {
+      const slugs = variantDrafts.map((d) => d.slug);
+      const existing = await supabase
+        .from('products')
+        .select('id,slug')
+        .in('slug', slugs);
+
+      if (existing.error) throw existing.error;
+      const existingSlugs = new Set((existing.data || []).map((row: any) => row.slug));
+
+      const rows = variantDrafts
+        .filter((draft) => !existingSlugs.has(draft.slug))
+        .map((draft) => {
+          const priceValue = Number.parseFloat(draft.price || '') || Number.parseFloat(basePrice || '0') || 0;
+          const baseSlug = slug || product.slug || '';
+          const baseSlugEnValue = slugEn || (product as any)?.slug_en || '';
+          const slugEnValue = baseSlugEnValue
+            ? buildStockItemSlug(baseSlugEnValue, draft.profile, draft.color, draft.widthMm, draft.lengthMm)
+            : draft.slug;
+
+          return {
+            name,
+            name_en: nameEn || name || null,
+            slug: draft.slug,
+            slug_en: slugEnValue,
+            description: description || null,
+            description_en: descriptionEn || description || null,
+            base_price: priceValue,
+            sale_price: null,
+            wood_type: woodType,
+            category: deriveCategoryFromUsage(usageType),
+            usage_type: usageType || null,
+            image_url: draft.imageUrl || imageUrl || null,
+            is_active: false,
+            sku: draft.sku || null,
+            width: draft.widthMm,
+            depth: draft.lengthMm,
+            height: height ? Number.parseFloat(height) : null,
+          };
+        });
+
+      if (rows.length === 0) {
+        setVariantGeneratorError('Visos variacijos jau egzistuoja.');
+        return;
+      }
+
+      const { error } = await supabase.from('products').insert(rows);
+      if (error) throw error;
+
+      setVariantDrafts([]);
+    } catch (error) {
+      setVariantGeneratorError(formatUnknownError(error));
+    } finally {
+      setIsCreatingVariants(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Left Sidebar - Image Preview */}
@@ -881,13 +1119,23 @@ export default function ProductForm({ product, mode }: Props) {
                 <input
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    setName(next);
+                    setIsNameManuallyEdited(next.trim().length > 0);
+                  }}
+                  readOnly={lockBaseFields}
                   className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
                     errors.name ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
-                  }`}
+                  } ${lockBaseFields ? 'bg-[#EAEAEA]' : ''}`}
                   placeholder={t('placeholders.nameLt')}
                 />
                 {errors.name && <p className="text-sm text-red-600 mt-1">{errors.name}</p>}
+                {lockBaseFields ? (
+                  <p className="text-xs text-[#7C7C7C] mt-1">
+                    Vardas generuojamas automatiškai iš Fasadinė/Terasinė + Eglė/Maumedis.
+                  </p>
+                ) : null}
               </div>
 
               <div>
@@ -897,8 +1145,15 @@ export default function ProductForm({ product, mode }: Props) {
                 <input
                   type="text"
                   value={nameEn}
-                  onChange={(e) => setNameEn(e.target.value)}
-                  className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA]"
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    setNameEn(next);
+                    setIsNameEnManuallyEdited(next.trim().length > 0);
+                  }}
+                  readOnly={lockBaseFields}
+                  className={`w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] ${
+                    lockBaseFields ? 'bg-[#EAEAEA]' : ''
+                  }`}
                   placeholder={t('placeholders.nameEn')}
                 />
               </div>
@@ -915,9 +1170,10 @@ export default function ProductForm({ product, mode }: Props) {
                     setSlug(next);
                     setIsSlugManuallyEdited(next.length > 0);
                   }}
+                  readOnly={lockBaseFields}
                   className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
                     errors.slug ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
-                  }`}
+                  } ${lockBaseFields ? 'bg-[#EAEAEA]' : ''}`}
                   placeholder={t('placeholders.slugLt')}
                 />
                 {errors.slug && <p className="text-sm text-red-600 mt-1">{errors.slug}</p>}
@@ -933,9 +1189,10 @@ export default function ProductForm({ product, mode }: Props) {
                     setSlugEn(next);
                     setIsSlugEnManuallyEdited(next.length > 0);
                   }}
+                  readOnly={lockBaseFields}
                   className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
                     errors.slug_en ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
-                  }`}
+                  } ${lockBaseFields ? 'bg-[#EAEAEA]' : ''}`}
                   placeholder={t('placeholders.slugEn')}
                 />
                 {errors.slug_en && <p className="text-sm text-red-600 mt-1">{errors.slug_en}</p>}
@@ -1191,6 +1448,187 @@ export default function ProductForm({ product, mode }: Props) {
             <p className="text-[#535353] font-['DM_Sans'] text-center py-8">
               {t('variants.empty')}
             </p>
+          )}
+        </div>
+
+        {/* Variant Generator (WooCommerce-style) */}
+        <div className="bg-[#EAEAEA] rounded-[24px] p-6 border border-[#E1E1E1]">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div>
+              <h3 className="text-lg font-['DM_Sans'] font-medium">Variacijų generatorius</h3>
+              <p className="text-sm text-[#535353] font-['Outfit']">
+                Sugeneruoja atskiras prekes (stock-item) pagal profilį, spalvą ir matmenis.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={generateVariantDrafts}
+                className="px-4 py-2 border border-[#161616] rounded-lg font-['DM_Sans'] text-sm hover:bg-[#E1E1E1]"
+              >
+                Generuoti kombinacijas
+              </button>
+              <button
+                type="button"
+                onClick={handleCreateVariants}
+                disabled={isCreatingVariants || variantDrafts.length === 0}
+                className="px-4 py-2 bg-[#161616] text-white rounded-lg font-['DM_Sans'] text-sm hover:bg-[#2d2d2d] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCreatingVariants ? 'Kuriama…' : 'Sukurti variacijas'}
+              </button>
+            </div>
+          </div>
+
+          {variantGeneratorError ? (
+            <div className="mb-4 text-sm text-red-600 font-['DM_Sans']">
+              {variantGeneratorError}
+            </div>
+          ) : null}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm font-['DM_Sans'] font-medium mb-2">Spalvos</p>
+              <div className="space-y-2">
+                {colorVariantOptions.length === 0 ? (
+                  <p className="text-xs text-[#7C7C7C]">Nėra spalvų variantų</p>
+                ) : (
+                  colorVariantOptions.map((color) => (
+                    <label key={color} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedVariantColors.includes(color)}
+                        onChange={() => toggleStringSelection(color, selectedVariantColors, setSelectedVariantColors)}
+                      />
+                      <span>{color}</span>
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="md:col-span-2">
+              <p className="text-sm font-['DM_Sans'] font-medium mb-2">Nuotraukos pagal spalvą</p>
+              {selectedVariantColors.length === 0 ? (
+                <p className="text-xs text-[#7C7C7C]">Pasirinkite spalvas, kad pridėtumėte nuotraukas</p>
+              ) : (
+                <div className="space-y-2">
+                  {selectedVariantColors.map((color) => (
+                    <div key={color} className="flex flex-col gap-1">
+                      <label className="text-xs text-[#535353]">{color}</label>
+                      <input
+                        type="text"
+                        value={variantColorImages[color] ?? ''}
+                        onChange={(e) => updateColorImage(color, e.target.value)}
+                        className="w-full px-2 py-2 border border-[#E1E1E1] rounded"
+                        placeholder="Nuotraukos URL"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <p className="text-sm font-['DM_Sans'] font-medium mb-2">Profiliai</p>
+              <div className="space-y-2">
+                {allowedProfileOptions.length === 0 ? (
+                  <p className="text-xs text-[#7C7C7C]">Nėra profilių variantų</p>
+                ) : (
+                  allowedProfileOptions.map((profile) => (
+                    <label key={profile} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedVariantProfiles.includes(profile)}
+                        onChange={() => toggleStringSelection(profile, selectedVariantProfiles, setSelectedVariantProfiles)}
+                      />
+                      <span>{profile}</span>
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-['DM_Sans'] font-medium mb-2">Plotis (mm)</p>
+              <div className="space-y-2">
+                {WIDTH_OPTIONS_MM.map((widthOption) => (
+                  <label key={widthOption} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={selectedVariantWidths.includes(widthOption)}
+                      onChange={() => toggleNumberSelection(widthOption, selectedVariantWidths, setSelectedVariantWidths)}
+                    />
+                    <span>{widthOption}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-['DM_Sans'] font-medium mb-2">Ilgis (mm)</p>
+              <div className="space-y-2">
+                {LENGTH_OPTIONS_MM.map((lengthOption) => (
+                  <label key={lengthOption} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={selectedVariantLengths.includes(lengthOption)}
+                      onChange={() => toggleNumberSelection(lengthOption, selectedVariantLengths, setSelectedVariantLengths)}
+                    />
+                    <span>{lengthOption}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {variantDrafts.length > 0 ? (
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full text-sm border border-[#E1E1E1]">
+                <thead className="bg-[#E1E1E1]">
+                  <tr>
+                    <th className="text-left px-3 py-2">Profilis</th>
+                    <th className="text-left px-3 py-2">Spalva</th>
+                    <th className="text-left px-3 py-2">Plotis</th>
+                    <th className="text-left px-3 py-2">Ilgis</th>
+                    <th className="text-left px-3 py-2">Kaina</th>
+                    <th className="text-left px-3 py-2">SKU</th>
+                    <th className="text-left px-3 py-2">Nuotrauka</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {variantDrafts.map((draft) => (
+                    <tr key={draft.id} className="border-t border-[#E1E1E1]">
+                      <td className="px-3 py-2">{draft.profile}</td>
+                      <td className="px-3 py-2">{draft.color}</td>
+                      <td className="px-3 py-2">{draft.widthMm}</td>
+                      <td className="px-3 py-2">{draft.lengthMm}</td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={draft.price}
+                          onChange={(e) => updateVariantDraft(draft.id, { price: e.target.value })}
+                          className="w-[110px] px-2 py-1 border border-[#E1E1E1] rounded"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={draft.sku}
+                          onChange={(e) => updateVariantDraft(draft.id, { sku: e.target.value })}
+                          className="w-[140px] px-2 py-1 border border-[#E1E1E1] rounded"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-xs text-[#535353]">
+                        {draft.imageUrl ? 'Pagal spalvą' : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-sm text-[#7C7C7C] mt-4">Dar nėra sugeneruotų variacijų.</p>
           )}
         </div>
 

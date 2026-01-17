@@ -4,6 +4,7 @@ import { trackAddToCart, trackRemoveFromCart } from '@/lib/analytics'
 
 export interface CartItemConfiguration {
   usageType?: string;
+  sku?: string;
   profileVariantId?: string;
   colorVariantId?: string;
   thicknessOptionId?: string;
@@ -66,6 +67,7 @@ const createLineId = (item: {
     item.color ?? '',
     item.finish ?? '',
     cfg?.usageType ?? '',
+    cfg?.sku ?? '',
     cfg?.profileVariantId ?? '',
     cfg?.colorVariantId ?? '',
     cfg?.thicknessOptionId ?? '',
@@ -116,6 +118,30 @@ const migrateCart = (persistedState: any, version: number): CartState => {
                   configuration: item.configuration && typeof item.configuration === 'object' ? item.configuration : undefined,
                   configurationId: typeof item.configurationId === 'string' ? item.configurationId : undefined,
                 }),
+          };
+          return next;
+        }) || [],
+      isHydrated: false,
+    } as CartState;
+  }
+  if (version === 2) {
+    // Migration from v2 (lineId without sku) to v3
+    return {
+      ...persistedState,
+      items:
+        persistedState.items?.map((item: any) => {
+          const configuration = item.configuration && typeof item.configuration === 'object' ? item.configuration : undefined;
+          const next: CartItem = {
+            ...item,
+            addedAt: item.addedAt || Date.now(),
+            configuration,
+            lineId: createLineId({
+              id: String(item.id || ''),
+              color: typeof item.color === 'string' ? item.color : undefined,
+              finish: typeof item.finish === 'string' ? item.finish : undefined,
+              configuration,
+              configurationId: typeof item.configurationId === 'string' ? item.configurationId : undefined,
+            }),
           };
           return next;
         }) || [],
@@ -353,7 +379,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'yakiwood-cart',
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => {
         // SSR safeguard: only use localStorage in browser
         if (typeof window === 'undefined') {

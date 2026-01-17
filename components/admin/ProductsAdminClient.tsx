@@ -56,6 +56,10 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isArchivingInvalid, setIsArchivingInvalid] = useState(false);
+
+  const ALLOWED_USAGE_TYPES = new Set(['facade', 'terrace']);
+  const ALLOWED_WOOD_TYPES = new Set(['spruce', 'larch']);
 
   // Filtered products
   const filteredProducts = useMemo(() => {
@@ -217,6 +221,38 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
     }
   };
 
+  const handleArchiveInvalid = async () => {
+    const invalid = products.filter((product) => {
+      const usageOk = !product.usage_type || ALLOWED_USAGE_TYPES.has(product.usage_type);
+      const woodOk = !product.wood_type || ALLOWED_WOOD_TYPES.has(product.wood_type);
+      return !(usageOk && woodOk);
+    });
+
+    if (invalid.length === 0) return;
+    if (!confirm(tList('bulk.deleteConfirm', { count: invalid.length }))) return;
+
+    setIsArchivingInvalid(true);
+    try {
+      const ids = invalid.map((p) => p.id);
+      const { error } = await supabase
+        .from('products')
+        .update({ is_active: false })
+        .in('id', ids);
+
+      if (error) throw error;
+
+      setProducts((prev) =>
+        prev.map((p) => (ids.includes(p.id) ? { ...p, is_active: false } : p))
+      );
+      router.refresh();
+    } catch (error) {
+      console.error('Error archiving invalid products:', error);
+      alert(tList('errors.bulkDeleteFailed'));
+    } finally {
+      setIsArchivingInvalid(false);
+    }
+  };
+
   return (
     <AdminStack>
       {/* Header Actions */}
@@ -230,9 +266,17 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
           />
         </div>
 
-        <AdminButtonLink href={toLocalePath('/admin/products/new', locale)}>
-          {tList('newProductButton')}
-        </AdminButtonLink>
+        <div className="flex items-center gap-3">
+          <AdminButton
+            onClick={handleArchiveInvalid}
+            disabled={isArchivingInvalid || products.length === 0}
+          >
+            {isArchivingInvalid ? tList('bulk.processing') : 'Archive invalid products'}
+          </AdminButton>
+          <AdminButtonLink href={toLocalePath('/admin/products/new', locale)}>
+            {tList('newProductButton')}
+          </AdminButtonLink>
+        </div>
       </div>
 
       {/* Filters */}
@@ -242,8 +286,6 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
           <option value="all">{tList('filters.allCategories')}</option>
           <option value="cladding">{tForm('options.categories.cladding')}</option>
           <option value="decking">{tForm('options.categories.decking')}</option>
-          <option value="interior">{tForm('options.categories.interior')}</option>
-          <option value="tiles">{tForm('options.categories.tiles')}</option>
         </AdminSelect>
         </div>
 
@@ -252,8 +294,6 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
           <option value="all">{tList('filters.allUsage')}</option>
           <option value="facade">{tForm('options.usageTypes.facade')}</option>
           <option value="terrace">{tForm('options.usageTypes.terrace')}</option>
-          <option value="interior">{tForm('options.usageTypes.interior')}</option>
-          <option value="fence">{tForm('options.usageTypes.fence')}</option>
         </AdminSelect>
         </div>
 

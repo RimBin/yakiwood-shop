@@ -46,6 +46,29 @@ export interface Product {
   inStock?: boolean
 }
 
+const USAGE_LABELS = {
+  facade: { lt: 'Fasadinė dailylentė', en: 'Facade cladding' },
+  terrace: { lt: 'Terasinė lenta', en: 'Terrace board' },
+} as const
+
+const WOOD_LABELS = {
+  spruce: { lt: 'Eglė', en: 'Spruce' },
+  larch: { lt: 'Maumedis', en: 'Larch' },
+} as const
+
+function buildBaseProductName(
+  usageType?: string | null,
+  woodType?: string | null,
+  locale: 'lt' | 'en' = 'lt'
+): string | null {
+  const usageKey = (usageType || '').trim().toLowerCase() as keyof typeof USAGE_LABELS
+  const woodKey = (woodType || '').trim().toLowerCase() as keyof typeof WOOD_LABELS
+  const usage = USAGE_LABELS[usageKey]?.[locale]
+  const wood = WOOD_LABELS[woodKey]?.[locale]
+  if (!usage || !wood) return null
+  return `${usage} / ${wood}`
+}
+
 type FetchProductsOptions = {
   mode?: 'active' | 'stock-items' | 'all'
 }
@@ -160,6 +183,8 @@ export function transformDbProduct(db: DbProduct): Product {
 
   const image = db.image_url || '/images/ui/wood/imgSpruce.png'
   const usage = db.usage_type || db.category || 'facade'
+  const baseNameLt = buildBaseProductName(usage, db.wood_type, 'lt')
+  const baseNameEn = buildBaseProductName(usage, db.wood_type, 'en')
 
   const inStock =
     variants.length === 0
@@ -170,8 +195,8 @@ export function transformDbProduct(db: DbProduct): Product {
     id: db.id,
     slug: db.slug,
     slugEn: db.slug_en ?? undefined,
-    name: db.name,
-    nameEn: db.name_en ?? undefined,
+    name: baseNameLt ?? db.name,
+    nameEn: baseNameEn ?? db.name_en ?? db.name,
     price: toNumber(db.base_price),
     salePrice: db.sale_price === null ? undefined : toNumber(db.sale_price),
     image,

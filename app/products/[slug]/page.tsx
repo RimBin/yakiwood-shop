@@ -1,5 +1,5 @@
 ﻿import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { generateBreadcrumbSchema, generateProductSchema } from '@/lib/seo/structured-data';
 import { fetchProductBySlug, transformDbProduct } from '@/lib/products.supabase';
@@ -8,6 +8,36 @@ import { getProductOgImage } from '@/lib/og-image';
 import { toLocalePath } from '@/i18n/paths';
 import { applySeoOverride } from '@/lib/seo/overrides';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+
+function parseStockItemSlug(slug: string) {
+  const parts = slug.split('--');
+  if (parts.length < 4) return null;
+  const [baseSlug, profile, color, size] = parts;
+  if (!baseSlug || !profile || !color || !size) return null;
+  return { baseSlug, profile, color, size };
+}
+
+function parseSizeToken(size: string | undefined | null): { widthMm: number; lengthMm: number } | null {
+  if (!size) return null;
+  const match = String(size).trim().match(/(\d+)\s*[x×]\s*(\d+)/i);
+  if (!match) return null;
+  const widthMm = Number(match[1]);
+  const lengthMm = Number(match[2]);
+  if (!Number.isFinite(widthMm) || !Number.isFinite(lengthMm) || widthMm <= 0 || lengthMm <= 0) return null;
+  return { widthMm, lengthMm };
+}
+
+function normalizeKey(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[_\s]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 
 interface ProductPageProps {
   params: { slug: string };
@@ -112,6 +142,38 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const locale = await getLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
+  // Normalize legacy stock-item URLs into the base product URL with query params.
+  if (resolvedParams.slug.includes('--')) {
+    const parsed = parseStockItemSlug(resolvedParams.slug);
+    if (parsed?.baseSlug) {
+      const base = await fetchProductBySlug(parsed.baseSlug, { locale: currentLocale });
+      if (base) {
+        const size = parseSizeToken(parsed.size);
+        const qs = new URLSearchParams();
+        if (size) {
+          qs.set('w', String(size.widthMm));
+          qs.set('l', String(size.lengthMm));
+        }
+
+        const colorToken = normalizeKey(parsed.color);
+        const profileToken = normalizeKey(parsed.profile);
+
+        const colorMatch = (base.colors ?? []).find((c) => normalizeKey(c.name || '').includes(colorToken));
+        if (colorMatch?.id) qs.set('c', colorMatch.id);
+
+        const profileMatch = (base.profiles ?? []).find((p) => {
+          const hay = normalizeKey([p.code, p.name].filter(Boolean).join(' '));
+          return hay.includes(profileToken);
+        });
+        if (profileMatch?.id) qs.set('f', profileMatch.id);
+
+        const baseSlugForLocale = currentLocale === 'en' ? (base.slugEn ?? base.slug) : base.slug;
+        const target = toLocalePath(`/products/${baseSlugForLocale}`, currentLocale);
+        redirect(qs.toString() ? `${target}?${qs.toString()}` : target);
+      }
+    }
+  }
   const slugForLocale = currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug;
 
   const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;

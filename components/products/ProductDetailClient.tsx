@@ -3,12 +3,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
 import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
 import { localizeColorLabel } from '@/lib/products.supabase';
 import { assets, getAsset } from '@/lib/assets';
-import type { AssetKey } from '@/lib/assets';
 import { useCartStore } from '@/lib/cart/store';
 import { trackEvent, trackProductView } from '@/lib/analytics';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
@@ -144,6 +144,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const tBreadcrumbs = useTranslations('breadcrumbs');
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchParamsKey = searchParams.toString();
   const addItem = useCartStore((state) => state.addItem);
   const cartItems = useCartStore((state) => state.items);
 
@@ -158,26 +162,35 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     }, 0);
   }, [cartItems]);
 
-  const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
-  const localizedDisplayName = (() => {
-    if (!product.slug.includes('--')) return displayName;
-    const parsed = parseStockItemSlug(product.slug);
-    const categoryKey = typeof product.category === 'string' ? product.category.trim().toLowerCase() : '';
-    const usageKey = categoryKey ? `solutions.${categoryKey}` : null;
-    const usageLabelRaw = usageKey && t.has(usageKey) ? t(usageKey) : '';
-    const usageLabel = typeof usageLabelRaw === 'string' && usageLabelRaw.startsWith('productPage.') ? '' : usageLabelRaw;
+  const baseDisplayName = useMemo(() => {
+    const usageKey = typeof product.category === 'string' ? product.category.trim().toLowerCase() : '';
+    const woodKey = typeof product.woodType === 'string' ? product.woodType.trim().toLowerCase() : '';
 
-    const woodTypeKey = typeof product.woodType === 'string' ? product.woodType.trim().toLowerCase() : '';
-    const woodKey = woodTypeKey ? `woodTypes.${woodTypeKey}` : null;
-    const woodLabelRaw = woodKey && t.has(woodKey) ? t(woodKey) : '';
-    const woodLabel = typeof woodLabelRaw === 'string' && woodLabelRaw.startsWith('productPage.') ? '' : woodLabelRaw;
-    const colorName = product.colors?.[0]?.name ?? parsed?.color ?? '';
-    const colorLabel = colorName ? localizeColorLabel(colorName, currentLocale) : '';
-    const sizeLabel = parsed?.size ? formatSizeLabel(parsed.size) : '';
+    const usageLabel =
+      usageKey === 'terrace'
+        ? currentLocale === 'lt'
+          ? 'Terasinė lenta'
+          : 'Terrace board'
+        : usageKey === 'facade'
+          ? currentLocale === 'lt'
+            ? 'Fasadinė dailylentė'
+            : 'Facade cladding'
+          : '';
 
-    const parts = ['Shou Sugi Ban', usageLabel, woodLabel, colorLabel, sizeLabel].filter(Boolean);
-    return parts.length > 0 ? parts.join(' · ') : displayName;
-  })();
+    const woodLabel =
+      woodKey === 'larch'
+        ? currentLocale === 'lt'
+          ? 'Maumedis'
+          : 'Larch'
+        : woodKey === 'spruce'
+          ? currentLocale === 'lt'
+            ? 'Eglė'
+            : 'Spruce'
+          : '';
+
+    const base = usageLabel && woodLabel ? `${usageLabel} / ${woodLabel}` : '';
+    return base || (currentLocale === 'en' && product.nameEn ? product.nameEn : product.name);
+  }, [product.category, product.woodType, product.name, product.nameEn, currentLocale]);
   const displayDescription =
     currentLocale === 'en' && product.descriptionEn ? product.descriptionEn : product.description;
   const hasSale =
@@ -201,6 +214,28 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       size: parseSizeToken(parsed.size),
     };
   }, [product.slug]);
+
+  const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(null);
+  const [selectedFinish, setSelectedFinish] = useState<ProductProfileVariant | null>(null);
+  const [selectedWidthMm, setSelectedWidthMm] = useState<number>(() => widthOptionsMm[0]);
+  const [selectedLengthMm, setSelectedLengthMm] = useState<number>(() => lengthOptionsMm[0]);
+  const [targetAreaM2, setTargetAreaM2] = useState<number>(200);
+
+  const selectedSizeLabel = useMemo(() => {
+    return `${selectedWidthMm}×${selectedLengthMm} mm`;
+  }, [selectedWidthMm, selectedLengthMm]);
+
+  const localizedDisplayName = useMemo(() => {
+    return baseDisplayName;
+  }, [baseDisplayName]);
+
+  const attributeSummary = useMemo(() => {
+    const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
+    const colorName = selectedColor?.name || (parsed?.color ? localizeColorLabel(parsed.color, currentLocale) : '');
+    const profileName = selectedFinish?.name || (parsed?.profile ? parsed.profile.replace(/[-_]+/g, ' ') : '');
+    const sizeLabel = selectedSizeLabel || (parsed?.size ? formatSizeLabel(parsed.size) : '');
+    return [profileName, colorName, sizeLabel].filter(Boolean).join(' · ');
+  }, [product.slug, selectedColor?.name, selectedFinish?.name, selectedSizeLabel, currentLocale]);
 
   useEffect(() => {
     if (!product?.id) return;
@@ -226,6 +261,15 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     }));
   }, [product.colors, product.id, currentLocale]);
 
+  const usageTypeForQuote: UsageType | undefined = useMemo(() => {
+    const v = String(product.category || '').toLowerCase();
+    if (v === 'cladding') return 'facade';
+    if (v === 'decking') return 'terrace';
+    if (v === 'tiles') return 'interior';
+    if (v === 'facade' || v === 'terrace' || v === 'interior' || v === 'fence') return v;
+    return undefined;
+  }, [product.category]);
+
   const profileOptions = useMemo<ProductProfileVariant[]>(() => {
     const mapped = (product.profiles || []).map((profile, index) => {
       const dimensionLabel = [
@@ -248,31 +292,32 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       };
     });
 
-    if (mapped.length > 0) return mapped;
+    if (mapped.length > 0) {
+      if (usageTypeForQuote === 'terrace') return mapped.slice(0, 1);
+      if (usageTypeForQuote === 'facade' && mapped.length > 1) return mapped.slice(1);
+      return mapped;
+    }
     return FALLBACK_PROFILE_OPTIONS.map((fallback) => ({ ...(fallback as unknown as ProductProfileVariant) }));
-  }, [product.id, product.profiles]);
+  }, [product.id, product.profiles, usageTypeForQuote]);
 
-  const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(colorOptions[0] || null);
-  const [selectedFinish, setSelectedFinish] = useState<ProductProfileVariant | null>(profileOptions[0] || null);
-
-  const [selectedWidthMm, setSelectedWidthMm] = useState<number>(() => widthOptionsMm[0]);
-  const [selectedLengthMm, setSelectedLengthMm] = useState<number>(() => lengthOptionsMm[0]);
-  const [targetAreaM2, setTargetAreaM2] = useState<number>(200);
+  const skipNextUrlSyncRef = useRef(false);
 
   const selectionInitializedForProductIdRef = useRef<string | null>(null);
-
-  const usageTypeForQuote: UsageType | undefined = useMemo(() => {
-    const v = String(product.category || '').toLowerCase();
-    if (v === 'cladding') return 'facade';
-    if (v === 'decking') return 'terrace';
-    if (v === 'tiles') return 'interior';
-    if (v === 'facade' || v === 'terrace' || v === 'interior' || v === 'fence') return v;
-    return undefined;
-  }, [product.category]);
 
   const [selectedThicknessMm, setSelectedThicknessMm] = useState<number>(() => {
     return usageTypeForQuote === 'terrace' ? 28 : 20;
   });
+
+  const thicknessOptions = useMemo(() => {
+    const all = [
+      { valueMm: 20, label: '18/20 mm' },
+      { valueMm: 28, label: '28 mm' },
+    ];
+
+    if (usageTypeForQuote === 'terrace') return all.filter((x) => x.valueMm === 28);
+    if (usageTypeForQuote === 'facade') return all.filter((x) => x.valueMm === 20);
+    return all;
+  }, [usageTypeForQuote]);
 
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
@@ -285,38 +330,176 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     lineTotal: number;
   }>(null);
 
+  const baseSlugForSelection = useMemo(() => {
+    return String(product.slug || '').split('--')[0] || String(product.slug || '');
+  }, [product.slug]);
+
+  const selectedColorToken = useMemo(() => {
+    return selectedColor?.name ? normalizeColorKey(String(selectedColor.name)) : '';
+  }, [selectedColor?.name]);
+
+  const selectedProfileToken = useMemo(() => {
+    const raw = [selectedFinish?.code, selectedFinish?.name].filter(Boolean).join(' ');
+    return raw ? normalizeColorKey(raw) : '';
+  }, [selectedFinish?.code, selectedFinish?.name]);
+
+  const [variantInventory, setVariantInventory] = useState<null | {
+    loading: boolean;
+    foundProduct: boolean;
+    foundInventory: boolean;
+    sku: string | null;
+    quantityAvailable: number;
+    quantityReserved: number;
+  }>(null);
+
   useEffect(() => {
     if (!product?.id) return;
     if (selectionInitializedForProductIdRef.current === product.id) return;
 
     // Initialize once per product (including stock-item presets).
+    const urlColorId = searchParams.get('c');
+    const urlFinishId = searchParams.get('f');
+    const urlWidth = Number(searchParams.get('w'));
+    const urlLength = Number(searchParams.get('l'));
+    const urlThickness = Number(searchParams.get('t'));
+
     const presetColorKey = stockPreset?.colorToken ? normalizeColorKey(stockPreset.colorToken) : null;
     const presetProfileKey = stockPreset?.profileToken ? normalizeLabel(stockPreset.profileToken) : null;
 
     const initialColor =
-      presetColorKey && colorOptions.length
-        ? colorOptions.find((c) => normalizeColorKey(c.name || '').includes(presetColorKey)) ?? null
-        : null;
+      urlColorId && colorOptions.length
+        ? colorOptions.find((c) => c.id === urlColorId) ?? null
+        : presetColorKey && colorOptions.length
+          ? colorOptions.find((c) => normalizeColorKey(c.name || '').includes(presetColorKey)) ?? null
+          : null;
 
     const initialFinish =
-      presetProfileKey && profileOptions.length
-        ? profileOptions.find((p) => {
-            const hay = normalizeLabel([p.code, p.name].filter(Boolean).join(' '));
-            return hay.includes(presetProfileKey);
-          }) ?? null
-        : null;
+      urlFinishId && profileOptions.length
+        ? profileOptions.find((p) => p.id === urlFinishId) ?? null
+        : presetProfileKey && profileOptions.length
+          ? profileOptions.find((p) => {
+              const hay = normalizeLabel([p.code, p.name].filter(Boolean).join(' '));
+              return hay.includes(presetProfileKey);
+            }) ?? null
+          : null;
 
     setSelectedColor(initialColor ?? colorOptions[0] ?? null);
     setSelectedFinish(initialFinish ?? profileOptions[0] ?? null);
 
-    const presetSize = stockPreset?.size;
-    if (presetSize) {
-      if (widthOptionsMm.includes(presetSize.widthMm as any)) setSelectedWidthMm(presetSize.widthMm);
-      if (lengthOptionsMm.includes(presetSize.lengthMm as any)) setSelectedLengthMm(presetSize.lengthMm);
+    if (Number.isFinite(urlWidth) && widthOptionsMm.includes(urlWidth as any)) {
+      setSelectedWidthMm(urlWidth);
+    } else {
+      const presetSize = stockPreset?.size;
+      if (presetSize && widthOptionsMm.includes(presetSize.widthMm as any)) setSelectedWidthMm(presetSize.widthMm);
+    }
+
+    if (Number.isFinite(urlLength) && lengthOptionsMm.includes(urlLength as any)) {
+      setSelectedLengthMm(urlLength);
+    } else {
+      const presetSize = stockPreset?.size;
+      if (presetSize && lengthOptionsMm.includes(presetSize.lengthMm as any)) setSelectedLengthMm(presetSize.lengthMm);
+    }
+
+    if (Number.isFinite(urlThickness) && thicknessOptions.some((x) => x.valueMm === urlThickness)) {
+      setSelectedThicknessMm(urlThickness);
     }
 
     selectionInitializedForProductIdRef.current = product.id;
-  }, [product?.id, stockPreset, colorOptions, profileOptions, widthOptionsMm, lengthOptionsMm]);
+  }, [product?.id, stockPreset, colorOptions, profileOptions, widthOptionsMm, lengthOptionsMm, thicknessOptions, searchParamsKey, searchParams]);
+
+  useEffect(() => {
+    if (!product?.id) return;
+    if (selectionInitializedForProductIdRef.current !== product.id) return;
+
+    const urlColorId = searchParams.get('c');
+    const urlFinishId = searchParams.get('f');
+    const urlWidth = Number(searchParams.get('w'));
+    const urlLength = Number(searchParams.get('l'));
+    const urlThickness = Number(searchParams.get('t'));
+
+    let didUpdate = false;
+
+    if (urlColorId && selectedColor?.id !== urlColorId) {
+      const match = colorOptions.find((c) => c.id === urlColorId) ?? null;
+      if (match) {
+        setSelectedColor(match);
+        didUpdate = true;
+      }
+    }
+
+    if (urlFinishId && selectedFinish?.id !== urlFinishId) {
+      const match = profileOptions.find((p) => p.id === urlFinishId) ?? null;
+      if (match) {
+        setSelectedFinish(match);
+        didUpdate = true;
+      }
+    }
+
+    if (Number.isFinite(urlWidth) && widthOptionsMm.includes(urlWidth as any) && selectedWidthMm !== urlWidth) {
+      setSelectedWidthMm(urlWidth);
+      didUpdate = true;
+    }
+
+    if (Number.isFinite(urlLength) && lengthOptionsMm.includes(urlLength as any) && selectedLengthMm !== urlLength) {
+      setSelectedLengthMm(urlLength);
+      didUpdate = true;
+    }
+
+    if (Number.isFinite(urlThickness) && thicknessOptions.some((x) => x.valueMm === urlThickness) && selectedThicknessMm !== urlThickness) {
+      setSelectedThicknessMm(urlThickness);
+      didUpdate = true;
+    }
+
+    if (didUpdate) {
+      skipNextUrlSyncRef.current = true;
+    }
+  }, [product?.id, searchParamsKey, colorOptions, profileOptions, widthOptionsMm, lengthOptionsMm, thicknessOptions, selectedColor?.id, selectedFinish?.id, selectedWidthMm, selectedLengthMm, selectedThicknessMm, searchParams]);
+
+  useEffect(() => {
+    if (!product?.id) return;
+    if (selectionInitializedForProductIdRef.current !== product.id) return;
+
+    if (skipNextUrlSyncRef.current) {
+      skipNextUrlSyncRef.current = false;
+      return;
+    }
+
+    const next = new URLSearchParams(searchParams.toString());
+
+    const desired: Record<string, string | null> = {
+      w: String(selectedWidthMm),
+      l: String(selectedLengthMm),
+      c: selectedColor?.id ?? null,
+      f: selectedFinish?.id ?? null,
+      t: String(selectedThicknessMm),
+    };
+
+    let changed = false;
+    for (const [key, value] of Object.entries(desired)) {
+      const current = next.get(key);
+      if (value === null || value === '') {
+        if (current !== null) {
+          next.delete(key);
+          changed = true;
+        }
+        continue;
+      }
+      if (current !== value) {
+        next.set(key, value);
+        changed = true;
+      }
+    }
+
+    if (!changed) return;
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [product?.id, selectedWidthMm, selectedLengthMm, selectedColor?.id, selectedFinish?.id, selectedThicknessMm, pathname, router, searchParamsKey, searchParams]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const base = 'Yakiwood';
+    document.title = localizedDisplayName ? `${localizedDisplayName} | ${base}` : base;
+  }, [localizedDisplayName]);
 
   useEffect(() => {
     // Keep a valid selection if the options list changes.
@@ -339,23 +522,67 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     }
   }, [profileOptions, selectedFinish]);
 
-  const thicknessOptions = useMemo(() => {
-    const all = [
-      { valueMm: 20, label: '18/20 mm' },
-      { valueMm: 28, label: '28 mm' },
-    ];
-
-    if (usageTypeForQuote === 'terrace') return all.filter((x) => x.valueMm === 28);
-    if (usageTypeForQuote === 'facade') return all.filter((x) => x.valueMm === 20);
-    return all;
-  }, [usageTypeForQuote]);
-
   useEffect(() => {
     const allowed = new Set(thicknessOptions.map((x) => x.valueMm));
     if (!allowed.has(selectedThicknessMm)) {
       setSelectedThicknessMm(thicknessOptions[0]?.valueMm ?? 20);
     }
   }, [selectedThicknessMm, thicknessOptions]);
+
+  useEffect(() => {
+    if (!baseSlugForSelection || !selectedColorToken || !selectedProfileToken) {
+      setVariantInventory(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    setVariantInventory((prev) => ({
+      loading: true,
+      foundProduct: prev?.foundProduct ?? false,
+      foundInventory: prev?.foundInventory ?? false,
+      sku: prev?.sku ?? null,
+      quantityAvailable: prev?.quantityAvailable ?? 0,
+      quantityReserved: prev?.quantityReserved ?? 0,
+    }));
+
+    const run = async () => {
+      try {
+        const qs = new URLSearchParams({
+          baseSlug: baseSlugForSelection,
+          profile: selectedProfileToken,
+          color: selectedColorToken,
+          w: String(selectedWidthMm),
+          l: String(selectedLengthMm),
+        });
+
+        const res = await fetch(`/api/public/variant-inventory?${qs.toString()}`, {
+          signal: controller.signal,
+          headers: { Accept: 'application/json' },
+        });
+
+        if (!res.ok) {
+          setVariantInventory(null);
+          return;
+        }
+
+        const data = (await res.json()) as any;
+        setVariantInventory({
+          loading: false,
+          foundProduct: !!data?.foundProduct,
+          foundInventory: !!data?.foundInventory,
+          sku: typeof data?.sku === 'string' ? data.sku : null,
+          quantityAvailable: Number.isFinite(Number(data?.quantityAvailable)) ? Number(data.quantityAvailable) : 0,
+          quantityReserved: Number.isFinite(Number(data?.quantityReserved)) ? Number(data.quantityReserved) : 0,
+        });
+      } catch (e: any) {
+        if (e?.name === 'AbortError') return;
+        setVariantInventory(null);
+      }
+    };
+
+    run();
+    return () => controller.abort();
+  }, [baseSlugForSelection, selectedColorToken, selectedProfileToken, selectedWidthMm, selectedLengthMm]);
 
   const selectedThicknessLabel = useMemo(() => {
     return thicknessOptions.find((opt) => opt.valueMm === selectedThicknessMm)?.label ?? `${selectedThicknessMm} mm`;
@@ -392,6 +619,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         usageType: usageTypeForQuote,
         colorVariantId: selectedColor?.id,
         profileVariantId: selectedFinish?.id,
+        sku: typeof variantInventory?.sku === 'string' && variantInventory.sku.trim().length > 0 ? variantInventory.sku : undefined,
         thicknessMm: selectedThicknessMm,
         widthMm: selectedWidthMm,
         lengthMm: selectedLengthMm,
@@ -618,9 +846,29 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <h1 className="font-['DM_Sans'] font-normal text-[28px] lg:text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616]">
                 {localizedDisplayName}
               </h1>
+              {attributeSummary ? (
+                <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
+                  {attributeSummary}
+                </p>
+              ) : null}
               <p className="font-['DM_Sans'] font-normal text-[28px] lg:text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616]">
                 {effectivePrice.toFixed(0)} €
               </p>
+              {variantInventory ? (
+                <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
+                  {variantInventory.loading
+                    ? currentLocale === 'lt'
+                      ? 'Tikrinamas sandėlis…'
+                      : 'Checking stock…'
+                    : variantInventory.foundInventory
+                      ? currentLocale === 'lt'
+                        ? `Sandėlyje: ${variantInventory.quantityAvailable}`
+                        : `In stock: ${variantInventory.quantityAvailable}`
+                      : currentLocale === 'lt'
+                        ? 'Sandėlio informacijos nėra'
+                        : 'No stock info'}
+                </p>
+              ) : null}
               {quoteError ? (
                 <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">{quoteError}</p>
               ) : null}

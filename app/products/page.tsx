@@ -277,8 +277,6 @@ export default function ProductsPage() {
     () => [
       { id: 'facade', label: t('usageFilters.facade') },
       { id: 'terrace', label: t('usageFilters.terrace') },
-      { id: 'interior', label: t('usageFilters.interior') },
-      { id: 'fence', label: t('usageFilters.fence') },
     ],
     [t]
   );
@@ -295,8 +293,6 @@ export default function ProductsPage() {
     return {
       facade: t('usageFilters.facade'),
       terrace: t('usageFilters.terrace'),
-      interior: t('usageFilters.interior'),
-      fence: t('usageFilters.fence'),
     };
   }, [t]);
 
@@ -345,25 +341,17 @@ export default function ProductsPage() {
 
   const formatProductDisplayName = (product: Product) => {
     const baseName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
-    if (!product.slug.includes('--')) return baseName;
+    return baseName;
+  };
 
-    const parsed = parseStockItemSlug(product.slug);
+  const formatProductAttributes = (product: Product) => {
+    const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
     const colorName = product.colors?.[0]?.name ?? parsed?.color ?? '';
-    const usageLabel = product.category ? usageLabels[product.category] ?? product.category : '';
-    const woodLabel = product.woodType ? woodLabels[product.woodType] ?? product.woodType : '';
     const colorLabel = colorName ? localizeColorLabel(colorName, currentLocale) : '';
+    const profileLabel = product.profiles?.[0]?.name ?? parsed?.profile ?? '';
     const sizeLabel = parsed?.size ? formatSizeLabel(parsed.size) : '';
-
-    const parts = [
-      'Shou Sugi Ban',
-      usageLabel,
-      woodLabel,
-      colorLabel,
-      sizeLabel,
-    ].filter(Boolean);
-
-    if (parts.length === 0) return baseName;
-    return parts.join(' · ');
+    const parts = [profileLabel, colorLabel, sizeLabel].filter(Boolean);
+    return parts.length > 0 ? parts.join(' · ') : '';
   };
 
   const colorOptions = useMemo(() => {
@@ -495,7 +483,8 @@ export default function ProductsPage() {
 
       const q = searchQuery.trim().toLowerCase();
       const displayName = formatProductDisplayName(product).toLowerCase();
-      const matchesQuery = q.length === 0 || displayName.includes(q);
+      const attributeText = formatProductAttributes(product).toLowerCase();
+      const matchesQuery = q.length === 0 || displayName.includes(q) || attributeText.includes(q);
 
       return (
         matchesUsage &&
@@ -510,6 +499,7 @@ export default function ProductsPage() {
   }, [
     allProducts,
     formatProductDisplayName,
+    formatProductAttributes,
     searchQuery,
     selectedColor,
     selectedLength,
@@ -869,6 +859,7 @@ export default function ProductsPage() {
             {shownProducts.map((product, idx) => (
               (() => {
                 const localizedDisplayName = formatProductDisplayName(product);
+                const attributeLabel = formatProductAttributes(product);
                 const hasSale =
                   typeof product.salePrice === 'number' &&
                   product.salePrice > 0 &&
@@ -907,6 +898,13 @@ export default function ProductsPage() {
               >
                 {localizedDisplayName}
               </p>
+              {attributeLabel ? (
+                <p
+                  className="font-['Outfit'] font-normal text-[12px] leading-[1.2] text-[#7C7C7C] tracking-[0.6px] uppercase"
+                >
+                  {attributeLabel}
+                </p>
+              ) : null}
               {(product.category || product.woodType) && (
                 <p
                   className="font-['DM_Sans'] font-normal text-[14px] leading-[1.2] text-[#535353] tracking-[-0.28px]"

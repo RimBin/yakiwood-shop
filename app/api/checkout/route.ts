@@ -87,6 +87,7 @@ export async function POST(req: NextRequest) {
         finish?: string;
         configuration?: {
           usageType?: UsageType;
+          sku?: string;
           profileVariantId?: string;
           colorVariantId?: string;
           thicknessOptionId?: string;
@@ -193,12 +194,18 @@ export async function POST(req: NextRequest) {
     // For initial scaffold we convert basePrice EUR to cents direct.
     const lineItemsResolved = await Promise.all(
       discountedItems.map(async (item) => {
+        const sku =
+          typeof (item as any)?.configuration?.sku === 'string' && (item as any).configuration.sku.trim().length > 0
+            ? String((item as any).configuration.sku)
+            : null;
+
         // Shipping and other non-product items must keep provided price.
         if (item.id === 'shipping') {
           return {
             quantity: item.quantity,
             unitAmountCents: Math.round(item.basePrice * 100),
             displayName: item.name,
+            sku,
           };
         }
 
@@ -215,6 +222,7 @@ export async function POST(req: NextRequest) {
             quantity: item.quantity,
             unitAmountCents: Math.round(item.basePrice * 100),
             displayName: item.name,
+            sku,
           };
         }
 
@@ -226,6 +234,7 @@ export async function POST(req: NextRequest) {
             quantity: item.quantity,
             unitAmountCents: Math.round(discountedUnit * 100),
             displayName: item.name,
+            sku,
           };
         }
 
@@ -246,6 +255,7 @@ export async function POST(req: NextRequest) {
             quantity: item.quantity,
             unitAmountCents: Math.round(item.basePrice * 100),
             displayName: item.name,
+            sku,
           };
         }
 
@@ -256,6 +266,7 @@ export async function POST(req: NextRequest) {
           quantity: item.quantity,
           unitAmountCents,
           displayName: item.name,
+          sku,
         };
       })
     );
@@ -267,6 +278,7 @@ export async function POST(req: NextRequest) {
         unit_amount: i.unitAmountCents,
         product_data: {
           name: i.displayName,
+          metadata: i.sku ? { sku: i.sku } : undefined,
         },
       },
     }));
