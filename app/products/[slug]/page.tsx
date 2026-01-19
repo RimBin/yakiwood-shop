@@ -41,6 +41,24 @@ function normalizeKey(value: string): string {
 
 interface ProductPageProps {
   params: { slug: string };
+  searchParams?: Record<string, string | string[] | undefined>;
+}
+
+function buildQueryString(searchParams: ProductPageProps['searchParams']): string {
+  if (!searchParams) return '';
+  const qs = new URLSearchParams();
+  for (const [key, raw] of Object.entries(searchParams)) {
+    if (typeof raw === 'string') {
+      if (raw !== '') qs.set(key, raw);
+      continue;
+    }
+    if (Array.isArray(raw)) {
+      for (const v of raw) {
+        if (typeof v === 'string' && v !== '') qs.append(key, v);
+      }
+    }
+  }
+  return qs.toString();
 }
 
 // Generate metadata for SEO
@@ -117,7 +135,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 }
 
 // Main product page component (Server Component)
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params, searchParams }: ProductPageProps) {
   const resolvedParams = await params;
   let product = await fetchProductBySlug(resolvedParams.slug, { locale: 'en' });
 
@@ -142,6 +160,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const locale = await getLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
+  // If the product has a locale-specific slug, enforce the canonical URL.
+  // This prevents mixed-language pages like EN UI under a LT slug (and vice versa).
+  const canonicalSlug = currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug;
+  if (!resolvedParams.slug.includes('--') && canonicalSlug && resolvedParams.slug !== canonicalSlug) {
+    const target = toLocalePath(`/products/${canonicalSlug}`, currentLocale);
+    const qs = buildQueryString(searchParams);
+    redirect(qs ? `${target}?${qs}` : target);
+  }
 
   // Normalize legacy stock-item URLs into the base product URL with query params.
   if (resolvedParams.slug.includes('--')) {
@@ -174,7 +201,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       }
     }
   }
-  const slugForLocale = currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug;
+  const slugForLocale = canonicalSlug;
 
   const displayName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
   const displayDescription =

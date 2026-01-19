@@ -150,9 +150,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Dynamic product pages
-  const productPages: MetadataRoute.Sitemap = products.flatMap((product) => [
+  const productPages: MetadataRoute.Sitemap = products.flatMap((product) => {
+    const enSlug = (product as any).slugEn ?? product.slug;
+    return [
     {
-      url: `${BASE_URL}/products/${product.slug}`,
+      url: `${BASE_URL}/products/${enSlug}`,
       lastModified: product.updatedAt,
       changeFrequency: 'weekly',
       priority: 0.8,
@@ -163,7 +165,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.7,
     },
-  ]);
+    ];
+  });
 
   // Dynamic project pages
   const projectPages: MetadataRoute.Sitemap = projects.flatMap((project) => [

@@ -20,6 +20,7 @@
     "assets:download:node": "node scripts/download-figma-assets.js",
     "assets:generate": "node scripts/generate-asset-types.js",
     "db:seed:fixed": "node scripts/seed-fixed-products.mjs",
+    "db:backfill:slug-en": "node scripts/backfill-product-slug-en.mjs",
     "env:check": "node scripts/check-env.js",
     "env:validate": "node scripts/check-env.js --validate",
     "env:check:strict": "node scripts/check-env.js --strict",

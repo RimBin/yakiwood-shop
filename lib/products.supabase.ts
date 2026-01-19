@@ -438,7 +438,7 @@ export async function fetchProductBySlug(
   const supabase = createPublicClient()
 
   if (!supabase) {
-    const seed = seedProducts.find((p) => p.slug === slug)
+    const seed = seedProducts.find((p) => p.slug === slug || (p as any).slugEn === slug)
     return seed ? transformSeedProduct(seed) : null
   }
 
@@ -516,6 +516,6 @@ export async function fetchProductBySlug(
     }
   }
 
-  const seed = seedProducts.find((p) => p.slug === slug)
+  const seed = seedProducts.find((p) => p.slug === slug || (p as any).slugEn === slug)
   return seed ? transformSeedProduct(seed) : null
 }

@@ -12,6 +12,7 @@ interface ProjectInfoProps {
   productsUsed: {
     name: string;
     slug: string;
+    slugEn?: string;
   }[];
 }
 
@@ -78,7 +79,10 @@ export default function ProjectInfo({
             {productsUsed.map((product, index) => (
               <React.Fragment key={product.slug}>
                 <Link
-                  href={toLocalePath(`/products/${product.slug}`, currentLocale)}
+                  href={toLocalePath(
+                    `/products/${currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug}`,
+                    currentLocale
+                  )}
                   className="font-['Outfit'] font-normal text-[#161616] text-xs uppercase tracking-[0.6px] leading-[1.3] underline hover:no-underline transition-all"
                 >
                   {product.name}

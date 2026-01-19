@@ -41,6 +41,24 @@ function normalizeKey(value: string): string {
 
 interface ProductPageProps {
 	params: { slug: string };
+	searchParams?: Record<string, string | string[] | undefined>;
+}
+
+function buildQueryString(searchParams: ProductPageProps['searchParams']): string {
+	if (!searchParams) return '';
+	const qs = new URLSearchParams();
+	for (const [key, raw] of Object.entries(searchParams)) {
+		if (typeof raw === 'string') {
+			if (raw !== '') qs.set(key, raw);
+			continue;
+		}
+		if (Array.isArray(raw)) {
+			for (const v of raw) {
+				if (typeof v === 'string' && v !== '') qs.append(key, v);
+			}
+		}
+	}
+	return qs.toString();
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
@@ -115,7 +133,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 	return applySeoOverride(metadata, new URL(canonical).pathname, currentLocale);
 }
 
-export default async function ProduktasPage({ params }: ProductPageProps) {
+export default async function ProduktasPage({ params, searchParams }: ProductPageProps) {
 	const resolvedParams = await params;
 	let product = await fetchProductBySlug(resolvedParams.slug, { locale: 'lt' });
 
@@ -140,6 +158,15 @@ export default async function ProduktasPage({ params }: ProductPageProps) {
 
 	const locale = await getLocale();
 	const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
+	// Enforce canonical slug for the active locale.
+	// Prevents mixed URLs like /lt/produktai/<english-slug> for LT pages.
+	const canonicalSlug = currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug;
+	if (!resolvedParams.slug.includes('--') && canonicalSlug && resolvedParams.slug !== canonicalSlug) {
+		const target = toLocalePath(`/products/${canonicalSlug}`, currentLocale);
+		const qs = buildQueryString(searchParams);
+		redirect(qs ? `${target}?${qs}` : target);
+	}
 
 	// Normalize legacy stock-item URLs into the base product URL with query params.
 	if (resolvedParams.slug.includes('--')) {
@@ -180,7 +207,7 @@ export default async function ProduktasPage({ params }: ProductPageProps) {
 		typeof product.salePrice === 'number' && product.salePrice > 0 && product.salePrice < product.price;
 	const offerPrice = hasSale ? product.salePrice! : product.price;
 
-	const slugForLocale = currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug;
+	const slugForLocale = canonicalSlug;
 
 	const productSchema = generateProductSchema({
 		name: displayName,

@@ -22,6 +22,7 @@ interface Product {
   id: string;
   name: string;
   slug: string;
+  slug_en?: string | null;
   description?: string;
   base_price: number;
   wood_type?: string;
@@ -426,7 +427,10 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
                       </Link>
                       <span className="text-[#E1E1E1]">|</span>
                       <Link
-                        href={toLocalePath(`/products/${product.slug}`, locale)}
+                        href={toLocalePath(
+                          `/products/${locale === 'en' ? (product.slug_en || product.slug) : product.slug}`,
+                          locale
+                        )}
                         target="_blank"
                         className="text-sm text-[#535353] hover:underline font-['DM_Sans']"
                       >
