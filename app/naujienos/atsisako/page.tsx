@@ -47,7 +47,7 @@ function UnsubscribeContent() {
 
   if (!email) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6 bg-[#EAEAEA]">
+      <div className="min-h-screen flex items-center justify-center px-6 bg-[#E1E1E1]">
         <div className="max-w-md w-full bg-white p-8 rounded-[24px] shadow-lg text-center">
           <h1 className="text-3xl font-['DM_Sans'] font-medium tracking-[-1.2px] text-[#161616] mb-4">
             Neteisingas nuoroda
@@ -68,7 +68,7 @@ function UnsubscribeContent() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6 bg-[#EAEAEA]">
+      <div className="min-h-screen flex items-center justify-center px-6 bg-[#E1E1E1]">
         <div className="max-w-md w-full bg-white p-8 rounded-[24px] shadow-lg text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
@@ -115,7 +115,7 @@ function UnsubscribeContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 bg-[#EAEAEA]">
+    <div className="min-h-screen flex items-center justify-center px-6 bg-[#E1E1E1]">
       <div className="max-w-md w-full bg-white p-8 rounded-[24px] shadow-lg">
         <h1 className="text-3xl font-['DM_Sans'] font-medium tracking-[-1.2px] text-[#161616] mb-4 text-center">
           Atsisakyti prenumeratos
@@ -159,7 +159,7 @@ function UnsubscribeContent() {
 export default function UnsubscribePage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center px-6 bg-[#EAEAEA]">
+      <div className="min-h-screen flex items-center justify-center px-6 bg-[#E1E1E1]">
         <div className="font-['Outfit'] text-[16px] text-[#161616]">Kraunama...</div>
       </div>
     }>

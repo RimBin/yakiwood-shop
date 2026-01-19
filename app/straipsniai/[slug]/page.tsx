@@ -15,7 +15,7 @@ interface BlogPostPageProps {
 }
 
 export async function generateStaticParams() {
-  return blogPosts.map((post) => ({ slug: post.slug.en }));
+  return blogPosts.map((post) => ({ slug: post.slug.lt }));
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
@@ -55,16 +55,16 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   return applySeoOverride(metadata, new URL(canonical).pathname, currentLocale);
 }
 
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
+export default async function ArticlePageLt({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const locale = await getLocale();
 
-  if (locale === 'lt') {
-    const match = blogPosts.find((post) => post.slug.en === slug);
+  if (locale !== 'lt') {
+    const match = blogPosts.find((post) => post.slug.lt === slug);
     if (match) {
-      redirect(`/lt/straipsniai/${match.slug.lt}`);
+      redirect(`/blog/${match.slug.en}`);
     }
-    redirect('/lt/straipsniai');
+    redirect('/blog');
   }
 
   const currentLocale = locale === 'lt' ? 'lt' : 'en';

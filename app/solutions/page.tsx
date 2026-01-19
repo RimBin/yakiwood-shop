@@ -397,7 +397,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
   ];
 
   return (
-    <div className="bg-[#E1E1E1]">
+    <div className="bg-transparent">
       {/* Hero Section */}
       <PageCover>
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-[24px] lg:gap-0">
@@ -461,15 +461,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
           <p>Do you want to give your building a distinctive and appealing look? Encourage diverse design solutions with charred wood.</p>
         </div>
 
-        {/* Hero Image - full width */}
-        <div className="relative w-full h-[200px] lg:h-[758px]">
-          <Image
-            src="/images/solutions/hero.webp"
-            alt="Modern architecture with burnt wood cladding"
-            fill
-            className="object-cover"
-          />
-        </div>
+        {/* Hero Image removed (no wood background) */}
       </section>
 
       {/* Applications Sections (anchor targets) */}

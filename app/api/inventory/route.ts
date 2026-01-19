@@ -3,14 +3,58 @@ import { createClient } from '@/lib/supabase/server';
 import { InventoryManager } from '@/lib/inventory/manager';
 import type { InventoryFilters, InventoryStats } from '@/lib/inventory/types';
 
+function isSupabaseConfigured(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) return false;
+  // Basic JWT-ish format check (same idea as other Supabase helpers in repo)
+  return /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(anonKey.trim());
+}
+
+function isAdminUser(user: any): boolean {
+  if (!user) return false;
+  if (user.user_metadata?.role === 'admin') return true;
+  const adminEmails = (process.env.ADMIN_EMAILS || '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  const email = typeof user.email === 'string' ? user.email.toLowerCase() : '';
+  return !!email && adminEmails.includes(email);
+}
+
 // GET /api/inventory - List all inventory items with filters
 export async function GET(request: Request) {
   try {
+    if (!isSupabaseConfigured()) {
+      const { searchParams } = new URL(request.url);
+      const page = parseInt(searchParams.get('page') || '1');
+      const limit = parseInt(searchParams.get('limit') || '50');
+
+      if (process.env.NODE_ENV !== 'production') {
+        const stats: InventoryStats = {
+          total_items: 0,
+          in_stock: 0,
+          low_stock: 0,
+          out_of_stock: 0,
+          total_value: 0,
+        };
+        return NextResponse.json({
+          items: [],
+          pagination: { page, limit, total: 0, pages: 1 },
+          stats,
+          demo: true,
+          warning: 'Database not configured',
+        });
+      }
+
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
+
     const supabase = await createClient();
     
     // Check if user is admin
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user || user.user_metadata?.role !== 'admin') {
+    if (!isAdminUser(user)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -101,11 +145,15 @@ export async function GET(request: Request) {
 // POST /api/inventory - Create new inventory item
 export async function POST(request: Request) {
   try {
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
+
     const supabase = await createClient();
     
     // Check if user is admin
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user || user.user_metadata?.role !== 'admin') {
+    if (!isAdminUser(user)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

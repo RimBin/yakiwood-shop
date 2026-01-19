@@ -5,6 +5,7 @@ import { applySeoOverride } from '@/lib/seo/overrides';
 import { canonicalUrl } from '@/lib/seo/canonical';
 import { getProjectOgImage } from '@/lib/og-image';
 import { getBlogPosts } from '@/data/blog-posts';
+import BlogListClient from '@/components/blog/BlogListClient';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.blog');
@@ -40,12 +41,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return applySeoOverride(metadata, new URL(canonical).pathname, currentLocale);
 }
 
-export default async function BlogPageLt() {
+export default async function ArticlesPageLt() {
   const locale = await getLocale();
   if (locale !== 'lt') {
     redirect('/blog');
   }
-  redirect('/lt/straipsniai');
 
-  return null;
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const posts = getBlogPosts(currentLocale).filter((post) => post.published);
+
+  return (
+    <main className="bg-[#E1E1E1] min-h-screen">
+      <BlogListClient initialPosts={posts} />
+    </main>
+  );
 }

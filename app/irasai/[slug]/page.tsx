@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { applySeoOverride } from '@/lib/seo/overrides';
 import { canonicalUrl } from '@/lib/seo/canonical';
-import { generateArticleSchema } from '@/lib/schema';
 import { getProjectOgImage } from '@/lib/og-image';
-import BlogPostClient from '@/components/blog/BlogPostClient';
-import { blogPosts, getBlogPostBySlug, getRelatedBlogPosts } from '@/data/blog-posts';
+import { blogPosts, getBlogPostBySlug } from '@/data/blog-posts';
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -67,26 +65,7 @@ export default async function BlogPostPageLt({ params }: BlogPostPageProps) {
     redirect('/blog');
   }
 
-  const currentLocale = locale === 'lt' ? 'lt' : 'en';
-  const post = getBlogPostBySlug(slug, currentLocale);
+  redirect(`/lt/straipsniai/${slug}`);
 
-  if (!post) {
-    notFound();
-  }
-
-  const related = getRelatedBlogPosts(post.slug, currentLocale, 3);
-  const schema = generateArticleSchema({
-    title: post.title,
-    description: post.excerpt,
-    image: getProjectOgImage(post.heroImage),
-    datePublished: post.date,
-    author: post.author,
-  });
-
-  return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-      <BlogPostClient initialPost={post} initialRelated={related} />
-    </>
-  );
+  return null;
 }

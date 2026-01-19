@@ -340,18 +340,48 @@ export default function ProductsPage() {
   };
 
   const formatProductDisplayName = (product: Product) => {
-    const baseName = currentLocale === 'en' && product.nameEn ? product.nameEn : product.name;
-    return baseName;
+    // Card title intentionally shows color + wood (e.g. "Black Larch").
+    // Color names remain English even on LT pages.
+    const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
+    const colorName = product.colors?.[0]?.name ?? parsed?.color ?? '';
+    const colorLabel = colorName ? localizeColorLabel(colorName, 'en') : '';
+
+    const woodKey = typeof product.woodType === 'string' ? product.woodType.trim().toLowerCase() : '';
+    const woodLabel =
+      woodKey === 'larch'
+        ? currentLocale === 'lt'
+          ? 'Maumedis'
+          : 'Larch'
+        : woodKey === 'spruce'
+          ? currentLocale === 'lt'
+            ? 'Eglė'
+            : 'Spruce'
+          : product.woodType ?? '';
+
+    const title = [colorLabel, woodLabel].filter(Boolean).join(' ');
+    return title || (currentLocale === 'en' && product.nameEn ? product.nameEn : product.name);
   };
 
   const formatProductAttributes = (product: Product) => {
     const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
-    const colorName = product.colors?.[0]?.name ?? parsed?.color ?? '';
-    const colorLabel = colorName ? localizeColorLabel(colorName, currentLocale) : '';
     const profileLabel = product.profiles?.[0]?.name ?? parsed?.profile ?? '';
+    const profileSuffix = currentLocale === 'lt' ? 'Profilis' : 'Profile';
     const sizeLabel = parsed?.size ? formatSizeLabel(parsed.size) : '';
-    const parts = [profileLabel, colorLabel, sizeLabel].filter(Boolean);
+    const parts = [profileLabel ? `${profileLabel} ${profileSuffix}` : '', sizeLabel].filter(Boolean);
     return parts.length > 0 ? parts.join(' · ') : '';
+  };
+
+  const formatCardPrice = (price: number) => {
+    const rounded = price.toFixed(0);
+    // Match typical locale formatting used in UI.
+    return currentLocale === 'lt' ? `${rounded} €/m²` : `€${rounded}/m²`;
+  };
+
+  const formatMaybeLabel = (value: string | undefined) => {
+    if (!value) return undefined;
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
   };
 
   const colorOptions = useMemo(() => {
@@ -700,11 +730,13 @@ export default function ProductsPage() {
           </p>
           </div>
 
-          <p
-            className="font-['Outfit'] font-normal text-[12px] md:text-[14px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]"
-          >
-            {activeUsageLabel}
-          </p>
+          {!isDefaultListing && (
+            <p
+              className="font-['Outfit'] font-normal text-[12px] md:text-[14px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]"
+            >
+              {activeUsageLabel}
+            </p>
+          )}
         </div>
       </PageCover>
 
@@ -886,7 +918,7 @@ export default function ProductsPage() {
               <div className="relative w-full h-[250px] border border-[#161616] border-opacity-30 overflow-hidden">
                 <Image
                   src={product.image || '/images/ui/wood/imgSpruce.png'}
-                  alt={product.name}
+                  alt={localizedDisplayName}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -911,7 +943,9 @@ export default function ProductsPage() {
                   style={{ fontVariationSettings: "'opsz' 14" }}
                 >
                   {[
-                    product.category ? (usageLabels[product.category] ?? product.category) : undefined,
+                    product.category
+                      ? usageLabels[product.category] ?? formatMaybeLabel(product.category)
+                      : undefined,
                     product.woodType ? (woodLabels[product.woodType] ?? product.woodType) : undefined,
                   ]
                     .filter(Boolean)
@@ -923,11 +957,11 @@ export default function ProductsPage() {
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
                 <span className={hasSale ? 'text-[#161616]' : undefined}>
-                  {t('fromPrice', { price: effectivePrice.toFixed(0) })}
+                  {formatCardPrice(effectivePrice)}
                 </span>
                 {hasSale ? (
                   <span className="ml-[10px] text-[#7C7C7C] line-through">
-                    {product.price.toFixed(0)} €
+                    {formatCardPrice(product.price)}
                   </span>
                 ) : null}
               </p>

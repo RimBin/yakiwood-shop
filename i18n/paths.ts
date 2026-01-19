@@ -6,7 +6,7 @@ const enToLt: PrefixMap = [
   { from: '/products', to: '/produktai' },
   { from: '/solutions', to: '/sprendimai' },
   { from: '/projects', to: '/projektai' },
-  { from: '/blog', to: '/irasai' },
+  { from: '/blog', to: '/straipsniai' },
   { from: '/about', to: '/apie' },
   { from: '/contact', to: '/kontaktai' },
   { from: '/faq', to: '/duk' },

@@ -44,13 +44,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function BlogPage() {
   const locale = await getLocale();
   if (locale === 'lt') {
-    redirect('/lt/irasai');
+    redirect('/lt/straipsniai');
   }
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const initialPosts = getBlogPosts(currentLocale).filter((post) => post.published);
 
   return (
-    <main className="bg-[#EAEAEA] min-h-screen">
+    <main className="bg-[#E1E1E1] min-h-screen">
       <BlogListClient initialPosts={initialPosts} />
     </main>
   );

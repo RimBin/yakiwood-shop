@@ -232,6 +232,19 @@ const COLOR_LABELS: Record<string, { lt: string; en: string }> = {
   'dark-brown': { lt: 'Dark Brown', en: 'Dark Brown' },
 }
 
+// Some datasets/slugs use Lithuanian color tokens (e.g., "juoda").
+// We intentionally display color names in English even for LT UI.
+const COLOR_SYNONYMS: Record<string, keyof typeof COLOR_LABELS> = {
+  juoda: 'black',
+  sidabrine: 'silver',
+  grafitas: 'graphite',
+  anglis: 'carbon',
+  'sviesi-anglis': 'carbon-light',
+  'tamsi-anglis': 'carbon-dark',
+  ruda: 'brown',
+  'tamsi-ruda': 'dark-brown',
+}
+
 function normalizeColorKey(input: string): string {
   return input
     .trim()
@@ -243,7 +256,8 @@ function normalizeColorKey(input: string): string {
 }
 
 export function localizeColorLabel(input: string, locale: 'lt' | 'en'): string {
-  const normalized = normalizeColorKey(input)
+  const normalizedRaw = normalizeColorKey(input)
+  const normalized = COLOR_SYNONYMS[normalizedRaw] ?? normalizedRaw
   if (!normalized) return input
 
   const direct = COLOR_LABELS[normalized]

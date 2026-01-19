@@ -789,9 +789,9 @@
       "ogTitle": "Naujienos - Yakiwood"
     },
     "blog": {
-      "title": "Įrašai - Shou Sugi Ban įžvalgos",
+      "title": "Straipsniai - Shou Sugi Ban įžvalgos",
       "description": "Skaitykite straipsnius apie degintą medieną, dizaino pasirinkimus, priežiūrą ir projektų planavimą.",
-      "ogTitle": "Įrašai - Yakiwood"
+      "ogTitle": "Straipsniai - Yakiwood"
     },
     "faq": {
       "title": "DUK apie Shou Sugi Ban medieną",
@@ -817,7 +817,7 @@
       "dashboard": "Skydelis",
       "products": "Produktai",
       "projects": "Projektai",
-      "posts": "Įrašai",
+      "posts": "Straipsniai",
       "seo": "SEO",
       "emailTemplates": "El. pašto šablonai",
       "orders": "Užsakymai",
@@ -828,7 +828,7 @@
     },
     "main": {
       "title": "Administravimo skydas",
-      "subtitle": "Tvarkykite produktus, projektus ir įrašus",
+      "subtitle": "Tvarkykite produktus, projektus ir straipsnius",
       "loadSampleProducts": "Įkelti pavyzdinius produktus",
       "sampleProductsLoaded": "{count} produktai įkelti!"
     },
@@ -836,7 +836,7 @@
       "dashboard": "Skydelis",
       "products": "Produktai",
       "projects": "Projektai",
-      "posts": "Įrašai",
+      "posts": "Straipsniai",
       "orders": "Užsakymai",
       "inventory": "Atsargos",
       "options": "Parinktys",

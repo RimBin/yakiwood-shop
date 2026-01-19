@@ -338,25 +338,10 @@ export default function ChatbotWidget() {
                       <div className="font-['DM_Sans'] text-[14px] font-semibold tracking-[-0.2px] text-white">
                         {t('title')}
                       </div>
-                      <div className="font-['Outfit'] text-[12px] text-white/70">{t('subtitle')}</div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-[6px]">
-                    <button
-                      type="button"
-                      onClick={openHandoff}
-                      className="h-[34px] px-[10px] rounded-[999px] bg-white/10 text-white ring-1 ring-white/15 font-['Outfit'] text-[11px] hover:bg-white/15"
-                    >
-                      {handoff.label}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={clearChat}
-                      className="h-[34px] px-[10px] rounded-[999px] bg-white/10 text-white ring-1 ring-white/15 font-['Outfit'] text-[11px] hover:bg-white/15"
-                    >
-                      {t('clear')}
-                    </button>
                     <button
                       type="button"
                       onClick={() => setOpen(false)}
@@ -528,7 +513,7 @@ export default function ChatbotWidget() {
                   onClick={openHandoff}
                   className="mt-[10px] w-full text-left font-['Outfit'] text-[12px] text-[#535353] hover:text-[#161616]"
                 >
-                  <span className="underline underline-offset-4">{t('handoff')}</span>
+                  <span className="underline underline-offset-4">Need human</span>
                 </button>
               </div>
             </div>

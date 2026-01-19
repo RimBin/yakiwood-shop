@@ -107,12 +107,20 @@ export default function Projects() {
   );
 
   const featuredProjects = useMemo(() => {
-    // Homepage grid shows 6 cards
-    const items = projects.slice(0, 6);
+    // Homepage grid shows 6 cards.
+    // Prefer admin-marked featured projects first; then fill with the rest in original order.
+    const safeProjects = Array.isArray(projects) ? projects : [];
+    const featured = safeProjects.filter((p) => Boolean(p?.featured));
+    const nonFeatured = safeProjects.filter((p) => !p?.featured);
+
+    const items: Project[] = [...featured, ...nonFeatured].slice(0, 6);
+
+    // Final fallback: seed projects (prevents empty UI on a fresh browser)
     while (items.length < 6) {
       const fallback = projectsData.length > 0 ? projectsData[items.length % projectsData.length] : undefined;
       items.push((fallback ?? projectsData[0]) as Project);
     }
+
     return items;
   }, [projects]);
 

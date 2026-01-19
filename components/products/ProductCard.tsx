@@ -18,14 +18,37 @@ export default function ProductCard({ product, href }: ProductCardProps) {
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const linkHref = href || `/produktai/${product.slug}`;
+
+  const cardTitle = useMemo(() => {
+    const parsed = product.slug.includes('--') ? product.slug.split('--') : null;
+    const parsedColor = parsed && parsed.length >= 3 ? parsed[2] : '';
+    const colorName = product.colors?.[0]?.name ?? parsedColor ?? '';
+    const colorLabel = colorName ? localizeColorLabel(colorName, 'en') : '';
+
+    const woodKey = typeof product.woodType === 'string' ? product.woodType.trim().toLowerCase() : '';
+    const woodLabel =
+      woodKey === 'larch'
+        ? currentLocale === 'lt'
+          ? 'Maumedis'
+          : 'Larch'
+        : woodKey === 'spruce'
+          ? currentLocale === 'lt'
+            ? 'Eglė'
+            : 'Spruce'
+          : product.woodType ?? '';
+
+    const title = [colorLabel, woodLabel].filter(Boolean).join(' ');
+    return title || (currentLocale === 'en' && product.nameEn ? product.nameEn : product.name);
+  }, [product.slug, product.colors, product.woodType, product.name, product.nameEn, currentLocale]);
   const attributeLabel = useMemo(() => {
     if (!product.slug.includes('--')) return '';
     const parts = product.slug.split('--');
     if (parts.length < 4) return '';
-    const [, profile, color, size] = parts;
-    const colorLabel = color ? localizeColorLabel(color, currentLocale) : '';
+    const [, profile, , size] = parts;
+    const profileSuffix = currentLocale === 'lt' ? 'Profilis' : 'Profile';
     const sizeLabel = size ? `${size.replace(/x/gi, '×')} mm` : '';
-    return [profile, colorLabel, sizeLabel].filter(Boolean).join(' · ');
+    const profileLabel = profile ? `${profile} ${profileSuffix}` : '';
+    return [profileLabel, sizeLabel].filter(Boolean).join(' · ');
   }, [product.slug, currentLocale]);
   const usageLabel = useMemo(() => {
     if (!product.category) return undefined;
@@ -33,7 +56,8 @@ export default function ProductCard({ product, href }: ProductCardProps) {
       facade: t('productsPage.usageFilters.facade'),
       terrace: t('productsPage.usageFilters.terrace'),
     };
-    return labels[product.category] || product.category;
+    const fallback = product.category.trim();
+    return labels[product.category] || (fallback ? fallback.charAt(0).toUpperCase() + fallback.slice(1) : product.category);
   }, [product.category, t]);
 
   return (
@@ -43,7 +67,7 @@ export default function ProductCard({ product, href }: ProductCardProps) {
       onClick={() => {
         trackSelectItem({
           id: product.id,
-          name: product.name,
+          name: cardTitle,
           price: product.price,
           category: product.category,
         });
@@ -52,7 +76,7 @@ export default function ProductCard({ product, href }: ProductCardProps) {
       <div className="relative aspect-square bg-[#EAEAEA] rounded-[24px] overflow-hidden mb-4 group-hover:shadow-lg transition-shadow">
         <Image
           src={product.image || '/images/ui/wood/imgSpruce.png'}
-          alt={product.name}
+          alt={cardTitle}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -79,7 +103,7 @@ export default function ProductCard({ product, href }: ProductCardProps) {
       </div>
       
       <h3 className="font-['DM_Sans'] font-medium text-[#161616] mb-1 group-hover:text-[#535353] transition-colors">
-        {product.name}
+        {cardTitle}
       </h3>
       {attributeLabel ? (
         <p className="font-['Outfit'] text-xs text-[#7C7C7C] mb-1 uppercase tracking-[0.6px]">
@@ -95,10 +119,7 @@ export default function ProductCard({ product, href }: ProductCardProps) {
       
       <div className="flex items-baseline gap-2">
         <span className="font-['DM_Sans'] font-medium text-lg text-[#161616]">
-          €{product.price.toFixed(0)}
-        </span>
-        <span className="font-['Outfit'] text-xs text-[#7C7C7C]">
-          {t('relatedProducts.from')}
+          {currentLocale === 'lt' ? `${product.price.toFixed(0)} €` : `€${product.price.toFixed(0)}`}
         </span>
       </div>
     </Link>

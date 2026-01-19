@@ -20,6 +20,7 @@ import {
 export default function InventoryPage() {
   const [items, setItems] = useState<InventoryWithProduct[]>([]);
   const [stats, setStats] = useState<InventoryStats | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<InventoryFilters>({
     status: 'all',
     search: '',
@@ -43,14 +44,32 @@ export default function InventoryPage() {
       });
 
       const response = await fetch(`/api/inventory?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch inventory');
+      if (!response.ok) {
+        let details: string | undefined;
+        try {
+          const json = await response.json();
+          if (json && typeof json.error === 'string') details = json.error;
+        } catch {
+          // ignore
+        }
+
+        const statusLabel = `${response.status}${response.statusText ? ` ${response.statusText}` : ''}`;
+        setErrorMessage(details ? `${details} (${statusLabel})` : `Nepavyko gauti atsargų (${statusLabel})`);
+        setItems([]);
+        setStats(null);
+        setTotalPages(1);
+        return;
+      }
 
       const data = await response.json();
       setItems(data.items || []);
       setStats(data.stats);
       setTotalPages(data.pagination.pages);
+      setErrorMessage(null);
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error fetching inventory:', error);
+      setErrorMessage(`Nepavyko gauti atsargų (${message})`);
     } finally {
       setLoading(false);
     }
@@ -187,6 +206,14 @@ export default function InventoryPage() {
         </AdminCard>
 
         <AdminCard className="p-0 overflow-hidden">
+          {errorMessage && (
+            <div className="border-b border-[#E1E1E1] bg-[#FFF7ED] px-[16px] py-[12px]">
+              <div className="font-['Outfit'] text-[13px] text-[#7C2D12]">{errorMessage}</div>
+              <div className="mt-[4px] font-['Outfit'] text-[12px] text-[#9A3412]">
+                Jei tai vystymo aplinka: patikrinkite `NEXT_PUBLIC_SUPABASE_URL` ir `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+              </div>
+            </div>
+          )}
           {loading ? (
             <div className="p-[64px] text-center">
               <div className="font-['Outfit'] text-[14px] text-[#7C7C7C]">Kraunama...</div>

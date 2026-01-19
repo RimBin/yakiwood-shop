@@ -8,6 +8,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { localizeBlogPost, normalizeStoredPosts, type LocalizedBlogPost } from '@/data/blog-posts';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
 import { assets } from '@/lib/assets';
+import { Breadcrumbs } from '@/components/ui';
+import { PageLayout } from '@/components/shared/PageLayout';
 
 const POSTS_STORAGE_KEY = 'yakiwood_posts';
 
@@ -60,6 +62,7 @@ export default function BlogPostClient({
   initialRelated: LocalizedBlogPost[];
 }) {
   const t = useTranslations('blog');
+  const tBreadcrumbs = useTranslations('breadcrumbs');
   const locale = useLocale() as AppLocale;
   const [post, setPost] = useState<LocalizedBlogPost>(initialPost);
   const [related, setRelated] = useState<LocalizedBlogPost[]>(initialRelated);
@@ -97,97 +100,100 @@ export default function BlogPostClient({
     }
   }, [initialPost, initialRelated, locale]);
 
-  const metaLine = useMemo(
-    () => `${formatDate(post.date, locale)} • ${t('readTime', { minutes: post.readTimeMinutes })}`,
-    [post.date, post.readTimeMinutes, locale, t]
-  );
+  const formattedDate = useMemo(() => formatDate(post.date, locale), [post.date, locale]);
 
   return (
     <main className="bg-[#E1E1E1]">
-      <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px] pt-[40px] pb-[120px]">
-        <Link
-          href={toLocalePath('/blog', locale)}
-          className="inline-flex items-center gap-[8px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] hover:text-[#161616]"
-        >
-          <span className="text-[16px]">←</span> {t('back')}
-        </Link>
+      <Breadcrumbs
+        items={[
+          { label: tBreadcrumbs('home'), href: toLocalePath('/', locale) },
+          { label: t('title'), href: toLocalePath('/blog', locale) },
+          { label: post.title },
+        ]}
+      />
 
-        <div className="mt-[20px] relative h-[240px] md:h-[420px] lg:h-[560px] rounded-[28px] overflow-hidden">
+      <PageLayout>
+        <div className="pt-[16px] pb-[120px]">
+
+        <div className="mt-[18px] relative h-[240px] md:h-[420px] lg:h-[560px] overflow-hidden">
           <BlogImage src={post.heroImage} alt={post.title} />
         </div>
 
-        <div className="mt-[32px] grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-[32px] lg:gap-[60px]">
-          <div>
-            <div className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">
-              {post.category}
-            </div>
-            <h1 className="mt-[12px] font-['DM_Sans'] font-light text-[40px] md:text-[56px] leading-[1.05] text-[#161616]">
+        <div className="mt-[26px] grid grid-cols-1 lg:grid-cols-[520px_1fr] gap-[34px] lg:gap-[64px]">
+          <div className="flex flex-col">
+            <h1 className="font-['DM_Sans'] font-light text-[40px] md:text-[64px] leading-[1.02] tracking-[-1.6px] text-[#161616]">
               {post.title}
             </h1>
-            <p className="mt-[12px] font-['Outfit'] text-[14px] leading-[1.6] text-[#535353]">
-              {post.excerpt}
-            </p>
-            <div className="mt-[18px] font-['Outfit'] text-[12px] text-[#888]">
-              {post.author} • {metaLine}
+
+            <div className="mt-[14px]">
+              <div className="font-['Outfit'] text-[12px] text-[#161616]">{post.author}</div>
+              <div className="mt-[2px] font-['Outfit'] text-[12px] text-[#535353]">{formattedDate}</div>
             </div>
+
+            {post.gallery.length > 0 && (
+              <div className="mt-[22px] flex flex-col gap-[16px] max-w-[360px]">
+                {post.gallery.slice(0, 2).map((src, index) => (
+                  <div
+                    key={`${src}-${index}`}
+                    className="relative h-[160px] md:h-[200px] overflow-hidden"
+                  >
+                    <BlogImage src={src} alt={`${post.title} ${index + 1}`} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
-            <p className="font-['Outfit'] text-[14px] leading-[1.7] text-[#535353]">
+            <p className="font-['Outfit'] text-[12px] md:text-[13px] leading-[1.75] text-[#535353]">
               {post.summary}
             </p>
-            <div className="mt-[20px] space-y-[16px]">
+
+            <div className="mt-[18px] space-y-[18px]">
               {post.sections.map((section) => (
                 <div key={section.heading}>
-                  <div className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616]">
+                  <div className="font-['Outfit'] font-semibold text-[12px] md:text-[13px] leading-[1.35] text-[#161616]">
                     {section.heading}
                   </div>
-                  <p className="mt-[6px] font-['Outfit'] text-[14px] leading-[1.6] text-[#535353]">
+                  <p className="mt-[6px] font-['Outfit'] text-[12px] md:text-[13px] leading-[1.75] text-[#535353]">
                     {section.body}
                   </p>
                 </div>
               ))}
             </div>
+
+            {post.body.length > 0 && (
+              <div className="mt-[18px] space-y-[14px]">
+                {post.body.map((paragraph, idx) => (
+                  <p key={`${post.id}-p-top-${idx}`} className="font-['Outfit'] text-[12px] md:text-[13px] leading-[1.75] text-[#535353]">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {post.gallery.length > 0 && (
-          <div className="mt-[36px] grid grid-cols-2 gap-[12px] md:gap-[18px]">
-            {post.gallery.slice(0, 2).map((src, index) => (
-              <div key={`${src}-${index}`} className="relative h-[140px] md:h-[220px] rounded-[16px] overflow-hidden">
-                <BlogImage src={src} alt={`${post.title} ${index + 1}`} />
-              </div>
-            ))}
-          </div>
-        )}
-
         {post.callout && (
-          <div className="mt-[40px] md:mt-[56px]">
-            <p className="font-['DM_Sans'] font-light text-[26px] md:text-[40px] leading-[1.2] text-[#161616] text-center max-w-[860px] mx-auto">
-              “{post.callout}”
+          <div className="mt-[56px] md:mt-[72px]">
+            <p className="font-['DM_Sans'] font-light text-[22px] md:text-[32px] leading-[1.25] tracking-[-0.6px] text-[#161616] text-center max-w-[900px] mx-auto">
+              {post.callout}
             </p>
           </div>
         )}
 
-        {post.body.length > 0 && (
-          <div className="mt-[40px] md:mt-[56px]">
-            <div className="columns-1 md:columns-2 gap-[32px]">
-              {post.body.map((paragraph, idx) => (
-                <p
-                  key={`${post.id}-p-${idx}`}
-                  className="font-['Outfit'] text-[14px] leading-[1.7] text-[#535353] mb-[18px] break-inside-avoid"
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
+        {post.excerpt && (
+          <div className="mt-[44px] md:mt-[54px]">
+            <p className="font-['DM_Sans'] font-light text-[18px] md:text-[22px] leading-[1.35] tracking-[-0.4px] text-[#161616] text-center max-w-[980px] mx-auto">
+              {post.excerpt}
+            </p>
           </div>
         )}
 
         {post.featureImages.length > 0 && (
-          <div className="mt-[36px] grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+          <div className="mt-[44px] grid grid-cols-1 md:grid-cols-2 gap-[16px]">
             {post.featureImages.slice(0, 2).map((src, index) => (
-              <div key={`${src}-${index}`} className="relative h-[240px] md:h-[360px] rounded-[20px] overflow-hidden">
+              <div key={`${src}-${index}`} className="relative h-[240px] md:h-[360px] overflow-hidden">
                 <BlogImage src={src} alt={`${post.title} feature ${index + 1}`} />
               </div>
             ))}
@@ -214,7 +220,8 @@ export default function BlogPostClient({
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </PageLayout>
 
       <section className="relative pb-[140px] md:pb-[200px]">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

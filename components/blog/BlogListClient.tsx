@@ -9,6 +9,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { localizeBlogPost, normalizeStoredPosts, type LocalizedBlogPost } from '@/data/blog-posts';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
 import { getPaginationRange } from '@/lib/pagination';
+import { PageCover } from '@/components/shared';
+import { PageLayout } from '@/components/shared/PageLayout';
 
 const POSTS_STORAGE_KEY = 'yakiwood_posts';
 
@@ -73,96 +75,108 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
   }, [posts.length]);
 
   return (
-    <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px] pb-[120px]">
-      <div className="pt-[28px] md:pt-[44px]">
-        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[96px] leading-[0.95] tracking-[-2.8px] md:tracking-[-4px] text-[#161616]">
-          {t('title')}
-        </h1>
-        <div className="mt-[20px] h-px w-full bg-[#161616]/30" />
-      </div>
+    <>
+      <PageCover>
+        <div className="flex items-start gap-[8px]">
+          <h1
+            className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] text-[#161616] tracking-[-2.8px] md:tracking-[-6.4px]"
+            style={{ fontVariationSettings: "'opsz' 14" }}
+          >
+            {t('title')}
+          </h1>
+          <p
+            className="font-['DM_Sans'] font-normal text-[18px] md:text-[32px] leading-[1.1] text-[#161616] tracking-[-0.72px] md:tracking-[-1.28px]"
+            style={{ fontVariationSettings: "'opsz' 14" }}
+          >
+            ({posts.length})
+          </p>
+        </div>
+      </PageCover>
 
-      {posts.length ? (
-        <>
-          <div className="mt-[24px] md:mt-[32px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[repeat(4,328px)] xl:justify-between gap-x-[16px] gap-y-[16px]">
-            {visiblePosts.map((post, index) => {
-              const tall = index % 2 === 1;
-              const imageHeight = tall ? 'h-[320px] md:h-[448px]' : 'h-[220px] md:h-[305px]';
+      <PageLayout>
+        <div className="pt-[24px] pb-[120px]">
+          {posts.length ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[repeat(4,328px)] xl:justify-between gap-x-[16px] gap-y-[16px]">
+                {visiblePosts.map((post, index) => {
+                  const tall = index % 2 === 1;
+                  const imageHeight = tall ? 'h-[320px] md:h-[448px]' : 'h-[220px] md:h-[305px]';
 
-              return (
-                <article key={post.id} className="overflow-hidden xl:w-[328px]">
-                <Link href={toLocalePath(`/blog/${post.slug}`, locale)} className="block">
-                  <div className={`relative w-full ${imageHeight} overflow-hidden bg-[#D9D9D9]`}>
-                    <BlogImage src={post.heroImage} alt={post.title} />
-                  </div>
-                  <div className="px-[12px] py-[10px]">
-                    <div className="font-['DM_Sans'] text-[18px] leading-[1.25] text-[#161616]">
-                      {post.title}
-                    </div>
-                  </div>
-                </Link>
-              </article>
-              );
-            })}
-          </div>
-
-          {totalPages > 1 && (
-            <nav aria-label="Blog pagination" className="mt-[34px] flex items-center justify-center gap-[10px]">
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={safePage === 1}
-                aria-label="Previous page"
-                className="h-[32px] w-[32px] inline-flex items-center justify-center text-[#161616] disabled:opacity-40"
-              >
-                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-              </button>
-
-              {pages.map((p, idx) => {
-                if (p === 'ellipsis') {
                   return (
-                    <span
-                      key={`ellipsis-${idx}`}
-                      className="h-[32px] min-w-[32px] inline-flex items-center justify-center text-[12px] font-['DM_Sans'] text-[#161616]/70 select-none"
-                      aria-hidden="true"
-                    >
-                      …
-                    </span>
+                    <article key={post.id} className="overflow-hidden xl:w-[328px]">
+                      <Link href={toLocalePath(`/blog/${post.slug}`, locale)} className="block">
+                        <div className={`relative w-full ${imageHeight} overflow-hidden bg-[#D9D9D9]`}>
+                          <BlogImage src={post.heroImage} alt={post.title} />
+                        </div>
+                        <div className="px-[12px] py-[10px]">
+                          <div className="font-['DM_Sans'] text-[18px] leading-[1.25] text-[#161616]">
+                            {post.title}
+                          </div>
+                        </div>
+                      </Link>
+                    </article>
                   );
-                }
+                })}
+              </div>
 
-                const active = p === safePage;
-                return (
+              {totalPages > 1 && (
+                <nav aria-label="Blog pagination" className="mt-[34px] flex items-center justify-center gap-[10px]">
                   <button
-                    key={p}
                     type="button"
-                    onClick={() => setPage(p)}
-                    aria-current={active ? 'page' : undefined}
-                    className={`h-[32px] min-w-[32px] px-[10px] inline-flex items-center justify-center rounded-full text-[12px] font-['DM_Sans'] transition-colors ${
-                      active
-                        ? 'bg-[#161616] text-white'
-                        : 'text-[#161616] hover:bg-[#161616]/10'
-                    }`}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={safePage === 1}
+                    aria-label="Previous page"
+                    className="h-[32px] w-[32px] inline-flex items-center justify-center text-[#161616] disabled:opacity-40"
                   >
-                    {p}
+                    <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                   </button>
-                );
-              })}
 
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={safePage === totalPages}
-                aria-label="Next page"
-                className="h-[32px] w-[32px] inline-flex items-center justify-center text-[#161616] disabled:opacity-40"
-              >
-                <ChevronRight className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </nav>
+                  {pages.map((p, idx) => {
+                    if (p === 'ellipsis') {
+                      return (
+                        <span
+                          key={`ellipsis-${idx}`}
+                          className="h-[32px] min-w-[32px] inline-flex items-center justify-center text-[12px] font-['DM_Sans'] text-[#161616]/70 select-none"
+                          aria-hidden="true"
+                        >
+                          …
+                        </span>
+                      );
+                    }
+
+                    const active = p === safePage;
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPage(p)}
+                        aria-current={active ? 'page' : undefined}
+                        className={`h-[32px] min-w-[32px] px-[10px] inline-flex items-center justify-center rounded-full text-[12px] font-['DM_Sans'] transition-colors ${
+                          active ? 'bg-[#161616] text-white' : 'text-[#161616] hover:bg-[#161616]/10'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={safePage === totalPages}
+                    aria-label="Next page"
+                    className="h-[32px] w-[32px] inline-flex items-center justify-center text-[#161616] disabled:opacity-40"
+                  >
+                    <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </nav>
+              )}
+            </>
+          ) : (
+            <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('empty')}</p>
           )}
-        </>
-      ) : (
-        <p className="mt-[32px] font-['Outfit'] text-[14px] text-[#535353]">{t('empty')}</p>
-      )}
-    </div>
+        </div>
+      </PageLayout>
+    </>
   );
 }
