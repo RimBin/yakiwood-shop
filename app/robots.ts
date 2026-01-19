@@ -29,6 +29,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://yakiwood.lt/sitemap.xml',
+    sitemap: 'https://shop.yakiwood.co.uk/sitemap.xml',
   };
 }

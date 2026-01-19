@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { projects } from '@/data/projects';
 
-const BASE_URL = 'https://yakiwood.lt';
+const BASE_URL = 'https://shop.yakiwood.co.uk';
 
 // Indexable variant landing pages (do not include preset/query URLs in sitemap)
 const SHOU_SUGI_BAN_VARIANT_SLUGS = ['larch-carbon', 'spruce-natural', 'accoya-black'] as const;
@@ -45,8 +45,44 @@ async function getProducts(): Promise<{ slug: string; updatedAt: Date }[]> {
   return fallbackProducts;
 }
 
+async function getSanityPages(): Promise<MetadataRoute.Sitemap> {
+  try {
+    // Import Sanity client if available in the project
+    const { client } = await import('@/sanity/lib/client');
+    const query = '*[_type in ["page","post","news"] && defined(slug.current)]{ "slug": slug.current, _updatedAt, _type }';
+    const docs = await client.fetch(query);
+
+    if (!docs || docs.length === 0) return [];
+
+    return docs.flatMap((doc: any) => {
+      const lastModified = doc._updatedAt ? new Date(doc._updatedAt) : new Date();
+      const slug = doc.slug;
+
+      // Map Sanity docs to both English and Lithuanian routes where applicable
+      return [
+        {
+          url: `${BASE_URL}/${slug}`,
+          lastModified,
+          changeFrequency: 'monthly' as const,
+          priority: 0.5,
+        },
+        {
+          url: `${BASE_URL}/lt/${slug}`,
+          lastModified,
+          changeFrequency: 'monthly' as const,
+          priority: 0.45,
+        },
+      ];
+    });
+  } catch (err) {
+    console.warn('Sanity not available or query failed, skipping Sanity pages for sitemap');
+    return [];
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const products = await getProducts();
+  const sanityPages = await getSanityPages();
   const now = new Date();
 
   // Static pages
@@ -147,24 +183,61 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
+    // Add common legal/news pages that may be managed via CMS
+    {
+      url: `${BASE_URL}/terms`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${BASE_URL}/privacy`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${BASE_URL}/lt/taisykles`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.25,
+    },
+    {
+      url: `${BASE_URL}/lt/privatumas`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.25,
+    },
+    {
+      url: `${BASE_URL}/news`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.5,
+    },
+    {
+      url: `${BASE_URL}/lt/naujienos`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.45,
+    },
   ];
 
   // Dynamic product pages
   const productPages: MetadataRoute.Sitemap = products.flatMap((product) => {
     const enSlug = (product as any).slugEn ?? product.slug;
     return [
-    {
-      url: `${BASE_URL}/products/${enSlug}`,
-      lastModified: product.updatedAt,
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/lt/produktai/${product.slug}`,
-      lastModified: product.updatedAt,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
+      {
+        url: `${BASE_URL}/products/${enSlug}`,
+        lastModified: product.updatedAt,
+        changeFrequency: 'weekly',
+        priority: 0.8,
+      },
+      {
+        url: `${BASE_URL}/lt/produktai/${product.slug}`,
+        lastModified: product.updatedAt,
+        changeFrequency: 'weekly',
+        priority: 0.7,
+      },
     ];
   });
 
@@ -200,5 +273,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]);
 
-  return [...staticPages, ...productPages, ...variantLandingPages, ...projectPages];
+  return [...staticPages, ...productPages, ...variantLandingPages, ...projectPages, ...sanityPages];
 }
