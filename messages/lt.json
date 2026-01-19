@@ -519,7 +519,77 @@
     "patirtis": "Patirtis",
     "tvarumas": "Tvarumas",
     "inovacijos": "Inovacijos",
-    "susisiekite": "Susisiekite su mumis"
+    "susisiekite": "Susisiekite su mumis",
+    "page": {
+      "heroTitle": "Apie mus",
+      "heroLead": "Yakiwood esame degintos medienos paruošimo ekspertai – specializuojamės fasadų, terasų, tvorų ir interjero sprendimuose. Sukaupta patirtis leidžia užtikrinti aukštą kokybę ir ilgaamžį rezultatą, taikant natūralų, laiko patikrintą medienos apdirbimo metodą.",
+      "heroBody": "Gaminame medieną, paruoštą pagal unikalią, laiko patikrintą japonišką medienos deginimo technologiją „Yakisugi“ (dar vadinamą „Shou Sugi Ban“). Tai vienas natūraliausių medienos paruošimo būdų, suteikiantis tiek apsauginę, tiek estetinę funkciją. Šimtmečius skaičiuojanti tradicija atsirado siekiant apsaugoti medieną nuo aplinkos poveikio. Degimas sutraukia medienos paviršiaus poras, todėl ji tampa tvirtesnė ir atsparesnė, kartu išlaikydama natūralumą, raštą ir spalvą.",
+      "videoAlt": "Yakiwood proceso vaizdo įrašas",
+      "videoAria": "Žiūrėti vaizdo įrašą",
+      "videoWatch": "Žiūrėti",
+
+      "foundationsEyebrow": "Mūsų pagrindai",
+      "foundationsTitlePrefix": "Vedami tradicijos, skatinami",
+      "foundationsTitleItalic": "tikslu",
+
+      "missionTitle": "Mūsų misija",
+      "missionBody": "Mūsų tikslas – padėti jums sukurti jaukią ir tvarią aplinką, naudojant Yakisugi (Shou Sugi Ban) – tradicinę japonišką medienos deginimo techniką, kuri sustiprina medienos apsaugą ir estetiką.",
+
+      "visionTitle": "Mūsų vizija",
+      "visionBody": "Tapti pirmaujančiu tvarių degintos medienos sprendimų tiekėju Lietuvoje ir už jos ribų, įkvepiant rinktis natūralias, ilgaamžes ir aplinkai draugiškas medžiagas architektūroje bei interjere. Siekiame puoselėti tradiciją ir kartu diegti inovacijas žalesnei ateičiai.",
+      "visionBodyMobile": "Tapti pirmaujančiu tvarių degintos medienos sprendimų tiekėju Lietuvoje ir už jos ribų, įkvepiant rinktis natūralias, ilgaamžes ir aplinkai draugiškas medžiagas. Puoselėjame tradiciją ir diegiame inovacijas žalesnei ateičiai.",
+
+      "promiseTitle": "Mūsų pažadas",
+      "promiseBody": "Nesvarbu, ar tai būtų fasadai, terasos, tvoros ar interjero sprendimai – degintos medienos apdaila suteikia šilumos, stiliaus ir ilgalaikę apsaugą jūsų namams bei aplinkai.",
+
+      "valuesTitle": "Mūsų vertybės",
+      "valueCraftsmanshipTitle": "Meistriškumas",
+      "valueCraftsmanshipBody": "Didžiuojamės savo darbu ir skiriame ypatingą dėmesį kiekvienai detalei, kad užtikrintume aukščiausią kokybę.",
+      "valueSustainabilityTitle": "Tvarumas",
+      "valueSustainabilityBody": "Tikime aplinkai draugiškais sprendimais, kurie saugo gamtą ir praturtina jūsų gyvenamąją erdvę.",
+      "valueAuthenticityTitle": "Autentiškumas",
+      "valueAuthenticityBody": "Gerbiame šimtmečių Yakisugi tradiciją ir pateikiame medieną, kuri išlaiko natūralų grožį bei tvirtumą.",
+      "valueCraftsmanshipBodyMobile": "Didžiuojamės savo darbu ir skiriame dėmesį kiekvienai detalei.",
+      "valueSustainabilityBodyMobile": "Tikime aplinkai draugiškais sprendimais, kurie saugo gamtą.",
+      "valueAuthenticityBodyMobile": "Gerbiame šimtmečių Yakisugi tradiciją.",
+
+      "foundationsBlurbA": "Degintos medienos gaminiai kuriami naudojant šimtmečius skaičiuojantį japonišką metodą, kuris natūraliai sustiprina ir konservuoja medieną sutraukdamas jos poras. Procesas didina ilgaamžiškumą, išlaikant natūralią tekstūrą, raštą ir spalvą.",
+      "foundationsBlurbB": "Mūsų meistrai dirba kruopščiai ir atsakingai, kad kiekviena detalė atitiktų aukščiausius standartus. Naudojame ilgaamžiškiausias medienos rūšis – eglę ir maumedį – bei impregnuojame natūraliais aliejais, kad išgautume išskirtines spalvas ir patikimą apsaugą.",
+
+      "processEyebrow": "Mūsų procesas",
+      "processTitlePrefix": "Degintos medienos",
+      "processTitleItalic": "menas:",
+      "processTitleSuffix": "mūsų procesas",
+      "processBodyA": "Deginta mediena išgaunama deginant medieną itin aukštoje temperatūroje specialioje krosnyje, sukuriant natūralų ir vaizdingą paviršių. Šis procesas suteikia unikalių tekstūrų ir spalvų, didina atsparumą drėgmei bei ugniai.",
+      "processBodyB": "Jei norite savo namams ar verslo erdvėms suteikti išskirtinę ir ekologišką apdailą, verta rinktis degintą medieną. Ji suteikia interjerui savitą, stilingą išvaizdą ir kartu prisideda prie aplinkos tausojimo.",
+      "processBodyMobile": "Deginta mediena išgaunama deginant medieną itin aukštoje temperatūroje specialioje krosnyje, sukuriant natūralų ir vaizdingą paviršių. Šis procesas suteikia unikalių tekstūrų ir spalvų, didina atsparumą drėgmei bei ugniai.",
+
+      "step1Title": "Medienos paruošimas",
+      "step1Body": "Pirmiausia paruošiamos lentos – pašalinamos dulkės ir nešvarumai.",
+      "step2Title": "Degimas ir šukavimas",
+      "step2Body": "Mediena įkaitinama iki labai aukštos temperatūros – taip lentai suteikiamos unikalios tekstūros ir spalvos.",
+      "step3Title": "Aliejavimas",
+      "step3Body": "Visiškai atvėsus, lenta apdorojama ir padengiama apsauginiu sluoksniu.",
+
+      "ctaTitlePrefix": "Pasiruošę",
+      "ctaTitleItalic": "kurti",
+      "ctaTitleSuffix": "su ugnimi?",
+      "ctaShopNow": "Pirkti dabar",
+      "ctaGetInTouch": "Susisiekti",
+
+      "modalLabel": "Vaizdo įrašas",
+      "modalCloseOverlay": "Uždaryti vaizdo įrašą",
+      "modalCloseButton": "Uždaryti",
+      "modalIframeTitle": "YouTube vaizdo įrašas",
+
+      "teamEyebrow": "Mūsų komanda",
+      "teamTitlePrefix": "Susipažinkite su",
+      "teamTitleItalic": "ekspertais",
+      "teamTitleSuffix": "už Yakiwood",
+      "teamMemberAlt": "Komandos narys",
+      "teamMemberName": "Vardas Pavardė",
+      "teamMemberRole": "Direktorius"
+    }
   },
   "contact": {
     "pavadinimas": "Susisiekite su mumis",

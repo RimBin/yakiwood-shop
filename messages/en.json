@@ -451,7 +451,77 @@
     "experience": "Experience",
     "sustainability": "Sustainability",
     "innovation": "Innovation",
-    "contactUs": "Contact us"
+    "contactUs": "Contact us",
+    "page": {
+      "heroTitle": "About us",
+      "heroLead": "At Yakiwood, we are experts in the preparation of burnt wood, specializing in facades, terraces, fences, and interiors. With years of experience, we guarantee high-quality, long-lasting results using a natural, time-tested woodworking method.",
+      "heroBody": "We produce wood prepared according to the unique, time-tested Japanese wood-burning technology \"Yakisugi\" (or \"Shou Sugi Ban\"). This is the most natural way of preparing wood, giving it both a protective and aesthetic function. The traditional Japanese woodworking technology, which has been around for centuries, was introduced to protect wood from the effects of the environment. Burning shrinks the pores in the surface of the wood, making it stronger and more resistant. At the same time, it retains its properties, naturalness, pattern and colour.",
+      "videoAlt": "Yakiwood process video",
+      "videoAria": "Watch video",
+      "videoWatch": "Watch",
+
+      "foundationsEyebrow": "Our foundations",
+      "foundationsTitlePrefix": "Guided by tradition, driven by",
+      "foundationsTitleItalic": "purpose",
+
+      "missionTitle": "Our mission",
+      "missionBody": "Our goal is to help you create a cosy and sustainable environment by using Yakisugi (Shou Sugi Ban)—a traditional Japanese wood-burning technique that enhances both the protection and aesthetics of wood.",
+
+      "visionTitle": "Our Vision",
+      "visionBody": "To become the leading provider of sustainable burnt wood solutions in Lithuania and beyond, inspiring people to embrace natural, durable, and eco-friendly materials in architecture and interior design. We strive to preserve tradition while innovating for a greener future.",
+      "visionBodyMobile": "To become the leading provider of sustainable burnt wood solutions in Lithuania and beyond, inspiring people to embrace natural, durable, and eco-friendly materials. We strive to preserve tradition while innovating for a greener future.",
+
+      "promiseTitle": "Our promise",
+      "promiseBody": "Whether for facades, terraces, fences, or interior designs, our burnt wood solutions add warmth, style, and lasting protection to your home and surroundings.",
+
+      "valuesTitle": "Our values",
+      "valueCraftsmanshipTitle": "Craftsmanship",
+      "valueCraftsmanshipBody": "We take pride in our work, paying close attention to every detail to ensure the highest quality.",
+      "valueSustainabilityTitle": "Sustainability",
+      "valueSustainabilityBody": "We believe in eco-friendly solutions that preserve nature while enhancing your living space.",
+      "valueAuthenticityTitle": "Authenticity",
+      "valueAuthenticityBody": "We honor the centuries-old Yakisugi tradition, delivering wood that retains its natural beauty and strength.",
+      "valueCraftsmanshipBodyMobile": "We take pride in our work, paying close attention to every detail.",
+      "valueSustainabilityBodyMobile": "We believe in eco-friendly solutions that preserve nature.",
+      "valueAuthenticityBodyMobile": "We honor the centuries-old Yakisugi tradition.",
+
+      "foundationsBlurbA": "We produce burnt wood products using the centuries-old Japanese method that naturally strengthens and preserves wood by shrinking its pores. This process enhances durability while maintaining the wood's natural texture, pattern, and color.",
+      "foundationsBlurbB": "Our skilled craftsmen are meticulous in their work, ensuring every detail meets the highest quality standards. We use the most durable woods—spruce and larch—treated with natural oils to achieve exceptional colours and protection.",
+
+      "processEyebrow": "Our process",
+      "processTitlePrefix": "The art of",
+      "processTitleItalic": "burnt wood:",
+      "processTitleSuffix": "our process",
+      "processBodyA": "Burnt wood is produced by burning wood at high temperatures in a special kiln, creating a natural and picturesque wood surface. This process gives the wood unique textures and colors, increases its resistance to moisture and fire",
+      "processBodyB": "So, if you want to give your home or business premises a special and eco-friendly finish, it is worth taking a look at burnt wood. It will give the interior a unique and stylish look, while at the same time helping to contribute to environmental protection.",
+      "processBodyMobile": "Burnt wood is produced by burning wood at high temperatures in a special kiln, creating a natural and picturesque wood surface. This process gives the wood unique textures and colors, increases its resistance to moisture and fire.",
+
+      "step1Title": "Wood preparation",
+      "step1Body": "First, the boards are prepared, dust and dirt are removed.",
+      "step2Title": "Burning and combing",
+      "step2Body": "The wood is heated to very high temperatures, which gives the board unique textures and colors.",
+      "step3Title": "Oil coating",
+      "step3Body": "When the board is completely cooled, it is processed and coated with a protective layer.",
+
+      "ctaTitlePrefix": "Ready to",
+      "ctaTitleItalic": "build",
+      "ctaTitleSuffix": "with fire?",
+      "ctaShopNow": "shop now",
+      "ctaGetInTouch": "get in touch",
+
+      "modalLabel": "Video",
+      "modalCloseOverlay": "Close video",
+      "modalCloseButton": "Close",
+      "modalIframeTitle": "YouTube video",
+
+      "teamEyebrow": "Our team",
+      "teamTitlePrefix": "Meet the",
+      "teamTitleItalic": "experts",
+      "teamTitleSuffix": "behind Yakiwood",
+      "teamMemberAlt": "Team member",
+      "teamMemberName": "Full name",
+      "teamMemberRole": "Director"
+    }
   },
   "contact": {
     "title": "Contact us",

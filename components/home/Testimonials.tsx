@@ -79,7 +79,7 @@ export default function Testimonials() {
         {/* Horizontal scroll cards - Responsive */}
         <div 
           ref={scrollRef}
-          className="flex gap-[16px] overflow-x-auto scrollbar-hide px-[16px] md:px-[32px] pb-[8px]"
+          className="flex gap-[16px] overflow-x-auto scrollbar-hide px-0 pb-[8px]"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {testimonials.map((testimonial, index) => (
@@ -141,7 +141,7 @@ export default function Testimonials() {
               {t('eyebrow')}
             </p>
             {/* Main Heading */}
-            <p className="absolute left-[calc(25%+25px)] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] w-[687px]">
+            <p className="absolute left-[calc(25%+25px)] right-[120px] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] whitespace-nowrap">
               {renderHeading()}
             </p>
             {/* Navigation buttons - positioned at far right */}
@@ -167,7 +167,7 @@ export default function Testimonials() {
             </div>
           </div>
 
-          <div className="flex items-stretch justify-center gap-[24px] overflow-hidden">
+          <div className="flex items-start justify-center gap-[24px] overflow-visible">
             {testimonials.map((testimonial, index) => {
               const isActive = index === activeIndex;
               return (

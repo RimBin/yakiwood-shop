@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { PageCover } from '@/components/shared/PageLayout';
 import { Testimonials } from '@/components/home';
 import { toLocalePath } from '@/i18n/paths';
@@ -11,16 +12,20 @@ import { assets } from '@/lib/assets';
 
 // Local image for the about video thumbnail
 const imgVideo = '/assets/about/fire.png';
-const imgTeam1 = "https://www.figma.com/api/mcp/asset/bf70d331-5e28-461f-8c66-0da654728647";
-const imgTeam2 = "https://www.figma.com/api/mcp/asset/87885949-1e42-4fa2-ac0e-c161d0979163";
-const imgTeam3 = "https://www.figma.com/api/mcp/asset/2bcc8d00-1d2e-4322-bef2-c14fa440d13a";
-const imgTeam4 = "https://www.figma.com/api/mcp/asset/db641b47-8ed9-40bc-91f0-d8baa158f56a";
+// Team images (currently unused; keep local paths to avoid expiring remote URLs)
+const imgTeam1 = assets.projects[0];
+const imgTeam2 = assets.projects[1];
+const imgTeam3 = assets.projects[2];
+const imgTeam4 = assets.projects[3];
 const imgCTA = assets.ctaBackground;
 
 export default function About() {
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const t = useTranslations('about.page');
   const showTeamSection = false;
+
+  const heroIndent = '                            ';
 
   const [isVideoOpen, setIsVideoOpen] = useState(false);
 
@@ -46,7 +51,7 @@ export default function About() {
       <PageCover>
         <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
             style={{ fontVariationSettings: "'opsz' 14" }}>
-          About us
+          {t('heroTitle')}
         </h1>
       </PageCover>
 
@@ -55,10 +60,10 @@ export default function About() {
         <div className="relative lg:min-h-[560px]">
           {/* Big heading text with leading spaces to create indent - matches Figma exactly */}
           <p className="font-['DM_Sans'] font-light leading-[1] text-[#161616] lg:whitespace-pre-wrap m-0" style={{ fontSize: 'clamp(28px, 4vw, 52px)', letterSpacing: 'clamp(-1.28px, -0.04em, -2.08px)' }}>
-{`                            At Yakiwood, we are experts in the preparation of burnt wood, specializing in facades, terraces, fences, and interiors. With years of experience, we guarantee high-quality, long-lasting results using a natural, time-tested woodworking method.`}
+{`${heroIndent}${t('heroLead')}`}
           </p>
           <p className="font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full lg:max-w-[309px] mt-[32px] lg:mt-0 lg:absolute lg:bottom-0 lg:left-1/2 lg:translate-x-[96px]">
-            We produce wood prepared according to the unique, time-tested Japanese wood-burning technology "Yakisugi" (or "Shou Sugi Ban"). This is the most natural way of preparing wood, giving it both a protective and aesthetic function. The traditional Japanese woodworking technology, which has been around for centuries, was introduced to protect wood from the effects of the environment. Burning shrinks the pores in the surface of the wood, making it stronger and more resistant. At the same time, it retains its properties, naturalness, pattern and colour.
+            {t('heroBody')}
           </p>
         </div>
       </section>
@@ -70,7 +75,7 @@ export default function About() {
           <div className="relative h-[200px] md:h-[450px] lg:h-[642px] w-full rounded-[8px] overflow-hidden">
             <Image
               src={imgVideo}
-              alt="Yakiwood process video"
+              alt={t('videoAlt')}
               fill
               className="object-cover"
             />
@@ -78,10 +83,10 @@ export default function About() {
               type="button"
               onClick={() => setIsVideoOpen(true)}
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[rgba(255,255,255,0.2)] rounded-[100px] w-[59px] h-[59px] md:w-[100px] md:h-[100px] flex items-center justify-center z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#161616]"
-              aria-label="Watch video"
+              aria-label={t('videoAria')}
             >
               <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                Watch
+                {t('videoWatch')}
               </span>
             </button>
           </div>
@@ -90,14 +95,14 @@ export default function About() {
 
       {/* Foundations Section */}
       <div className="bg-[#161616] pt-[64px] md:pt-[80px] lg:pt-[180px] pb-[64px] md:pb-[80px] lg:pb-[200px] w-full">
-        <div className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] relative">
+        <div className="max-w-[1440px] mx-auto pl-[16px] pr-0 md:pl-[32px] md:pr-0 lg:pl-[40px] lg:pr-0 relative">
           {/* Title */}
           <div className="mb-[32px] md:mb-[48px] grid grid-cols-1 gap-[12px] lg:grid-cols-[344px_auto] lg:items-start lg:gap-0">
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-white lg:mt-[26px]">
-              Our foundations
+              {t('foundationsEyebrow')}
             </p>
             <h2 className="font-['DM_Sans'] font-light text-[40px] md:text-[64px] lg:text-[80px] leading-none tracking-[-2px] md:tracking-[-3.2px] lg:tracking-[-4.4px] text-white lg:justify-self-start lg:max-w-[672px]">
-              Guided by tradition, driven by <span className="font-['Tiro_Tamil'] italic">purpose</span>
+              {t('foundationsTitlePrefix')} <span className="font-['Tiro_Tamil'] italic">{t('foundationsTitleItalic')}</span>
             </h2>
           </div>
 
@@ -106,10 +111,10 @@ export default function About() {
             {/* Row 1: col1 bordered, col2 empty, col3 bordered, col4 no border */}
             <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
               <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                Our mission
+                {t('missionTitle')}
               </p>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                Our goal is to help you create a cosy and sustainable environment by using Yakisugi (Shou Sugi Ban)—a traditional Japanese wood-burning technique that enhances both the protection and aesthetics of wood.
+                {t('missionBody')}
               </p>
             </div>
             
@@ -118,17 +123,17 @@ export default function About() {
 
             <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
               <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                Our Vision
+                {t('visionTitle')}
               </p>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                To become the leading provider of sustainable burnt wood solutions in Lithuania and beyond, inspiring people to embrace natural, durable, and eco-friendly materials in architecture and interior design. We strive to preserve tradition while innovating for a greener future.
+                {t('visionBody')}
               </p>
             </div>
 
             {/* No border - column 4 */}
             <div className="p-[24px] flex flex-col gap-[16px] h-[300px]">
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-white">
-                We produce burnt wood products using the centuries-old Japanese method that naturally strengthens and preserves wood by shrinking its pores. This process enhances durability while maintaining the wood's natural texture, pattern, and color.
+                {t('foundationsBlurbA')}
               </p>
             </div>
 
@@ -136,32 +141,32 @@ export default function About() {
             {/* No border - column 1 */}
             <div className="p-[24px] flex flex-col gap-[16px] h-[300px]">
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-white">
-                Our skilled craftsmen are meticulous in their work, ensuring every detail meets the highest quality standards. We use the most durable woods—spruce and larch—treated with natural oils to achieve exceptional colours and protection.
+                {t('foundationsBlurbB')}
               </p>
             </div>
 
             <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
               <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                Our mission
+                {t('missionTitle')}
               </p>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                Our goal is to help you create a cosy and sustainable environment by using Yakisugi (Shou Sugi Ban)—a traditional Japanese wood-burning technique that enhances both the protection and aesthetics of wood.
+                {t('missionBody')}
               </p>
             </div>
 
             <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
               <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                Our values
+                {t('valuesTitle')}
               </p>
               <div className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
                 <p className="mb-[10px]">
-                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">Craftsmanship</span><span className="font-['Outfit'] font-light text-[14px]"> – We take pride in our work, paying close attention to every detail to ensure the highest quality.</span>
+                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueCraftsmanshipTitle')}</span><span className="font-['Outfit'] font-light text-[14px]"> – {t('valueCraftsmanshipBody')}</span>
                 </p>
                 <p className="mb-[10px]">
-                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">Sustainability</span><span className="font-['Outfit'] font-light text-[14px]"> – We believe in eco-friendly solutions that preserve nature while enhancing your living space.</span>
+                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueSustainabilityTitle')}</span><span className="font-['Outfit'] font-light text-[14px]"> – {t('valueSustainabilityBody')}</span>
                 </p>
                 <p>
-                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">Authenticity</span><span className="font-['Outfit'] font-light text-[14px]"> – We honor the centuries-old Yakisugi tradition, delivering wood that retains its natural beauty and strength.</span>
+                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueAuthenticityTitle')}</span><span className="font-['Outfit'] font-light text-[14px]"> – {t('valueAuthenticityBody')}</span>
                 </p>
               </div>
             </div>
@@ -175,44 +180,44 @@ export default function About() {
             <div className="flex snap-x snap-mandatory gap-[16px] overflow-x-auto px-[16px] pb-[8px] scrollbar-hide">
               <div className="snap-start shrink-0 w-[260px] border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
                 <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                  Our mission
+                  {t('missionTitle')}
                 </p>
                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                  Our goal is to help you create a cosy and sustainable environment by using Yakisugi (Shou Sugi Ban)—a traditional Japanese wood-burning technique that enhances both the protection and aesthetics of wood.
+                  {t('missionBody')}
                 </p>
               </div>
 
               <div className="snap-start shrink-0 w-[260px] border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
                 <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                  Our Vision
+                  {t('visionTitle')}
                 </p>
                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                  To become the leading provider of sustainable burnt wood solutions in Lithuania and beyond, inspiring people to embrace natural, durable, and eco-friendly materials. We strive to preserve tradition while innovating for a greener future.
+                  {t('visionBodyMobile')}
                 </p>
               </div>
 
               <div className="snap-start shrink-0 w-[260px] border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
                 <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                  Our promise
+                  {t('promiseTitle')}
                 </p>
                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                  Whether for facades, terraces, fences, or interior designs, our burnt wood solutions add warmth, style, and lasting protection to your home and surroundings.
+                  {t('promiseBody')}
                 </p>
               </div>
 
               <div className="snap-start shrink-0 w-[260px] border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px] overflow-auto">
                 <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                  Our values
+                  {t('valuesTitle')}
                 </p>
                 <div className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
                   <p className="mb-[10px]">
-                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">Craftsmanship</span> – We take pride in our work, paying close attention to every detail.
+                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueCraftsmanshipTitle')}</span> – {t('valueCraftsmanshipBodyMobile')}
                   </p>
                   <p className="mb-[10px]">
-                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">Sustainability</span> – We believe in eco-friendly solutions that preserve nature.
+                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueSustainabilityTitle')}</span> – {t('valueSustainabilityBodyMobile')}
                   </p>
                   <p>
-                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">Authenticity</span> – We honor the centuries-old Yakisugi tradition.
+                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueAuthenticityTitle')}</span> – {t('valueAuthenticityBodyMobile')}
                   </p>
                 </div>
               </div>
@@ -227,10 +232,10 @@ export default function About() {
           {/* Title */}
           <div className="mb-[32px] md:mb-[48px] grid grid-cols-1 gap-[12px] lg:grid-cols-[344px_auto] lg:items-start lg:gap-0">
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] lg:mt-[26px]">
-              Our process
+              {t('processEyebrow')}
             </p>
             <h2 className="font-['DM_Sans'] font-light text-[40px] md:text-[80px] leading-none tracking-[-2px] md:tracking-[-4.4px] text-[#161616] lg:justify-self-start lg:max-w-[767px]">
-              The art of <span className="font-['Tiro_Tamil'] italic">burnt wood:</span> our process
+              {t('processTitlePrefix')} <span className="font-['Tiro_Tamil'] italic">{t('processTitleItalic')}</span> {t('processTitleSuffix')}
             </h2>
           </div>
 
@@ -239,10 +244,10 @@ export default function About() {
             <div></div>
             <div className="flex gap-[68px]">
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[276px]">
-                Burnt wood is produced by burning wood at high temperatures in a special kiln, creating a natural and picturesque wood surface. This process gives the wood unique textures and colors, increases its resistance to moisture and fire
+                {t('processBodyA')}
               </p>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[294px]">
-                So, if you want to give your home or business premises a special and eco-friendly finish, it is worth taking a look at burnt wood. It will give the interior a unique and stylish look, while at the same time helping to contribute to environmental protection.
+                {t('processBodyB')}
               </p>
             </div>
           </div>
@@ -250,7 +255,7 @@ export default function About() {
           {/* Mobile description */}
           <div className="lg:hidden mb-[32px]">
             <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-              Burnt wood is produced by burning wood at high temperatures in a special kiln, creating a natural and picturesque wood surface. This process gives the wood unique textures and colors, increases its resistance to moisture and fire.
+              {t('processBodyMobile')}
             </p>
           </div>
 
@@ -260,28 +265,28 @@ export default function About() {
             <div className="w-full max-w-[672px]">
               <div className="border-t border-[#7C7C7C] py-[16px] flex justify-between items-start gap-[24px]">
                 <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-[#161616]">
-                  Wood preparation
+                  {t('step1Title')}
                 </p>
                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full max-w-[328px]">
-                  First, the boards are prepared, dust and dirt are removed.
+                  {t('step1Body')}
                 </p>
               </div>
 
               <div className="border-t border-[#7C7C7C] py-[16px] flex justify-between items-start gap-[24px]">
                 <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-[#161616]">
-                  Burning and combing
+                  {t('step2Title')}
                 </p>
                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full max-w-[328px]">
-                  The wood is heated to very high temperatures, which gives the board unique textures and colors.
+                  {t('step2Body')}
                 </p>
               </div>
 
               <div className="border-t border-[#7C7C7C] py-[16px] flex justify-between items-start gap-[24px]">
                 <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-[#161616]">
-                  Oil coating
+                  {t('step3Title')}
                 </p>
                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full max-w-[328px]">
-                  When the board is completely cooled, it is processed and coated with a protective layer.
+                  {t('step3Body')}
                 </p>
               </div>
               <div className="border-t border-[#7C7C7C]" />
@@ -292,26 +297,26 @@ export default function About() {
           <div className="lg:hidden">
             <div className="border-t border-[#7C7C7C] py-[16px] flex flex-col gap-[8px]">
               <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-[#161616]">
-                Wood preparation
+                {t('step1Title')}
               </p>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-                First, the boards are prepared, dust and dirt are removed.
+                {t('step1Body')}
               </p>
             </div>
             <div className="border-t border-[#7C7C7C] py-[16px] flex flex-col gap-[8px]">
               <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-[#161616]">
-                Burning and combing
+                {t('step2Title')}
               </p>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-                The wood is heated to very high temperatures, which gives the board unique textures and colors.
+                {t('step2Body')}
               </p>
             </div>
             <div className="border-t border-[#7C7C7C] py-[16px] flex flex-col gap-[8px]">
               <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-[#161616]">
-                Oil coating
+                {t('step3Title')}
               </p>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
-                When the board is completely cooled, it is processed and coated with a protective layer.
+                {t('step3Body')}
               </p>
             </div>
             <div className="border-t border-[#7C7C7C]" />
@@ -327,10 +332,10 @@ export default function About() {
               {/* Title */}
               <div className="mb-[32px] md:mb-[48px] grid grid-cols-1 gap-[12px] lg:grid-cols-[344px_auto] lg:items-start lg:gap-0">
                 <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] lg:mt-[26px]">
-                  Our teem
+                  {t('teamEyebrow')}
                 </p>
                 <h2 className="font-['DM_Sans'] font-light text-[40px] md:text-[80px] leading-none tracking-[-2px] md:tracking-[-4.4px] text-[#161616] lg:justify-self-start lg:max-w-[814px]">
-                  Meet the <span className="font-['Tiro_Tamil'] italic">experts</span> behind Yakiwood
+                  {t('teamTitlePrefix')} <span className="font-['Tiro_Tamil'] italic">{t('teamTitleItalic')}</span> {t('teamTitleSuffix')}
                 </h2>
               </div>
 
@@ -341,16 +346,16 @@ export default function About() {
                   <div className="relative h-[434px] w-full overflow-hidden">
                     <Image
                       src={imgTeam1}
-                      alt="Team member"
+                      alt={t('teamMemberAlt')}
                       fill
                       className="object-cover"
                     />
                   </div>
                   <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
-                    Full name
+                    {t('teamMemberName')}
                   </p>
                   <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">
-                    Director
+                    {t('teamMemberRole')}
                   </p>
                 </div>
 
@@ -359,16 +364,16 @@ export default function About() {
                   <div className="relative h-[434px] w-full overflow-hidden">
                     <Image
                       src={imgTeam2}
-                      alt="Team member"
+                      alt={t('teamMemberAlt')}
                       fill
                       className="object-cover"
                     />
                   </div>
                   <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
-                    Full name
+                    {t('teamMemberName')}
                   </p>
                   <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">
-                    Director
+                    {t('teamMemberRole')}
                   </p>
                 </div>
 
@@ -377,16 +382,16 @@ export default function About() {
                   <div className="relative h-[434px] w-full overflow-hidden">
                     <Image
                       src={imgTeam3}
-                      alt="Team member"
+                      alt={t('teamMemberAlt')}
                       fill
                       className="object-cover"
                     />
                   </div>
                   <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
-                    Full name
+                    {t('teamMemberName')}
                   </p>
                   <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">
-                    Director
+                    {t('teamMemberRole')}
                   </p>
                 </div>
 
@@ -395,16 +400,16 @@ export default function About() {
                   <div className="relative h-[434px] w-full overflow-hidden">
                     <Image
                       src={imgTeam4}
-                      alt="Team member"
+                      alt={t('teamMemberAlt')}
                       fill
                       className="object-cover"
                     />
                   </div>
                   <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616]">
-                    Full name
+                    {t('teamMemberName')}
                   </p>
                   <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">
-                    Director
+                    {t('teamMemberRole')}
                   </p>
                 </div>
               </div>
@@ -413,31 +418,31 @@ export default function About() {
               <div className="lg:hidden grid grid-cols-2 gap-[16px]">
                 <div className="flex flex-col gap-[8px]">
                   <div className="relative h-[218px] w-full overflow-hidden">
-                    <Image src={imgTeam1} alt="Team member" fill className="object-cover" />
+                    <Image src={imgTeam1} alt={t('teamMemberAlt')} fill className="object-cover" />
                   </div>
-                  <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">Full name</p>
-                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">Director</p>
+                  <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">{t('teamMemberName')}</p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">{t('teamMemberRole')}</p>
                 </div>
                 <div className="flex flex-col gap-[8px]">
                   <div className="relative h-[218px] w-full overflow-hidden">
-                    <Image src={imgTeam2} alt="Team member" fill className="object-cover" />
+                    <Image src={imgTeam2} alt={t('teamMemberAlt')} fill className="object-cover" />
                   </div>
-                  <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">Full name</p>
-                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">Director</p>
+                  <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">{t('teamMemberName')}</p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">{t('teamMemberRole')}</p>
                 </div>
                 <div className="flex flex-col gap-[8px]">
                   <div className="relative h-[218px] w-full overflow-hidden">
-                    <Image src={imgTeam3} alt="Team member" fill className="object-cover" />
+                    <Image src={imgTeam3} alt={t('teamMemberAlt')} fill className="object-cover" />
                   </div>
-                  <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">Full name</p>
-                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">Director</p>
+                  <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">{t('teamMemberName')}</p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">{t('teamMemberRole')}</p>
                 </div>
                 <div className="flex flex-col gap-[8px]">
                   <div className="relative h-[218px] w-full overflow-hidden">
-                    <Image src={imgTeam4} alt="Team member" fill className="object-cover" />
+                    <Image src={imgTeam4} alt={t('teamMemberAlt')} fill className="object-cover" />
                   </div>
-                  <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">Full name</p>
-                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">Director</p>
+                  <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">{t('teamMemberName')}</p>
+                  <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">{t('teamMemberRole')}</p>
                 </div>
               </div>
             </div>
@@ -462,7 +467,7 @@ export default function About() {
         </div>
         <div className="relative max-w-[1440px] mx-auto px-[16px] md:px-[40px] h-full flex flex-col items-center justify-center">
           <p className="font-['DM_Sans'] font-light text-[45px] md:text-[128px] leading-[45px] md:leading-[0.95] tracking-[-1.8px] md:tracking-[-6.4px] text-[#161616] text-center max-w-[358px] md:max-w-[861px] mb-[32px] md:mb-[80px]">
-            Ready to <span className="font-['Tiro_Tamil'] italic">build</span> with fire?
+            {t('ctaTitlePrefix')} <span className="font-['Tiro_Tamil'] italic">{t('ctaTitleItalic')}</span> {t('ctaTitleSuffix')}
           </p>
           <div className="flex flex-col md:flex-row gap-[16px] items-center">
             <Link
@@ -470,7 +475,7 @@ export default function About() {
               className="bg-[#161616] rounded-[100px] px-[40px] py-[10px] h-[48px] flex items-center justify-center"
             >
               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                shop now
+                {t('ctaShopNow')}
               </p>
             </Link>
             <Link
@@ -478,7 +483,7 @@ export default function About() {
               className="border border-[#161616] rounded-[100px] px-[40px] py-[10px] h-[48px] flex items-center justify-center"
             >
               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-                get in touch
+                {t('ctaGetInTouch')}
               </p>
             </Link>
           </div>
@@ -490,13 +495,13 @@ export default function About() {
           className="fixed inset-0 z-[100] flex items-center justify-center px-[16px]"
           role="dialog"
           aria-modal="true"
-          aria-label="Video"
+          aria-label={t('modalLabel')}
         >
           <button
             type="button"
             className="absolute inset-0 bg-black/70"
             onClick={() => setIsVideoOpen(false)}
-            aria-label="Close video"
+            aria-label={t('modalCloseOverlay')}
           />
 
           <div className="relative w-full max-w-[960px] bg-black rounded-[12px] overflow-hidden shadow-2xl">
@@ -506,7 +511,7 @@ export default function About() {
                 onClick={() => setIsVideoOpen(false)}
                 className="h-[36px] px-[12px] rounded-[100px] bg-white/10 text-white font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
-                Close
+                {t('modalCloseButton')}
               </button>
             </div>
 
@@ -514,7 +519,7 @@ export default function About() {
               <iframe
                 className="absolute inset-0 h-full w-full"
                 src={videoSrc}
-                title="YouTube video"
+                title={t('modalIframeTitle')}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
               />
