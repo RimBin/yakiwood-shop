@@ -170,46 +170,51 @@ export default function About() {
             <div className="h-[300px]"></div>
           </div>
 
-          {/* Mobile Cards - stacked */}
-          <div className="lg:hidden flex flex-col gap-[16px]">
-            <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px]">
-              <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                Our mission
-              </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                Our goal is to help you create a cosy and sustainable environment by using Yakisugi (Shou Sugi Ban)—a traditional Japanese wood-burning technique that enhances both the protection and aesthetics of wood.
-              </p>
-            </div>
-            <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px]">
-              <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                Our Vision
-              </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                To become the leading provider of sustainable burnt wood solutions in Lithuania and beyond, inspiring people to embrace natural, durable, and eco-friendly materials. We strive to preserve tradition while innovating for a greener future.
-              </p>
-            </div>
-            <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px]">
-              <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                Our promise
-              </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                Whether for facades, terraces, fences, or interior designs, our burnt wood solutions add warmth, style, and lasting protection to your home and surroundings.
-              </p>
-            </div>
-            <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px]">
-              <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                Our values
-              </p>
-              <div className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                <p className="mb-[10px]">
-                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">Craftsmanship</span> – We take pride in our work, paying close attention to every detail.
+          {/* Mobile Cards - horizontal scroll (left padding matches page, cards peek on 320px) */}
+          <div className="lg:hidden">
+            <div className="flex snap-x snap-mandatory gap-[16px] overflow-x-auto px-[16px] pb-[8px] scrollbar-hide">
+              <div className="snap-start shrink-0 w-[260px] border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
+                <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
+                  Our mission
                 </p>
-                <p className="mb-[10px]">
-                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">Sustainability</span> – We believe in eco-friendly solutions that preserve nature.
+                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
+                  Our goal is to help you create a cosy and sustainable environment by using Yakisugi (Shou Sugi Ban)—a traditional Japanese wood-burning technique that enhances both the protection and aesthetics of wood.
                 </p>
-                <p>
-                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">Authenticity</span> – We honor the centuries-old Yakisugi tradition.
+              </div>
+
+              <div className="snap-start shrink-0 w-[260px] border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
+                <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
+                  Our Vision
                 </p>
+                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
+                  To become the leading provider of sustainable burnt wood solutions in Lithuania and beyond, inspiring people to embrace natural, durable, and eco-friendly materials. We strive to preserve tradition while innovating for a greener future.
+                </p>
+              </div>
+
+              <div className="snap-start shrink-0 w-[260px] border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
+                <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
+                  Our promise
+                </p>
+                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
+                  Whether for facades, terraces, fences, or interior designs, our burnt wood solutions add warmth, style, and lasting protection to your home and surroundings.
+                </p>
+              </div>
+
+              <div className="snap-start shrink-0 w-[260px] border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px] overflow-auto">
+                <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
+                  Our values
+                </p>
+                <div className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
+                  <p className="mb-[10px]">
+                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">Craftsmanship</span> – We take pride in our work, paying close attention to every detail.
+                  </p>
+                  <p className="mb-[10px]">
+                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">Sustainability</span> – We believe in eco-friendly solutions that preserve nature.
+                  </p>
+                  <p>
+                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">Authenticity</span> – We honor the centuries-old Yakisugi tradition.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

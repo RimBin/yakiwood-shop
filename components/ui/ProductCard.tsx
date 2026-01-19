@@ -9,6 +9,7 @@ interface ProductCardProps {
   id: string;
   name: string;
   slug: string;
+  slugEn?: string;
   price: number;
   description: string;
   image: string;
@@ -22,6 +23,7 @@ export default function ProductCard({
   id,
   name,
   slug,
+  slugEn,
   price,
   description,
   image,
@@ -33,9 +35,11 @@ export default function ProductCard({
   const locale = useLocale();
   const currentLocale: AppLocale = locale === 'lt' ? 'lt' : 'en';
 
+  const resolvedSlug = currentLocale === 'en' ? (slugEn ?? slug) : slug;
+
   return (
     <Link 
-      href={toLocalePath(`/products/${slug}`, currentLocale)}
+      href={toLocalePath(`/products/${resolvedSlug}`, currentLocale)}
       className={`bg-[#eaeaea] rounded-[8px] flex flex-col gap-[24px] items-center pt-[24px] pb-[40px] px-[24px] relative group hover:shadow-lg transition-shadow ${className}`}
     >
       {/* Product Image */}

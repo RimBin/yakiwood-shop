@@ -38,7 +38,7 @@ async function getProducts(): Promise<{ slug: string; updatedAt: Date }[]> {
         }));
       }
     }
-  } catch (error) {
+  } catch {
     console.warn('Supabase not available, using fallback products for sitemap');
   }
 

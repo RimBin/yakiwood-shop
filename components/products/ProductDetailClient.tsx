@@ -610,7 +610,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     addItem({
       id: product.id,
       name: localizedDisplayName,
-      slug: product.slug,
+      slug: currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug,
       basePrice: typeof unitPricePerBoard === 'number' ? unitPricePerBoard : selectionPrice,
       quantity: resolvedQuantityBoards,
       color: selectedColor?.name,
