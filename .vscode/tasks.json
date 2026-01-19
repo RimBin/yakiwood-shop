@@ -1,29 +1,209 @@
 {
 	"version": "2.0.0",
 	"tasks": [
+		// ---------------------------------------------------------------------
+		// Workflow tasks (predictable terminals, single-instance)
+		// ---------------------------------------------------------------------
+		// Use these tasks instead of running commands manually in random terminals.
+		// They are designed to:
+		// - Reuse dedicated terminal panels (less terminal chaos)
+		// - Limit each task to a single active instance (avoid accidental parallel runs)
+		// - Keep commands explicit and familiar (no hidden automation)
 		{
-			"label": "build:next",
+			"label": "dev: next (npm run dev)",
 			"type": "shell",
 			"command": "npm",
 			"args": [
 				"run",
-				"build"
+				"dev"
 			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "dev",
+				"showReuseMessage": false,
+				"clear": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
+		},
+		{
+			"label": "dev: unlock (npm run dev:unlock)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"dev:unlock"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"isBackground": false,
 			"problemMatcher": [],
-			"group": "build"
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "dev-tools",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
 		},
 		{
-			"label": "build",
+			"label": "PRODUCTION: build (npm run build)",
 			"type": "shell",
 			"command": "npm",
 			"args": [
 				"run",
 				"build"
 			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"isBackground": false,
-			"problemMatcher": []
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "build",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
 		},
+		{
+			"label": "test: unit (npm run test)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"test"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "test-unit",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
+		},
+		{
+			"label": "test: e2e (Playwright) (npm run test:e2e)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"test:e2e"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "test-e2e",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
+		},
+		{
+			"label": "test: e2e UI (Playwright) (npm run test:e2e:ui)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"test:e2e:ui"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "test-e2e",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
+		},
+		{
+			"label": "test: e2e headed (Playwright) (npm run test:e2e:headed)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"test:e2e:headed"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "test-e2e",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
+		},
+		{
+			"label": "test: e2e debug (Playwright) (npm run test:e2e:debug)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"test:e2e:debug"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "test-e2e",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
+		},
+
 		{
 			"label": "remove-next-lock",
 			"type": "shell",
@@ -34,21 +214,19 @@
 				"Remove-Item -Force \"C:\\Users\\rimvy\\yakiwood-website\\.next\\lock\" -ErrorAction SilentlyContinue; if (Test-Path \"C:\\Users\\rimvy\\yakiwood-website\\.next\\lock\") { Write-Error \"lock still exists\"; exit 1 } else { Write-Output \"lock removed\" }"
 			],
 			"isBackground": false,
-			"problemMatcher": []
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "dev-tools",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
 		},
 		{
-			"label": "build-next",
-			"type": "shell",
-			"command": "npm",
-			"args": [
-				"run",
-				"build"
-			],
-			"isBackground": false,
-			"problemMatcher": []
-		},
-		{
-			"label": "kill-node-next",
+			"label": "DANGER: kill all node / npm / next processes",
 			"type": "shell",
 			"command": "powershell",
 			"args": [
@@ -56,10 +234,19 @@
 				"-Command",
 				"taskkill /F /IM node.exe /T 2>$null; taskkill /F /IM npm.exe /T 2>$null; taskkill /F /IM next.exe /T 2>$null; Write-Output \"killed\""
 			],
-			"isBackground": false
+			"isBackground": false,
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "maintenance",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
 		},
 		{
-			"label": "clean-next",
+			"label": "DANGER: delete .next cache",
 			"type": "shell",
 			"command": "powershell",
 			"args": [
@@ -67,10 +254,19 @@
 				"-Command",
 				"$p=\"C:\\Users\\rimvy\\yakiwood-website\\.next\"; if (Test-Path $p) { Remove-Item -Recurse -Force $p -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 200; if (Test-Path $p) { Remove-Item -Recurse -Force $p -ErrorAction SilentlyContinue } }; if (Test-Path $p) { Write-Output \".next still exists\"; exit 1 } else { Write-Output \".next removed\" }"
 			],
-			"isBackground": false
+			"isBackground": false,
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "maintenance",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
 		},
 		{
-			"label": "clean-next-verbose",
+			"label": "DANGER: delete .next cache (verbose)",
 			"type": "shell",
 			"command": "powershell",
 			"args": [
@@ -78,7 +274,16 @@
 				"-Command",
 				"$p=\"C:\\Users\\rimvy\\yakiwood-website\\.next\"; if (!(Test-Path $p)) { Write-Output \".next does not exist\"; exit 0 }; try { Remove-Item -Recurse -Force $p -ErrorAction Stop } catch { Write-Output (\"remove failed: \" + $_.Exception.Message) }; Start-Sleep -Milliseconds 300; if (Test-Path $p) { Write-Output \".next still exists\"; Get-ChildItem -LiteralPath $p -Recurse -Force -ErrorAction SilentlyContinue | Select-Object -First 30 | ForEach-Object { $_.FullName }; exit 1 } else { Write-Output \".next removed\" }"
 			],
-			"isBackground": false
+			"isBackground": false,
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "maintenance",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
 		},
 		{
 			"label": "list-node-next-procs",
@@ -89,7 +294,16 @@
 				"-Command",
 				"Get-Process node,npm,next -ErrorAction SilentlyContinue | Select-Object Name,Id,Path | Format-Table -AutoSize | Out-String -Width 200"
 			],
-			"isBackground": false
+			"isBackground": false,
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "maintenance",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
 		},
 		{
 			"label": "tasklist-node-next",
@@ -100,18 +314,16 @@
 				"-Command",
 				"tasklist | findstr /I /C:\"node.exe\" /C:\"npm.exe\" /C:\"next.exe\"; exit 0"
 			],
-			"isBackground": false
-		},
-		{
-			"label": "next-build-direct",
-			"type": "shell",
-			"command": "npx",
-			"args": [
-				"next",
-				"build"
-			],
 			"isBackground": false,
-			"group": "build"
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"group": "maintenance",
+				"showReuseMessage": false
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
 		}
 	]
 }

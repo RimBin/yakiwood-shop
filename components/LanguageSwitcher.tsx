@@ -12,6 +12,8 @@ interface Language {
   label: string;
 }
 
+type LanguageSwitcherVariant = 'light' | 'dark';
+
 const languages: Language[] = [
   { code: 'lt', label: 'Lietuvių' },
   { code: 'en', label: 'English' },
@@ -122,13 +124,19 @@ function toEnPath(pathname: string): string {
   return replaceLeadingPath(withoutPrefix, ltToEn);
 }
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({
+  variant = 'light',
+}: {
+  variant?: LanguageSwitcherVariant;
+}) {
   const locale = useLocale();
   const t = useTranslations('languageSwitcher');
   const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const isDark = variant === 'dark';
 
   const currentLanguage = languages.find((lang) => lang.code === locale) || languages[0];
 
@@ -189,18 +197,26 @@ export default function LanguageSwitcher() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="group border border-[#BBBBBB] border-solid rounded-[100px] flex gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[16px] md:px-[20px] py-[10px] bg-transparent hover:bg-[#161616] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#161616] focus-visible:ring-offset-2"
+        className={`group border border-solid rounded-[100px] flex gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[16px] md:px-[20px] py-[10px] bg-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+          isDark
+            ? 'border-white/20 hover:bg-white/10 focus-visible:ring-white focus-visible:ring-offset-[#161616]'
+            : 'border-[#BBBBBB] hover:bg-[#161616] focus-visible:ring-[#161616]'
+        }`}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-label={t('toggleAria')}
       >
-        <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white shrink-0">
+        <span
+          className={`font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase shrink-0 ${
+            isDark ? 'text-white' : 'text-[#161616] group-hover:text-white'
+          }`}
+        >
           {currentLanguage.code}
         </span>
         <svg
-          className={`w-4 h-4 text-[#161616] group-hover:text-white transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          className={`w-4 h-4 transition-transform duration-200 ${
+            isDark ? 'text-white' : 'text-[#161616] group-hover:text-white'
+          } ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

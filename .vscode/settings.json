@@ -1,4 +1,48 @@
 {
+    // ---------------------------------------------------------------------
+    // Developer workflow guardrails (terminal hygiene)
+    // ---------------------------------------------------------------------
+    // Goals:
+    // - Prefer a single predictable default shell on Windows
+    // - Reduce terminal spam when tasks are re-run or VS Code reloads
+    // - Keep behavior safe and reversible (no app/runtime changes)
+    //
+    // Notes for future agents:
+    // - Do NOT auto-run dev/build/test.
+    // - Prefer VS Code Tasks (see `.vscode/tasks.json`) to avoid spawning many
+    //   ad-hoc PowerShell/pwsh/node terminals.
+    // - Do NOT change non-VSCode files unless explicitly requested.
+
+    // Use a single default shell. "Windows PowerShell" exists on all Windows
+    // installs; PowerShell 7 (pwsh) may not.
+    "terminal.integrated.defaultProfile.windows": "Windows PowerShell",
+    "terminal.integrated.profiles.windows": {
+        "Windows PowerShell": {
+            "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "args": ["-NoProfile"]
+        },
+        // Optional: PowerShell 7 profile (only used if user selects it)
+        "PowerShell": {
+            "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "args": ["-NoProfile"]
+        }
+    },
+
+    // Keep terminals anchored to the workspace by default.
+    "terminal.integrated.cwd": "${workspaceFolder}",
+
+    // Persist terminal tabs but do not revive processes (prevents surprise
+    // background restarts and duplicated sessions).
+    "terminal.integrated.enablePersistentSessions": true,
+    "terminal.integrated.persistentSessionReviveProcess": "never",
+    "terminal.integrated.showExitAlert": false,
+    "terminal.integrated.tabs.enabled": true,
+    "terminal.integrated.tabs.hideCondition": "singleTerminal",
+
+    // Reduce task noise by preferring curated tasks over auto-detected npm tasks.
+    "npm.autoDetect": "off",
+
+    // Existing Python testing settings (kept as-is).
     "python.testing.pytestArgs": [
         "."
     ],

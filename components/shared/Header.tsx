@@ -142,12 +142,17 @@ export default function Header() {
               
               <button 
                 onClick={() => setIsCartOpen(true)}
-                className="border border-[#BBBBBB] border-solid rounded-[100px] flex gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[16px] md:px-[24px] py-[10px] bg-transparent hover:bg-[#161616] hover:text-white transition-colors group relative"
+                className="border border-[#BBBBBB] border-solid rounded-[100px] flex gap-[0px] md:gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[12px] md:px-[24px] py-[10px] bg-transparent hover:bg-[#161616] hover:text-white transition-colors group relative"
               >
                 <div className="relative w-[24px] h-[24px] overflow-clip shrink-0 icon-wrapper">
                   <Image src={getAsset('imgCart')} alt="Cart" fill className="icon-image" style={{ objectFit: 'contain' }} />
+                  {items.length > 0 && (
+                    <span className="absolute -top-[6px] -right-[6px] min-w-[18px] h-[18px] px-[4px] rounded-full bg-[#161616] border border-[#E1E1E1] flex items-center justify-center font-['Outfit'] text-[10px] leading-none text-white">
+                      {items.length > 9 ? '9+' : items.length}
+                    </span>
+                  )}
                 </div>
-                <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white shrink-0">
+                <span className="hidden md:inline font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white shrink-0">
                   {t(locale === 'lt' ? 'header.krepselis' : 'header.cart')} {items.length > 0 && `(${items.length})`}
                 </span>
               </button>
@@ -156,7 +161,7 @@ export default function Header() {
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
                 className="lg:hidden border border-[#BBBBBB] border-solid rounded-[100px] w-[48px] h-[48px] flex items-center justify-center bg-transparent hover:bg-[#161616] transition-colors group"
-                aria-label="Open menu"
+                aria-label={t(locale === 'lt' ? 'header.atidarykMenu' : 'header.openMenu')}
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:stroke-white transition-colors">
                   <path d="M3 12H21M3 6H21M3 18H21" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:stroke-white"/>

@@ -8,7 +8,8 @@
     "apie": "Apie mus",
     "kontaktai": "Kontaktai",
     "duk": "DUK",
-    "pagrindinis": "Pagrindinis"
+    "pagrindinis": "Pagrindinis",
+    "paskyra": "Paskyra"
   },
   "about": {
     "pavadinimas": "apie mus"
@@ -154,6 +155,9 @@
     "atidarykMenu": "Atidaryti meniu",
     "uzdarykMenu": "Uždaryti meniu"
   },
+  "mobileMenu": {
+    "ctaGetInTouch": "Susisiekti"
+  },
   "footer": {
     "navigacija": "Navigacija",
     "teisine": "Teisinė informacija",
@@ -169,7 +173,32 @@
     "darbasLaikas": "Darbo laikas",
     "pirmadienisPenktadienis": "Pirmadienis - Penktadienis",
     "sestadienia": "Šeštadienis",
-    "sekmadienis": "Sekmadienis"
+    "sekmadienis": "Sekmadienis",
+    "shared": {
+      "columns": {
+        "information": "Informacija",
+        "clientCare": "Klientų aptarnavimas",
+        "social": "Socialiniai tinklai",
+        "account": "Paskyra"
+      },
+      "links": {
+        "about": "Apie mus",
+        "contacts": "Kontaktai",
+        "projects": "Projektai",
+        "blog": "Straipsniai",
+        "faqs": "DUK",
+        "policies": "Politikos",
+        "cookiePolicy": "Slapukų politika",
+        "facebook": "Facebook",
+        "instagram": "Instagram",
+        "linkedin": "LinkedIn",
+        "myAccount": "Mano paskyra",
+        "shipping": "Pristatymas",
+        "refundPolicy": "Grąžinimo politika"
+      },
+      "paymentsAlt": "Mokėjimo būdai",
+      "copyright": "© {year} YAKIWOOD, LLC. Visos teisės saugomos"
+    }
   },
   "hero": {
     "mainHeading": "Amžinas grožis, sustiprintas ugnies - ",

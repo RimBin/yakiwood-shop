@@ -8,7 +8,8 @@
     "about": "About us",
     "contact": "Contact",
     "faq": "FAQ",
-    "home": "Home"
+    "home": "Home",
+    "account": "Account"
   },
   "chatbot": {
     "button": "Chat",
@@ -171,6 +172,9 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
   },
+  "mobileMenu": {
+    "ctaGetInTouch": "Get in touch"
+  },
   "footer": {
     "navigation": "Navigation",
     "legal": "Legal",
@@ -186,7 +190,32 @@
     "workingHours": "Working hours",
     "mondayFriday": "Monday - Friday",
     "saturday": "Saturday",
-    "sunday": "Sunday"
+    "sunday": "Sunday",
+    "shared": {
+      "columns": {
+        "information": "Information",
+        "clientCare": "Client care",
+        "social": "Social",
+        "account": "Account"
+      },
+      "links": {
+        "about": "About us",
+        "contacts": "Contacts",
+        "projects": "Projects",
+        "blog": "Blog",
+        "faqs": "FAQs",
+        "policies": "Policies",
+        "cookiePolicy": "Cookie policy",
+        "facebook": "Facebook",
+        "instagram": "Instagram",
+        "linkedin": "LinkedIn",
+        "myAccount": "My account",
+        "shipping": "Shipping",
+        "refundPolicy": "Refund policy"
+      },
+      "paymentsAlt": "Payment methods",
+      "copyright": "© {year} YAKIWOOD, LLC. All rights reserved"
+    }
   },
   "hero": {
     "mainHeading": "Timeless beauty, enhanced by fire - ",

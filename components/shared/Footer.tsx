@@ -4,44 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { assets } from '@/lib/assets';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
-
-const navColumns = [
-  {
-    title: 'Information',
-    links: [
-      { label: 'About us', href: '/about' },
-      { label: 'Contacts', href: '/contact' },
-      { label: 'Projects', href: '/projects' },
-      { label: 'Blog', href: '/blog' },
-    ],
-  },
-  {
-    title: 'Client care',
-    links: [
-      { label: 'FAQs', href: '/faq' },
-      { label: 'Policies', href: '/policies' },
-      { label: 'Cookie policy', href: '/cookie-policy' },
-    ],
-  },
-  {
-    title: 'Social',
-    links: [
-      { label: 'Facebook', href: 'https://facebook.com' },
-      { label: 'Instagram', href: 'https://instagram.com' },
-      { label: 'LinkedIn', href: 'https://linkedin.com' },
-    ],
-  },
-  {
-    title: 'Account',
-    links: [
-      { label: 'My account', href: '/account' },
-      { label: 'Shipping', href: '/policies/shipping' },
-      { label: 'Refund policy', href: '/policies/refund' },
-    ],
-  },
-];
 
 // Certificate logos with background colors
 const certificates = [
@@ -70,8 +34,45 @@ const certificates = [
 
 export default function Footer() {
   const locale = useLocale();
+  const t = useTranslations('footer.shared');
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const year = new Date().getFullYear();
+
+  const navColumns = [
+    {
+      title: t('columns.information'),
+      links: [
+        { label: t('links.about'), href: '/about' },
+        { label: t('links.contacts'), href: '/contact' },
+        { label: t('links.projects'), href: '/projects' },
+        { label: t('links.blog'), href: '/blog' },
+      ],
+    },
+    {
+      title: t('columns.clientCare'),
+      links: [
+        { label: t('links.faqs'), href: '/faq' },
+        { label: t('links.policies'), href: '/policies' },
+        { label: t('links.cookiePolicy'), href: '/cookie-policy' },
+      ],
+    },
+    {
+      title: t('columns.social'),
+      links: [
+        { label: t('links.facebook'), href: 'https://facebook.com' },
+        { label: t('links.instagram'), href: 'https://instagram.com' },
+        { label: t('links.linkedin'), href: 'https://linkedin.com' },
+      ],
+    },
+    {
+      title: t('columns.account'),
+      links: [
+        { label: t('links.myAccount'), href: '/account' },
+        { label: t('links.shipping'), href: '/policies/shipping' },
+        { label: t('links.refundPolicy'), href: '/policies/refund' },
+      ],
+    },
+  ];
 
   const desktopNavColumns = navColumns;
 
@@ -140,12 +141,12 @@ export default function Footer() {
         {/* Copyright & Payment - Mobile */}
         <div className="flex flex-col gap-[16px]">
           <p className="font-['DM_Sans'] font-medium text-[14px] leading-[1.2] tracking-[-0.56px] text-[#E1E1E1]">
-            @{year} YAKIWOOD, LLC. All rights reserved
+            {t('copyright', { year })}
           </p>
           <div className="opacity-30">
             <Image
               src={assets.payments}
-              alt="Payment methods"
+              alt={t('paymentsAlt')}
               width={300}
               height={18}
               className="h-[16px] w-auto"
@@ -221,11 +222,11 @@ export default function Footer() {
           {/* Copyright & Payment - Desktop (same row) */}
           <div className="flex items-center justify-between">
             <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.64px] text-[#E1E1E1]">
-              @{year} YAKIWOOD, LLC. All rights reserved
+              {t('copyright', { year })}
             </p>
             <Image
               src={assets.payments}
-              alt="Payment methods"
+              alt={t('paymentsAlt')}
               width={520}
               height={32}
               className="h-[30px] w-auto"

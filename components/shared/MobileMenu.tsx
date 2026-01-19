@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface MobileMenuProps {
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const locale = useLocale();
   const t = useTranslations();
+  const tm = useTranslations('mobileMenu');
 
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
 
@@ -56,11 +58,11 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         <div className="flex flex-col h-full px-[24px] py-[24px]">
           {/* Header with Close Button */}
           <div className="flex items-center justify-between mb-[48px]">
-            <div className="w-[40px]" />
+            <LanguageSwitcher variant="dark" />
             <button
               onClick={onClose}
               className="w-[48px] h-[48px] rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors"
-              aria-label="Close menu"
+              aria-label={t(locale === 'lt' ? 'header.uzdarykMenu' : 'header.closeMenu')}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18 6L6 18M6 6L18 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -75,28 +77,28 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
-              Account
+              {t(locale === 'lt' ? 'nav.paskyra' : 'nav.account')}
             </Link>
             <Link
               href={toLocalePath('/products', currentLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
-              Products
+              {t(locale === 'lt' ? 'nav.produktai' : 'nav.products')}
             </Link>
             <Link
               href={toLocalePath('/solutions', currentLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
-              Solutions
+              {t(locale === 'lt' ? 'nav.sprendimai' : 'nav.solutions')}
             </Link>
             <Link
               href={toLocalePath('/projects', currentLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
-              Projects
+              {t(locale === 'lt' ? 'nav.projektai' : 'nav.projects')}
             </Link>
 
             <Link
@@ -119,25 +121,29 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
-              About us
+              {t(locale === 'lt' ? 'nav.apie' : 'nav.about')}
             </Link>
             <Link
               href={toLocalePath('/contact', currentLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
-              Contact
+              {t(locale === 'lt' ? 'nav.kontaktai' : 'nav.contact')}
             </Link>
           </nav>
 
           {/* Bottom Section */}
           <div className="flex flex-col gap-[32px] pt-[32px] border-t border-white/20">
             {/* CTA Button - Figma: border only, not filled */}
-            <button className="w-full max-w-[357px] mx-auto border border-[#535353] rounded-[100px] h-[48px] flex items-center justify-center hover:bg-white/10 transition-colors">
+            <Link
+              href={toLocalePath('/contact', currentLocale)}
+              onClick={onClose}
+              className="w-full max-w-[357px] mx-auto border border-[#535353] rounded-[100px] h-[48px] flex items-center justify-center hover:bg-white/10 transition-colors"
+            >
               <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                Get in touch
+                {tm('ctaGetInTouch')}
               </span>
-            </button>
+            </Link>
 
             {/* Social Links - Figma: 24px font size */}
             <div className="flex items-center justify-center gap-[32px]">
