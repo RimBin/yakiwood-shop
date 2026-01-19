@@ -312,6 +312,15 @@ export default function ProductsPage() {
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
 
+  const normalizeUsageId = (value: string | undefined) => {
+    const token = normalizeToken(value ?? '');
+    if (!token) return null;
+    if (token === 'facade' || token === 'terrace') return token;
+    if (token.includes('facade') || token.includes('fasad')) return 'facade';
+    if (token.includes('terrace') || token.includes('teras') || token.includes('deck')) return 'terrace';
+    return token;
+  };
+
   const parseStockItemSlug = (slug: string) => {
     const parts = slug.split('--');
     if (parts.length < 4) return null;
@@ -483,9 +492,10 @@ export default function ProductsPage() {
 
   const filteredProducts = useMemo(() => {
     return allProducts.filter((product) => {
+      const usageId = normalizeUsageId(product.category);
       const matchesUsage =
         selectedUsage.length === 0 ||
-        (product.category ? selectedUsage.includes(product.category) : false);
+        (usageId ? selectedUsage.includes(usageId) : false);
       const matchesWood =
         selectedWood.length === 0 ||
         (product.woodType ? selectedWood.includes(product.woodType) : false);
@@ -730,7 +740,7 @@ export default function ProductsPage() {
           </p>
           </div>
 
-          {!isDefaultListing && (
+          {!isDefaultListing && selectedUsage.length > 0 && (
             <p
               className="font-['Outfit'] font-normal text-[12px] md:text-[14px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]"
             >

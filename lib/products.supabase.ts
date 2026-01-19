@@ -56,6 +56,20 @@ const WOOD_LABELS = {
   larch: { lt: 'Maumedis', en: 'Larch' },
 } as const
 
+function normalizeUsageType(value?: string | null): keyof typeof USAGE_LABELS | null {
+  const raw = (value ?? '').trim().toLowerCase()
+  if (!raw) return null
+
+  // Already canonical
+  if (raw === 'facade' || raw === 'terrace') return raw
+
+  // Common DB/category labels
+  if (raw.includes('facade') || raw.includes('fasad')) return 'facade'
+  if (raw.includes('terrace') || raw.includes('teras') || raw.includes('deck')) return 'terrace'
+
+  return null
+}
+
 function buildBaseProductName(
   usageType?: string | null,
   woodType?: string | null,
@@ -182,7 +196,11 @@ export function transformDbProduct(db: DbProduct): Product {
     : []
 
   const image = db.image_url || '/images/ui/wood/imgSpruce.png'
-  const usage = db.usage_type || db.category || 'facade'
+  const usage =
+    normalizeUsageType(db.usage_type) ??
+    normalizeUsageType(db.category) ??
+    // Keep a safe default so filters/UI don't break.
+    'facade'
   const baseNameLt = buildBaseProductName(usage, db.wood_type, 'lt')
   const baseNameEn = buildBaseProductName(usage, db.wood_type, 'en')
 
