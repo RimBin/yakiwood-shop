@@ -61,12 +61,10 @@ async function getAuthenticatedRoleDiscount(request: NextRequest): Promise<RoleD
 
 export async function POST(req: NextRequest) {
   try {
-    const stripe = getStripeClient();
-    if (!stripe) {
-      return NextResponse.json({ error: 'Stripe konfigūracija nerasta' }, { status: 503 });
-    }
+    const url = new URL(req.url);
+    const forceDemo = url.searchParams.get('demo') === '1';
 
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
     const {
       orderId,
       items,
@@ -75,7 +73,7 @@ export async function POST(req: NextRequest) {
       customerPhone: customerPhoneRaw,
       customerAddress: customerAddressRaw,
       customer,
-    } = body as {
+    } = (body || {}) as {
       orderId?: string;
       items: Array<{
         id: string;
@@ -109,6 +107,34 @@ export async function POST(req: NextRequest) {
         country?: string;
       };
     };
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (process.env.NODE_ENV === 'production' && (!siteUrl || !siteUrl.trim())) {
+      return NextResponse.json(
+        { error: 'NEXT_PUBLIC_SITE_URL privalomas production aplinkoje' },
+        { status: 500 }
+      );
+    }
+    const resolvedSiteUrl = siteUrl || 'http://localhost:3000';
+
+    const stripe = getStripeClient();
+    if (!stripe || (forceDemo && process.env.NODE_ENV !== 'production')) {
+      if (!stripe && process.env.NODE_ENV === 'production') {
+        return NextResponse.json({ error: 'Stripe konfigūracija nerasta' }, { status: 503 });
+      }
+
+      if (!items || items.length === 0) {
+        if (!orderId || typeof orderId !== 'string' || orderId.trim().length === 0) {
+          return NextResponse.json({ error: 'Tuščias krepšelis' }, { status: 400 });
+        }
+      }
+
+      const demoSessionId = `demo_${(typeof orderId === 'string' && orderId.trim()) || Date.now()}`;
+      return NextResponse.json({
+        demo: true,
+        url: `${resolvedSiteUrl}/order-confirmation?session_id=${encodeURIComponent(demoSessionId)}`,
+      });
+    }
 
     const customerEmail = customerEmailRaw || customer?.email;
     const customerName = customerNameRaw || customer?.name;
@@ -147,15 +173,6 @@ export async function POST(req: NextRequest) {
       }
       resolvedItems = order.items as any;
     }
-
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-    if (process.env.NODE_ENV === 'production' && (!siteUrl || !siteUrl.trim())) {
-      return NextResponse.json(
-        { error: 'NEXT_PUBLIC_SITE_URL privalomas production aplinkoje' },
-        { status: 500 }
-      );
-    }
-    const resolvedSiteUrl = siteUrl || 'http://localhost:3000';
 
     // Apply role discount only for authenticated users.
     const roleDiscount = await getAuthenticatedRoleDiscount(req);

@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { createClient } from '@/lib/supabase/client'
 
 import { projects as defaultProjects } from '@/data/projects'
 import type { Project } from '@/types/project'
@@ -18,6 +19,70 @@ import {
 } from '@/components/admin/ui/AdminUI'
 
 const PROJECTS_STORAGE_KEY = 'yakiwood_projects'
+const PROJECT_IMAGES_BUCKET = 'project-images'
+
+async function getAdminToken(): Promise<string | null> {
+  const supabase = createClient()
+  if (!supabase) return null
+  const { data } = await supabase.auth.getSession()
+  return data.session?.access_token ?? null
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message) return error.message
+  if (typeof error === 'string' && error) return error
+  return fallback
+}
+
+async function uploadImageToSupabase(file: File, bucket = PROJECT_IMAGES_BUCKET): Promise<string> {
+  const supabase = createClient()
+  if (!supabase) {
+    throw new Error('Supabase is not configured (missing env vars)')
+  }
+
+  const token = await getAdminToken()
+  if (!token) {
+    throw new Error('No admin session. Please login again.')
+  }
+
+  const res = await fetch('/api/admin/uploads', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      fileName: file.name,
+      contentType: file.type || 'application/octet-stream',
+      bucket,
+    }),
+  })
+
+  const json = (await res.json().catch(() => null)) as any
+  if (!res.ok) {
+    const msg = json?.error || `Upload URL request failed (${res.status})`
+    throw new Error(msg)
+  }
+
+  const path = String(json?.path || '')
+  const signedToken = String(json?.token || '')
+  const outBucket = String(json?.bucket || bucket)
+  const publicUrl = String(json?.publicUrl || '')
+
+  if (!path || !signedToken || !publicUrl) {
+    throw new Error('Upload URL response missing required fields')
+  }
+
+  const { error } = await supabase.storage.from(outBucket).uploadToSignedUrl(path, signedToken, file, {
+    contentType: file.type || undefined,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return publicUrl
+}
 
 let adminDbPromise: Promise<IDBDatabase> | null = null
 
@@ -150,6 +215,7 @@ export default function ProjectsAdminClient() {
 
   const [projectImageFiles, setProjectImageFiles] = useState<string[]>([])
   const [featuredImageFile, setFeaturedImageFile] = useState('')
+  const [isUploadingImages, setIsUploadingImages] = useState(false)
 
   const projectFileInputRef = useRef<HTMLInputElement | null>(null)
   const featuredImageInputRef = useRef<HTMLInputElement | null>(null)
@@ -187,34 +253,54 @@ export default function ProjectsAdminClient() {
     window.setTimeout(() => setMessage(''), 3000)
   }
 
-  const handleProjectImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files) return
+  const handleProjectImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files
+    if (!fileList || fileList.length === 0) return
 
-    const readers: Promise<string>[] = []
+    const files = Array.from(fileList)
+    const fileNames = files.map((f) => f.name).join(', ')
+    setProjectSelectedFileNames(fileNames)
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      const reader = new FileReader()
+    setIsUploadingImages(true)
 
-      const promise = new Promise<string>((resolve) => {
-        reader.onload = (event) => {
-          resolve(event.target?.result as string)
+    try {
+      const urls: string[] = []
+      for (const file of files) {
+        urls.push(await uploadImageToSupabase(file))
+      }
+
+      setProjectImageFiles((prev) => [...prev, ...urls])
+      showToast(`Uploaded ${urls.length} image(s) to Supabase.`)
+    } catch (error) {
+      // Fallback to local base64 in case Supabase isn't configured yet.
+      try {
+        const base64Images = await Promise.all(
+          files.map(
+            (file) =>
+              new Promise<string>((resolve, reject) => {
+                const reader = new FileReader()
+                reader.onload = () => resolve(String(reader.result || ''))
+                reader.onerror = () => reject(reader.error ?? new Error('File read failed'))
+                reader.readAsDataURL(file)
+              })
+          )
+        )
+
+        const cleaned = base64Images.filter(Boolean)
+        if (cleaned.length > 0) {
+          setProjectImageFiles((prev) => [...prev, ...cleaned])
         }
-        reader.readAsDataURL(file)
-      })
 
-      readers.push(promise)
+        showToast(`Upload failed; kept images locally: ${getErrorMessage(error, 'Upload failed')}`)
+      } catch {
+        showToast(getErrorMessage(error, 'Upload failed'))
+      }
+    } finally {
+      setIsUploadingImages(false)
+      // allow selecting same file again
+      e.target.value = ''
+      if (projectFileInputRef.current) projectFileInputRef.current.value = ''
     }
-
-    Promise.all(readers).then((base64Images) => {
-      setProjectImageFiles((prev) => [...prev, ...base64Images])
-
-      const fileNames = Array.from(files)
-        .map((f) => f.name)
-        .join(', ')
-      setProjectSelectedFileNames(fileNames)
-    })
   }
 
   const handleProjectFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -229,15 +315,28 @@ export default function ProjectsAdminClient() {
     setProjectSelectedFileNames(names)
   }
 
-  const handleFeaturedImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFeaturedImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setFeaturedImageFile(reader.result as string)
+    setIsUploadingImages(true)
+    try {
+      const url = await uploadImageToSupabase(file)
+      setFeaturedImageFile(url)
+      showToast('Featured image uploaded to Supabase.')
+    } catch (error) {
+      // Fallback to local base64
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setFeaturedImageFile(String(reader.result || ''))
+        showToast(`Upload failed; kept image locally: ${getErrorMessage(error, 'Upload failed')}`)
+      }
+      reader.readAsDataURL(file)
+    } finally {
+      setIsUploadingImages(false)
+      e.target.value = ''
+      if (featuredImageInputRef.current) featuredImageInputRef.current.value = ''
     }
-    reader.readAsDataURL(file)
   }
 
   const handleProjectSubmit = async (e: React.FormEvent) => {

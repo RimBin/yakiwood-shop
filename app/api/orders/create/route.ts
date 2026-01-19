@@ -145,6 +145,56 @@ async function getAuthenticatedRoleDiscount(request: NextRequest): Promise<RoleD
 export async function POST(req: NextRequest) {
   try {
     if (!supabaseAdmin) {
+      // Local/dev fallback: allow checkout UI + E2E flows to proceed without Supabase.
+      if (process.env.NODE_ENV !== 'production') {
+        const body = (await req.json().catch(() => null)) as CreateOrderBody | null;
+
+        const items = normalizeItems(body?.items || []);
+        if (!items.length) {
+          return NextResponse.json({ error: 'Tuščias krepšelis' }, { status: 400 });
+        }
+
+        const customerEmail = String(body?.customer?.email || '').trim();
+        const customerName = String(body?.customer?.name || '').trim();
+        if (!customerEmail || !customerName) {
+          return NextResponse.json({ error: 'Trūksta pirkėjo duomenų' }, { status: 400 });
+        }
+
+        const itemsGrossSubtotal = items.reduce((sum, i) => sum + i.basePrice * i.quantity, 0);
+        const shippingGross = computeShippingGross(itemsGrossSubtotal);
+        const enrichedItems = shippingGross > 0
+          ? [
+              ...items,
+              {
+                id: 'shipping',
+                name: 'Pristatymas',
+                slug: 'shipping',
+                quantity: 1,
+                basePrice: shippingGross,
+              },
+            ]
+          : items;
+        const grossTotal = enrichedItems.reduce((sum, i) => sum + i.basePrice * i.quantity, 0);
+        const totals = computeTotalsFromGross(grossTotal);
+
+        const now = new Date();
+        const year = now.getFullYear();
+        const orderId = `demo-order-${now.getTime()}`;
+        const orderNumber = `DEMO-${year}-${String(Math.floor(Math.random() * 100000)).padStart(5, '0')}`;
+
+        return NextResponse.json({
+          demo: true,
+          order: {
+            id: orderId,
+            orderNumber,
+            status: 'pending',
+            paymentStatus: 'pending',
+            total: totals.totalGross,
+            currency: 'EUR',
+          },
+        });
+      }
+
       return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
     }
 

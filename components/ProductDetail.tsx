@@ -75,16 +75,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
   return (
     <div className="min-h-screen bg-[#E1E1E1]">
+      {/* Breadcrumbs */}
 
       {/* Breadcrumbs */}
-      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[10px] border-b border-[#bbbbbb]">
-        <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] text-[#7c7c7c]">
-          <Link href={toLocalePath('/', currentLocale)} className="hover:text-[#161616]">Home</Link>
-          {' / '}
-          <Link href={toLocalePath('/produktai', currentLocale)} className="hover:text-[#161616]">Shop</Link>
-          {' / '}
-          <span className="text-[#161616]">{product.name}</span>
-        </p>
+      <div className="w-full border-b border-[#BBBBBB]">
+        <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[10px]">
+          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] text-[#7c7c7c]">
+            <Link href={toLocalePath('/', currentLocale)} className="hover:text-[#161616]">Home</Link>
+            {' / '}
+            <Link href={toLocalePath('/produktai', currentLocale)} className="hover:text-[#161616]">Shop</Link>
+            {' / '}
+            <span className="text-[#161616]">{product.name}</span>
+          </p>
+        </div>
       </div>
 
       {/* Product Section */}

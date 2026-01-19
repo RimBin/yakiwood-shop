@@ -112,8 +112,8 @@ function getActiveTabFromUrl(pathname: string, tabParam: string | null): AdminTa
   if (p === '/admin') {
     if (tabParam === 'projects') return 'projects';
     if (tabParam === 'posts') return 'posts';
-    // Default for /admin is products (matches current demo UI).
-    return 'products';
+    // Default for /admin is dashboard.
+    return 'dashboard';
   }
 
   // Fallback
@@ -253,12 +253,6 @@ export default function AdminPanelHeader() {
     () => [
       { key: 'dashboard', label: t('tabs.dashboard'), href: `${pathPrefix}/admin/dashboard` },
       {
-        key: 'products',
-        label: t('tabs.products'),
-        href: `${pathPrefix}/admin/products`,
-        count: counts.products,
-      },
-      {
         key: 'projects',
         label: t('tabs.projects'),
         href: `${pathPrefix}/admin/projects`,
@@ -270,8 +264,6 @@ export default function AdminPanelHeader() {
         href: `${pathPrefix}/admin/posts`,
         count: counts.posts,
       },
-      { key: 'orders', label: t('tabs.orders'), href: `${pathPrefix}/admin/orders` },
-      { key: 'inventory', label: t('tabs.inventory'), href: `${pathPrefix}/admin/inventory` },
       { key: 'options', label: t('tabs.options'), href: `${pathPrefix}/admin/options` },
       { key: 'users', label: t('tabs.users'), href: `${pathPrefix}/admin/users` },
       { key: 'chatbot', label: t('tabs.chatbot'), href: `${pathPrefix}/admin/chatbot` },
@@ -291,8 +283,8 @@ export default function AdminPanelHeader() {
         <Breadcrumbs items={breadcrumbsItems} showDivider={false} />
       </div>
 
-      <div className="bg-[#E1E1E1] pt-[clamp(28px,4vw,56px)] px-[clamp(16px,3vw,40px)]">
-        <div className="max-w-[1440px] mx-auto">
+      <div className="bg-[#E1E1E1] pt-[clamp(28px,4vw,56px)]">
+        <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px]">
           <div className="mb-[clamp(24px,3vw,40px)]">
             <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616]">
               {pageTitle}
@@ -302,9 +294,9 @@ export default function AdminPanelHeader() {
             </p>
           </div>
 
-          <div className="flex gap-[8px] overflow-x-auto pb-[8px]">
+          <div className="w-full">
             <div className="flex flex-col gap-[12px] sm:flex-row sm:items-center sm:justify-between w-full">
-              <div className="flex gap-[8px] overflow-x-auto pb-[8px]">
+              <div className="flex flex-wrap gap-[8px]">
                 {tabs.map((tab) => {
                   const isActive = activeTab === tab.key;
                   const label = typeof tab.count === 'number' ? `${tab.label} (${tab.count})` : tab.label;
@@ -314,7 +306,7 @@ export default function AdminPanelHeader() {
                       key={tab.key}
                       href={tab.href}
                       className={
-                        `h-[48px] px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap inline-flex items-center ` +
+                        `h-[44px] px-[18px] sm:h-[48px] sm:px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap inline-flex items-center ` +
                         (isActive
                           ? 'bg-[#161616] text-white'
                           : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#DCDCDC]')

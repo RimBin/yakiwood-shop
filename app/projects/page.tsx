@@ -7,7 +7,7 @@ import { projects as projectsData } from '@/data/projects';
 import { useLocale } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
 import { getProjectLocation, getProjectSlug, getProjectTitle, normalizeProjectLocale } from '@/lib/projects/i18n';
-// PageCover removed per request
+import { PageCover } from '@/components/shared/PageLayout';
 
 const PROJECTS_STORAGE_KEY = 'yakiwood_projects';
 
@@ -95,7 +95,14 @@ export default function ProjectsPage() {
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
-      {/* Title removed */}
+      <PageCover>
+        <h1
+          className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+          style={{ fontVariationSettings: "'opsz' 14" }}
+        >
+          {currentLocale === 'lt' ? 'Mūsų projektai' : 'Our projects'}
+        </h1>
+      </PageCover>
 
       {/* Projects Grid */}
       <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px] pt-[64px]">
