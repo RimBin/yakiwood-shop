@@ -34,10 +34,10 @@ export const testProducts = {
 export const routes = {
   home: '/',
   products: '/products',
-  solutions: '/sprendimai',
-  projects: '/projektai',
-  about: '/apie',
-  contact: '/kontaktai',
+  solutions: '/solutions',
+  projects: '/projects',
+  about: '/about',
+  contact: '/contact',
   login: '/login',
   register: '/register',
 };

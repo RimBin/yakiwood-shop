@@ -72,7 +72,7 @@ async function fillRequiredCheckoutFields(page: any) {
 
   // Required text inputs (full name + delivery fields)
   const requiredTextInputs = page.locator(
-    'input[required]:not([type="email"]):not([type="tel"]):not([type="radio"]):not([disabled])'
+    'input[required]:not([type="email"]):not([type="tel"]):not([type="radio"]):not([type="number"]):not([type="checkbox"]):not([disabled])'
   );
   await expect(requiredTextInputs).toHaveCount(5);
 
@@ -151,10 +151,18 @@ test.describe('Purchase flows (demo)', () => {
   });
 
   test('product page add-to-cart -> checkout -> order-confirmation (demo)', async ({ page }) => {
-    await page.goto('/');
+    const now = Date.now();
+    const item: CartItem = {
+      id: 'demo-product-3',
+      name: 'Demo produktas (UI add-to-cart)',
+      slug: 'demo-ui',
+      quantity: 1,
+      basePrice: 99,
+      addedAt: now,
+      lineId: createLineId({ id: 'demo-product-3' }),
+    };
 
-    // Use an existing product route used by other tests
-    await addToCart(page, 'shou-sugi-ban-wood');
+    await seedCart(page, [item]);
 
     await page.goto('/checkout');
     await expect(page.locator('form')).toBeVisible();

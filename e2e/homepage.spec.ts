@@ -3,33 +3,35 @@ import { routes } from './fixtures/data';
 
 test.describe('Homepage', () => {
   test('should load homepage successfully', async ({ page }) => {
-    await page.goto('/');
+    await page.goto(routes.home);
     await expect(page).toHaveTitle(/Yakiwood/i);
-    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+    // Hero uses styled <p> text; assert a stable hero asset exists.
+    await expect(page.getByAltText(/Shou Sugi Ban Plank/i)).toBeVisible();
   });
 
   test('should have working navigation links', async ({ page }) => {
-    await page.goto('/');
+    await page.goto(routes.home);
+
+    // Desktop nav is hidden on the Mobile Chrome project; force a desktop viewport for this check.
+    await page.setViewportSize({ width: 1280, height: 720 });
     
     // Check that main navigation links are present
-    await expect(page.locator('a[href="/products"], a[href="/produktai"]').first()).toBeVisible();
-    await expect(page.locator('a[href="/sprendimai"]').first()).toBeVisible();
-    await expect(page.locator('a[href="/projektai"]').first()).toBeVisible();
-    // Legacy LT paths may exist via redirects; canonical pages are EN folders.
-    await expect(page.locator('a[href="/apie"], a[href="/about"]').first()).toBeVisible();
-    await expect(page.locator('a[href="/kontaktai"], a[href="/contact"]').first()).toBeVisible();
+    await expect(page.locator('a[href="/products"], a[href="/produktai"], a[href="/lt/produktai"]').first()).toBeVisible();
+    await expect(page.locator('a[href="/solutions"], a[href="/sprendimai"], a[href="/lt/sprendimai"]').first()).toBeVisible();
+    await expect(page.locator('a[href="/projects"], a[href="/projektai"], a[href="/lt/projektai"]').first()).toBeVisible();
+    await expect(page.locator('a[href="/about"], a[href="/apie"], a[href="/lt/apie"]').first()).toBeVisible();
+    await expect(page.locator('a[href="/contact"], a[href="/kontaktai"], a[href="/lt/kontaktai"]').first()).toBeVisible();
   });
 
   test('should navigate to products page', async ({ page }) => {
-    // Use canonical route directly; nav may still contain legacy LT hrefs.
-    await page.goto('/products');
-    await expect(page).toHaveURL(/\/products/);
+    await page.goto(routes.products);
+    await expect(page).toHaveURL(/\/(products|produktai)(\/|$)/);
   });
 
   test('should open mobile menu on mobile viewport', async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto('/');
+    await page.goto(routes.home);
     
     // Look for mobile menu button (adjust selector based on actual implementation)
     const menuButton = page.locator('button[aria-label*="menu" i], button:has-text("Menu")');
@@ -42,7 +44,7 @@ test.describe('Homepage', () => {
   });
 
   test('should display hero section', async ({ page }) => {
-    await page.goto('/');
+    await page.goto(routes.home);
     // Hero section should contain heading or image
     const heroSection = page.locator('section').first();
     await expect(heroSection).toBeVisible();

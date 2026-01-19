@@ -3,7 +3,7 @@ import { routes } from './fixtures/data';
 
 test.describe('Smoke Tests', () => {
   test('should load homepage successfully', async ({ page }) => {
-    const response = await page.goto('/');
+    const response = await page.goto(routes.home);
     expect(response?.status()).toBe(200);
     
     await expect(page).toHaveTitle(/Yakiwood/i);
@@ -23,7 +23,7 @@ test.describe('Smoke Tests', () => {
     for (const route of mainRoutes) {
       const response = await page.goto(route, { waitUntil: 'domcontentloaded' });
       expect(response?.status()).toBe(200);
-      await expect(page.locator('body')).toBeVisible();
+      await expect(page.locator('header')).toBeVisible();
     }
   });
 
@@ -54,7 +54,7 @@ test.describe('Smoke Tests', () => {
       }
     });
     
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.goto(routes.home, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1000);
     
     // Filter out known acceptable errors (if any)
@@ -76,7 +76,7 @@ test.describe('Smoke Tests', () => {
   });
 
   test('should load CSS and JavaScript assets', async ({ page }) => {
-    await page.goto('/');
+    await page.goto(routes.home);
     await page.waitForLoadState('networkidle');
     
     // Check if styles are applied
@@ -102,7 +102,7 @@ test.describe('Smoke Tests', () => {
   });
 
   test('should have proper meta tags', async ({ page }) => {
-    await page.goto('/');
+    await page.goto(routes.home);
     
     // Check for essential meta tags
     const title = await page.title();
@@ -121,7 +121,7 @@ test.describe('Smoke Tests', () => {
 
     for (const viewport of viewports) {
       await page.setViewportSize(viewport);
-      await page.goto('/');
+      await page.goto(routes.home);
       
       // Page should be visible at all viewport sizes
       await expect(page.locator('body')).toBeVisible();
@@ -129,9 +129,9 @@ test.describe('Smoke Tests', () => {
   });
 
   test('should have proper language attribute', async ({ page }) => {
-    await page.goto('/');
+    await page.goto(routes.home);
     
     const htmlLang = await page.locator('html').getAttribute('lang');
-    expect(htmlLang).toBe('lt'); // Lithuanian locale
+    expect(htmlLang).toBe('en'); // defaultLocale
   });
 });

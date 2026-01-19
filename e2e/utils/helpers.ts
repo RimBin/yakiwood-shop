@@ -5,13 +5,29 @@ import { Page } from '@playwright/test';
  * @param page - Playwright page object
  * @param email - User email
  * @param password - User password
-  await page.goto(`/products/${productSlug}`);
+ */
 export async function login(page: Page, email: string, password: string): Promise<void> {
   await page.goto('/login');
   await page.fill('input[name="email"]', email);
   await page.fill('input[name="password"]', password);
   await page.click('button[type="submit"]');
   await page.waitForURL('/', { timeout: 10000 });
+}
+
+async function clickAddToCartButton(page: Page): Promise<void> {
+  const addToCart = page
+    .locator(
+      [
+        'button[data-testid="add-to-cart"]',
+        'button:has-text("Add to cart")',
+        'button:has-text("Į krepšelį")',
+        'button:has-text("Pridėti")',
+      ].join(', ')
+    )
+    .first();
+
+  await addToCart.waitFor({ state: 'visible', timeout: 10000 });
+  await addToCart.click();
 }
 
 /**
@@ -21,7 +37,7 @@ export async function login(page: Page, email: string, password: string): Promis
  */
 export async function addToCart(page: Page, productSlug: string): Promise<void> {
   await page.goto(`/products/${productSlug}`);
-  await page.click('button:has-text("Į krepšelį")');
+  await clickAddToCartButton(page);
   await page.waitForTimeout(500); // Wait for cart update
 }
 

@@ -33,8 +33,10 @@ test.describe('Shou Sugi Ban configurator', () => {
   test('preset landing CTA opens product with preset and preselects options', async ({ page }) => {
     await page.goto('/shou-sugi-ban/accoya-black');
 
-    await page.click('[data-testid="variant-cta"]');
-    await expect(page).toHaveURL(/\/products\/shou-sugi-ban-wood\?preset=accoya-black/);
+    await Promise.all([
+      page.waitForURL(/\/(lt\/)?products\/shou-sugi-ban-wood\?preset=accoya-black/, { timeout: 15000 }),
+      page.click('[data-testid="variant-cta"]'),
+    ]);
 
     const summary = page.locator('[data-testid="configurator-summary"]');
     await expect(summary).toContainText('"wood": "accoya"');
