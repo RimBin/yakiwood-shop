@@ -155,7 +155,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             {/* Social Links */}
             <div className="flex flex-wrap items-center justify-center gap-x-[24px] gap-y-[8px] px-[8px]">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/yakiwood.europe"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-['DM_Sans'] font-light text-[clamp(18px,4.6vw,24px)] leading-[1.2] tracking-[-0.96px] text-white hover:opacity-70 transition-opacity"
@@ -163,7 +163,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 Facebook
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/yakiwood.eu"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-['DM_Sans'] font-light text-[clamp(18px,4.6vw,24px)] leading-[1.2] tracking-[-0.96px] text-white hover:opacity-70 transition-opacity"
@@ -171,7 +171,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 Instagram
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/company/yakiwood/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-['DM_Sans'] font-light text-[clamp(18px,4.6vw,24px)] leading-[1.2] tracking-[-0.96px] text-white hover:opacity-70 transition-opacity"

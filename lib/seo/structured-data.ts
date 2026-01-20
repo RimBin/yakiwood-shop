@@ -91,9 +91,9 @@ export function generateOrganizationSchema(): OrganizationSchema {
       availableLanguage: ['Lithuanian', 'English'],
     },
     sameAs: [
-      'https://www.facebook.com/yakiwood',
-      'https://www.instagram.com/yakiwood',
-      'https://www.linkedin.com/company/yakiwood',
+      'https://www.facebook.com/yakiwood.europe',
+      'https://www.instagram.com/yakiwood.eu',
+      'https://www.linkedin.com/company/yakiwood/',
     ],
   };
 }

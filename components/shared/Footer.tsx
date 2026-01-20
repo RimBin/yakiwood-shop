@@ -61,9 +61,9 @@ export default function Footer() {
     {
       title: t('columns.social'),
       links: [
-        { label: t('links.facebook'), href: 'https://facebook.com' },
-        { label: t('links.instagram'), href: 'https://instagram.com' },
-        { label: t('links.linkedin'), href: 'https://linkedin.com' },
+        { label: t('links.facebook'), href: 'https://www.facebook.com/yakiwood.europe' },
+        { label: t('links.instagram'), href: 'https://www.instagram.com/yakiwood.eu' },
+        { label: t('links.linkedin'), href: 'https://www.linkedin.com/company/yakiwood/' },
       ],
     },
     {

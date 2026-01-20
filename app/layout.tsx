@@ -119,9 +119,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       availableLanguage: ['Lithuanian', 'English'],
     },
     sameAs: [
-      // Add social media profiles when available
-      // 'https://facebook.com/yakiwood',
-      // 'https://instagram.com/yakiwood',
+      'https://www.facebook.com/yakiwood.europe',
+      'https://www.instagram.com/yakiwood.eu',
+      'https://www.linkedin.com/company/yakiwood/',
     ],
   };
 

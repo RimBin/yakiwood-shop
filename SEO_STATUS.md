@@ -349,8 +349,9 @@ export default function Home() {
       contactType: 'Customer Service',
     },
     sameAs: [
-      'https://facebook.com/yakiwood',
-      'https://instagram.com/yakiwood',
+      'https://www.facebook.com/yakiwood.europe',
+      'https://www.instagram.com/yakiwood.eu',
+      'https://www.linkedin.com/company/yakiwood/',
     ],
   };
 
