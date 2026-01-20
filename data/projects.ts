@@ -48,7 +48,7 @@ export const projects: Project[] = [
   },
   {
     id: '2',
-    slug: 'modern-villa',
+    slug: 'moderni-vila',
     title: 'Moderni vila',
     location: 'Kaunas, Lietuva',
     images: [
@@ -64,7 +64,7 @@ export const projects: Project[] = [
     i18n: {
       lt: {
         title: 'Moderni vila',
-        slug: 'modern-villa',
+        slug: 'moderni-vila',
         location: 'Kaunas, Lietuva',
         description:
           'Įspūdinga moderni vila, kurioje deginta mediena išryškina fasado tekstūrą ir suteikia ilgaamžiškumo.',
@@ -81,7 +81,7 @@ export const projects: Project[] = [
   },
   {
     id: '3',
-    slug: 'countryside-retreat',
+    slug: 'uzmiescio-poilsio-namai',
     title: 'Užmiesčio poilsio namai',
     location: 'Trakai, Lietuva',
     images: [
@@ -96,7 +96,7 @@ export const projects: Project[] = [
     i18n: {
       lt: {
         title: 'Užmiesčio poilsio namai',
-        slug: 'countryside-retreat',
+        slug: 'uzmiescio-poilsio-namai',
         location: 'Trakai, Lietuva',
         description: 'Ramus prieglobstis gamtoje su elegantišku degintos medienos fasadu.',
       },
@@ -111,8 +111,8 @@ export const projects: Project[] = [
   },
   {
     id: '4',
-    slug: 'harmony-retreat-divi',
-    title: 'Harmony retreat',
+    slug: 'harmonijos-poilsis-divi',
+    title: 'Harmonijos poilsis',
     subtitle: 'Divi',
     location: 'Lietuva',
     images: [
@@ -122,16 +122,16 @@ export const projects: Project[] = [
       { name: 'Black larch', slug: 'black-larch' },
     ],
     description:
-      '„Harmony retreat Divi“ projektas, kuriame deginta mediena tampa pagrindiniu natūraliu akcentu.',
+      '„Harmonijos poilsis Divi“ projektas, kuriame deginta mediena tampa pagrindiniu natūraliu akcentu.',
     fullDescription:
       'Rami poilsio erdvė, sujungianti modernų dizainą su tradicine Shou Sugi Ban degintos medienos technika. Natūralios tekstūros ir tamsūs paviršiai kuria jaukią atmosferą atsipalaidavimui ir gerai savijautai.',
     i18n: {
       lt: {
-        title: 'Harmony retreat',
+        title: 'Harmonijos poilsis',
         subtitle: 'Divi',
-        slug: 'harmony-retreat-divi',
+        slug: 'harmonijos-poilsis-divi',
         location: 'Lietuva',
-        description: '„Harmony retreat Divi“ projektas, kuriame deginta mediena tampa pagrindiniu natūraliu akcentu.',
+        description: '„Harmonijos poilsis Divi“ projektas, kuriame deginta mediena tampa pagrindiniu natūraliu akcentu.',
         fullDescription:
           'Rami poilsio erdvė, sujungianti modernų dizainą su tradicine Shou Sugi Ban degintos medienos technika. Natūralios tekstūros ir tamsūs paviršiai kuria jaukią atmosferą atsipalaidavimui ir gerai savijautai.',
       },
@@ -150,8 +150,8 @@ export const projects: Project[] = [
   },
   {
     id: '5',
-    slug: 'forestline-harmony-residences',
-    title: 'Forestline Harmony Residences',
+    slug: 'forestline-harmonijos-rezidencijos',
+    title: 'Forestline harmonijos rezidencijos',
     location: 'Lietuva',
     images: [
       'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80',
@@ -160,18 +160,18 @@ export const projects: Project[] = [
       { name: 'Brown larch', slug: 'brown-larch' },
     ],
     description:
-      '„Forestline Harmony Residences“ — gyvenamasis kompleksas su natūralios medienos estetika ir degintos medienos apdaila.',
+      '„Forestline harmonijos rezidencijos“ — gyvenamasis kompleksas su natūralios medienos estetika ir degintos medienos apdaila.',
     fullDescription:
       'Gyvenamasis kompleksas harmoningai įsiliejęs į miško aplinką, naudojant premium degintos medienos fasadą. Natūrali tekstūra ir medienos šiluma sukuria tvirtą ryšį tarp architektūros ir gamtos.',
     i18n: {
       lt: {
-        title: 'Forestline Harmony Residences',
-        slug: 'forestline-harmony-residences',
+        title: 'Forestline harmonijos rezidencijos',
+        slug: 'forestline-harmonijos-rezidencijos',
         location: 'Lietuva',
         description:
-          '„Forestline Harmony Residences“ — gyvenamasis kompleksas su natūralios medienos estetika ir degintos medienos apdaila.',
+          '„Forestline harmonijos rezidencijos“ — gyvenamasis kompleksas su natūralios medienos estetika ir degintos medienos apdaila.',
         fullDescription:
-          'Gyvenamasis kompleksas harmoningai įsiliejęs į miško aplinką, naudojant premium degintos medienos fasadą. Natūrali tekstūra ir medienos šiluma sukuria tvirtą ryšį tarp architektūros ir gamtos.',
+          'Gyvenamasis kompleksas harmoningai įsiliejęs į miško aplinką, naudojant aukščiausios kokybės degintos medienos fasadą. Natūrali tekstūra ir medienos šiluma sukuria tvirtą ryšį tarp architektūros ir gamtos.',
       },
       en: {
         title: 'Forestline Harmony Residences',
@@ -187,7 +187,7 @@ export const projects: Project[] = [
   },
   {
     id: '6',
-    slug: 'nordic-driftwood-serenity',
+    slug: 'siaurietiska-dreifmedzio-ramybe',
     title: 'Šiaurietiška dreifmedžio ramybė',
     location: 'Lietuva',
     images: [
@@ -203,7 +203,7 @@ export const projects: Project[] = [
     i18n: {
       lt: {
         title: 'Šiaurietiška dreifmedžio ramybė',
-        slug: 'nordic-driftwood-serenity',
+        slug: 'siaurietiska-dreifmedzio-ramybe',
         location: 'Lietuva',
         description:
           'Šiaurietiško minimalizmo įkvėptas dizainas su dreifmedžio estetika ir degintos medienos paviršiais.',
@@ -224,7 +224,7 @@ export const projects: Project[] = [
   },
   {
     id: '7',
-    slug: 'nordic-coastline-living',
+    slug: 'siaurietiskas-pajurio-gyvenimas',
     title: 'Šiaurietiškas pajūrio gyvenimas',
     location: 'Lietuva',
     images: [
@@ -240,7 +240,7 @@ export const projects: Project[] = [
     i18n: {
       lt: {
         title: 'Šiaurietiškas pajūrio gyvenimas',
-        slug: 'nordic-coastline-living',
+        slug: 'siaurietiskas-pajurio-gyvenimas',
         location: 'Lietuva',
         description:
           'Pajūrio gyvenimo nuotaika ir Šiaurės šalių dizaino principai — su atspariu degintos medienos fasadu.',
@@ -261,7 +261,7 @@ export const projects: Project[] = [
   },
   {
     id: '8',
-    slug: 'modern-office',
+    slug: 'modernus-biuras',
     title: 'Modernus biuras',
     location: 'Vilnius, Lietuva',
     images: [
@@ -278,7 +278,7 @@ export const projects: Project[] = [
     i18n: {
       lt: {
         title: 'Modernus biuras',
-        slug: 'modern-office',
+        slug: 'modernus-biuras',
         location: 'Vilnius, Lietuva',
         description:
           'Šiuolaikinė biuro erdvė su degintos medienos akcentais, kuriančiais šiltą ir profesionalų įvaizdį.',
@@ -299,7 +299,7 @@ export const projects: Project[] = [
   },
   {
     id: '9',
-    slug: 'lilys-apartaments',
+    slug: 'lilys-apartamentai',
     title: 'Lily’s apartamentai',
     location: 'Kaunas, Lietuva',
     images: [
@@ -316,7 +316,7 @@ export const projects: Project[] = [
     i18n: {
       lt: {
         title: 'Lily’s apartamentai',
-        slug: 'lilys-apartaments',
+        slug: 'lilys-apartamentai',
         location: 'Kaunas, Lietuva',
         description:
           'Elegantiškas apartamentų kompleksas su natūralios medienos apdaila ir degintos medienos detalėmis.',

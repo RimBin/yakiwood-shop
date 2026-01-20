@@ -1262,6 +1262,8 @@
         "addProject": "Add project",
         "import": "Import",
         "export": "Export",
+        "regenerateSlugs": "Regenerate slugs",
+        "migrateLtTexts": "Restore LT texts",
         "edit": "Edit",
         "delete": "Delete",
         "save": "Save"

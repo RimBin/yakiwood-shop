@@ -5,6 +5,7 @@ import { getLocale } from 'next-intl/server';
 import { getTranslations } from 'next-intl/server';
 import { assets } from '@/lib/assets';
 import { toLocalePath } from '@/i18n/paths';
+import { clamp } from '@/lib/design-system';
 
 const imgProductImage = assets.heroPlank;
 const certifications = assets.certificationsList;
@@ -15,8 +16,12 @@ export default async function Hero() {
   const tHero = await getTranslations('hero');
   const tSolutions = await getTranslations('productPage.solutions');
 
+  const heroHeadingSize = clamp(45, 80);
+  const heroHeadingTracking = clamp(-1.8, -4.4);
+  const heroDescriptionSize = clamp(14, 16);
+
   return (
-    <section className="w-full bg-[#EAEAEA] relative overflow-hidden pb-[80px] lg:pb-0">
+    <section className="w-full bg-[#E1E1E1] relative overflow-hidden pb-[80px] lg:pb-0">
       {/* Full-width hero vector background */}
       <div className="absolute inset-0 hidden md:block">
         <Image src={assets.heroVector} alt="" fill className="object-cover" priority sizes="100vw" />
@@ -25,11 +30,17 @@ export default async function Hero() {
       {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
       <div className="lg:hidden flex flex-col">
         <div className="px-4 pt-4 pb-2 flex flex-col gap-2">
-          <p className="font-['DM_Sans'] font-light text-[45px] leading-none tracking-[-1.8px] text-[#161616] w-[355px] whitespace-pre-wrap">
+          <p
+            className="font-['DM_Sans'] font-light leading-none text-[#161616] w-full max-w-[355px] whitespace-pre-wrap break-words"
+            style={{ fontSize: heroHeadingSize, letterSpacing: heroHeadingTracking }}
+          >
             {tHero('mainHeading')}
             <span className="font-['Tiro_Tamil'] italic">{tHero('brandName')}</span>
           </p>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] w-[323px]">
+          <p
+            className="font-['Outfit'] font-light leading-[1.2] tracking-[0.14px] text-[#161616] w-full max-w-[323px] break-words pb-2"
+            style={{ fontSize: heroDescriptionSize }}
+          >
             {tHero('description')}
           </p>
         </div>
@@ -112,13 +123,19 @@ export default async function Hero() {
         {/* Centered content container */}
         <div className="relative max-w-[1440px] mx-auto h-full">
           <div className="absolute left-[40px] top-[190px] flex flex-col gap-[24px] z-10">
-            <p className="font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] w-[606px] whitespace-pre-wrap">
+            <p
+              className="font-['DM_Sans'] font-light leading-none text-[#161616] w-[606px] whitespace-pre-wrap"
+              style={{ fontSize: heroHeadingSize, letterSpacing: heroHeadingTracking }}
+            >
               {tHero('mainHeading')}
               <span className="font-['Tiro_Tamil'] italic tracking-[-1.6px]">{tHero('brandName')}</span>
             </p>
 
             <div className="flex flex-col gap-[24px] overflow-clip">
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] w-[323px] whitespace-pre-wrap">
+              <p
+                className="font-['Outfit'] font-light leading-[1.2] tracking-[0.14px] text-[#161616] w-[323px] whitespace-pre-wrap"
+                style={{ fontSize: heroDescriptionSize }}
+              >
                 {tHero('description')}
               </p>
 

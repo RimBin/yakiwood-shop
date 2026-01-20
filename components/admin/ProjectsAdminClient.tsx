@@ -165,6 +165,262 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, '')
 }
 
+function trimString(value: unknown) {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+const defaultProjectsById = new Map(defaultProjects.map((project) => [project.id, project]))
+const defaultProjectsByLtSlug = new Map(
+  defaultProjects
+    .map((project) => {
+      const ltSlug = trimString(project.i18n?.lt?.slug) || trimString(project.slug)
+      return ltSlug ? ([ltSlug, project] as const) : null
+    })
+    .filter(Boolean) as Array<readonly [string, Project]>
+)
+const defaultProjectsByEnSlug = new Map(
+  defaultProjects
+    .map((project) => {
+      const enSlug = trimString(project.i18n?.en?.slug)
+      return enSlug ? ([enSlug, project] as const) : null
+    })
+    .filter(Boolean) as Array<readonly [string, Project]>
+)
+
+function shouldReplaceWithDefaultLt(options: {
+  current: string
+  base: string
+  currentEn: string
+  defaultEn: string
+}) {
+  const { current, base, currentEn, defaultEn } = options
+  if (!current) return true
+  if (defaultEn && current === defaultEn) return true
+  if (currentEn && current === currentEn) return true
+  if (base && current === base && ((defaultEn && base === defaultEn) || (currentEn && base === currentEn))) return true
+  return false
+}
+
+function shouldReplaceBaseWithDefaultLt(options: { base: string; currentEn: string; defaultEn: string }) {
+  const { base, currentEn, defaultEn } = options
+  if (!base) return true
+  if (currentEn && base === currentEn) return true
+  if (defaultEn && base === defaultEn) return true
+  return false
+}
+
+function findDefaultProjectForMigration(project: Project): Project | null {
+  const byId = defaultProjectsById.get(project.id)
+  if (byId) return byId
+
+  const baseSlug = trimString(project.slug)
+  const enSlug = trimString(project.i18n?.en?.slug)
+  const ltSlug = trimString(project.i18n?.lt?.slug)
+
+  return (
+    (enSlug ? defaultProjectsByEnSlug.get(enSlug) : null) ||
+    (ltSlug ? defaultProjectsByLtSlug.get(ltSlug) : null) ||
+    (baseSlug ? defaultProjectsByEnSlug.get(baseSlug) || defaultProjectsByLtSlug.get(baseSlug) : null) ||
+    null
+  )
+}
+
+function migrateProjectLtFromDefaults(project: Project): { project: Project; changed: boolean } {
+  const defaults = findDefaultProjectForMigration(project)
+  if (!defaults) return { project, changed: false }
+
+  const nextLt = { ...(project.i18n?.lt ?? {}) }
+  const nextI18n = { ...(project.i18n ?? {}), lt: nextLt }
+  let nextProject: Project = project
+  let changed = false
+
+  const fields: Array<{
+    key: 'title' | 'subtitle' | 'slug' | 'location' | 'description' | 'fullDescription'
+    baseValue: () => string
+    setBase: (value: string) => void
+    ltValue: () => string
+    setLt: (value: string) => void
+    enValue: () => string
+    defaultLt: () => string
+    defaultEn: () => string
+  }> = [
+    {
+      key: 'title',
+      baseValue: () => trimString(nextProject.title),
+      setBase: (value) => {
+        nextProject = { ...nextProject, title: value }
+      },
+      ltValue: () => trimString(nextLt.title),
+      setLt: (value) => {
+        nextLt.title = value
+      },
+      enValue: () => trimString(nextProject.i18n?.en?.title),
+      defaultLt: () => trimString(defaults.i18n?.lt?.title) || trimString(defaults.title),
+      defaultEn: () => trimString(defaults.i18n?.en?.title),
+    },
+    {
+      key: 'subtitle',
+      baseValue: () => trimString(nextProject.subtitle),
+      setBase: (value) => {
+        nextProject = { ...nextProject, subtitle: value }
+      },
+      ltValue: () => trimString(nextLt.subtitle),
+      setLt: (value) => {
+        nextLt.subtitle = value
+      },
+      enValue: () => trimString(nextProject.i18n?.en?.subtitle),
+      defaultLt: () => trimString(defaults.i18n?.lt?.subtitle) || trimString(defaults.subtitle),
+      defaultEn: () => trimString(defaults.i18n?.en?.subtitle),
+    },
+    {
+      key: 'slug',
+      baseValue: () => trimString(nextProject.slug),
+      setBase: (value) => {
+        nextProject = { ...nextProject, slug: value }
+      },
+      ltValue: () => trimString(nextLt.slug),
+      setLt: (value) => {
+        nextLt.slug = value
+      },
+      enValue: () => trimString(nextProject.i18n?.en?.slug),
+      defaultLt: () => trimString(defaults.i18n?.lt?.slug) || trimString(defaults.slug),
+      defaultEn: () => trimString(defaults.i18n?.en?.slug),
+    },
+    {
+      key: 'location',
+      baseValue: () => trimString(nextProject.location),
+      setBase: (value) => {
+        nextProject = { ...nextProject, location: value }
+      },
+      ltValue: () => trimString(nextLt.location),
+      setLt: (value) => {
+        nextLt.location = value
+      },
+      enValue: () => trimString(nextProject.i18n?.en?.location),
+      defaultLt: () => trimString(defaults.i18n?.lt?.location) || trimString(defaults.location),
+      defaultEn: () => trimString(defaults.i18n?.en?.location),
+    },
+    {
+      key: 'description',
+      baseValue: () => trimString(nextProject.description),
+      setBase: (value) => {
+        nextProject = { ...nextProject, description: value }
+      },
+      ltValue: () => trimString(nextLt.description),
+      setLt: (value) => {
+        nextLt.description = value
+      },
+      enValue: () => trimString(nextProject.i18n?.en?.description),
+      defaultLt: () => trimString(defaults.i18n?.lt?.description) || trimString(defaults.description),
+      defaultEn: () => trimString(defaults.i18n?.en?.description),
+    },
+    {
+      key: 'fullDescription',
+      baseValue: () => trimString(nextProject.fullDescription),
+      setBase: (value) => {
+        nextProject = { ...nextProject, fullDescription: value }
+      },
+      ltValue: () => trimString(nextLt.fullDescription),
+      setLt: (value) => {
+        nextLt.fullDescription = value
+      },
+      enValue: () => trimString(nextProject.i18n?.en?.fullDescription),
+      defaultLt: () => trimString(defaults.i18n?.lt?.fullDescription) || trimString(defaults.fullDescription),
+      defaultEn: () => trimString(defaults.i18n?.en?.fullDescription),
+    },
+  ]
+
+  for (const field of fields) {
+    const defaultLtValue = field.defaultLt()
+    if (!defaultLtValue) continue
+
+    const base = field.baseValue()
+    const current = field.ltValue()
+    const currentEn = field.enValue()
+    const defaultEn = field.defaultEn()
+
+    if (shouldReplaceWithDefaultLt({ current, base, currentEn, defaultEn })) {
+      field.setLt(defaultLtValue)
+      changed = true
+    }
+
+    if (shouldReplaceBaseWithDefaultLt({ base, currentEn, defaultEn })) {
+      field.setBase(defaultLtValue)
+      changed = true
+    }
+  }
+
+  if (!changed) return { project, changed: false }
+
+  return {
+    project: {
+      ...nextProject,
+      i18n: nextI18n,
+    },
+    changed: true,
+  }
+}
+
+function migrateProjectSlugs(project: Project): { project: Project; changed: boolean } {
+  const ltTitle = trimString(project.i18n?.lt?.title) || trimString(project.title)
+  const enTitle = trimString(project.i18n?.en?.title) || trimString(project.title)
+
+  const desiredLtSlug = ltTitle ? slugify(ltTitle) : ''
+  const desiredEnSlug = enTitle ? slugify(enTitle) : ''
+
+  const existingBaseSlug = trimString(project.slug)
+  const existingLtSlug = trimString(project.i18n?.lt?.slug)
+  const existingEnSlug = trimString(project.i18n?.en?.slug)
+
+  let nextBaseSlug = existingBaseSlug
+  const nextLt = { ...(project.i18n?.lt ?? {}) }
+  const nextEn = { ...(project.i18n?.en ?? {}) }
+  let changed = false
+
+  if (desiredLtSlug && !existingLtSlug) {
+    nextLt.slug = desiredLtSlug
+    changed = true
+  }
+
+  if (desiredEnSlug && !existingEnSlug) {
+    nextEn.slug = desiredEnSlug
+    changed = true
+  }
+
+  const targetLtSlug = trimString(nextLt.slug) || desiredLtSlug
+
+  if (!nextBaseSlug && targetLtSlug) {
+    nextBaseSlug = targetLtSlug
+    changed = true
+  }
+
+  const baseMatchesEnglishAuto =
+    Boolean(targetLtSlug) &&
+    Boolean(nextBaseSlug) &&
+    nextBaseSlug !== targetLtSlug &&
+    ((desiredEnSlug && nextBaseSlug === desiredEnSlug) || (existingEnSlug && nextBaseSlug === existingEnSlug))
+
+  if (baseMatchesEnglishAuto && targetLtSlug) {
+    nextBaseSlug = targetLtSlug
+    changed = true
+  }
+
+  if (!changed) return { project, changed: false }
+
+  return {
+    project: {
+      ...project,
+      slug: nextBaseSlug || project.slug,
+      i18n: {
+        ...(project.i18n ?? {}),
+        lt: nextLt,
+        en: nextEn,
+      },
+    },
+    changed: true,
+  }
+}
+
 type ProjectFormState = {
   title: string
   subtitle: string
@@ -219,6 +475,8 @@ export default function ProjectsAdminClient() {
   const [projectImageFiles, setProjectImageFiles] = useState<string[]>([])
   const [featuredImageFile, setFeaturedImageFile] = useState('')
   const [isUploadingImages, setIsUploadingImages] = useState(false)
+  const [isRegeneratingSlugs, setIsRegeneratingSlugs] = useState(false)
+  const [isMigratingLtTexts, setIsMigratingLtTexts] = useState(false)
 
   const projectFileInputRef = useRef<HTMLInputElement | null>(null)
   const featuredImageInputRef = useRef<HTMLInputElement | null>(null)
@@ -603,6 +861,94 @@ export default function ProjectsAdminClient() {
     link.click()
   }
 
+  const handleRegenerateProjectSlugs = async () => {
+    if (projects.length === 0) {
+      showToast('Nėra projektų, kuriems reikėtų atnaujinti slug’us.')
+      return
+    }
+
+    const confirmed = window.confirm(
+      "Atnaujinti slug’us iš pavadinimų (LT ir EN)?\n\n• Trūkstami slug’ai bus sugeneruoti automatiškai.\n• Jei pagrindinis slug’as akivaizdžiai angliškas, jis bus pakeistas į lietuvišką.\n• Rankiniu būdu pakeisti slug’ai nebus perrašyti."
+    )
+    if (!confirmed) return
+
+    setIsRegeneratingSlugs(true)
+    try {
+      let changedCount = 0
+      const updated = projects.map((project) => {
+        const result = migrateProjectSlugs(project)
+        if (result.changed) changedCount += 1
+        return result.project
+      })
+
+      if (changedCount === 0) {
+        showToast('Slug’ai jau atnaujinti.')
+        return
+      }
+
+      setProjects(updated)
+
+      let persisted = true
+      try {
+        await kvSet(PROJECTS_STORAGE_KEY, updated)
+      } catch {
+        persisted = false
+      }
+
+      showToast(
+        persisted
+          ? `Atnaujinti slug’ai: ${changedCount} projektų.`
+          : `Atnaujinti slug’ai: ${changedCount} projektų, bet nepavyko išsaugoti šiame naršyklės saugykloje (limitai).`
+      )
+    } finally {
+      setIsRegeneratingSlugs(false)
+    }
+  }
+
+  const handleMigrateLtTextsFromDefaults = async () => {
+    if (projects.length === 0) {
+      showToast('Nėra projektų, kuriems reikėtų atnaujinti LT tekstus.')
+      return
+    }
+
+    const confirmed = window.confirm(
+      'Atnaujinti lietuviškus (pagrindinius) projekto tekstus iš pradinio šablono?\n\n• Pritaikoma tik pradiniams demo projektams (pagal ID/slug).\n• LT laukai bus pataisyti, jei jie tušti arba akivaizdžiai angliški.\n• EN turinys nebus keičiamas.'
+    )
+    if (!confirmed) return
+
+    setIsMigratingLtTexts(true)
+    try {
+      let changedCount = 0
+      const updated = projects.map((project) => {
+        const result = migrateProjectLtFromDefaults(project)
+        if (result.changed) changedCount += 1
+        return result.project
+      })
+
+      if (changedCount === 0) {
+        showToast('LT tekstai jau atnaujinti (arba nėra atpažintų demo projektų).')
+        return
+      }
+
+      setProjects(updated)
+
+      let persisted = true
+      try {
+        await kvSet(PROJECTS_STORAGE_KEY, updated)
+      } catch {
+        persisted = false
+      }
+
+      showToast(
+        persisted
+          ? `Atnaujinti LT tekstai: ${changedCount} projektų.`
+          : `Atnaujinti LT tekstai: ${changedCount} projektų, bet nepavyko išsaugoti šiame naršyklės saugykloje (limitai).`
+      )
+    } finally {
+      setIsMigratingLtTexts(false)
+    }
+  }
+
   return (
     <AdminStack>
       {message && (
@@ -962,6 +1308,12 @@ export default function ProjectsAdminClient() {
             <input id="projectImportInput" type="file" accept=".json" onChange={handleProjectImport} className="hidden" />
             <AdminButton size="sm" onClick={handleProjectExport}>
               {t('projects.actions.export')}
+            </AdminButton>
+            <AdminButton size="sm" variant="outline" onClick={handleRegenerateProjectSlugs} disabled={isRegeneratingSlugs}>
+              {t('projects.actions.regenerateSlugs')}
+            </AdminButton>
+            <AdminButton size="sm" variant="outline" onClick={handleMigrateLtTextsFromDefaults} disabled={isMigratingLtTexts}>
+              {t('projects.actions.migrateLtTexts')}
             </AdminButton>
           </div>
         </div>

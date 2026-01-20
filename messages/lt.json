@@ -1022,6 +1022,8 @@
         "addProject": "Pridėti projektą",
         "import": "Importuoti",
         "export": "Eksportuoti",
+        "regenerateSlugs": "Atnaujinti slug'us",
+        "migrateLtTexts": "Atnaujinti LT tekstus",
         "edit": "Redaguoti",
         "delete": "Ištrinti",
         "save": "Išsaugoti"
