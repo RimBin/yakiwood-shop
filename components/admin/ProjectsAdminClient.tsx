@@ -2,11 +2,12 @@
 
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
 import { projects as defaultProjects } from '@/data/projects'
 import type { Project } from '@/types/project'
+import { getProjectDescription, getProjectLocation, getProjectSubtitle, getProjectTitle, normalizeProjectLocale } from '@/lib/projects/i18n'
 import {
   AdminBadge,
   AdminButton,
@@ -206,6 +207,8 @@ const EMPTY_FORM: ProjectFormState = {
 
 export default function ProjectsAdminClient() {
   const t = useTranslations('admin')
+  const locale = useLocale()
+  const currentLocale = normalizeProjectLocale(locale)
 
   const [message, setMessage] = useState('')
   const [projects, setProjects] = useState<Project[]>([])
@@ -270,7 +273,7 @@ export default function ProjectsAdminClient() {
       }
 
       setProjectImageFiles((prev) => [...prev, ...urls])
-      showToast(`Uploaded ${urls.length} image(s) to Supabase.`)
+      showToast(`Įkelta ${urls.length} nuotr. į Supabase.`)
     } catch (error) {
       // Fallback to local base64 in case Supabase isn't configured yet.
       try {
@@ -291,9 +294,11 @@ export default function ProjectsAdminClient() {
           setProjectImageFiles((prev) => [...prev, ...cleaned])
         }
 
-        showToast(`Upload failed; kept images locally: ${getErrorMessage(error, 'Upload failed')}`)
+        showToast(
+          `Įkėlimas nepavyko; nuotraukos išsaugotos lokaliai: ${getErrorMessage(error, 'Įkėlimas nepavyko')}`
+        )
       } catch {
-        showToast(getErrorMessage(error, 'Upload failed'))
+        showToast(getErrorMessage(error, 'Įkėlimas nepavyko'))
       }
     } finally {
       setIsUploadingImages(false)
@@ -323,13 +328,13 @@ export default function ProjectsAdminClient() {
     try {
       const url = await uploadImageToSupabase(file)
       setFeaturedImageFile(url)
-      showToast('Featured image uploaded to Supabase.')
+      showToast('Pagrindinė nuotrauka įkelta į Supabase.')
     } catch (error) {
       // Fallback to local base64
       const reader = new FileReader()
       reader.onloadend = () => {
         setFeaturedImageFile(String(reader.result || ''))
-        showToast(`Upload failed; kept image locally: ${getErrorMessage(error, 'Upload failed')}`)
+        showToast(`Įkėlimas nepavyko; nuotrauka išsaugota lokaliai: ${getErrorMessage(error, 'Įkėlimas nepavyko')}`)
       }
       reader.readAsDataURL(file)
     } finally {
@@ -425,8 +430,8 @@ export default function ProjectsAdminClient() {
       }
       showToast(
         persisted
-          ? 'Project updated successfully!'
-          : 'Project updated, but could not be saved in this browser (storage limit).'
+          ? 'Projektas atnaujintas!'
+          : 'Projektas atnaujintas, bet nepavyko išsaugoti šiame naršyklės saugykloje (limitai).'
       )
       setEditingProjectId(null)
     } else {
@@ -473,8 +478,8 @@ export default function ProjectsAdminClient() {
       }
       showToast(
         persisted
-          ? 'Project added successfully!'
-          : 'Project added, but could not be saved in this browser (storage limit).'
+          ? 'Projektas pridėtas!'
+          : 'Projektas pridėtas, bet nepavyko išsaugoti šiame naršyklės saugykloje (limitai).'
       )
     }
 
@@ -497,7 +502,7 @@ export default function ProjectsAdminClient() {
     void kvSet(PROJECTS_STORAGE_KEY, updated).catch(() => {
       // ignore
     })
-    showToast('Project deleted')
+    showToast('Projektas ištrintas')
   }
 
   const handleProjectCancelEdit = () => {
@@ -572,7 +577,7 @@ export default function ProjectsAdminClient() {
       try {
         const importedProjects = JSON.parse(event.target?.result as string) as unknown
         if (!Array.isArray(importedProjects)) {
-          showToast('Error importing projects. Please check the JSON format.')
+          showToast('Nepavyko importuoti projektų. Patikrinkite JSON formatą.')
           return
         }
         const updated = [...projects, ...(importedProjects as Project[])]
@@ -580,9 +585,9 @@ export default function ProjectsAdminClient() {
         void kvSet(PROJECTS_STORAGE_KEY, updated).catch(() => {
           // ignore
         })
-        showToast(`Imported ${importedProjects.length} projects successfully!`)
+        showToast(`Importuota: ${importedProjects.length} projektai.`)
       } catch {
-        showToast('Error importing projects. Please check the JSON format.')
+        showToast('Nepavyko importuoti projektų. Patikrinkite JSON formatą.')
       }
     }
     reader.readAsText(file)
@@ -649,10 +654,10 @@ export default function ProjectsAdminClient() {
                       }
                     })
                   }}
-                  placeholder="Project Title"
+                  placeholder="Projekto pavadinimas"
                 />
                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                  Project title — shown in listings and project page header.
+                  Rodomas sąrašuose ir projekto puslapyje.
                 </p>
               </div>
 
@@ -661,10 +666,10 @@ export default function ProjectsAdminClient() {
                   type="text"
                   value={projectForm.subtitle}
                   onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })}
-                  placeholder="Subtitle (optional)"
+                  placeholder="Paantraštė (nebūtina)"
                 />
                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                  Optional short subtitle displayed beside the title.
+                  Trumpa paantraštė šalia pavadinimo.
                 </p>
               </div>
             </div>
@@ -676,10 +681,10 @@ export default function ProjectsAdminClient() {
                   required
                   value={projectForm.slug}
                   onChange={(e) => setProjectForm({ ...projectForm, slug: slugify(e.target.value) })}
-                  placeholder="project-slug"
+                  placeholder="projekto-slug"
                 />
                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                  URL-friendly identifier, lowercase with hyphens. Auto-generated but editable.
+                  URL identifikatorius (mažosios raidės, brūkšneliai). Sugeneruojamas automatiškai, bet galima keisti.
                 </p>
               </div>
 
@@ -689,9 +694,81 @@ export default function ProjectsAdminClient() {
                   required
                   value={projectForm.location}
                   onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })}
-                  placeholder="Location (e.g., Vilnius, Lithuania)"
+                  placeholder="Vieta (pvz., Vilnius, Lietuva)"
                 />
-                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">City, Country (e.g., Vilnius, Lithuania).</p>
+                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Miestas, šalis (pvz., Vilnius, Lietuva).</p>
+              </div>
+            </div>
+
+            <div className="rounded-[16px] border border-[#BBBBBB] bg-[#EAEAEA] p-[16px]">
+              <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">English (optional)</p>
+              <p className="mt-[4px] font-['Outfit'] text-[12px] text-[#535353]">Palikite tuščia — bus naudojamas LT tekstas.</p>
+
+              <div className="mt-[12px] grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                <div>
+                  <AdminInput
+                    type="text"
+                    value={projectForm.titleEn}
+                    onChange={(e) => {
+                      const nextTitle = e.target.value
+                      setProjectForm((prev) => {
+                        const prevAutoSlug = slugify(prev.titleEn)
+                        const shouldAuto = !prev.slugEn || prev.slugEn === prevAutoSlug
+                        return {
+                          ...prev,
+                          titleEn: nextTitle,
+                          slugEn: shouldAuto ? slugify(nextTitle) : prev.slugEn,
+                        }
+                      })
+                    }}
+                    placeholder="Project title (EN)"
+                  />
+                </div>
+                <div>
+                  <AdminInput
+                    type="text"
+                    value={projectForm.subtitleEn}
+                    onChange={(e) => setProjectForm({ ...projectForm, subtitleEn: e.target.value })}
+                    placeholder="Subtitle (EN)"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-[12px] grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                <div>
+                  <AdminInput
+                    type="text"
+                    value={projectForm.slugEn}
+                    onChange={(e) => setProjectForm({ ...projectForm, slugEn: slugify(e.target.value) })}
+                    placeholder="project-slug (EN)"
+                  />
+                </div>
+                <div>
+                  <AdminInput
+                    type="text"
+                    value={projectForm.locationEn}
+                    onChange={(e) => setProjectForm({ ...projectForm, locationEn: e.target.value })}
+                    placeholder="Location (EN)"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-[12px]">
+                <AdminTextarea
+                  value={projectForm.descriptionEn}
+                  onChange={(e) => setProjectForm({ ...projectForm, descriptionEn: e.target.value })}
+                  rows={3}
+                  placeholder="Short Description (EN)"
+                />
+              </div>
+
+              <div className="mt-[12px]">
+                <AdminTextarea
+                  value={projectForm.fullDescriptionEn}
+                  onChange={(e) => setProjectForm({ ...projectForm, fullDescriptionEn: e.target.value })}
+                  rows={5}
+                  placeholder="Full Description (EN)"
+                />
               </div>
             </div>
 
@@ -701,11 +778,11 @@ export default function ProjectsAdminClient() {
                   value={projectForm.category}
                   onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })}
                 >
-                  <option value="residential">Residential</option>
-                  <option value="commercial">Commercial</option>
-                  <option value="public">Public</option>
+                  <option value="residential">Gyvenamieji</option>
+                  <option value="commercial">Komerciniai</option>
+                  <option value="public">Viešieji</option>
                 </AdminSelect>
-                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Project category (residential / commercial / public).</p>
+                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Projekto kategorija.</p>
               </div>
 
               <div>
@@ -716,10 +793,10 @@ export default function ProjectsAdminClient() {
                     onChange={(e) => setProjectForm({ ...projectForm, featured: e.target.checked })}
                     className="w-[20px] h-[20px]"
                   />
-                  <span className="font-['Outfit'] text-[14px]">Featured Project</span>
+                  <span className="font-['Outfit'] text-[14px]">Rekomenduojamas projektas</span>
                 </label>
                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                  Toggle to mark the project as featured (appears in highlighted lists).
+                  Pažymėkite, jei projektas turi būti rodomas „rekomenduojamų“ sąrašuose.
                 </p>
               </div>
             </div>
@@ -730,9 +807,9 @@ export default function ProjectsAdminClient() {
                 value={projectForm.description}
                 onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
                 rows={3}
-                placeholder="Short Description (for cards)"
+                placeholder="Trumpas aprašymas (kortelėms)"
               />
-              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">One-line summary shown in project cards.</p>
+              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Trumpas tekstas, rodomas projekto kortelėje.</p>
             </div>
 
             <div>
@@ -740,9 +817,9 @@ export default function ProjectsAdminClient() {
                 value={projectForm.fullDescription}
                 onChange={(e) => setProjectForm({ ...projectForm, fullDescription: e.target.value })}
                 rows={5}
-                placeholder="Full Description (optional, for project detail page)"
+                placeholder="Pilnas aprašymas (nebūtina, projekto puslapiui)"
               />
-              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Detailed content for the project details page.</p>
+              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Išsamesnis tekstas projekto puslapiui.</p>
             </div>
 
             <div>
@@ -750,9 +827,9 @@ export default function ProjectsAdminClient() {
                 type="text"
                 value={projectForm.productsUsed}
                 onChange={(e) => setProjectForm({ ...projectForm, productsUsed: e.target.value })}
-                placeholder="Products Used (comma-separated, e.g., Black larch, Brown larch)"
+                placeholder="Produktai (atskirti kableliais, pvz., Black larch, Brown larch)"
               />
-              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Comma-separated list (e.g., Black larch, Brown larch).</p>
+              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Pvz.: Black larch, Brown larch.</p>
             </div>
 
             <div className="space-y-[12px]">
@@ -774,12 +851,12 @@ export default function ProjectsAdminClient() {
                     className="flex items-center justify-center w-full px-[16px] py-[12px] border-2 border-dashed border-[#161616] rounded-[12px] font-['Outfit'] text-[14px] cursor-pointer hover:bg-[#EAEAEA] transition-colors"
                   >
                     <span className="text-[#161616] font-medium">
-                      {featuredImageFile ? 'Change Featured Image' : 'Upload Featured Image'}
+                      {featuredImageFile ? 'Pakeisti nuotrauką' : 'Įkelti nuotrauką'}
                     </span>
                   </label>
                 </div>
                 <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                  Main catalog image (16:9). Displays in listings when set.
+                  Pagrindinė (16:9). Rodoma sąrašuose, jei nustatyta.
                 </p>
               </label>
 
@@ -805,7 +882,7 @@ export default function ProjectsAdminClient() {
             <div className="space-y-[12px]">
               <label className="block">
                 <span className="font-['Outfit'] text-[14px] text-[#535353] mb-[8px] block">
-                  Gallery Images (papildomos nuotraukos)
+                  Galerijos nuotraukos (papildomos)
                 </span>
                 <div className="relative">
                   <input
@@ -827,7 +904,7 @@ export default function ProjectsAdminClient() {
                     <span className="text-[#535353]">{projectSelectedFileNames}</span>
                   </label>
                 </div>
-                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Additional gallery images (square thumbnails).</p>
+                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Papildomos galerijos nuotraukos (kvadratinės miniatiūros).</p>
               </label>
 
               {projectImageFiles.length > 0 && (
@@ -873,7 +950,7 @@ export default function ProjectsAdminClient() {
       <AdminCard>
         <div className="flex justify-between items-center mb-[24px]">
           <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616]">
-            Projects ({projects.length})
+            Projektai ({projects.length})
           </h2>
           <div className="flex gap-[8px]">
             <label
@@ -903,7 +980,7 @@ export default function ProjectsAdminClient() {
                       <div className="w-[120px] h-[80px] relative rounded-[8px] overflow-hidden flex-shrink-0">
                         <Image
                           src={typeof project.images[0] === 'string' ? project.images[0] : (project.images[0] as any).url || ''}
-                          alt={project.title}
+                          alt={getProjectTitle(project, currentLocale) || 'Projektas'}
                           fill
                           className="object-cover"
                         />
@@ -913,21 +990,23 @@ export default function ProjectsAdminClient() {
                       <div className="flex items-start justify-between">
                         <div>
                           <h3 className="font-['DM_Sans'] text-[20px] tracking-[-0.8px]">
-                            {project.title}
-                            {project.subtitle && <span className="text-[#535353] ml-[8px]">— {project.subtitle}</span>}
+                            {getProjectTitle(project, currentLocale)}
+                            {getProjectSubtitle(project, currentLocale) && (
+                              <span className="text-[#535353] ml-[8px]">— {getProjectSubtitle(project, currentLocale)}</span>
+                            )}
                             {project.featured && (
                               <span className="ml-[8px]">
-                                <AdminBadge>Featured</AdminBadge>
+                                <AdminBadge>Rekomenduojamas</AdminBadge>
                               </span>
                             )}
                           </h3>
-                          <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">{project.location}</p>
+                          <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">{getProjectLocation(project, currentLocale)}</p>
                           <p className="font-['Outfit'] text-[14px] text-[#161616] mt-[8px] line-clamp-2">
-                            {project.description}
+                            {getProjectDescription(project, currentLocale)}
                           </p>
                           {project.productsUsed && (project as any).productsUsed.length > 0 && (
                             <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">
-                              Products:{' '}
+                              Produktai:{' '}
                               {Array.isArray(project.productsUsed)
                                 ? project.productsUsed.map((p) => (typeof p === 'string' ? p : p.name)).join(', ')
                                 : (project.productsUsed as any)}
@@ -955,129 +1034,201 @@ export default function ProjectsAdminClient() {
                   <div className="border-t border-[#BBBBBB] bg-[#EAEAEA] p-[clamp(20px,3vw,32px)]">
                     <h3 className="font-['DM_Sans'] text-[18px] tracking-[-0.72px] text-[#161616] mb-[24px]">Projekto redagavimas</h3>
                     <form onSubmit={handleProjectSubmit} className="space-y-[20px]">
+                      <div className="rounded-[16px] border border-[#BBBBBB] bg-white/50 p-[16px]">
+                        <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">Lietuvių (pagrindinė)</p>
+
+                        <div className="mt-[12px] grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                          <div>
+                            <AdminInput
+                              type="text"
+                              required
+                              value={projectForm.title}
+                              onChange={(e) => {
+                                const nextTitle = e.target.value
+                                setProjectForm((prev) => {
+                                  const prevAutoSlug = slugify(prev.title)
+                                  const shouldAuto = !prev.slug || prev.slug === prevAutoSlug
+                                  return { ...prev, title: nextTitle, slug: shouldAuto ? slugify(nextTitle) : prev.slug }
+                                })
+                              }}
+                              placeholder="Projekto pavadinimas"
+                            />
+                            <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Rodomas sąrašuose ir projekto puslapyje.</p>
+                          </div>
+
+                          <div>
+                            <AdminInput
+                              type="text"
+                              value={projectForm.subtitle}
+                              onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })}
+                              placeholder="Paantraštė (nebūtina)"
+                            />
+                            <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Trumpa paantraštė šalia pavadinimo.</p>
+                          </div>
+                        </div>
+
+                        <div className="mt-[12px] grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                          <div>
+                            <AdminInput
+                              type="text"
+                              required
+                              value={projectForm.slug}
+                              onChange={(e) => setProjectForm({ ...projectForm, slug: slugify(e.target.value) })}
+                              placeholder="projekto-slug"
+                            />
+                            <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
+                              URL identifikatorius (mažosios raidės, brūkšneliai). Sugeneruojamas automatiškai, bet galima keisti.
+                            </p>
+                          </div>
+
+                          <div>
+                            <AdminInput
+                              type="text"
+                              required
+                              value={projectForm.location}
+                              onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })}
+                              placeholder="Vieta (pvz., Vilnius, Lietuva)"
+                            />
+                            <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Miestas, šalis (pvz., Vilnius, Lietuva).</p>
+                          </div>
+                        </div>
+
+                        <div className="mt-[12px]">
+                          <AdminTextarea
+                            required
+                            value={projectForm.description}
+                            onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
+                            rows={3}
+                            placeholder="Trumpas aprašymas (kortelėms)"
+                          />
+                          <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Trumpas tekstas, rodomas projekto kortelėje.</p>
+                        </div>
+
+                        <div className="mt-[12px]">
+                          <AdminTextarea
+                            value={projectForm.fullDescription}
+                            onChange={(e) => setProjectForm({ ...projectForm, fullDescription: e.target.value })}
+                            rows={4}
+                            placeholder="Pilnas aprašymas (nebūtina)"
+                          />
+                          <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Išsamesnis tekstas projekto puslapiui.</p>
+                        </div>
+                      </div>
+
+                      <div className="rounded-[16px] border border-[#BBBBBB] bg-white/50 p-[16px]">
+                        <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">English (optional)</p>
+                        <p className="mt-[4px] font-['Outfit'] text-[12px] text-[#535353]">Palikite tuščia — bus naudojamas LT tekstas.</p>
+
+                        <div className="mt-[12px] grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                          <div>
+                            <AdminInput
+                              type="text"
+                              value={projectForm.titleEn}
+                              onChange={(e) => {
+                                const nextTitle = e.target.value
+                                setProjectForm((prev) => {
+                                  const prevAutoSlug = slugify(prev.titleEn)
+                                  const shouldAuto = !prev.slugEn || prev.slugEn === prevAutoSlug
+                                  return {
+                                    ...prev,
+                                    titleEn: nextTitle,
+                                    slugEn: shouldAuto ? slugify(nextTitle) : prev.slugEn,
+                                  }
+                                })
+                              }}
+                              placeholder="Project title (EN)"
+                            />
+                          </div>
+                          <div>
+                            <AdminInput
+                              type="text"
+                              value={projectForm.subtitleEn}
+                              onChange={(e) => setProjectForm({ ...projectForm, subtitleEn: e.target.value })}
+                              placeholder="Subtitle (EN)"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="mt-[12px] grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                          <div>
+                            <AdminInput
+                              type="text"
+                              value={projectForm.slugEn}
+                              onChange={(e) => setProjectForm({ ...projectForm, slugEn: slugify(e.target.value) })}
+                              placeholder="project-slug (EN)"
+                            />
+                          </div>
+                          <div>
+                            <AdminInput
+                              type="text"
+                              value={projectForm.locationEn}
+                              onChange={(e) => setProjectForm({ ...projectForm, locationEn: e.target.value })}
+                              placeholder="Location (EN)"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="mt-[12px]">
+                          <AdminTextarea
+                            value={projectForm.descriptionEn}
+                            onChange={(e) => setProjectForm({ ...projectForm, descriptionEn: e.target.value })}
+                            rows={3}
+                            placeholder="Short description (EN)"
+                          />
+                        </div>
+
+                        <div className="mt-[12px]">
+                          <AdminTextarea
+                            value={projectForm.fullDescriptionEn}
+                            onChange={(e) => setProjectForm({ ...projectForm, fullDescriptionEn: e.target.value })}
+                            rows={4}
+                            placeholder="Full description (EN)"
+                          />
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                         <div>
                           <AdminInput
                             type="text"
-                            required
-                            value={projectForm.title}
-                            onChange={(e) => {
-                              const nextTitle = e.target.value
-                              setProjectForm((prev) => {
-                                const prevAutoSlug = slugify(prev.title)
-                                const shouldAuto = !prev.slug || prev.slug === prevAutoSlug
-                                return { ...prev, title: nextTitle, slug: shouldAuto ? slugify(nextTitle) : prev.slug }
-                              })
-                            }}
-                            placeholder="Project Title"
+                            value={projectForm.productsUsed}
+                            onChange={(e) => setProjectForm({ ...projectForm, productsUsed: e.target.value })}
+                            placeholder="Produktai (atskirti kableliais)"
                           />
-                          <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                            Project title — shown in listings and project page header.
-                          </p>
+                          <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Pvz.: Black larch, Brown larch.</p>
                         </div>
-                        <div>
-                          <AdminInput
-                            type="text"
-                            value={projectForm.subtitle}
-                            onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })}
-                            placeholder="Subtitle (optional)"
-                          />
-                          <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                            Optional short subtitle displayed beside the title.
-                          </p>
-                        </div>
-                      </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
-                        <div>
-                          <AdminInput
-                            type="text"
-                            required
-                            value={projectForm.slug}
-                            onChange={(e) => setProjectForm({ ...projectForm, slug: slugify(e.target.value) })}
-                            placeholder="project-slug"
-                          />
-                          <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                            URL-friendly identifier, lowercase with hyphens. Auto-generated but editable.
-                          </p>
-                        </div>
-                        <div>
-                          <AdminInput
-                            type="text"
-                            required
-                            value={projectForm.location}
-                            onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })}
-                            placeholder="Location"
-                          />
-                          <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">City, Country (e.g., Vilnius, Lithuania).</p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <AdminTextarea
-                          required
-                          value={projectForm.description}
-                          onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
-                          rows={3}
-                          placeholder="Description"
-                        />
-                        <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">One-line summary shown in project cards.</p>
-                      </div>
-
-                      <div>
-                        <AdminTextarea
-                          value={projectForm.fullDescription}
-                          onChange={(e) => setProjectForm({ ...projectForm, fullDescription: e.target.value })}
-                          rows={4}
-                          placeholder="Full Description (optional)"
-                        />
-                        <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Detailed content for the project details page.</p>
-                      </div>
-
-                      <div>
-                        <AdminInput
-                          type="text"
-                          value={projectForm.productsUsed}
-                          onChange={(e) => setProjectForm({ ...projectForm, productsUsed: e.target.value })}
-                          placeholder="Products Used (comma-separated)"
-                        />
-                        <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Comma-separated list (e.g., Black larch, Brown larch).</p>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                         <div>
                           <AdminSelect
                             value={projectForm.category}
                             onChange={(e) => setProjectForm({ ...projectForm, category: e.target.value })}
                           >
-                            <option value="residential">Residential</option>
-                            <option value="commercial">Commercial</option>
-                            <option value="public">Public</option>
+                            <option value="residential">Gyvenamieji</option>
+                            <option value="commercial">Komerciniai</option>
+                            <option value="public">Viešieji</option>
                           </AdminSelect>
-                          <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                            Project category (residential / commercial / public).
-                          </p>
-                        </div>
-
-                        <div>
-                          <label className="flex items-center gap-[12px] px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] bg-[#EAEAEA] cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={projectForm.featured}
-                              onChange={(e) => setProjectForm({ ...projectForm, featured: e.target.checked })}
-                              className="w-[20px] h-[20px]"
-                            />
-                            <span className="font-['Outfit'] text-[14px]">Featured Project</span>
-                          </label>
-                          <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                            Toggle to mark the project as featured (appears in highlighted lists).
-                          </p>
+                          <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Projekto kategorija.</p>
                         </div>
                       </div>
 
                       <div>
+                        <label className="flex items-center gap-[12px] px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] bg-[#EAEAEA] cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={projectForm.featured}
+                            onChange={(e) => setProjectForm({ ...projectForm, featured: e.target.checked })}
+                            className="w-[20px] h-[20px]"
+                          />
+                          <span className="font-['Outfit'] text-[14px]">Rekomenduojamas projektas</span>
+                        </label>
+                        <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
+                          Pažymėkite, jei projektas turi būti rodomas „rekomenduojamų“ sąrašuose.
+                        </p>
+                      </div>
+
+                      <div>
                         <label className="block">
-                          <span className="font-['Outfit'] text-[14px] font-medium text-[#161616] mb-[8px] block">Featured Image</span>
+                          <span className="font-['Outfit'] text-[14px] font-medium text-[#161616] mb-[8px] block">Pagrindinė nuotrauka</span>
                           <div className="relative">
                             <input
                               ref={featuredImageInputRef}
@@ -1092,12 +1243,12 @@ export default function ProjectsAdminClient() {
                               className="flex items-center justify-center w-full px-[16px] py-[12px] border-2 border-dashed border-[#161616] rounded-[12px] font-['Outfit'] text-[14px] cursor-pointer hover:bg-[#f0f0f0] transition-colors bg-[#EAEAEA]"
                             >
                               <span className="text-[#161616] font-medium">
-                                {featuredImageFile ? 'Change Featured Image' : 'Upload Featured Image'}
+                                {featuredImageFile ? 'Pakeisti nuotrauką' : 'Įkelti nuotrauką'}
                               </span>
                             </label>
                           </div>
                           <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                            Main catalog image (16:9). Displays in listings when set.
+                            Pagrindinė (16:9). Rodoma sąrašuose, jei nustatyta.
                           </p>
                         </label>
 
@@ -1122,7 +1273,7 @@ export default function ProjectsAdminClient() {
 
                       <div>
                         <label className="block font-['Outfit'] text-[14px] text-[#535353] mb-[8px]">
-                          Gallery Images {projectImageFiles.length > 0 && `(${projectImageFiles.length} selected)`}
+                          Galerijos nuotraukos {projectImageFiles.length > 0 && `(${projectImageFiles.length} pasirinkta)`}
                         </label>
                         <input
                           ref={projectFileInputRef}
@@ -1159,7 +1310,7 @@ export default function ProjectsAdminClient() {
                           </div>
                         )}
                         <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                          Additional gallery images (square thumbnails).
+                          Papildomos galerijos nuotraukos (kvadratinės miniatiūros).
                         </p>
                       </div>
 

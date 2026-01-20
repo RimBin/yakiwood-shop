@@ -18,7 +18,7 @@ export default async function Hero() {
   return (
     <section className="w-full bg-[#EAEAEA] relative overflow-hidden pb-[80px] lg:pb-0">
       {/* Full-width hero vector background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 hidden md:block">
         <Image src={assets.heroVector} alt="" fill className="object-cover" priority sizes="100vw" />
       </div>
 

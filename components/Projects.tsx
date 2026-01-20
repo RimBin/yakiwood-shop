@@ -132,7 +132,7 @@ export default function Projects() {
       <div className="lg:hidden">
         {/* Description text - Mobile */}
         <p className="px-[16px] md:px-[32px] font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[600px] mb-[24px] md:mb-[32px]">
-          People who have chosen charred wood often share their positive impressions and experiences. They note not only the exceptional appearance of the wood, but also its functionality and durability.
+          Žmonės, pasirinkę degintą medieną, dažnai dalinasi teigiamais įspūdžiais ir patirtimis. Jie pastebi ne tik išskirtinę išvaizdą, bet ir funkcionalumą bei ilgaamžiškumą.
         </p>
 
         {/* Projects Grid - Mobile: Complex masonry-like layout from Figma */}
@@ -235,7 +235,7 @@ export default function Projects() {
 
           {/* Description between projects */}
           <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full max-w-[266px] mb-[24px]">
-            People who have chosen charred wood often share their positive impressions and experiences. They note not only the exceptional appearance of the wood, but also its functionality and durability.
+            Žmonės, pasirinkę degintą medieną, dažnai dalinasi teigiamais įspūdžiais ir patirtimis. Jie pastebi ne tik išskirtinę išvaizdą, bet ir funkcionalumą bei ilgaamžiškumą.
           </p>
 
           {/* Row 5: Middle card right aligned (230x176px) */}
@@ -354,7 +354,7 @@ export default function Projects() {
         </div>
 
         <p className="mt-[48px] font-['Outfit'] text-[14px] font-light leading-[1.4] tracking-[0.14px] text-[#535353] w-[269px]">
-          People who have chosen charred wood often share their positive impressions and experiences. They note not only the exceptional appearance of the wood, but also its functionality and durability.
+          Žmonės, pasirinkę degintą medieną, dažnai dalinasi teigiamais įspūdžiais ir patirtimis. Jie pastebi ne tik išskirtinę išvaizdą, bet ir funkcionalumą bei ilgaamžiškumą.
         </p>
       </div>
     </section>
