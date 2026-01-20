@@ -65,6 +65,50 @@ function stripEnPrefixFromUrlString(value: string): string {
   }
 }
 
+function copyHeaders(target: NextResponse, source: NextResponse, { exclude = [] }: { exclude?: string[] } = {}) {
+  const excludeSet = new Set(exclude.map((h) => h.toLowerCase()))
+  source.headers.forEach((value, key) => {
+    if (excludeSet.has(key.toLowerCase())) return
+    target.headers.set(key, value)
+  })
+}
+
+function urlFromRewriteHeader(rewriteHeader: string, request: NextRequest): URL {
+  try {
+    return new URL(rewriteHeader)
+  } catch {
+    return new URL(rewriteHeader, request.url)
+  }
+}
+
+function normalizeIntlResponse(intlResponse: NextResponse, request: NextRequest): NextResponse {
+  const rewriteHeader = intlResponse.headers.get('x-middleware-rewrite')
+  if (rewriteHeader) {
+    const fixed = stripEnPrefixFromUrlString(rewriteHeader)
+    if (fixed !== rewriteHeader) {
+      const url = urlFromRewriteHeader(fixed, request)
+      const normalized = NextResponse.rewrite(url)
+      copyHeaders(normalized, intlResponse, { exclude: ['x-middleware-rewrite'] })
+      applyCookies(normalized, intlResponse)
+      return normalized
+    }
+  }
+
+  const locationHeader = intlResponse.headers.get('location')
+  if (locationHeader) {
+    const fixed = stripEnPrefixFromUrlString(locationHeader)
+    if (fixed !== locationHeader) {
+      const url = new URL(fixed, request.url)
+      const normalized = NextResponse.redirect(url, 301)
+      copyHeaders(normalized, intlResponse, { exclude: ['location'] })
+      applyCookies(normalized, intlResponse)
+      return normalized
+    }
+  }
+
+  return intlResponse
+}
+
 // Enable Supabase session syncing only when credentials are present, so local
 // development without keys keeps working.
 const hasSupabaseEnv =
@@ -151,24 +195,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Let next-intl determine the locale from the URL.
-  const intlResponse = intlMiddleware(request)
-
-  // Enforce canonical EN URLs even if middleware emits /en.
-  const rewriteHeader = intlResponse.headers.get('x-middleware-rewrite')
-  if (rewriteHeader) {
-    const fixed = stripEnPrefixFromUrlString(rewriteHeader)
-    if (fixed !== rewriteHeader) {
-      intlResponse.headers.set('x-middleware-rewrite', fixed)
-    }
-  }
-
-  const locationHeader = intlResponse.headers.get('location')
-  if (locationHeader) {
-    const fixed = stripEnPrefixFromUrlString(locationHeader)
-    if (fixed !== locationHeader) {
-      intlResponse.headers.set('location', fixed)
-    }
-  }
+  const intlResponse = normalizeIntlResponse(intlMiddleware(request), request)
 
   // For /lt/*, rewrite to the internal EN routes while keeping locale=lt.
   if (pathname === '/lt' || pathname.startsWith('/lt/')) {
@@ -193,8 +220,8 @@ export async function proxy(request: NextRequest) {
     const rewriteResponse = NextResponse.rewrite(internalUrl)
 
     // Preserve locale headers/cookies that next-intl middleware set.
-    intlResponse.headers.forEach((value, key) => {
-      rewriteResponse.headers.set(key, value)
+    copyHeaders(rewriteResponse, intlResponse, {
+      exclude: ['x-middleware-rewrite', 'location'],
     })
     applyCookies(rewriteResponse, intlResponse)
 

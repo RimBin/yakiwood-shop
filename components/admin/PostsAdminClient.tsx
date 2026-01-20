@@ -73,6 +73,7 @@ function joinParagraphs(value: string[]): string {
 
 export default function PostsAdminClient() {
   const t = useTranslations('admin');
+  const ltSlugOptions = useMemo(() => ({ preserveDiacritics: true }), []);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(createEmptyPost());
@@ -144,9 +145,17 @@ export default function PostsAdminClient() {
         ...prev,
         title: { ...prev.title, [locale]: value },
       };
-      const autoSlug = !slugTouched[locale] || prev.slug[locale] === slugify(prev.title[locale]);
+      const autoSlug =
+        !slugTouched[locale] ||
+        prev.slug[locale] ===
+          (locale === 'lt'
+            ? slugify(prev.title[locale], 96, ltSlugOptions)
+            : slugify(prev.title[locale]));
       if (autoSlug) {
-        next.slug = { ...next.slug, [locale]: slugify(value) };
+        next.slug = {
+          ...next.slug,
+          [locale]: locale === 'lt' ? slugify(value, 96, ltSlugOptions) : slugify(value),
+        };
       }
       return next;
     });
@@ -383,7 +392,7 @@ export default function PostsAdminClient() {
                   value={draft.slug.lt}
                   onChange={(e) => {
                     setSlugTouched((prev) => ({ ...prev, lt: true }));
-                    updateLocalizedField('slug', 'lt', slugify(e.target.value));
+                    updateLocalizedField('slug', 'lt', slugify(e.target.value, 96, ltSlugOptions));
                   }}
                   className="w-full h-[38px] rounded-[12px] border border-[#BBBBBB] px-[12px] font-['Outfit'] text-[13px]"
                   placeholder={t('posts.placeholders.slugLt')}
