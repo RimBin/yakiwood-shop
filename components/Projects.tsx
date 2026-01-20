@@ -142,7 +142,7 @@ export default function Projects() {
             href={getProjectHrefLocalized(basePath, featuredProjects[0], currentLocale)}
             className="flex flex-col gap-[8px] mb-[16px]"
           >
-            <div className="h-[268px] w-[267px] rounded-[8px] relative overflow-hidden">
+            <div className="h-[268px] w-full max-w-[267px] rounded-[8px] relative overflow-hidden">
               <Image
                 src={getProjectCardImage(featuredProjects[0]) || fallbackImages[0]}
                 alt={getProjectTitle(featuredProjects[0], currentLocale) || 'Project'}
@@ -166,7 +166,7 @@ export default function Projects() {
               href={getProjectHrefLocalized(basePath, featuredProjects[1], currentLocale)}
               className="flex flex-col gap-[8px]"
             >
-              <div className="h-[176px] w-[230px] rounded-[8px] relative overflow-hidden">
+              <div className="h-[176px] w-full max-w-[230px] rounded-[8px] relative overflow-hidden">
                 <Image
                   src={getProjectCardImage(featuredProjects[1]) || fallbackImages[1]}
                   alt={getProjectTitle(featuredProjects[1], currentLocale) || 'Project'}
@@ -174,7 +174,7 @@ export default function Projects() {
                   className="object-cover"
                 />
               </div>
-              <div className="flex flex-col gap-[8px] text-[#161616] w-[230px]">
+              <div className="flex flex-col gap-[8px] text-[#161616] w-full max-w-[230px]">
                 <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
                   {getProjectTitle(featuredProjects[1], currentLocale) || 'Project title'}
                 </p>
@@ -190,7 +190,7 @@ export default function Projects() {
             href={getProjectHrefLocalized(basePath, featuredProjects[2], currentLocale)}
             className="flex flex-col gap-[8px] mb-[16px]"
           >
-            <div className="h-[330px] w-[328px] rounded-[8px] relative overflow-hidden">
+            <div className="h-[330px] w-full max-w-[328px] rounded-[8px] relative overflow-hidden">
               <Image
                 src={getProjectCardImage(featuredProjects[2]) || fallbackImages[2]}
                 alt={getProjectTitle(featuredProjects[2], currentLocale) || 'Project'}
@@ -214,7 +214,7 @@ export default function Projects() {
               href={getProjectHrefLocalized(basePath, featuredProjects[3], currentLocale)}
               className="flex flex-col gap-[8px]"
             >
-              <div className="h-[177px] w-[175px] rounded-[8px] relative overflow-hidden">
+              <div className="h-[177px] w-full max-w-[175px] rounded-[8px] relative overflow-hidden">
                 <Image
                   src={getProjectCardImage(featuredProjects[3]) || fallbackImages[3]}
                   alt={getProjectTitle(featuredProjects[3], currentLocale) || 'Project'}
@@ -222,7 +222,7 @@ export default function Projects() {
                   className="object-cover"
                 />
               </div>
-              <div className="flex flex-col gap-[8px] text-[#161616] w-[175px]">
+              <div className="flex flex-col gap-[8px] text-[#161616] w-full max-w-[175px]">
                 <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
                   {getProjectTitle(featuredProjects[3], currentLocale) || 'Project title'}
                 </p>
@@ -234,7 +234,7 @@ export default function Projects() {
           </div>
 
           {/* Description between projects */}
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-[266px] mb-[24px]">
+          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full max-w-[266px] mb-[24px]">
             People who have chosen charred wood often share their positive impressions and experiences. They note not only the exceptional appearance of the wood, but also its functionality and durability.
           </p>
 
@@ -244,7 +244,7 @@ export default function Projects() {
               href={getProjectHrefLocalized(basePath, featuredProjects[4], currentLocale)}
               className="flex flex-col gap-[8px]"
             >
-              <div className="h-[176px] w-[230px] rounded-[8px] relative overflow-hidden">
+              <div className="h-[176px] w-full max-w-[230px] rounded-[8px] relative overflow-hidden">
                 <Image
                   src={getProjectCardImage(featuredProjects[4]) || fallbackImages[5]}
                   alt={getProjectTitle(featuredProjects[4], currentLocale) || 'Project'}
@@ -252,7 +252,7 @@ export default function Projects() {
                   className="object-cover"
                 />
               </div>
-              <div className="flex flex-col gap-[8px] text-[#161616] w-[230px]">
+              <div className="flex flex-col gap-[8px] text-[#161616] w-full max-w-[230px]">
                 <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
                   {getProjectTitle(featuredProjects[4], currentLocale) || 'Project title'}
                 </p>
@@ -268,7 +268,7 @@ export default function Projects() {
             href={getProjectHrefLocalized(basePath, featuredProjects[5], currentLocale)}
             className="flex flex-col gap-[8px] mb-[24px]"
           >
-            <div className="h-[330px] w-[328px] rounded-[8px] relative overflow-hidden">
+            <div className="h-[330px] w-full max-w-[328px] rounded-[8px] relative overflow-hidden">
               <Image
                 src={getProjectCardImage(featuredProjects[5]) || fallbackImages[4]}
                 alt={getProjectTitle(featuredProjects[5], currentLocale) || 'Project'}

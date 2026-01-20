@@ -140,20 +140,20 @@ function MobileProductCard({
   };
 
   return (
-    <div className="bg-[#eaeaea] rounded-[8px] pt-[12px] pb-[16px] px-[12px] w-[303px] md:w-[360px] flex-shrink-0 flex flex-col gap-[24px] items-center relative">
+    <div className="bg-[#eaeaea] rounded-[8px] pt-[12px] pb-[16px] px-[12px] w-[min(303px,calc(100vw-32px))] md:w-[360px] flex-shrink-0 flex flex-col gap-[24px] items-center relative">
       {/* Background mask overlay */}
-      <div className="absolute left-0 top-0 w-[303px] h-[532px] pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none">
         <Image src={imgMask} alt="" fill className="object-cover" />
       </div>
 
       {/* Product image slider - 271x260px on mobile */}
-      <div className="relative w-[271px] h-[260px] shrink-0 z-10 rounded-[8px] overflow-hidden">
+      <div className="relative w-full max-w-[271px] aspect-[271/260] shrink-0 z-10 rounded-[8px] overflow-hidden">
         <Image
           src={slides[currentIndex]?.image || product.image}
           alt={product.title}
           fill
           className="object-cover"
-          sizes="271px"
+          sizes="(max-width: 420px) calc(100vw - 56px), 271px"
         />
 
         {!!slides[currentIndex]?.label && (
@@ -173,7 +173,7 @@ function MobileProductCard({
       </div>
 
       {/* Content container - 279px width */}
-      <div className="w-[279px] flex flex-col gap-[16px] relative z-10">
+  <div className="w-full flex flex-col gap-[16px] relative z-10">
         {/* Solution chips */}
         <div className="flex gap-[8px] items-center justify-start flex-wrap">
           {product.solutions.map((sol, idx) => (
@@ -428,7 +428,7 @@ export default function Products() {
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
             {t('eyebrow')}
           </p>
-          <p className="font-['DM_Sans'] font-light text-[40px] leading-none tracking-[-1.6px] text-[#161616] w-[358px]">
+          <p className="font-['DM_Sans'] font-light text-[40px] leading-none tracking-[-1.6px] text-[#161616] w-full max-w-[358px]">
             <span>{t('headline.prefix')}</span>
             <span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
             <span>{t('headline.suffix')}</span>
@@ -459,7 +459,7 @@ export default function Products() {
         <div className="px-[16px] pb-[64px]">
           <Link
             href={shopHref}
-            className="w-[358px] max-w-full mx-auto block bg-[#161616] rounded-[100px] h-[48px] flex items-center justify-center"
+            className="w-full max-w-[358px] mx-auto block bg-[#161616] rounded-[100px] h-[48px] flex items-center justify-center"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
               {t('cta.offer')}

@@ -78,6 +78,8 @@
     "next": "Next",
     "previous": "Previous",
     "loading": "Loading...",
+    "kraunasi": "Loading...",
+    "valiuta": "€",
     "checkout": {
       "title": "Checkout",
       "contact": {
@@ -1188,6 +1190,72 @@
       "add": "Add",
       "cancel": "Cancel",
       "addNewEllipsis": "Add new…"
+    },
+    "dashboard": {
+      "filters": {
+        "title": "Filters",
+        "timePeriod": "Time period",
+        "status": "Status",
+        "allTime": "All time",
+        "today": "Today",
+        "lastWeek": "Last week",
+        "lastMonth": "Last month",
+        "allOrders": "All orders"
+      },
+      "quickActions": {
+        "manageOrders": "Manage orders",
+        "manageOrdersSubtitle": "View and change order status",
+        "inventory": "Inventory",
+        "inventorySubtitle": "Manage stock levels",
+        "products": "Products",
+        "productsSubtitle": "Add and edit products",
+        "projects": "Projects",
+        "projectsSubtitle": "Show portfolio"
+      },
+      "stats": {
+        "todayOrders": "Today's orders",
+        "totalOrders": "Total orders",
+        "totalOrdersSubtitle": "{currency}{revenue} revenue",
+        "pending": "Pending",
+        "pendingSubtitle": "awaiting processing",
+        "completed": "Completed",
+        "completedSubtitle": "successful",
+        "products": "Products",
+        "productsSubtitle": "in catalog",
+        "lowStock": "Low stock",
+        "lowStockSubtitle": "< 10 pcs",
+        "avgOrder": "Avg. order",
+        "conversion": "Conversion",
+        "conversionSubtitle": "completed"
+      },
+      "topProducts": {
+        "title": "Top products",
+        "empty": "No sales data",
+        "table": {
+          "product": "Product",
+          "sold": "Sold",
+          "revenue": "Revenue"
+        }
+      },
+      "recentOrders": {
+        "title": "Recent orders",
+        "allOrders": "All orders",
+        "empty": "No orders",
+        "table": {
+          "order": "Order",
+          "customer": "Customer",
+          "date": "Date",
+          "total": "Total",
+          "status": "Status"
+        }
+      },
+      "orderStatus": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "units": "pcs"
     },
     "projects": {
       "actions": {
