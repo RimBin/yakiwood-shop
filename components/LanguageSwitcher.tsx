@@ -234,13 +234,17 @@ export default function LanguageSwitcher({
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className="
-            absolute right-0 mt-2 w-40
-            bg-white border border-[#E1E1E1] rounded-lg
-            shadow-lg overflow-hidden
+          className={`
+            absolute mt-2 w-40
+            rounded-lg shadow-lg overflow-hidden
             z-50
             animate-in fade-in slide-in-from-top-2 duration-200
-          "
+            ${
+              isDark
+                ? 'left-0 bg-[#161616] border border-white/20'
+                : 'right-0 bg-white border border-[#E1E1E1]'
+            }
+          `}
           role="listbox"
           aria-label={t('optionsAria')}
         >
@@ -256,9 +260,13 @@ export default function LanguageSwitcher({
                   font-['DM_Sans'] text-[14px] text-left
                   transition-all duration-200
                   ${
-                    isActive
-                      ? 'bg-[#161616] text-white'
-                      : 'text-[#161616] hover:bg-[#F5F5F5]'
+                    isDark
+                      ? isActive
+                        ? 'bg-white/10 text-white'
+                        : 'text-white/80 hover:bg-white/5 hover:text-white'
+                      : isActive
+                        ? 'bg-[#161616] text-white'
+                        : 'text-[#161616] hover:bg-[#F5F5F5]'
                   }
                 `}
                 role="option"

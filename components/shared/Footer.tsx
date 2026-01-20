@@ -38,6 +38,8 @@ export default function Footer() {
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const year = new Date().getFullYear();
 
+  const socialColumnTitle = t('columns.social');
+
   const navColumns = [
     {
       title: t('columns.information'),
@@ -75,6 +77,7 @@ export default function Footer() {
   ];
 
   const desktopNavColumns = navColumns;
+  const mobileNavColumns = navColumns.filter((column) => column.title !== socialColumnTitle);
 
   return (
     <footer className="w-full bg-[#161616]">
@@ -82,7 +85,7 @@ export default function Footer() {
       <div className="lg:hidden px-[16px] pt-[48px] pb-[32px]">
         {/* Navigation Columns - Mobile: Stacked */}
         <div className="flex flex-col gap-[32px] mb-[32px]">
-          {navColumns.map((column) => (
+          {mobileNavColumns.map((column) => (
             <div key={column.title}>
               <h4 className="font-['DM_Sans'] font-normal text-[20px] leading-[1.1] tracking-[-0.8px] text-[#E1E1E1] mb-[12px]">
                 {column.title}

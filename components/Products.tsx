@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
@@ -140,7 +140,7 @@ function MobileProductCard({
   };
 
   return (
-    <div className="bg-[#eaeaea] rounded-[8px] pt-[12px] pb-[16px] px-[12px] w-[min(303px,calc(100vw-32px))] md:w-[360px] flex-shrink-0 flex flex-col gap-[24px] items-center relative">
+    <div className="bg-[#eaeaea] rounded-[8px] pt-[12px] pb-[16px] px-[12px] w-full max-w-[360px] flex flex-col gap-[24px] items-center relative">
       {/* Background mask overlay */}
       <div className="absolute inset-0 pointer-events-none">
         <Image src={imgMask} alt="" fill className="object-cover" />
@@ -369,8 +369,6 @@ export default function Products() {
 
   const shopHref = toLocalePath('/products', locale);
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-
   const products = useMemo<ProductData[]>(
     () => [
       {
@@ -435,14 +433,10 @@ export default function Products() {
           </p>
         </div>
 
-        {/* Horizontal scrolling product cards - Figma 803:13033 */}
-        <div
-          ref={scrollRef}
-          className="flex gap-[8px] overflow-x-auto px-[16px] pb-[24px] scrollbar-hide"
-          style={{ scrollSnapType: 'x mandatory' }}
-        >
+        {/* Stacked product cards (no horizontal scroll) */}
+        <div className="flex flex-col gap-[16px] px-[16px] pb-[24px]">
           {products.map((product, idx) => (
-            <div key={idx} style={{ scrollSnapAlign: 'start' }}>
+            <div key={idx} className="w-full flex justify-center">
               <MobileProductCard
                 product={product}
                 colorsLabel={colorsLabel}

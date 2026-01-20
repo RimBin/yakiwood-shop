@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { getAsset } from '@/lib/assets';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -27,6 +29,8 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     href: toLocalePath('/configurator3d', currentLocale),
     label: t(locale === 'lt' ? 'nav.konfiguratorius3d' : 'nav.configurator3d'),
   };
+
+  const ctaLabel = locale === 'lt' ? 'Skambinti' : 'Make a call';
 
   useEffect(() => {
     if (isOpen) {
@@ -71,7 +75,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex flex-col gap-[24px] mb-auto">
+          <nav className="flex flex-col gap-[12px] mb-auto">
             <Link
               href={toLocalePath('/account', currentLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
@@ -133,25 +137,28 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           </nav>
 
           {/* Bottom Section */}
-          <div className="flex flex-col gap-[32px] pt-[32px] border-t border-white/20">
+          <div className="flex flex-col pt-[24px]">
+            <div className="flex flex-col gap-[24px]">
             {/* CTA Button - Figma: border only, not filled */}
-            <Link
-              href={toLocalePath('/contact', currentLocale)}
-              onClick={onClose}
+            <a
+              href="tel:+37067564733"
+              onClick={() => {
+                onClose();
+              }}
               className="w-full max-w-[357px] mx-auto border border-[#535353] rounded-[100px] h-[48px] flex items-center justify-center hover:bg-white/10 transition-colors"
             >
               <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                {tm('ctaGetInTouch')}
+                {ctaLabel}
               </span>
-            </Link>
+            </a>
 
-            {/* Social Links - Figma: 24px font size */}
-            <div className="flex items-center justify-center gap-[32px]">
+            {/* Social Links */}
+            <div className="flex flex-wrap items-center justify-center gap-x-[24px] gap-y-[8px] px-[8px]">
               <a
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-['DM_Sans'] font-light text-[24px] leading-[1.2] tracking-[-0.96px] text-white hover:opacity-70 transition-opacity"
+                className="font-['DM_Sans'] font-light text-[clamp(18px,4.6vw,24px)] leading-[1.2] tracking-[-0.96px] text-white hover:opacity-70 transition-opacity"
               >
                 Facebook
               </a>
@@ -159,7 +166,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-['DM_Sans'] font-light text-[24px] leading-[1.2] tracking-[-0.96px] text-white hover:opacity-70 transition-opacity"
+                className="font-['DM_Sans'] font-light text-[clamp(18px,4.6vw,24px)] leading-[1.2] tracking-[-0.96px] text-white hover:opacity-70 transition-opacity"
               >
                 Instagram
               </a>
@@ -167,23 +174,27 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-['DM_Sans'] font-light text-[24px] leading-[1.2] tracking-[-0.96px] text-white hover:opacity-70 transition-opacity"
+                className="font-['DM_Sans'] font-light text-[clamp(18px,4.6vw,24px)] leading-[1.2] tracking-[-0.96px] text-white hover:opacity-70 transition-opacity"
               >
                 LinkedIn
               </a>
             </div>
 
             {/* Payment Icons */}
-            <div className="flex flex-wrap items-center justify-center gap-[16px] opacity-40">
-              {['Mastercard', 'Visa', 'Maestro', 'Stripe', 'PayPal'].map((label) => (
-                <span
-                  key={label}
-                  className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white/70"
-                >
-                  {label}
-                </span>
-              ))}
+            <div className="flex items-center justify-center opacity-100">
+              <Image
+                src={getAsset('imgPayments')}
+                alt="Payments"
+                width={260}
+                height={24}
+                className="h-[24px] w-auto"
+              />
             </div>
+
+            </div>
+
+            {/* Bottom divider line */}
+            <div className="mt-[16px] h-[5px] w-[70%] mx-auto bg-white/20 rounded-[100px]" />
           </div>
         </div>
       </div>

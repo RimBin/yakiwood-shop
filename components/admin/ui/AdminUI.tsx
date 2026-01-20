@@ -18,8 +18,8 @@ function cx(...values: ClassValue[]) {
 
 export function AdminBody({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <main className={cx('px-[clamp(16px,3vw,40px)] pb-[clamp(32px,5vw,64px)]', className)}>
-      <div className="max-w-[1440px] mx-auto">{children}</div>
+    <main className={cx('pb-[clamp(32px,5vw,64px)]', className)}>
+      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px]">{children}</div>
     </main>
   )
 }
@@ -32,7 +32,7 @@ export function AdminCard({ children, className }: { children: ReactNode; classN
   return (
     <div
       className={cx(
-        'bg-[#EAEAEA] border border-[#E1E1E1] rounded-[24px] p-[clamp(20px,3vw,32px)]',
+        'bg-[#E1E1E1] border border-[#BBBBBB] rounded-[24px] p-[clamp(20px,3vw,32px)]',
         className
       )}
     >
@@ -72,7 +72,7 @@ export function AdminInput({ className, ...props }: InputHTMLAttributes<HTMLInpu
     <input
       {...props}
       className={cx(
-        "h-[48px] w-full rounded-[100px] bg-[#EAEAEA] border border-[#BBBBBB] px-[16px] font-['Outfit'] text-[14px] text-[#161616] outline-none focus:border-[#161616] transition-colors",
+        "h-[48px] w-full rounded-[100px] bg-[#E1E1E1] border border-[#BBBBBB] px-[16px] font-['Outfit'] text-[14px] text-[#161616] outline-none focus:border-[#161616] transition-colors",
         className
       )}
     />
@@ -84,7 +84,7 @@ export function AdminSelect({ className, ...props }: SelectHTMLAttributes<HTMLSe
     <select
       {...props}
       className={cx(
-        "h-[48px] w-full rounded-[100px] bg-[#EAEAEA] border border-[#BBBBBB] px-[16px] font-['Outfit'] text-[14px] text-[#161616] outline-none focus:border-[#161616] transition-colors yw-select",
+        "h-[48px] w-full rounded-[100px] bg-[#E1E1E1] border border-[#BBBBBB] px-[16px] font-['Outfit'] text-[14px] text-[#161616] outline-none focus:border-[#161616] transition-colors yw-select",
         className
       )}
     />
@@ -99,7 +99,7 @@ export function AdminTextarea({
     <textarea
       {...props}
       className={cx(
-        "w-full rounded-[24px] bg-[#EAEAEA] border border-[#BBBBBB] px-[16px] py-[12px] font-['Outfit'] text-[14px] text-[#161616] outline-none focus:border-[#161616] transition-colors",
+        "w-full rounded-[24px] bg-[#E1E1E1] border border-[#BBBBBB] px-[16px] py-[12px] font-['Outfit'] text-[14px] text-[#161616] outline-none focus:border-[#161616] transition-colors",
         className
       )}
     />
@@ -112,7 +112,7 @@ type AdminButtonSize = 'sm' | 'md'
 const buttonVariantClass: Record<AdminButtonVariant, string> = {
   primary: 'bg-[#161616] text-white hover:bg-[#535353]',
   secondary: 'bg-[#E1E1E1] text-[#161616] hover:bg-[#BBBBBB]',
-  outline: 'border border-[#161616] bg-[#EAEAEA] text-[#161616] hover:bg-[#E1E1E1]',
+  outline: 'border border-[#161616] bg-[#E1E1E1] text-[#161616] hover:bg-[#DCDCDC]',
   danger: 'bg-[#FF3B30] text-white hover:bg-[#D92C25]',
 }
 

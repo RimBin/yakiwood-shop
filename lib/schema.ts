@@ -109,7 +109,7 @@ export function generateLocalBusinessSchema() {
     description:
       'Premium Shou Sugi Ban burnt wood products delivered across the UK. Traditional Japanese technique for sustainable, beautiful, and durable wood surfaces.',
     url: 'https://yakiwood.lt',
-    telephone: '+370-XXX-XXXXX', // Add real phone number
+    telephone: '+37067564733', // Updated phone number
     email: 'info@yakiwood.lt',
     address: {
       '@type': 'PostalAddress',

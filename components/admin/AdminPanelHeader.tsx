@@ -309,7 +309,7 @@ export default function AdminPanelHeader() {
                         `h-[44px] px-[18px] sm:h-[48px] sm:px-[24px] rounded-[100px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase transition-all whitespace-nowrap inline-flex items-center ` +
                         (isActive
                           ? 'bg-[#161616] text-white'
-                          : 'bg-[#EAEAEA] text-[#161616] hover:bg-[#DCDCDC]')
+                          : 'bg-[#E1E1E1] border border-[#BBBBBB] text-[#161616] hover:bg-[#DCDCDC]')
                       }
                       aria-current={isActive ? 'page' : undefined}
                     >
