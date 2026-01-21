@@ -14,11 +14,11 @@ export default async function CTA() {
   const t = await getTranslations('home.cta');
 
   return (
-    <section className="relative w-full overflow-visible bg-[#E1E1E1]">
+    <section className="relative w-full overflow-hidden bg-[#E1E1E1]">
       {/* Background Image with opacity and luminosity blend */}
       <div className="absolute pointer-events-none mix-blend-luminosity opacity-[0.18] z-0 inset-0">
         {/* Mobile: large circular artwork centered behind the content */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[200vw] h-[200vw] md:w-[160vw] md:h-[160vw] lg:w-[1099px] lg:h-[1053px]">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[140vmax] h-[140vmax] md:w-[120vmax] md:h-[120vmax] lg:w-[1099px] lg:h-[1053px]">
           <Image src={backgroundImage} alt="" fill className="object-contain" sizes="100vw" />
         </div>
       </div>

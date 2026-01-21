@@ -112,13 +112,13 @@ export default function Testimonials() {
               setActiveIndex(nearest);
             }, 120);
           }}
-          className={`${getContainerPadding()} flex gap-[16px] overflow-x-auto scrollbar-hide pb-[8px] snap-x snap-mandatory scroll-smooth`}
+          className="flex gap-[16px] overflow-x-auto scrollbar-hide pb-[8px] snap-x snap-mandatory scroll-smooth"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {testimonials.map((testimonial, index) => (
             <article
               key={testimonial.author}
-              className="relative flex-shrink-0 w-[calc(100vw-32px)] md:w-[calc(100vw-64px)] h-[450px] md:h-[480px] rounded-[16px] overflow-hidden snap-center"
+              className="relative flex-shrink-0 w-[calc(100vw_-_32px)] md:w-[calc(100vw_-_64px)] mx-[16px] md:mx-[32px] h-[450px] md:h-[480px] rounded-[16px] overflow-hidden snap-center"
             >
               <div className="absolute inset-0">
                 <Image

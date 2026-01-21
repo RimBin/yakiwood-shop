@@ -463,22 +463,12 @@ export default function ProductForm({ product, mode }: Props) {
   const [deleteModal, setDeleteModal] = useState(false);
   const lockBaseFields = false;
 
-  // Auto-generate LT + EN names/slugs from usage + wood.
+  // Auto-generate slugs only (names remain manual).
   // Stops per-field once user edits it manually (unless they clear it).
   useEffect(() => {
     const usageOk = ALLOWED_USAGE_TYPES.includes(usageType as any);
     const woodOk = ALLOWED_WOOD_TYPES.includes(woodType as any);
     if (!usageOk || !woodOk) return;
-
-    if (!isNameManuallyEdited) {
-      const nextName = buildLtProductName(usageType, woodType);
-      if (nextName && nextName !== name) setName(nextName);
-    }
-
-    if (!isNameEnManuallyEdited) {
-      const nextNameEn = buildEnProductName(usageType, woodType);
-      if (nextNameEn && nextNameEn !== nameEn) setNameEn(nextNameEn);
-    }
 
     if (!isSlugManuallyEdited) {
       const baseName = name?.trim() || buildLtProductName(usageType, woodType);
@@ -492,7 +482,7 @@ export default function ProductForm({ product, mode }: Props) {
       if (nextEn && nextEn !== slugEn) setSlugEn(nextEn);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usageType, woodType, variants, isSlugManuallyEdited, isSlugEnManuallyEdited, isNameManuallyEdited, isNameEnManuallyEdited, slug, slugEn, name, nameEn]);
+  }, [usageType, woodType, variants, isSlugManuallyEdited, isSlugEnManuallyEdited, slug, slugEn, name, nameEn]);
 
   // Keep derived fields in sync
   useEffect(() => {
