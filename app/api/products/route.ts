@@ -83,7 +83,43 @@ export async function GET(request: Request) {
       )
     }
 
-    return NextResponse.json(products || [])
+    const list = products || []
+
+    if (mode === 'stock-items' && list.length > 0) {
+      // Stock items are stored as separate product rows with slug pattern:
+      // <baseSlug>--<profile>--<color>--<width>x<length>
+      // Hide stock items whose base product is not active.
+      const baseSlugs = Array.from(
+        new Set(
+          list
+            .map((p: any) => String(p?.slug || ''))
+            .filter(Boolean)
+            .map((slug: string) => slug.split('--')[0])
+            .filter((base: string) => base && !base.includes('--'))
+        )
+      )
+
+      if (baseSlugs.length > 0) {
+        const { data: activeBases } = await supabase
+          .from('products')
+          .select('slug')
+          .in('slug', baseSlugs)
+          .eq('is_active', true)
+
+        const allowed = new Set((activeBases || []).map((row: any) => String(row?.slug || '')).filter(Boolean))
+
+        const filtered = list.filter((p: any) => {
+          const slug = String(p?.slug || '')
+          const base = slug.split('--')[0]
+          if (!base) return false
+          return allowed.has(base)
+        })
+
+        return NextResponse.json(filtered)
+      }
+    }
+
+    return NextResponse.json(list)
   } catch (error) {
     console.error('Error fetching products:', error)
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })

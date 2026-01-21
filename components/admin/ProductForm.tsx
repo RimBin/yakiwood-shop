@@ -208,6 +208,38 @@ export default function ProductForm({ product, mode }: Props) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations('admin.products.form');
 
+  async function getAdminToken(): Promise<string | null> {
+    if (!supabase) return null;
+    const { data } = await supabase!.auth.getSession();
+    return data.session?.access_token ?? null;
+  }
+
+  async function adminRequest<T>(input: RequestInfo | URL, init: RequestInit = {}): Promise<T> {
+    const token = await getAdminToken();
+    if (!token) throw new Error('Missing admin token');
+
+    const headers = new Headers(init.headers);
+    headers.set('authorization', `Bearer ${token}`);
+    if (init.body && !headers.has('content-type')) {
+      headers.set('content-type', 'application/json');
+    }
+
+    const response = await fetch(input, { ...init, headers });
+    let payload: any = null;
+    try {
+      payload = await response.json();
+    } catch {
+      payload = null;
+    }
+
+    if (!response.ok) {
+      const msg = payload?.error || `Request failed (${response.status})`;
+      throw new Error(String(msg));
+    }
+
+    return payload as T;
+  }
+
   const catalogMigrationPath = 'supabase/migrations/20260111_catalog_options_assets_sale_thickness.sql';
   const slugEnMigrationPath = 'supabase/migrations/20260113_add_products_slug_en.sql';
 
@@ -725,18 +757,15 @@ export default function ProductForm({ product, mode }: Props) {
 
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', product.id);
-
-      if (error) throw error;
+      // Archive product (soft-delete) via admin API to avoid RLS issues in the browser.
+      await adminRequest(`/api/admin/products/${product.id}`, { method: 'DELETE' });
 
       router.push(toLocalePath('/admin/products', locale));
       router.refresh();
     } catch (error) {
-      console.error('Error deleting product:', error);
-      setSaveError(t('errors.deleteFailed'));
+      const message = formatUnknownError(error);
+      console.error('Error deleting product:', message);
+      setSaveError(message || t('errors.deleteFailed'));
     } finally {
       setIsSaving(false);
       setDeleteModal(false);

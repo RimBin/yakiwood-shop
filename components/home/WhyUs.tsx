@@ -29,7 +29,7 @@ export default async function WhyUs() {
   return (
     <section className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7566 ===== */}
-      <div className={`lg:hidden ${getSectionPadding()}`}>
+      <div className="lg:hidden pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0">
         {/* Title Section - Mobile/Tablet */}
         <div className={`flex flex-col ${getGap('sm')} mb-[16px] md:mb-[24px]`}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">

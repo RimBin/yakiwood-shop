@@ -14,16 +14,19 @@ export default async function CTA() {
   const t = await getTranslations('home.cta');
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#E1E1E1]">
+    <section className="relative w-full overflow-visible bg-[#E1E1E1]">
       {/* Background Image with opacity and luminosity blend */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] md:w-[625px] lg:w-[1099px] h-[520px] md:h-[599px] lg:h-[1053px] opacity-[0.15] mix-blend-luminosity pointer-events-none">
-        <Image src={backgroundImage} alt="" fill className="object-contain" sizes="100vw" />
+      <div className="absolute pointer-events-none mix-blend-luminosity opacity-[0.18] z-0 inset-0">
+        {/* Mobile: large circular artwork centered behind the content */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[200vw] h-[200vw] md:w-[160vw] md:h-[160vw] lg:w-[1099px] lg:h-[1053px]">
+          <Image src={backgroundImage} alt="" fill className="object-contain" sizes="100vw" />
+        </div>
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7625 ===== */}
-      <div className={`lg:hidden relative z-10 flex flex-col items-center justify-center ${getSectionPadding()}`}>
+      <div className={`lg:hidden relative z-10 flex flex-col items-center justify-center h-[580px] ${getSectionPadding()}`}>
         {/* Heading - Mobile/Tablet */}
-        <h2 className="font-['DM_Sans'] font-light text-center max-w-[600px] mb-[32px] md:mb-[40px]" style={{ fontSize: 'clamp(40px, 7vw, 64px)', lineHeight: 1, letterSpacing: 'clamp(-1.8px, -0.04em, -2.56px)' }}>
+        <h2 className="font-['DM_Sans'] font-light text-center max-w-[600px] mb-[12px] md:mb-[40px]" style={{ fontSize: 'clamp(40px, 7vw, 64px)', lineHeight: 1, letterSpacing: 'clamp(-1.8px, -0.04em, -2.56px)' }}>
           <span>{t('headline.prefix')}</span>
           <span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
           <span>{t('headline.suffix')}</span>
@@ -33,7 +36,7 @@ export default async function CTA() {
         <div className="flex flex-col md:flex-row gap-[16px] w-full md:w-auto md:justify-center max-w-[358px] md:max-w-none">
           {/* Primary Button - GET AN OFFER */}
           <Link
-            href={toLocalePath('/kontaktai', currentLocale)}
+            href={toLocalePath('/produktai', currentLocale)}
             className="bg-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full md:w-auto md:px-[40px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">

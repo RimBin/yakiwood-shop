@@ -57,6 +57,9 @@ export async function GET(
     if (error instanceof AdminAuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status })
     }
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
     return NextResponse.json({ error: 'Unexpected server error' }, { status: 500 })
   }
 }
@@ -133,6 +136,9 @@ export async function PATCH(
   } catch (error) {
     if (error instanceof AdminAuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status })
+    }
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
     return NextResponse.json({ error: 'Unexpected server error' }, { status: 500 })
   }
@@ -225,6 +231,9 @@ export async function PUT(
     if (error instanceof AdminAuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status })
     }
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
     return NextResponse.json({ error: 'Unexpected server error' }, { status: 500 })
   }
 }
@@ -250,6 +259,9 @@ export async function DELETE(
   } catch (error) {
     if (error instanceof AdminAuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status })
+    }
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
     return NextResponse.json({ error: 'Unexpected server error' }, { status: 500 })
   }

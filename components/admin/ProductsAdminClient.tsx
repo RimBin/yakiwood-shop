@@ -62,6 +62,38 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
   const ALLOWED_USAGE_TYPES = new Set(['facade', 'terrace']);
   const ALLOWED_WOOD_TYPES = new Set(['spruce', 'larch']);
 
+  async function getAdminToken(): Promise<string | null> {
+    if (!supabase) return null;
+    const { data } = await supabase!.auth.getSession();
+    return data.session?.access_token ?? null;
+  }
+
+  async function adminRequest<T>(input: RequestInfo | URL, init: RequestInit = {}): Promise<T> {
+    const token = await getAdminToken();
+    if (!token) throw new Error('Missing admin token');
+
+    const headers = new Headers(init.headers);
+    headers.set('authorization', `Bearer ${token}`);
+    if (init.body && !headers.has('content-type')) {
+      headers.set('content-type', 'application/json');
+    }
+
+    const response = await fetch(input, { ...init, headers });
+    let payload: any = null;
+    try {
+      payload = await response.json();
+    } catch {
+      payload = null;
+    }
+
+    if (!response.ok) {
+      const msg = payload?.error || `Request failed (${response.status})`;
+      throw new Error(String(msg));
+    }
+
+    return payload as T;
+  }
+
   // Filtered products
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
@@ -108,12 +140,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
   const handleDelete = async (id: string) => {
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from('products')
-        .update({ is_active: false })
-        .eq('id', id);
-
-      if (error) throw error;
+      await adminRequest(`/api/admin/products/${id}`, { method: 'DELETE' });
 
       setProducts(products.map(p => 
         p.id === id ? { ...p, is_active: false } : p
@@ -121,7 +148,11 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
       setDeleteConfirmId(null);
       router.refresh();
     } catch (error) {
-      console.error('Error deleting product:', error);
+      const message =
+        typeof error === 'object' && error && 'message' in error
+          ? String((error as any).message)
+          : String(error);
+      console.error('Error deleting product:', message);
       alert(tList('errors.deleteFailed'));
     } finally {
       setIsDeleting(false);
@@ -133,12 +164,11 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
     
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from('products')
-        .update({ is_active: false })
-        .in('id', Array.from(selectedIds));
-
-      if (error) throw error;
+      const ids = Array.from(selectedIds);
+      await adminRequest('/api/admin/products/bulk', {
+        method: 'POST',
+        body: JSON.stringify({ ids, isActive: false }),
+      });
 
       setProducts(products.map(p => 
         selectedIds.has(p.id) ? { ...p, is_active: false } : p
@@ -146,7 +176,11 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
       setSelectedIds(new Set());
       router.refresh();
     } catch (error) {
-      console.error('Error bulk deleting:', error);
+      const message =
+        typeof error === 'object' && error && 'message' in error
+          ? String((error as any).message)
+          : String(error);
+      console.error('Error bulk deleting:', message);
       alert(tList('errors.bulkDeleteFailed'));
     } finally {
       setIsDeleting(false);
@@ -156,12 +190,11 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
   const handleBulkToggleStatus = async (active: boolean) => {
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from('products')
-        .update({ is_active: active })
-        .in('id', Array.from(selectedIds));
-
-      if (error) throw error;
+      const ids = Array.from(selectedIds);
+      await adminRequest('/api/admin/products/bulk', {
+        method: 'POST',
+        body: JSON.stringify({ ids, isActive: active }),
+      });
 
       setProducts(products.map(p => 
         selectedIds.has(p.id) ? { ...p, is_active: active } : p
@@ -169,7 +202,11 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
       setSelectedIds(new Set());
       router.refresh();
     } catch (error) {
-      console.error('Error updating status:', error);
+      const message =
+        typeof error === 'object' && error && 'message' in error
+          ? String((error as any).message)
+          : String(error);
+      console.error('Error updating status:', message);
       alert(tList('errors.statusFailed'));
     } finally {
       setIsDeleting(false);
@@ -235,19 +272,21 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
     setIsArchivingInvalid(true);
     try {
       const ids = invalid.map((p) => p.id);
-      const { error } = await supabase
-        .from('products')
-        .update({ is_active: false })
-        .in('id', ids);
-
-      if (error) throw error;
+      await adminRequest('/api/admin/products/bulk', {
+        method: 'POST',
+        body: JSON.stringify({ ids, isActive: false }),
+      });
 
       setProducts((prev) =>
         prev.map((p) => (ids.includes(p.id) ? { ...p, is_active: false } : p))
       );
       router.refresh();
     } catch (error) {
-      console.error('Error archiving invalid products:', error);
+      const message =
+        typeof error === 'object' && error && 'message' in error
+          ? String((error as any).message)
+          : String(error);
+      console.error('Error archiving invalid products:', message);
       alert(tList('errors.bulkDeleteFailed'));
     } finally {
       setIsArchivingInvalid(false);

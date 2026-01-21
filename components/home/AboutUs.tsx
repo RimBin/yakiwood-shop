@@ -113,7 +113,7 @@ export default function AboutUs() {
   return (
     <section id="about-us" className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
-      <div className={`lg:hidden ${getSectionSpacing()}`}>
+      <div className="lg:hidden pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0">
         <div className={`${getContainerPadding()} mb-[24px]`}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
             {t('eyebrow')}

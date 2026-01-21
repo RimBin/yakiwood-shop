@@ -21,7 +21,7 @@ export default async function Hero() {
   const heroDescriptionSize = clamp(14, 16);
 
   return (
-    <section className="w-full bg-[#E1E1E1] md:bg-[#EAEAEA] relative overflow-hidden pb-[80px] lg:pb-0">
+    <section className="w-full bg-[#E1E1E1] md:bg-[#EAEAEA] relative overflow-hidden lg:pb-0">
       {/* Full-width hero vector background */}
       <div className="absolute inset-0 hidden md:block z-0 pointer-events-none">
         <Image src={assets.heroVector} alt="" fill className="object-cover" priority sizes="100vw" />
@@ -45,19 +45,19 @@ export default async function Hero() {
           </p>
         </div>
 
-        <div className="relative w-full pb-[72px]">
+        <div className="relative w-full">
           <div className="bg-[#bbab92] w-full h-[423px] relative">
-            <div className="absolute left-[8.34px] top-0 w-[367px] h-[309.127px] flex items-center justify-center overflow-hidden">
-              <div className="rotate-[333.068deg]">
-                <div className="w-[317.433px] h-[185.467px] relative">
-                    <Image
-                      src={imgProductImage}
-                      alt="Shou Sugi Ban Plank"
-                      fill
-                      className="object-contain"
-                      sizes="(max-width: 1024px) 320px, 575px"
-                      priority
-                    />
+            <div className="absolute inset-x-0 top-0 h-[309px] flex items-center justify-center">
+              <div className="rotate-[333.068deg] w-full px-4 flex items-center justify-center">
+                <div className="w-full max-w-[340px] aspect-[317/185] relative">
+                  <Image
+                    src={imgProductImage}
+                    alt="Shou Sugi Ban Plank"
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 1024px) 90vw, 575px"
+                    priority
+                  />
                 </div>
               </div>
             </div>
