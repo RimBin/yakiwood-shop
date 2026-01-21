@@ -46,6 +46,30 @@ function buildLtProductSlug(usageType: string, woodType: string): string {
   return slugify(buildLtProductName(usageType, woodType));
 }
 
+function woodLtFromType(woodType: string): string {
+  return woodType === 'larch' ? 'Maumedis' : 'Eglė';
+}
+
+function woodEnFromType(woodType: string): string {
+  return woodType === 'larch' ? 'Larch' : 'Spruce';
+}
+
+function buildLtSlugFromNameAndWood(name: string, woodType: string): string {
+  const wood = woodLtFromType(woodType);
+  const normalizedName = (name || '').toLowerCase();
+  const normalizedWood = wood.toLowerCase();
+  const base = normalizedName.includes(normalizedWood) ? name : `${name} ${wood}`;
+  return slugify(base);
+}
+
+function buildEnSlugFromNameAndWood(name: string, woodType: string): string {
+  const wood = woodEnFromType(woodType);
+  const normalizedName = (name || '').toLowerCase();
+  const normalizedWood = wood.toLowerCase();
+  const base = normalizedName.includes(normalizedWood) ? name : `${name} ${wood}`;
+  return slugify(base);
+}
+
 function buildStockItemSlug(baseSlug: string, profile: string, color: string, width: number, length: number): string {
   return `${baseSlug}--${slugify(profile)}--${slugify(color)}--${width}x${length}`;
 }
@@ -85,6 +109,26 @@ function formatUnknownError(error: unknown): string {
   return String(error);
 }
 
+function normalizeNumberInput(input: string): string {
+  return input.replace(',', '.');
+}
+
+function parseRequiredNumber(input: string): number | undefined | null {
+  const trimmed = (input || '').trim();
+  if (!trimmed) return undefined;
+  const n = Number(normalizeNumberInput(trimmed));
+  return Number.isFinite(n) ? n : null;
+}
+
+function parseOptionalInteger(input: string): number | undefined | null {
+  const trimmed = (input || '').trim();
+  if (!trimmed) return undefined;
+  const n = Number(normalizeNumberInput(trimmed));
+  if (!Number.isFinite(n)) return null;
+  if (!Number.isInteger(n)) return null;
+  return n;
+}
+
 function isMissingColumnError(message: string, column: string): boolean {
   if (!message) return false;
   const escaped = column.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -93,6 +137,31 @@ function isMissingColumnError(message: string, column: string): boolean {
     new RegExp(`column\\s+products\\.${escaped}\\s+does not exist`, 'i').test(message) ||
     (new RegExp(escaped, 'i').test(message) && /schema cache/i.test(message))
   );
+}
+
+function isRlsOrPermissionError(message: string): boolean {
+  if (!message) return false;
+  return (
+    /row-level security/i.test(message) ||
+    /violates row-level security/i.test(message) ||
+    /new row violates row-level security policy/i.test(message) ||
+    /permission denied/i.test(message) ||
+    /not allowed/i.test(message)
+  );
+}
+
+function inferUniqueFieldFromError(message: string): 'slug' | 'slug_en' | 'sku' | null {
+  if (!message) return null;
+  // Postgres details often look like: Key (slug)=(...) already exists.
+  if (/key\s*\(\s*slug\s*\)\s*=\s*\(/i.test(message)) return 'slug';
+  if (/key\s*\(\s*slug_en\s*\)\s*=\s*\(/i.test(message)) return 'slug_en';
+  if (/key\s*\(\s*sku\s*\)\s*=\s*\(/i.test(message)) return 'sku';
+
+  // Fallback to constraint names when available.
+  if (/products_slug(_idx|_key|_unique)?/i.test(message) || /slug\s+unique/i.test(message)) return 'slug';
+  if (/products_slug_en/i.test(message)) return 'slug_en';
+  if (/products_sku/i.test(message)) return 'sku';
+  return null;
 }
 
 function createProductSchema(t: (key: string) => string) {
@@ -117,13 +186,17 @@ function createProductSchema(t: (key: string) => string) {
       .string()
       .min(1, t('validation.woodRequired'))
       .refine((v) => (ALLOWED_WOOD_TYPES as readonly string[]).includes(v), t('validation.woodInvalid')),
-    base_price: z.number().min(0, t('validation.basePricePositive')),
+    base_price: z.number({ message: t('validation.basePriceNumber') }).min(0, t('validation.basePricePositive')),
     status: z.enum(['draft', 'published']),
-    stock_quantity: z.number().min(0).optional(),
+    stock_quantity: z
+      .number({ message: t('validation.integerExpected') })
+      .int(t('validation.integerExpected'))
+      .min(0, t('validation.numberMinZero'))
+      .optional(),
     sku: z.string().optional(),
-    width: z.number().optional(),
-    height: z.number().optional(),
-    depth: z.number().optional(),
+    width: z.number({ message: t('validation.numberExpected') }),
+    height: z.number({ message: t('validation.numberExpected') }),
+    depth: z.number({ message: t('validation.numberExpected') }),
   });
 }
 
@@ -242,6 +315,7 @@ export default function ProductForm({ product, mode }: Props) {
 
   const catalogMigrationPath = 'supabase/migrations/20260111_catalog_options_assets_sale_thickness.sql';
   const slugEnMigrationPath = 'supabase/migrations/20260113_add_products_slug_en.sql';
+  const dimensionsMigrationPath = 'supabase/migrations/20260121_add_product_dimensions.sql';
 
   // Form state
   const [name, setName] = useState(product?.name || '');
@@ -387,7 +461,7 @@ export default function ProductForm({ product, mode }: Props) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveWarning, setSaveWarning] = useState<string | null>(null);
   const [deleteModal, setDeleteModal] = useState(false);
-  const lockBaseFields = true;
+  const lockBaseFields = false;
 
   // Auto-generate LT + EN names/slugs from usage + wood.
   // Stops per-field once user edits it manually (unless they clear it).
@@ -407,12 +481,14 @@ export default function ProductForm({ product, mode }: Props) {
     }
 
     if (!isSlugManuallyEdited) {
-      const nextLt = buildLtProductSlug(usageType, woodType);
+      const baseName = name?.trim() || buildLtProductName(usageType, woodType);
+      const nextLt = buildLtSlugFromNameAndWood(baseName, woodType);
       if (nextLt && nextLt !== slug) setSlug(nextLt);
     }
 
     if (!isSlugEnManuallyEdited) {
-      const nextEn = buildEnProductSlug(usageType, woodType);
+      const baseNameEn = nameEn?.trim() || buildEnProductName(usageType, woodType);
+      const nextEn = buildEnSlugFromNameAndWood(baseNameEn, woodType);
       if (nextEn && nextEn !== slugEn) setSlugEn(nextEn);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -578,8 +654,15 @@ export default function ProductForm({ product, mode }: Props) {
 
   // Validate form
   const validateForm = (): boolean => {
+    const basePriceValue = parseRequiredNumber(basePrice);
+    const stockQuantityValue = parseOptionalInteger(stockQuantity);
+    const widthValue = parseRequiredNumber(width);
+    const heightValue = parseRequiredNumber(height);
+    const depthValue = parseRequiredNumber(depth);
+
     try {
       const productSchema = createProductSchema((key: string) => t(key as any));
+
       productSchema.parse({
         name,
         name_en: nameEn || undefined,
@@ -589,13 +672,13 @@ export default function ProductForm({ product, mode }: Props) {
         description_en: descriptionEn || undefined,
         usage_type: usageType,
         wood_type: woodType,
-        base_price: parseFloat(basePrice),
+        base_price: basePriceValue ?? null,
         status,
-        stock_quantity: stockQuantity ? parseInt(stockQuantity) : undefined,
+        stock_quantity: stockQuantityValue,
         sku: sku || undefined,
-        width: width ? parseFloat(width) : undefined,
-        height: height ? parseFloat(height) : undefined,
-        depth: depth ? parseFloat(depth) : undefined,
+        width: widthValue,
+        height: heightValue,
+        depth: depthValue,
       });
       setErrors({});
       return true;
@@ -607,6 +690,21 @@ export default function ProductForm({ product, mode }: Props) {
             newErrors[err.path[0].toString()] = err.message;
           }
         });
+
+        // Prefer a clearer message when the field is simply missing.
+        if (basePriceValue === undefined) {
+          newErrors.base_price = t('validation.basePriceRequired');
+        }
+        if (widthValue === undefined) {
+          newErrors.width = t('validation.widthRequired');
+        }
+        if (heightValue === undefined) {
+          newErrors.height = t('validation.heightRequired');
+        }
+        if (depthValue === undefined) {
+          newErrors.depth = t('validation.depthRequired');
+        }
+
         setErrors(newErrors);
       }
       return false;
@@ -626,6 +724,15 @@ export default function ProductForm({ product, mode }: Props) {
     setIsSaving(true);
 
     try {
+      const basePriceValue = parseRequiredNumber(basePrice);
+      if (basePriceValue === undefined) throw new Error(t('validation.basePriceRequired'));
+      if (typeof basePriceValue !== 'number') throw new Error(t('validation.basePriceNumber'));
+
+      const stockQuantityValue = parseOptionalInteger(stockQuantity);
+      const widthValue = parseRequiredNumber(width);
+      const heightValue = parseRequiredNumber(height);
+      const depthValue = parseRequiredNumber(depth);
+
       // Upload image if new file selected
       let finalImageUrl = imageUrl;
       if (imageFile) {
@@ -645,13 +752,13 @@ export default function ProductForm({ product, mode }: Props) {
         category: deriveCategoryFromUsage(usageType),
         usage_type: usageType || null,
         wood_type: woodType,
-        base_price: parseFloat(basePrice),
+        base_price: basePriceValue,
         is_active: status === 'published',
-        stock_quantity: stockQuantity ? parseInt(stockQuantity) : null,
+        stock_quantity: typeof stockQuantityValue === 'number' ? stockQuantityValue : null,
         sku: sku || null,
-        width: width ? parseFloat(width) : null,
-        height: height ? parseFloat(height) : null,
-        depth: depth ? parseFloat(depth) : null,
+        width: typeof widthValue === 'number' ? widthValue : null,
+        height: typeof heightValue === 'number' ? heightValue : null,
+        depth: typeof depthValue === 'number' ? depthValue : null,
         image_url: finalImageUrl,
       };
 
@@ -665,12 +772,26 @@ export default function ProductForm({ product, mode }: Props) {
 
         if (error) {
           const message = formatUnknownError(error);
-          if (isMissingColumnError(message, 'slug_en')) {
-            const { slug_en, ...fallback } = productData as any;
+          const missingSlugEn = isMissingColumnError(message, 'slug_en');
+          const missingWidth = isMissingColumnError(message, 'width');
+          const missingHeight = isMissingColumnError(message, 'height');
+          const missingDepth = isMissingColumnError(message, 'depth');
+
+          if (missingSlugEn || missingWidth || missingHeight || missingDepth) {
+            const fallback = { ...(productData as any) };
+            if (missingSlugEn) delete fallback.slug_en;
+            if (missingWidth) delete fallback.width;
+            if (missingHeight) delete fallback.height;
+            if (missingDepth) delete fallback.depth;
+
             const retry = await supabase.from('products').insert(fallback).select().single();
             if (retry.error) throw retry.error;
             data = retry.data as any;
-            setSaveWarning(t('errors.slugEnMissing', { path: slugEnMigrationPath } as any));
+
+            const warnings: string[] = [];
+            if (missingSlugEn) warnings.push(t('errors.slugEnMissing', { path: slugEnMigrationPath } as any));
+            if (missingWidth || missingHeight || missingDepth) warnings.push(t('errors.dimensionsMissing', { path: dimensionsMigrationPath } as any));
+            if (warnings.length > 0) setSaveWarning(warnings.join('\n'));
           } else {
             throw error;
           }
@@ -683,11 +804,25 @@ export default function ProductForm({ product, mode }: Props) {
 
         if (error) {
           const message = formatUnknownError(error);
-          if (isMissingColumnError(message, 'slug_en')) {
-            const { slug_en, ...fallback } = productData as any;
+          const missingSlugEn = isMissingColumnError(message, 'slug_en');
+          const missingWidth = isMissingColumnError(message, 'width');
+          const missingHeight = isMissingColumnError(message, 'height');
+          const missingDepth = isMissingColumnError(message, 'depth');
+
+          if (missingSlugEn || missingWidth || missingHeight || missingDepth) {
+            const fallback = { ...(productData as any) };
+            if (missingSlugEn) delete fallback.slug_en;
+            if (missingWidth) delete fallback.width;
+            if (missingHeight) delete fallback.height;
+            if (missingDepth) delete fallback.depth;
+
             const retry = await supabase.from('products').update(fallback).eq('id', product!.id);
             if (retry.error) throw retry.error;
-            setSaveWarning(t('errors.slugEnMissing', { path: slugEnMigrationPath } as any));
+
+            const warnings: string[] = [];
+            if (missingSlugEn) warnings.push(t('errors.slugEnMissing', { path: slugEnMigrationPath } as any));
+            if (missingWidth || missingHeight || missingDepth) warnings.push(t('errors.dimensionsMissing', { path: dimensionsMigrationPath } as any));
+            if (warnings.length > 0) setSaveWarning(warnings.join('\n'));
           } else {
             throw error;
           }
@@ -739,12 +874,30 @@ export default function ProductForm({ product, mode }: Props) {
       router.refresh();
     } catch (error) {
       const message = formatUnknownError(error);
-      console.error('Error saving product:', message);
+
+      const uniqueField = inferUniqueFieldFromError(message);
+      if (uniqueField) {
+        const nextErrors = { ...errors } as Record<string, string>;
+        if (uniqueField === 'slug') nextErrors.slug = t('errors.slugTaken');
+        if (uniqueField === 'slug_en') nextErrors.slug_en = t('errors.slugEnTaken');
+        if (uniqueField === 'sku') nextErrors.sku = t('errors.skuTaken');
+        setErrors(nextErrors);
+        setSaveError(null);
+        return;
+      }
 
       if (isMissingColumnError(message, 'slug_en')) {
         setSaveError(t('errors.slugEnMissing', { path: slugEnMigrationPath } as any));
+      } else if (isMissingColumnError(message, 'width') || isMissingColumnError(message, 'height') || isMissingColumnError(message, 'depth')) {
+        setSaveError(t('errors.dimensionsMissing', { path: dimensionsMigrationPath } as any));
+      } else if (isMissingColumnError(message, 'sku') || isMissingColumnError(message, 'stock_quantity') || isMissingColumnError(message, 'usage_type')) {
+        setSaveError(t('errors.inventoryFieldsMissing', { path: 'supabase/migrations/20260121_add_products_inventory_fields.sql' } as any));
+      } else if (isRlsOrPermissionError(message)) {
+        setSaveError(t('errors.notAuthorized'));
       } else {
-        setSaveError(message || t('errors.saveFailed'));
+        console.error('Error saving product:', message);
+        // Keep UI errors localized; log technical details to console.
+        setSaveError(locale === 'lt' ? t('errors.saveFailed') : (message || t('errors.saveFailed')));
       }
     } finally {
       setIsSaving(false);
@@ -765,7 +918,7 @@ export default function ProductForm({ product, mode }: Props) {
     } catch (error) {
       const message = formatUnknownError(error);
       console.error('Error deleting product:', message);
-      setSaveError(message || t('errors.deleteFailed'));
+      setSaveError(locale === 'lt' ? t('errors.deleteFailed') : (message || t('errors.deleteFailed')));
     } finally {
       setIsSaving(false);
       setDeleteModal(false);
@@ -933,7 +1086,34 @@ export default function ProductForm({ product, mode }: Props) {
       }
 
       const { error } = await supabase.from('products').insert(rows);
-      if (error) throw error;
+      if (error) {
+        const message = formatUnknownError(error);
+        const missingSlugEn = isMissingColumnError(message, 'slug_en');
+        const missingWidth = isMissingColumnError(message, 'width');
+        const missingHeight = isMissingColumnError(message, 'height');
+        const missingDepth = isMissingColumnError(message, 'depth');
+
+        if (missingSlugEn || missingWidth || missingHeight || missingDepth) {
+          const fallbackRows = rows.map((row: any) => {
+            const next = { ...row };
+            if (missingSlugEn) delete next.slug_en;
+            if (missingWidth) delete next.width;
+            if (missingHeight) delete next.height;
+            if (missingDepth) delete next.depth;
+            return next;
+          });
+
+          const retry = await supabase.from('products').insert(fallbackRows);
+          if (retry.error) throw retry.error;
+
+          const warnings: string[] = [];
+          if (missingSlugEn) warnings.push(t('errors.slugEnMissing', { path: slugEnMigrationPath } as any));
+          if (missingWidth || missingHeight || missingDepth) warnings.push(t('errors.dimensionsMissing', { path: dimensionsMigrationPath } as any));
+          if (warnings.length > 0) setSaveWarning(warnings.join('\n'));
+        } else {
+          throw error;
+        }
+      }
 
       setVariantDrafts([]);
     } catch (error) {
@@ -1152,6 +1332,11 @@ export default function ProductForm({ product, mode }: Props) {
                     const next = e.target.value;
                     setName(next);
                     setIsNameManuallyEdited(next.trim().length > 0);
+
+                    if (!isSlugManuallyEdited) {
+                      const nextSlug = buildLtSlugFromNameAndWood(next.trim() || next, woodType);
+                      setSlug(nextSlug);
+                    }
                   }}
                   readOnly={lockBaseFields}
                   className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 ${
@@ -1178,6 +1363,11 @@ export default function ProductForm({ product, mode }: Props) {
                     const next = e.target.value;
                     setNameEn(next);
                     setIsNameEnManuallyEdited(next.trim().length > 0);
+
+                    if (!isSlugEnManuallyEdited) {
+                      const nextSlugEn = buildEnSlugFromNameAndWood(next.trim() || next, woodType);
+                      setSlugEn(nextSlugEn);
+                    }
                   }}
                   readOnly={lockBaseFields}
                   className={`w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] ${
@@ -1330,9 +1520,12 @@ export default function ProductForm({ product, mode }: Props) {
                 type="number"
                 value={stockQuantity}
                 onChange={(e) => setStockQuantity(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA]"
+                className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 bg-[#EAEAEA] ${
+                  errors.stock_quantity ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
+                }`}
                 placeholder={t('placeholders.stockQuantity')}
               />
+              {errors.stock_quantity && <p className="text-sm text-red-600 mt-1">{errors.stock_quantity}</p>}
             </div>
 
             <div>
@@ -1343,9 +1536,12 @@ export default function ProductForm({ product, mode }: Props) {
                 type="text"
                 value={sku}
                 onChange={(e) => setSku(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA]"
+                className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 bg-[#EAEAEA] ${
+                  errors.sku ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
+                }`}
                 placeholder={t('placeholders.sku')}
               />
+              {errors.sku && <p className="text-sm text-red-600 mt-1">{errors.sku}</p>}
             </div>
           </div>
         </div>
@@ -1362,7 +1558,9 @@ export default function ProductForm({ product, mode }: Props) {
               <select
                 value={width}
                 onChange={(e) => setWidth(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA] yw-select"
+                className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 bg-[#EAEAEA] yw-select ${
+                  errors.width ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
+                }`}
               >
                 {WIDTH_OPTIONS_MM.map((mm) => (
                   <option key={mm} value={String(mm)}>
@@ -1370,6 +1568,7 @@ export default function ProductForm({ product, mode }: Props) {
                   </option>
                 ))}
               </select>
+              {errors.width && <p className="text-sm text-red-600 mt-1">{errors.width}</p>}
             </div>
 
             <div>
@@ -1380,7 +1579,9 @@ export default function ProductForm({ product, mode }: Props) {
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
                 disabled={!usageType}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA] disabled:opacity-60 yw-select"
+                className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 bg-[#EAEAEA] disabled:opacity-60 yw-select ${
+                  errors.height ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
+                }`}
               >
                 {!usageType ? (
                   <option value="">{t('placeholders.selectUsageFirst')}</option>
@@ -1390,6 +1591,7 @@ export default function ProductForm({ product, mode }: Props) {
                   <option value="18">18/20 mm</option>
                 )}
               </select>
+              {errors.height && <p className="text-sm text-red-600 mt-1">{errors.height}</p>}
             </div>
 
             <div>
@@ -1399,7 +1601,9 @@ export default function ProductForm({ product, mode }: Props) {
               <select
                 value={depth}
                 onChange={(e) => setDepth(e.target.value)}
-                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616] bg-[#EAEAEA] yw-select"
+                className={`w-full px-4 py-2 border rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 bg-[#EAEAEA] yw-select ${
+                  errors.depth ? 'border-red-500 focus:ring-red-500' : 'border-[#E1E1E1] focus:ring-[#161616]'
+                }`}
               >
                 {LENGTH_OPTIONS_MM.map((mm) => (
                   <option key={mm} value={String(mm)}>
@@ -1407,6 +1611,7 @@ export default function ProductForm({ product, mode }: Props) {
                   </option>
                 ))}
               </select>
+              {errors.depth && <p className="text-sm text-red-600 mt-1">{errors.depth}</p>}
             </div>
           </div>
         </div>

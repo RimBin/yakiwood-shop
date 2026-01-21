@@ -246,16 +246,35 @@ export async function DELETE(
     const { supabase } = await requireAdmin(request)
     const { id } = await resolveParams(context)
 
+    // Hard delete: remove dependent rows first to satisfy FK constraints.
+    const dependentDeletes = [
+      supabase.from('product_variants').delete().eq('product_id', id),
+      supabase.from('product_assets').delete().eq('product_id', id),
+      supabase.from('product_3d_models').delete().eq('product_id', id),
+      supabase.from('product_configuration_prices').delete().eq('product_id', id),
+      supabase.from('custom_configurations').delete().eq('product_id', id),
+      supabase.from('inventory_items').delete().eq('product_id', id),
+      supabase.from('cart_items').delete().eq('product_id', id),
+      supabase.from('order_items').delete().eq('product_id', id),
+    ]
+
+    for (const result of dependentDeletes) {
+      const { error } = await result
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+    }
+
     const { error } = await supabase
       .from('products')
-      .update({ is_active: false })
+      .delete()
       .eq('id', id)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, message: 'Product archived successfully' })
+    return NextResponse.json({ success: true, message: 'Product deleted successfully' })
   } catch (error) {
     if (error instanceof AdminAuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status })

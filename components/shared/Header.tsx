@@ -20,6 +20,7 @@ export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const items = useCartStore((state) => state.items);
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   
   const isHomepage = pathname === '/' || pathname === '/lt';
 
@@ -69,14 +70,17 @@ export default function Header() {
   return (
     <header className="w-full fixed top-0 z-50">
       {/* Black Announcement Bar */}
-      <div className="bg-[#161616] w-full py-[8px] px-[40px]">
-        <div className="flex items-center justify-center gap-[32px] xl:gap-[200px]">
+      <div className="bg-[#161616] w-full py-[8px] px-[clamp(12px,4vw,40px)]">
+        <div className="max-w-[1440px] mx-auto flex items-center justify-between sm:justify-center w-full gap-[clamp(12px,5vw,200px)]">
           {/* Fast Delivery */}
           <div className="flex items-center gap-[8px]">
             <div className="relative w-[24px] h-[24px] shrink-0">
               <Image src={getAsset('imgIconTruck')} alt={t('header.fastDelivery')} width={24} height={24} />
             </div>
-            <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
+            <p
+              className="hidden min-[520px]:block font-['Outfit'] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap"
+              style={{ fontSize: 'clamp(10px, 1.4vw, 12px)' }}
+            >
               {t('header.fastDelivery')}
             </p>
           </div>
@@ -86,17 +90,23 @@ export default function Header() {
             <div className="relative w-[24px] h-[24px] shrink-0">
               <Image src={getAsset('imgIconCoins')} alt={t('header.moneyBack')} width={24} height={24} />
             </div>
-            <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
+            <p
+              className="hidden min-[520px]:block font-['Outfit'] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap"
+              style={{ fontSize: 'clamp(10px, 1.4vw, 12px)' }}
+            >
               {t('header.moneyBack')}
             </p>
           </div>
 
           {/* Eco-Friendly */}
-          <div className="hidden lg:flex items-center gap-[8px]">
+          <div className="hidden min-[900px]:flex items-center gap-[8px]">
             <div className="relative w-[24px] h-[24px] shrink-0">
               <Image src={getAsset('imgIconPlant')} alt={t('header.ecoFriendly')} width={24} height={24} />
             </div>
-            <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
+            <p
+              className="font-['Outfit'] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap"
+              style={{ fontSize: 'clamp(10px, 1.2vw, 12px)' }}
+            >
               {t('header.ecoFriendly')}
             </p>
           </div>
@@ -144,16 +154,18 @@ export default function Header() {
                 onClick={() => setIsCartOpen(true)}
                 className="border border-[#BBBBBB] border-solid rounded-[100px] flex gap-[0px] md:gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[12px] md:px-[24px] py-[10px] bg-transparent hover:bg-[#161616] hover:text-white transition-colors group relative"
               >
-                <div className="relative w-[24px] h-[24px] overflow-clip shrink-0 icon-wrapper">
-                  <Image src={getAsset('imgCart')} alt="Cart" fill className="icon-image" style={{ objectFit: 'contain' }} />
-                  {items.length > 0 && (
-                    <span className="absolute -top-[6px] -right-[6px] min-w-[18px] h-[18px] px-[4px] rounded-full bg-[#161616] border border-[#E1E1E1] flex items-center justify-center font-['Outfit'] text-[10px] leading-none text-white">
-                      {items.length > 9 ? '9+' : items.length}
+                <div className="relative h-[24px] w-[32px] shrink-0">
+                  <div className="absolute left-0 top-0 h-[24px] w-[24px]">
+                    <Image src={getAsset('imgCart')} alt="Cart" fill style={{ objectFit: 'contain' }} />
+                  </div>
+                  {itemCount > 0 && (
+                    <span className="absolute -top-[6px] right-0 min-w-[18px] h-[18px] px-[4px] rounded-full bg-[#161616] border border-[#E1E1E1] flex items-center justify-center font-['Outfit'] text-[10px] leading-none text-white">
+                      {itemCount > 9 ? '9+' : itemCount}
                     </span>
                   )}
                 </div>
                 <span className="hidden md:inline font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white shrink-0">
-                  {t(locale === 'lt' ? 'header.krepselis' : 'header.cart')} {items.length > 0 && `(${items.length})`}
+                  {t(locale === 'lt' ? 'header.krepselis' : 'header.cart')} {itemCount > 0 && `(${itemCount})`}
                 </span>
               </button>
 

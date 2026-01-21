@@ -449,17 +449,7 @@ export default function Products() {
           ))}
         </div>
 
-        {/* GET AN OFFER Button - Mobile */}
-        <div className="px-[16px] pb-[64px]">
-          <Link
-            href={shopHref}
-            className="w-full max-w-[358px] mx-auto block bg-[#161616] rounded-[100px] h-[48px] flex items-center justify-center"
-          >
-            <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-              {t('cta.offer')}
-            </span>
-          </Link>
-        </div>
+        {/* Removed mobile GET AN OFFER button per request */}
       </div>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}

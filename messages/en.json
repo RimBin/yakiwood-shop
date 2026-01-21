@@ -129,10 +129,6 @@
         "finishLabel": "Finish:",
         "quantity": "Qty: {count} pcs"
       },
-      "coupon": {
-        "placeholder": "Enter discount code",
-        "apply": "Apply"
-      },
       "success": {
         "withNumber": "Order {orderNumber} created. We'll contact you about the next steps.",
         "withoutNumber": "Order created. We'll contact you about the next steps.",
@@ -1738,12 +1734,26 @@
           "usageInvalid": "Only Facade or Terrace is allowed",
           "woodRequired": "Wood type is required",
           "woodInvalid": "Only Spruce or Larch is allowed",
-          "basePricePositive": "Price must be a positive number"
+          "basePriceRequired": "Base price is required",
+          "basePriceNumber": "Enter the price as a number",
+          "basePricePositive": "Price must be a positive number",
+          "widthRequired": "Width is required",
+          "heightRequired": "Thickness is required",
+          "depthRequired": "Length is required",
+          "numberExpected": "Enter a number",
+          "integerExpected": "Enter an integer",
+          "numberMinZero": "Value cannot be negative"
         },
         "errors": {
           "saveFailed": "Error saving product",
           "deleteFailed": "Error deleting product",
-          "slugEnMissing": "Your database is missing `products.slug_en`. Apply migration: {path}"
+          "slugEnMissing": "Your database is missing `products.slug_en`. Apply migration: {path}",
+          "dimensionsMissing": "Your database is missing product dimension fields (`products.width/height/depth`). Apply migration: {path}",
+          "inventoryFieldsMissing": "Your database is missing inventory fields (`products.sku`, `products.stock_quantity`, `products.usage_type`). Apply migration: {path}",
+          "notAuthorized": "You don't have permission to create/update products. Sign in with an admin account.",
+          "slugTaken": "This LT slug already exists. Choose another slug.",
+          "slugEnTaken": "This EN slug already exists. Choose another slug.",
+          "skuTaken": "This SKU is already used. Change it or leave it empty."
         },
         "options": {
           "categories": {

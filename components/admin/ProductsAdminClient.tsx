@@ -142,9 +142,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
     try {
       await adminRequest(`/api/admin/products/${id}`, { method: 'DELETE' });
 
-      setProducts(products.map(p => 
-        p.id === id ? { ...p, is_active: false } : p
-      ));
+      setProducts(products.filter(p => p.id !== id));
       setDeleteConfirmId(null);
       router.refresh();
     } catch (error) {
@@ -167,12 +165,10 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
       const ids = Array.from(selectedIds);
       await adminRequest('/api/admin/products/bulk', {
         method: 'POST',
-        body: JSON.stringify({ ids, isActive: false }),
+        body: JSON.stringify({ ids, hardDelete: true }),
       });
 
-      setProducts(products.map(p => 
-        selectedIds.has(p.id) ? { ...p, is_active: false } : p
-      ));
+      setProducts(products.filter(p => !selectedIds.has(p.id)));
       setSelectedIds(new Set());
       router.refresh();
     } catch (error) {

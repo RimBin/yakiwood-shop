@@ -1489,12 +1489,26 @@
           "usageInvalid": "Leidžiama tik: fasadas arba terasa",
           "woodRequired": "Medienos tipas privalomas",
           "woodInvalid": "Leidžiama tik: eglė arba maumedis",
-          "basePricePositive": "Kaina turi būti teigiama"
+          "basePriceRequired": "Bazinė kaina privaloma",
+          "basePriceNumber": "Įveskite kainą skaičiumi",
+          "basePricePositive": "Kaina turi būti teigiama",
+          "widthRequired": "Plotis privalomas",
+          "heightRequired": "Storis privalomas",
+          "depthRequired": "Ilgis privalomas",
+          "numberExpected": "Įveskite skaičių",
+          "integerExpected": "Įveskite sveikąjį skaičių",
+          "numberMinZero": "Reikšmė negali būti neigiama"
         },
         "errors": {
           "saveFailed": "Klaida išsaugant produktą",
           "deleteFailed": "Klaida trinant produktą",
-          "slugEnMissing": "Duomenų bazėje trūksta `products.slug_en`. Pritaikykite migraciją: {path}"
+          "slugEnMissing": "Duomenų bazėje trūksta `products.slug_en`. Pritaikykite migraciją: {path}",
+          "dimensionsMissing": "Duomenų bazėje trūksta produkto matmenų laukų (`products.width/height/depth`). Pritaikykite migraciją: {path}",
+          "inventoryFieldsMissing": "Duomenų bazėje trūksta sandėlio laukų (`products.sku`, `products.stock_quantity`, `products.usage_type`). Pritaikykite migraciją: {path}",
+          "notAuthorized": "Neturite teisių kurti/keisti produktus. Prisijunkite su administratoriaus paskyra.",
+          "slugTaken": "Toks Slug (LT) jau egzistuoja. Pakeiskite Slug.",
+          "slugEnTaken": "Toks Slug (EN) jau egzistuoja. Pakeiskite Slug.",
+          "skuTaken": "Toks SKU jau naudojamas. Pakeiskite SKU arba palikite tuščią."
         },
         "options": {
           "categories": {

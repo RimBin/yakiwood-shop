@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { getSectionSpacing, getContainerPadding } from '@/lib/design-system';
 import { assets } from '@/lib/assets';
 
@@ -62,6 +62,17 @@ export default function Testimonials() {
     );
   };
 
+  // Scroll the mobile container to the active item when activeIndex changes
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const child = container.children[activeIndex] as HTMLElement | undefined;
+    if (!child) return;
+    // center the child inside the container
+    const offset = child.offsetLeft - (container.clientWidth - child.clientWidth) / 2;
+    container.scrollTo({ left: offset, behavior: 'smooth' });
+  }, [activeIndex]);
+
   return (
     <section id="testimonials" className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7576 ===== */}
@@ -79,13 +90,35 @@ export default function Testimonials() {
         {/* Horizontal scroll cards - Responsive */}
         <div 
           ref={scrollRef}
-          className="flex gap-[16px] overflow-x-auto scrollbar-hide px-0 pb-[8px]"
+          onScroll={() => {
+            // debounce active index update while user is scrolling/swiping
+            const ref = (scrollRef as any) as { current: HTMLDivElement | null; _scrollTimer?: number };
+            if (ref._scrollTimer) window.clearTimeout(ref._scrollTimer);
+            ref._scrollTimer = window.setTimeout(() => {
+              const container = scrollRef.current;
+              if (!container) return;
+              const children = Array.from(container.children) as HTMLElement[];
+              const center = container.scrollLeft + container.clientWidth / 2;
+              let nearest = 0;
+              let minDist = Infinity;
+              children.forEach((c, i) => {
+                const cCenter = c.offsetLeft + c.clientWidth / 2;
+                const dist = Math.abs(cCenter - center);
+                if (dist < minDist) {
+                  minDist = dist;
+                  nearest = i;
+                }
+              });
+              setActiveIndex(nearest);
+            }, 120);
+          }}
+          className={`${getContainerPadding()} flex gap-[16px] overflow-x-auto scrollbar-hide pb-[8px] snap-x snap-mandatory scroll-smooth`}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {testimonials.map((testimonial, index) => (
             <article
               key={testimonial.author}
-              className="relative flex-shrink-0 w-[303px] md:w-[380px] h-[450px] md:h-[480px] rounded-[16px] overflow-hidden"
+              className="relative flex-shrink-0 w-[calc(100vw-32px)] md:w-[calc(100vw-64px)] h-[450px] md:h-[480px] rounded-[16px] overflow-hidden snap-center"
             >
               <div className="absolute inset-0">
                 <Image
@@ -130,6 +163,12 @@ export default function Testimonials() {
           </button>
         </div>
       </div>
+
+      {/* keep mobile arrows in sync by scrolling container when activeIndex changes */}
+      {
+        /* effect to scroll selected card into view when activeIndex changes (used by arrow buttons) */
+      }
+      
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
       <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] py-[120px]">
