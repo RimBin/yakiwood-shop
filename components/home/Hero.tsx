@@ -21,14 +21,14 @@ export default async function Hero() {
   const heroDescriptionSize = clamp(14, 16);
 
   return (
-    <section className="w-full bg-[#E1E1E1] relative overflow-hidden pb-[80px] lg:pb-0">
+    <section className="w-full bg-[#E1E1E1] md:bg-[#EAEAEA] relative overflow-hidden pb-[80px] lg:pb-0">
       {/* Full-width hero vector background */}
-      <div className="absolute inset-0 hidden md:block">
+      <div className="absolute inset-0 hidden md:block z-0 pointer-events-none">
         <Image src={assets.heroVector} alt="" fill className="object-cover" priority sizes="100vw" />
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
-      <div className="lg:hidden flex flex-col">
+      <div className="lg:hidden flex flex-col relative z-10">
         <div className="px-4 pt-4 pb-2 flex flex-col gap-2">
           <p
             className="font-['DM_Sans'] font-light leading-none text-[#161616] w-full max-w-[355px] whitespace-pre-wrap break-words"
@@ -119,7 +119,7 @@ export default async function Hero() {
         </div>
       </div>
 
-      <div className="hidden lg:block relative w-full min-h-[861px]">
+      <div className="hidden lg:block relative z-10 w-full min-h-[861px]">
         {/* Centered content container */}
         <div className="relative max-w-[1440px] mx-auto h-full">
           <div className="absolute left-[40px] top-[190px] flex flex-col gap-[24px] z-10">

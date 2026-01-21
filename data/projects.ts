@@ -265,7 +265,8 @@ export const projects: Project[] = [
     title: 'Modernus biuras',
     location: 'Vilnius, Lietuva',
     images: [
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+      '/images/ui/projects/imgProject4.jpg',
+      '/images/ui/projects/imgProject2.jpg',
     ],
     productsUsed: [
       { name: 'Carbon larch', slug: 'carbon-larch' },
@@ -330,6 +331,46 @@ export const projects: Project[] = [
         description: 'Elegant apartment complex with natural wood finishes',
         fullDescription:
           'Modern apartment building combining elegance with sustainability through the use of high-quality burnt wood cladding. The natural material provides excellent insulation and a timeless aesthetic.',
+      },
+    },
+    category: 'residential',
+    featured: false,
+  },
+  {
+    id: '10',
+    slug: 'tamsaus-fasado-namas',
+    title: 'Tamsaus fasado namas',
+    subtitle: 'Shou Sugi Ban apdaila',
+    location: 'Klaipėda, Lietuva',
+    images: ['/images/ui/projects/imgProject6.jpg', '/images/ui/projects/imgProject5.jpg', '/images/ui/projects/imgProject1.jpg'],
+    productsUsed: [
+      { name: 'Black larch', slug: 'black-larch' },
+      { name: 'Carbon larch', slug: 'carbon-larch' },
+    ],
+    description:
+      'Privataus namo fasadas su matine degintos medienos apdaila – aiškios linijos, gili tekstūra ir ilgaamžė apsauga nuo aplinkos poveikio.',
+    fullDescription:
+      'Šiame projekte pasirinkta Shou Sugi Ban technika padėjo sukurti išraiškingą, tačiau santūrų fasadą. Deginta mediena suteikia natūralią UV ir drėgmės apsaugą, o matinis paviršius gražiai „sugeria“ šviesą ir dera su modernia architektūra. Sprendimas parinktas taip, kad būtų lengva prižiūrėti ir ilgai išlaikytų vienodą estetiką Lietuvos klimato sąlygomis.',
+    i18n: {
+      lt: {
+        title: 'Tamsaus fasado namas',
+        subtitle: 'Shou Sugi Ban apdaila',
+        slug: 'tamsaus-fasado-namas',
+        location: 'Klaipėda, Lietuva',
+        description:
+          'Privataus namo fasadas su matine degintos medienos apdaila – aiškios linijos, gili tekstūra ir ilgaamžė apsauga nuo aplinkos poveikio.',
+        fullDescription:
+          'Šiame projekte pasirinkta Shou Sugi Ban technika padėjo sukurti išraiškingą, tačiau santūrų fasadą. Deginta mediena suteikia natūralią UV ir drėgmės apsaugą, o matinis paviršius gražiai „sugeria“ šviesą ir dera su modernia architektūra. Sprendimas parinktas taip, kad būtų lengva prižiūrėti ir ilgai išlaikytų vienodą estetiką Lietuvos klimato sąlygomis.',
+      },
+      en: {
+        title: 'Dark facade house',
+        subtitle: 'Shou Sugi Ban cladding',
+        slug: 'dark-facade-house',
+        location: 'Klaipėda, Lithuania',
+        description:
+          'Private house facade finished with matte burnt wood cladding – clean lines, deep texture, and long-lasting protection against the elements.',
+        fullDescription:
+          'In this project, the Shou Sugi Ban technique was used to create a distinctive yet minimal facade. Burnt wood provides natural UV and moisture resistance, while the matte surface absorbs light beautifully and complements modern architecture. The system was selected for easy maintenance and consistent aesthetics in Lithuania’s climate.',
       },
     },
     category: 'residential',

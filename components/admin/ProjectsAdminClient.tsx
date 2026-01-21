@@ -982,67 +982,88 @@ export default function ProjectsAdminClient() {
 
         {showAddForm && (
           <form onSubmit={handleProjectSubmit} className="mt-[24px] space-y-[20px]">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
-              <div>
-                <AdminInput
-                  type="text"
-                  required
-                  value={projectForm.title}
-                  onChange={(e) => {
-                    const nextTitle = e.target.value
-                    setProjectForm((prev) => {
-                      const prevAutoSlug = slugify(prev.title)
-                      const shouldAuto = !prev.slug || prev.slug === prevAutoSlug
-                      return {
-                        ...prev,
-                        title: nextTitle,
-                        slug: shouldAuto ? slugify(nextTitle) : prev.slug,
-                      }
-                    })
-                  }}
-                  placeholder="Projekto pavadinimas"
-                />
-                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                  Rodomas sąrašuose ir projekto puslapyje.
-                </p>
+            <div className="rounded-[16px] border border-[#BBBBBB] bg-[#EAEAEA] p-[16px]">
+              <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">Lietuvių (pagrindinė)</p>
+
+              <div className="mt-[12px] grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                <div>
+                  <AdminInput
+                    type="text"
+                    required
+                    value={projectForm.title}
+                    onChange={(e) => {
+                      const nextTitle = e.target.value
+                      setProjectForm((prev) => {
+                        const prevAutoSlug = slugify(prev.title)
+                        const shouldAuto = !prev.slug || prev.slug === prevAutoSlug
+                        return {
+                          ...prev,
+                          title: nextTitle,
+                          slug: shouldAuto ? slugify(nextTitle) : prev.slug,
+                        }
+                      })
+                    }}
+                    placeholder="Projekto pavadinimas"
+                  />
+                  <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Rodomas sąrašuose ir projekto puslapyje.</p>
+                </div>
+
+                <div>
+                  <AdminInput
+                    type="text"
+                    value={projectForm.subtitle}
+                    onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })}
+                    placeholder="Paantraštė (nebūtina)"
+                  />
+                  <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Trumpa paantraštė šalia pavadinimo.</p>
+                </div>
               </div>
 
-              <div>
-                <AdminInput
-                  type="text"
-                  value={projectForm.subtitle}
-                  onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })}
-                  placeholder="Paantraštė (nebūtina)"
-                />
-                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                  Trumpa paantraštė šalia pavadinimo.
-                </p>
-              </div>
-            </div>
+              <div className="mt-[12px] grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                <div>
+                  <AdminInput
+                    type="text"
+                    required
+                    value={projectForm.slug}
+                    onChange={(e) => setProjectForm({ ...projectForm, slug: slugify(e.target.value) })}
+                    placeholder="projekto-slug"
+                  />
+                  <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
+                    URL identifikatorius (mažosios raidės, brūkšneliai). Sugeneruojamas automatiškai, bet galima keisti.
+                  </p>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
-              <div>
-                <AdminInput
-                  type="text"
-                  required
-                  value={projectForm.slug}
-                  onChange={(e) => setProjectForm({ ...projectForm, slug: slugify(e.target.value) })}
-                  placeholder="projekto-slug"
-                />
-                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">
-                  URL identifikatorius (mažosios raidės, brūkšneliai). Sugeneruojamas automatiškai, bet galima keisti.
-                </p>
+                <div>
+                  <AdminInput
+                    type="text"
+                    required
+                    value={projectForm.location}
+                    onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })}
+                    placeholder="Vieta (pvz., Vilnius, Lietuva)"
+                  />
+                  <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Miestas, šalis (pvz., Vilnius, Lietuva).</p>
+                </div>
               </div>
 
-              <div>
-                <AdminInput
-                  type="text"
+              <div className="mt-[12px]">
+                <AdminTextarea
                   required
-                  value={projectForm.location}
-                  onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })}
-                  placeholder="Vieta (pvz., Vilnius, Lietuva)"
+                  value={projectForm.description}
+                  onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
+                  rows={3}
+                  placeholder="Trumpas aprašymas (kortelėms)"
                 />
-                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Miestas, šalis (pvz., Vilnius, Lietuva).</p>
+                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Trumpas tekstas, rodomas projekto kortelėje.</p>
+              </div>
+
+              <div className="mt-[12px]">
+                <AdminTextarea
+                  value={projectForm.fullDescription}
+                  onChange={(e) => setProjectForm({ ...projectForm, fullDescription: e.target.value })}
+                  rows={5}
+                  placeholder="Pilnas aprašymas (nebūtina, projekto puslapiui)"
+                />
+                <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Išsamesnis tekstas projekto puslapiui.</p>
               </div>
             </div>
 
@@ -1132,7 +1153,7 @@ export default function ProjectsAdminClient() {
               </div>
 
               <div>
-                <label className="flex items-center gap-[12px] px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px]">
+                <label className="flex items-center gap-[12px] px-[16px] py-[12px] border border-[#BBBBBB] rounded-[12px] bg-[#EAEAEA] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={projectForm.featured}
@@ -1145,27 +1166,6 @@ export default function ProjectsAdminClient() {
                   Pažymėkite, jei projektas turi būti rodomas „rekomenduojamų“ sąrašuose.
                 </p>
               </div>
-            </div>
-
-            <div>
-              <AdminTextarea
-                required
-                value={projectForm.description}
-                onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
-                rows={3}
-                placeholder="Trumpas aprašymas (kortelėms)"
-              />
-              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Trumpas tekstas, rodomas projekto kortelėje.</p>
-            </div>
-
-            <div>
-              <AdminTextarea
-                value={projectForm.fullDescription}
-                onChange={(e) => setProjectForm({ ...projectForm, fullDescription: e.target.value })}
-                rows={5}
-                placeholder="Pilnas aprašymas (nebūtina, projekto puslapiui)"
-              />
-              <p className="mt-[8px] font-['Outfit'] text-[12px] text-[#535353]">Išsamesnis tekstas projekto puslapiui.</p>
             </div>
 
             <div>
