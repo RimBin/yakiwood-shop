@@ -31,14 +31,14 @@ export default async function Hero() {
       <div className="lg:hidden flex flex-col relative z-10">
         <div className="px-4 pt-4 pb-2 flex flex-col gap-2">
           <p
-            className="font-['DM_Sans'] font-light leading-none text-[#161616] w-full max-w-[355px] whitespace-pre-wrap break-words"
+            className="font-['DM_Sans'] font-light leading-none text-[#161616] w-full max-w-full sm:max-w-[355px] whitespace-pre-line break-words"
             style={{ fontSize: heroHeadingSize, letterSpacing: heroHeadingTracking }}
           >
             {tHero('mainHeading')}
             <span className="font-['Tiro_Tamil'] italic">{tHero('brandName')}</span>
           </p>
           <p
-            className="font-['Outfit'] font-light leading-[1.2] tracking-[0.14px] text-[#161616] w-full max-w-[323px] break-words pb-2"
+            className="font-['Outfit'] font-light leading-[1.2] tracking-[0.14px] text-[#161616] w-full max-w-full sm:max-w-[323px] break-words pb-2"
             style={{ fontSize: heroDescriptionSize }}
           >
             {tHero('description')}

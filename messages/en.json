@@ -272,8 +272,151 @@
           "description": "Naturally durable and resilient, larch wood is well-suited for outdoor use. Its dense grain and rich tone make it a reliable choice for long-lasting facades and surfaces."
         }
       }
-    }
-    ,
+    },
+    "whyUs": {
+      "eyebrow": "Yakiwood",
+      "headline": "Burnt wood that <italic>protects</italic> and inspires",
+      "description": "Shou Sugi Ban is not just a striking look — it is a proven way to improve durability and reduce maintenance over time.",
+      "benefits": {
+        "aesthetics": {
+          "title": "Beautiful natural aesthetics",
+          "description": "Deep tones and expressive texture that stand out in any project.",
+          "alt": "Textured burnt wood surface"
+        },
+        "look": {
+          "title": "Premium look",
+          "description": "A modern, architectural finish that adds value and character.",
+          "alt": "Modern burnt wood facade"
+        },
+        "eco": {
+          "title": "Eco-friendly",
+          "description": "Natural processing and long lifespan mean fewer replacements.",
+          "alt": "Eco-friendly wood"
+        },
+        "versatile": {
+          "title": "Versatile",
+          "description": "Suitable for facades, terraces, fences, and interiors.",
+          "alt": "Burnt wood used in multiple applications"
+        }
+      }
+    },
+    "solutions": {
+      "eyebrow": "Purpose",
+      "headline": {
+        "prefix": "Versatile ",
+        "emphasis": "solutions",
+        "suffix": " for every project"
+      },
+      "cta": {
+        "offer": "Get an offer",
+        "learnMore": "Find out more"
+      },
+      "items": {
+        "terrace": {
+          "title": "Terrace",
+          "description": "Outdoor spaces designed to endure. Our fire-treated decking offers natural texture, slip resistance, and longevity."
+        },
+        "facade": {
+          "title": "Facade",
+          "description": "Turn any building into a landmark with burnt wood cladding that combines aesthetics with long-term protection."
+        },
+        "fence": {
+          "title": "Fence",
+          "description": "Private, elegant, and built to last — charred wood fencing that withstands every season."
+        },
+        "interior": {
+          "title": "Interior",
+          "description": "Bring depth, warmth, and texture indoors with premium Shou Sugi Ban wall panels."
+        }
+      }
+    },
+    "projects": {
+      "eyebrow": "Projects",
+      "headline": {
+        "prefix": "Inspiring ",
+        "emphasis": "projects"
+      },
+      "viewAll": "View all projects",
+      "fallback": {
+        "project": "Project",
+        "title": "Project title",
+        "location": "Location"
+      }
+    },
+    "steps": {
+      "eyebrow": "Process",
+      "headline": {
+        "prefix": "Simple & fast ",
+        "emphasis": "ordering",
+        "suffix": " process"
+      },
+      "cta": {
+        "label": "Shop now",
+        "aria": "Shop now"
+      },
+      "items": {
+        "1": {
+          "title": "Choose product",
+          "description": "Select wood type, finish, and quantity based on your project needs."
+        },
+        "2": {
+          "title": "Request an offer",
+          "description": "Send a quick request and receive a tailored price and timeline."
+        },
+        "3": {
+          "title": "Production",
+          "description": "We craft your order using the Shou Sugi Ban technique and quality control."
+        },
+        "4": {
+          "title": "Delivery",
+          "description": "We deliver your products safely to your specified location."
+        }
+      }
+    },
+    "aboutUs": {
+      "eyebrow": "About",
+      "headline": {
+        "prefix": "Our story: crafting ",
+        "quality": "quality",
+        "middle": " with ",
+        "passion": "passion",
+        "emphasis": "with passion",
+        "suffix": ""
+      },
+      "description1": "We create burnt wood products using the traditional Japanese Shou Sugi Ban technique, combining craftsmanship with modern quality standards.",
+      "description2": "Our goal is to deliver beautiful, durable wood surfaces that perform in real-world conditions for years.",
+      "readAbout": "Read about us",
+      "partners": "Our partners",
+      "watch": "Watch",
+      "paragraphs": {
+        "p1": "We create burnt wood products using the traditional Japanese Shou Sugi Ban technique, combining craftsmanship with modern quality standards.",
+        "p2": "Our goal is to deliver beautiful, durable wood surfaces that perform in real-world conditions for years."
+      },
+      "actions": {
+        "readAbout": "Read about us",
+        "partners": "Our partners",
+        "watch": "Watch"
+      },
+      "aria": {
+        "watchVideo": "Watch video",
+        "dialog": "Video",
+        "dialogLabel": "Video",
+        "closeVideo": "Close video"
+      },
+      "close": "Close"
+    },
+    "cta": {
+      "headline": {
+        "prefix": "Ready to build ",
+        "emphasis": "with fire",
+        "suffix": "?"
+      },
+      "buttons": {
+        "offer": "Get an offer",
+        "getInTouch": "Get in touch",
+        "chooseWood": "Choose wood"
+      }
+    },
     "faq": {
       "eyebrow": "FAQ",
       "headline": {
@@ -980,6 +1123,10 @@
       "citata": "Outstanding craftsmanship and attention to detail. Exceeded our expectations!",
       "autorius": "Laura S.",
       "role": "Interior Designer"
+    },
+    "aria": {
+      "previous": "Previous testimonial",
+      "next": "Next testimonial"
     }
   },
   "configurator": {

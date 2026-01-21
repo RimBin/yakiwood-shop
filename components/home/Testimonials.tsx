@@ -113,7 +113,7 @@ export default function Testimonials() {
           <button
             onClick={handlePrev}
             className="w-[40px] h-[40px] rounded-full border border-[#161616] flex items-center justify-center bg-transparent"
-            aria-label="Previous testimonial"
+            aria-label={t('aria.previous')}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M15 6L9 12L15 18" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -122,7 +122,7 @@ export default function Testimonials() {
           <button
             onClick={handleNext}
             className="w-[40px] h-[40px] rounded-full bg-[#161616] flex items-center justify-center"
-            aria-label="Next testimonial"
+            aria-label={t('aria.next')}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 6L15 12L9 18" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -149,7 +149,7 @@ export default function Testimonials() {
               <button
                 onClick={handlePrev}
                 className="w-[40px] h-[40px] rounded-full border border-[#161616] flex items-center justify-center bg-transparent hover:bg-[#161616]/5 transition-colors"
-                aria-label="Previous testimonial"
+                aria-label={t('aria.previous')}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M15 6L9 12L15 18" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -158,7 +158,7 @@ export default function Testimonials() {
               <button
                 onClick={handleNext}
                 className="w-[40px] h-[40px] rounded-full bg-[#161616] flex items-center justify-center hover:bg-[#0c0c0c] transition-colors"
-                aria-label="Next testimonial"
+                aria-label={t('aria.next')}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 6L15 12L9 18" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

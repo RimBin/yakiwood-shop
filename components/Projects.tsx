@@ -7,7 +7,7 @@ import ArrowRight from '@/components/icons/ArrowRight';
 import { assets } from '@/lib/assets';
 import { projects as projectsData } from '@/data/projects';
 import type { Project } from '@/types/project';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
 import { getProjectLocation, getProjectSlug, getProjectTitle, normalizeProjectLocale } from '@/lib/projects/i18n';
 
@@ -86,6 +86,7 @@ export default function Projects() {
   const locale = useLocale();
   const currentLocale = normalizeProjectLocale(locale);
   const basePath = toLocalePath('/projects', currentLocale);
+  const t = useTranslations('home.projects');
 
   const [projects, setProjects] = useState<Project[]>(projectsData);
 
@@ -125,7 +126,7 @@ export default function Projects() {
   }, [projects]);
 
   return (
-    <section className="w-full bg-[#E1E1E1]">
+    <section className="w-full bg-[#E1E1E1] overflow-x-hidden">
       {/* Header removed */}
 
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7712 ===== */}
@@ -145,17 +146,17 @@ export default function Projects() {
             <div className="h-[268px] w-full max-w-[267px] rounded-[8px] relative overflow-hidden">
               <Image
                 src={getProjectCardImage(featuredProjects[0]) || fallbackImages[0]}
-                alt={getProjectTitle(featuredProjects[0], currentLocale) || 'Project'}
+                  alt={getProjectTitle(featuredProjects[0], currentLocale) || t('fallback.project')}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="flex flex-col gap-[8px] text-[#161616]">
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
-                {getProjectTitle(featuredProjects[0], currentLocale) || 'Project title'}
+              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] break-words">
+                {getProjectTitle(featuredProjects[0], currentLocale) || t('fallback.title')}
               </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
-                {getProjectLocation(featuredProjects[0], currentLocale) || 'Location'}
+              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] break-words">
+                {getProjectLocation(featuredProjects[0], currentLocale) || t('fallback.location')}
               </p>
             </div>
           </Link>
@@ -169,17 +170,17 @@ export default function Projects() {
               <div className="h-[176px] w-full max-w-[230px] rounded-[8px] relative overflow-hidden">
                 <Image
                   src={getProjectCardImage(featuredProjects[1]) || fallbackImages[1]}
-                  alt={getProjectTitle(featuredProjects[1], currentLocale) || 'Project'}
+                  alt={getProjectTitle(featuredProjects[1], currentLocale) || t('fallback.project')}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="flex flex-col gap-[8px] text-[#161616] w-full max-w-[230px]">
-                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
-                  {getProjectTitle(featuredProjects[1], currentLocale) || 'Project title'}
+                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] break-words">
+                  {getProjectTitle(featuredProjects[1], currentLocale) || t('fallback.title')}
                 </p>
-                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
-                  {getProjectLocation(featuredProjects[1], currentLocale) || 'Location'}
+                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] break-words">
+                  {getProjectLocation(featuredProjects[1], currentLocale) || t('fallback.location')}
                 </p>
               </div>
             </Link>
@@ -193,17 +194,17 @@ export default function Projects() {
             <div className="h-[330px] w-full max-w-[328px] rounded-[8px] relative overflow-hidden">
               <Image
                 src={getProjectCardImage(featuredProjects[2]) || fallbackImages[2]}
-                alt={getProjectTitle(featuredProjects[2], currentLocale) || 'Project'}
+                alt={getProjectTitle(featuredProjects[2], currentLocale) || t('fallback.project')}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="flex flex-col gap-[8px] text-[#161616]">
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
-                {getProjectTitle(featuredProjects[2], currentLocale) || 'Project title'}
+              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] break-words">
+                {getProjectTitle(featuredProjects[2], currentLocale) || t('fallback.title')}
               </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
-                {getProjectLocation(featuredProjects[2], currentLocale) || 'Location'}
+              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] break-words">
+                {getProjectLocation(featuredProjects[2], currentLocale) || t('fallback.location')}
               </p>
             </div>
           </Link>
@@ -217,17 +218,17 @@ export default function Projects() {
               <div className="h-[177px] w-full max-w-[175px] rounded-[8px] relative overflow-hidden">
                 <Image
                   src={getProjectCardImage(featuredProjects[3]) || fallbackImages[3]}
-                  alt={getProjectTitle(featuredProjects[3], currentLocale) || 'Project'}
+                  alt={getProjectTitle(featuredProjects[3], currentLocale) || t('fallback.project')}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="flex flex-col gap-[8px] text-[#161616] w-full max-w-[175px]">
-                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
-                  {getProjectTitle(featuredProjects[3], currentLocale) || 'Project title'}
+                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] break-words">
+                  {getProjectTitle(featuredProjects[3], currentLocale) || t('fallback.title')}
                 </p>
-                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
-                  {getProjectLocation(featuredProjects[3], currentLocale) || 'Location'}
+                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] break-words">
+                  {getProjectLocation(featuredProjects[3], currentLocale) || t('fallback.location')}
                 </p>
               </div>
             </Link>
@@ -247,17 +248,17 @@ export default function Projects() {
               <div className="h-[176px] w-full max-w-[230px] rounded-[8px] relative overflow-hidden">
                 <Image
                   src={getProjectCardImage(featuredProjects[4]) || fallbackImages[5]}
-                  alt={getProjectTitle(featuredProjects[4], currentLocale) || 'Project'}
+                  alt={getProjectTitle(featuredProjects[4], currentLocale) || t('fallback.project')}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="flex flex-col gap-[8px] text-[#161616] w-full max-w-[230px]">
-                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
-                  {getProjectTitle(featuredProjects[4], currentLocale) || 'Project title'}
+                <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] break-words">
+                  {getProjectTitle(featuredProjects[4], currentLocale) || t('fallback.title')}
                 </p>
-                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
-                  {getProjectLocation(featuredProjects[4], currentLocale) || 'Location'}
+                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] break-words">
+                  {getProjectLocation(featuredProjects[4], currentLocale) || t('fallback.location')}
                 </p>
               </div>
             </Link>
@@ -271,17 +272,17 @@ export default function Projects() {
             <div className="h-[330px] w-full max-w-[328px] rounded-[8px] relative overflow-hidden">
               <Image
                 src={getProjectCardImage(featuredProjects[5]) || fallbackImages[4]}
-                alt={getProjectTitle(featuredProjects[5], currentLocale) || 'Project'}
+                alt={getProjectTitle(featuredProjects[5], currentLocale) || t('fallback.project')}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="flex flex-col gap-[8px] text-[#161616]">
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">
-                {getProjectTitle(featuredProjects[5], currentLocale) || 'Project title'}
+              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] break-words">
+                {getProjectTitle(featuredProjects[5], currentLocale) || t('fallback.title')}
               </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">
-                {getProjectLocation(featuredProjects[5], currentLocale) || 'Location'}
+              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] break-words">
+                {getProjectLocation(featuredProjects[5], currentLocale) || t('fallback.location')}
               </p>
             </div>
           </Link>
@@ -291,7 +292,7 @@ export default function Projects() {
         <div className="flex justify-center pb-[64px]">
           <Link href={basePath} className="flex gap-[8px] items-center h-[24px]">
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-              View all projects
+              {t('viewAll')}
             </p>
             <ArrowRight color="#161616" />
           </Link>
@@ -303,16 +304,16 @@ export default function Projects() {
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+25px)] */}
         <div className="relative h-[80px] mb-[64px]">
           <p className="absolute left-0 top-[22px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
-            Projects
+            {t('eyebrow')}
           </p>
           <p className="absolute left-[calc(25%+25px)] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] w-[739px]">
-            <span>Inspiring </span>
-            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">projects</span>
+            <span>{t('headline.prefix')}</span>
+            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">{t('headline.emphasis')}</span>
           </p>
           {/* View All Projects button */}
           <Link href={basePath} className="absolute right-0 top-[28px] flex gap-[8px] items-center h-[24px]">
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-              View all projects
+              {t('viewAll')}
             </p>
             <ArrowRight color="#161616" />
           </Link>
@@ -336,17 +337,17 @@ export default function Projects() {
               >
                 <Image
                   src={getProjectCardImage(project) || fallbackImages[idx % fallbackImages.length]}
-                  alt={getProjectTitle(project, currentLocale) || 'Project'}
+                  alt={getProjectTitle(project, currentLocale) || t('fallback.project')}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="flex flex-col gap-[4px]">
-                <p className="font-['DM_Sans'] text-[18px] font-medium tracking-[-0.36px] text-[#161616]">
-                  {getProjectTitle(project, currentLocale) || 'Project title'}
+                <p className="font-['DM_Sans'] text-[18px] font-medium tracking-[-0.36px] text-[#161616] break-words">
+                  {getProjectTitle(project, currentLocale) || t('fallback.title')}
                 </p>
-                <p className="font-['Outfit'] text-[14px] font-light tracking-[0.14px] text-[#535353]">
-                  {getProjectLocation(project, currentLocale) || 'Location'}
+                <p className="font-['Outfit'] text-[14px] font-light tracking-[0.14px] text-[#535353] break-words">
+                  {getProjectLocation(project, currentLocale) || t('fallback.location')}
                 </p>
               </div>
             </Link>

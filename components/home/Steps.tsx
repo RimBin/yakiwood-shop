@@ -1,36 +1,37 @@
 import React from 'react';
 import Link from 'next/link';
-import { getLocale } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { getSectionPadding } from '@/lib/design-system';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
-
-const steps = [
-	{
-		number: '1',
-		title: 'Customize Your Order',
-		description: 'Choose wood type, color, width, and height to match your needs.',
-	},
-	{
-		number: '2',
-		title: 'Add to Cart & Checkout',
-		description: 'Review your selection and proceed with secure payment.',
-	},
-	{
-		number: '3',
-		title: 'Select Delivery',
-		description: 'Pick a shipping option that suits you best.',
-	},
-	{
-		number: '4',
-		title: 'Receive Your Order',
-		description: 'We pack and ship your wood safely to your doorstep.',
-	},
-];
 
 export default async function Steps() {
 	const locale = await getLocale();
 	const currentLocale: AppLocale = locale === 'lt' ? 'lt' : 'en';
+	const t = await getTranslations('home.steps');
 	const shopHref = toLocalePath('/products', currentLocale);
+
+	const steps = [
+		{
+			number: '1',
+			title: t('items.1.title'),
+			description: t('items.1.description'),
+		},
+		{
+			number: '2',
+			title: t('items.2.title'),
+			description: t('items.2.description'),
+		},
+		{
+			number: '3',
+			title: t('items.3.title'),
+			description: t('items.3.description'),
+		},
+		{
+			number: '4',
+			title: t('items.4.title'),
+			description: t('items.4.description'),
+		},
+	];
 
 	return (
 		<section className="w-full bg-[#161616]">
@@ -39,7 +40,7 @@ export default async function Steps() {
 				{/* Title Section - Mobile/Tablet */}
 				<div className="mb-[32px] md:mb-[40px]">
 					<p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-white mb-[8px]">
-						Process
+						{t('eyebrow')}
 					</p>
 					<p
 						className="font-['DM_Sans'] font-light leading-none text-white max-w-[600px]"
@@ -48,9 +49,9 @@ export default async function Steps() {
 							letterSpacing: 'clamp(-1.6px, -0.04em, -2.08px)',
 						}}
 					>
-						<span>Simple & fast </span>
-						<span className="font-['Tiro_Tamil'] italic">ordering</span>
-						<span> process</span>
+						<span>{t('headline.prefix')}</span>
+						<span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
+						<span>{t('headline.suffix')}</span>
 					</p>
 				</div>
 
@@ -91,10 +92,10 @@ export default async function Steps() {
 					<Link
 						href={shopHref}
 						className="bg-white w-full md:w-auto md:min-w-[240px] h-[48px] rounded-[100px] flex items-center justify-center px-[40px]"
-						aria-label="Shop now"
+						aria-label={t('cta.aria')}
 					>
 						<span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-							Shop now
+							{t('cta.label')}
 						</span>
 					</Link>
 				</div>
@@ -105,14 +106,12 @@ export default async function Steps() {
 				{/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+24px)] */}
 				<div className="absolute left-[40px] top-[120px] text-white font-normal z-10 w-full">
 					<p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase left-[0px] top-[25px] whitespace-nowrap">
-						Process
+						{t('eyebrow')}
 					</p>
 					<p className="absolute font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] left-[calc(25%+24px)] top-[0px] w-[574px] whitespace-pre-wrap">
-						<span>Simple & </span>
-						<span className="text-white">fast</span>
-						<span> </span>
-						<span className="font-['Tiro_Tamil'] italic">ordering</span>
-						<span> process</span>
+						<span>{t('headline.prefix')}</span>
+						<span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
+						<span>{t('headline.suffix')}</span>
 					</p>
 				</div>
 
@@ -197,10 +196,10 @@ export default async function Steps() {
 					<Link
 						href={shopHref}
 						className="bg-white flex items-center justify-center px-[40px] py-[10px] rounded-[100px] w-full h-full"
-						aria-label="Shop now"
+						aria-label={t('cta.aria')}
 					>
 						<span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-							Shop now
+							{t('cta.label')}
 						</span>
 					</Link>
 				</div>

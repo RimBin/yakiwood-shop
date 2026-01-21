@@ -4,51 +4,36 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import ArrowRight from '@/components/icons/ArrowRight';
 import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
-import { PageCover } from '@/components/shared/PageLayout';
 import { assets } from '@/lib/assets';
 const { fence: imgFence, facades: imgFacades, terrace: imgTerrace, interior: imgInterior } = assets.categories;
 
+type SolutionId = 'terrace' | 'facade' | 'fence' | 'interior';
+
 type SolutionItem = {
-  title: string;
+  id: SolutionId;
   image: string;
-  description: string;
 };
 
 const solutions: SolutionItem[] = [
-  { 
-    title: 'Terrace', 
-    image: imgTerrace,
-    description: 'Outdoor spaces designed to endure. Our fire-treated decking offers natural texture, slip resistance, and unmatched longevity.'
-  },
-  { 
-    title: 'Facade', 
-    image: imgFacades,
-    description: 'Turn any building into a landmark with burnt wood cladding that combines striking aesthetics with long-term protection against the elements.'
-  },
-  { 
-    title: 'Fence', 
-    image: imgFence,
-    description: 'Private, elegant, and built to last – charred wood fencing that withstands every season while making a statement.'
-  },
-  { 
-    title: 'Interior', 
-    image: imgInterior,
-    description: 'Bring depth, warmth, and texture indoors with premium Shou Sugi Ban wall panels that elevate modern interiors.'
-  },
+  { id: 'terrace', image: imgTerrace },
+  { id: 'facade', image: imgFacades },
+  { id: 'fence', image: imgFence },
+  { id: 'interior', image: imgInterior },
 ];
 
 export default function Solutions() {
   const [openIndex, setOpenIndex] = useState<number>(0); // Terrace open by default
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const t = useTranslations('home.solutions');
 
-  const anchorMap: Record<string, string> = {
-    Terrace: 'terraces',
-    Facade: 'facades',
-    Fence: 'fences',
-    Interior: 'interior',
+  const anchorMap: Record<SolutionId, string> = {
+    terrace: 'terraces',
+    facade: 'facades',
+    fence: 'fences',
+    interior: 'interior',
   };
 
   return (
@@ -72,27 +57,27 @@ export default function Solutions() {
               >
                 {/* Title */}
                 <p className={`font-['DM_Sans'] font-normal text-[20px] md:text-[24px] leading-[1.1] tracking-[-0.96px] max-w-[600px] ${openIndex === idx ? 'text-white' : 'text-[#161616]'}`}>
-                  {solution.title}
+                  {t(`items.${solution.id}.title`)}
                 </p>
                 
                 {/* Image - responsive height */}
                 <div className={`w-full rounded-[8px] relative overflow-hidden transition-all ${openIndex === idx ? 'h-[160px] md:h-[220px]' : 'h-[56px] md:h-[80px]'}`}>
-                  <Image src={solution.image} alt={solution.title} fill className="object-cover" />
+                  <Image src={solution.image} alt={t(`items.${solution.id}.title`)} fill className="object-cover" />
                 </div>
                 
                 {/* Description + Learn More - only when open */}
                 {openIndex === idx && (
                   <div className="flex flex-col gap-[24px] w-full">
                     <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-white">
-                      {solution.description}
+                      {t(`items.${solution.id}.description`)}
                     </p>
                     <div className="flex gap-[8px] items-center h-[24px]">
                       <Link
-                        href={toLocalePath(`/solutions#${anchorMap[solution.title]}`, currentLocale)}
+                        href={toLocalePath(`/solutions#${anchorMap[solution.id]}`, currentLocale)}
                         className="flex items-center gap-[8px]"
                       >
                         <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                          FIND OUT MORE
+                          {t('cta.learnMore')}
                         </p>
                         <ArrowRight color="#FFFFFF" />
                       </Link>
@@ -114,11 +99,14 @@ export default function Solutions() {
 
         {/* GET AN OFFER Button - Mobile: Figma 759:7710 */}
         <div className="px-[16px] py-[48px]">
-          <button className="w-[358px] max-w-full mx-auto block bg-[#161616] rounded-[100px] h-[48px] flex items-center justify-center">
+          <Link
+            href={toLocalePath('/contact', currentLocale)}
+            className="w-[358px] max-w-full mx-auto block bg-[#161616] rounded-[100px] h-[48px] flex items-center justify-center"
+          >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-              Get an offer
+              {t('cta.offer')}
             </span>
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -128,12 +116,12 @@ export default function Solutions() {
         <div className="max-w-[1440px] mx-auto px-[40px] pt-[120px] pb-[40px]">
           <div className="relative h-[160px] text-[#161616]">
             <p className="absolute left-0 top-[25px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase">
-              purpose
+              {t('eyebrow')}
             </p>
             <p className="absolute left-[calc(25%+24px)] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] w-[713px]">
-              <span>Versatile </span>
-              <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">solutions</span>
-              <span> for every project</span>
+              <span>{t('headline.prefix')}</span>
+              <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">{t('headline.emphasis')}</span>
+              <span>{t('headline.suffix')}</span>
             </p>
           </div>
         </div>
@@ -149,7 +137,7 @@ export default function Solutions() {
             const isOpen = openIndex === idx;
 
             return (
-              <React.Fragment key={solution.title}>
+              <React.Fragment key={solution.id}>
                 <button
                   type="button"
                   className={`${isOpen ? 'bg-[#161616]' : 'bg-[#e1e1e1]'} w-full text-left`}
@@ -165,27 +153,27 @@ export default function Solutions() {
                       <p
                         className={`font-['DM_Sans'] font-normal text-[32px] leading-[1.1] tracking-[-1.28px] whitespace-pre-wrap ${isOpen ? 'text-white' : 'text-[#161616]'}`}
                       >
-                        {solution.title}
+                        {t(`items.${solution.id}.title`)}
                       </p>
                     </div>
 
                     <div
                       className={`w-[672px] relative overflow-hidden ${isOpen ? 'h-[300px] rounded-[8px]' : 'h-[100px] rounded-tl-[8px] rounded-tr-[8px]'}`}
                     >
-                      <Image src={solution.image} alt={solution.title} fill className="object-cover" />
+                      <Image src={solution.image} alt={t(`items.${solution.id}.title`)} fill className="object-cover" />
                     </div>
 
                     {isOpen && (
                       <div className="w-[288px] h-[300px] flex flex-col items-start justify-between shrink-0">
                         <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-white whitespace-pre-wrap">
-                          {solution.description}
+                          {t(`items.${solution.id}.description`)}
                         </p>
                         <div className="flex gap-[16px] items-center">
                           <Link
-                            href={toLocalePath(`/solutions#${anchorMap[solution.title]}`, currentLocale)}
+                            href={toLocalePath(`/solutions#${anchorMap[solution.id]}`, currentLocale)}
                             className="flex items-center gap-[8px]"
                           >
-                            <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">FIND OUT MORE</p>
+                            <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">{t('cta.learnMore')}</p>
                             <ArrowRight color="#FFFFFF" />
                           </Link>
                         </div>

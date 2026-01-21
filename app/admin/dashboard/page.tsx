@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 import { AdminBody, AdminCard, AdminKicker, AdminLabel, AdminSectionTitle, AdminSelect, AdminStack } from '@/components/admin/ui/AdminUI';
 
 interface DashboardStats {
@@ -27,15 +28,6 @@ interface Order {
   status: string;
   payment_status: string;
   created_at: string;
-}
-
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  basePrice: number;
-  inStock: boolean;
-  stock?: number;
 }
 
 interface ProductSales {
@@ -79,9 +71,8 @@ export default function DashboardPage() {
       const ordersData = await ordersResponse.json();
       const orders: Order[] = ordersData.orders || [];
 
-      // Fetch products (from localStorage for now)
-      const productsData = localStorage.getItem('yakiwood_products');
-      const products: Product[] = productsData ? JSON.parse(productsData) : [];
+      // Fetch products (Supabase when available; fallback to legacy localStorage)
+      const { totalProducts, lowStockProducts } = await fetchProductStats();
       // Apply filters
       const filteredOrders = applyFilters(orders);
 
@@ -119,8 +110,8 @@ export default function DashboardPage() {
       setStats({
         totalOrders: filteredOrders.length,
         totalRevenue,
-        totalProducts: products.length,
-        lowStockProducts: products.filter(p => p.stock && p.stock < 10).length,
+        totalProducts,
+        lowStockProducts,
         pendingOrders,
         completedOrders,
         todayOrders: todayOrders.length,
@@ -133,6 +124,64 @@ export default function DashboardPage() {
       console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProductStats = async (): Promise<{ totalProducts: number; lowStockProducts: number }> => {
+    const supabase = createSupabaseClient();
+
+    // Preferred: query Supabase directly in the browser (uses the current user's session).
+    if (supabase) {
+      const { data: products, error: productsError } = await supabase
+        .from('products')
+        .select('id, slug, stock_quantity')
+        // Keep behaviour consistent with /admin/products: stock-item products (slug contains "--")
+        // are managed via Inventory and hidden from the main products list.
+        .not('slug', 'like', '%--%');
+
+      if (!productsError && Array.isArray(products)) {
+        const totalProducts = products.length;
+
+        const productIds = products.map((p: any) => p.id).filter(Boolean);
+        let lowStockProducts = 0;
+
+        // If products have explicit stock_quantity, use it.
+        const withStockQuantity = products.filter((p: any) => typeof p.stock_quantity === 'number');
+        if (withStockQuantity.length > 0) {
+          lowStockProducts = withStockQuantity.filter((p: any) => (p.stock_quantity ?? 0) < 10).length;
+          return { totalProducts, lowStockProducts };
+        }
+
+        // Otherwise derive low-stock from variants.
+        if (productIds.length > 0) {
+          const { data: lowVariants, error: variantsError } = await supabase
+            .from('product_variants')
+            .select('product_id, stock_quantity, is_available')
+            .in('product_id', productIds)
+            .lt('stock_quantity', 10)
+            .eq('is_available', true);
+
+          if (!variantsError && Array.isArray(lowVariants)) {
+            const lowIds = new Set(lowVariants.map((v: any) => v.product_id).filter(Boolean));
+            lowStockProducts = lowIds.size;
+          }
+        }
+
+        return { totalProducts, lowStockProducts };
+      }
+    }
+
+    // Fallback: legacy demo/local mode (keeps dashboard usable without Supabase).
+    try {
+      const productsData = localStorage.getItem('yakiwood_products');
+      const products = productsData ? (JSON.parse(productsData) as Array<any>) : [];
+      const totalProducts = Array.isArray(products) ? products.length : 0;
+      const lowStockProducts = Array.isArray(products)
+        ? products.filter((p: any) => typeof p?.stock === 'number' && p.stock < 10).length
+        : 0;
+      return { totalProducts, lowStockProducts };
+    } catch {
+      return { totalProducts: 0, lowStockProducts: 0 };
     }
   };
 

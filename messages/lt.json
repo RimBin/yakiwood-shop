@@ -241,14 +241,14 @@
         "selectColor": "Pasirinkti {label} ({index}/{total})"
       },
       "finishes": {
-        "natural": "Natural",
-        "silver": "Silver",
-        "carbon": "Carbon",
-        "carbonLight": "Carbon Light",
-        "graphite": "Graphite",
+        "natural": "Natūrali",
+        "silver": "Sidabrinė",
+        "carbon": "Anglies",
+        "carbonLight": "Šviesi anglies",
+        "graphite": "Grafito",
         "latte": "Latte",
-        "darkBrown": "Dark Brown",
-        "black": "Black"
+        "darkBrown": "Tamsiai ruda",
+        "black": "Juoda"
       },
       "items": {
         "spruce": {
@@ -261,7 +261,141 @@
         }
       }
     }
+
     ,
+    "whyUs": {
+      "eyebrow": "yakiwood",
+      "headline": "Esame <italic>degintos medienos</italic> paruošimo ekspertai, turintys ilgametę <italic>sėkmingą</italic> patirtį ruošiant medieną fasadams, terasoms, tvoroms ir interjerui, todėl garantuojame <italic>aukštą kokybę</italic> bei ilgalaikį <italic>rezultatą</italic>.",
+      "description": "Mūsų tikslas – padėti sukurti jaukią ir tvarią aplinką naudojant natūralų, laiko patikrintą medienos paruošimo būdą. Gaminame medieną pagal unikalią japonų deginimo technologiją \"Yakisugi\" (arba \"Shou Sugi Ban\") – tai natūraliausias būdas suteikti medienai ir apsaugines, ir estetines savybes.",
+      "benefits": {
+        "aesthetics": {
+          "title": "Graži natūrali estetika",
+          "description": "Ugnimi apdorota mediena tampa atsparesnė drėgmei, kenkėjams ir puviniui.",
+          "alt": "Ugnies piktograma – natūrali estetika"
+        },
+        "look": {
+          "title": "Išraiškinga išvaizda",
+          "description": "Gili tekstūra ir sodrūs tonai papuoš bet kokį dizainą.",
+          "alt": "Piktograma – išraiškinga išvaizda"
+        },
+        "eco": {
+          "title": "Draugiška aplinkai",
+          "description": "Tvariai gaunama mediena be kenksmingų chemikalų.",
+          "alt": "Lapo piktograma – ekologiška"
+        },
+        "versatile": {
+          "title": "Tinka bet kokiam projektui",
+          "description": "Puikiai tinka apkalimui, terasoms ir interjerui.",
+          "alt": "Kubas – universalumas"
+        }
+      }
+    },
+    "solutions": {
+      "eyebrow": "Sprendimai",
+      "headline": {
+        "prefix": "Universalūs ",
+        "emphasis": "sprendimai",
+        "suffix": " kiekvienam projektui"
+      },
+      "cta": {
+        "offer": "Gauti pasiūlymą",
+        "learnMore": "Sužinoti daugiau"
+      },
+      "items": {
+        "terrace": {
+          "title": "Terasa",
+          "description": "Lauko erdvės, sukurtos tarnauti ilgai. Ugnimi apdorotos terasinės lentos pasižymi natūralia tekstūra, neslystančiu paviršiumi ir išskirtiniu ilgaamžiškumu."
+        },
+        "facade": {
+          "title": "Fasadas",
+          "description": "Paverskite pastatą išskirtiniu – degintos medienos apdaila sujungia įspūdingą estetiką ir ilgalaikę apsaugą nuo aplinkos poveikio."
+        },
+        "fence": {
+          "title": "Tvora",
+          "description": "Privatu, elegantiška ir ilgaamžiška – degintos medienos tvora atlaiko sezonų kaitą ir išlaiko charakterį."
+        },
+        "interior": {
+          "title": "Interjeras",
+          "description": "Suteikite erdvei gylio, šilumos ir tekstūros su premium Shou Sugi Ban sienų apdailos sprendimais."
+        }
+      }
+    },
+    "projects": {
+      "eyebrow": "Projektai",
+      "headline": {
+        "prefix": "Įkvepiantys ",
+        "emphasis": "projektai",
+        "suffix": ""
+      },
+      "viewAll": "Peržiūrėti visus projektus",
+      "fallback": {
+        "project": "Projektas",
+        "title": "Projekto pavadinimas",
+        "location": "Vieta"
+      }
+    },
+    "steps": {
+      "eyebrow": "Procesas",
+      "headline": {
+        "prefix": "Paprastas ir greitas ",
+        "emphasis": "užsakymo",
+        "suffix": " procesas"
+      },
+      "cta": {
+        "label": "Apsipirkti",
+        "aria": "Apsipirkti"
+      },
+      "items": {
+        "1": {
+          "title": "Susikonfigūruokite užsakymą",
+          "description": "Pasirinkite medienos tipą, spalvą, plotį ir ilgį pagal poreikį."
+        },
+        "2": {
+          "title": "Įdėkite į krepšelį ir apmokėkite",
+          "description": "Peržiūrėkite pasirinkimą ir tęskite saugų apmokėjimą."
+        },
+        "3": {
+          "title": "Pasirinkite pristatymą",
+          "description": "Išsirinkite jums tinkamiausią pristatymo būdą."
+        },
+        "4": {
+          "title": "Gaukite užsakymą",
+          "description": "Saugiai supakuosime ir pristatysime medieną iki jūsų durų."
+        }
+      }
+    },
+    "aboutUs": {
+      "eyebrow": "apie mus",
+      "headline": {
+        "prefix": "Mūsų istorija: kuriame ",
+        "quality": "kokybę",
+        "middle": " su ",
+        "passion": "aistra"
+      },
+      "description1": "Gerbiame senovinį japonų Shou Sugi Ban meną – ugnimi apdorojame medieną, kad sukurtume gražius, patvarius ir tvarius produktus.",
+      "description2": "Mūsų patirtis sujungia tradiciją ir inovacijas, todėl pristatome aukštos kokybės dailylentes, kurios puošia ir saugo jūsų erdves.",
+      "readAbout": "Skaityti apie mus",
+      "partners": "Mūsų partneriai",
+      "watch": "Žiūrėti",
+      "aria": {
+        "watchVideo": "Žiūrėti vaizdo įrašą",
+        "closeVideo": "Uždaryti vaizdo įrašą",
+        "dialog": "Vaizdo įrašas"
+      },
+      "close": "Uždaryti"
+    },
+    "cta": {
+      "headline": {
+        "prefix": "Pasiruošę ",
+        "emphasis": "kurti",
+        "suffix": " su ugnimi?"
+      },
+      "buttons": {
+        "offer": "Gauti pasiūlymą",
+        "getInTouch": "Susisiekti",
+        "chooseWood": "Rinktis medieną"
+      }
+    },
     "blog": {
       "title": "Straipsniai apie Shou Sugi Ban",
       "description": "Skaitykite straipsnius apie degintą medieną, dizaino sprendimus, priežiūrą ir projektų planavimą.",
@@ -701,6 +835,10 @@
     "eyebrow": "atsiliepimai",
     "pavadinimas": "Ką sako mūsų klientai",
     "antraste": "Ką sako mūsų klientai",
+    "aria": {
+      "previous": "Ankstesnis atsiliepimas",
+      "next": "Kitas atsiliepimas"
+    },
     "atsiliepimas1": {
       "citata": "Apdeginta mediena puikiai papildė mūsų šiuolaikinio namo dizainą. Atrodo nuostabiai!",
       "autorius": "Jonas K.",

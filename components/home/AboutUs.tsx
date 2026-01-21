@@ -88,7 +88,7 @@ function PartnersMarquee({
 }
 
 export default function AboutUs() {
-  const t = useTranslations('about');
+  const t = useTranslations('home.aboutUs');
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const aboutHref = toLocalePath('/about', currentLocale);
@@ -116,11 +116,13 @@ export default function AboutUs() {
       <div className={`lg:hidden ${getSectionSpacing()}`}>
         <div className={`${getContainerPadding()} mb-[24px]`}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-            {t('pavadinimas')}
+            {t('eyebrow')}
           </p>
           <h2 className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[520px]" style={{ fontSize: 'clamp(34px, 6vw, 44px)', letterSpacing: 'clamp(-1.6px, -0.04em, -1.76px)' }}>
-            Our story: crafting <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">quality</span> with{' '}
-            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">passion</span>
+            <span>{t('headline.prefix')}</span>
+            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">{t('headline.quality')}</span>
+            <span>{t('headline.middle')}</span>
+            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">{t('headline.passion')}</span>
           </h2>
         </div>
 
@@ -130,7 +132,7 @@ export default function AboutUs() {
               <Image src={imgProject1} alt="" fill className="object-cover" />
             </div>
             <p className="font-['Outfit'] font-light text-[14px] leading-[1.4] tracking-[0.14px] text-[#535353]">
-              We honor the ancient Japanese art of Shou Sugi Ban, transforming wood with fire to create beautiful, durable, and sustainable products.
+              {t('description1')}
             </p>
           </div>
 
@@ -142,16 +144,16 @@ export default function AboutUs() {
                 type="button"
                 onClick={() => setIsVideoOpen(true)}
                 className="w-[64px] h-[64px] rounded-full bg-[#161616]/75 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#161616] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E1E1E1]"
-                aria-label="Watch video"
+                aria-label={t('aria.watchVideo')}
               >
-                <span className="font-['Outfit'] font-normal text-[10px] tracking-[0.6px] uppercase text-white">Watch</span>
+                <span className="font-['Outfit'] font-normal text-[10px] tracking-[0.6px] uppercase text-white">{t('watch')}</span>
               </button>
             </div>
           </div>
 
           <Link href={aboutHref} className="flex gap-[8px] items-center h-[24px]">
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-              Read about us
+              {t('readAbout')}
             </p>
             <ArrowRight color="#161616" />
           </Link>
@@ -159,7 +161,7 @@ export default function AboutUs() {
 
         <div className="mt-[40px]">
           <p className="px-[16px] md:px-[32px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[16px]">
-            Our partners
+            {t('partners')}
           </p>
           <PartnersMarquee items={partnerNames} durationSeconds={22} fullBleed />
         </div>
@@ -169,14 +171,14 @@ export default function AboutUs() {
       <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[120px]">
         <div className="relative h-[160px]">
           <p className="absolute left-0 top-[26px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
-            about us
+            {t('eyebrow')}
           </p>
 
           <p className="absolute left-[calc(25%+24px)] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] w-[760px]">
-            <span>Our story: crafting </span>
-            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">quality</span>
-            <span> with </span>
-            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">passion</span>
+            <span>{t('headline.prefix')}</span>
+            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">{t('headline.quality')}</span>
+            <span>{t('headline.middle')}</span>
+            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">{t('headline.passion')}</span>
           </p>
         </div>
 
@@ -198,9 +200,9 @@ export default function AboutUs() {
                   type="button"
                   onClick={() => setIsVideoOpen(true)}
                   className="w-[72px] h-[72px] rounded-full bg-[#161616]/75 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#161616] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E1E1E1]"
-                  aria-label="Watch video"
+                  aria-label={t('aria.watchVideo')}
                 >
-                  <span className="font-['Outfit'] font-normal text-[10px] tracking-[0.6px] uppercase text-white">Watch</span>
+                  <span className="font-['Outfit'] font-normal text-[10px] tracking-[0.6px] uppercase text-white">{t('watch')}</span>
                 </button>
               </div>
             </div>
@@ -210,16 +212,16 @@ export default function AboutUs() {
           <div className="col-span-3 col-start-10 flex flex-col gap-[40px]">
             <div className="flex flex-col gap-[16px]">
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.4] tracking-[0.14px] text-[#535353]">
-                We honor the ancient Japanese art of Shou Sugi Ban, transforming wood with fire to create beautiful, durable, and sustainable products.
+                {t('description1')}
               </p>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.4] tracking-[0.14px] text-[#535353]">
-                Our expertise combines tradition with innovation, delivering high-quality wood planks that enhance and protect any space.
+                {t('description2')}
               </p>
             </div>
 
             <Link href={aboutHref} className="flex gap-[8px] items-center h-[24px]">
               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-                Read about us
+                {t('readAbout')}
               </p>
               <ArrowRight color="#161616" />
             </Link>
@@ -227,7 +229,7 @@ export default function AboutUs() {
         </div>
 
         <p className="mt-[64px] ml-[calc(25%+24px)] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
-          Our partners
+          {t('partners')}
         </p>
 
         <div className="mt-[24px]">
@@ -240,13 +242,13 @@ export default function AboutUs() {
           className="fixed inset-0 z-[100] flex items-center justify-center px-[16px]"
           role="dialog"
           aria-modal="true"
-          aria-label="Video"
+          aria-label={t('aria.dialog')}
         >
           <button
             type="button"
             className="absolute inset-0 bg-black/70"
             onClick={() => setIsVideoOpen(false)}
-            aria-label="Close video"
+            aria-label={t('aria.closeVideo')}
           />
 
           <div className="relative w-full max-w-[960px] bg-black rounded-[12px] overflow-hidden shadow-2xl">
@@ -256,7 +258,7 @@ export default function AboutUs() {
                 onClick={() => setIsVideoOpen(false)}
                 className="h-[36px] px-[12px] rounded-[100px] bg-white/10 text-white font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
-                Close
+                {t('close')}
               </button>
             </div>
 

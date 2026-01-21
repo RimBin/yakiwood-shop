@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { getLocale } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { getSectionPadding, getGap } from '@/lib/design-system';
 import { assets } from '@/lib/assets';
 import { toLocalePath } from '@/i18n/paths';
@@ -11,6 +11,7 @@ const backgroundImage = assets.ctaBackground;
 export default async function CTA() {
   const locale = await getLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const t = await getTranslations('home.cta');
 
   return (
     <section className="relative w-full overflow-hidden bg-[#E1E1E1]">
@@ -23,9 +24,9 @@ export default async function CTA() {
       <div className={`lg:hidden relative z-10 flex flex-col items-center justify-center ${getSectionPadding()}`}>
         {/* Heading - Mobile/Tablet */}
         <h2 className="font-['DM_Sans'] font-light text-center max-w-[600px] mb-[32px] md:mb-[40px]" style={{ fontSize: 'clamp(40px, 7vw, 64px)', lineHeight: 1, letterSpacing: 'clamp(-1.8px, -0.04em, -2.56px)' }}>
-          <span>Ready to </span>
-          <span className="font-['Tiro_Tamil'] italic">build </span>
-          <span>with fire?</span>
+          <span>{t('headline.prefix')}</span>
+          <span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
+          <span>{t('headline.suffix')}</span>
         </h2>
 
         {/* Buttons - Mobile/Tablet */}
@@ -36,7 +37,7 @@ export default async function CTA() {
             className="bg-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full md:w-auto md:px-[40px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-              get an offer
+              {t('buttons.offer')}
             </span>
           </Link>
 
@@ -46,7 +47,7 @@ export default async function CTA() {
             className="border border-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-              get in touch
+              {t('buttons.getInTouch')}
             </span>
           </Link>
         </div>
@@ -56,9 +57,9 @@ export default async function CTA() {
       <div className="hidden lg:flex relative z-10 flex-col items-center justify-center min-h-[1053px] py-[113px] px-[40px]">
         {/* Heading - Desktop */}
         <h2 className="font-['DM_Sans'] font-light text-[128px] leading-[0.95] tracking-[-6.4px] text-[#161616] text-center mb-[66px] w-[861px]">
-          <span>Ready to </span>
-          <span className="font-['Tiro_Tamil'] italic">build </span>
-          <span>with fire?</span>
+          <span>{t('headline.prefix')}</span>
+          <span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
+          <span>{t('headline.suffix')}</span>
         </h2>
 
         {/* Action Buttons - Desktop: Side by Side */}
@@ -69,7 +70,7 @@ export default async function CTA() {
             className="border border-[#161616] flex items-center justify-center h-[48px] px-[40px] py-[10px] rounded-[100px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-              get in touch
+              {t('buttons.getInTouch')}
             </span>
           </Link>
 
@@ -79,7 +80,7 @@ export default async function CTA() {
             className="bg-[#161616] flex items-center justify-center h-[48px] px-[40px] py-[10px] rounded-[100px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-              Choose wood
+              {t('buttons.chooseWood')}
             </span>
           </Link>
         </div>
