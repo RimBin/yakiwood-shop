@@ -45,7 +45,7 @@ export default async function Hero() {
           </p>
         </div>
 
-        <div className="relative w-full">
+        <div className="relative w-full pb-[72px]">
           <div className="bg-[#bbab92] w-full h-[423px] relative">
             <div className="absolute left-[8.34px] top-0 w-[367px] h-[309.127px] flex items-center justify-center overflow-hidden">
               <div className="rotate-[333.068deg]">
@@ -54,7 +54,7 @@ export default async function Hero() {
                       src={imgProductImage}
                       alt="Shou Sugi Ban Plank"
                       fill
-                      className="object-cover"
+                      className="object-contain"
                       sizes="(max-width: 1024px) 320px, 575px"
                       priority
                     />
@@ -63,7 +63,7 @@ export default async function Hero() {
             </div>
           </div>
 
-          <div className="absolute left-4 bottom-[35px] right-4 bg-white/10 backdrop-blur-[20px] border border-white/50 rounded-[16px] p-3 flex flex-col gap-3">
+          <div className="absolute left-4 bottom-[80px] right-4 bg-white/10 backdrop-blur-[20px] border border-white/50 rounded-[16px] p-3 flex flex-col gap-3">
             <div className="flex items-start justify-between w-full">
               <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white">{tHero('productName')}</p>
               <div className="flex gap-1 items-center text-white">
@@ -108,11 +108,11 @@ export default async function Hero() {
           </div>
         </div>
 
-        <div className="absolute left-0 right-0 bottom-0 bg-[#161616] h-[64px] px-[16px] flex items-center z-20 overflow-x-auto lg:hidden">
-          <div className="flex items-center gap-[24px] w-max">
+        <div className="absolute left-0 right-0 bottom-0 bg-[#161616] h-[64px] px-4 flex items-center z-20 lg:hidden">
+          <div className="flex w-full items-center justify-between gap-3">
             {certifications.map((src) => (
-              <div key={src} className="h-[24px] w-[96px] relative flex-shrink-0">
-                <Image src={src} alt="" fill className="object-contain" sizes="96px" />
+              <div key={src} className="relative h-[24px] flex-1 min-w-0">
+                <Image src={src} alt="" fill className="object-contain" sizes="(max-width: 1024px) 16vw, 96px" />
               </div>
             ))}
           </div>
