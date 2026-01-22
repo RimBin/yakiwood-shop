@@ -259,6 +259,18 @@ export default function ConfiguratorPage() {
     [normalizeToken]
   );
 
+  const normalizeWoodId = useCallback(
+    (value: string | undefined) => {
+      const token = normalizeToken(value ?? '');
+      if (!token) return null;
+      if (token === 'spruce' || token === 'larch') return token;
+      if (token.includes('spruce') || token.includes('egle') || token.includes('egl')) return 'spruce';
+      if (token.includes('larch') || token.includes('maumed') || token.includes('maum')) return 'larch';
+      return null;
+    },
+    [normalizeToken]
+  );
+
   const usageOptions = useMemo(
     () => [
       { value: 'facade', label: t('productsPage.usageFilters.facade') },
@@ -339,7 +351,8 @@ export default function ConfiguratorPage() {
     return allProducts.filter((p) => {
       const usageId = normalizeUsageId(p.category);
       const matchesUsage = selectedUsage.length === 0 || (usageId ? selectedUsage.includes(usageId) : false);
-      const matchesWood = selectedWood.length === 0 || (p.woodType ? selectedWood.includes(p.woodType) : false);
+      const woodId = normalizeWoodId(p.woodType);
+      const matchesWood = selectedWood.length === 0 || (woodId ? selectedWood.includes(woodId) : false);
 
       const normalizedColors = (p.colors ?? []).map((c) => normalizeToken(c?.name ?? '')).filter(Boolean);
       const matchesColor =
@@ -363,7 +376,7 @@ export default function ConfiguratorPage() {
 
       return matchesUsage && matchesWood && matchesColor && matchesProfile && matchesWidth && matchesLength;
     });
-  }, [allProducts, normalizeToken, normalizeUsageId, selectedColor, selectedLength, selectedProfile, selectedUsage, selectedWidth, selectedWood]);
+  }, [allProducts, normalizeToken, normalizeUsageId, normalizeWoodId, selectedColor, selectedLength, selectedProfile, selectedUsage, selectedWidth, selectedWood]);
 
   useEffect(() => {
     if (filteredProducts.length === 0) {

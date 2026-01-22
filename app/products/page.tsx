@@ -339,6 +339,15 @@ export default function ProductsPage() {
     return token;
   };
 
+  const normalizeWoodId = (value: string | undefined) => {
+    const token = normalizeToken(value ?? '');
+    if (!token) return null;
+    if (token === 'spruce' || token === 'larch') return token;
+    if (token.includes('spruce') || token.includes('egle') || token.includes('egl')) return 'spruce';
+    if (token.includes('larch') || token.includes('maumed') || token.includes('maum')) return 'larch';
+    return null;
+  };
+
   const parseStockItemSlug = (slug: string) => {
     const parts = slug.split('--');
     if (parts.length < 4) return null;
@@ -574,9 +583,10 @@ export default function ProductsPage() {
       const matchesUsage =
         selectedUsage.length === 0 ||
         (usageId ? selectedUsage.includes(usageId) : false);
+      const woodId = normalizeWoodId(product.woodType);
       const matchesWood =
         selectedWood.length === 0 ||
-        (product.woodType ? selectedWood.includes(product.woodType) : false);
+        (woodId ? selectedWood.includes(woodId) : false);
 
       const normalizedColors = (product.colors ?? [])
         .map((c) => normalizeToken(c?.name ?? ''))
@@ -998,8 +1008,14 @@ export default function ProductsPage() {
                   if (dims?.width) detailParams.set('w', String(dims.width));
                   if (dims?.length) detailParams.set('l', String(dims.length));
                 }
-                if (parsedStock?.color) detailParams.set('ct', normalizeToken(parsedStock.color));
-                if (parsedStock?.profile) detailParams.set('ft', normalizeToken(parsedStock.profile));
+                const cardColorName = product.colors?.[0]?.name ?? parsedStock?.color ?? '';
+                if (cardColorName) detailParams.set('ct', normalizeToken(cardColorName));
+
+                const cardProfileKey = product.profiles?.[0]
+                  ? resolveProfileKey(product.profiles[0])
+                  : parsedStock?.profile ?? '';
+                if (cardProfileKey) detailParams.set('ft', normalizeToken(cardProfileKey));
+                if (product.image) detailParams.set('img', product.image);
                 const detailHref = detailParams.toString()
                   ? `${detailPath}?${detailParams.toString()}`
                   : detailPath;
@@ -1033,6 +1049,11 @@ export default function ProductsPage() {
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
+                {unitPriceLabel ? (
+                  <div className="absolute top-[10px] left-[10px] text-[14px] font-['DM_Sans'] text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]">
+                    {unitPriceLabel}
+                  </div>
+                ) : null}
                 {discountPercent ? (
                   <div className="absolute top-[10px] right-[10px] rounded-[100px] bg-[#161616] px-[10px] py-[6px] text-[12px] font-['DM_Sans'] text-white">
                     -{discountPercent}%
@@ -1081,11 +1102,7 @@ export default function ProductsPage() {
                     </span>
                   ) : null}
                 </span>
-                {unitPriceLabel ? (
-                  <span className="text-[14px] text-[#161616]">
-                    {unitPriceLabel}
-                  </span>
-                ) : null}
+                
               </p>
             </Link>
               );

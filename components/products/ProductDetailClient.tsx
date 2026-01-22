@@ -13,6 +13,7 @@ import { useCartStore } from '@/lib/cart/store';
 import { trackEvent, trackProductView } from '@/lib/analytics';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
 import type { UsageType } from '@/lib/pricing/configuration';
+import ModalOverlay from '@/components/modals/ModalOverlay';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -108,6 +109,17 @@ function normalizeProfileKey(value: string): string {
   return normalizeColorKey(value);
 }
 
+function normalizeProfileToken(value: string): string {
+  const token = normalizeProfileKey(value);
+  if (!token) return '';
+  const isHalf = token.includes('half') || token.includes('taper') || token.includes('pus') || token.includes('spunto');
+  if (isHalf && token.includes('45')) return 'half-taper-45';
+  if (isHalf) return 'half-taper';
+  if (token.includes('rhomb') || token.includes('romb')) return 'rhombus';
+  if (token.includes('rectangle') || token.includes('staciakamp')) return 'rectangle';
+  return token;
+}
+
 function localizeProfileLabel(value: string, locale: 'lt' | 'en'): string {
   const normalized = normalizeProfileKey(value);
   if (!normalized) return value;
@@ -168,6 +180,7 @@ function isFallbackProfileId(id: string | undefined | null): boolean {
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   const t = useTranslations('productPage');
   const tBreadcrumbs = useTranslations('breadcrumbs');
+  const tContact = useTranslations('contact');
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const router = useRouter();
@@ -177,6 +190,18 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const addItem = useCartStore((state) => state.addItem);
   const cartItems = useCartStore((state) => state.items);
   const [stockDerivedOptions, setStockDerivedOptions] = useState<StockDerivedOptions | null>(null);
+  const [isNeedAssistanceOpen, setIsNeedAssistanceOpen] = useState(false);
+  const [needAssistanceSubmitted, setNeedAssistanceSubmitted] = useState(false);
+  const [needAssistanceSubmitting, setNeedAssistanceSubmitting] = useState(false);
+  const [needAssistanceError, setNeedAssistanceError] = useState<string | null>(null);
+  const [needAssistanceConsent, setNeedAssistanceConsent] = useState(false);
+  const [needAssistanceForm, setNeedAssistanceForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    company: '',
+  });
+  const needAssistanceStartedAtRef = useRef<number>(Date.now());
 
   const widthOptionsMm = useMemo(() => {
     const derived = stockDerivedOptions?.widths ?? [];
@@ -370,6 +395,36 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     return FALLBACK_PROFILE_OPTIONS.map((fallback) => ({ ...(fallback as unknown as ProductProfileVariant) }));
   }, [product.id, product.profiles, currentLocale, stockDerivedOptions?.profiles]);
 
+  const urlColorSelection = useMemo(() => {
+    const urlColorId = searchParams.get('c');
+    const urlColorToken = searchParams.get('ct');
+    if (urlColorId) return colorOptions.find((c) => c.id === urlColorId) ?? null;
+    if (urlColorToken) {
+      const token = normalizeColorKey(urlColorToken);
+      return colorOptions.find((c) => normalizeColorKey(c.name || '').includes(token)) ?? null;
+    }
+    return null;
+  }, [searchParamsKey, searchParams, colorOptions]);
+
+  const urlFinishSelection = useMemo(() => {
+    const urlFinishId = searchParams.get('f');
+    const urlFinishToken = searchParams.get('ft');
+    if (urlFinishId) return profileOptions.find((p) => p.id === urlFinishId) ?? null;
+    if (urlFinishToken) {
+      const token = normalizeProfileToken(urlFinishToken);
+      return (
+        profileOptions.find((p) => {
+          const hay = normalizeProfileToken([p.code, p.name].filter(Boolean).join(' '));
+          return hay === token || hay.includes(token);
+        }) ?? null
+      );
+    }
+    return null;
+  }, [searchParamsKey, searchParams, profileOptions]);
+
+  const effectiveSelectedColor = selectedColor ?? urlColorSelection ?? null;
+  const effectiveSelectedFinish = selectedFinish ?? urlFinishSelection ?? null;
+
   const skipNextUrlSyncRef = useRef(false);
 
   const selectionInitializedForProductIdRef = useRef<string | null>(null);
@@ -434,13 +489,20 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           if (!parsed) continue;
           if (normalizeColorKey(parsed.baseSlug) !== baseKey) continue;
 
+          const itemImage =
+            typeof item?.image_url === 'string'
+              ? item.image_url
+              : typeof item?.image === 'string'
+                ? item.image
+                : null;
+
           const colorToken = normalizeColorKey(parsed.color);
           if (colorToken && !colors.has(colorToken)) {
             colors.set(colorToken, {
               id: `stock-color:${colorToken}`,
               name: localizeColorLabel(parsed.color, currentLocale),
               hex: undefined,
-              image: undefined,
+              image: itemImage ?? undefined,
               priceModifier: 0,
             });
           }
@@ -481,13 +543,13 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   }, [baseSlugForSelection, currentLocale]);
 
   const selectedColorToken = useMemo(() => {
-    return selectedColor?.name ? normalizeColorKey(String(selectedColor.name)) : '';
-  }, [selectedColor?.name]);
+    return effectiveSelectedColor?.name ? normalizeColorKey(String(effectiveSelectedColor.name)) : '';
+  }, [effectiveSelectedColor?.name]);
 
   const selectedProfileToken = useMemo(() => {
-    const raw = selectedFinish?.code || selectedFinish?.name || '';
-    return raw ? normalizeProfileKey(raw) : '';
-  }, [selectedFinish?.code, selectedFinish?.name]);
+    const raw = effectiveSelectedFinish?.code || effectiveSelectedFinish?.name || '';
+    return raw ? normalizeProfileToken(raw) : '';
+  }, [effectiveSelectedFinish?.code, effectiveSelectedFinish?.name]);
 
   const [variantInventory, setVariantInventory] = useState<null | {
     loading: boolean;
@@ -512,34 +574,54 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     const urlThickness = Number(searchParams.get('t'));
 
     const presetColorKey = stockPreset?.colorToken ? normalizeColorKey(stockPreset.colorToken) : null;
-    const presetProfileKey = stockPreset?.profileToken ? normalizeLabel(stockPreset.profileToken) : null;
+    const presetProfileKey = stockPreset?.profileToken ? normalizeProfileToken(stockPreset.profileToken) : null;
 
-    const initialColor =
-      urlColorId && colorOptions.length
-        ? colorOptions.find((c) => c.id === urlColorId) ?? null
-        : urlColorToken && colorOptions.length
-          ? colorOptions.find((c) => normalizeColorKey(c.name || '').includes(normalizeColorKey(urlColorToken))) ?? null
-          : presetColorKey && colorOptions.length
-            ? colorOptions.find((c) => normalizeColorKey(c.name || '').includes(presetColorKey)) ?? null
-            : null;
+    const hasColorParam = Boolean(urlColorId || urlColorToken || presetColorKey);
+    const hasFinishParam = Boolean(urlFinishId || urlFinishToken || presetProfileKey);
 
-    const initialFinish =
-      urlFinishId && profileOptions.length
-        ? profileOptions.find((p) => p.id === urlFinishId) ?? null
-        : urlFinishToken && profileOptions.length
-          ? profileOptions.find((p) => {
-              const hay = normalizeProfileKey([p.code, p.name].filter(Boolean).join(' '));
-              return hay.includes(normalizeProfileKey(urlFinishToken));
-            }) ?? null
-          : presetProfileKey && profileOptions.length
-            ? profileOptions.find((p) => {
-                const hay = normalizeLabel([p.code, p.name].filter(Boolean).join(' '));
-                return hay.includes(presetProfileKey);
-              }) ?? null
-            : null;
+    let initialColor: ProductColorVariant | null = null;
+    if (urlColorId && colorOptions.length) {
+      initialColor = colorOptions.find((c) => c.id === urlColorId) ?? null;
+    }
+    if (!initialColor && urlColorToken && colorOptions.length) {
+      initialColor =
+        colorOptions.find((c) => normalizeColorKey(c.name || '').includes(normalizeColorKey(urlColorToken))) ?? null;
+    }
+    if (!initialColor && presetColorKey && colorOptions.length) {
+      initialColor = colorOptions.find((c) => normalizeColorKey(c.name || '').includes(presetColorKey)) ?? null;
+    }
 
-    setSelectedColor(initialColor ?? colorOptions[0] ?? null);
-    setSelectedFinish(initialFinish ?? profileOptions[0] ?? null);
+    let initialFinish: ProductProfileVariant | null = null;
+    if (urlFinishId && profileOptions.length) {
+      initialFinish = profileOptions.find((p) => p.id === urlFinishId) ?? null;
+    }
+    if (!initialFinish && urlFinishToken && profileOptions.length) {
+      const token = normalizeProfileToken(urlFinishToken);
+      initialFinish =
+        profileOptions.find((p) => {
+          const hay = normalizeProfileToken([p.code, p.name].filter(Boolean).join(' '));
+          return hay === token || hay.includes(token);
+        }) ?? null;
+    }
+    if (!initialFinish && presetProfileKey && profileOptions.length) {
+      initialFinish =
+        profileOptions.find((p) => {
+          const hay = normalizeProfileToken([p.code, p.name].filter(Boolean).join(' '));
+          return hay === presetProfileKey || hay.includes(presetProfileKey);
+        }) ?? null;
+    }
+
+    if (initialColor) {
+      setSelectedColor(initialColor);
+    } else if (!hasColorParam) {
+      setSelectedColor(colorOptions[0] ?? null);
+    }
+
+    if (initialFinish) {
+      setSelectedFinish(initialFinish);
+    } else if (!hasFinishParam) {
+      setSelectedFinish(profileOptions[0] ?? null);
+    }
 
     if (Number.isFinite(urlWidth) && widthOptionsMm.includes(urlWidth as any)) {
       setSelectedWidthMm(urlWidth);
@@ -559,7 +641,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       setSelectedThicknessMm(urlThickness);
     }
 
-    selectionInitializedForProductIdRef.current = product.id;
+    const pendingColor = hasColorParam && !initialColor;
+    const pendingFinish = hasFinishParam && !initialFinish;
+    if (!pendingColor && !pendingFinish) {
+      selectionInitializedForProductIdRef.current = product.id;
+    }
   }, [product?.id, stockPreset, colorOptions, profileOptions, widthOptionsMm, lengthOptionsMm, thicknessOptions, searchParamsKey, searchParams]);
 
   useEffect(() => {
@@ -582,7 +668,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         setSelectedColor(match);
         didUpdate = true;
       }
-    } else if (urlColorToken) {
+    }
+    if (urlColorToken) {
       const token = normalizeColorKey(urlColorToken);
       const match = colorOptions.find((c) => normalizeColorKey(c.name || '').includes(token)) ?? null;
       if (match && selectedColor?.id !== match.id) {
@@ -597,11 +684,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         setSelectedFinish(match);
         didUpdate = true;
       }
-    } else if (urlFinishToken) {
-      const token = normalizeProfileKey(urlFinishToken);
+    }
+    if (urlFinishToken) {
+      const token = normalizeProfileToken(urlFinishToken);
       const match = profileOptions.find((p) => {
-        const hay = normalizeProfileKey([p.code, p.name].filter(Boolean).join(' '));
-        return hay.includes(token);
+        const hay = normalizeProfileToken([p.code, p.name].filter(Boolean).join(' '));
+        return hay === token || hay.includes(token);
       }) ?? null;
       if (match && selectedFinish?.id !== match.id) {
         setSelectedFinish(match);
@@ -627,7 +715,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     if (didUpdate) {
       skipNextUrlSyncRef.current = true;
     }
-  }, [product?.id, searchParamsKey, colorOptions, profileOptions, widthOptionsMm, lengthOptionsMm, thicknessOptions, selectedColor?.id, selectedFinish?.id, selectedWidthMm, selectedLengthMm, selectedThicknessMm, searchParams]);
+  }, [product?.id, searchParamsKey, colorOptions, profileOptions, widthOptionsMm, lengthOptionsMm, thicknessOptions, searchParams]);
 
   useEffect(() => {
     if (!product?.id) return;
@@ -646,7 +734,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       c: selectedColor?.id ?? null,
       f: selectedFinish?.id ?? null,
       ct: selectedColor?.name ? normalizeColorKey(String(selectedColor.name)) : null,
-      ft: selectedFinish ? normalizeProfileKey(selectedFinish.code || selectedFinish.name || '') : null,
+      ft: selectedFinish ? normalizeProfileToken(selectedFinish.code || selectedFinish.name || '') : null,
       t: String(selectedThicknessMm),
     };
 
@@ -678,6 +766,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   }, [localizedDisplayName]);
 
   useEffect(() => {
+    if (!product?.id) return;
+    if (selectionInitializedForProductIdRef.current !== product.id) return;
     // Keep a valid selection if the options list changes.
     if (!selectedColor) {
       setSelectedColor(colorOptions[0] ?? null);
@@ -686,9 +776,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     if (!colorOptions.some((c) => c.id === selectedColor.id)) {
       setSelectedColor(colorOptions[0] ?? null);
     }
-  }, [colorOptions, selectedColor]);
+  }, [product?.id, colorOptions, selectedColor]);
 
   useEffect(() => {
+    if (!product?.id) return;
+    if (selectionInitializedForProductIdRef.current !== product.id) return;
     if (!selectedFinish) {
       setSelectedFinish(profileOptions[0] ?? null);
       return;
@@ -696,21 +788,25 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     if (!profileOptions.some((p) => p.id === selectedFinish.id)) {
       setSelectedFinish(profileOptions[0] ?? null);
     }
-  }, [profileOptions, selectedFinish]);
+  }, [product?.id, profileOptions, selectedFinish]);
 
   useEffect(() => {
+    if (!product?.id) return;
+    if (selectionInitializedForProductIdRef.current !== product.id) return;
     if (widthOptionsMm.length === 0) return;
     if (!widthOptionsMm.includes(selectedWidthMm)) {
       setSelectedWidthMm(widthOptionsMm[0] ?? selectedWidthMm);
     }
-  }, [selectedWidthMm, widthOptionsMm]);
+  }, [product?.id, selectedWidthMm, widthOptionsMm]);
 
   useEffect(() => {
+    if (!product?.id) return;
+    if (selectionInitializedForProductIdRef.current !== product.id) return;
     if (lengthOptionsMm.length === 0) return;
     if (!lengthOptionsMm.includes(selectedLengthMm)) {
       setSelectedLengthMm(lengthOptionsMm[0] ?? selectedLengthMm);
     }
-  }, [selectedLengthMm, lengthOptionsMm]);
+  }, [product?.id, selectedLengthMm, lengthOptionsMm]);
 
   useEffect(() => {
     const allowed = new Set(thicknessOptions.map((x) => x.valueMm));
@@ -938,11 +1034,74 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     return srcs;
   }, [product.image, product.images]);
 
-  const activeImage = thumbs[activeThumb] ?? product.image;
+  const urlImageOverride = searchParams.get('img');
+  const colorPreviewImage =
+    typeof effectiveSelectedColor?.image === 'string' ? effectiveSelectedColor.image : null;
+  const activeImage = colorPreviewImage || urlImageOverride || thumbs[activeThumb] || product.image;
 
   const shopHref = toLocalePath('/products', currentLocale);
   const homeHref = toLocalePath('/', currentLocale);
-  const contactHref = toLocalePath('/kontaktai', currentLocale);
+  const needAssistanceLabel = currentLocale === 'lt' ? 'Reikia pagalbos?' : 'Need assistance?';
+  const needAssistanceLead =
+    currentLocale === 'lt' ? 'Nerandate to, ko ieškote?' : "Haven't found what you're looking for?";
+
+  const closeNeedAssistance = () => {
+    setIsNeedAssistanceOpen(false);
+  };
+
+  const handleNeedAssistanceSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!needAssistanceConsent || needAssistanceSubmitting) return;
+
+    setNeedAssistanceSubmitting(true);
+    setNeedAssistanceError(null);
+
+    trackEvent('contact_submit_attempt', {
+      method: 'product_need_assistance',
+      has_phone: Boolean(needAssistanceForm.phone?.trim()),
+    });
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: needAssistanceForm.fullName,
+          email: needAssistanceForm.email,
+          phone: needAssistanceForm.phone,
+          company: needAssistanceForm.company,
+          startedAt: needAssistanceStartedAtRef.current,
+        }),
+      });
+
+      if (!res.ok) {
+        trackEvent('contact_submit_error', {
+          method: 'product_need_assistance',
+          status: res.status,
+        });
+        setNeedAssistanceError(tContact('messageError'));
+        setNeedAssistanceSubmitting(false);
+        return;
+      }
+
+      trackEvent('generate_lead', {
+        method: 'product_need_assistance',
+      });
+
+      setNeedAssistanceSubmitted(true);
+      setNeedAssistanceForm({ fullName: '', email: '', phone: '', company: '' });
+      setNeedAssistanceConsent(false);
+      needAssistanceStartedAtRef.current = Date.now();
+    } catch {
+      trackEvent('contact_submit_error', {
+        method: 'product_need_assistance',
+        status: 'network_error',
+      });
+      setNeedAssistanceError(tContact('messageError'));
+    } finally {
+      setNeedAssistanceSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#E1E1E1]">
@@ -1138,12 +1297,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 <div className="flex flex-col gap-[8px]">
                   <div className="flex gap-[4px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase">
                     <span className="text-[#7C7C7C]">Color:</span>
-                    <span className="text-[#161616]">{selectedColor?.name || t('selectColorPlaceholder')}</span>
+                    <span className="text-[#161616]">{effectiveSelectedColor?.name || t('selectColorPlaceholder')}</span>
                   </div>
                   <div className="flex gap-[8px] flex-wrap">
                     {colorOptions.map((color) => {
                       const swatchSrc = resolveColorSwatchSrc(color);
-                      const isActive = selectedColor?.id === color.id;
+                      const isActive = effectiveSelectedColor?.id === color.id;
                       const fallbackSrc = typeof color.image === 'string' ? color.image : null;
                       const canUseNextImage = (src: string) => src.startsWith('/');
 
@@ -1183,7 +1342,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   </p>
                   <div className="flex gap-[8px] flex-wrap">
                     {profileOptions.map((finish, index) => {
-                      const active = selectedFinish?.id === finish.id;
+                      const active = effectiveSelectedFinish?.id === finish.id;
                       const profileIconSrc = resolveProfileIconSrc(finish) ?? PROFILE_ICON_FALLBACK_BY_INDEX[index] ?? null;
                       const fallbackSrc = typeof finish.image === 'string' ? finish.image : null;
                       const canUseNextImage = (src: string) => src.startsWith('/');
@@ -1250,10 +1409,18 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             {/* Actions */}
             <div className="flex flex-col gap-[8px] items-center max-w-[434px]">
               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#535353] text-center">
-                Haven't found what you're looking for?{' '}
-                <Link href={contactHref} className="text-[#161616] underline">
-                  Contact us
-                </Link>
+                {needAssistanceLead}{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNeedAssistanceSubmitted(false);
+                    setNeedAssistanceError(null);
+                    setIsNeedAssistanceOpen(true);
+                  }}
+                  className="text-[#161616] underline"
+                >
+                  {needAssistanceLabel}
+                </button>
               </p>
               <button
                 type="button"
@@ -1266,6 +1433,130 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           </div>
         </div>
       </main>
+
+      <ModalOverlay isOpen={isNeedAssistanceOpen} onClose={closeNeedAssistance}>
+        <div className="relative w-[min(520px,92vw)] bg-[#EAEAEA] border border-[#BBBBBB] rounded-[16px] p-[20px] sm:p-[28px]">
+          <button
+            type="button"
+            onClick={closeNeedAssistance}
+            className="absolute right-[16px] top-[16px] h-[28px] w-[28px] rounded-full border border-[#BBBBBB] text-[#535353] hover:text-[#161616] hover:border-[#161616]"
+            aria-label="Close"
+          >
+            ×
+          </button>
+
+          <p className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#7C7C7C]">
+            {currentLocale === 'lt' ? 'Užklausa' : 'Request'}
+          </p>
+          <h3 className="mt-[6px] font-['DM_Sans'] text-[20px] sm:text-[22px] text-[#161616]">
+            {tContact('subtitle')}
+          </h3>
+
+          <div className="mt-[16px]">
+            {needAssistanceSubmitted ? (
+              <div className="py-[16px]">
+                <p className="font-['DM_Sans'] text-[20px] text-[#161616]">{tContact('thankYou')}</p>
+                <p className="mt-[6px] font-['Outfit'] text-[14px] text-[#535353]">{tContact('thankYouMessage')}</p>
+              </div>
+            ) : (
+              <form onSubmit={handleNeedAssistanceSubmit} className="space-y-[12px]">
+                <div className="space-y-[8px]">
+                  <label className="block font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#7C7C7C]">
+                    {tContact('fullName')}*
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={needAssistanceForm.fullName}
+                    onChange={(event) =>
+                      setNeedAssistanceForm((prev) => ({
+                        ...prev,
+                        fullName: event.target.value,
+                      }))
+                    }
+                    className="w-full h-[44px] px-[14px] bg-transparent border border-[#BBBBBB] rounded-[8px] font-['Outfit'] text-[14px] text-[#161616]"
+                  />
+                </div>
+                <div className="space-y-[8px]">
+                  <label className="block font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#7C7C7C]">
+                    {tContact('email')}*
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={needAssistanceForm.email}
+                    onChange={(event) =>
+                      setNeedAssistanceForm((prev) => ({
+                        ...prev,
+                        email: event.target.value,
+                      }))
+                    }
+                    className="w-full h-[44px] px-[14px] bg-transparent border border-[#BBBBBB] rounded-[8px] font-['Outfit'] text-[14px] text-[#161616]"
+                  />
+                </div>
+                <div className="space-y-[8px]">
+                  <label className="block font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#7C7C7C]">
+                    {tContact('phone')}*
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={needAssistanceForm.phone}
+                    onChange={(event) =>
+                      setNeedAssistanceForm((prev) => ({
+                        ...prev,
+                        phone: event.target.value,
+                      }))
+                    }
+                    className="w-full h-[44px] px-[14px] bg-transparent border border-[#BBBBBB] rounded-[8px] font-['Outfit'] text-[14px] text-[#161616]"
+                  />
+                </div>
+
+                <input
+                  type="text"
+                  value={needAssistanceForm.company}
+                  onChange={(event) =>
+                    setNeedAssistanceForm((prev) => ({
+                      ...prev,
+                      company: event.target.value,
+                    }))
+                  }
+                  className="hidden"
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+
+                <label className="flex items-start gap-[10px] text-[12px] text-[#535353] font-['Outfit']">
+                  <input
+                    type="checkbox"
+                    checked={needAssistanceConsent}
+                    onChange={(event) => setNeedAssistanceConsent(event.target.checked)}
+                    className="mt-[2px] h-[16px] w-[16px] border border-[#BBBBBB] accent-[#161616]"
+                  />
+                  <span>
+                    {tContact('privacyConsent')}{' '}
+                    <Link href="/privacy-policy" className="text-[#161616] underline">
+                      {tContact('privacyPolicy')}
+                    </Link>
+                  </span>
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={needAssistanceSubmitting || !needAssistanceConsent}
+                  className="w-full h-[48px] bg-[#161616] rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-white disabled:opacity-50"
+                >
+                  {needAssistanceSubmitting ? tContact('sending') : tContact('leaveRequest')}
+                </button>
+
+                {needAssistanceError ? (
+                  <p className="font-['Outfit'] text-[12px] text-[#F63333]">{needAssistanceError}</p>
+                ) : null}
+              </form>
+            )}
+          </div>
+        </div>
+      </ModalOverlay>
     </div>
   );
 }

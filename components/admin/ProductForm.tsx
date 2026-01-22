@@ -469,6 +469,9 @@ export default function ProductForm({ product, mode }: Props) {
   const [variantProducts, setVariantProducts] = useState<Array<any>>([]);
   const [variantProductsLoading, setVariantProductsLoading] = useState(false);
   const [variantProductsError, setVariantProductsError] = useState<string | null>(null);
+  const [bulkVariantPrice, setBulkVariantPrice] = useState('');
+  const [bulkVariantPriceError, setBulkVariantPriceError] = useState<string | null>(null);
+  const [bulkVariantPriceSaving, setBulkVariantPriceSaving] = useState(false);
   const [expandedVariantId, setExpandedVariantId] = useState<string | null>(null);
   const [variantEditValues, setVariantEditValues] = useState<Record<string, VariantProductEdit>>({});
   const [variantEditErrors, setVariantEditErrors] = useState<Record<string, string>>({});
@@ -681,6 +684,56 @@ export default function ProductForm({ product, mode }: Props) {
 
     setVariantProducts((prev) => prev.map((item) => (item.id === id ? { ...item, ...data } : item)));
     setVariantEditSaving(false);
+  };
+
+  const handleApplyPriceToAllVariants = async () => {
+    if (!supabase) return;
+    if (variantProducts.length === 0) return;
+
+    const raw = bulkVariantPrice.trim().replace(',', '.');
+    const value = Number.parseFloat(raw);
+    if (!Number.isFinite(value) || value < 0) {
+      setBulkVariantPriceError('Įveskite teisingą kainą.');
+      return;
+    }
+
+    setBulkVariantPriceError(null);
+    setBulkVariantPriceSaving(true);
+
+    const ids = variantProducts.map((item) => item.id).filter(Boolean);
+    const { data, error } = await supabase
+      .from('products')
+      .update({ base_price: value })
+      .in('id', ids)
+      .select('id,name,slug,sku,stock_quantity,base_price,sale_price,is_active');
+
+    if (error) {
+      setBulkVariantPriceError(formatUnknownError(error));
+      setBulkVariantPriceSaving(false);
+      return;
+    }
+
+    if (Array.isArray(data)) {
+      setVariantProducts((prev) =>
+        prev.map((item) => {
+          const updated = data.find((row: any) => row.id === item.id);
+          return updated ? { ...item, ...updated } : item;
+        })
+      );
+
+      setVariantEditValues((prev) => {
+        const next = { ...prev };
+        for (const item of variantProducts) {
+          next[item.id] = {
+            ...(next[item.id] || {}),
+            base_price: value.toFixed(2),
+          };
+        }
+        return next;
+      });
+    }
+
+    setBulkVariantPriceSaving(false);
   };
 
   useEffect(() => {
@@ -2302,6 +2355,30 @@ export default function ProductForm({ product, mode }: Props) {
                 <p className="text-sm text-[#7C7C7C] mt-3">Dar nėra sukurtų variacijų.</p>
               ) : (
                 <div className="mt-4 overflow-x-auto">
+                  <div className="mb-4 flex flex-col sm:flex-row sm:items-end gap-3">
+                    <div>
+                      <label className="block text-xs text-[#535353] mb-1">Kaina visoms variacijoms (EUR)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={bulkVariantPrice}
+                        onChange={(e) => setBulkVariantPrice(e.target.value)}
+                        className="w-[180px] px-2 py-2 border border-[#E1E1E1] rounded"
+                        placeholder="Pvz. 89.00"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleApplyPriceToAllVariants}
+                      disabled={bulkVariantPriceSaving}
+                      className="px-4 py-2 bg-[#161616] text-white rounded-[100px] text-sm disabled:opacity-50"
+                    >
+                      {bulkVariantPriceSaving ? 'Taikoma...' : 'Taikyti visoms'}
+                    </button>
+                    {bulkVariantPriceError ? (
+                      <p className="text-sm text-red-600">{bulkVariantPriceError}</p>
+                    ) : null}
+                  </div>
                   <table className="w-full text-sm border border-[#E1E1E1]">
                     <thead className="bg-[#E1E1E1]">
                       <tr>

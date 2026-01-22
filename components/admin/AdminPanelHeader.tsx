@@ -281,7 +281,7 @@ export default function AdminPanelHeader() {
     <>
       {/* Full-width breadcrumb bar */}
       <div className="w-full bg-[#E1E1E1]">
-        <Breadcrumbs items={breadcrumbsItems} showDivider={false} />
+        <Breadcrumbs items={breadcrumbsItems} showDivider />
       </div>
 
       <div className="bg-[#E1E1E1] pt-[clamp(28px,4vw,56px)]">
