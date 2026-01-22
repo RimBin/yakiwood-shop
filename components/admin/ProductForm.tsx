@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { z } from 'zod';
 import { USAGE_TYPES } from '@/types/admin';
+import { buildInventorySku } from '@/lib/inventory/sku';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
 
@@ -198,6 +199,25 @@ function createProductSchema(t: (key: string) => string) {
     height: z.number({ message: t('validation.numberExpected') }),
     depth: z.number({ message: t('validation.numberExpected') }),
   });
+}
+
+const PROFILE_LABELS_LT: Record<string, string> = {
+  'half-taper-45': 'Pusė špunto 45°',
+  'half-taper': 'Pusė špunto',
+  rhombus: 'Rombas',
+  rectangle: 'Stačiakampis',
+};
+
+function resolveProfileLabel(
+  code: string,
+  labelLt: string | undefined,
+  labelEn: string | undefined,
+  locale: 'lt' | 'en'
+): string {
+  if (locale === 'lt') {
+    return labelLt || PROFILE_LABELS_LT[code] || labelEn || code;
+  }
+  return labelEn || code || labelLt || PROFILE_LABELS_LT[code] || code;
 }
 
 interface Variant {
@@ -416,8 +436,14 @@ export default function ProductForm({ product, mode }: Props) {
   }, [profileVariantOptions, catalogProfileOptions]);
 
   const allowedProfileOptions = useMemo(() => {
-    if (usageType === 'terrace') return baseProfileOptions.slice(0, 1);
-    if (usageType === 'facade' && baseProfileOptions.length > 1) return baseProfileOptions.slice(1);
+    if (usageType === 'terrace') {
+      const rectangle = baseProfileOptions.filter((option) => option.code === 'rectangle');
+      return rectangle.length > 0 ? rectangle : baseProfileOptions;
+    }
+    if (usageType === 'facade') {
+      const filtered = baseProfileOptions.filter((option) => option.code !== 'rectangle');
+      return filtered.length > 0 ? filtered : baseProfileOptions;
+    }
     return baseProfileOptions;
   }, [baseProfileOptions, usageType]);
 
@@ -429,6 +455,8 @@ export default function ProductForm({ product, mode }: Props) {
   const [variantDrafts, setVariantDrafts] = useState<VariantDraft[]>([]);
   const [variantGeneratorError, setVariantGeneratorError] = useState<string | null>(null);
   const [isCreatingVariants, setIsCreatingVariants] = useState(false);
+  const [variantDiscountType, setVariantDiscountType] = useState<'none' | 'percent' | 'amount'>('none');
+  const [variantDiscountValue, setVariantDiscountValue] = useState('');
 
   useEffect(() => {
     if (selectedVariantColors.length === 0 && availableColorOptions.length > 0) {
@@ -494,7 +522,7 @@ export default function ProductForm({ product, mode }: Props) {
               const code = (row.value_text as string | null) ?? '';
               const labelEn = (row.label_en as string | null) || undefined;
               const labelLt = (row.label_lt as string | null) || undefined;
-              const label = labelEn || code || labelLt;
+              const label = resolveProfileLabel(code, labelLt, labelEn, locale as 'lt' | 'en');
               return { code, label };
             })
             .filter((x) => x.code);
@@ -1085,6 +1113,7 @@ export default function ProductForm({ product, mode }: Props) {
     }
 
     const basePriceValue = Number.parseFloat(basePrice || '0') || 0;
+    const discountedPrice = computeDiscountedPrice(basePriceValue);
     const drafts: VariantDraft[] = [];
 
     for (const profile of selectedVariantProfiles) {
@@ -1099,9 +1128,9 @@ export default function ProductForm({ product, mode }: Props) {
               color,
               widthMm,
               lengthMm,
-              price: basePriceValue ? String(basePriceValue) : '',
+              price: discountedPrice ? String(discountedPrice) : '',
               imageUrl: colorImage,
-              sku: '',
+              sku: buildVariantSku(profile, color, widthMm, lengthMm),
               slug: slugValue,
             });
           }
@@ -1118,11 +1147,52 @@ export default function ProductForm({ product, mode }: Props) {
     );
   };
 
+  useEffect(() => {
+    if (variantDrafts.length === 0) return;
+    const basePriceValue = Number.parseFloat(basePrice || '0') || 0;
+    const discountedPrice = computeDiscountedPrice(basePriceValue);
+    setVariantDrafts((prev) =>
+      prev.map((draft) => ({
+        ...draft,
+        price: discountedPrice ? String(discountedPrice) : '',
+      }))
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variantDiscountType, variantDiscountValue]);
+
   const updateColorImage = (color: string, value: string) => {
     setVariantColorImages((prev) => ({ ...prev, [color]: value }));
     setVariantDrafts((prev) =>
       prev.map((draft) => (draft.color === color ? { ...draft, imageUrl: value } : draft))
     );
+  };
+
+  const computeDiscountedPrice = (base: number): number => {
+    if (!Number.isFinite(base)) return 0;
+    const raw = Number.parseFloat(variantDiscountValue.replace(',', '.'));
+    if (!Number.isFinite(raw) || raw <= 0) return base;
+    if (variantDiscountType === 'percent') {
+      const next = base * (1 - raw / 100);
+      return Math.max(0, Number(next.toFixed(2)));
+    }
+    if (variantDiscountType === 'amount') {
+      const next = base - raw;
+      return Math.max(0, Number(next.toFixed(2)));
+    }
+    return base;
+  };
+
+  const buildVariantSku = (profile: string, color: string, widthMm: number, lengthMm: number) => {
+    const thicknessMm = parseRequiredNumber(height);
+    return buildInventorySku({
+      usageType,
+      woodType,
+      profile,
+      color,
+      widthMm,
+      lengthMm,
+      thicknessMm: typeof thicknessMm === 'number' ? thicknessMm : null,
+    });
   };
 
   const ensureColorVariants = (current: Variant[]): Variant[] => {
@@ -1175,16 +1245,20 @@ export default function ProductForm({ product, mode }: Props) {
 
       if (existing.error) throw existing.error;
       const existingSlugs = new Set((existing.data || []).map((row: any) => row.slug));
+      const basePriceValue = Number.parseFloat(basePrice || '0') || 0;
 
       const rows = variantDrafts
         .filter((draft) => !existingSlugs.has(draft.slug))
         .map((draft) => {
-          const priceValue = Number.parseFloat(draft.price || '') || Number.parseFloat(basePrice || '0') || 0;
+          const priceValueRaw = Number.parseFloat(draft.price || '');
+          const salePriceValue = Number.isFinite(priceValueRaw) ? priceValueRaw : null;
+          const salePrice = salePriceValue !== null && salePriceValue < basePriceValue ? salePriceValue : null;
           const baseSlug = slug || product.slug || '';
           const baseSlugEnValue = slugEn || (product as any)?.slug_en || '';
           const slugEnValue = baseSlugEnValue
             ? buildStockItemSlug(baseSlugEnValue, draft.profile, draft.color, draft.widthMm, draft.lengthMm)
             : draft.slug;
+          const skuValue = draft.sku || buildVariantSku(draft.profile, draft.color, draft.widthMm, draft.lengthMm);
 
           return {
             name,
@@ -1193,14 +1267,14 @@ export default function ProductForm({ product, mode }: Props) {
             slug_en: slugEnValue,
             description: description || null,
             description_en: descriptionEn || description || null,
-            base_price: priceValue,
-            sale_price: null,
+            base_price: basePriceValue,
+            sale_price: salePrice,
             wood_type: woodType,
             category: deriveCategoryFromUsage(usageType),
             usage_type: usageType || null,
             image_url: draft.imageUrl || imageUrl || null,
             is_active: false,
-            sku: draft.sku || null,
+            sku: skuValue || null,
             width: draft.widthMm,
             depth: draft.lengthMm,
             height: height ? Number.parseFloat(height) : null,
@@ -1847,6 +1921,36 @@ export default function ProductForm({ product, mode }: Props) {
             </div>
           </div>
 
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs text-[#535353] font-['DM_Sans'] mb-1">Nuolaida</label>
+              <select
+                value={variantDiscountType}
+                onChange={(e) => setVariantDiscountType(e.target.value as 'none' | 'percent' | 'amount')}
+                className="w-full px-3 py-2 border border-[#E1E1E1] rounded font-['DM_Sans'] text-sm"
+              >
+                <option value="none">Be nuolaidos</option>
+                <option value="percent">% nuo kainos</option>
+                <option value="amount">EUR nuo kainos</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-[#535353] font-['DM_Sans'] mb-1">Reikšmė</label>
+              <input
+                type="number"
+                step="0.01"
+                value={variantDiscountValue}
+                onChange={(e) => setVariantDiscountValue(e.target.value)}
+                disabled={variantDiscountType === 'none'}
+                className="w-full px-3 py-2 border border-[#E1E1E1] rounded font-['DM_Sans'] text-sm disabled:opacity-50"
+                placeholder={variantDiscountType === 'percent' ? '10' : '5'}
+              />
+            </div>
+            <div className="flex items-end text-xs text-[#7C7C7C]">
+              Nuolaida taikoma visoms sugeneruotoms variacijoms.
+            </div>
+          </div>
+
           {variantGeneratorError ? (
             <div className="mb-4 text-sm text-red-600 font-['DM_Sans']">
               {variantGeneratorError}
@@ -1998,7 +2102,7 @@ export default function ProductForm({ product, mode }: Props) {
                     <th className="text-left px-3 py-2">Spalva</th>
                     <th className="text-left px-3 py-2">Plotis</th>
                     <th className="text-left px-3 py-2">Ilgis</th>
-                    <th className="text-left px-3 py-2">Kaina</th>
+                    <th className="text-left px-3 py-2">Kaina su nuolaida</th>
                     <th className="text-left px-3 py-2">SKU</th>
                     <th className="text-left px-3 py-2">Nuotrauka</th>
                   </tr>
@@ -2006,7 +2110,14 @@ export default function ProductForm({ product, mode }: Props) {
                 <tbody>
                   {variantDrafts.map((draft) => (
                     <tr key={draft.id} className="border-t border-[#E1E1E1]">
-                      <td className="px-3 py-2">{draft.profile}</td>
+                      <td className="px-3 py-2">
+                        {resolveProfileLabel(
+                          draft.profile,
+                          catalogProfileOptions.find((option) => option.code === draft.profile)?.label,
+                          catalogProfileOptions.find((option) => option.code === draft.profile)?.label,
+                          locale as 'lt' | 'en'
+                        )}
+                      </td>
                       <td className="px-3 py-2">{draft.color}</td>
                       <td className="px-3 py-2">{draft.widthMm}</td>
                       <td className="px-3 py-2">{draft.lengthMm}</td>

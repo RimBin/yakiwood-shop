@@ -169,7 +169,7 @@ export function transformDbProduct(db: DbProduct): Product {
   const profiles: ProductProfileVariant[] = profileSource
     .map((v) => ({
       id: v.id,
-      name: v.label_lt ?? v.name,
+      name: v.label_en ?? v.name,
       code: v.name,
       priceModifier: v.price_adjustment === null ? undefined : toNumber(v.price_adjustment),
       image: v.image_url ?? v.texture_url ?? undefined,

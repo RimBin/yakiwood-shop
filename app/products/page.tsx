@@ -196,8 +196,21 @@ export default function ProductsPage() {
     async function loadProducts() {
       try {
         console.log('Loading products from Supabase...');
-        // Show base (active) products in the listing.
-        const products = await fetchProducts({ mode: 'active' });
+
+        let products: Product[] = [];
+
+        try {
+          const stockItems = await fetchProducts({ mode: 'stock-items' });
+          if (stockItems.length > 0) {
+            products = stockItems;
+          } else {
+            products = await fetchProducts({ mode: 'active' });
+          }
+        } catch (stockError) {
+          console.warn('Stock items unavailable, falling back to active products.', stockError);
+          products = await fetchProducts({ mode: 'active' });
+        }
+
         console.log('Products loaded:', products.length);
 
         // Apply role discount for authenticated users.

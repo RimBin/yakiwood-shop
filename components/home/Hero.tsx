@@ -29,16 +29,16 @@ export default async function Hero() {
 
       {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
       <div className="lg:hidden flex flex-col relative z-10">
-        <div className="px-4 pt-4 pb-2 flex flex-col gap-2">
+        <div className="px-4 pt-4 pb-2 flex flex-col gap-2 md:max-w-[620px]">
           <p
-            className="font-['DM_Sans'] font-light leading-none text-[#161616] w-full max-w-full sm:max-w-[355px] whitespace-pre-line break-words"
+            className="font-['DM_Sans'] font-light leading-none text-[#161616] w-full max-w-full sm:max-w-[520px] md:max-w-[620px] whitespace-pre-line break-words"
             style={{ fontSize: heroHeadingSize, letterSpacing: heroHeadingTracking }}
           >
             {tHero('mainHeading')}
             <span className="font-['Tiro_Tamil'] italic">{tHero('brandName')}</span>
           </p>
           <p
-            className="font-['Outfit'] font-light leading-[1.2] tracking-[0.14px] text-[#161616] w-full max-w-full sm:max-w-[323px] break-words pb-2"
+            className="font-['Outfit'] font-light leading-[1.2] tracking-[0.14px] text-[#161616] w-full max-w-full sm:max-w-[420px] md:max-w-[520px] break-words pb-2"
             style={{ fontSize: heroDescriptionSize }}
           >
             {tHero('description')}
@@ -46,7 +46,7 @@ export default async function Hero() {
         </div>
 
         <div className="relative w-full">
-          <div className="bg-[#bbab92] w-full h-[423px] relative">
+          <div className="bg-[#bbab92] w-full h-[423px] md:h-[520px] relative">
             <div className="absolute inset-x-0 top-0 h-[309px] flex items-center justify-center">
               <div className="rotate-[333.068deg] w-full px-4 flex items-center justify-center">
                 <div className="w-full max-w-[340px] aspect-[317/185] relative">
@@ -63,7 +63,7 @@ export default async function Hero() {
             </div>
           </div>
 
-          <div className="absolute left-4 bottom-[80px] right-4 bg-white/10 backdrop-blur-[20px] border border-white/50 rounded-[16px] p-3 flex flex-col gap-3">
+          <div className="absolute right-4 bottom-[80px] w-[280px] md:w-[360px] bg-white/10 backdrop-blur-[20px] border border-white/50 rounded-[16px] p-3 flex flex-col gap-3">
             <div className="flex items-start justify-between w-full">
               <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white">{tHero('productName')}</p>
               <div className="flex gap-1 items-center text-white">
