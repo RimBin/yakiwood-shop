@@ -443,6 +443,24 @@ export default function ProductsPage() {
     return currentLocale === 'lt' ? `${rounded} €/m²` : `€${rounded}/m²`;
   };
 
+  const roundUpToCents = (value: number) => Math.ceil(value * 100) / 100;
+
+  const formatUnitPrice = (price: number) => {
+    const rounded = roundUpToCents(price);
+    const formatted = rounded.toFixed(2);
+    return currentLocale === 'lt' ? `${formatted} €/vnt` : `€${formatted}/pc`;
+  };
+
+  const getUnitPrice = (pricePerM2: number, size: { width: string; length: string } | null) => {
+    if (!size) return null;
+    const widthMm = Number(size.width);
+    const lengthMm = Number(size.length);
+    if (!Number.isFinite(widthMm) || !Number.isFinite(lengthMm)) return null;
+    const areaM2 = (widthMm / 1000) * (lengthMm / 1000);
+    if (!Number.isFinite(areaM2) || areaM2 <= 0) return null;
+    return pricePerM2 * areaM2;
+  };
+
   const formatMaybeLabel = (value: string | undefined) => {
     if (!value) return undefined;
     const trimmed = value.trim();
@@ -967,7 +985,15 @@ export default function ProductsPage() {
                   product.salePrice > 0 &&
                   product.salePrice < product.price;
                 const effectivePrice = hasSale ? product.salePrice! : product.price;
+                const discountPercent = hasSale
+                  ? Math.max(1, Math.round(((product.price - effectivePrice) / product.price) * 100))
+                  : null;
                 const hrefSlug = currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug;
+
+                const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
+                const dims = parsed?.size ? parseSizeDimensions(parsed.size) : null;
+                const unitPrice = getUnitPrice(effectivePrice, dims);
+                const unitPriceLabel = unitPrice ? formatUnitPrice(unitPrice) : null;
 
                 return (
             <Link
@@ -993,6 +1019,11 @@ export default function ProductsPage() {
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
+                {discountPercent ? (
+                  <div className="absolute top-[10px] right-[10px] rounded-[100px] bg-[#161616] px-[10px] py-[6px] text-[12px] font-['DM_Sans'] text-white">
+                    -{discountPercent}%
+                  </div>
+                ) : null}
               </div>
               <p
                 className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] text-[#161616] tracking-[-0.36px]"
@@ -1023,15 +1054,22 @@ export default function ProductsPage() {
                 </p>
               )}
               <p
-                className="font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#535353] tracking-[-0.32px]"
+                className="flex items-center justify-between gap-[12px] font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#535353] tracking-[-0.32px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
-                <span className={hasSale ? 'text-[#161616]' : undefined}>
-                  {formatCardPrice(effectivePrice)}
+                <span className="flex items-center gap-[10px]">
+                  <span className={hasSale ? 'text-[#161616]' : undefined}>
+                    {formatCardPrice(effectivePrice)}
+                  </span>
+                  {hasSale ? (
+                    <span className="text-[#7C7C7C] line-through">
+                      {formatCardPrice(product.price)}
+                    </span>
+                  ) : null}
                 </span>
-                {hasSale ? (
-                  <span className="ml-[10px] text-[#7C7C7C] line-through">
-                    {formatCardPrice(product.price)}
+                {unitPriceLabel ? (
+                  <span className="text-[14px] text-[#161616]">
+                    {unitPriceLabel}
                   </span>
                 ) : null}
               </p>

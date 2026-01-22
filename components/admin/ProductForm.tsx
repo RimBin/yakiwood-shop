@@ -619,6 +619,34 @@ export default function ProductForm({ product, mode }: Props) {
     }));
   };
 
+  const parseNumber = (value: string) => {
+    const normalized = value.replace(',', '.');
+    const parsed = Number.parseFloat(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  const computeDiscountPercent = (base?: number | null, sale?: number | null) => {
+    if (!base || !sale) return null;
+    if (!Number.isFinite(base) || !Number.isFinite(sale) || base <= 0) return null;
+    if (sale >= base) return null;
+    const raw = ((base - sale) / base) * 100;
+    return raw < 0 ? null : raw;
+  };
+
+  const formatPercent = (value: number) => {
+    const rounded = Math.round(value * 100) / 100;
+    return rounded.toFixed(2).replace(/\.00$/, '');
+  };
+
+  const applyDiscountPercent = (baseValue: string, percentValue: string) => {
+    const base = parseNumber(baseValue);
+    const percent = parseNumber(percentValue);
+    if (!base || !percent || percent <= 0) return '';
+    const clamped = Math.min(percent, 99.99);
+    const sale = base * (1 - clamped / 100);
+    return sale.toFixed(2);
+  };
+
   const handleSaveVariantEdit = async (id: string) => {
     if (!supabase) return;
     const values = variantEditValues[id];
@@ -2292,7 +2320,13 @@ export default function ProductForm({ product, mode }: Props) {
                             <td className="px-3 py-2">{item.slug}</td>
                             <td className="px-3 py-2">{item.sku || '—'}</td>
                             <td className="px-3 py-2">{typeof item.base_price === 'number' ? item.base_price.toFixed(2) : '—'}</td>
-                            <td className="px-3 py-2">{typeof item.sale_price === 'number' ? item.sale_price.toFixed(2) : '—'}</td>
+                            <td className="px-3 py-2">
+                              {(() => {
+                                if (typeof item.base_price !== 'number' || typeof item.sale_price !== 'number') return '—';
+                                const percent = computeDiscountPercent(item.base_price, item.sale_price);
+                                return percent ? `${formatPercent(percent)}%` : '—';
+                              })()}
+                            </td>
                             <td className="px-3 py-2">{typeof item.stock_quantity === 'number' ? item.stock_quantity : '—'}</td>
                             <td className="px-3 py-2">
                               <button
@@ -2328,12 +2362,24 @@ export default function ProductForm({ product, mode }: Props) {
                                     />
                                   </div>
                                   <div>
-                                    <label className="block text-xs text-[#535353] mb-1">Nuolaida</label>
+                                    <label className="block text-xs text-[#535353] mb-1">Nuolaida (%)</label>
                                     <input
                                       type="number"
                                       step="0.01"
-                                      value={variantEditValues[item.id]?.sale_price ?? ''}
-                                      onChange={(e) => updateVariantEditValue(item.id, { sale_price: e.target.value })}
+                                      value={(() => {
+                                        const base = parseNumber(variantEditValues[item.id]?.base_price ?? '');
+                                        const sale = parseNumber(variantEditValues[item.id]?.sale_price ?? '');
+                                        const percent = computeDiscountPercent(base, sale);
+                                        return percent ? formatPercent(percent) : '';
+                                      })()}
+                                      onChange={(e) =>
+                                        updateVariantEditValue(item.id, {
+                                          sale_price: applyDiscountPercent(
+                                            variantEditValues[item.id]?.base_price ?? '',
+                                            e.target.value
+                                          ),
+                                        })
+                                      }
                                       className="w-full px-2 py-1 border border-[#E1E1E1] rounded"
                                     />
                                   </div>
