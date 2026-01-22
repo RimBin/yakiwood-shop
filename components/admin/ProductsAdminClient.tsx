@@ -51,16 +51,11 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
   
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [usageFilter, setUsageFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [isArchivingInvalid, setIsArchivingInvalid] = useState(false);
-
-  const ALLOWED_USAGE_TYPES = new Set(['facade', 'terrace']);
-  const ALLOWED_WOOD_TYPES = new Set(['spruce', 'larch']);
 
   async function getAdminToken(): Promise<string | null> {
     if (!supabase) return null;
@@ -99,14 +94,13 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
     return products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.slug.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
       const matchesUsage = usageFilter === 'all' || product.usage_type === usageFilter;
       const matchesStatus = statusFilter === 'all' || 
                            (statusFilter === 'active' && product.is_active) ||
                            (statusFilter === 'inactive' && !product.is_active);
-      return matchesSearch && matchesCategory && matchesUsage && matchesStatus;
+      return matchesSearch && matchesUsage && matchesStatus;
     });
-  }, [products, searchQuery, categoryFilter, usageFilter, statusFilter]);
+  }, [products, searchQuery, statusFilter, usageFilter]);
 
   if (!supabase) {
     return (
@@ -255,40 +249,6 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
     }
   };
 
-  const handleArchiveInvalid = async () => {
-    const invalid = products.filter((product) => {
-      const usageOk = !product.usage_type || ALLOWED_USAGE_TYPES.has(product.usage_type);
-      const woodOk = !product.wood_type || ALLOWED_WOOD_TYPES.has(product.wood_type);
-      return !(usageOk && woodOk);
-    });
-
-    if (invalid.length === 0) return;
-    if (!confirm(tList('bulk.deleteConfirm', { count: invalid.length }))) return;
-
-    setIsArchivingInvalid(true);
-    try {
-      const ids = invalid.map((p) => p.id);
-      await adminRequest('/api/admin/products/bulk', {
-        method: 'POST',
-        body: JSON.stringify({ ids, isActive: false }),
-      });
-
-      setProducts((prev) =>
-        prev.map((p) => (ids.includes(p.id) ? { ...p, is_active: false } : p))
-      );
-      router.refresh();
-    } catch (error) {
-      const message =
-        typeof error === 'object' && error && 'message' in error
-          ? String((error as any).message)
-          : String(error);
-      console.error('Error archiving invalid products:', message);
-      alert(tList('errors.bulkDeleteFailed'));
-    } finally {
-      setIsArchivingInvalid(false);
-    }
-  };
-
   return (
     <AdminStack>
       {/* Header Actions */}
@@ -303,12 +263,6 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         </div>
 
         <div className="flex items-center gap-3">
-          <AdminButton
-            onClick={handleArchiveInvalid}
-            disabled={isArchivingInvalid || products.length === 0}
-          >
-            {isArchivingInvalid ? tList('bulk.processing') : 'Archive invalid products'}
-          </AdminButton>
           <AdminButtonLink href={toLocalePath('/admin/products/new', locale)}>
             {tList('newProductButton')}
           </AdminButtonLink>
@@ -317,14 +271,6 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4">
-        <div className="min-w-[220px]">
-        <AdminSelect value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-          <option value="all">{tList('filters.allCategories')}</option>
-          <option value="cladding">{tForm('options.categories.cladding')}</option>
-          <option value="decking">{tForm('options.categories.decking')}</option>
-        </AdminSelect>
-        </div>
-
         <div className="min-w-[220px]">
         <AdminSelect value={usageFilter} onChange={(e) => setUsageFilter(e.target.value)}>
           <option value="all">{tList('filters.allUsage')}</option>
@@ -378,12 +324,6 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
                   {tList('table.product')}
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
-                  {tList('table.category')}
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
-                  {tList('table.usage')}
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
                   {tList('table.price')}
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium font-['DM_Sans'] text-[#161616]">
@@ -430,12 +370,6 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
                         <div className="text-sm text-[#535353]">{product.slug}</div>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-['DM_Sans'] text-[#535353]">
-                    {product.category || '-'}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-['DM_Sans'] text-[#535353]">
-                    {product.usage_type ? tForm(`options.usageTypes.${product.usage_type}` as any) : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm font-['DM_Sans'] font-medium text-[#161616]">
                     €{product.base_price.toFixed(2)}
@@ -496,7 +430,7 @@ export default function ProductsAdminClient({ initialProducts }: Props) {
         {filteredProducts.length === 0 && (
           <div className="text-center py-12">
             <p className="text-[#535353] font-['DM_Sans']">
-              {searchQuery || categoryFilter !== 'all' || statusFilter !== 'all'
+              {searchQuery || usageFilter !== 'all' || statusFilter !== 'all'
                 ? tList('empty.noneFound')
                 : tList('empty.noneYet')}
             </p>

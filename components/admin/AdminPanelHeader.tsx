@@ -215,6 +215,7 @@ export default function AdminPanelHeader() {
   const breadcrumbsItems = useMemo(() => {
     const homeHref = pathPrefix ? `${pathPrefix}` : '/';
     const adminHref = `${pathPrefix}/admin`;
+    const productsHref = `${pathPrefix}/admin/products`;
 
     const items: Array<{ label: string; href?: string }> = [
       { label: t('breadcrumb.home'), href: homeHref },
@@ -227,7 +228,7 @@ export default function AdminPanelHeader() {
 
     // Third breadcrumb based on active tab
     if (activeTab === 'dashboard') items.push({ label: t('breadcrumb.dashboard') });
-    else if (activeTab === 'products') items.push({ label: t('breadcrumb.products') });
+    else if (activeTab === 'products') items.push({ label: t('breadcrumb.products'), href: productsHref });
     else if (activeTab === 'projects') items.push({ label: t('breadcrumb.projects') });
     else if (activeTab === 'posts') items.push({ label: t('breadcrumb.posts') });
     else if (activeTab === 'orders') items.push({ label: t('breadcrumb.orders') });
