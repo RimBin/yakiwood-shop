@@ -186,6 +186,9 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
         const colorToken = normalizeKey(parsed.color);
         const profileToken = normalizeKey(parsed.profile);
 
+        if (colorToken) qs.set('ct', colorToken);
+        if (profileToken) qs.set('ft', profileToken);
+
         const colorMatch = (base.colors ?? []).find((c) => normalizeKey(c.name || '').includes(colorToken));
         if (colorMatch?.id) qs.set('c', colorMatch.id);
 

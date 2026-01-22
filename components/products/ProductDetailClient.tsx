@@ -97,6 +97,32 @@ function resolveProfileIconSrc(profile: Pick<ProductProfileVariant, 'name' | 'co
   return null;
 }
 
+const PROFILE_LABELS: Record<string, { lt: string; en: string }> = {
+  'half-taper': { lt: 'Pusė špunto', en: 'Half Taper' },
+  'half-taper-45': { lt: 'Pusė špunto 45°', en: 'Half Taper 45°' },
+  rectangle: { lt: 'Stačiakampis', en: 'Rectangle' },
+  rhombus: { lt: 'Rombas', en: 'Rhombus' },
+};
+
+function normalizeProfileKey(value: string): string {
+  return normalizeColorKey(value);
+}
+
+function localizeProfileLabel(value: string, locale: 'lt' | 'en'): string {
+  const normalized = normalizeProfileKey(value);
+  if (!normalized) return value;
+  const mapped = PROFILE_LABELS[normalized];
+  if (mapped) return locale === 'lt' ? mapped.lt : mapped.en;
+  return value;
+}
+
+type StockDerivedOptions = {
+  colors: ProductColorVariant[];
+  profiles: ProductProfileVariant[];
+  widths: number[];
+  lengths: number[];
+};
+
 const PROFILE_ICON_FALLBACK_BY_INDEX = [
   assets.profiles.halfTaper45Deg,
   assets.profiles.halfTaper,
@@ -150,9 +176,17 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const searchParamsKey = searchParams.toString();
   const addItem = useCartStore((state) => state.addItem);
   const cartItems = useCartStore((state) => state.items);
+  const [stockDerivedOptions, setStockDerivedOptions] = useState<StockDerivedOptions | null>(null);
 
-  const widthOptionsMm = useMemo(() => [95, 120, 145] as const, []);
-  const lengthOptionsMm = useMemo(() => [3000, 3300, 3600] as const, []);
+  const widthOptionsMm = useMemo(() => {
+    const derived = stockDerivedOptions?.widths ?? [];
+    return derived.length > 0 ? derived : [95, 120, 145];
+  }, [stockDerivedOptions?.widths]);
+
+  const lengthOptionsMm = useMemo(() => {
+    const derived = stockDerivedOptions?.lengths ?? [];
+    return derived.length > 0 ? derived : [3000, 3300, 3600];
+  }, [stockDerivedOptions?.lengths]);
 
   const cartTotalAreaM2 = useMemo(() => {
     return cartItems.reduce((sum, item) => {
@@ -252,14 +286,31 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   }, [effectivePrice, localizedDisplayName, product?.category, product?.id]);
 
   const colorOptions = useMemo<ProductColorVariant[]>(() => {
-    return (product.colors || []).map((color, index) => ({
+    const base = (product.colors || []).map((color, index) => ({
       ...color,
       id: color.id || `${product.id}-color-${index}`,
       name: color.name ? localizeColorLabel(color.name, currentLocale) : color.name,
       hex: color.hex || '#444444',
       priceModifier: color.priceModifier ?? 0,
     }));
-  }, [product.colors, product.id, currentLocale]);
+
+    const derived = stockDerivedOptions?.colors ?? [];
+    if (base.length === 0) return derived;
+    if (derived.length === 0) return base;
+
+    const map = new Map<string, ProductColorVariant>();
+    for (const color of base) {
+      const key = normalizeColorKey(color.name || color.id || '');
+      if (!key) continue;
+      map.set(key, color);
+    }
+    for (const color of derived) {
+      const key = normalizeColorKey(color.name || color.id || '');
+      if (!key || map.has(key)) continue;
+      map.set(key, color);
+    }
+    return Array.from(map.values());
+  }, [product.colors, product.id, currentLocale, stockDerivedOptions?.colors]);
 
   const usageTypeForQuote: UsageType | undefined = useMemo(() => {
     const v = String(product.category || '').toLowerCase();
@@ -284,21 +335,40 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         .filter(Boolean)
         .join(' • ');
 
+      const localizedName = profile.name
+        ? localizeProfileLabel(profile.name, currentLocale)
+        : profile.name;
+
       return {
         ...profile,
+        name: localizedName,
         id: profile.id || `${product.id}-profile-${index}`,
         description,
         priceModifier: profile.priceModifier ?? 0,
       };
     });
 
+    const derived = stockDerivedOptions?.profiles ?? [];
+
     if (mapped.length > 0) {
-      if (usageTypeForQuote === 'terrace') return mapped.slice(0, 1);
-      if (usageTypeForQuote === 'facade' && mapped.length > 1) return mapped.slice(1);
-      return mapped;
+      if (derived.length === 0) return mapped;
+      const map = new Map<string, ProductProfileVariant>();
+      for (const profile of mapped) {
+        const key = normalizeProfileKey([profile.code, profile.name].filter(Boolean).join(' '));
+        if (!key) continue;
+        map.set(key, profile);
+      }
+      for (const profile of derived) {
+        const key = normalizeProfileKey([profile.code, profile.name].filter(Boolean).join(' '));
+        if (!key || map.has(key)) continue;
+        map.set(key, profile);
+      }
+      return Array.from(map.values());
     }
+
+    if (derived.length > 0) return derived;
     return FALLBACK_PROFILE_OPTIONS.map((fallback) => ({ ...(fallback as unknown as ProductProfileVariant) }));
-  }, [product.id, product.profiles, usageTypeForQuote]);
+  }, [product.id, product.profiles, currentLocale, stockDerivedOptions?.profiles]);
 
   const skipNextUrlSyncRef = useRef(false);
 
@@ -334,13 +404,89 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     return String(product.slug || '').split('--')[0] || String(product.slug || '');
   }, [product.slug]);
 
+  useEffect(() => {
+    if (!baseSlugForSelection) return;
+
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const run = async () => {
+      try {
+        const res = await fetch('/api/products?mode=stock-items', {
+          signal: controller.signal,
+          headers: { Accept: 'application/json' },
+        });
+
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!Array.isArray(json)) return;
+
+        const baseKey = normalizeColorKey(baseSlugForSelection);
+        const colors = new Map<string, ProductColorVariant>();
+        const profiles = new Map<string, ProductProfileVariant>();
+        const widths = new Set<number>();
+        const lengths = new Set<number>();
+
+        for (const item of json) {
+          const slug = typeof item?.slug === 'string' ? item.slug : '';
+          if (!slug.includes('--')) continue;
+          const parsed = parseStockItemSlug(slug);
+          if (!parsed) continue;
+          if (normalizeColorKey(parsed.baseSlug) !== baseKey) continue;
+
+          const colorToken = normalizeColorKey(parsed.color);
+          if (colorToken && !colors.has(colorToken)) {
+            colors.set(colorToken, {
+              id: `stock-color:${colorToken}`,
+              name: localizeColorLabel(parsed.color, currentLocale),
+              hex: undefined,
+              image: undefined,
+              priceModifier: 0,
+            });
+          }
+
+          const profileToken = normalizeProfileKey(parsed.profile);
+          if (profileToken && !profiles.has(profileToken)) {
+            profiles.set(profileToken, {
+              id: `stock-profile:${profileToken}`,
+              name: localizeProfileLabel(parsed.profile.replace(/[-_]+/g, ' '), currentLocale),
+              code: parsed.profile,
+              priceModifier: 0,
+            });
+          }
+
+          const size = parseSizeToken(parsed.size);
+          if (size?.widthMm) widths.add(size.widthMm);
+          if (size?.lengthMm) lengths.add(size.lengthMm);
+        }
+
+        const derived: StockDerivedOptions = {
+          colors: Array.from(colors.values()),
+          profiles: Array.from(profiles.values()),
+          widths: Array.from(widths.values()).sort((a, b) => a - b),
+          lengths: Array.from(lengths.values()).sort((a, b) => a - b),
+        };
+
+        if (isMounted) setStockDerivedOptions(derived);
+      } catch (e: any) {
+        if (e?.name === 'AbortError') return;
+      }
+    };
+
+    run();
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [baseSlugForSelection, currentLocale]);
+
   const selectedColorToken = useMemo(() => {
     return selectedColor?.name ? normalizeColorKey(String(selectedColor.name)) : '';
   }, [selectedColor?.name]);
 
   const selectedProfileToken = useMemo(() => {
-    const raw = [selectedFinish?.code, selectedFinish?.name].filter(Boolean).join(' ');
-    return raw ? normalizeColorKey(raw) : '';
+    const raw = selectedFinish?.code || selectedFinish?.name || '';
+    return raw ? normalizeProfileKey(raw) : '';
   }, [selectedFinish?.code, selectedFinish?.name]);
 
   const [variantInventory, setVariantInventory] = useState<null | {
@@ -358,7 +504,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
     // Initialize once per product (including stock-item presets).
     const urlColorId = searchParams.get('c');
+    const urlColorToken = searchParams.get('ct');
     const urlFinishId = searchParams.get('f');
+    const urlFinishToken = searchParams.get('ft');
     const urlWidth = Number(searchParams.get('w'));
     const urlLength = Number(searchParams.get('l'));
     const urlThickness = Number(searchParams.get('t'));
@@ -369,19 +517,26 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     const initialColor =
       urlColorId && colorOptions.length
         ? colorOptions.find((c) => c.id === urlColorId) ?? null
-        : presetColorKey && colorOptions.length
-          ? colorOptions.find((c) => normalizeColorKey(c.name || '').includes(presetColorKey)) ?? null
-          : null;
+        : urlColorToken && colorOptions.length
+          ? colorOptions.find((c) => normalizeColorKey(c.name || '').includes(normalizeColorKey(urlColorToken))) ?? null
+          : presetColorKey && colorOptions.length
+            ? colorOptions.find((c) => normalizeColorKey(c.name || '').includes(presetColorKey)) ?? null
+            : null;
 
     const initialFinish =
       urlFinishId && profileOptions.length
         ? profileOptions.find((p) => p.id === urlFinishId) ?? null
-        : presetProfileKey && profileOptions.length
+        : urlFinishToken && profileOptions.length
           ? profileOptions.find((p) => {
-              const hay = normalizeLabel([p.code, p.name].filter(Boolean).join(' '));
-              return hay.includes(presetProfileKey);
+              const hay = normalizeProfileKey([p.code, p.name].filter(Boolean).join(' '));
+              return hay.includes(normalizeProfileKey(urlFinishToken));
             }) ?? null
-          : null;
+          : presetProfileKey && profileOptions.length
+            ? profileOptions.find((p) => {
+                const hay = normalizeLabel([p.code, p.name].filter(Boolean).join(' '));
+                return hay.includes(presetProfileKey);
+              }) ?? null
+            : null;
 
     setSelectedColor(initialColor ?? colorOptions[0] ?? null);
     setSelectedFinish(initialFinish ?? profileOptions[0] ?? null);
@@ -412,7 +567,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     if (selectionInitializedForProductIdRef.current !== product.id) return;
 
     const urlColorId = searchParams.get('c');
+    const urlColorToken = searchParams.get('ct');
     const urlFinishId = searchParams.get('f');
+    const urlFinishToken = searchParams.get('ft');
     const urlWidth = Number(searchParams.get('w'));
     const urlLength = Number(searchParams.get('l'));
     const urlThickness = Number(searchParams.get('t'));
@@ -425,11 +582,28 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         setSelectedColor(match);
         didUpdate = true;
       }
+    } else if (urlColorToken) {
+      const token = normalizeColorKey(urlColorToken);
+      const match = colorOptions.find((c) => normalizeColorKey(c.name || '').includes(token)) ?? null;
+      if (match && selectedColor?.id !== match.id) {
+        setSelectedColor(match);
+        didUpdate = true;
+      }
     }
 
     if (urlFinishId && selectedFinish?.id !== urlFinishId) {
       const match = profileOptions.find((p) => p.id === urlFinishId) ?? null;
       if (match) {
+        setSelectedFinish(match);
+        didUpdate = true;
+      }
+    } else if (urlFinishToken) {
+      const token = normalizeProfileKey(urlFinishToken);
+      const match = profileOptions.find((p) => {
+        const hay = normalizeProfileKey([p.code, p.name].filter(Boolean).join(' '));
+        return hay.includes(token);
+      }) ?? null;
+      if (match && selectedFinish?.id !== match.id) {
         setSelectedFinish(match);
         didUpdate = true;
       }
@@ -471,6 +645,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       l: String(selectedLengthMm),
       c: selectedColor?.id ?? null,
       f: selectedFinish?.id ?? null,
+      ct: selectedColor?.name ? normalizeColorKey(String(selectedColor.name)) : null,
+      ft: selectedFinish ? normalizeProfileKey(selectedFinish.code || selectedFinish.name || '') : null,
       t: String(selectedThicknessMm),
     };
 
@@ -521,6 +697,20 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       setSelectedFinish(profileOptions[0] ?? null);
     }
   }, [profileOptions, selectedFinish]);
+
+  useEffect(() => {
+    if (widthOptionsMm.length === 0) return;
+    if (!widthOptionsMm.includes(selectedWidthMm)) {
+      setSelectedWidthMm(widthOptionsMm[0] ?? selectedWidthMm);
+    }
+  }, [selectedWidthMm, widthOptionsMm]);
+
+  useEffect(() => {
+    if (lengthOptionsMm.length === 0) return;
+    if (!lengthOptionsMm.includes(selectedLengthMm)) {
+      setSelectedLengthMm(lengthOptionsMm[0] ?? selectedLengthMm);
+    }
+  }, [selectedLengthMm, lengthOptionsMm]);
 
   useEffect(() => {
     const allowed = new Set(thicknessOptions.map((x) => x.valueMm));

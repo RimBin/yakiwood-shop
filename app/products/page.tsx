@@ -989,6 +989,20 @@ export default function ProductsPage() {
                   ? Math.max(1, Math.round(((product.price - effectivePrice) / product.price) * 100))
                   : null;
                 const hrefSlug = currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug;
+                const parsedStock = hrefSlug.includes('--') ? parseStockItemSlug(hrefSlug) : null;
+                const detailSlug = parsedStock?.baseSlug ?? hrefSlug;
+                const detailPath = toLocalePath(`/products/${detailSlug}`, currentLocale);
+                const detailParams = new URLSearchParams();
+                if (parsedStock?.size) {
+                  const dims = parseSizeDimensions(parsedStock.size);
+                  if (dims?.width) detailParams.set('w', String(dims.width));
+                  if (dims?.length) detailParams.set('l', String(dims.length));
+                }
+                if (parsedStock?.color) detailParams.set('ct', normalizeToken(parsedStock.color));
+                if (parsedStock?.profile) detailParams.set('ft', normalizeToken(parsedStock.profile));
+                const detailHref = detailParams.toString()
+                  ? `${detailPath}?${detailParams.toString()}`
+                  : detailPath;
 
                 const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
                 const dims = parsed?.size ? parseSizeDimensions(parsed.size) : null;
@@ -998,7 +1012,7 @@ export default function ProductsPage() {
                 return (
             <Link
               key={product.id}
-              href={toLocalePath(`/products/${hrefSlug}`, currentLocale)}
+              href={detailHref}
               data-testid="product-card"
               className="flex flex-col gap-[8px] group"
               onClick={() => {
