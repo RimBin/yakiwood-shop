@@ -1729,6 +1729,7 @@
           "nameRequired": "Name is required",
           "slugRequired": "Slug is required",
           "slugFormat": "Slug must contain only lowercase letters, numbers, and hyphens",
+          "colorRequired": "Select at least one color",
           "categoryRequired": "Category is required",
           "usageRequired": "Usage is required",
           "usageInvalid": "Only Facade or Terrace is allowed",

@@ -70,34 +70,43 @@ export default function Header() {
   return (
     <header className="w-full fixed top-0 z-50">
       {/* Black Announcement Bar */}
-      <div className="bg-[#161616] w-full py-[8px] px-[40px]">
-        <div className="flex items-center justify-center gap-[32px] xl:gap-[200px]">
+      <div className="bg-[#161616] w-full py-[8px] px-[clamp(12px,4vw,40px)]">
+        <div className="max-w-[1440px] mx-auto flex items-center w-full gap-[clamp(12px,5vw,200px)] justify-center">
           {/* Fast Delivery */}
           <div className="flex items-center gap-[8px]">
             <div className="relative w-[24px] h-[24px] shrink-0">
               <Image src={getAsset('imgIconTruck')} alt={t('header.fastDelivery')} width={24} height={24} />
             </div>
-            <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
+            <p
+              className="font-['Outfit'] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap"
+              style={{ fontSize: 'clamp(10px, 2.4vw, 12px)' }}
+            >
               {t('header.fastDelivery')}
             </p>
           </div>
 
           {/* Money Back Guarantee */}
-          <div className="flex items-center gap-[8px]">
+          <div className="hidden min-[640px]:flex items-center gap-[8px]">
             <div className="relative w-[24px] h-[24px] shrink-0">
               <Image src={getAsset('imgIconCoins')} alt={t('header.moneyBack')} width={24} height={24} />
             </div>
-            <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
+            <p
+              className="font-['Outfit'] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap"
+              style={{ fontSize: 'clamp(10px, 1.2vw, 12px)' }}
+            >
               {t('header.moneyBack')}
             </p>
           </div>
 
           {/* Eco-Friendly */}
-          <div className="hidden lg:flex items-center gap-[8px]">
+          <div className="hidden min-[1024px]:flex items-center gap-[8px]">
             <div className="relative w-[24px] h-[24px] shrink-0">
               <Image src={getAsset('imgIconPlant')} alt={t('header.ecoFriendly')} width={24} height={24} />
             </div>
-            <p className="font-['Outfit'] text-[12px] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap">
+            <p
+              className="font-['Outfit'] font-normal leading-[1.2] uppercase tracking-[0.6px] text-white whitespace-nowrap"
+              style={{ fontSize: 'clamp(10px, 1.1vw, 12px)' }}
+            >
               {t('header.ecoFriendly')}
             </p>
           </div>

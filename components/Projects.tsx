@@ -130,7 +130,7 @@ export default function Projects() {
       {/* Header removed */}
 
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7712 ===== */}
-      <div className="lg:hidden">
+      <div className="xl:hidden">
         {/* Description text - Mobile */}
         <p className="px-[16px] md:px-[32px] font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[600px] mb-[24px] md:mb-[32px]">
           Žmonės, pasirinkę degintą medieną, dažnai dalinasi teigiamais įspūdžiais ir patirtimis. Jie pastebi ne tik išskirtinę išvaizdą, bet ir funkcionalumą bei ilgaamžiškumą.
@@ -300,7 +300,7 @@ export default function Projects() {
       </div>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[120px]">
+      <div className="hidden xl:block max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[120px]">
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+25px)] */}
         <div className="relative h-[80px] mb-[64px]">
           <p className="absolute left-0 top-[22px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">

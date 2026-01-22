@@ -196,8 +196,8 @@ export default function ProductsPage() {
     async function loadProducts() {
       try {
         console.log('Loading products from Supabase...');
-        // Show stock-item (variation) products as separate cards.
-        const products = await fetchProducts({ mode: 'stock-items' });
+        // Show base (active) products in the listing.
+        const products = await fetchProducts({ mode: 'active' });
         console.log('Products loaded:', products.length);
 
         // Apply role discount for authenticated users.

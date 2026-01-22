@@ -279,11 +279,11 @@ export function localizeColorLabel(input: string, locale: 'lt' | 'en'): string {
   if (!normalized) return input
 
   const direct = COLOR_LABELS[normalized]
-  if (direct) return direct[locale]
+  if (direct) return direct.en
 
   const parts = normalized.split('-').filter(Boolean)
   if (parts.length > 1) {
-    const mapped = parts.map((part) => COLOR_LABELS[part]?.[locale] ?? humanizeSlugToken(part))
+    const mapped = parts.map((part) => COLOR_LABELS[part]?.en ?? humanizeSlugToken(part))
     return mapped.join(' ')
   }
 

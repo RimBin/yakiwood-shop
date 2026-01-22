@@ -205,6 +205,7 @@ interface Variant {
   name: string;
   variant_type: 'color' | 'finish' | 'profile';
   hex_color?: string;
+  image_url?: string;
   price_adjustment?: number;
   description?: string;
   is_available: boolean;
@@ -364,6 +365,7 @@ export default function ProductForm({ product, mode }: Props) {
   );
   const [libraryIsLoading, setLibraryIsLoading] = useState(false);
   const [libraryError, setLibraryError] = useState<string | null>(null);
+  const [activeColorLibrary, setActiveColorLibrary] = useState<string | null>(null);
 
   const isMissingCatalogSchemaError = (message: string | null) => {
     if (!message) return false;
@@ -380,6 +382,8 @@ export default function ProductForm({ product, mode }: Props) {
   const [variants, setVariants] = useState<Variant[]>(product?.variants || []);
   const [showVariantForm, setShowVariantForm] = useState(false);
   const [editingVariant, setEditingVariant] = useState<Variant | null>(null);
+  const [catalogColorOptions, setCatalogColorOptions] = useState<Array<{ code: string; label: string; hex?: string }>>([]);
+  const [catalogProfileOptions, setCatalogProfileOptions] = useState<Array<{ code: string; label: string }>>([]);
 
   const colorVariantOptions = useMemo(() => {
     const names = variants
@@ -397,11 +401,25 @@ export default function ProductForm({ product, mode }: Props) {
     return Array.from(new Set(names));
   }, [variants]);
 
+  const availableColorOptions = useMemo(() => {
+    if (colorVariantOptions.length > 0) {
+      return colorVariantOptions.map((code) => ({ code, label: code }));
+    }
+    return catalogColorOptions;
+  }, [colorVariantOptions, catalogColorOptions]);
+
+  const baseProfileOptions = useMemo(() => {
+    if (profileVariantOptions.length > 0) {
+      return profileVariantOptions.map((code) => ({ code, label: code }));
+    }
+    return catalogProfileOptions;
+  }, [profileVariantOptions, catalogProfileOptions]);
+
   const allowedProfileOptions = useMemo(() => {
-    if (usageType === 'terrace') return profileVariantOptions.slice(0, 1);
-    if (usageType === 'facade' && profileVariantOptions.length > 1) return profileVariantOptions.slice(1);
-    return profileVariantOptions;
-  }, [profileVariantOptions, usageType]);
+    if (usageType === 'terrace') return baseProfileOptions.slice(0, 1);
+    if (usageType === 'facade' && baseProfileOptions.length > 1) return baseProfileOptions.slice(1);
+    return baseProfileOptions;
+  }, [baseProfileOptions, usageType]);
 
   const [selectedVariantColors, setSelectedVariantColors] = useState<string[]>([]);
   const [selectedVariantProfiles, setSelectedVariantProfiles] = useState<string[]>([]);
@@ -413,38 +431,101 @@ export default function ProductForm({ product, mode }: Props) {
   const [isCreatingVariants, setIsCreatingVariants] = useState(false);
 
   useEffect(() => {
-    if (selectedVariantColors.length === 0 && colorVariantOptions.length > 0) {
-      setSelectedVariantColors(colorVariantOptions);
+    if (selectedVariantColors.length === 0 && availableColorOptions.length > 0) {
+      setSelectedVariantColors(availableColorOptions.map((option) => option.code));
     }
-  }, [colorVariantOptions, selectedVariantColors.length]);
+  }, [availableColorOptions, selectedVariantColors.length]);
 
   useEffect(() => {
-    if (colorVariantOptions.length === 0) return;
+    if (availableColorOptions.length === 0) return;
     setVariantColorImages((prev) => {
       const next = { ...prev };
       let changed = false;
-      for (const color of colorVariantOptions) {
-        if (next[color] === undefined) {
-          next[color] = imageUrl || '';
+      for (const color of availableColorOptions) {
+        if (next[color.code] === undefined) {
+          const matched = variants.find((variant) => variant.variant_type === 'color' && variant.name === color.code);
+          next[color.code] = matched?.image_url || imageUrl || '';
           changed = true;
         }
       }
       return changed ? next : prev;
     });
-  }, [colorVariantOptions, imageUrl]);
+  }, [availableColorOptions, imageUrl, variants]);
+
+  useEffect(() => {
+    if (!supabase) return;
+    let isMounted = true;
+
+    const loadCatalogOptions = async () => {
+      try {
+        const [colorsRes, profilesRes] = await Promise.all([
+          supabase
+            .from('catalog_options')
+            .select('value_text,label_lt,label_en,hex_color,sort_order,is_active')
+            .eq('option_type', 'color')
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true, nullsFirst: true }),
+          supabase
+            .from('catalog_options')
+            .select('value_text,label_lt,label_en,sort_order,is_active')
+            .eq('option_type', 'profile')
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true, nullsFirst: true }),
+        ]);
+
+        if (!isMounted) return;
+
+        if (!colorsRes.error) {
+          const normalized = (colorsRes.data || [])
+            .map((row: any) => {
+              const code = (row.value_text as string | null) ?? '';
+              const labelEn = (row.label_en as string | null) || undefined;
+              const labelLt = (row.label_lt as string | null) || undefined;
+              const label = labelEn || code || labelLt;
+              return { code, label, hex: (row.hex_color as string | null) ?? undefined };
+            })
+            .filter((x) => x.code);
+          setCatalogColorOptions(normalized);
+        }
+
+        if (!profilesRes.error) {
+          const normalized = (profilesRes.data || [])
+            .map((row: any) => {
+              const code = (row.value_text as string | null) ?? '';
+              const labelEn = (row.label_en as string | null) || undefined;
+              const labelLt = (row.label_lt as string | null) || undefined;
+              const label = labelEn || code || labelLt;
+              return { code, label };
+            })
+            .filter((x) => x.code);
+          setCatalogProfileOptions(normalized);
+        }
+      } catch {
+        // ignore catalog load failures; variants can still be added manually
+      }
+    };
+
+    if (colorVariantOptions.length === 0 || profileVariantOptions.length === 0) {
+      void loadCatalogOptions();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [supabase, locale, colorVariantOptions.length, profileVariantOptions.length]);
 
   useEffect(() => {
     if (selectedVariantProfiles.length === 0 && allowedProfileOptions.length > 0) {
-      setSelectedVariantProfiles(allowedProfileOptions);
+      setSelectedVariantProfiles(allowedProfileOptions.map((option) => option.code));
     }
   }, [allowedProfileOptions, selectedVariantProfiles.length]);
 
   useEffect(() => {
     if (selectedVariantProfiles.length === 0) return;
-    const allowed = new Set(allowedProfileOptions);
+    const allowed = new Set(allowedProfileOptions.map((option) => option.code));
     const next = selectedVariantProfiles.filter((p) => allowed.has(p));
     if (next.length === selectedVariantProfiles.length) return;
-    setSelectedVariantProfiles(next.length > 0 ? next : allowedProfileOptions);
+    setSelectedVariantProfiles(next.length > 0 ? next : allowedProfileOptions.map((option) => option.code));
   }, [allowedProfileOptions, selectedVariantProfiles]);
 
   useEffect(() => {
@@ -546,6 +627,11 @@ export default function ProductForm({ product, mode }: Props) {
     setImagePreview(url);
   };
 
+  const chooseColorLibraryImage = (color: string, url: string) => {
+    updateColorImage(color, url);
+    setActiveColorLibrary(null);
+  };
+
   const clearImageSelection = () => {
     setImageUrl('');
     setImageFile(null);
@@ -570,9 +656,9 @@ export default function ProductForm({ product, mode }: Props) {
     const normalized = (data || [])
       .map((row: any) => {
         const code = (row.value_text as string | null) ?? '';
-        const labelLt = (row.label_lt as string | null) || undefined;
         const labelEn = (row.label_en as string | null) || undefined;
-        const label = (locale === 'en' ? labelEn : labelLt) || labelLt || labelEn || code;
+        const labelLt = (row.label_lt as string | null) || undefined;
+        const label = labelEn || code || labelLt;
         return { code, label };
       })
       .filter((x) => x.code);
@@ -649,6 +735,8 @@ export default function ProductForm({ product, mode }: Props) {
     const widthValue = parseRequiredNumber(width);
     const heightValue = parseRequiredNumber(height);
     const depthValue = parseRequiredNumber(depth);
+    const hasColorVariant = variants.some((variant) => variant.variant_type === 'color' && variant.name?.trim());
+    const hasColorSelection = selectedVariantColors.length > 0;
 
     try {
       const productSchema = createProductSchema((key: string) => t(key as any));
@@ -670,6 +758,17 @@ export default function ProductForm({ product, mode }: Props) {
         height: heightValue,
         depth: depthValue,
       });
+
+      const nextErrors: Record<string, string> = {};
+      if (!hasColorVariant && !hasColorSelection) {
+        nextErrors.colorVariants = t('validation.colorRequired');
+      }
+
+      if (Object.keys(nextErrors).length > 0) {
+        setErrors(nextErrors);
+        return false;
+      }
+
       setErrors({});
       return true;
     } catch (error) {
@@ -680,6 +779,10 @@ export default function ProductForm({ product, mode }: Props) {
             newErrors[err.path[0].toString()] = err.message;
           }
         });
+
+        if (!hasColorVariant && !hasColorSelection) {
+          newErrors.colorVariants = t('validation.colorRequired');
+        }
 
         // Prefer a clearer message when the field is simply missing.
         if (basePriceValue === undefined) {
@@ -722,6 +825,10 @@ export default function ProductForm({ product, mode }: Props) {
       const widthValue = parseRequiredNumber(width);
       const heightValue = parseRequiredNumber(height);
       const depthValue = parseRequiredNumber(depth);
+      const variantsToSave = ensureColorVariants(variants);
+      if (variantsToSave !== variants) {
+        setVariants(variantsToSave);
+      }
 
       // Upload image if new file selected
       let finalImageUrl = imageUrl;
@@ -823,7 +930,7 @@ export default function ProductForm({ product, mode }: Props) {
       if (productId) {
         // Delete removed variants
         const existingVariantIds = product?.variants?.map(v => v.id).filter(Boolean) || [];
-        const currentVariantIds = variants.map(v => v.id).filter(Boolean);
+        const currentVariantIds = variantsToSave.map(v => v.id).filter(Boolean);
         const deletedVariantIds = existingVariantIds.filter(id => !currentVariantIds.includes(id));
 
         if (deletedVariantIds.length > 0) {
@@ -834,12 +941,13 @@ export default function ProductForm({ product, mode }: Props) {
         }
 
         // Update or insert variants
-        for (const variant of variants) {
+        for (const variant of variantsToSave) {
           const variantData = {
             product_id: productId,
             name: variant.name,
             variant_type: variant.variant_type,
             hex_color: variant.hex_color || null,
+            image_url: variant.image_url || null,
             price_adjustment: variant.price_adjustment || 0,
             description: variant.description || null,
             is_available: variant.is_available,
@@ -1015,6 +1123,35 @@ export default function ProductForm({ product, mode }: Props) {
     setVariantDrafts((prev) =>
       prev.map((draft) => (draft.color === color ? { ...draft, imageUrl: value } : draft))
     );
+  };
+
+  const ensureColorVariants = (current: Variant[]): Variant[] => {
+    if (selectedVariantColors.length === 0) return current;
+
+    const existing = new Set(
+      current
+        .filter((variant) => variant.variant_type === 'color')
+        .map((variant) => variant.name)
+        .filter(Boolean)
+    );
+
+    const missing = selectedVariantColors.filter((code) => !existing.has(code));
+    if (missing.length === 0) return current;
+
+    const next = [...current];
+    for (const code of missing) {
+      const catalog = catalogColorOptions.find((option) => option.code === code);
+      next.push({
+        name: code,
+        variant_type: 'color',
+        hex_color: catalog?.hex,
+        image_url: variantColorImages[code] || undefined,
+        price_adjustment: 0,
+        is_available: true,
+      });
+    }
+
+    return next;
   };
 
   const handleCreateVariants = async () => {
@@ -1633,6 +1770,13 @@ export default function ProductForm({ product, mode }: Props) {
                         style={{ backgroundColor: variant.hex_color }}
                       />
                     )}
+                    {variant.image_url && (
+                      <img
+                        src={variant.image_url}
+                        alt=""
+                        className="w-10 h-10 rounded border border-[#E1E1E1] object-cover"
+                      />
+                    )}
                     <div>
                       <div className="font-['DM_Sans'] font-medium">{variant.name}</div>
                       <div className="text-sm text-[#535353] font-['DM_Sans']">
@@ -1712,18 +1856,21 @@ export default function ProductForm({ product, mode }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <p className="text-sm font-['DM_Sans'] font-medium mb-2">Spalvos</p>
+              {errors.colorVariants ? (
+                <p className="text-xs text-red-600 mb-2">{errors.colorVariants}</p>
+              ) : null}
               <div className="space-y-2">
-                {colorVariantOptions.length === 0 ? (
+                {availableColorOptions.length === 0 ? (
                   <p className="text-xs text-[#7C7C7C]">Nėra spalvų variantų</p>
                 ) : (
-                  colorVariantOptions.map((color) => (
-                    <label key={color} className="flex items-center gap-2 text-sm">
+                  availableColorOptions.map((color) => (
+                    <label key={color.code} className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
-                        checked={selectedVariantColors.includes(color)}
-                        onChange={() => toggleStringSelection(color, selectedVariantColors, setSelectedVariantColors)}
+                        checked={selectedVariantColors.includes(color.code)}
+                        onChange={() => toggleStringSelection(color.code, selectedVariantColors, setSelectedVariantColors)}
                       />
-                      <span>{color}</span>
+                      <span>{color.label}</span>
                     </label>
                   ))
                 )}
@@ -1736,9 +1883,11 @@ export default function ProductForm({ product, mode }: Props) {
                 <p className="text-xs text-[#7C7C7C]">Pasirinkite spalvas, kad pridėtumėte nuotraukas</p>
               ) : (
                 <div className="space-y-2">
-                  {selectedVariantColors.map((color) => (
+                  {selectedVariantColors.map((color) => {
+                    const label = availableColorOptions.find((opt) => opt.code === color)?.label || color;
+                    return (
                     <div key={color} className="flex flex-col gap-1">
-                      <label className="text-xs text-[#535353]">{color}</label>
+                      <label className="text-xs text-[#535353]">{label}</label>
                       <input
                         type="text"
                         value={variantColorImages[color] ?? ''}
@@ -1746,8 +1895,43 @@ export default function ProductForm({ product, mode }: Props) {
                         className="w-full px-2 py-2 border border-[#E1E1E1] rounded"
                         placeholder="Nuotraukos URL"
                       />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveColorLibrary(color);
+                          setLibraryColorCode(color);
+                          void loadLibraryAssets({ colorCode: color, woodType });
+                        }}
+                        className="w-fit text-xs text-[#161616] underline"
+                      >
+                        Rinktis iš bibliotekos
+                      </button>
+                      {activeColorLibrary === color ? (
+                        <div className="mt-2 rounded border border-[#E1E1E1] p-2">
+                          {libraryIsLoading ? (
+                            <p className="text-xs text-[#7C7C7C]">Kraunama…</p>
+                          ) : libraryError ? (
+                            <p className="text-xs text-red-600">{libraryError}</p>
+                          ) : libraryAssets.length === 0 ? (
+                            <p className="text-xs text-[#7C7C7C]">Nėra nuotraukų šiai spalvai</p>
+                          ) : (
+                            <div className="flex flex-wrap gap-2">
+                              {libraryAssets.map((asset) => (
+                                <button
+                                  key={asset.id}
+                                  type="button"
+                                  onClick={() => chooseColorLibraryImage(color, asset.url)}
+                                  className="border border-[#E1E1E1] rounded overflow-hidden"
+                                >
+                                  <img src={asset.url} alt="" className="h-16 w-16 object-cover" />
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : null}
                     </div>
-                  ))}
+                  )})}
                 </div>
               )}
             </div>
@@ -1759,13 +1943,13 @@ export default function ProductForm({ product, mode }: Props) {
                   <p className="text-xs text-[#7C7C7C]">Nėra profilių variantų</p>
                 ) : (
                   allowedProfileOptions.map((profile) => (
-                    <label key={profile} className="flex items-center gap-2 text-sm">
+                    <label key={profile.code} className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
-                        checked={selectedVariantProfiles.includes(profile)}
-                        onChange={() => toggleStringSelection(profile, selectedVariantProfiles, setSelectedVariantProfiles)}
+                        checked={selectedVariantProfiles.includes(profile.code)}
+                        onChange={() => toggleStringSelection(profile.code, selectedVariantProfiles, setSelectedVariantProfiles)}
                       />
-                      <span>{profile}</span>
+                      <span>{profile.label}</span>
                     </label>
                   ))
                 )}
@@ -1967,6 +2151,7 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
   const [name, setName] = useState(variant?.name || '');
   const [variantType, setVariantType] = useState<'color' | 'finish' | 'profile'>(variant?.variant_type || 'color');
   const [hexColor, setHexColor] = useState(variant?.hex_color || '#161616');
+  const [imageUrl, setImageUrl] = useState(variant?.image_url || '');
   const [priceAdjustment, setPriceAdjustment] = useState(variant?.price_adjustment?.toString() || '0');
   const [description, setDescription] = useState(variant?.description || '');
   const [isAvailable, setIsAvailable] = useState(variant?.is_available ?? true);
@@ -1980,6 +2165,7 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
       name,
       variant_type: variantType,
       hex_color: variantType === 'color' ? hexColor : undefined,
+      image_url: variantType === 'color' ? (imageUrl || undefined) : undefined,
       price_adjustment: parseFloat(priceAdjustment) || 0,
       description: description || undefined,
       is_available: isAvailable,
@@ -2053,6 +2239,28 @@ function VariantFormModal({ variant, onSave, onCancel }: VariantFormModalProps) 
                   placeholder={t('variantModal.placeholders.hex')}
                 />
               </div>
+            </div>
+          )}
+
+          {variantType === 'color' && (
+            <div>
+              <label className="block text-sm font-['DM_Sans'] font-medium mb-2">
+                {t('variantModal.fields.image')}
+              </label>
+              <input
+                type="text"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                className="w-full px-4 py-2 border border-[#E1E1E1] rounded-lg font-['DM_Sans'] focus:outline-none focus:ring-2 focus:ring-[#161616]"
+                placeholder={t('variantModal.placeholders.image')}
+              />
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt=""
+                  className="mt-2 h-20 w-20 rounded border border-[#E1E1E1] object-cover"
+                />
+              ) : null}
             </div>
           )}
 

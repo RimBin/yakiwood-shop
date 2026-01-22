@@ -6,6 +6,7 @@ export interface ProductVariant {
   name: string;
   variant_type: 'color' | 'finish' | 'profile';
   hex_color?: string;
+  image_url?: string;
   price_adjustment?: number;
   description?: string;
   texture_url?: string;

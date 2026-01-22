@@ -1484,6 +1484,7 @@
           "nameRequired": "Pavadinimas privalomas",
           "slugRequired": "Slug privalomas",
           "slugFormat": "Slug turi būti tik mažosios raidės, skaičiai ir brūkšneliai",
+          "colorRequired": "Pasirinkite bent vieną spalvą",
           "categoryRequired": "Kategorija privaloma",
           "usageRequired": "Pritaikymas privalomas",
           "usageInvalid": "Leidžiama tik: fasadas arba terasa",
@@ -1574,6 +1575,7 @@
             "name": "Pavadinimas *",
             "type": "Tipas *",
             "hex": "Spalvos kodas (HEX)",
+            "image": "Nuotraukos URL",
             "priceAdjustment": "Kainos koregavimas (EUR)",
             "description": "Aprašymas",
             "available": "Variantas prieinamas užsakymui"
@@ -1581,6 +1583,7 @@
           "placeholders": {
             "name": "Pvz., Natūrali deginta",
             "hex": "#161616",
+            "image": "https://...",
             "priceAdjustment": "0.00",
             "description": "Papildomas aprašymas…"
           },

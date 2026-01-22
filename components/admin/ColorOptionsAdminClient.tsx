@@ -408,7 +408,7 @@ export default function ColorOptionsAdminClient({
                 list.push(p)
                 byWood.set(wt, list)
               }
-              const label = opt.label_lt || opt.label_en || code || '(be kodo)'
+              const label = opt.label_en || code || opt.label_lt || '(be kodo)'
 
               return (
                 <div key={opt.id} className="px-[16px] py-[16px]">

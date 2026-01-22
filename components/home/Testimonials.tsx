@@ -76,7 +76,7 @@ export default function Testimonials() {
   return (
     <section id="testimonials" className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7576 ===== */}
-      <div className="lg:hidden pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0">
+      <div className="xl:hidden pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0">
         {/* Title Section - Mobile/Tablet */}
         <div className={`${getContainerPadding()} mb-[24px] md:mb-[32px]`}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
@@ -112,13 +112,13 @@ export default function Testimonials() {
               setActiveIndex(nearest);
             }, 120);
           }}
-          className="flex gap-[16px] overflow-x-auto scrollbar-hide pb-[8px] snap-x snap-mandatory scroll-smooth"
+          className={`${getContainerPadding()} flex gap-[16px] overflow-x-auto scrollbar-hide pb-[8px] snap-x snap-mandatory scroll-smooth`}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {testimonials.map((testimonial, index) => (
             <article
               key={testimonial.author}
-              className="relative flex-shrink-0 w-[calc(100vw_-_32px)] md:w-[calc(100vw_-_64px)] mx-[16px] md:mx-[32px] h-[450px] md:h-[480px] rounded-[16px] overflow-hidden snap-center"
+              className="relative flex-shrink-0 w-full md:w-full h-[450px] md:h-[480px] rounded-[16px] overflow-hidden snap-center"
             >
               <div className="absolute inset-0">
                 <Image
@@ -171,7 +171,7 @@ export default function Testimonials() {
       
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] py-[120px]">
+      <div className="hidden xl:block max-w-[1440px] mx-auto px-[40px] py-[120px]">
         <div className="flex flex-col gap-[48px]">
           {/* Title Row - Figma pattern: eyebrow at left-[40px], heading at left-[calc(25%+25px)] */}
           <div className="relative h-[80px]">

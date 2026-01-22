@@ -29,7 +29,7 @@ export default async function WhyUs() {
   return (
     <section className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7566 ===== */}
-      <div className={`lg:hidden ${getSectionPadding('x')} pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0`}>
+      <div className={`xl:hidden ${getSectionPadding('x')} pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0`}>
         {/* Title Section - Mobile/Tablet */}
         <div className={`flex flex-col ${getGap('sm')} mb-[16px] md:mb-[24px]`}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
@@ -72,7 +72,7 @@ export default async function WhyUs() {
       </div>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden lg:block w-full max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[200px]">
+      <div className="hidden xl:block w-full max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[200px]">
         {/* Label */}
         <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] -mb-[30px]">
           {t('eyebrow')}

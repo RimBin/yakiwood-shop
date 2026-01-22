@@ -24,7 +24,7 @@ export default async function CTA() {
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7625 ===== */}
-      <div className={`lg:hidden relative z-10 flex flex-col items-center justify-center h-[580px] ${getSectionPadding()}`}>
+      <div className={`xl:hidden relative z-10 flex flex-col items-center justify-center h-[580px] ${getSectionPadding()}`}>
         {/* Heading - Mobile/Tablet */}
         <h2 className="font-['DM_Sans'] font-light text-center max-w-[600px] mb-[12px] md:mb-[40px]" style={{ fontSize: 'clamp(40px, 7vw, 64px)', lineHeight: 1, letterSpacing: 'clamp(-1.8px, -0.04em, -2.56px)' }}>
           <span>{t('headline.prefix')}</span>
@@ -57,7 +57,7 @@ export default async function CTA() {
       </div>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden lg:flex relative z-10 flex-col items-center justify-center min-h-[1053px] py-[113px] px-[40px]">
+      <div className="hidden xl:flex relative z-10 flex-col items-center justify-center min-h-[1053px] py-[113px] px-[40px]">
         {/* Heading - Desktop */}
         <h2 className="font-['DM_Sans'] font-light text-[128px] leading-[0.95] tracking-[-6.4px] text-[#161616] text-center mb-[66px] w-[861px]">
           <span>{t('headline.prefix')}</span>

@@ -34,9 +34,9 @@ export default async function Steps() {
 	];
 
 	return (
-		<section className="w-full bg-[#161616]">
+		<section className="w-full bg-[#161616] overflow-hidden">
 			{/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7672 ===== */}
-			<div className={`lg:hidden ${getSectionPadding()}`}>
+			<div className={`xl:hidden ${getSectionPadding()}`}>
 				{/* Title Section - Mobile/Tablet */}
 				<div className="mb-[32px] md:mb-[40px]">
 					<p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-white mb-[8px]">
@@ -102,7 +102,7 @@ export default async function Steps() {
 			</div>
 
 			{/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-			<div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] relative">
+			<div className="hidden xl:block max-w-[1440px] mx-auto px-[40px] relative">
 				{/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+24px)] */}
 				<div className="absolute left-[40px] top-[120px] text-white font-normal z-10 w-full">
 					<p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase left-[0px] top-[25px] whitespace-nowrap">

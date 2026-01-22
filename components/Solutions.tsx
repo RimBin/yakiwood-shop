@@ -42,7 +42,7 @@ export default function Solutions() {
       {/* Removed duplicated header blocks as requested */}
       
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7698 ===== */}
-      <div className="lg:hidden">
+        <div className="xl:hidden">
         {/* Cards - Mobile: Full width accordion style like Figma 759:7702 */}
         <div className="w-full flex flex-col">
           {/* Top border */}
@@ -111,7 +111,7 @@ export default function Solutions() {
       </div>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden lg:block">
+        <div className="hidden xl:block">
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+24px)] */}
         <div className="max-w-[1440px] mx-auto px-[40px] pt-[120px] pb-[40px]">
           <div className="relative h-[160px] text-[#161616]">
