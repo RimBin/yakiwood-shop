@@ -14,6 +14,8 @@ export interface ProductColorVariant {
 export interface ProductProfileVariant {
   id: string
   name: string
+  nameLt?: string
+  nameEn?: string
   code?: string
   description?: string
   priceModifier?: number
@@ -170,6 +172,8 @@ export function transformDbProduct(db: DbProduct): Product {
     .map((v) => ({
       id: v.id,
       name: v.label_en ?? v.name,
+      nameEn: v.label_en ?? v.name,
+      nameLt: v.label_lt ?? undefined,
       code: v.name,
       priceModifier: v.price_adjustment === null ? undefined : toNumber(v.price_adjustment),
       image: v.image_url ?? v.texture_url ?? undefined,
@@ -190,6 +194,7 @@ export function transformDbProduct(db: DbProduct): Product {
         {
           id: `stock-profile:${parsedStock.profile}`,
           name: humanizeSlugToken(parsedStock.profile),
+          nameEn: humanizeSlugToken(parsedStock.profile),
           code: parsedStock.profile,
         },
       ]

@@ -64,9 +64,11 @@ export default async function Hero() {
           </div>
 
           <div className="absolute right-4 bottom-[80px] w-[280px] md:w-[360px] bg-white/10 backdrop-blur-[20px] border border-white/50 rounded-[16px] p-3 flex flex-col gap-3">
-            <div className="flex items-start justify-between w-full">
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white">{tHero('productName')}</p>
-              <div className="flex gap-1 items-center text-white">
+            <div className="flex flex-col gap-2 w-full">
+              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white w-full">
+                {tHero('productName')}
+              </p>
+              <div className="flex gap-1 items-center text-white justify-end w-full">
                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">{tHero('from')}</p>
                 <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">89 €</p>
               </div>
@@ -74,7 +76,7 @@ export default async function Hero() {
 
             <div className="flex flex-col gap-2">
               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.1] tracking-[-0.24px] text-white">{tHero('solutions')}</p>
-              <div className="flex gap-1">
+              <div className="flex flex-wrap gap-1">
                 {(['facade', 'fence', 'terrace', 'interior'] as const).map((key) => (
                   <div key={key} className="bg-white/40 px-2 h-[24px] rounded-[4px] flex items-center justify-center">
                     <p className="font-['Outfit'] font-normal text-[10px] leading-[1.1] tracking-[0.5px] uppercase text-[#161616]">{tSolutions(key)}</p>

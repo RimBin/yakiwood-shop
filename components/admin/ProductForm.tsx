@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Fragment } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { z } from 'zod';
@@ -244,6 +245,14 @@ interface VariantDraft {
   slug: string;
 }
 
+interface VariantProductEdit {
+  sku: string;
+  base_price: string;
+  sale_price: string;
+  stock_quantity: string;
+  is_active: boolean;
+}
+
 interface ProductData {
   id?: string;
   name: string;
@@ -457,6 +466,13 @@ export default function ProductForm({ product, mode }: Props) {
   const [isCreatingVariants, setIsCreatingVariants] = useState(false);
   const [variantDiscountType, setVariantDiscountType] = useState<'none' | 'percent' | 'amount'>('none');
   const [variantDiscountValue, setVariantDiscountValue] = useState('');
+  const [variantProducts, setVariantProducts] = useState<Array<any>>([]);
+  const [variantProductsLoading, setVariantProductsLoading] = useState(false);
+  const [variantProductsError, setVariantProductsError] = useState<string | null>(null);
+  const [expandedVariantId, setExpandedVariantId] = useState<string | null>(null);
+  const [variantEditValues, setVariantEditValues] = useState<Record<string, VariantProductEdit>>({});
+  const [variantEditErrors, setVariantEditErrors] = useState<Record<string, string>>({});
+  const [variantEditSaving, setVariantEditSaving] = useState(false);
 
   useEffect(() => {
     if (selectedVariantColors.length === 0 && availableColorOptions.length > 0) {
@@ -541,6 +557,103 @@ export default function ProductForm({ product, mode }: Props) {
       isMounted = false;
     };
   }, [supabase, locale, colorVariantOptions.length, profileVariantOptions.length]);
+
+  useEffect(() => {
+    if (!supabase || mode !== 'edit' || !product?.id) return;
+    const baseSlug = product?.slug || slug;
+    if (!baseSlug) return;
+    let isMounted = true;
+    const loadVariantProducts = async () => {
+      setVariantProductsLoading(true);
+      setVariantProductsError(null);
+      const { data, error } = await supabase
+        .from('products')
+        .select('id,name,slug,sku,stock_quantity,base_price,sale_price,is_active')
+        .ilike('slug', `${baseSlug}-%`)
+        .neq('id', product.id)
+        .order('slug', { ascending: true });
+
+      if (!isMounted) return;
+      if (error) {
+        setVariantProductsError(formatUnknownError(error));
+        setVariantProducts([]);
+      } else {
+        setVariantProducts(Array.isArray(data) ? data : []);
+      }
+      setVariantProductsLoading(false);
+    };
+
+    loadVariantProducts();
+    return () => {
+      isMounted = false;
+    };
+  }, [mode, product?.id, product?.slug, slug, supabase]);
+
+  const ensureVariantEditValues = (item: any) => {
+    if (variantEditValues[item.id]) return;
+    setVariantEditValues((prev) => ({
+      ...prev,
+      [item.id]: {
+        sku: item.sku ?? '',
+        base_price: typeof item.base_price === 'number' ? String(item.base_price) : '',
+        sale_price: typeof item.sale_price === 'number' ? String(item.sale_price) : '',
+        stock_quantity: typeof item.stock_quantity === 'number' ? String(item.stock_quantity) : '0',
+        is_active: Boolean(item.is_active),
+      },
+    }));
+  };
+
+  const toggleVariantAccordion = (item: any) => {
+    if (expandedVariantId === item.id) {
+      setExpandedVariantId(null);
+      return;
+    }
+    ensureVariantEditValues(item);
+    setExpandedVariantId(item.id);
+  };
+
+  const updateVariantEditValue = (id: string, patch: Partial<VariantProductEdit>) => {
+    setVariantEditValues((prev) => ({
+      ...prev,
+      [id]: { ...(prev[id] || {}), ...patch },
+    }));
+  };
+
+  const handleSaveVariantEdit = async (id: string) => {
+    if (!supabase) return;
+    const values = variantEditValues[id];
+    if (!values) return;
+    setVariantEditSaving(true);
+    setVariantEditErrors((prev) => ({ ...prev, [id]: '' }));
+
+    const basePriceValue = values.base_price.trim() === '' ? null : Number.parseFloat(values.base_price);
+    const salePriceValue = values.sale_price.trim() === '' ? null : Number.parseFloat(values.sale_price);
+    const stockValue = values.stock_quantity.trim() === '' ? null : Number.parseInt(values.stock_quantity, 10);
+
+    const payload = {
+      sku: values.sku.trim() || null,
+      base_price: Number.isFinite(basePriceValue as number) ? basePriceValue : null,
+      sale_price: Number.isFinite(salePriceValue as number) ? salePriceValue : null,
+      stock_quantity: Number.isFinite(stockValue as number) ? stockValue : null,
+      is_active: values.is_active,
+    };
+
+    const { data, error } = await supabase
+      .from('products')
+      .update(payload)
+      .eq('id', id)
+      .select('id,name,slug,sku,stock_quantity,base_price,sale_price,is_active')
+      .single();
+
+    if (error) {
+      setVariantEditErrors((prev) => ({ ...prev, [id]: formatUnknownError(error) }));
+      setVariantEditSaving(false);
+      return;
+    }
+
+    setVariantProducts((prev) => prev.map((item) => (item.id === id ? { ...item, ...data } : item)));
+    setVariantEditSaving(false);
+  };
 
   useEffect(() => {
     if (selectedVariantProfiles.length === 0 && allowedProfileOptions.length > 0) {
@@ -2148,6 +2261,134 @@ export default function ProductForm({ product, mode }: Props) {
             </div>
           ) : (
             <p className="text-sm text-[#7C7C7C] mt-4">Dar nėra sugeneruotų variacijų.</p>
+          )}
+
+          {mode === 'edit' && (
+            <div className="mt-8">
+              <h4 className="text-base font-['DM_Sans'] font-medium">Sukurtos variacijos (prekės)</h4>
+              {variantProductsLoading ? (
+                <p className="text-sm text-[#7C7C7C] mt-3">Kraunamos variacijos...</p>
+              ) : variantProductsError ? (
+                <p className="text-sm text-red-600 mt-3">{variantProductsError}</p>
+              ) : variantProducts.length === 0 ? (
+                <p className="text-sm text-[#7C7C7C] mt-3">Dar nėra sukurtų variacijų.</p>
+              ) : (
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-sm border border-[#E1E1E1]">
+                    <thead className="bg-[#E1E1E1]">
+                      <tr>
+                        <th className="text-left px-3 py-2">Slug</th>
+                        <th className="text-left px-3 py-2">SKU</th>
+                        <th className="text-left px-3 py-2">Kaina</th>
+                        <th className="text-left px-3 py-2">Nuolaida</th>
+                        <th className="text-left px-3 py-2">Sandėlis</th>
+                        <th className="text-left px-3 py-2">Veiksmai</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {variantProducts.map((item: any) => (
+                        <Fragment key={item.id}>
+                          <tr className="border-t border-[#E1E1E1]">
+                            <td className="px-3 py-2">{item.slug}</td>
+                            <td className="px-3 py-2">{item.sku || '—'}</td>
+                            <td className="px-3 py-2">{typeof item.base_price === 'number' ? item.base_price.toFixed(2) : '—'}</td>
+                            <td className="px-3 py-2">{typeof item.sale_price === 'number' ? item.sale_price.toFixed(2) : '—'}</td>
+                            <td className="px-3 py-2">{typeof item.stock_quantity === 'number' ? item.stock_quantity : '—'}</td>
+                            <td className="px-3 py-2">
+                              <button
+                                type="button"
+                                className="text-sm font-medium text-[#161616] underline"
+                                onClick={() => toggleVariantAccordion(item)}
+                              >
+                                Redaguoti
+                              </button>
+                            </td>
+                          </tr>
+                          {expandedVariantId === item.id && (
+                            <tr className="border-t border-[#E1E1E1]">
+                              <td colSpan={6} className="px-3 py-4 bg-white">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                                  <div>
+                                    <label className="block text-xs text-[#535353] mb-1">SKU</label>
+                                    <input
+                                      type="text"
+                                      value={variantEditValues[item.id]?.sku ?? ''}
+                                      onChange={(e) => updateVariantEditValue(item.id, { sku: e.target.value })}
+                                      className="w-full px-2 py-1 border border-[#E1E1E1] rounded"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs text-[#535353] mb-1">Kaina</label>
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      value={variantEditValues[item.id]?.base_price ?? ''}
+                                      onChange={(e) => updateVariantEditValue(item.id, { base_price: e.target.value })}
+                                      className="w-full px-2 py-1 border border-[#E1E1E1] rounded"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs text-[#535353] mb-1">Nuolaida</label>
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      value={variantEditValues[item.id]?.sale_price ?? ''}
+                                      onChange={(e) => updateVariantEditValue(item.id, { sale_price: e.target.value })}
+                                      className="w-full px-2 py-1 border border-[#E1E1E1] rounded"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs text-[#535353] mb-1">Sandėlis</label>
+                                    <input
+                                      type="number"
+                                      step="1"
+                                      value={variantEditValues[item.id]?.stock_quantity ?? ''}
+                                      onChange={(e) => updateVariantEditValue(item.id, { stock_quantity: e.target.value })}
+                                      className="w-full px-2 py-1 border border-[#E1E1E1] rounded"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs text-[#535353] mb-1">Statusas</label>
+                                    <select
+                                      value={variantEditValues[item.id]?.is_active ? 'published' : 'draft'}
+                                      onChange={(e) => updateVariantEditValue(item.id, { is_active: e.target.value === 'published' })}
+                                      className="w-full px-2 py-1 border border-[#E1E1E1] rounded"
+                                    >
+                                      <option value="draft">Juodraštis</option>
+                                      <option value="published">Publikuota</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                {variantEditErrors[item.id] && (
+                                  <p className="text-sm text-red-600 mt-3">{variantEditErrors[item.id]}</p>
+                                )}
+                                <div className="mt-4 flex gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSaveVariantEdit(item.id)}
+                                    disabled={variantEditSaving}
+                                    className="px-4 py-2 bg-[#161616] text-white rounded-[100px] text-sm disabled:opacity-50"
+                                  >
+                                    {variantEditSaving ? 'Saugoma...' : 'Išsaugoti'}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setExpandedVariantId(null)}
+                                    className="px-4 py-2 border border-[#E1E1E1] rounded-[100px] text-sm"
+                                  >
+                                    Uždaryti
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </Fragment>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           )}
         </div>
 

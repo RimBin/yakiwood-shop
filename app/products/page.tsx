@@ -14,7 +14,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { PageCover } from '@/components/shared';
 import { PageLayout } from '@/components/shared/PageLayout';
-import { fetchProducts, localizeColorLabel, type Product } from '@/lib/products.supabase';
+import {
+  fetchProducts,
+  localizeColorLabel,
+  type Product,
+  type ProductProfileVariant,
+} from '@/lib/products.supabase';
 import { useLocale, useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { applyRoleDiscount, type RoleDiscount } from '@/lib/pricing/roleDiscounts';
@@ -384,9 +389,48 @@ export default function ProductsPage() {
     return title || (currentLocale === 'en' && product.nameEn ? product.nameEn : product.name);
   };
 
+  const PROFILE_LABELS: Record<string, { lt: string; en: string }> = {
+    'half-taper': { lt: 'Pusė špunto', en: 'Half Taper' },
+    'half-taper-45': { lt: 'Pusė špunto 45°', en: 'Half Taper 45°' },
+    rectangle: { lt: 'Stačiakampis', en: 'Rectangle' },
+    rhombus: { lt: 'Rombas', en: 'Rhombus' },
+  };
+
+  const normalizeProfileKey = (input: string) => normalizeToken(input);
+
+  const localizeProfileLabel = (input: string, locale: 'lt' | 'en') => {
+    const normalized = normalizeProfileKey(input);
+    if (!normalized) return input;
+    const mapped = PROFILE_LABELS[normalized];
+    if (mapped) return locale === 'lt' ? mapped.lt : mapped.en;
+    return input;
+  };
+
+  const resolveProfileKey = useCallback((profile?: ProductProfileVariant | null) => {
+    const raw = profile?.code ?? profile?.nameEn ?? profile?.name ?? profile?.nameLt ?? '';
+    return normalizeProfileKey(raw);
+  }, []);
+
+  const resolveProfileLabel = useCallback(
+    (profile?: ProductProfileVariant | null) => {
+      if (!profile) return '';
+      if (currentLocale === 'lt') {
+        const raw = profile.nameLt ?? profile.name ?? profile.nameEn ?? profile.code ?? '';
+        return localizeProfileLabel(raw, 'lt');
+      }
+      const raw = profile.nameEn ?? profile.name ?? profile.nameLt ?? profile.code ?? '';
+      return localizeProfileLabel(raw, 'en');
+    },
+    [currentLocale]
+  );
+
   const formatProductAttributes = (product: Product) => {
     const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
-    const profileLabel = product.profiles?.[0]?.name ?? parsed?.profile ?? '';
+    const profileLabel = product.profiles?.[0]
+      ? resolveProfileLabel(product.profiles[0])
+      : parsed?.profile
+        ? localizeProfileLabel(parsed.profile, currentLocale)
+        : '';
     const profileSuffix = currentLocale === 'lt' ? 'Profilis' : 'Profile';
     const sizeLabel = parsed?.size ? formatSizeLabel(parsed.size) : '';
     const parts = [profileLabel ? `${profileLabel} ${profileSuffix}` : '', sizeLabel].filter(Boolean);
@@ -421,15 +465,21 @@ export default function ProductsPage() {
       }));
   }, [allProducts, currentLocale]);
 
-  const profileOptions = useMemo(() => {
-    const set = new Set<string>();
+  const profileDropdownOptions = useMemo(() => {
+    const map = new Map<string, string>();
     for (const product of allProducts) {
       for (const profile of product.profiles ?? []) {
-        if (profile?.name) set.add(profile.name);
+        const key = resolveProfileKey(profile);
+        if (!key) continue;
+        const label = resolveProfileLabel(profile) || profile.name || profile.code || key;
+        if (!map.has(key)) map.set(key, label);
       }
     }
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [allProducts]);
+
+    return Array.from(map.entries())
+      .sort((a, b) => a[1].localeCompare(b[1]))
+      .map(([value, label]) => ({ value, label }));
+  }, [allProducts, resolveProfileKey, resolveProfileLabel]);
 
   const sizeOptions = useMemo(() => {
     const widths = new Set<string>();
@@ -465,10 +515,7 @@ export default function ProductsPage() {
     [woodFilters]
   );
 
-  const profileDropdownOptions = useMemo(
-    () => profileOptions.map((value) => ({ value, label: value })),
-    [profileOptions]
-  );
+  
 
   const renderDropdown = (
     id: string,
@@ -521,7 +568,7 @@ export default function ProductsPage() {
         selectedColor.some((value) => normalizedColors.includes(normalizeToken(value)));
 
       const normalizedProfiles = (product.profiles ?? [])
-        .map((p) => normalizeToken(p?.name ?? ''))
+        .map((p) => resolveProfileKey(p))
         .filter(Boolean);
       const matchesProfile =
         selectedProfile.length === 0 ||
