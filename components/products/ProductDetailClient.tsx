@@ -9,6 +9,7 @@ import { toLocalePath } from '@/i18n/paths';
 import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
 import { localizeColorLabel } from '@/lib/products.supabase';
 import { assets, getAsset } from '@/lib/assets';
+import { Accordion } from '@/components/ui';
 import { useCartStore } from '@/lib/cart/store';
 import { trackEvent, trackProductView } from '@/lib/analytics';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
@@ -17,6 +18,7 @@ import ModalOverlay from '@/components/modals/ModalOverlay';
 
 interface ProductDetailClientProps {
   product: Product;
+  relatedProducts?: Product[];
 }
 
 function normalizeLabel(value: string): string {
@@ -177,8 +179,9 @@ function isFallbackProfileId(id: string | undefined | null): boolean {
   return typeof id === 'string' && id.startsWith('fallback-profile-');
 }
 
-export default function ProductDetailClient({ product }: ProductDetailClientProps) {
+export default function ProductDetailClient({ product, relatedProducts = [] }: ProductDetailClientProps) {
   const t = useTranslations('productPage');
+  const tProducts = useTranslations('productsPage');
   const tBreadcrumbs = useTranslations('breadcrumbs');
   const tContact = useTranslations('contact');
   const locale = useLocale();
@@ -202,6 +205,55 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     company: '',
   });
   const needAssistanceStartedAtRef = useRef<number>(Date.now());
+
+  const accordionItems = useMemo(
+    () =>
+      currentLocale === 'lt'
+        ? [
+            {
+              title: 'Produkto priežiūra',
+              content:
+                'Kiekviena situacija yra unikali, todėl jei turite klausimų dėl priežiūros, susisiekite – įvertinsime jūsų poreikius ir pasiūlysime tinkamiausią sprendimą.',
+            },
+            {
+              title: 'Spalvų išlyga',
+              content:
+                'Natūrali mediena gali nežymiai skirtis atspalviu ir raštu. Galutinis vaizdas priklauso nuo apdailos ir aplinkos sąlygų.',
+            },
+            {
+              title: 'Pristatymas ir grąžinimas',
+              content:
+                'Pristatymo terminai ir grąžinimo sąlygos derinamos individualiai. Susisiekite, kad suderintume detales.',
+            },
+            {
+              title: 'Apmokėjimas',
+              content:
+                'Galimi bankinis pavedimas ir kiti mokėjimo būdai. Dėl detalių susisiekite su mumis.',
+            },
+          ]
+        : [
+            {
+              title: 'Product maintenance',
+              content:
+                'Every situation is unique, so if you have any questions about maintenance, we encourage you to contact us so that we can assess your needs and offer the most appropriate solution.',
+            },
+            {
+              title: 'Color disclaimer',
+              content:
+                'Natural wood may vary slightly in tone and grain. The final appearance depends on finish and environmental conditions.',
+            },
+            {
+              title: 'Shipping & return',
+              content:
+                'Shipping timelines and return terms are arranged individually. Contact us to confirm the details.',
+            },
+            {
+              title: 'Payment',
+              content: 'Bank transfer and other payment options are available. Contact us for details.',
+            },
+          ],
+    [currentLocale]
+  );
 
   const widthOptionsMm = useMemo(() => {
     const derived = stockDerivedOptions?.widths ?? [];
@@ -258,6 +310,90 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     product.salePrice < product.price;
   const effectivePrice = hasSale ? product.salePrice! : product.price;
 
+  const usageLabels = useMemo<Record<string, string>>(
+    () => ({
+      facade: tProducts('usageFilters.facade'),
+      terrace: tProducts('usageFilters.terrace'),
+    }),
+    [tProducts]
+  );
+
+  const woodLabels = useMemo<Record<string, string>>(
+    () => ({
+      spruce: currentLocale === 'lt' ? 'Eglė' : 'Spruce',
+      larch: currentLocale === 'lt' ? 'Maumedis' : 'Larch',
+    }),
+    [currentLocale]
+  );
+
+  const formatCardPrice = useMemo(
+    () => (price: number) => {
+      const rounded = price.toFixed(0);
+      return currentLocale === 'lt' ? `${rounded} €/m²` : `€${rounded}/m²`;
+    },
+    [currentLocale]
+  );
+
+  const getUnitPrice = useMemo(
+    () => (pricePerM2: number, size: { widthMm: number; lengthMm: number } | null) => {
+      if (!size) return null;
+      const areaM2 = (size.widthMm / 1000) * (size.lengthMm / 1000);
+      if (!Number.isFinite(areaM2) || areaM2 <= 0) return null;
+      return pricePerM2 * areaM2;
+    },
+    []
+  );
+
+  const formatMaybeLabel = useMemo(
+    () => (value: string | undefined) => {
+      if (!value) return undefined;
+      const trimmed = value.trim();
+      if (!trimmed) return undefined;
+      return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+    },
+    []
+  );
+
+  const formatRelatedDisplayName = useMemo(
+    () => (item: Product) => {
+      const parsed = item.slug.includes('--') ? parseStockItemSlug(item.slug) : null;
+      const colorName = item.colors?.[0]?.name ?? parsed?.color ?? '';
+      const colorLabel = colorName ? localizeColorLabel(colorName, 'en') : '';
+
+      const woodKey = typeof item.woodType === 'string' ? item.woodType.trim().toLowerCase() : '';
+      const woodLabel =
+        woodKey === 'larch'
+          ? currentLocale === 'lt'
+            ? 'Maumedis'
+            : 'Larch'
+          : woodKey === 'spruce'
+            ? currentLocale === 'lt'
+              ? 'Eglė'
+              : 'Spruce'
+            : item.woodType ?? '';
+
+      const title = [colorLabel, woodLabel].filter(Boolean).join(' ');
+      return title || (currentLocale === 'en' && item.nameEn ? item.nameEn : item.name);
+    },
+    [currentLocale]
+  );
+
+  const formatRelatedAttributes = useMemo(
+    () => (item: Product) => {
+      const parsed = item.slug.includes('--') ? parseStockItemSlug(item.slug) : null;
+      const profileLabel = item.profiles?.[0]
+        ? localizeProfileLabel(item.profiles[0].name ?? item.profiles[0].code ?? '', currentLocale)
+        : parsed?.profile
+          ? localizeProfileLabel(parsed.profile, currentLocale)
+          : '';
+      const profileSuffix = currentLocale === 'lt' ? 'Profilis' : 'Profile';
+      const sizeLabel = parsed?.size ? formatSizeLabel(parsed.size) : '';
+      const parts = [profileLabel ? `${profileLabel} ${profileSuffix}` : '', sizeLabel].filter(Boolean);
+      return parts.length > 0 ? parts.join(' · ') : '';
+    },
+    [currentLocale]
+  );
+
   const trackedProductIdRef = useRef<string | null>(null);
 
   const [activeThumb, setActiveThumb] = useState(0);
@@ -279,6 +415,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const [selectedWidthMm, setSelectedWidthMm] = useState<number>(() => widthOptionsMm[0]);
   const [selectedLengthMm, setSelectedLengthMm] = useState<number>(() => lengthOptionsMm[0]);
   const [targetAreaM2, setTargetAreaM2] = useState<number>(200);
+  const [inputMode, setInputMode] = useState<InputMode>('area');
+  const [quantityBoards, setQuantityBoards] = useState<number>(500);
 
   const selectedSizeLabel = useMemo(() => {
     return `${selectedWidthMm}×${selectedLengthMm} mm`;
@@ -401,7 +539,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     if (urlColorId) return colorOptions.find((c) => c.id === urlColorId) ?? null;
     if (urlColorToken) {
       const token = normalizeColorKey(urlColorToken);
-      return colorOptions.find((c) => normalizeColorKey(c.name || '').includes(token)) ?? null;
+      return (
+        colorOptions.find((c) => normalizeColorKey(c.name || '') === token) ??
+        colorOptions.find((c) => normalizeColorKey(c.name || '').includes(token)) ??
+        null
+      );
     }
     return null;
   }, [searchParamsKey, searchParams, colorOptions]);
@@ -584,11 +726,17 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       initialColor = colorOptions.find((c) => c.id === urlColorId) ?? null;
     }
     if (!initialColor && urlColorToken && colorOptions.length) {
+      const token = normalizeColorKey(urlColorToken);
       initialColor =
-        colorOptions.find((c) => normalizeColorKey(c.name || '').includes(normalizeColorKey(urlColorToken))) ?? null;
+        colorOptions.find((c) => normalizeColorKey(c.name || '') === token) ??
+        colorOptions.find((c) => normalizeColorKey(c.name || '').includes(token)) ??
+        null;
     }
     if (!initialColor && presetColorKey && colorOptions.length) {
-      initialColor = colorOptions.find((c) => normalizeColorKey(c.name || '').includes(presetColorKey)) ?? null;
+      initialColor =
+        colorOptions.find((c) => normalizeColorKey(c.name || '') === presetColorKey) ??
+        colorOptions.find((c) => normalizeColorKey(c.name || '').includes(presetColorKey)) ??
+        null;
     }
 
     let initialFinish: ProductProfileVariant | null = null;
@@ -600,15 +748,29 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       initialFinish =
         profileOptions.find((p) => {
           const hay = normalizeProfileToken([p.code, p.name].filter(Boolean).join(' '));
-          return hay === token || hay.includes(token);
+          return hay === token;
         }) ?? null;
+      if (!initialFinish) {
+        initialFinish =
+          profileOptions.find((p) => {
+            const hay = normalizeProfileToken([p.code, p.name].filter(Boolean).join(' '));
+            return hay.includes(token);
+          }) ?? null;
+      }
     }
     if (!initialFinish && presetProfileKey && profileOptions.length) {
       initialFinish =
         profileOptions.find((p) => {
           const hay = normalizeProfileToken([p.code, p.name].filter(Boolean).join(' '));
-          return hay === presetProfileKey || hay.includes(presetProfileKey);
+          return hay === presetProfileKey;
         }) ?? null;
+      if (!initialFinish) {
+        initialFinish =
+          profileOptions.find((p) => {
+            const hay = normalizeProfileToken([p.code, p.name].filter(Boolean).join(' '));
+            return hay.includes(presetProfileKey);
+          }) ?? null;
+      }
     }
 
     if (initialColor) {
@@ -671,7 +833,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     }
     if (urlColorToken) {
       const token = normalizeColorKey(urlColorToken);
-      const match = colorOptions.find((c) => normalizeColorKey(c.name || '').includes(token)) ?? null;
+      const match =
+        colorOptions.find((c) => normalizeColorKey(c.name || '') === token) ??
+        colorOptions.find((c) => normalizeColorKey(c.name || '').includes(token)) ??
+        null;
       if (match && selectedColor?.id !== match.id) {
         setSelectedColor(match);
         didUpdate = true;
@@ -687,10 +852,16 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     }
     if (urlFinishToken) {
       const token = normalizeProfileToken(urlFinishToken);
-      const match = profileOptions.find((p) => {
-        const hay = normalizeProfileToken([p.code, p.name].filter(Boolean).join(' '));
-        return hay === token || hay.includes(token);
-      }) ?? null;
+      const match =
+        profileOptions.find((p) => {
+          const hay = normalizeProfileToken([p.code, p.name].filter(Boolean).join(' '));
+          return hay === token;
+        }) ??
+        profileOptions.find((p) => {
+          const hay = normalizeProfileToken([p.code, p.name].filter(Boolean).join(' '));
+          return hay.includes(token);
+        }) ??
+        null;
       if (match && selectedFinish?.id !== match.id) {
         setSelectedFinish(match);
         didUpdate = true;
@@ -880,25 +1051,101 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     return effectivePrice + colorMod + finishMod;
   }, [effectivePrice, selectedColor?.priceModifier, selectedFinish?.priceModifier]);
 
+  const unitAreaM2Raw = useMemo(() => {
+    const widthM = selectedWidthMm / 1000;
+    const lengthM = selectedLengthMm / 1000;
+    const area = widthM * lengthM;
+    return Number.isFinite(area) && area > 0 ? area : null;
+  }, [selectedWidthMm, selectedLengthMm]);
+
+  const formatUnitPrice = (value: number) => {
+    const rounded = Math.ceil(value * 100) / 100;
+    const formatted = rounded.toFixed(2);
+    return currentLocale === 'lt' ? `${formatted} €/vnt` : `€${formatted}/pc`;
+  };
+
+  const unitPricePerBoardDisplay = useMemo(() => {
+    const fromQuote = quotedPricing?.unitPricePerBoard;
+    if (typeof fromQuote === 'number' && Number.isFinite(fromQuote) && fromQuote > 0) return fromQuote;
+    if (typeof unitAreaM2Raw === 'number' && Number.isFinite(unitAreaM2Raw) && unitAreaM2Raw > 0) {
+      const fallback = selectionPrice * unitAreaM2Raw;
+      return Number.isFinite(fallback) && fallback > 0 ? fallback : null;
+    }
+    return null;
+  }, [quotedPricing?.unitPricePerBoard, selectionPrice, unitAreaM2Raw]);
+
   const handleAddToCart = () => {
     const unitPricePerBoard = quotedPricing?.unitPricePerBoard;
     const unitPricePerM2 = quotedPricing?.unitPricePerM2;
     const unitAreaM2 = quotedPricing?.unitAreaM2;
     const totalAreaM2 = quotedPricing?.totalAreaM2;
-    const quantityBoards = quotedPricing?.quantityBoards;
+    const quotedQuantityBoards = quotedPricing?.quantityBoards;
     const lineTotal = quotedPricing?.lineTotal;
 
+    const resolvedTargetAreaM2 =
+      inputMode === 'area' && typeof targetAreaM2 === 'number' && Number.isFinite(targetAreaM2) && targetAreaM2 > 0
+        ? targetAreaM2
+        : undefined;
+
+    const fallbackUnitAreaM2 =
+      typeof unitAreaM2 === 'number' && Number.isFinite(unitAreaM2) && unitAreaM2 > 0 ? unitAreaM2 : unitAreaM2Raw;
+
+    const fallbackUnitPricePerM2 =
+      typeof unitPricePerM2 === 'number' && Number.isFinite(unitPricePerM2) && unitPricePerM2 > 0
+        ? unitPricePerM2
+        : selectionPrice;
+
+    const fallbackUnitPricePerBoard =
+      typeof fallbackUnitAreaM2 === 'number' && Number.isFinite(fallbackUnitAreaM2) && fallbackUnitAreaM2 > 0
+        ? fallbackUnitPricePerM2 * fallbackUnitAreaM2
+        : null;
+
     const resolvedQuantityBoards =
-      typeof quantityBoards === 'number' && Number.isFinite(quantityBoards) && quantityBoards > 0
-        ? Math.max(1, Math.round(quantityBoards))
-        : 1;
+      typeof quotedQuantityBoards === 'number' && Number.isFinite(quotedQuantityBoards) && quotedQuantityBoards > 0
+        ? Math.max(1, Math.round(quotedQuantityBoards))
+        : inputMode === 'boards'
+          ? Math.max(1, Math.round(Number(quantityBoards) || 1))
+          : 1;
+
+    const basePriceForCart =
+      inputMode === 'area'
+        ? fallbackUnitPricePerM2
+        : typeof unitPricePerBoard === 'number' && Number.isFinite(unitPricePerBoard) && unitPricePerBoard > 0
+          ? unitPricePerBoard
+          : typeof fallbackUnitPricePerBoard === 'number' && Number.isFinite(fallbackUnitPricePerBoard)
+            ? fallbackUnitPricePerBoard
+            : selectionPrice;
+
+    const fallbackTotalAreaM2 =
+      inputMode === 'area'
+        ? typeof resolvedTargetAreaM2 === 'number'
+          ? resolvedTargetAreaM2
+          : 0
+        : typeof fallbackUnitAreaM2 === 'number' && Number.isFinite(fallbackUnitAreaM2)
+          ? fallbackUnitAreaM2 * resolvedQuantityBoards
+          : 0;
+
+    const fallbackLineTotal =
+      inputMode === 'area'
+        ? fallbackUnitPricePerM2 * (resolvedTargetAreaM2 ?? 0)
+        : typeof fallbackUnitPricePerBoard === 'number' && Number.isFinite(fallbackUnitPricePerBoard)
+          ? fallbackUnitPricePerBoard * resolvedQuantityBoards
+          : selectionPrice * resolvedQuantityBoards;
+
+    const cartImage =
+      typeof activeImage === 'string' && activeImage.trim().length > 0
+        ? activeImage
+        : typeof product.image === 'string'
+          ? product.image
+          : undefined;
 
     addItem({
       id: product.id,
       name: localizedDisplayName,
       slug: currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug,
-      basePrice: typeof unitPricePerBoard === 'number' ? unitPricePerBoard : selectionPrice,
-      quantity: resolvedQuantityBoards,
+      image: cartImage,
+      basePrice: basePriceForCart,
+      quantity: inputMode === 'area' && resolvedTargetAreaM2 ? resolvedTargetAreaM2 : resolvedQuantityBoards,
       color: selectedColor?.name,
       finish: selectedFinish?.name,
       configuration: {
@@ -910,11 +1157,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         widthMm: selectedWidthMm,
         lengthMm: selectedLengthMm,
       },
-      inputMode: 'area',
+      inputMode,
       targetAreaM2:
-        typeof targetAreaM2 === 'number' && Number.isFinite(targetAreaM2) && targetAreaM2 > 0
-          ? targetAreaM2
-          : undefined,
+        inputMode === 'area' ? resolvedTargetAreaM2 : undefined,
       pricingSnapshot:
         typeof unitPricePerBoard === 'number' &&
         typeof unitPricePerM2 === 'number' &&
@@ -928,7 +1173,19 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               unitPrice: unitPricePerBoard,
               lineTotal,
             }
-          : undefined,
+          : typeof fallbackUnitAreaM2 === 'number' &&
+              Number.isFinite(fallbackUnitAreaM2) &&
+              fallbackUnitAreaM2 > 0
+            ? {
+                unitAreaM2: fallbackUnitAreaM2,
+                totalAreaM2: fallbackTotalAreaM2,
+                pricePerM2Used: fallbackUnitPricePerM2,
+                unitPrice: typeof fallbackUnitPricePerBoard === 'number' && Number.isFinite(fallbackUnitPricePerBoard)
+                  ? fallbackUnitPricePerBoard
+                  : fallbackUnitPricePerM2 * fallbackUnitAreaM2,
+                lineTotal: fallbackLineTotal,
+              }
+            : undefined,
     });
   };
 
@@ -938,13 +1195,28 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
     const safeTargetAreaM2 =
       typeof targetAreaM2 === 'number' && Number.isFinite(targetAreaM2) && targetAreaM2 > 0 ? targetAreaM2 : 0;
+    const safeQuantityBoards =
+      typeof quantityBoards === 'number' && Number.isFinite(quantityBoards) && quantityBoards > 0
+        ? Math.max(1, Math.round(quantityBoards))
+        : 0;
 
     if (!product?.id) return;
-    if (!safeTargetAreaM2) {
+    if (inputMode === 'area' && !safeTargetAreaM2) {
       setQuotedPricing(null);
       setQuoteError(null);
       return;
     }
+
+    if (inputMode === 'boards' && !safeQuantityBoards) {
+      setQuotedPricing(null);
+      setQuoteError(null);
+      return;
+    }
+
+    const requestedAreaFromBoards =
+      inputMode === 'boards' && typeof unitAreaM2Raw === 'number' && Number.isFinite(unitAreaM2Raw) && unitAreaM2Raw > 0
+        ? unitAreaM2Raw * safeQuantityBoards
+        : 0;
 
     const controller = new AbortController();
 
@@ -964,9 +1236,15 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             thicknessMm: selectedThicknessMm,
             widthMm,
             lengthMm,
-            inputMode: 'area',
-            targetAreaM2: safeTargetAreaM2,
-            cartTotalAreaM2: cartTotalAreaM2 + safeTargetAreaM2,
+            inputMode,
+            quantityBoards: inputMode === 'boards' ? safeQuantityBoards : undefined,
+            targetAreaM2: inputMode === 'area' ? safeTargetAreaM2 : undefined,
+            cartTotalAreaM2:
+              inputMode === 'area'
+                ? cartTotalAreaM2 + safeTargetAreaM2
+                : requestedAreaFromBoards > 0
+                  ? cartTotalAreaM2 + requestedAreaFromBoards
+                  : cartTotalAreaM2,
           }),
         });
 
@@ -1026,7 +1304,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     run();
 
     return () => controller.abort();
-  }, [product?.id, usageTypeForQuote, selectedFinish?.id, selectedColor?.id, selectedThicknessMm, selectedWidthMm, selectedLengthMm, targetAreaM2, cartTotalAreaM2, currentLocale]);
+  }, [product?.id, usageTypeForQuote, selectedFinish?.id, selectedColor?.id, selectedThicknessMm, selectedWidthMm, selectedLengthMm, targetAreaM2, quantityBoards, inputMode, cartTotalAreaM2, currentLocale, unitAreaM2Raw]);
 
   const thumbs = useMemo(() => {
     const srcs = [product.images?.[0], product.images?.[1], product.images?.[2]].filter(Boolean) as string[];
@@ -1202,25 +1480,31 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   {attributeSummary}
                 </p>
               ) : null}
-              <p className="font-['DM_Sans'] font-normal text-[28px] lg:text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616]">
-                {effectivePrice.toFixed(0)} €
+              {typeof unitAreaM2Raw === 'number' && Number.isFinite(unitAreaM2Raw) ? (
+                <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
+                  {currentLocale === 'lt' ? 'Vienos lentos plotas' : 'Board area'}: {unitAreaM2Raw.toFixed(3)} m²
+                </p>
+              ) : null}
+              {unitPricePerBoardDisplay ? (
+                <p className="font-['DM_Sans'] font-medium text-[22px] lg:text-[24px] leading-[1.15] tracking-[-0.6px] text-[#161616]">
+                  {currentLocale === 'lt' ? 'Vienos lentos kaina' : 'Price per board'}: {formatUnitPrice(unitPricePerBoardDisplay)}
+                </p>
+              ) : null}
+              <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
+                {currentLocale === 'lt' ? 'Kaina už m²' : 'Price per m²'}: {effectivePrice.toFixed(0)} €
               </p>
-              {variantInventory ? (
+              {variantInventory && (variantInventory.loading || variantInventory.foundInventory) ? (
                 <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
                   {variantInventory.loading
                     ? currentLocale === 'lt'
                       ? 'Tikrinamas sandėlis…'
                       : 'Checking stock…'
-                    : variantInventory.foundInventory
-                      ? currentLocale === 'lt'
-                        ? `Sandėlyje: ${variantInventory.quantityAvailable}`
-                        : `In stock: ${variantInventory.quantityAvailable}`
-                      : currentLocale === 'lt'
-                        ? 'Sandėlio informacijos nėra'
-                        : 'No stock info'}
+                    : currentLocale === 'lt'
+                      ? `Sandėlyje: ${variantInventory.quantityAvailable}`
+                      : `In stock: ${variantInventory.quantityAvailable}`}
                 </p>
               ) : null}
-              {quoteError ? (
+              {quoteError && quoteError !== 'Kaina nerasta šiai konfigūracijai' ? (
                 <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">{quoteError}</p>
               ) : null}
             </div>
@@ -1235,7 +1519,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               {/* Width */}
               <div className="flex flex-col gap-[8px]">
                 <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7c7c7c]">
-                  Overall width (mm)
+                  {currentLocale === 'lt' ? 'Bendras plotis (mm)' : 'Overall width (mm)'}
                 </p>
                 <div className="flex gap-[8px]">
                   {widthOptionsMm.map((width) => (
@@ -1265,7 +1549,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               {/* Length */}
               <div className="flex flex-col gap-[8px]">
                 <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7c7c7c]">
-                  Length (mm)
+                  {currentLocale === 'lt' ? 'Ilgis (mm)' : 'Length (mm)'}
                 </p>
                 <div className="flex gap-[8px]">
                   {lengthOptionsMm.map((length) => (
@@ -1296,7 +1580,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               {colorOptions.length > 0 && (
                 <div className="flex flex-col gap-[8px]">
                   <div className="flex gap-[4px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase">
-                    <span className="text-[#7C7C7C]">Color:</span>
+                    <span className="text-[#7C7C7C]">{currentLocale === 'lt' ? 'Spalva:' : 'Color:'}</span>
                     <span className="text-[#161616]">{effectiveSelectedColor?.name || t('selectColorPlaceholder')}</span>
                   </div>
                   <div className="flex gap-[8px] flex-wrap">
@@ -1338,7 +1622,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               {profileOptions.length > 0 && (
                 <div className="flex flex-col gap-[8px]">
                   <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7c7c7c]">
-                    Profile
+                    {currentLocale === 'lt' ? 'Profilis' : 'Profile'}
                   </p>
                   <div className="flex gap-[8px] flex-wrap">
                     {profileOptions.map((finish, index) => {
@@ -1387,21 +1671,64 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               {/* Quantity */}
               <div className="flex flex-col gap-[8px]">
                 <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7c7c7c]">
-                  Quantity m2
+                  {currentLocale === 'lt' ? 'Kiekis' : 'Quantity'}
                 </p>
+                <div className="flex gap-[8px]">
+                  <button
+                    type="button"
+                    onClick={() => setInputMode('area')}
+                    className={`h-[36px] px-[12px] flex items-center justify-center font-['Outfit'] font-normal text-[12px] tracking-[0.42px] uppercase transition-colors ${
+                      inputMode === 'area'
+                        ? 'bg-[#161616] text-white'
+                        : 'border border-[#bbbbbb] text-[#161616] hover:border-[#161616]'
+                    }`}
+                    aria-pressed={inputMode === 'area'}
+                  >
+                    {currentLocale === 'lt' ? 'm²' : 'm²'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInputMode('boards')}
+                    className={`h-[36px] px-[12px] flex items-center justify-center font-['Outfit'] font-normal text-[12px] tracking-[0.42px] uppercase transition-colors ${
+                      inputMode === 'boards'
+                        ? 'bg-[#161616] text-white'
+                        : 'border border-[#bbbbbb] text-[#161616] hover:border-[#161616]'
+                    }`}
+                    aria-pressed={inputMode === 'boards'}
+                  >
+                    {currentLocale === 'lt' ? 'vnt' : 'pcs'}
+                  </button>
+                </div>
                 <div className="h-[48px] px-[16px] border border-[#bbbbbb] flex items-center max-w-[438px]">
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    value={Number.isFinite(targetAreaM2) ? targetAreaM2 : ''}
-                    onChange={(e) => {
-                      const next = Number(e.target.value);
-                      setTargetAreaM2(Number.isFinite(next) ? next : 0);
-                    }}
-                    className="w-full font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase text-[#161616] bg-transparent outline-none"
-                    min={0}
-                    step={0.1}
-                  />
+                  {inputMode === 'area' ? (
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      value={Number.isFinite(targetAreaM2) ? targetAreaM2 : ''}
+                      onChange={(e) => {
+                        const next = Number(e.target.value);
+                        setTargetAreaM2(Number.isFinite(next) ? next : 0);
+                      }}
+                      className="w-full font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase text-[#161616] bg-transparent outline-none"
+                      min={0}
+                      step={0.1}
+                      aria-label={currentLocale === 'lt' ? 'Plotas m²' : 'Area m²'}
+                    />
+                  ) : (
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={Number.isFinite(quantityBoards) ? quantityBoards : ''}
+                      onChange={(e) => {
+                        const next = Number(e.target.value);
+                        setQuantityBoards(Number.isFinite(next) ? next : 0);
+                      }}
+                      className="w-full font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase text-[#161616] bg-transparent outline-none"
+                      min={1}
+                      step={1}
+                      aria-label={currentLocale === 'lt' ? 'Kiekis vnt' : 'Quantity pcs'}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -1427,12 +1754,141 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 onClick={handleAddToCart}
                 className="w-full bg-[#161616] text-white h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase flex items-center justify-center hover:bg-[#2d2d2d] transition-colors"
               >
-                Add to cart
+                {currentLocale === 'lt' ? 'Į krepšelį' : 'Add to cart'}
               </button>
             </div>
           </div>
         </div>
       </main>
+
+      <section className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[32px] lg:py-[48px]">
+        <Accordion items={accordionItems} defaultOpen={0} />
+      </section>
+
+      {relatedProducts.length > 0 ? (
+        <section className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[40px] lg:py-[80px]">
+          <div className="flex items-center justify-between mb-[24px]">
+            <h2 className="font-['DM_Sans'] font-light text-[40px] lg:text-[80px] leading-none tracking-[-2.2px] lg:tracking-[-4.4px] text-[#161616]">
+              {t('relatedProducts.title')}
+            </h2>
+            <Link
+              href={toLocalePath('/products', currentLocale)}
+              className="hidden lg:flex items-center gap-[8px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase text-[#161616] hover:opacity-70"
+            >
+              {t('relatedProducts.viewAll')}
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-[16px] md:gap-x-[19px] gap-y-[40px] md:gap-y-[56px]">
+            {relatedProducts.slice(0, 4).map((item) => {
+              const localizedDisplayName = formatRelatedDisplayName(item);
+              const attributeLabel = formatRelatedAttributes(item);
+              const hasSaleItem =
+                typeof item.salePrice === 'number' &&
+                item.salePrice > 0 &&
+                item.salePrice < item.price;
+              const effectiveItemPrice = hasSaleItem ? item.salePrice! : item.price;
+              const discountPercent = hasSaleItem
+                ? Math.max(1, Math.round(((item.price - effectiveItemPrice) / item.price) * 100))
+                : null;
+              const hrefSlug = currentLocale === 'en' ? (item.slugEn ?? item.slug) : item.slug;
+              const parsed = hrefSlug.includes('--') ? parseStockItemSlug(hrefSlug) : null;
+              const size = parseSizeToken(parsed?.size ?? null);
+              const unitPrice = getUnitPrice(effectiveItemPrice, size);
+              const unitPriceLabel = unitPrice ? formatUnitPrice(unitPrice) : null;
+              const detailSlug = parsed?.baseSlug ?? hrefSlug;
+              const detailPath = toLocalePath(`/products/${detailSlug}`, currentLocale);
+              const detailParams = new URLSearchParams();
+              if (size?.widthMm) detailParams.set('w', String(size.widthMm));
+              if (size?.lengthMm) detailParams.set('l', String(size.lengthMm));
+              const cardColorName = parsed?.color ?? item.colors?.[0]?.name ?? '';
+              if (cardColorName) detailParams.set('ct', normalizeColorKey(cardColorName));
+              const cardProfileToken = parsed?.profile
+                ? parsed.profile
+                : item.profiles?.[0]
+                  ? item.profiles[0].code ?? item.profiles[0].name ?? ''
+                  : '';
+              if (cardProfileToken) detailParams.set('ft', normalizeProfileToken(cardProfileToken));
+              if (item.image) detailParams.set('img', item.image);
+              const href = detailParams.toString() ? `${detailPath}?${detailParams.toString()}` : detailPath;
+
+              return (
+                <Link
+                  key={item.id}
+                  href={href}
+                  className="flex flex-col gap-[8px] group"
+                >
+                  <div className="relative w-full h-[250px] border border-[#161616] border-opacity-30 overflow-hidden">
+                    <Image
+                      src={item.image || '/images/ui/wood/imgSpruce.png'}
+                      alt={localizedDisplayName}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    />
+                    {unitPriceLabel ? (
+                      <div className="absolute top-[10px] left-[10px] text-[14px] font-['DM_Sans'] text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]">
+                        {unitPriceLabel}
+                      </div>
+                    ) : null}
+                    {discountPercent ? (
+                      <div className="absolute top-[10px] right-[10px] rounded-[100px] bg-[#161616] px-[10px] py-[6px] text-[12px] font-['DM_Sans'] text-white">
+                        -{discountPercent}%
+                      </div>
+                    ) : null}
+                  </div>
+                  <p
+                    className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] text-[#161616] tracking-[-0.36px]"
+                    style={{ fontVariationSettings: "'opsz' 14" }}
+                  >
+                    {localizedDisplayName}
+                  </p>
+                  {attributeLabel ? (
+                    <p
+                      className="font-['Outfit'] font-normal text-[12px] leading-[1.2] text-[#7C7C7C] tracking-[0.6px] uppercase"
+                    >
+                      {attributeLabel}
+                    </p>
+                  ) : null}
+                  {(item.category || item.woodType) && (
+                    <p
+                      className="font-['DM_Sans'] font-normal text-[14px] leading-[1.2] text-[#535353] tracking-[-0.28px]"
+                      style={{ fontVariationSettings: "'opsz' 14" }}
+                    >
+                      {[
+                        item.category
+                          ? usageLabels[item.category] ?? formatMaybeLabel(item.category)
+                          : undefined,
+                        item.woodType ? (woodLabels[item.woodType] ?? item.woodType) : undefined,
+                      ]
+                        .filter(Boolean)
+                        .join(' • ')}
+                    </p>
+                  )}
+                  <p
+                    className="flex items-center justify-between gap-[12px] font-['DM_Sans'] font-normal text-[16px] leading-[1.2] text-[#535353] tracking-[-0.32px]"
+                    style={{ fontVariationSettings: "'opsz' 14" }}
+                  >
+                    <span className="flex items-center gap-[10px]">
+                      <span className={hasSaleItem ? 'text-[#161616]' : undefined}>
+                        {formatCardPrice(effectiveItemPrice)}
+                      </span>
+                      {hasSaleItem ? (
+                        <span className="text-[#7C7C7C] line-through">
+                          {formatCardPrice(item.price)}
+                        </span>
+                      ) : null}
+                    </span>
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       <ModalOverlay isOpen={isNeedAssistanceOpen} onClose={closeNeedAssistance}>
         <div className="relative w-[min(520px,92vw)] bg-[#EAEAEA] border border-[#BBBBBB] rounded-[16px] p-[20px] sm:p-[28px]">
@@ -1440,7 +1896,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             type="button"
             onClick={closeNeedAssistance}
             className="absolute right-[16px] top-[16px] h-[28px] w-[28px] rounded-full border border-[#BBBBBB] text-[#535353] hover:text-[#161616] hover:border-[#161616]"
-            aria-label="Close"
+            aria-label={currentLocale === 'lt' ? 'Uždaryti' : 'Close'}
           >
             ×
           </button>

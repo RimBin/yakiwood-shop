@@ -494,6 +494,11 @@ export default function ProductsPage() {
 
   const profileDropdownOptions = useMemo(() => {
     const map = new Map<string, string>();
+
+    for (const [key, labels] of Object.entries(PROFILE_LABELS)) {
+      map.set(key, currentLocale === 'lt' ? labels.lt : labels.en);
+    }
+
     for (const product of allProducts) {
       for (const profile of product.profiles ?? []) {
         const key = resolveProfileKey(profile);
@@ -506,7 +511,7 @@ export default function ProductsPage() {
     return Array.from(map.entries())
       .sort((a, b) => a[1].localeCompare(b[1]))
       .map(([value, label]) => ({ value, label }));
-  }, [allProducts, resolveProfileKey, resolveProfileLabel]);
+  }, [allProducts, currentLocale, resolveProfileKey, resolveProfileLabel]);
 
   const sizeOptions = useMemo(() => {
     const widths = new Set<string>();
@@ -739,14 +744,6 @@ export default function ProductsPage() {
 
   const shownProducts = orderedProducts.slice(0, visibleCount);
 
-  const activeUsageLabel =
-    selectedUsage.length > 0
-      ? usageFilters
-          .filter((filter) => selectedUsage.includes(filter.id))
-          .map((filter) => filter.label)
-          .join(', ')
-      : t('filtersAll');
-
   useEffect(() => {
     if (isLoading) return;
     if (error) return;
@@ -828,13 +825,6 @@ export default function ProductsPage() {
           </p>
           </div>
 
-          {!isDefaultListing && selectedUsage.length > 0 && (
-            <p
-              className="font-['Outfit'] font-normal text-[12px] md:text-[14px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]"
-            >
-              {activeUsageLabel}
-            </p>
-          )}
         </div>
       </PageCover>
 
@@ -1008,13 +998,15 @@ export default function ProductsPage() {
                   if (dims?.width) detailParams.set('w', String(dims.width));
                   if (dims?.length) detailParams.set('l', String(dims.length));
                 }
-                const cardColorName = product.colors?.[0]?.name ?? parsedStock?.color ?? '';
+                const cardColorName = parsedStock?.color ?? product.colors?.[0]?.name ?? '';
                 if (cardColorName) detailParams.set('ct', normalizeToken(cardColorName));
 
-                const cardProfileKey = product.profiles?.[0]
-                  ? resolveProfileKey(product.profiles[0])
-                  : parsedStock?.profile ?? '';
-                if (cardProfileKey) detailParams.set('ft', normalizeToken(cardProfileKey));
+                const cardProfileToken = parsedStock?.profile
+                  ? parsedStock.profile
+                  : product.profiles?.[0]
+                    ? resolveProfileKey(product.profiles[0])
+                    : '';
+                if (cardProfileToken) detailParams.set('ft', normalizeToken(cardProfileToken));
                 if (product.image) detailParams.set('img', product.image);
                 const detailHref = detailParams.toString()
                   ? `${detailPath}?${detailParams.toString()}`

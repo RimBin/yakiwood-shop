@@ -498,6 +498,10 @@
     "back": "Back",
     "photo": "Photo",
     "view3d": "3D",
+    "relatedProducts": {
+      "title": "Related products",
+      "viewAll": "View all products"
+    },
     "toggleShowPhotoAria": "Show photo",
     "toggleShow3dAria": "Show 3D view",
     "thicknessLabel": "Thickness",
@@ -758,6 +762,8 @@
     "quantity": "Quantity",
     "subtotal": "Subtotal",
     "total": "Total",
+    "subtotalExVat": "Subtotal excl. VAT",
+    "vatAmount": "VAT ({rate}%)",
     "shipping": "Shipping",
     "shippingCalculated": "Calculated at checkout",
     "tax": "Tax",
@@ -835,6 +841,8 @@
       "remove": "Remove",
       "subtotal": "Subtotal",
       "shipping": "Shipping",
+      "subtotalExVat": "Subtotal excl. VAT",
+      "vatAmount": "VAT ({rate}%)",
       "total": "Total",
       "includingTaxes": "Including taxes",
       "colorLabel": "Color:",
@@ -944,6 +952,11 @@
     "signUp": "Sign up",
     "register": "Register",
     "login": "Log in",
+    "loggingIn": "Logging in...",
+    "fullName": "Full name",
+    "agreeToTerms": "I agree to the Terms & Conditions and Privacy Policy",
+    "agreeToTermsError": "Please agree to the Terms & Conditions",
+    "creatingAccount": "Creating...",
     "forgotPassword": "Forgot password?",
     "resetPassword": "Reset password",
     "rememberMe": "Remember me",
@@ -1962,7 +1975,8 @@
   "relatedProducts": {
     "title": "Related products",
     "view": "View",
-    "from": "from"
+    "from": "from",
+    "viewAll": "View all products"
   },
   "adminUsers": {
     "title": "Users",

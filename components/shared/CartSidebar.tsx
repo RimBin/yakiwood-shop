@@ -6,6 +6,31 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
 import { toLocalePath } from '@/i18n/paths';
 
+const PROFILE_LABELS_LT: Record<string, string> = {
+  'half-taper': 'Pusė špunto',
+  'half-taper-45': 'Pusė špunto 45°',
+  rectangle: 'Stačiakampis',
+  rhombus: 'Rombas',
+};
+
+const normalizeProfileToken = (value: string) => {
+  const token = value
+    .trim()
+    .toLowerCase()
+    .replace(/[_\s]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+
+  if (!token) return '';
+  const isHalf = token.includes('half') || token.includes('taper') || token.includes('pus') || token.includes('spunto');
+  if (isHalf && token.includes('45')) return 'half-taper-45';
+  if (isHalf) return 'half-taper';
+  if (token.includes('rhomb') || token.includes('romb')) return 'rhombus';
+  if (token.includes('rectangle') || token.includes('staciakamp')) return 'rectangle';
+  return token;
+};
+
 interface CartSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,10 +41,21 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const t = useTranslations();
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const VAT_RATE = 0.21;
 
   const subtotal = items.reduce((sum, item) => sum + item.basePrice * item.quantity, 0);
   const shipping = subtotal > 500 ? 0 : 15;
   const total = subtotal + shipping;
+  const roundedTotal = Math.round(total);
+  const totalNet = total > 0 ? total / (1 + VAT_RATE) : 0;
+  const totalVat = total - totalNet;
+
+  const formatFinishLabel = (finish?: string) => {
+    if (!finish) return finish;
+    if (currentLocale !== 'lt') return finish;
+    const token = normalizeProfileToken(finish);
+    return PROFILE_LABELS_LT[token] ?? finish;
+  };
 
   const productsHref = toLocalePath('/products', currentLocale);
   const checkoutHref = toLocalePath('/checkout', currentLocale);
@@ -81,8 +117,16 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     <div key={item.addedAt ?? item.lineId} className="flex gap-[16px] pb-[16px] border-b border-[#BBBBBB]">
                       {/* Image */}
                       <div className="w-[111px] h-[125px] rounded-[8px] bg-white overflow-hidden shrink-0">
-                        {/* Placeholder - replace with actual product image */}
-                        <div className="w-full h-full bg-gradient-to-br from-[#BBBBBB] to-[#E1E1E1]" />
+                        {typeof item.image === 'string' && item.image.trim().length > 0 ? (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-[#BBBBBB] to-[#E1E1E1]" />
+                        )}
                       </div>
 
                       {/* Info */}
@@ -100,7 +144,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                               )}
                               {item.finish && (
                                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.3] text-[#161616]">
-                                  {t('cart.finish')} {item.finish}
+                                  {t('cart.finish')} {formatFinishLabel(item.finish)}
                                 </p>
                               )}
                             </div>
@@ -119,12 +163,22 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 {t('cart.dimensionsNotSet')}
                               </p>
                             )}
+                            {typeof item.configuration?.widthMm === 'number' && typeof item.configuration?.lengthMm === 'number' ? (
+                              <p className="mt-[2px] font-['Outfit'] font-normal text-[12px] leading-[1.4] text-[#535353]">
+                                {t('cart.boardArea') ?? 'Vienos lentos plotas'}:{' '}
+                                {((item.configuration.widthMm / 1000) * (item.configuration.lengthMm / 1000)).toFixed(3)} m²
+                              </p>
+                            ) : null}
                           </div>
                         </div>
 
                         <div className="flex items-center justify-between">
                           <div className="font-['DM_Sans'] font-light text-[20px] leading-[1.1] tracking-[-0.8px] text-[#161616]">
-                            {item.basePrice * item.quantity} €
+                            {(
+                              typeof item.pricingSnapshot?.lineTotal === 'number'
+                                ? item.pricingSnapshot.lineTotal
+                                : item.basePrice * item.quantity
+                            ).toFixed(2)} €
                           </div>
 
                           {/* Quantity Controls */}
@@ -137,8 +191,13 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 <path d="M3 8H13" stroke="#161616" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
                             </button>
-                            <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] min-w-[24px] text-center">
-                              {item.quantity}
+                            <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] min-w-[32px] text-center">
+                              {item.inputMode === 'area'
+                                ? Number(item.quantity).toFixed(1)
+                                : item.quantity}
+                            </span>
+                            <span className="font-['Outfit'] font-normal text-[12px] leading-[1.5] text-[#535353]">
+                              {item.inputMode === 'area' ? 'm²' : 'vnt'}
                             </span>
                             <button
                               onClick={() => updateQuantity(item.lineId, item.quantity + 1)}
@@ -187,13 +246,31 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                 {/* Divider */}
                 <div className="h-px bg-[#BBBBBB]" />
 
+                <div className="flex items-center justify-between">
+                  <span className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
+                    {t('cart.subtotalExVat')}
+                  </span>
+                  <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616]">
+                    {totalNet.toFixed(2)} €
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
+                    {t('cart.vatAmount', { rate: Math.round(VAT_RATE * 100) })}
+                  </span>
+                  <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616]">
+                    {totalVat.toFixed(2)} €
+                  </span>
+                </div>
+
                 {/* Total */}
                 <div className="flex items-center justify-between">
                   <span className="font-['DM_Sans'] font-light text-[24px] leading-[1.1] tracking-[-0.96px] text-[#161616]">
                     {t('cart.total')}
                   </span>
                   <span className="font-['DM_Sans'] font-light text-[24px] leading-[1.1] tracking-[-0.96px] text-[#161616]">
-                    {total.toFixed(2)} €
+                    {roundedTotal} €
                   </span>
                 </div>
 

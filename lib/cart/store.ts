@@ -28,6 +28,7 @@ export interface CartItem {
   id: string; // product id
   name: string;
   slug: string;
+  image?: string;
   quantity: number;
   basePrice: number;
   color?: string;
@@ -60,12 +61,14 @@ const createLineId = (item: {
   finish?: string;
   configuration?: CartItemConfiguration;
   configurationId?: string;
+  inputMode?: CartItemInputMode;
 }): string => {
   const cfg = item.configuration;
   const parts = [
     item.id,
     item.color ?? '',
     item.finish ?? '',
+    item.inputMode ?? '',
     cfg?.usageType ?? '',
     cfg?.sku ?? '',
     cfg?.profileVariantId ?? '',
@@ -117,6 +120,7 @@ const migrateCart = (persistedState: any, version: number): CartState => {
                   finish: typeof item.finish === 'string' ? item.finish : undefined,
                   configuration: item.configuration && typeof item.configuration === 'object' ? item.configuration : undefined,
                   configurationId: typeof item.configurationId === 'string' ? item.configurationId : undefined,
+                  inputMode: item.inputMode,
                 }),
           };
           return next;
@@ -141,6 +145,32 @@ const migrateCart = (persistedState: any, version: number): CartState => {
               finish: typeof item.finish === 'string' ? item.finish : undefined,
               configuration,
               configurationId: typeof item.configurationId === 'string' ? item.configurationId : undefined,
+              inputMode: item.inputMode,
+            }),
+          };
+          return next;
+        }) || [],
+      isHydrated: false,
+    } as CartState;
+  }
+  if (version === 3) {
+    // Migration from v3 to v4 (lineId includes inputMode)
+    return {
+      ...persistedState,
+      items:
+        persistedState.items?.map((item: any) => {
+          const configuration = item.configuration && typeof item.configuration === 'object' ? item.configuration : undefined;
+          const next: CartItem = {
+            ...item,
+            addedAt: item.addedAt || Date.now(),
+            configuration,
+            lineId: createLineId({
+              id: String(item.id || ''),
+              color: typeof item.color === 'string' ? item.color : undefined,
+              finish: typeof item.finish === 'string' ? item.finish : undefined,
+              configuration,
+              configurationId: typeof item.configurationId === 'string' ? item.configurationId : undefined,
+              inputMode: item.inputMode,
             }),
           };
           return next;
@@ -156,9 +186,11 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       isHydrated: false,
+
+      
       
       addItem: (item) => {
-        const addQty = item.quantity || 1
+        const addQty = typeof item.quantity === 'number' && Number.isFinite(item.quantity) ? item.quantity : 1
         const variant = [item.color, item.finish].filter(Boolean).join(' / ') || undefined
         const unitPrice = typeof (item as CartItem).pricingSnapshot?.unitPrice === 'number'
           ? (item as CartItem).pricingSnapshot!.unitPrice
@@ -180,6 +212,7 @@ export const useCartStore = create<CartState>()(
           const existingSnapshot = existing.pricingSnapshot
           const incomingSnapshot = (item as CartItem).pricingSnapshot
           const baseSnapshot = existingSnapshot ?? incomingSnapshot
+          const isArea = (existing.inputMode ?? item.inputMode) === 'area'
 
           return {
             items: state.items.map(i => 
@@ -187,11 +220,12 @@ export const useCartStore = create<CartState>()(
                 ? {
                     ...i,
                     quantity: nextQuantity,
+                  image: i.image ?? (item as CartItem).image,
                     pricingSnapshot: baseSnapshot
                       ? {
                           ...baseSnapshot,
-                          totalAreaM2: baseSnapshot.unitAreaM2 * nextQuantity,
-                          lineTotal: baseSnapshot.unitPrice * nextQuantity,
+                          totalAreaM2: isArea ? nextQuantity : baseSnapshot.unitAreaM2 * nextQuantity,
+                          lineTotal: isArea ? baseSnapshot.pricePerM2Used * nextQuantity : baseSnapshot.unitPrice * nextQuantity,
                         }
                       : undefined,
                   }
@@ -205,13 +239,19 @@ export const useCartStore = create<CartState>()(
             { 
               ...item, 
               lineId,
-              quantity: item.quantity || 1,
+              quantity: addQty || 1,
               addedAt: Date.now(),
               pricingSnapshot: (item as CartItem).pricingSnapshot
                 ? {
                     ...(item as CartItem).pricingSnapshot!,
-                    totalAreaM2: (item as CartItem).pricingSnapshot!.unitAreaM2 * (item.quantity || 1),
-                    lineTotal: (item as CartItem).pricingSnapshot!.unitPrice * (item.quantity || 1),
+                    totalAreaM2:
+                      item.inputMode === 'area'
+                        ? addQty || 1
+                        : (item as CartItem).pricingSnapshot!.unitAreaM2 * (addQty || 1),
+                    lineTotal:
+                      item.inputMode === 'area'
+                        ? (item as CartItem).pricingSnapshot!.pricePerM2Used * (addQty || 1)
+                        : (item as CartItem).pricingSnapshot!.unitPrice * (addQty || 1),
                   }
                 : undefined,
             }
@@ -235,6 +275,7 @@ export const useCartStore = create<CartState>()(
           finish: current.finish,
           configuration: nextConfiguration,
           configurationId: current.configurationId,
+          inputMode: current.inputMode,
         });
 
         if (nextLineId === current.lineId) {
@@ -293,7 +334,10 @@ export const useCartStore = create<CartState>()(
       updateQuantity: (lineId, quantity) => {
         const current = get().items.find((i) => i.lineId === lineId)
         if (current) {
-          const nextQuantity = Math.max(0, Math.round(quantity))
+          const isArea = current.inputMode === 'area'
+          const nextQuantity = isArea
+            ? Math.max(0, Number.isFinite(quantity) ? quantity : 0)
+            : Math.max(0, Math.round(quantity))
           const delta = nextQuantity - current.quantity
           const variant = [current.color, current.finish].filter(Boolean).join(' / ') || undefined
           const unitPrice = typeof current.pricingSnapshot?.unitPrice === 'number'
@@ -312,7 +356,10 @@ export const useCartStore = create<CartState>()(
           items: quantity > 0
             ? state.items.map(i => {
                 if (i.lineId !== lineId) return i
-                const nextQuantity = Math.max(1, Math.round(quantity))
+                const isArea = i.inputMode === 'area'
+                const nextQuantity = isArea
+                  ? Math.max(0.1, Number.isFinite(quantity) ? quantity : 0.1)
+                  : Math.max(1, Math.round(quantity))
                 const snap = i.pricingSnapshot
                 return {
                   ...i,
@@ -320,8 +367,8 @@ export const useCartStore = create<CartState>()(
                   pricingSnapshot: snap
                   ? {
                       ...snap,
-                      totalAreaM2: snap.unitAreaM2 * nextQuantity,
-                      lineTotal: snap.unitPrice * nextQuantity,
+                      totalAreaM2: isArea ? nextQuantity : snap.unitAreaM2 * nextQuantity,
+                      lineTotal: isArea ? snap.pricePerM2Used * nextQuantity : snap.unitPrice * nextQuantity,
                     }
                   : undefined,
               }
@@ -379,7 +426,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'yakiwood-cart',
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => {
         // SSR safeguard: only use localStorage in browser
         if (typeof window === 'undefined') {

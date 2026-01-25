@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { getAsset } from '@/lib/assets';
 
@@ -16,6 +17,7 @@ export default function RegisterModal({
   onClose,
   onSwitchToLogin 
 }: RegisterModalProps) {
+  const t = useTranslations('account');
   const supabase = useMemo(() => createClient(), []);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -31,7 +33,7 @@ export default function RegisterModal({
     e.preventDefault();
     setError(null);
     if (!agreeTerms) {
-      setError('Please agree to Terms & Conditions');
+      setError(t('agreeToTermsError'));
       return;
     }
 
@@ -86,7 +88,7 @@ export default function RegisterModal({
 
       {/* Title */}
       <p className="font-['Outfit'] font-normal text-xs text-[#7C7C7C] uppercase tracking-[0.6px] leading-[1.2]">
-        Create account
+        {t('createAccount')}
       </p>
 
       {/* Form */}
@@ -94,7 +96,7 @@ export default function RegisterModal({
         {/* Full name field */}
         <div className="flex flex-col gap-1 w-full">
           <label className="font-['Outfit'] font-normal text-xs text-[#7C7C7C] uppercase tracking-[0.6px] leading-[1.3]">
-            Full name <span className="text-[#F63333]">*</span>
+            {t('fullName')} <span className="text-[#F63333]">*</span>
           </label>
           <input
             type="text"
@@ -108,7 +110,7 @@ export default function RegisterModal({
         {/* Email field */}
         <div className="flex flex-col gap-1 w-full">
           <label className="font-['Outfit'] font-normal text-xs text-[#7C7C7C] uppercase tracking-[0.6px] leading-[1.3]">
-            Email <span className="text-[#F63333]">*</span>
+            {t('emailAddress')} <span className="text-[#F63333]">*</span>
           </label>
           <input
             type="email"
@@ -122,7 +124,7 @@ export default function RegisterModal({
         {/* Password field */}
         <div className="flex flex-col gap-1 w-full">
           <label className="font-['Outfit'] font-normal text-xs text-[#7C7C7C] uppercase tracking-[0.6px] leading-[1.3]">
-            Password <span className="text-[#F63333]">*</span>
+            {t('password')} <span className="text-[#F63333]">*</span>
           </label>
           <div className="relative h-12 border border-[#BBBBBB] flex items-center">
             <input
@@ -154,7 +156,7 @@ export default function RegisterModal({
             className="w-6 h-6 border border-[#161616] mt-0.5"
           />
           <span className="font-['Outfit'] font-light text-sm text-[#535353] leading-[1.2] tracking-[0.14px]">
-            I agree to the <span className="underline">Term & Conditions</span> and <span className="underline">Privacy Policy</span>
+            {t('agreeToTerms')}
           </span>
         </label>
 
@@ -165,19 +167,19 @@ export default function RegisterModal({
           className="w-full h-12 bg-[#161616] rounded-[100px] flex items-center justify-center hover:bg-[#2a2a2a] transition-colors disabled:opacity-60"
         >
           <span className="font-['Outfit'] font-normal text-xs text-white uppercase tracking-[0.6px]">
-            {loading ? 'Creating...' : 'Join'}
+            {loading ? t('creatingAccount') : t('register')}
           </span>
         </button>
 
         {/* Login link */}
         <div className="flex justify-center gap-1 font-['Outfit'] text-xs text-[#535353]">
-          <span>Already have an account?</span>
+          <span>{t('alreadyHaveAccount')}</span>
           <button
             type="button"
             onClick={onSwitchToLogin}
             className="text-[#161616] uppercase tracking-[0.6px] hover:underline"
           >
-            Log in
+            {t('login')}
           </button>
         </div>
       </form>

@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { generateBreadcrumbSchema, generateProductSchema } from '@/lib/seo/structured-data';
-import { fetchProductBySlug, transformDbProduct } from '@/lib/products.supabase';
+import { fetchProductBySlug, fetchProducts, transformDbProduct } from '@/lib/products.supabase';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
 import { toLocalePath } from '@/i18n/paths';
@@ -235,6 +235,28 @@ export default async function ProduktasPage({ params, searchParams }: ProductPag
 		},
 	]);
 
+	let allProducts: Product[] = [];
+	try {
+		const stockItems = await fetchProducts({ mode: 'stock-items' });
+		allProducts = stockItems.length > 0 ? stockItems : await fetchProducts({ mode: 'active' });
+	} catch (stockError) {
+		console.warn('Stock items unavailable, falling back to active products.', stockError);
+		allProducts = await fetchProducts({ mode: 'active' });
+	}
+	const sameCategoryOrWood = allProducts.filter((item) => {
+		if (item.id === product.id) return false;
+		const sameCategory = product.category && item.category === product.category;
+		const sameWood = product.woodType && item.woodType === product.woodType;
+		return Boolean(sameCategory || sameWood);
+	});
+	const relatedProducts = sameCategoryOrWood.slice(0, 4);
+	if (relatedProducts.length < 4) {
+		const fallback = allProducts.filter(
+			(item) => item.id !== product.id && !relatedProducts.some((rel) => rel.id === item.id)
+		);
+		relatedProducts.push(...fallback.slice(0, 4 - relatedProducts.length));
+	}
+
 	return (
 		<>
 			<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
@@ -243,7 +265,7 @@ export default async function ProduktasPage({ params, searchParams }: ProductPag
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
 			/>
 
-			<ProductDetailClient product={product} />
+			<ProductDetailClient product={product} relatedProducts={relatedProducts} />
 		</>
 	);
 }

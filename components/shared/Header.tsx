@@ -156,7 +156,13 @@ export default function Header() {
               >
                 <div className="relative h-[24px] w-[32px] shrink-0">
                   <div className="absolute left-0 top-0 h-[24px] w-[24px]">
-                    <Image src={getAsset('imgCart')} alt="Cart" fill style={{ objectFit: 'contain' }} />
+                    <Image
+                      src={getAsset('imgCart')}
+                      alt="Cart"
+                      fill
+                      style={{ objectFit: 'contain' }}
+                      className="transition-colors group-hover:invert"
+                    />
                   </div>
                   {itemCount > 0 && (
                     <span className="absolute -top-[6px] right-0 min-w-[18px] h-[18px] px-[4px] rounded-full bg-[#161616] border border-[#E1E1E1] flex items-center justify-center font-['Outfit'] text-[10px] leading-none text-white">

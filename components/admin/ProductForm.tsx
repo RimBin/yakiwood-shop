@@ -2296,6 +2296,7 @@ export default function ProductForm({ product, mode }: Props) {
                     <th className="text-left px-3 py-2">Spalva</th>
                     <th className="text-left px-3 py-2">Plotis</th>
                     <th className="text-left px-3 py-2">Ilgis</th>
+                    <th className="text-left px-3 py-2">Plotas (m²)</th>
                     <th className="text-left px-3 py-2">Kaina su nuolaida</th>
                     <th className="text-left px-3 py-2">SKU</th>
                     <th className="text-left px-3 py-2">Nuotrauka</th>
@@ -2315,6 +2316,11 @@ export default function ProductForm({ product, mode }: Props) {
                       <td className="px-3 py-2">{draft.color}</td>
                       <td className="px-3 py-2">{draft.widthMm}</td>
                       <td className="px-3 py-2">{draft.lengthMm}</td>
+                      <td className="px-3 py-2">
+                        {typeof draft.widthMm === 'number' && typeof draft.lengthMm === 'number'
+                          ? ((draft.widthMm / 1000) * (draft.lengthMm / 1000)).toFixed(3)
+                          : '—'}
+                      </td>
                       <td className="px-3 py-2">
                         <input
                           type="number"
@@ -2386,6 +2392,7 @@ export default function ProductForm({ product, mode }: Props) {
                         <th className="text-left px-3 py-2">SKU</th>
                         <th className="text-left px-3 py-2">Kaina</th>
                         <th className="text-left px-3 py-2">Nuolaida</th>
+                        <th className="text-left px-3 py-2">Plotas (m²)</th>
                         <th className="text-left px-3 py-2">Sandėlis</th>
                         <th className="text-left px-3 py-2">Veiksmai</th>
                       </tr>
@@ -2403,6 +2410,11 @@ export default function ProductForm({ product, mode }: Props) {
                                 const percent = computeDiscountPercent(item.base_price, item.sale_price);
                                 return percent ? `${formatPercent(percent)}%` : '—';
                               })()}
+                            </td>
+                            <td className="px-3 py-2">
+                              {typeof item.width === 'number' && typeof item.depth === 'number'
+                                ? ((item.width / 1000) * (item.depth / 1000)).toFixed(3)
+                                : '—'}
                             </td>
                             <td className="px-3 py-2">{typeof item.stock_quantity === 'number' ? item.stock_quantity : '—'}</td>
                             <td className="px-3 py-2">

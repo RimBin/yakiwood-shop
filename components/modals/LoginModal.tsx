@@ -19,7 +19,7 @@ export default function LoginModal({
   onSwitchToRegister,
   onForgotPassword 
 }: LoginModalProps) {
-  const t = useTranslations();
+  const t = useTranslations('account');
   const supabase = useMemo(() => createClient(), []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -73,7 +73,7 @@ export default function LoginModal({
 
       {/* Title */}
       <p className="font-['Outfit'] font-normal text-xs text-[#7C7C7C] uppercase tracking-[0.6px] leading-[1.2]">
-        Log in
+        {t('login')}
       </p>
 
       {/* Form */}
@@ -81,7 +81,7 @@ export default function LoginModal({
         {/* Email field */}
         <div className="flex flex-col gap-1 w-full">
           <label className="font-['Outfit'] font-normal text-xs text-[#7C7C7C] uppercase tracking-[0.6px] leading-[1.3]">
-            Email <span className="text-[#F63333]">*</span>
+            {t('emailAddress')} <span className="text-[#F63333]">*</span>
           </label>
           <input
             type="email"
@@ -95,7 +95,7 @@ export default function LoginModal({
         {/* Password field */}
         <div className="flex flex-col gap-1 w-full">
           <label className="font-['Outfit'] font-normal text-xs text-[#7C7C7C] uppercase tracking-[0.6px] leading-[1.3]">
-            Password <span className="text-[#F63333]">*</span>
+            {t('password')} <span className="text-[#F63333]">*</span>
           </label>
           <div className="relative h-12 border border-[#BBBBBB] flex items-center">
             <input
@@ -124,7 +124,7 @@ export default function LoginModal({
           onClick={onForgotPassword}
           className="text-left font-['Outfit'] font-normal text-xs text-[#161616] uppercase tracking-[0.6px] hover:underline"
         >
-          Forgot password?
+          {t('forgotPassword')}
         </button>
 
         {/* Submit button */}
@@ -134,19 +134,19 @@ export default function LoginModal({
           className="w-full h-12 bg-[#161616] rounded-[100px] flex items-center justify-center hover:bg-[#2a2a2a] transition-colors disabled:opacity-60"
         >
           <span className="font-['Outfit'] font-normal text-xs text-white uppercase tracking-[0.6px]">
-            {loading ? 'Logging in...' : 'Log in'}
+            {loading ? t('loggingIn') : t('login')}
           </span>
         </button>
 
         {/* Register link */}
         <div className="flex justify-center gap-1 font-['Outfit'] text-xs text-[#535353]">
-          <span>Don't have an account?</span>
+          <span>{t('dontHaveAccount')}</span>
           <button
             type="button"
             onClick={onSwitchToRegister}
             className="text-[#161616] uppercase tracking-[0.6px] hover:underline"
           >
-            Join
+            {t('register')}
           </button>
         </div>
       </form>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useCartStore } from '@/lib/cart/store';
 import { calculateShippingEur } from '@/lib/shipping/policy';
@@ -13,6 +13,7 @@ import ForgotPasswordModal from '@/components/modals/ForgotPasswordModal';
 import Link from 'next/link';
 import { seedProducts } from '@/data/seed-products';
 import { useLocale, useTranslations } from 'next-intl';
+import { createClient } from '@/lib/supabase/client';
 
 function formatMoney(value: number, locale: string): string {
   const rounded = Math.round(value);
@@ -113,6 +114,8 @@ function FigmaCheckbox({
 export default function CheckoutPage() {
   const locale = useLocale();
   const t = useTranslations('checkout');
+  const supabase = useMemo(() => createClient(), []);
+  const VAT_RATE = 0.21;
 
   const items = useCartStore((s) => s.items);
   const removeItem = useCartStore((s) => s.removeItem);
@@ -139,6 +142,7 @@ export default function CheckoutPage() {
   const [postalCode, setPostalCode] = useState('');
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [deliverDifferentAddress, setDeliverDifferentAddress] = useState(false);
+  const [autofillReady, setAutofillReady] = useState(false);
 
   // UI-only: payment + coupon
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'cards' | 'paypal' | 'paysera'>('stripe');
@@ -154,6 +158,144 @@ export default function CheckoutPage() {
   const subtotal = items.reduce((sum, item) => sum + item.basePrice * item.quantity, 0);
   const shipping = calculateShippingEur(subtotal);
   const total = subtotal + shipping;
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadAutofill = async () => {
+      const applyIfEmpty = (current: string, next?: string | null) => (current.trim() ? current : next ?? '');
+
+      type StoredAccountDetails = {
+        fullName?: string;
+        companyName?: string;
+        email?: string;
+        phoneNumber?: string;
+        country?: string;
+        city?: string;
+        streetAddress?: string;
+        postcodeZip?: string;
+      };
+
+      let authEmail: string | null = null;
+      let authFullName: string | null = null;
+
+      if (supabase) {
+        try {
+          const { data } = await supabase.auth.getUser();
+          authEmail = data?.user?.email ?? null;
+          authFullName =
+            (data?.user?.user_metadata?.fullName as string | undefined) ||
+            (data?.user?.user_metadata?.full_name as string | undefined) ||
+            null;
+        } catch {
+          // ignore
+        }
+      }
+
+      if (!authEmail) {
+        try {
+          const rawUser = localStorage.getItem('user');
+          const parsed = rawUser ? (JSON.parse(rawUser) as { email?: string } | null) : null;
+          authEmail = parsed?.email ?? null;
+        } catch {
+          // ignore
+        }
+      }
+
+      let accountStored: StoredAccountDetails | null = null;
+      if (authEmail) {
+        try {
+          const raw = localStorage.getItem(`account_details_v1_${authEmail}`);
+          accountStored = raw ? (JSON.parse(raw) as StoredAccountDetails) : null;
+        } catch {
+          accountStored = null;
+        }
+      }
+
+      type StoredCheckoutDetails = {
+        fullName?: string;
+        companyName?: string;
+        email?: string;
+        phone?: string;
+        country?: string;
+        city?: string;
+        address?: string;
+        postalCode?: string;
+        deliveryNotes?: string;
+        deliverDifferentAddress?: boolean;
+      };
+
+      let checkoutStored: StoredCheckoutDetails | null = null;
+      try {
+        const rawCheckout = localStorage.getItem('checkout_autofill_v1');
+        checkoutStored = rawCheckout ? (JSON.parse(rawCheckout) as StoredCheckoutDetails) : null;
+      } catch {
+        checkoutStored = null;
+      }
+
+      if (!isCancelled) {
+        setFullName((prev) =>
+          applyIfEmpty(prev, checkoutStored?.fullName || accountStored?.fullName || authFullName)
+        );
+        setCompanyName((prev) => applyIfEmpty(prev, checkoutStored?.companyName || accountStored?.companyName));
+        setEmail((prev) => applyIfEmpty(prev, checkoutStored?.email || accountStored?.email || authEmail));
+        setPhone((prev) => applyIfEmpty(prev, checkoutStored?.phone || accountStored?.phoneNumber));
+        setCountry((prev) => applyIfEmpty(prev, checkoutStored?.country || accountStored?.country));
+        setCity((prev) => applyIfEmpty(prev, checkoutStored?.city || accountStored?.city));
+        setAddress((prev) => applyIfEmpty(prev, checkoutStored?.address || accountStored?.streetAddress));
+        setPostalCode((prev) => applyIfEmpty(prev, checkoutStored?.postalCode || accountStored?.postcodeZip));
+        setDeliveryNotes((prev) => applyIfEmpty(prev, checkoutStored?.deliveryNotes));
+        setDeliverDifferentAddress((prev) =>
+          typeof checkoutStored?.deliverDifferentAddress === 'boolean' ? checkoutStored.deliverDifferentAddress : prev
+        );
+      }
+
+      if (!isCancelled) setAutofillReady(true);
+    };
+
+    void loadAutofill();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [supabase]);
+
+  useEffect(() => {
+    if (!autofillReady) return;
+
+    const payload = {
+      fullName,
+      companyName,
+      email,
+      phone,
+      country,
+      city,
+      address,
+      postalCode,
+      deliveryNotes,
+      deliverDifferentAddress,
+    };
+
+    try {
+      localStorage.setItem('checkout_autofill_v1', JSON.stringify(payload));
+    } catch {
+      // ignore
+    }
+  }, [
+    autofillReady,
+    fullName,
+    companyName,
+    email,
+    phone,
+    country,
+    city,
+    address,
+    postalCode,
+    deliveryNotes,
+    deliverDifferentAddress,
+  ]);
+  const totalNet = total > 0 ? total / (1 + VAT_RATE) : 0;
+  const totalVat = total - totalNet;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -444,89 +586,6 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[672px_648px] gap-[32px] items-start">
           {/* Left Column */}
           <div className="flex flex-col gap-[64px]">
-            {/* Items & dimensions */}
-            <section className="flex flex-col gap-[24px]">
-              <div className="flex flex-col gap-[8px]">
-                <p className="font-['Outfit'] font-normal leading-[1.3] text-[#161616] text-[12px] tracking-[0.6px] uppercase">
-                  {t('items.title')}
-                </p>
-                <div className="h-px bg-[#BBBBBB]" />
-              </div>
-
-              <p className="font-['Outfit'] font-light text-[12px] leading-[1.5] text-[#535353]">
-                {t('items.hint')}
-              </p>
-
-              <div className="flex flex-col gap-[16px]">
-                {items.map((item) => {
-                  const widthValue = item.configuration?.widthMm;
-                  const lengthValue = item.configuration?.lengthMm;
-
-                  return (
-                    <div key={item.addedAt ?? item.lineId} className="border border-[#BBBBBB] rounded-[8px] p-[16px] bg-white/40">
-                      <div className="flex items-start justify-between gap-[16px]">
-                        <div className="min-w-0">
-                          <p className="font-['DM_Sans'] text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616] truncate">
-                            {item.name}
-                          </p>
-                          {(item.color || item.finish) && (
-                            <p className="mt-[4px] font-['Outfit'] text-[12px] leading-[1.4] text-[#535353]">
-                              {(item.color ? `${t('summary.colorLabel')} ${item.color}` : '') +
-                                (item.color && item.finish ? ' • ' : '') +
-                                (item.finish ? `${t('summary.finishLabel')} ${item.finish}` : '')}
-                            </p>
-                          )}
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => removeItem(item.lineId)}
-                          className="font-['Outfit'] font-normal leading-[1.2] text-[#161616] text-[12px] tracking-[0.6px] uppercase hover:opacity-70 transition-opacity"
-                        >
-                          {t('summary.remove')}
-                        </button>
-                      </div>
-
-                      <div className="mt-[12px] flex flex-wrap gap-[16px]">
-                        <div className="flex flex-col gap-[4px] w-full sm:w-[240px]">
-                          <FieldLabel>{t('items.widthMm')}</FieldLabel>
-                          <TextField
-                            inputMode="numeric"
-                            type="number"
-                            min={1}
-                            step={1}
-                            value={typeof widthValue === 'number' ? String(widthValue) : ''}
-                            onChange={(e) => {
-                              const next = e.target.value.trim();
-                              updateItemConfiguration(item.lineId, {
-                                widthMm: next === '' ? undefined : Number(next),
-                              });
-                            }}
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-[4px] w-full sm:w-[240px]">
-                          <FieldLabel>{t('items.lengthMm')}</FieldLabel>
-                          <TextField
-                            inputMode="numeric"
-                            type="number"
-                            min={1}
-                            step={1}
-                            value={typeof lengthValue === 'number' ? String(lengthValue) : ''}
-                            onChange={(e) => {
-                              const next = e.target.value.trim();
-                              updateItemConfiguration(item.lineId, {
-                                lengthMm: next === '' ? undefined : Number(next),
-                              });
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
 
             {/* Contact information */}
             <section className="flex flex-col gap-[24px]">
@@ -549,25 +608,25 @@ export default function CheckoutPage() {
                     <span>{t('contact.fullName')}</span>
                     <span className="text-[#F63333]">*</span>
                   </FieldLabel>
-                  <TextField value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                  <TextField value={fullName} onChange={(e) => setFullName(e.target.value)} required autoComplete="name" />
                 </div>
                 <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                   <FieldLabel>{t('contact.companyNameOptional')}</FieldLabel>
-                  <TextField value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                  <TextField value={companyName} onChange={(e) => setCompanyName(e.target.value)} autoComplete="organization" />
                 </div>
                 <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                   <FieldLabel>
                     <span>{t('contact.email')}</span>
                     <span className="text-[#F63333]">*</span>
                   </FieldLabel>
-                  <TextField type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <TextField type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
                 </div>
                 <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                   <FieldLabel>
                     <span>{t('contact.phone')}</span>
                     <span className="text-[#F63333]">*</span>
                   </FieldLabel>
-                  <TextField type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                  <TextField type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required autoComplete="tel" />
                 </div>
               </div>
             </section>
@@ -588,28 +647,28 @@ export default function CheckoutPage() {
                       <span>{t('delivery.country')}</span>
                       <span className="text-[#F63333]">*</span>
                     </FieldLabel>
-                    <TextField value={country} onChange={(e) => setCountry(e.target.value)} required />
+                      <TextField value={country} onChange={(e) => setCountry(e.target.value)} required autoComplete="country-name" />
                   </div>
                   <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                     <FieldLabel>
                       <span>{t('delivery.city')}</span>
                       <span className="text-[#F63333]">*</span>
                     </FieldLabel>
-                    <TextField value={city} onChange={(e) => setCity(e.target.value)} required />
+                      <TextField value={city} onChange={(e) => setCity(e.target.value)} required autoComplete="address-level2" />
                   </div>
                   <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                     <FieldLabel>
                       <span>{t('delivery.address')}</span>
                       <span className="text-[#F63333]">*</span>
                     </FieldLabel>
-                    <TextField value={address} onChange={(e) => setAddress(e.target.value)} required />
+                      <TextField value={address} onChange={(e) => setAddress(e.target.value)} required autoComplete="street-address" />
                   </div>
                   <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
                     <FieldLabel>
                       <span>{t('delivery.postalCode')}</span>
                       <span className="text-[#F63333]">*</span>
                     </FieldLabel>
-                    <TextField value={postalCode} onChange={(e) => setPostalCode(e.target.value)} required />
+                      <TextField value={postalCode} onChange={(e) => setPostalCode(e.target.value)} required autoComplete="postal-code" />
                   </div>
                 </div>
 
@@ -622,7 +681,7 @@ export default function CheckoutPage() {
 
                 <div className="flex flex-col gap-[4px]">
                   <FieldLabel>{t('delivery.notesOptional')}</FieldLabel>
-                  <TextAreaField value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} rows={5} className="h-[148px]" />
+                  <TextAreaField value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} rows={5} className="h-[148px]" autoComplete="shipping-instructions" />
                 </div>
               </div>
             </section>
@@ -920,6 +979,14 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-between w-full font-['Outfit'] font-normal leading-[1.3] text-[12px] tracking-[0.6px] uppercase">
                   <p className="text-[#BBBBBB]">{t('summary.shipping')}</p>
                   <p className="text-white">{formatMoney(shipping, locale)}</p>
+                </div>
+                <div className="flex items-center justify-between w-full font-['Outfit'] font-normal leading-[1.3] text-[12px] tracking-[0.6px] uppercase">
+                  <p className="text-[#BBBBBB]">{t('summary.subtotalExVat')}</p>
+                  <p className="text-white">{formatMoney(totalNet, locale)}</p>
+                </div>
+                <div className="flex items-center justify-between w-full font-['Outfit'] font-normal leading-[1.3] text-[12px] tracking-[0.6px] uppercase">
+                  <p className="text-[#BBBBBB]">{t('summary.vatAmount', { rate: Math.round(VAT_RATE * 100) })}</p>
+                  <p className="text-white">{formatMoney(totalVat, locale)}</p>
                 </div>
               </div>
 
