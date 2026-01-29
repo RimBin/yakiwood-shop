@@ -579,6 +579,7 @@
     },
     "delivery": {
       "title": "Pristatymo informacija",
+      "alternateTitle": "Kitas pristatymo adresas",
       "country": "Šalis ",
       "city": "Miestas ",
       "address": "Adresas ",
@@ -599,6 +600,8 @@
       "cardNumber": "Kortelės numeris ",
       "expiryDate": "Galiojimo data ",
       "cvc": "CVC kodas ",
+      "paypalInfo": "Apmokėjimas vyks per PayPal – po pateikimo būsite nukreipti į PayPal langą.",
+      "payseraInfo": "Apmokėjimas vyks per Paysera – po pateikimo būsite nukreipti į Paysera langą.",
       "saveInfo": "Išsaugoti šią informaciją kitam kartui",
       "creditDebitCard": "Kreditinė / debetinė kortelė"
     },
@@ -606,6 +609,13 @@
       "agreeTo": "Sutinku su <terms>Taisyklėmis ir sąlygomis</terms> bei <privacy>Privatumo politika</privacy>",
       "terms": "Taisyklėmis ir sąlygomis",
       "privacy": "Privatumo politika"
+    },
+    "termsAccordion": {
+      "termsTitle": "Taisyklės ir sąlygos",
+      "privacyTitle": "Privatumo politika",
+      "termsBody": "1. BENDROSIOS SĄLYGOS\nPateikdami užsakymą patvirtinate, kad susipažinote su šiomis sąlygomis ir sutinkate jų laikytis.\n\n2. UŽSAKYMO PATEIKIMAS\nUžsakymas laikomas pateiktu, kai užpildote atsiskaitymo formą ir patvirtinate apmokėjimą.\n\n3. KAINOS IR APMOKĖJIMAS\nVisos kainos pateikiamos eurais. Apmokėjimas vykdomas pasirinktu mokėjimo būdu.\n\n4. PRISTATYMAS\nPristatymo terminai ir kaina nurodomi užsakymo metu.\n\n5. GRĄŽINIMAS\nGrąžinimo sąlygos taikomos pagal galiojančius teisės aktus ir mūsų grąžinimo politiką.\n\n6. ATSAKOMYBĖ\nMes neatsakome už vėlavimus, atsiradusius dėl trečiųjų šalių (kurjerių, mokėjimo tiekėjų).\n\n7. KONTAKTAI\nJei turite klausimų, susisiekite per kontaktų puslapį.",
+      "privacyBody": "1. DUOMENŲ TVARKYMO TIKSLAS\nJūsų duomenys naudojami užsakymo vykdymui, pristatymui ir komunikacijai.\n\n2. KOKIUS DUOMENIS RENKAME\nKontaktiniai duomenys, pristatymo adresas, užsakymo informacija.\n\n3. DUOMENŲ SAUGOJIMAS\nDuomenis saugome tiek, kiek būtina užsakymo vykdymui ir teisinių prievolių įvykdymui.\n\n4. DUOMENŲ PERDAVIMAS\nDuomenys gali būti perduodami mokėjimo paslaugų teikėjams ir pristatymo partneriams.\n\n5. JŪSŲ TEISĖS\nTurite teisę susipažinti, taisyti ar prašyti ištrinti savo duomenis.\n\n6. KONTAKTAI\nDėl privatumo klausimų kreipkitės per kontaktų puslapį.",
+      "fullPolicyLink": "Peržiūrėti pilną tekstą"
     },
     "actions": {
       "backToCart": "Grįžti į krepšelį",

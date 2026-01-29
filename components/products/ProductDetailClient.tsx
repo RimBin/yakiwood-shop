@@ -137,6 +137,13 @@ type StockDerivedOptions = {
   lengths: number[];
 };
 
+type StockMatrixEntry = {
+  colorToken: string;
+  profileToken: string;
+  widthMm: number;
+  lengthMm: number;
+};
+
 const PROFILE_ICON_FALLBACK_BY_INDEX = [
   assets.profiles.halfTaper45Deg,
   assets.profiles.halfTaper,
@@ -193,6 +200,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
   const addItem = useCartStore((state) => state.addItem);
   const cartItems = useCartStore((state) => state.items);
   const [stockDerivedOptions, setStockDerivedOptions] = useState<StockDerivedOptions | null>(null);
+  const [stockMatrix, setStockMatrix] = useState<StockMatrixEntry[]>([]);
   const [isNeedAssistanceOpen, setIsNeedAssistanceOpen] = useState(false);
   const [needAssistanceSubmitted, setNeedAssistanceSubmitted] = useState(false);
   const [needAssistanceSubmitting, setNeedAssistanceSubmitting] = useState(false);
@@ -429,10 +437,13 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
   const attributeSummary = useMemo(() => {
     const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
     const colorName = selectedColor?.name || (parsed?.color ? localizeColorLabel(parsed.color, currentLocale) : '');
-    const profileName = selectedFinish?.name || (parsed?.profile ? parsed.profile.replace(/[-_]+/g, ' ') : '');
+    const profileSource = selectedFinish?.name || selectedFinish?.code || parsed?.profile || '';
+    const profileName = profileSource
+      ? localizeProfileLabel(profileSource, currentLocale)
+      : '';
     const sizeLabel = selectedSizeLabel || (parsed?.size ? formatSizeLabel(parsed.size) : '');
     return [profileName, colorName, sizeLabel].filter(Boolean).join(' · ');
-  }, [product.slug, selectedColor?.name, selectedFinish?.name, selectedSizeLabel, currentLocale]);
+  }, [product.slug, selectedColor?.name, selectedFinish?.name, selectedFinish?.code, selectedSizeLabel, currentLocale]);
 
   useEffect(() => {
     if (!product?.id) return;
@@ -601,6 +612,23 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
     return String(product.slug || '').split('--')[0] || String(product.slug || '');
   }, [product.slug]);
 
+  const getColorToken = (color?: ProductColorVariant | null) => {
+    if (!color) return '';
+    if (typeof color.id === 'string' && color.id.startsWith('stock-color:')) {
+      return color.id.replace('stock-color:', '');
+    }
+    return color.name ? normalizeColorKey(String(color.name)) : '';
+  };
+
+  const getProfileToken = (finish?: ProductProfileVariant | null) => {
+    if (!finish) return '';
+    if (typeof finish.id === 'string' && finish.id.startsWith('stock-profile:')) {
+      return finish.id.replace('stock-profile:', '');
+    }
+    const raw = finish.code || finish.name || '';
+    return raw ? normalizeProfileToken(raw) : '';
+  };
+
   useEffect(() => {
     if (!baseSlugForSelection) return;
 
@@ -623,6 +651,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
         const profiles = new Map<string, ProductProfileVariant>();
         const widths = new Set<number>();
         const lengths = new Set<number>();
+        const matrix: StockMatrixEntry[] = [];
 
         for (const item of json) {
           const slug = typeof item?.slug === 'string' ? item.slug : '';
@@ -649,7 +678,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
             });
           }
 
-          const profileToken = normalizeProfileKey(parsed.profile);
+          const profileToken = normalizeProfileToken(parsed.profile);
           if (profileToken && !profiles.has(profileToken)) {
             profiles.set(profileToken, {
               id: `stock-profile:${profileToken}`,
@@ -662,6 +691,15 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
           const size = parseSizeToken(parsed.size);
           if (size?.widthMm) widths.add(size.widthMm);
           if (size?.lengthMm) lengths.add(size.lengthMm);
+
+          if (colorToken && profileToken && size?.widthMm && size?.lengthMm) {
+            matrix.push({
+              colorToken,
+              profileToken,
+              widthMm: size.widthMm,
+              lengthMm: size.lengthMm,
+            });
+          }
         }
 
         const derived: StockDerivedOptions = {
@@ -671,7 +709,10 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
           lengths: Array.from(lengths.values()).sort((a, b) => a - b),
         };
 
-        if (isMounted) setStockDerivedOptions(derived);
+        if (isMounted) {
+          setStockDerivedOptions(derived);
+          setStockMatrix(matrix);
+        }
       } catch (e: any) {
         if (e?.name === 'AbortError') return;
       }
@@ -685,22 +726,26 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
   }, [baseSlugForSelection, currentLocale]);
 
   const selectedColorToken = useMemo(() => {
-    return effectiveSelectedColor?.name ? normalizeColorKey(String(effectiveSelectedColor.name)) : '';
-  }, [effectiveSelectedColor?.name]);
+    return getColorToken(effectiveSelectedColor);
+  }, [effectiveSelectedColor?.id, effectiveSelectedColor?.name]);
 
   const selectedProfileToken = useMemo(() => {
-    const raw = effectiveSelectedFinish?.code || effectiveSelectedFinish?.name || '';
-    return raw ? normalizeProfileToken(raw) : '';
-  }, [effectiveSelectedFinish?.code, effectiveSelectedFinish?.name]);
+    return getProfileToken(effectiveSelectedFinish);
+  }, [effectiveSelectedFinish?.id, effectiveSelectedFinish?.code, effectiveSelectedFinish?.name]);
 
-  const [variantInventory, setVariantInventory] = useState<null | {
-    loading: boolean;
-    foundProduct: boolean;
-    foundInventory: boolean;
-    sku: string | null;
-    quantityAvailable: number;
-    quantityReserved: number;
-  }>(null);
+  const hasStockMatrix = stockMatrix.length > 0;
+
+  const isSelectionAvailable = useMemo(() => {
+    if (!hasStockMatrix) return true;
+    if (!selectedColorToken || !selectedProfileToken) return true;
+    return stockMatrix.some(
+      (entry) =>
+        entry.colorToken === selectedColorToken &&
+        entry.profileToken === selectedProfileToken &&
+        entry.widthMm === selectedWidthMm &&
+        entry.lengthMm === selectedLengthMm
+    );
+  }, [hasStockMatrix, stockMatrix, selectedColorToken, selectedProfileToken, selectedWidthMm, selectedLengthMm]);
 
   useEffect(() => {
     if (!product?.id) return;
@@ -986,61 +1031,6 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
     }
   }, [selectedThicknessMm, thicknessOptions]);
 
-  useEffect(() => {
-    if (!baseSlugForSelection || !selectedColorToken || !selectedProfileToken) {
-      setVariantInventory(null);
-      return;
-    }
-
-    const controller = new AbortController();
-    setVariantInventory((prev) => ({
-      loading: true,
-      foundProduct: prev?.foundProduct ?? false,
-      foundInventory: prev?.foundInventory ?? false,
-      sku: prev?.sku ?? null,
-      quantityAvailable: prev?.quantityAvailable ?? 0,
-      quantityReserved: prev?.quantityReserved ?? 0,
-    }));
-
-    const run = async () => {
-      try {
-        const qs = new URLSearchParams({
-          baseSlug: baseSlugForSelection,
-          profile: selectedProfileToken,
-          color: selectedColorToken,
-          w: String(selectedWidthMm),
-          l: String(selectedLengthMm),
-        });
-
-        const res = await fetch(`/api/public/variant-inventory?${qs.toString()}`, {
-          signal: controller.signal,
-          headers: { Accept: 'application/json' },
-        });
-
-        if (!res.ok) {
-          setVariantInventory(null);
-          return;
-        }
-
-        const data = (await res.json()) as any;
-        setVariantInventory({
-          loading: false,
-          foundProduct: !!data?.foundProduct,
-          foundInventory: !!data?.foundInventory,
-          sku: typeof data?.sku === 'string' ? data.sku : null,
-          quantityAvailable: Number.isFinite(Number(data?.quantityAvailable)) ? Number(data.quantityAvailable) : 0,
-          quantityReserved: Number.isFinite(Number(data?.quantityReserved)) ? Number(data.quantityReserved) : 0,
-        });
-      } catch (e: any) {
-        if (e?.name === 'AbortError') return;
-        setVariantInventory(null);
-      }
-    };
-
-    run();
-    return () => controller.abort();
-  }, [baseSlugForSelection, selectedColorToken, selectedProfileToken, selectedWidthMm, selectedLengthMm]);
-
   const selectedThicknessLabel = useMemo(() => {
     return thicknessOptions.find((opt) => opt.valueMm === selectedThicknessMm)?.label ?? `${selectedThicknessMm} mm`;
   }, [selectedThicknessMm, thicknessOptions]);
@@ -1075,6 +1065,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
   }, [quotedPricing?.unitPricePerBoard, selectionPrice, unitAreaM2Raw]);
 
   const handleAddToCart = () => {
+    if (!isSelectionAvailable) return;
     const unitPricePerBoard = quotedPricing?.unitPricePerBoard;
     const unitPricePerM2 = quotedPricing?.unitPricePerM2;
     const unitAreaM2 = quotedPricing?.unitAreaM2;
@@ -1152,7 +1143,6 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
         usageType: usageTypeForQuote,
         colorVariantId: selectedColor?.id,
         profileVariantId: selectedFinish?.id,
-        sku: typeof variantInventory?.sku === 'string' && variantInventory.sku.trim().length > 0 ? variantInventory.sku : undefined,
         thicknessMm: selectedThicknessMm,
         widthMm: selectedWidthMm,
         lengthMm: selectedLengthMm,
@@ -1493,17 +1483,6 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
               <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
                 {currentLocale === 'lt' ? 'Kaina už m²' : 'Price per m²'}: {effectivePrice.toFixed(0)} €
               </p>
-              {variantInventory && (variantInventory.loading || variantInventory.foundInventory) ? (
-                <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
-                  {variantInventory.loading
-                    ? currentLocale === 'lt'
-                      ? 'Tikrinamas sandėlis…'
-                      : 'Checking stock…'
-                    : currentLocale === 'lt'
-                      ? `Sandėlyje: ${variantInventory.quantityAvailable}`
-                      : `In stock: ${variantInventory.quantityAvailable}`}
-                </p>
-              ) : null}
               {quoteError && quoteError !== 'Kaina nerasta šiai konfigūracijai' ? (
                 <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">{quoteError}</p>
               ) : null}
@@ -1522,18 +1501,34 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                   {currentLocale === 'lt' ? 'Bendras plotis (mm)' : 'Overall width (mm)'}
                 </p>
                 <div className="flex gap-[8px]">
-                  {widthOptionsMm.map((width) => (
+                  {widthOptionsMm.map((width) => {
+                    const isAvailable = !hasStockMatrix || stockMatrix.some((entry) =>
+                      entry.widthMm === width &&
+                      entry.lengthMm === selectedLengthMm &&
+                      (!selectedColorToken || entry.colorToken === selectedColorToken) &&
+                      (!selectedProfileToken || entry.profileToken === selectedProfileToken)
+                    );
+                    const isActive = selectedWidthMm === width;
+
+                    return (
                     <button
                       key={width}
-                      onClick={() => setSelectedWidthMm(width)}
+                      type="button"
+                      onClick={() => {
+                        if (!isAvailable) return;
+                        setSelectedWidthMm(width);
+                      }}
+                      disabled={!isAvailable}
                       className={`relative h-[48px] px-[16px] flex items-center justify-center font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase transition-colors ${
-                        selectedWidthMm === width
+                        isActive
                           ? 'bg-[#161616] text-white'
-                          : 'border border-[#bbbbbb] text-[#161616] hover:border-[#161616]'
+                          : isAvailable
+                            ? 'border border-[#bbbbbb] text-[#161616] hover:border-[#161616]'
+                            : 'border border-[#bbbbbb] text-[#161616] opacity-40 cursor-not-allowed'
                       }`}
-                      aria-pressed={selectedWidthMm === width}
+                      aria-pressed={isActive}
                     >
-                      {selectedWidthMm === width ? (
+                      {isActive ? (
                         <span className="absolute top-[8px] right-[8px]">
                           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                             <path d="M10 3.5L5 8.5L2 5.5" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -1542,7 +1537,8 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                       ) : null}
                       {width} mm
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1552,18 +1548,34 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                   {currentLocale === 'lt' ? 'Ilgis (mm)' : 'Length (mm)'}
                 </p>
                 <div className="flex gap-[8px]">
-                  {lengthOptionsMm.map((length) => (
+                  {lengthOptionsMm.map((length) => {
+                    const isAvailable = !hasStockMatrix || stockMatrix.some((entry) =>
+                      entry.lengthMm === length &&
+                      entry.widthMm === selectedWidthMm &&
+                      (!selectedColorToken || entry.colorToken === selectedColorToken) &&
+                      (!selectedProfileToken || entry.profileToken === selectedProfileToken)
+                    );
+                    const isActive = selectedLengthMm === length;
+
+                    return (
                     <button
                       key={length}
-                      onClick={() => setSelectedLengthMm(length)}
+                      type="button"
+                      onClick={() => {
+                        if (!isAvailable) return;
+                        setSelectedLengthMm(length);
+                      }}
+                      disabled={!isAvailable}
                       className={`relative h-[48px] px-[16px] flex items-center justify-center font-['Outfit'] font-normal text-[14px] tracking-[0.42px] uppercase transition-colors ${
-                        selectedLengthMm === length
+                        isActive
                           ? 'bg-[#161616] text-white'
-                          : 'border border-[#bbbbbb] text-[#161616] hover:border-[#161616]'
+                          : isAvailable
+                            ? 'border border-[#bbbbbb] text-[#161616] hover:border-[#161616]'
+                            : 'border border-[#bbbbbb] text-[#161616] opacity-40 cursor-not-allowed'
                       }`}
-                      aria-pressed={selectedLengthMm === length}
+                      aria-pressed={isActive}
                     >
-                      {selectedLengthMm === length ? (
+                      {isActive ? (
                         <span className="absolute top-[8px] right-[8px]">
                           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                             <path d="M10 3.5L5 8.5L2 5.5" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -1572,7 +1584,8 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                       ) : null}
                       {length} mm
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1587,16 +1600,28 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                     {colorOptions.map((color) => {
                       const swatchSrc = resolveColorSwatchSrc(color);
                       const isActive = effectiveSelectedColor?.id === color.id;
+                      const colorToken = getColorToken(color);
+                      const isAvailable = !hasStockMatrix || stockMatrix.some((entry) =>
+                        entry.colorToken === colorToken &&
+                        entry.widthMm === selectedWidthMm &&
+                        entry.lengthMm === selectedLengthMm &&
+                        (!selectedProfileToken || entry.profileToken === selectedProfileToken)
+                      );
                       const fallbackSrc = typeof color.image === 'string' ? color.image : null;
                       const canUseNextImage = (src: string) => src.startsWith('/');
 
                       return (
                         <button
                           key={color.id}
-                          onClick={() => setSelectedColor(color)}
+                          type="button"
+                          onClick={() => {
+                            if (!isAvailable) return;
+                            setSelectedColor(color);
+                          }}
+                          disabled={!isAvailable}
                           className={`relative w-[32px] h-[32px] rounded-full overflow-hidden border border-[#BBBBBB] ${
                             isActive ? 'ring-2 ring-[#161616] ring-offset-2' : ''
-                          }`}
+                          } ${!isAvailable ? 'opacity-40 cursor-not-allowed' : ''}`}
                           title={color.name}
                           aria-pressed={isActive}
                         >
@@ -1627,6 +1652,13 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                   <div className="flex gap-[8px] flex-wrap">
                     {profileOptions.map((finish, index) => {
                       const active = effectiveSelectedFinish?.id === finish.id;
+                      const profileToken = getProfileToken(finish);
+                      const isAvailable = !hasStockMatrix || stockMatrix.some((entry) =>
+                        entry.profileToken === profileToken &&
+                        entry.widthMm === selectedWidthMm &&
+                        entry.lengthMm === selectedLengthMm &&
+                        (!selectedColorToken || entry.colorToken === selectedColorToken)
+                      );
                       const profileIconSrc = resolveProfileIconSrc(finish) ?? PROFILE_ICON_FALLBACK_BY_INDEX[index] ?? null;
                       const fallbackSrc = typeof finish.image === 'string' ? finish.image : null;
                       const canUseNextImage = (src: string) => src.startsWith('/');
@@ -1634,9 +1666,18 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                       return (
                         <button
                           key={finish.id}
-                          onClick={() => setSelectedFinish(finish)}
+                          type="button"
+                          onClick={() => {
+                            if (!isAvailable) return;
+                            setSelectedFinish(finish);
+                          }}
+                          disabled={!isAvailable}
                           className={`relative h-[48px] w-[83px] flex items-center justify-center transition-colors ${
-                            active ? 'bg-[#161616]' : 'border border-[#bbbbbb] hover:border-[#161616]'
+                            active
+                              ? 'bg-[#161616]'
+                              : isAvailable
+                                ? 'border border-[#bbbbbb] hover:border-[#161616]'
+                                : 'border border-[#bbbbbb] opacity-40 cursor-not-allowed'
                           }`}
                           title={finish.name}
                           aria-pressed={active}
@@ -1667,6 +1708,12 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                   </div>
                 </div>
               )}
+
+              {!isSelectionAvailable && hasStockMatrix ? (
+                <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#B00020]">
+                  {currentLocale === 'lt' ? 'Tokios variacijos nėra' : 'This variation is unavailable'}
+                </p>
+              ) : null}
 
               {/* Quantity */}
               <div className="flex flex-col gap-[8px]">
@@ -1752,7 +1799,10 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="w-full bg-[#161616] text-white h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase flex items-center justify-center hover:bg-[#2d2d2d] transition-colors"
+                disabled={!isSelectionAvailable}
+                className={`w-full bg-[#161616] text-white h-[48px] rounded-[100px] px-[40px] py-[10px] font-['Outfit'] font-normal text-[12px] tracking-[0.6px] uppercase flex items-center justify-center transition-colors ${
+                  isSelectionAvailable ? 'hover:bg-[#2d2d2d]' : 'opacity-40 cursor-not-allowed'
+                }`}
               >
                 {currentLocale === 'lt' ? 'Į krepšelį' : 'Add to cart'}
               </button>

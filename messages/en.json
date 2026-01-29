@@ -803,6 +803,7 @@
     },
     "delivery": {
       "title": "Delivery information",
+      "alternateTitle": "Alternate delivery address",
       "country": "Country ",
       "city": "City ",
       "address": "Address ",
@@ -823,6 +824,8 @@
       "cardNumber": "Card number ",
       "expiryDate": "Expiry date ",
       "cvc": "CVC ",
+      "paypalInfo": "You will be redirected to PayPal after placing the order.",
+      "payseraInfo": "You will be redirected to Paysera after placing the order.",
       "saveInfo": "Save this information for next time",
       "creditDebitCard": "Credit / debit card"
     },
@@ -830,6 +833,13 @@
       "agreeTo": "I agree to the <terms>Terms and conditions</terms> and <privacy>Privacy policy</privacy>",
       "terms": "Terms and conditions",
       "privacy": "Privacy policy"
+    },
+    "termsAccordion": {
+      "termsTitle": "Terms and conditions",
+      "privacyTitle": "Privacy policy",
+      "termsBody": "1. GENERAL\nBy placing an order you confirm that you have read and accept these terms.\n\n2. ORDERING\nAn order is submitted when you complete checkout and confirm payment.\n\n3. PRICES & PAYMENT\nAll prices are in EUR. Payments are processed via the selected provider.\n\n4. DELIVERY\nDelivery timelines and costs are shown at checkout.\n\n5. RETURNS\nReturns are handled according to applicable law and our return policy.\n\n6. LIABILITY\nWe are not liable for delays caused by third parties (couriers, payment providers).\n\n7. CONTACT\nFor questions, please contact us via the contact page.",
+      "privacyBody": "1. PURPOSE\nWe process your data to fulfill orders, deliver goods, and communicate with you.\n\n2. DATA COLLECTED\nContact details, delivery address, and order information.\n\n3. RETENTION\nWe keep data as long as necessary for fulfillment and legal obligations.\n\n4. SHARING\nData may be shared with payment processors and delivery partners.\n\n5. YOUR RIGHTS\nYou can request access, correction, or deletion of your data.\n\n6. CONTACT\nFor privacy questions, contact us via the contact page.",
+      "fullPolicyLink": "Read the full policy"
     },
     "actions": {
       "backToCart": "Back to cart",

@@ -142,6 +142,10 @@ export default function CheckoutPage() {
   const [postalCode, setPostalCode] = useState('');
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [deliverDifferentAddress, setDeliverDifferentAddress] = useState(false);
+  const [altCountry, setAltCountry] = useState('');
+  const [altCity, setAltCity] = useState('');
+  const [altAddress, setAltAddress] = useState('');
+  const [altPostalCode, setAltPostalCode] = useState('');
   const [autofillReady, setAutofillReady] = useState(false);
 
   // UI-only: payment + coupon
@@ -149,6 +153,10 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState('');
   const [savePaymentInfo, setSavePaymentInfo] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvc, setCardCvc] = useState('');
+  const [openPolicy, setOpenPolicy] = useState<'terms' | 'privacy' | null>(null);
 
   // Payment Method
   const [isProcessing, setIsProcessing] = useState(false);
@@ -223,6 +231,10 @@ export default function CheckoutPage() {
         postalCode?: string;
         deliveryNotes?: string;
         deliverDifferentAddress?: boolean;
+        altCountry?: string;
+        altCity?: string;
+        altAddress?: string;
+        altPostalCode?: string;
       };
 
       let checkoutStored: StoredCheckoutDetails | null = null;
@@ -248,6 +260,10 @@ export default function CheckoutPage() {
         setDeliverDifferentAddress((prev) =>
           typeof checkoutStored?.deliverDifferentAddress === 'boolean' ? checkoutStored.deliverDifferentAddress : prev
         );
+        setAltCountry((prev) => applyIfEmpty(prev, checkoutStored?.altCountry));
+        setAltCity((prev) => applyIfEmpty(prev, checkoutStored?.altCity));
+        setAltAddress((prev) => applyIfEmpty(prev, checkoutStored?.altAddress));
+        setAltPostalCode((prev) => applyIfEmpty(prev, checkoutStored?.altPostalCode));
       }
 
       if (!isCancelled) setAutofillReady(true);
@@ -274,6 +290,10 @@ export default function CheckoutPage() {
       postalCode,
       deliveryNotes,
       deliverDifferentAddress,
+      altCountry,
+      altCity,
+      altAddress,
+      altPostalCode,
     };
 
     try {
@@ -293,6 +313,10 @@ export default function CheckoutPage() {
     postalCode,
     deliveryNotes,
     deliverDifferentAddress,
+    altCountry,
+    altCity,
+    altAddress,
+    altPostalCode,
   ]);
   const totalNet = total > 0 ? total / (1 + VAT_RATE) : 0;
   const totalVat = total - totalNet;
@@ -303,6 +327,15 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
+      const paymentsDisabled = process.env.NEXT_PUBLIC_PAYMENTS_DISABLED === 'true' || process.env.NODE_ENV !== 'production';
+      if (paymentsDisabled) {
+        setSuccessMessage(t('success.withoutNumber'));
+        setShowSuccessModal(true);
+        clearCart();
+        setIsProcessing(false);
+        return;
+      }
+
       const productItems = items.map((item) => ({
         id: item.id,
         name: item.name,
@@ -338,10 +371,12 @@ export default function CheckoutPage() {
         }
       } else {
         const serverErrorMessage = (quoteData as any)?.error as string | undefined;
+        const normalizedMessage = (serverErrorMessage || '').toLowerCase();
+        const isMissingConfigPrice = normalizedMessage.includes('kaina nerasta') || normalizedMessage.includes('price not found');
 
-        // If pricing lock fails due to server misconfiguration, optionally continue without quote.
+        // If pricing lock fails due to server misconfiguration or missing config price, optionally continue without quote.
         // Orders endpoint can compute totals from items when quoteToken is omitted.
-        if (allowPricingLockBypass && quoteRes.status >= 500) {
+        if (allowPricingLockBypass && (quoteRes.status >= 500 || isMissingConfigPrice)) {
           console.warn('Pricing lock unavailable; continuing without quote token', {
             status: quoteRes.status,
             error: serverErrorMessage,
@@ -353,6 +388,11 @@ export default function CheckoutPage() {
       }
 
       // 1) Always create order first (WooCommerce-like)
+      const shippingCountry = deliverDifferentAddress ? altCountry : country;
+      const shippingCity = deliverDifferentAddress ? altCity : city;
+      const shippingAddress = deliverDifferentAddress ? altAddress : address;
+      const shippingPostalCode = deliverDifferentAddress ? altPostalCode : postalCode;
+
       const orderRes = await fetch('/api/orders/create', {
         method: 'POST',
         headers: {
@@ -365,10 +405,10 @@ export default function CheckoutPage() {
             email,
             name: fullName,
             phone,
-            address,
-            city,
-            postalCode,
-            country,
+            address: shippingAddress,
+            city: shippingCity,
+            postalCode: shippingPostalCode,
+            country: shippingCountry,
           },
           deliveryNotes,
           couponCode: couponCode?.trim() ? couponCode.trim() : undefined,
@@ -454,11 +494,11 @@ export default function CheckoutPage() {
             email,
             name: fullName,
             phone,
-            address,
-            city,
-            postalCode,
-            country
-          }
+            address: shippingAddress,
+            city: shippingCity,
+            postalCode: shippingPostalCode,
+            country: shippingCountry,
+          },
         }),
       });
 
@@ -679,6 +719,68 @@ export default function CheckoutPage() {
                   label={t('delivery.deliverDifferentAddress')}
                 />
 
+                {deliverDifferentAddress && (
+                  <div className="flex flex-col gap-[16px]">
+                    <div className="flex flex-col gap-[8px]">
+                      <p className="font-['Outfit'] font-normal leading-[1.3] text-[#161616] text-[12px] tracking-[0.6px] uppercase">
+                        {t('delivery.alternateTitle')}
+                      </p>
+                      <div className="h-px bg-[#BBBBBB]" />
+                    </div>
+
+                    <div className="flex flex-wrap gap-[16px]">
+                      <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                        <FieldLabel>
+                          <span>{t('delivery.country')}</span>
+                          <span className="text-[#F63333]">*</span>
+                        </FieldLabel>
+                        <TextField
+                          value={altCountry}
+                          onChange={(e) => setAltCountry(e.target.value)}
+                          required={deliverDifferentAddress}
+                          autoComplete="shipping country-name"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                        <FieldLabel>
+                          <span>{t('delivery.city')}</span>
+                          <span className="text-[#F63333]">*</span>
+                        </FieldLabel>
+                        <TextField
+                          value={altCity}
+                          onChange={(e) => setAltCity(e.target.value)}
+                          required={deliverDifferentAddress}
+                          autoComplete="shipping address-level2"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                        <FieldLabel>
+                          <span>{t('delivery.address')}</span>
+                          <span className="text-[#F63333]">*</span>
+                        </FieldLabel>
+                        <TextField
+                          value={altAddress}
+                          onChange={(e) => setAltAddress(e.target.value)}
+                          required={deliverDifferentAddress}
+                          autoComplete="shipping street-address"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                        <FieldLabel>
+                          <span>{t('delivery.postalCode')}</span>
+                          <span className="text-[#F63333]">*</span>
+                        </FieldLabel>
+                        <TextField
+                          value={altPostalCode}
+                          onChange={(e) => setAltPostalCode(e.target.value)}
+                          required={deliverDifferentAddress}
+                          autoComplete="shipping postal-code"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex flex-col gap-[4px]">
                   <FieldLabel>{t('delivery.notesOptional')}</FieldLabel>
                   <TextAreaField value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} rows={5} className="h-[148px]" autoComplete="shipping-instructions" />
@@ -722,37 +824,58 @@ export default function CheckoutPage() {
                     stripe
                   </span>
                 </label>
+                {paymentMethod === 'stripe' && (
+                  <div className="flex flex-col gap-[16px]">
+                    <div className="flex flex-wrap gap-[16px]">
+                      <div className="flex flex-col gap-[4px] w-full">
+                        <FieldLabel>
+                          <span>{t('payment.cardNumber')}</span>
+                          <span className="text-[#F63333]">*</span>
+                        </FieldLabel>
+                        <TextField
+                          value={cardNumber}
+                          onChange={(e) => setCardNumber(e.target.value)}
+                          placeholder=""
+                          autoComplete="cc-number"
+                          inputMode="numeric"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                        <FieldLabel>
+                          <span>{t('payment.expiryDate')}</span>
+                          <span className="text-[#F63333]">*</span>
+                        </FieldLabel>
+                        <TextField
+                          value={cardExpiry}
+                          onChange={(e) => setCardExpiry(e.target.value)}
+                          placeholder=""
+                          autoComplete="cc-exp"
+                          inputMode="numeric"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                        <FieldLabel>
+                          <span>{t('payment.cvc')}</span>
+                          <span className="text-[#F63333]">*</span>
+                        </FieldLabel>
+                        <TextField
+                          value={cardCvc}
+                          onChange={(e) => setCardCvc(e.target.value)}
+                          placeholder=""
+                          autoComplete="cc-csc"
+                          inputMode="numeric"
+                        />
+                      </div>
+                    </div>
 
-                <div className="flex flex-wrap gap-[16px]">
-                  <div className="flex flex-col gap-[4px] w-full">
-                    <FieldLabel>
-                      <span>{t('payment.cardNumber')}</span>
-                      <span className="text-[#F63333]">*</span>
-                    </FieldLabel>
-                    <TextField value={''} onChange={() => {}} placeholder="" disabled />
+                    <FigmaCheckbox
+                      id="savePayment"
+                      checked={savePaymentInfo}
+                      onChange={setSavePaymentInfo}
+                      label={t('payment.saveInfo')}
+                    />
                   </div>
-                  <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
-                    <FieldLabel>
-                      <span>{t('payment.expiryDate')}</span>
-                      <span className="text-[#F63333]">*</span>
-                    </FieldLabel>
-                    <TextField value={''} onChange={() => {}} placeholder="" disabled />
-                  </div>
-                  <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
-                    <FieldLabel>
-                      <span>{t('payment.cvc')}</span>
-                      <span className="text-[#F63333]">*</span>
-                    </FieldLabel>
-                    <TextField value={''} onChange={() => {}} placeholder="" disabled />
-                  </div>
-                </div>
-
-                <FigmaCheckbox
-                  id="savePayment"
-                  checked={savePaymentInfo}
-                  onChange={setSavePaymentInfo}
-                  label={t('payment.saveInfo')}
-                />
+                )}
 
                 <div className="h-px bg-[#BBBBBB]" />
 
@@ -783,6 +906,59 @@ export default function CheckoutPage() {
                   </span>
                 </label>
 
+                {paymentMethod === 'cards' && (
+                  <div className="flex flex-col gap-[16px]">
+                    <div className="flex flex-wrap gap-[16px]">
+                      <div className="flex flex-col gap-[4px] w-full">
+                        <FieldLabel>
+                          <span>{t('payment.cardNumber')}</span>
+                          <span className="text-[#F63333]">*</span>
+                        </FieldLabel>
+                        <TextField
+                          value={cardNumber}
+                          onChange={(e) => setCardNumber(e.target.value)}
+                          placeholder=""
+                          autoComplete="cc-number"
+                          inputMode="numeric"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                        <FieldLabel>
+                          <span>{t('payment.expiryDate')}</span>
+                          <span className="text-[#F63333]">*</span>
+                        </FieldLabel>
+                        <TextField
+                          value={cardExpiry}
+                          onChange={(e) => setCardExpiry(e.target.value)}
+                          placeholder=""
+                          autoComplete="cc-exp"
+                          inputMode="numeric"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
+                        <FieldLabel>
+                          <span>{t('payment.cvc')}</span>
+                          <span className="text-[#F63333]">*</span>
+                        </FieldLabel>
+                        <TextField
+                          value={cardCvc}
+                          onChange={(e) => setCardCvc(e.target.value)}
+                          placeholder=""
+                          autoComplete="cc-csc"
+                          inputMode="numeric"
+                        />
+                      </div>
+                    </div>
+
+                    <FigmaCheckbox
+                      id="savePaymentCards"
+                      checked={savePaymentInfo}
+                      onChange={setSavePaymentInfo}
+                      label={t('payment.saveInfo')}
+                    />
+                  </div>
+                )}
+
                 <div className="h-px bg-[#BBBBBB]" />
 
                 <label className="flex items-center justify-between w-full">
@@ -811,6 +987,14 @@ export default function CheckoutPage() {
                     paypal
                   </span>
                 </label>
+
+                {paymentMethod === 'paypal' && (
+                  <div className="border border-[#BBBBBB] bg-white/40 px-[16px] py-[12px]">
+                    <p className="font-['Outfit'] text-[12px] leading-[1.4] text-[#535353]">
+                      {t('payment.paypalInfo')}
+                    </p>
+                  </div>
+                )}
 
                 <div className="h-px bg-[#BBBBBB]" />
 
@@ -841,6 +1025,14 @@ export default function CheckoutPage() {
                   </span>
                 </label>
 
+                {paymentMethod === 'paysera' && (
+                  <div className="border border-[#BBBBBB] bg-white/40 px-[16px] py-[12px]">
+                    <p className="font-['Outfit'] text-[12px] leading-[1.4] text-[#535353]">
+                      {t('payment.payseraInfo')}
+                    </p>
+                  </div>
+                )}
+
                 <div className="h-px bg-[#BBBBBB]" />
 
                 <FigmaCheckbox
@@ -850,17 +1042,57 @@ export default function CheckoutPage() {
                   required
                   label={t.rich('terms.agreeTo', {
                     terms: (chunks) => (
-                      <Link href="/policies" className="underline">
+                      <button
+                        type="button"
+                        className="underline"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setOpenPolicy((current) => (current === 'terms' ? null : 'terms'));
+                        }}
+                      >
                         {chunks}
-                      </Link>
+                      </button>
                     ),
                     privacy: (chunks) => (
-                      <Link href="/policies" className="underline">
+                      <button
+                        type="button"
+                        className="underline"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setOpenPolicy((current) => (current === 'privacy' ? null : 'privacy'));
+                        }}
+                      >
                         {chunks}
-                      </Link>
+                      </button>
                     ),
                   })}
                 />
+
+                {openPolicy && (
+                  <div className="border border-[#BBBBBB] bg-white/40 px-[16px] py-[12px]">
+                    <button
+                      type="button"
+                      onClick={() => setOpenPolicy(null)}
+                      className="w-full text-left font-['Outfit'] text-[12px] font-normal uppercase tracking-[0.6px] text-[#161616]"
+                    >
+                      {openPolicy === 'terms'
+                        ? t('termsAccordion.termsTitle')
+                        : t('termsAccordion.privacyTitle')}
+                    </button>
+                    <div className="mt-[8px] max-h-[360px] overflow-y-auto pr-[8px]">
+                      <p className="font-['Outfit'] text-[12px] leading-[1.5] text-[#535353] whitespace-pre-wrap">
+                        {openPolicy === 'terms'
+                          ? t('termsAccordion.termsBody')
+                          : t('termsAccordion.privacyBody')}
+                      </p>
+                    </div>
+                    <Link href="/policies" className="mt-[8px] inline-block underline text-[12px]">
+                      {t('termsAccordion.fullPolicyLink')}
+                    </Link>
+                  </div>
+                )}
 
                 {/* Error Message (kept from existing flow) */}
                 {error && (
