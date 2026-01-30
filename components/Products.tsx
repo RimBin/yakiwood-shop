@@ -459,10 +459,12 @@ export default function Products() {
           <p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase left-[0px] top-[23px]">
             {t('eyebrow')}
           </p>
-          <p className="absolute font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] left-[calc(25%+14px)] top-[0px] w-[692px]">
+          <p className="absolute font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] left-[calc(25%+14px)] top-[0px]">
             <span>{t('headline.prefix')}</span>
-            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">{t('headline.emphasis')}</span>
-            <span>{t('headline.suffix')}</span>
+            <span className="inline-flex whitespace-nowrap">
+              <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">{t('headline.emphasis')}</span>
+              <span>&nbsp;{t('headline.suffix')}</span>
+            </span>
           </p>
         </div>
 

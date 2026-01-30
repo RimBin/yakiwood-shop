@@ -48,5 +48,12 @@
         "."
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "editor.fontSize": 15,
+    "editor.minimap.sectionHeaderFontSize": 9,
+    "debug.console.fontSize": 15,
+    "scm.inputFontSize": 14,
+    "terminal.integrated.fontSize": 15,
+    "chat.editor.fontSize": 15,
+    "chat.fontSize": 15
 }

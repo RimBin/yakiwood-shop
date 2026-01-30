@@ -119,9 +119,11 @@ export default function Solutions() {
               {t('eyebrow')}
             </p>
             <p className="absolute left-[calc(25%+24px)] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] w-[713px]">
-              <span>{t('headline.prefix')}</span>
-              <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">{t('headline.emphasis')}</span>
-              <span>{t('headline.suffix')}</span>
+              <span className="inline-flex whitespace-nowrap">
+                <span>{t('headline.prefix')}</span>
+                <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">&nbsp;{t('headline.emphasis')}</span>
+              </span>
+              <span className="block">{t('headline.suffix')}</span>
             </p>
           </div>
         </div>
