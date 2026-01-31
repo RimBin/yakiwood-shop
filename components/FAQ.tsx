@@ -85,7 +85,7 @@ export default function FAQ() {
           {faqs.map((faq, idx) => (
             <div
               key={idx}
-              className={`w-full ${openIndex === idx ? 'bg-[#161616] min-h-[173px]' : 'bg-[#e1e1e1] h-[70px]'} py-[24px] cursor-pointer`}
+              className={`w-full ${openIndex === idx ? 'bg-[#161616] min-h-[173px]' : 'bg-[#e1e1e1] h-[70px]'} py-[24px] cursor-pointer border-t border-[#BBBBBB] last:border-b`}
               onClick={() => setOpenIndex(openIndex === idx ? -1 : idx)}
             >
               <div className="max-w-[1440px] mx-auto px-[40px] w-full">

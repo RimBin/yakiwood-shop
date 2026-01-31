@@ -153,7 +153,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   // Header is fixed; add a top offset so it doesn't overlap page content.
   // Keep auth/admin/studio screens unchanged to avoid breaking centered layouts.
   const normalizedPathname = (pathname || '/').replace(/^\/(lt|en)(?=\/|$)/, '');
-  const noHeaderOffsetPrefixes = ['/login', '/register', '/forgot-password', '/reset-password', '/studio'];
+  const noHeaderOffsetPrefixes = ['', '/', '/login', '/register', '/forgot-password', '/reset-password', '/studio'];
   const shouldApplyHeaderOffset = !noHeaderOffsetPrefixes.some(
     (prefix) => normalizedPathname === prefix || normalizedPathname.startsWith(`${prefix}/`)
   );
