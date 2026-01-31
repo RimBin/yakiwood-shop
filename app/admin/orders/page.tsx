@@ -313,18 +313,6 @@ export default function AdminOrdersPage() {
                   <div className="font-['Outfit'] text-[12px] text-[#7C7C7C] uppercase tracking-[0.6px]">
                     Sąskaitos
                   </div>
-                  <div className="flex items-center gap-[8px]">
-                    <span className="font-['Outfit'] text-[12px] text-[#7C7C7C]">Kalba:</span>
-                    <AdminSelect
-                      value={invoiceLocale}
-                      onChange={(e) => setInvoiceLocale(e.target.value as InvoiceLocale)}
-                      className="h-[36px] px-[12px] text-[12px]"
-                      aria-label="Sąskaitos PDF kalba"
-                    >
-                      <option value="lt">LT</option>
-                      <option value="en">EN</option>
-                    </AdminSelect>
-                  </div>
                 </div>
                 {invoices.length === 0 ? (
                   <div className="p-[40px] text-center">
@@ -451,16 +439,28 @@ export default function AdminOrdersPage() {
               </div>
             </div>
             <div className="flex items-center gap-[8px]">
-              <AdminSelect
-                value={invoiceLocale}
-                onChange={(e) => setInvoiceLocale(e.target.value as InvoiceLocale)}
-                className="h-[36px] px-[12px] text-[12px]"
-                aria-label="Peržiūros kalba"
+              <div className="relative">
+                <span className="pointer-events-none absolute right-[14px] top-1/2 -translate-y-1/2 text-[#7C7C7C]">
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <select
+                  value={invoiceLocale}
+                  onChange={(e) => setInvoiceLocale(e.target.value as InvoiceLocale)}
+                  className="h-[48px] pl-[16px] pr-[36px] rounded-[100px] bg-[#E1E1E1] border border-[#BBBBBB] font-['Outfit'] text-[14px] text-[#161616] outline-none focus:border-[#161616] transition-colors appearance-none cursor-pointer"
+                  aria-label="Peržiūros kalba"
+                >
+                  <option value="lt">LT</option>
+                  <option value="en">EN</option>
+                </select>
+              </div>
+              <AdminButton
+                size="md"
+                variant="outline"
+                onClick={() => setPreviewInvoice(null)}
+                className="px-[20px]"
               >
-                <option value="lt">LT</option>
-                <option value="en">EN</option>
-              </AdminSelect>
-              <AdminButton size="sm" variant="outline" onClick={() => setPreviewInvoice(null)} className="h-[36px]">
                 Uždaryti
               </AdminButton>
             </div>

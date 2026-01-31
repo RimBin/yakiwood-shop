@@ -3,6 +3,8 @@
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import fs from 'node:fs';
+import path from 'node:path';
 import type { Invoice, InvoiceItem } from '@/types/invoice';
 
 export type InvoiceLocale = 'lt' | 'en';
@@ -54,7 +56,7 @@ function getInvoiceStrings(locale: InvoiceLocale): InvoiceStrings {
 
   return {
     invoiceTitle: 'PVM SĄSKAITA FAKTŪRA',
-    headerTitleFallback: 'Production - Shou sugi ban',
+    headerTitleFallback: 'Gamyba – Shou sugi ban',
     seriesAndNumber: 'Serija / Nr.:',
     issueDate: 'Data:',
     orderNumber: 'Užsakymo Nr.:',
@@ -64,7 +66,7 @@ function getInvoiceStrings(locale: InvoiceLocale): InvoiceStrings {
     document: 'DOKUMENTAS',
     companyCode: 'Į. k.:',
     vatCode: 'PVM mok. kodas:',
-    tableHead: ['Prekė / Paslauga', 'Kiekis', 'Vnt.', 'Vnt. kaina', 'Suma be PVM'],
+    tableHead: ['Prekė', 'Kiekis', 'Vnt.', 'Vnt. kaina', 'Suma be PVM'],
     subtotalExVat: 'Suma be PVM:',
     vatAmount: 'PVM suma:',
     totalInclVat: 'Suma su PVM:',
@@ -79,6 +81,7 @@ export class InvoicePDFGenerator {
   private invoice: Invoice;
   private locale: InvoiceLocale;
   private strings: InvoiceStrings;
+  private baseFont: string;
   
   constructor(invoice: Invoice, options?: { locale?: InvoiceLocale }) {
     this.doc = new jsPDF({
@@ -90,10 +93,33 @@ export class InvoicePDFGenerator {
     // Default to EN to match the provided invoice template/screenshot.
     this.locale = options?.locale || 'en';
     this.strings = getInvoiceStrings(this.locale);
+    this.baseFont = this.registerFonts() ? 'NotoSans' : 'helvetica';
+  }
+
+  private registerFonts(): boolean {
+    try {
+      const regularPath = path.join(process.cwd(), 'public', 'fonts', 'NotoSans-Regular.ttf');
+      const boldPath = path.join(process.cwd(), 'public', 'fonts', 'NotoSans-Bold.ttf');
+
+      const regular = fs.readFileSync(regularPath).toString('base64');
+      const bold = fs.readFileSync(boldPath).toString('base64');
+
+      this.doc.addFileToVFS('NotoSans-Regular.ttf', regular);
+      this.doc.addFont('NotoSans-Regular.ttf', 'NotoSans', 'normal');
+
+      this.doc.addFileToVFS('NotoSans-Bold.ttf', bold);
+      this.doc.addFont('NotoSans-Bold.ttf', 'NotoSans', 'bold');
+
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private formatDate(dateString: string): string {
+    if (!dateString) return '';
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return '';
     const dateLocale = this.locale === 'en' ? 'en-GB' : 'lt-LT';
     return date.toLocaleDateString(dateLocale, {
       year: 'numeric',
@@ -104,7 +130,14 @@ export class InvoicePDFGenerator {
 
   private formatCurrency(amount: number): string {
     const currency = this.invoice.currency || 'EUR';
-    return `${amount.toFixed(2)} ${currency}`;
+    const safeAmount = Number.isFinite(amount) ? amount : 0;
+    return `${safeAmount.toFixed(2)} ${currency}`;
+  }
+
+  private safeText(value: unknown, fallback = ''): string {
+    if (value === null || value === undefined) return fallback;
+    const text = String(value).trim();
+    return text.length > 0 ? text : fallback;
   }
 
   private formatQty(value: number): string {
@@ -135,47 +168,54 @@ export class InvoicePDFGenerator {
 
     // Brand (left)
     this.doc.setTextColor(255, 255, 255);
-    this.doc.setFont('helvetica', 'normal');
+    this.doc.setFont(this.baseFont, 'normal');
     this.doc.setFontSize(26);
-    this.doc.text('YAKIWOOD', 20, 18);
+    const logoX = 15;
+    const logoText = 'YAKIWOOD';
+    this.doc.text(logoText, logoX, 18);
 
     // Header title (center)
     const headerTitle = this.invoice.documentTitle || this.strings.headerTitleFallback;
-    this.doc.setFontSize(11);
-    this.doc.text(headerTitle, pageWidth / 2, 16, { align: 'center' });
+    this.doc.setFontSize(9);
+    const headerX = pageWidth - 15;
+    this.doc.text(headerTitle, headerX, 18, { align: 'right' });
 
     // Reset text color
     this.doc.setTextColor(0, 0, 0);
 
     // Title
-    this.doc.setFont('helvetica', 'normal');
+    this.doc.setFont(this.baseFont, 'normal');
     this.doc.setFontSize(16);
-    this.doc.text(this.strings.invoiceTitle, 20, 45);
+    this.doc.text(this.strings.invoiceTitle, 15, 45);
   }
 
   private addParties() {
     const startY = 55;
 
-    const colSellerX = 20;
-    const colBuyerX = 90;
-    const colDocX = 150;
+    const colSellerX = 15;
+    const colBuyerX = 85;
+    const colDocX = 135;
 
     const headingY = startY;
     const contentY = startY + 7;
     const lineH = 4;
 
     // Headings
-    this.doc.setFont('helvetica', 'normal');
-    this.doc.setFontSize(9);
+    this.doc.setFont(this.baseFont, 'normal');
+    this.doc.setFontSize(8.5);
     this.doc.text(this.strings.seller, colSellerX, headingY);
     this.doc.text(this.strings.buyer, colBuyerX, headingY);
     this.doc.text(this.strings.document, colDocX, headingY);
 
     // Content
-    this.doc.setFontSize(8.5);
+    this.doc.setFontSize(8.2);
 
     let yLeft = contentY;
-    this.doc.text(this.invoice.seller.companyName || this.invoice.seller.name, colSellerX, yLeft);
+    this.doc.text(
+      this.safeText(this.invoice.seller.companyName || this.invoice.seller.name, '-'),
+      colSellerX,
+      yLeft
+    );
     yLeft += lineH;
     if (this.invoice.seller.companyCode) {
       this.doc.text(`${this.strings.companyCode} ${this.invoice.seller.companyCode}`, colSellerX, yLeft);
@@ -185,18 +225,26 @@ export class InvoicePDFGenerator {
       this.doc.text(`${this.strings.vatCode} ${this.invoice.seller.vatCode}`, colSellerX, yLeft);
       yLeft += lineH;
     }
-    this.doc.text(`Address: ${this.invoice.seller.address}`, colSellerX, yLeft);
+    this.doc.text(`Address: ${this.safeText(this.invoice.seller.address, '-')}`, colSellerX, yLeft);
     yLeft += lineH;
-    this.doc.text(`${this.invoice.seller.postalCode} ${this.invoice.seller.city}`, colSellerX, yLeft);
+    this.doc.text(
+      `${this.safeText(this.invoice.seller.postalCode)} ${this.safeText(this.invoice.seller.city)}`.trim(),
+      colSellerX,
+      yLeft
+    );
     yLeft += lineH;
-    this.doc.text(this.invoice.seller.country, colSellerX, yLeft);
+    this.doc.text(this.safeText(this.invoice.seller.country, '-'), colSellerX, yLeft);
     yLeft += lineH;
     if (this.invoice.seller.email) {
       this.doc.text(`Email: ${this.invoice.seller.email}`, colSellerX, yLeft);
     }
 
     let yMid = contentY;
-    this.doc.text(this.invoice.buyer.companyName || this.invoice.buyer.name, colBuyerX, yMid);
+    this.doc.text(
+      this.safeText(this.invoice.buyer.companyName || this.invoice.buyer.name, '-'),
+      colBuyerX,
+      yMid
+    );
     yMid += lineH;
     if (this.invoice.buyer.companyCode) {
       this.doc.text(`${this.strings.companyCode} ${this.invoice.buyer.companyCode}`, colBuyerX, yMid);
@@ -206,11 +254,15 @@ export class InvoicePDFGenerator {
       this.doc.text(`${this.strings.vatCode} ${this.invoice.buyer.vatCode}`, colBuyerX, yMid);
       yMid += lineH;
     }
-    this.doc.text(this.invoice.buyer.address, colBuyerX, yMid);
+    this.doc.text(this.safeText(this.invoice.buyer.address, '-'), colBuyerX, yMid);
     yMid += lineH;
-    this.doc.text(`${this.invoice.buyer.postalCode} ${this.invoice.buyer.city}`, colBuyerX, yMid);
+    this.doc.text(
+      `${this.safeText(this.invoice.buyer.postalCode)} ${this.safeText(this.invoice.buyer.city)}`.trim(),
+      colBuyerX,
+      yMid
+    );
     yMid += lineH;
-    this.doc.text(this.invoice.buyer.country, colBuyerX, yMid);
+    this.doc.text(this.safeText(this.invoice.buyer.country, '-'), colBuyerX, yMid);
 
     const orderNo = this.invoice.orderNumber || this.invoice.invoiceNumber;
     let yDoc = contentY;
@@ -222,11 +274,12 @@ export class InvoicePDFGenerator {
   }
 
   private addItemsTable() {
-    const tableData = this.invoice.items.map((item) => {
+    const items = Array.isArray(this.invoice.items) ? this.invoice.items : [];
+    const tableData = items.map((item) => {
       const unit = item.unit || 'vnt';
       const lineNet = typeof item.totalExclVat === 'number' ? item.totalExclVat : item.quantity * item.unitPrice;
       return [
-        item.name,
+        this.safeText(item.name, '-'),
         this.formatQty(item.quantity),
         unit,
         this.formatCurrency(item.unitPrice),
@@ -234,33 +287,42 @@ export class InvoicePDFGenerator {
       ];
     });
 
+    if (tableData.length === 0) {
+      tableData.push(['-', this.formatQty(0), 'vnt', this.formatCurrency(0), this.formatCurrency(0)]);
+    }
+
     autoTable(this.doc, {
       startY: 95,
       head: [this.strings.tableHead],
       body: tableData,
       styles: {
+        font: this.baseFont,
         fontSize: 9,
         cellPadding: 3
       },
       headStyles: {
         fillColor: [245, 245, 245],
         textColor: [0, 0, 0],
-        fontStyle: 'normal'
+        fontStyle: 'normal',
+        font: this.baseFont,
+        halign: 'left',
+        valign: 'middle'
       },
       columnStyles: {
-        0: { cellWidth: 80 },
-        1: { cellWidth: 25, halign: 'right' },
-        2: { cellWidth: 15, halign: 'center' },
-        3: { cellWidth: 25, halign: 'right' },
-        4: { cellWidth: 25, halign: 'right' }
+        0: { cellWidth: 95, halign: 'left' },
+        1: { cellWidth: 23, halign: 'left' },
+        2: { cellWidth: 13, halign: 'left' },
+        3: { cellWidth: 23, halign: 'left' },
+        4: { cellWidth: 26, halign: 'left' }
       },
-      margin: { left: 20, right: 20 }
+      margin: { left: 15, right: 15 }
     });
   }
 
   private addFooter() {
-    const finalY = (this.doc as any).lastAutoTable.finalY + 20;
-    const rightX = this.doc.internal.pageSize.getWidth() - 20;
+    const lastTable = (this.doc as any).lastAutoTable;
+    const finalY = (lastTable?.finalY ?? 120) + 20;
+    const rightX = this.doc.internal.pageSize.getWidth() - 15;
 
     const subtotal = this.invoice.subtotal;
     const vat = this.invoice.totalVat;
@@ -268,7 +330,7 @@ export class InvoicePDFGenerator {
     const paid = this.computeAdvancePaid();
     const remaining = this.computeRemainingDue();
 
-    this.doc.setFont('helvetica', 'normal');
+    this.doc.setFont(this.baseFont, 'normal');
     this.doc.setFontSize(9);
 
     const labelX = rightX - 55;
@@ -277,7 +339,7 @@ export class InvoicePDFGenerator {
     let y = finalY;
 
     const drawLine = (label: string, value: string, bold = false) => {
-      this.doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      this.doc.setFont(this.baseFont, bold ? 'bold' : 'normal');
       this.doc.text(label, labelX, y, { align: 'right' });
       this.doc.text(value, valueX, y, { align: 'right' });
       y += lineH;
