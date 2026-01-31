@@ -132,24 +132,30 @@ export default function AboutUs() {
             <div className="relative w-[96px] h-[96px] rounded-[8px] overflow-hidden shrink-0">
               <Image src={imgProject1} alt="" fill className="object-cover" />
             </div>
+
+            <div className="relative w-full h-[220px] md:h-[360px] rounded-[8px] overflow-hidden">
+              <Image src={imgAboutVideoThumb} alt="" fill className="object-cover" />
+              <div className="absolute inset-0 bg-black/20" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => setIsVideoOpen(true)}
+                  className="w-[64px] h-[64px] rounded-full bg-[#161616]/75 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#161616] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E1E1E1]"
+                  aria-label={t('aria.watchVideo')}
+                >
+                  <span className="font-['Outfit'] font-normal text-[10px] tracking-[0.6px] uppercase text-white">{t('watch')}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-[16px] hero-seq-item hero-seq-right" style={{ animationDelay: '420ms' }}>
             <p className="font-['Outfit'] font-light text-[14px] leading-[1.4] tracking-[0.14px] text-[#535353]">
               {t('description1')}
             </p>
-          </div>
-
-          <div className="relative w-full h-[360px] rounded-[8px] overflow-hidden hero-seq-item hero-seq-right" style={{ animationDelay: '420ms' }}>
-            <Image src={imgAboutVideoThumb} alt="" fill className="object-cover" />
-            <div className="absolute inset-0 bg-black/20" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <button
-                type="button"
-                onClick={() => setIsVideoOpen(true)}
-                className="w-[64px] h-[64px] rounded-full bg-[#161616]/75 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#161616] focus-visible:ring-offset-2 focus-visible:ring-offset-[#E1E1E1]"
-                aria-label={t('aria.watchVideo')}
-              >
-                <span className="font-['Outfit'] font-normal text-[10px] tracking-[0.6px] uppercase text-white">{t('watch')}</span>
-              </button>
-            </div>
+            <p className="font-['Outfit'] font-light text-[14px] leading-[1.4] tracking-[0.14px] text-[#535353]">
+              {t('description2')}
+            </p>
           </div>
 
           <Link href={aboutHref} className="flex gap-[8px] items-center h-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '600ms' }}>

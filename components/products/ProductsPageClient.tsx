@@ -112,14 +112,14 @@ function FilterDropdown({
   }, [isOpen, setOpenId]);
 
   return (
-    <div className="relative shrink-0">
+    <div className="relative w-full sm:w-auto">
       <button
         ref={buttonRef}
         type="button"
         onClick={() => setOpenId(isOpen ? null : id)}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        className="h-[40px] px-[14px] rounded-[100px] border border-[#BBBBBB] font-['Outfit'] text-[12px] tracking-[0.6px] flex items-center gap-[8px] max-w-[220px] select-none"
+        className="h-[40px] w-full sm:w-auto px-[14px] rounded-[100px] border border-[#BBBBBB] font-['Outfit'] text-[12px] tracking-[0.6px] flex items-center gap-[8px] max-w-none sm:max-w-[220px] select-none"
       >
         <span className="flex min-w-0 items-center gap-[8px]">
           <span className="shrink-0">{label}:</span>
@@ -832,8 +832,8 @@ export default function ProductsPageClient({
       <InView className="hero-animate-root">
         <PageLayout>
           <div className="py-[24px] flex flex-col gap-4">
-            <div className="flex flex-nowrap items-center gap-[12px] overflow-x-auto pb-[6px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-            <div className="relative flex-[1_1_220px] min-w-[220px] max-w-[520px]">
+            <div className="flex flex-col gap-[12px] sm:flex-row sm:flex-wrap sm:items-center hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+            <div className="relative w-full sm:flex-[1_1_260px] sm:min-w-[220px] sm:max-w-[520px]">
               <label className="sr-only">{t('searchLabel')}</label>
               <svg
                 className="absolute left-[14px] top-1/2 -translate-y-1/2"
