@@ -525,7 +525,7 @@ export default function ChatbotWidget() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="h-[56px] w-[56px] rounded-full bg-[#161616] text-white shadow-[0_18px_55px_rgba(0,0,0,0.28)] hover:opacity-90 grid place-items-center"
+          className="h-[56px] w-[56px] rounded-full border border-[#BBBBBB] bg-[#161616] text-white shadow-[0_18px_55px_rgba(0,0,0,0.28)] hover:opacity-90 grid place-items-center"
           aria-label={t('aria.open')}
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

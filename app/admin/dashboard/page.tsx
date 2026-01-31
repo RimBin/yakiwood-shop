@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
-import { AdminBody, AdminCard, AdminKicker, AdminLabel, AdminSectionTitle, AdminSelect, AdminStack } from '@/components/admin/ui/AdminUI';
+import { AdminBody, AdminCard, AdminInput, AdminKicker, AdminLabel, AdminSectionTitle, AdminSelect, AdminStack } from '@/components/admin/ui/AdminUI';
 
 interface DashboardStats {
   totalOrders: number;
@@ -58,10 +58,12 @@ export default function DashboardPage() {
   // Filters
   const [dateFilter, setDateFilter] = useState('all'); // all, today, week, month
   const [statusFilter, setStatusFilter] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   useEffect(() => {
     fetchDashboardData();
-  }, [dateFilter, statusFilter]);
+  }, [dateFilter, statusFilter, dateFrom, dateTo]);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -188,8 +190,18 @@ export default function DashboardPage() {
   const applyFilters = (orders: Order[]) => {
     let filtered = [...orders];
 
-    // Date filter
-    if (dateFilter !== 'all') {
+    // Date filter (custom range has priority)
+    if (dateFrom || dateTo) {
+      const start = dateFrom ? new Date(`${dateFrom}T00:00:00`) : null;
+      const end = dateTo ? new Date(`${dateTo}T23:59:59`) : null;
+
+      filtered = filtered.filter((order) => {
+        const created = new Date(order.created_at);
+        if (start && created < start) return false;
+        if (end && created > end) return false;
+        return true;
+      });
+    } else if (dateFilter !== 'all') {
       const now = new Date();
       const filterDate = new Date();
 
@@ -263,6 +275,27 @@ export default function DashboardPage() {
                 <option value="week">{t('filters.lastWeek')}</option>
                 <option value="month">{t('filters.lastMonth')}</option>
               </AdminSelect>
+
+              <div className="mt-[12px] grid grid-cols-1 sm:grid-cols-2 gap-[12px]">
+                <div>
+                  <AdminLabel className="mb-[6px]">Nuo</AdminLabel>
+                  <AdminInput
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    aria-label="Nuo"
+                  />
+                </div>
+                <div>
+                  <AdminLabel className="mb-[6px]">Iki</AdminLabel>
+                  <AdminInput
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    aria-label="Iki"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Status filter */}
@@ -310,26 +343,14 @@ export default function DashboardPage() {
 
           <Link
             href="/admin/products"
-            className="bg-[#EAEAEA] rounded-[24px] p-[24px] border border-[#E1E1E1] hover:border-[#161616] transition-colors"
+            className="bg-[#161616] text-white rounded-[24px] p-[24px] hover:bg-[#2a2a2a] transition-colors"
           >
             <div className="flex items-center justify-between mb-[12px]">
               <span className="text-[32px]">🛍️</span>
-              <span className="text-[14px] text-[#535353]">→</span>
+              <span className="text-[14px] opacity-60">→</span>
             </div>
-            <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px] text-[#161616]">{t('quickActions.products')}</p>
-            <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">{t('quickActions.productsSubtitle')}</p>
-          </Link>
-
-          <Link
-            href="/admin?tab=projects"
-            className="bg-[#EAEAEA] rounded-[24px] p-[24px] border border-[#E1E1E1] hover:border-[#161616] transition-colors"
-          >
-            <div className="flex items-center justify-between mb-[12px]">
-              <span className="text-[32px]">🏗️</span>
-              <span className="text-[14px] text-[#535353]">→</span>
-            </div>
-            <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px] text-[#161616]">{t('quickActions.projects')}</p>
-            <p className="font-['Outfit'] text-[12px] text-[#535353] mt-[4px]">{t('quickActions.projectsSubtitle')}</p>
+            <p className="font-['DM_Sans'] text-[20px] font-light tracking-[-0.8px]">{t('quickActions.products')}</p>
+            <p className="font-['Outfit'] text-[12px] opacity-60 mt-[4px]">{t('quickActions.productsSubtitle')}</p>
           </Link>
         </div>
 
