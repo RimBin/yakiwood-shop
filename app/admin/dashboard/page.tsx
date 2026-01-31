@@ -134,6 +134,22 @@ export default function DashboardPage() {
 
     // Preferred: query Supabase directly in the browser (uses the current user's session).
     if (supabase) {
+      // First try inventory positions (SKUs) so the dashboard reflects all stock items.
+      const { data: inventoryRows, error: inventoryError } = await supabase
+        .from('inventory_items')
+        .select('id, quantity_available, reorder_point');
+
+      if (!inventoryError && Array.isArray(inventoryRows)) {
+        const totalProducts = inventoryRows.length;
+        const lowStockProducts = inventoryRows.filter((row: any) => {
+          const available = Number(row?.quantity_available ?? 0);
+          const reorderPoint = Number(row?.reorder_point ?? 10);
+          return available > 0 && available <= reorderPoint;
+        }).length;
+
+        return { totalProducts, lowStockProducts };
+      }
+
       const { data: products, error: productsError } = await supabase
         .from('products')
         .select('id, slug, stock_quantity')

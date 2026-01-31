@@ -200,7 +200,7 @@ export async function GET(request: Request) {
               product_id: p.id,
               variant_id: null,
               sku,
-              quantity_available: 0,
+              quantity_available: 100,
               quantity_reserved: 0,
               quantity_sold: 0,
               reorder_point: 10,

@@ -588,7 +588,7 @@ async function main() {
                 lengthMm: length,
                 thicknessMm,
               }),
-              quantity_available: 0,
+              quantity_available: 100,
               reorder_point: 10,
               reorder_quantity: 50,
               location: null,
