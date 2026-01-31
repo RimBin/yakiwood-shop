@@ -653,6 +653,32 @@
       "generic": "Įvyko klaida. Bandykite dar kartą."
     }
   },
+  "orderConfirmationPage": {
+    "loading": "Kraunasi...",
+    "errorTitle": "Klaida",
+    "backHome": "Grįžti į pradžią",
+    "title": "Dėkojame už užsakymą!",
+    "messagePaid": "Jūsų mokėjimas buvo sėkmingai apdorotas. Netrukus gausite el. laišką su užsakymo patvirtinimu ir sąskaita faktūra.",
+    "messagePaysera": "Jūsų užsakymas sukurtas. Mokėjimą patvirtinsime, kai gausime Paysera patvirtinimą. Netrukus gausite el. laišką su užsakymo patvirtinimu.",
+    "paypalIdLabel": "PayPal ID",
+    "orderIdLabel": "Užsakymo ID",
+    "sessionIdLabel": "Sesijos ID",
+    "summaryTitle": "Užsakymo santrauka",
+    "summaryTotal": "Viso",
+    "summaryEmpty": "Užsakymo duomenų rasti nepavyko. Patikrinkite el. paštą dėl patvirtinimo.",
+    "variantLabel": "Variantas",
+    "qtyLabel": "Kiekis",
+    "priceLabel": "Kaina",
+    "nextStepsTitle": "Kas toliau?",
+    "nextStep1": "Gausite užsakymo patvirtinimo el. laišką su sąskaita faktūra",
+    "nextStep2": "Jūsų užsakymas bus apdorotas per 1-2 darbo dienas",
+    "nextStep3": "Gausite pranešimą, kai užsakymas bus išsiųstas",
+    "nextStep4": "Pristatymas per 3-5 darbo dienas (nemokamas virš 500€)",
+    "viewOrders": "Peržiūrėti užsakymus",
+    "continueShopping": "Tęsti apsipirkimą",
+    "supportTitle": "Turite klausimų apie užsakymą?",
+    "supportLink": "Susisiekite su mumis"
+  },
   "products": {
     "pavadinimas": "Produktai",
     "visiProduk tai": "Visi produktai",

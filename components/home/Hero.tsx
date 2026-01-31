@@ -29,7 +29,7 @@ export default async function Hero() {
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
-      <InView className="lg:hidden flex flex-col relative z-10 hero-animate-root">
+      <InView className="lg:hidden flex flex-col relative z-10 hero-animate-root pt-[120px] md:pt-[140px]">
         <div className="px-4 pt-4 pb-2 flex flex-col gap-2 md:max-w-[620px] hero-seq-item hero-seq-right hero-ease-in hero-seq-1">
           <p
             className="font-['DM_Sans'] font-light leading-none text-[#161616] w-full max-w-full sm:max-w-[520px] md:max-w-[620px] whitespace-pre-line break-words"

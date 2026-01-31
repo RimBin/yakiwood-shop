@@ -1,15 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
 import {
   clearPendingPurchase,
   isPurchaseTracked,
   loadPendingPurchase,
   markPurchaseTracked,
+  PendingPurchase,
   trackPurchase,
 } from '@/lib/analytics';
 import { toLocalePath } from '@/i18n/paths';
@@ -24,7 +25,18 @@ export default function OrderConfirmationPage() {
   const orderId = searchParams.get('order_id');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [purchase, setPurchase] = useState<PendingPurchase | null>(null);
   const clearCart = useCartStore(state => state.clear);
+  const t = useTranslations('orderConfirmationPage');
+
+  const formatter = useMemo(
+    () =>
+      new Intl.NumberFormat(currentLocale === 'lt' ? 'lt-LT' : 'en-US', {
+        style: 'currency',
+        currency: 'EUR',
+      }),
+    [currentLocale]
+  );
 
   useEffect(() => {
     const run = async () => {
@@ -58,6 +70,7 @@ export default function OrderConfirmationPage() {
 
           const key = paypalOrderId || orderId || ''
           const pending = loadPendingPurchase()
+          setPurchase(pending)
           if (key && !isPurchaseTracked(key) && pending) {
             trackPurchase(key, pending.total, pending.items)
             markPurchaseTracked(key)
@@ -85,6 +98,7 @@ export default function OrderConfirmationPage() {
 
         const key = orderId
         const pending = loadPendingPurchase()
+        setPurchase(pending)
         if (key && !isPurchaseTracked(key) && pending) {
           trackPurchase(key, pending.total, pending.items)
           markPurchaseTracked(key)
@@ -106,6 +120,7 @@ export default function OrderConfirmationPage() {
 
       const key = sessionId
       const pending = loadPendingPurchase()
+      setPurchase(pending)
       if (key && !isPurchaseTracked(key) && pending) {
         trackPurchase(key, pending.total, pending.items)
         markPurchaseTracked(key)
@@ -123,7 +138,7 @@ export default function OrderConfirmationPage() {
       <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#161616] mx-auto mb-4"></div>
-          <p className="font-['Outfit'] text-[14px] text-[#535353]">Kraunasi...</p>
+          <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('loading')}</p>
         </div>
       </div>
     );
@@ -139,7 +154,7 @@ export default function OrderConfirmationPage() {
             </svg>
           </div>
           <h1 className="font-['DM_Sans'] font-light text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616] mb-4">
-            Klaida
+            {t('errorTitle')}
           </h1>
           <p className="font-['Outfit'] text-[14px] text-[#535353] mb-6">
             {error}
@@ -148,7 +163,7 @@ export default function OrderConfirmationPage() {
             href="/"
             className="inline-block h-[48px] px-[24px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors flex items-center justify-center"
           >
-            Grįžti į pradžią
+            {t('backHome')}
           </Link>
         </div>
       </div>
@@ -167,37 +182,81 @@ export default function OrderConfirmationPage() {
 
         {/* Title */}
         <h1 className="font-['DM_Sans'] font-light text-[40px] md:text-[48px] leading-[1.1] tracking-[-1.92px] text-[#161616] text-center mb-4">
-          Dėkojame už užsakymą!
+          {t('title')}
         </h1>
 
         {/* Message */}
         <div className="text-center mb-8">
           <p className="font-['Outfit'] text-[16px] leading-[1.5] text-[#535353] mb-4">
-            {provider === 'paysera'
-              ? 'Jūsų užsakymas sukurtas. Mokėjimą patvirtinsime, kai gausime Paysera patvirtinimą. Netrukus gausite el. laišką su užsakymo patvirtinimu.'
-              : 'Jūsų mokėjimas buvo sėkmingai apdorotas. Netrukus gausite el. laišką su užsakymo patvirtinimu ir sąskaita faktūra.'}
+            {provider === 'paysera' ? t('messagePaysera') : t('messagePaid')}
           </p>
           <p className="font-['Outfit'] text-[14px] leading-[1.5] text-[#535353]">
             {provider === 'paypal' ? (
               <>
-                PayPal ID: <span className="font-mono text-[12px]">{paypalOrderId}</span>
+                {t('paypalIdLabel')}: <span className="font-mono text-[12px]">{paypalOrderId}</span>
               </>
             ) : provider === 'paysera' ? (
               <>
-                Užsakymo ID: <span className="font-mono text-[12px]">{orderId}</span>
+                {t('orderIdLabel')}: <span className="font-mono text-[12px]">{orderId}</span>
               </>
             ) : (
               <>
-                Sesijos ID: <span className="font-mono text-[12px]">{sessionId}</span>
+                {t('sessionIdLabel')}: <span className="font-mono text-[12px]">{sessionId}</span>
               </>
             )}
           </p>
         </div>
 
+        {/* Order Summary */}
+        <div className="border border-[#E1E1E1] rounded-[16px] p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-['DM_Sans'] font-light text-[20px] leading-[1.1] tracking-[-0.8px] text-[#161616]">
+              {t('summaryTitle')}
+            </h2>
+            {purchase?.total != null && (
+              <span className="font-['Outfit'] text-[14px] text-[#161616]">
+                {t('summaryTotal')}: {formatter.format(purchase.total)}
+              </span>
+            )}
+          </div>
+
+          {purchase?.items?.length ? (
+            <div className="space-y-4">
+              {purchase.items.map((item, index) => {
+                const lineTotal = item.price * item.quantity;
+                return (
+                  <div key={`${item.id}-${index}`} className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="font-['Outfit'] text-[14px] text-[#161616] truncate">
+                        {item.name}
+                      </p>
+                      {item.variant ? (
+                        <p className="font-['Outfit'] text-[12px] text-[#535353]">
+                          {t('variantLabel')}: {item.variant}
+                        </p>
+                      ) : null}
+                      <p className="font-['Outfit'] text-[12px] text-[#535353]">
+                        {t('qtyLabel')}: {item.quantity} · {t('priceLabel')}: {formatter.format(item.price)}
+                      </p>
+                    </div>
+                    <div className="font-['Outfit'] text-[14px] text-[#161616] whitespace-nowrap">
+                      {formatter.format(lineTotal)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="font-['Outfit'] text-[14px] text-[#535353]">
+              {t('summaryEmpty')}
+            </p>
+          )}
+        </div>
+
         {/* Info Box */}
         <div className="bg-[#F5F5F5] rounded-[16px] p-6 mb-8">
           <h2 className="font-['DM_Sans'] font-light text-[20px] leading-[1.1] tracking-[-0.8px] text-[#161616] mb-4">
-            Kas toliau?
+            {t('nextStepsTitle')}
           </h2>
           <ul className="space-y-3">
             <li className="flex items-start gap-3">
@@ -205,7 +264,7 @@ export default function OrderConfirmationPage() {
                 <span className="font-['Outfit'] text-[10px]">1</span>
               </div>
               <p className="font-['Outfit'] text-[14px] leading-[1.5] text-[#161616]">
-                Gausite užsakymo patvirtinimo el. laišką su sąskaita faktūra
+                {t('nextStep1')}
               </p>
             </li>
             <li className="flex items-start gap-3">
@@ -213,7 +272,7 @@ export default function OrderConfirmationPage() {
                 <span className="font-['Outfit'] text-[10px]">2</span>
               </div>
               <p className="font-['Outfit'] text-[14px] leading-[1.5] text-[#161616]">
-                Jūsų užsakymas bus apdorotas per 1-2 darbo dienas
+                {t('nextStep2')}
               </p>
             </li>
             <li className="flex items-start gap-3">
@@ -221,7 +280,7 @@ export default function OrderConfirmationPage() {
                 <span className="font-['Outfit'] text-[10px]">3</span>
               </div>
               <p className="font-['Outfit'] text-[14px] leading-[1.5] text-[#161616]">
-                Gausite pranešimą, kai užsakymas bus išsiųstas
+                {t('nextStep3')}
               </p>
             </li>
             <li className="flex items-start gap-3">
@@ -229,7 +288,7 @@ export default function OrderConfirmationPage() {
                 <span className="font-['Outfit'] text-[10px]">4</span>
               </div>
               <p className="font-['Outfit'] text-[14px] leading-[1.5] text-[#161616]">
-                Pristatymas per 3-5 darbo dienas (nemokamas virš 500€)
+                {t('nextStep4')}
               </p>
             </li>
           </ul>
@@ -241,26 +300,26 @@ export default function OrderConfirmationPage() {
             href={toLocalePath('/account', currentLocale)}
             className="flex-1 h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors flex items-center justify-center"
           >
-            Peržiūrėti užsakymus
+            {t('viewOrders')}
           </Link>
           <Link
             href={toLocalePath('/products', currentLocale)}
             className="flex-1 h-[48px] rounded-[100px] border border-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors flex items-center justify-center"
           >
-            Tęsti apsipirkimą
+            {t('continueShopping')}
           </Link>
         </div>
 
         {/* Support */}
         <div className="mt-8 pt-8 border-t border-[#E1E1E1] text-center">
           <p className="font-['Outfit'] text-[14px] text-[#535353] mb-2">
-            Turite klausimų apie užsakymą?
+            {t('supportTitle')}
           </p>
           <Link
             href={toLocalePath('/kontaktai', currentLocale)}
             className="font-['Outfit'] text-[14px] text-[#161616] hover:underline"
           >
-            Susisiekite su mumis
+            {t('supportLink')}
           </Link>
         </div>
       </div>
