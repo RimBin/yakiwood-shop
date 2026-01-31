@@ -786,6 +786,7 @@
     "free": "Free",
     "includingVat": "Including VAT",
     "dimensions": "Dimensions:",
+    "boardArea": "Single board area",
     "dimensionsNotSet": "Not set",
     "widthMm": "Width (mm)",
     "lengthMm": "Length (mm)",
@@ -1985,7 +1986,7 @@
   "relatedProducts": {
     "title": "Related products",
     "view": "View",
-    "from": "from",
+    "from": "From",
     "viewAll": "View all products"
   },
   "adminUsers": {

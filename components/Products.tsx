@@ -192,7 +192,7 @@ function MobileProductCard({
             {product.title}
           </p>
           <p className="font-['DM_Sans'] font-normal text-[24px] leading-[1.1] tracking-[-0.96px] text-[#161616]">
-            {product.price} €
+            nuo {product.price} €
           </p>
         </div>
 
@@ -315,7 +315,7 @@ function DesktopProductCard({
 
         <div className="flex items-start justify-between w-full leading-[1.1] font-['DM_Sans'] font-normal text-[32px] tracking-[-1.28px] text-[#161616]">
           <p className="shrink-0">{product.title}</p>
-          <p className="shrink-0">{product.price} €</p>
+          <p className="shrink-0">nuo {product.price} €</p>
         </div>
 
         <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full">
