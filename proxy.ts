@@ -11,6 +11,18 @@ const PUBLIC_FILE = /\.[^/]+$/
 type PrefixMap = Array<{ from: string; to: string }>
 
 const enToLt: PrefixMap = [
+  { from: '/admin/email-templates', to: '/administravimas/el-pasto-sablonai' },
+  { from: '/admin/orders', to: '/administravimas/uzsakymai' },
+  { from: '/admin/inventory', to: '/administravimas/sandelys' },
+  { from: '/admin/products', to: '/administravimas/produktai' },
+  { from: '/admin/projects', to: '/administravimas/projektai' },
+  { from: '/admin/posts', to: '/administravimas/straipsniai' },
+  { from: '/admin/options', to: '/administravimas/parinktys' },
+  { from: '/admin/users', to: '/administravimas/vartotojai' },
+  { from: '/admin/chatbot', to: '/administravimas/chatbot' },
+  { from: '/admin/seo', to: '/administravimas/seo' },
+  { from: '/admin/dashboard', to: '/administravimas/skydelis' },
+  { from: '/admin', to: '/administravimas' },
   { from: '/about', to: '/apie' },
   { from: '/contact', to: '/kontaktai' },
   { from: '/faq', to: '/duk' },
@@ -22,6 +34,18 @@ const enToLt: PrefixMap = [
 ]
 
 const ltToEn: PrefixMap = [
+  { from: '/administravimas/el-pasto-sablonai', to: '/admin/email-templates' },
+  { from: '/administravimas/uzsakymai', to: '/admin/orders' },
+  { from: '/administravimas/sandelys', to: '/admin/inventory' },
+  { from: '/administravimas/produktai', to: '/admin/products' },
+  { from: '/administravimas/projektai', to: '/admin/projects' },
+  { from: '/administravimas/straipsniai', to: '/admin/posts' },
+  { from: '/administravimas/parinktys', to: '/admin/options' },
+  { from: '/administravimas/vartotojai', to: '/admin/users' },
+  { from: '/administravimas/chatbot', to: '/admin/chatbot' },
+  { from: '/administravimas/seo', to: '/admin/seo' },
+  { from: '/administravimas/skydelis', to: '/admin/dashboard' },
+  { from: '/administravimas', to: '/admin' },
   { from: '/apie', to: '/about' },
   { from: '/kontaktai', to: '/contact' },
   { from: '/duk', to: '/faq' },

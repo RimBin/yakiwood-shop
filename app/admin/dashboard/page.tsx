@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 import { AdminBody, AdminCard, AdminInput, AdminKicker, AdminLabel, AdminSectionTitle, AdminSelect, AdminStack } from '@/components/admin/ui/AdminUI';
+import { toLocalePath, type AppLocale } from '@/i18n/paths';
 
 interface DashboardStats {
   totalOrders: number;
@@ -39,6 +41,11 @@ interface ProductSales {
 export default function DashboardPage() {
   const t = useTranslations('admin.dashboard');
   const tCommon = useTranslations('common');
+  const pathname = usePathname();
+  const currentLocale = useMemo<AppLocale>(() => (pathname.startsWith('/lt') ? 'lt' : 'en'), [pathname]);
+  const ordersHref = useMemo(() => toLocalePath('/admin/orders', currentLocale), [currentLocale]);
+  const inventoryHref = useMemo(() => toLocalePath('/admin/inventory', currentLocale), [currentLocale]);
+  const productsHref = useMemo(() => toLocalePath('/admin/products', currentLocale), [currentLocale]);
 
   const [stats, setStats] = useState<DashboardStats>({
     totalOrders: 0,
@@ -334,7 +341,7 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px]">
           <Link
-            href="/admin/orders"
+            href={ordersHref}
             className="bg-[#161616] text-white rounded-[24px] p-[24px] hover:bg-[#2a2a2a] transition-colors"
           >
             <div className="flex items-center justify-between mb-[12px]">
@@ -346,7 +353,7 @@ export default function DashboardPage() {
           </Link>
 
           <Link
-            href="/admin/inventory"
+            href={inventoryHref}
             className="bg-[#161616] text-white rounded-[24px] p-[24px] hover:bg-[#2a2a2a] transition-colors"
           >
             <div className="flex items-center justify-between mb-[12px]">
@@ -358,7 +365,7 @@ export default function DashboardPage() {
           </Link>
 
           <Link
-            href="/admin/products"
+            href={productsHref}
             className="bg-[#161616] text-white rounded-[24px] p-[24px] hover:bg-[#2a2a2a] transition-colors"
           >
             <div className="flex items-center justify-between mb-[12px]">
@@ -431,7 +438,14 @@ export default function DashboardPage() {
             <AdminSectionTitle className="text-[24px] tracking-[-0.96px]">{t('topProducts.title')}</AdminSectionTitle>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full table-fixed">
+              <colgroup>
+                <col className="w-[30%]" />
+                <col className="w-[20%]" />
+                <col className="w-[20%]" />
+                <col className="w-[15%]" />
+                <col className="w-[15%]" />
+              </colgroup>
               <thead>
                 <tr className="border-b border-[#E1E1E1]">
                   <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">#</th>
@@ -467,7 +481,7 @@ export default function DashboardPage() {
           <div className="p-[24px] border-b border-[#E1E1E1] flex items-center justify-between">
             <AdminSectionTitle className="text-[24px] tracking-[-0.96px]">{t('recentOrders.title')}</AdminSectionTitle>
             <Link
-              href="/admin/orders"
+              href={ordersHref}
               className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] hover:text-[#161616] transition-colors"
             >
               {t('recentOrders.allOrders')} →
@@ -477,29 +491,29 @@ export default function DashboardPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#E1E1E1]">
-                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.order')}</th>
-                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.customer')}</th>
-                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.date')}</th>
-                  <th className="text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.total')}</th>
-                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.status')}</th>
+                  <th className="px-[16px] text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.order')}</th>
+                  <th className="px-[16px] text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.customer')}</th>
+                  <th className="px-[16px] text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.date')}</th>
+                  <th className="px-[16px] text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.total')}</th>
+                  <th className="px-[16px] text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('recentOrders.table.status')}</th>
                 </tr>
               </thead>
               <tbody>
                 {recentOrders.length > 0 ? (
                   recentOrders.map((order) => (
                     <tr key={order.id} className="border-b border-[#E1E1E1] hover:bg-[#E1E1E1]">
-                      <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616] font-medium">{order.order_number}</td>
-                      <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616]">{order.customer_name}</td>
-                      <td className="py-[16px] font-['Outfit'] text-[14px] text-[#535353]">
+                      <td className="px-[16px] py-[16px] font-['Outfit'] text-[14px] text-[#161616] font-medium">{order.order_number}</td>
+                      <td className="px-[16px] py-[16px] font-['Outfit'] text-[14px] text-[#161616]">{order.customer_name}</td>
+                      <td className="px-[16px] py-[16px] font-['Outfit'] text-[14px] text-[#535353]">
                         {format(new Date(order.created_at), 'yyyy-MM-dd HH:mm')}
                       </td>
-                      <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right font-medium">€{Number(order.total).toFixed(2)}</td>
-                      <td className="py-[16px]">
+                      <td className="px-[16px] py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right font-medium">€{Number(order.total).toFixed(2)}</td>
+                      <td className="px-[16px] py-[16px] text-right">
                         <span className={`px-[12px] py-[4px] rounded-[100px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] ${
-                          order.status === 'completed' ? 'bg-[#EAEAEA] border border-green-200 text-green-700' :
-                          order.status === 'processing' ? 'bg-[#EAEAEA] border border-blue-200 text-blue-700' :
-                          order.status === 'pending' ? 'bg-[#EAEAEA] border border-yellow-200 text-yellow-700' :
-                          'bg-[#EAEAEA] border border-[#BBBBBB] text-[#535353]'
+                          order.status === 'completed' ? 'bg-[#EAEAEA] border border-green-500 text-green-700' :
+                          order.status === 'processing' ? 'bg-[#EAEAEA] border border-blue-500 text-blue-700' :
+                          order.status === 'pending' ? 'bg-[#EAEAEA] border border-yellow-500 text-yellow-700' :
+                          'bg-[#EAEAEA] border border-[#7C7C7C] text-[#535353]'
                         }`}>
                           {getOrderStatusLabel(order.status)}
                         </span>

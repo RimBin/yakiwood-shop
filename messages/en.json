@@ -271,7 +271,7 @@
     },
     "whyUs": {
       "eyebrow": "Yakiwood",
-      "headline": "Burnt wood that <italic>protects</italic> and inspires",
+      "headline": "We are experts in the preparation of <italic>burnt wood</italic>, with many years of <italic>successful</italic> experience in preparing wood for facades, terraces, fences and interiors, and we guarantee a <italic>high quality</italic> and long-lasting <italic>result</italic>.",
       "description": "Shou Sugi Ban is not just a striking look — it is a proven way to improve durability and reduce maintenance over time.",
       "benefits": {
         "aesthetics": {
@@ -342,9 +342,9 @@
     "steps": {
       "eyebrow": "Process",
       "headline": {
-        "prefix": "Simple & fast ",
+        "prefix": "Simple & fast",
         "emphasis": "ordering",
-        "suffix": " process"
+        "suffix": "process"
       },
       "cta": {
         "label": "Shop now",
@@ -628,7 +628,7 @@
     "contactUs": "Contact us",
     "page": {
       "heroTitle": "About us",
-      "heroLead": "At Yakiwood, we are experts in the preparation of burnt wood, specializing in facades, terraces, fences, and interiors. With years of experience, we guarantee high-quality, long-lasting results using a natural, time-tested woodworking method.",
+      "heroLead": "We are experts in the preparation of burnt wood, with many years of successful experience in preparing wood for facades, terraces, fences and interiors, and we guarantee a high quality and long-lasting result.",
       "heroBody": "We produce wood prepared according to the unique, time-tested Japanese wood-burning technology \"Yakisugi\" (or \"Shou Sugi Ban\"). This is the most natural way of preparing wood, giving it both a protective and aesthetic function. The traditional Japanese woodworking technology, which has been around for centuries, was introduced to protect wood from the effects of the environment. Burning shrinks the pores in the surface of the wood, making it stronger and more resistant. At the same time, it retains its properties, naturalness, pattern and colour.",
       "videoAlt": "Yakiwood process video",
       "videoAria": "Watch video",

@@ -224,6 +224,26 @@ const nextConfig: NextConfig = {
         destination: '/lt/konfiguratorius3d/:path*',
         permanent: true,
       },
+      {
+        source: '/administravimas',
+        destination: '/lt/administravimas',
+        permanent: true,
+      },
+      {
+        source: '/administravimas/:path*',
+        destination: '/lt/administravimas/:path*',
+        permanent: true,
+      },
+      {
+        source: '/lt/admin',
+        destination: '/lt/administravimas',
+        permanent: true,
+      },
+      {
+        source: '/lt/admin/:path*',
+        destination: '/lt/administravimas/:path*',
+        permanent: true,
+      },
     ];
   },
   async headers() {
@@ -291,6 +311,10 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/lt/admin/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/lt/administravimas/:path*',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },
       {

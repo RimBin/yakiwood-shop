@@ -254,6 +254,9 @@ function buildTargetsFromPaths(origin: string, paths: string[]): ScanTarget[] {
 	const cleaned = unique
 		.map((p) => (p.startsWith('/') ? p : `/${p}`))
 		.filter((p) => !p.startsWith('/admin'))
+		.filter((p) => !p.startsWith('/administravimas'))
+		.filter((p) => !p.startsWith('/lt/admin'))
+		.filter((p) => !p.startsWith('/lt/administravimas'))
 		.filter((p) => !p.startsWith('/studio'))
 
 	return cleaned.map((path) => ({ path, url: new URL(path, origin).toString() }))
@@ -526,6 +529,9 @@ export async function suggestSeoFixes(params: { origin: string; paths?: string[]
 
 		const shouldNoIndex =
 			page.path.startsWith('/admin') ||
+			page.path.startsWith('/administravimas') ||
+			page.path.startsWith('/lt/admin') ||
+			page.path.startsWith('/lt/administravimas') ||
 			page.path.startsWith('/studio') ||
 			page.path.startsWith('/account') ||
 			page.path.startsWith('/login') ||

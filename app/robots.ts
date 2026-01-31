@@ -9,6 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/api/*',
           '/admin/*',
+          '/administravimas/*',
           '/account/*',
           '/studio/*',
           '/checkout',
@@ -18,6 +19,7 @@ export default function robots(): MetadataRoute.Robots {
           '/forgot-password',
           '/reset-password',
           '/lt/admin/*',
+          '/lt/administravimas/*',
           '/lt/account/*',
           '/lt/studio/*',
           '/lt/checkout',

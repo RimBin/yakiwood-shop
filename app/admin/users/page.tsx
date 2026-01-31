@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
+import { getLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import UsersAdminClient from '@/components/admin/UsersAdminClient'
 import { AdminBody, AdminCard } from '@/components/admin/ui/AdminUI'
+import { toLocalePath, type AppLocale } from '@/i18n/paths'
 
 function looksLikeJwt(value: string | undefined): boolean {
   if (!value) return false
@@ -10,8 +11,6 @@ function looksLikeJwt(value: string | undefined): boolean {
 }
 
 export default async function AdminUsersPage() {
-  const t = await getTranslations('adminUsers')
-
   // If Supabase keys are placeholders, SSR auth will never work.
   if (!looksLikeJwt(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) {
     return (
@@ -34,7 +33,9 @@ export default async function AdminUsersPage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login?redirect=/admin/users')
+    const locale = (await getLocale()) as AppLocale
+    const redirectTo = toLocalePath('/admin/users', locale)
+    redirect(`/login?redirect=${encodeURIComponent(redirectTo)}`)
   }
 
   const adminEmails = (process.env.ADMIN_EMAILS || '')

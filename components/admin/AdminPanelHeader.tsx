@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useMemo, useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { toLocalePath, type AppLocale } from '@/i18n/paths';
 import { Breadcrumbs } from '@/components/ui';
 
 type AdminTabKey =
@@ -80,11 +81,8 @@ function safeParseArrayCount(value: string | null): number | undefined {
   }
 }
 
-function stripLocalePrefix(pathname: string): string {
-  // This project sometimes exposes routes with '/lt' prefix via next-intl.
-  // Keep the logic robust by normalizing to non-prefixed paths.
-  if (pathname.startsWith('/lt/')) return pathname.slice(3);
-  return pathname;
+function normalizeToAdminPath(pathname: string): string {
+  return toLocalePath(pathname, 'en');
 }
 
 function lastPathSegment(pathname: string): string {
@@ -94,7 +92,7 @@ function lastPathSegment(pathname: string): string {
 }
 
 function getActiveTabFromUrl(pathname: string, tabParam: string | null): AdminTabKey {
-  const p = stripLocalePrefix(pathname);
+  const p = normalizeToAdminPath(pathname);
 
   if (p.startsWith('/admin/products')) return 'products';
   if (p.startsWith('/admin/projects')) return 'projects';
@@ -128,7 +126,9 @@ export default function AdminPanelHeader() {
 
   const tabParam = searchParams.get('tab');
 
-  const normalizedPath = useMemo(() => stripLocalePrefix(pathname), [pathname]);
+  const normalizedPath = useMemo(() => normalizeToAdminPath(pathname), [pathname]);
+
+  const currentLocale = useMemo<AppLocale>(() => (pathname.startsWith('/lt') ? 'lt' : 'en'), [pathname]);
 
   const activeTab = useMemo(() => {
     return getActiveTabFromUrl(pathname, tabParam);
@@ -210,12 +210,10 @@ export default function AdminPanelHeader() {
     return t('main.subtitle');
   }, [activeTab, t]);
 
-  const pathPrefix = useMemo(() => (pathname.startsWith('/lt/') ? '/lt' : ''), [pathname]);
-
   const breadcrumbsItems = useMemo(() => {
-    const homeHref = pathPrefix ? `${pathPrefix}` : '/';
-    const adminHref = `${pathPrefix}/admin`;
-    const productsHref = `${pathPrefix}/admin/products`;
+    const homeHref = currentLocale === 'lt' ? '/lt' : '/';
+    const adminHref = toLocalePath('/admin', currentLocale);
+    const productsHref = toLocalePath('/admin/products', currentLocale);
 
     const items: Array<{ label: string; href?: string }> = [
       { label: t('breadcrumb.home'), href: homeHref },
@@ -248,33 +246,33 @@ export default function AdminPanelHeader() {
     }
 
     return items;
-  }, [activeTab, normalizedPath, pathPrefix, t]);
+  }, [activeTab, normalizedPath, currentLocale, t]);
 
   const tabs = useMemo<HeaderTab[]>(
     () => [
-      { key: 'dashboard', label: t('tabs.dashboard'), href: `${pathPrefix}/admin/dashboard` },
+      { key: 'dashboard', label: t('tabs.dashboard'), href: toLocalePath('/admin/dashboard', currentLocale) },
       {
         key: 'projects',
         label: t('tabs.projects'),
-        href: `${pathPrefix}/admin/projects`,
+        href: toLocalePath('/admin/projects', currentLocale),
         count: counts.projects,
       },
       {
         key: 'posts',
         label: t('tabs.posts'),
-        href: `${pathPrefix}/admin/posts`,
+        href: toLocalePath('/admin/posts', currentLocale),
         count: counts.posts,
       },
-      { key: 'options', label: t('tabs.options'), href: `${pathPrefix}/admin/options` },
-      { key: 'users', label: t('tabs.users'), href: `${pathPrefix}/admin/users` },
-      { key: 'chatbot', label: t('tabs.chatbot'), href: `${pathPrefix}/admin/chatbot` },
-      { key: 'seo', label: t('tabs.seo'), href: `${pathPrefix}/admin/seo` },
-      { key: 'email-templates', label: t('tabs.emailTemplates'), href: `${pathPrefix}/admin/email-templates` },
+      { key: 'options', label: t('tabs.options'), href: toLocalePath('/admin/options', currentLocale) },
+      { key: 'users', label: t('tabs.users'), href: toLocalePath('/admin/users', currentLocale) },
+      { key: 'chatbot', label: t('tabs.chatbot'), href: toLocalePath('/admin/chatbot', currentLocale) },
+      { key: 'seo', label: t('tabs.seo'), href: toLocalePath('/admin/seo', currentLocale) },
+      { key: 'email-templates', label: t('tabs.emailTemplates'), href: toLocalePath('/admin/email-templates', currentLocale) },
     ],
-    [t, counts, pathPrefix]
+    [t, counts, currentLocale]
   );
 
-  const newProductHref = useMemo(() => `${pathPrefix}/admin/products/new`, [pathPrefix]);
+  const newProductHref = useMemo(() => toLocalePath('/admin/products/new', currentLocale), [currentLocale]);
   const showNewProductButton = activeTab === 'products' && normalizedPath !== '/admin/products/new';
 
   return (

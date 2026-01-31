@@ -354,9 +354,9 @@
     "steps": {
       "eyebrow": "Procesas",
       "headline": {
-        "prefix": "Paprastas ir greitas ",
+        "prefix": "Paprastas ir greitas",
         "emphasis": "užsakymo",
-        "suffix": " procesas"
+        "suffix": "procesas"
       },
       "cta": {
         "label": "Apsipirkti",

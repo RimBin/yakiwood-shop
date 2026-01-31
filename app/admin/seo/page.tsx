@@ -2,6 +2,8 @@
 import { createClient } from '@/lib/supabase/server'
 import SEOAdminClient from '@/components/admin/SEOAdminClient'
 import { AdminBody, AdminCard } from '@/components/admin/ui/AdminUI'
+import { getLocale } from 'next-intl/server'
+import { toLocalePath, type AppLocale } from '@/i18n/paths'
 
 async function requireAdminPage() {
   const supabase = await createClient()
@@ -10,7 +12,9 @@ async function requireAdminPage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login?redirect=/admin/seo')
+    const locale = (await getLocale()) as AppLocale
+    const redirectTo = toLocalePath('/admin/seo', locale)
+    redirect(`/login?redirect=${encodeURIComponent(redirectTo)}`)
   }
 
   const adminEmails = (process.env.ADMIN_EMAILS || '')

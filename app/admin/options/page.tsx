@@ -1,8 +1,10 @@
 import { redirect } from 'next/navigation'
+import { getLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import ThicknessOptionsAdminClient from '../../../components/admin/ThicknessOptionsAdminClient'
 import ColorOptionsAdminClient from '../../../components/admin/ColorOptionsAdminClient'
 import { AdminBody, AdminCard, AdminKicker, AdminSectionTitle, AdminStack } from '@/components/admin/ui/AdminUI'
+import { toLocalePath, type AppLocale } from '@/i18n/paths'
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -12,7 +14,9 @@ async function requireAdmin() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login?redirect=/admin/options')
+    const locale = (await getLocale()) as AppLocale
+    const redirectTo = toLocalePath('/admin/options', locale)
+    redirect(`/login?redirect=${encodeURIComponent(redirectTo)}`)
   }
 
   const adminEmails = (process.env.ADMIN_EMAILS || '')

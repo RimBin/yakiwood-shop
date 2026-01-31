@@ -44,7 +44,7 @@ function PartnersMarquee({
   return (
     <div
       className={`relative overflow-hidden ${
-        fullBleed ? 'w-full' : ''
+        fullBleed ? 'w-screen left-1/2 -translate-x-1/2' : ''
       }`}
     >
       <div

@@ -49,9 +49,9 @@ export default async function Steps() {
 							letterSpacing: 'clamp(-1.6px, -0.04em, -2.08px)',
 						}}
 					>
-						<span>{t('headline.prefix')}</span>
+						<span className="block">{t('headline.prefix')}</span>
 						<span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
-						<span>{t('headline.suffix')}</span>
+						<span> {t('headline.suffix')}</span>
 					</p>
 				</div>
 
@@ -108,10 +108,10 @@ export default async function Steps() {
 					<p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase left-[0px] top-[25px] whitespace-nowrap">
 						{t('eyebrow')}
 					</p>
-					<p className="absolute font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] left-[calc(25%+24px)] top-[0px] w-[574px] whitespace-pre-wrap">
-						<span>{t('headline.prefix')}</span>
+					<p className="absolute font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] left-[calc(25%+24px)] top-[0px] w-[760px] whitespace-pre-wrap">
+						<span className="block">{t('headline.prefix')}</span>
 						<span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
-						<span>{t('headline.suffix')}</span>
+						<span> {t('headline.suffix')}</span>
 					</p>
 				</div>
 
@@ -131,10 +131,10 @@ export default async function Steps() {
 						</div>
 						<div className="flex flex-col gap-[8px] items-start w-full">
 							<p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white whitespace-pre-wrap w-[117px]">
-								Customize Your Order
+								{steps[0].title}
 							</p>
 							<p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB] whitespace-pre-wrap w-[198px]">
-								Choose wood type, color, width, and height to match your needs.
+								{steps[0].description}
 							</p>
 						</div>
 					</div>
@@ -148,10 +148,10 @@ export default async function Steps() {
 						</div>
 						<div className="flex flex-col gap-[8px] items-start w-full">
 							<p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white whitespace-pre-wrap w-[138px]">
-								Add to Cart & Checkout
+								{steps[1].title}
 							</p>
 							<p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB] whitespace-pre-wrap w-[157px]">
-								Review your selection and proceed with secure payment.
+								{steps[1].description}
 							</p>
 						</div>
 					</div>
@@ -165,10 +165,10 @@ export default async function Steps() {
 						</div>
 						<div className="flex flex-col gap-[8px] items-start w-full">
 							<p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white whitespace-pre-wrap w-[106px]">
-								Select Delivery
+								{steps[2].title}
 							</p>
 							<p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB] whitespace-pre-wrap min-w-full">
-								Pick a shipping option that suits you best.
+								{steps[2].description}
 							</p>
 						</div>
 					</div>
@@ -182,10 +182,10 @@ export default async function Steps() {
 						</div>
 						<div className="flex flex-col gap-[8px] items-start w-full">
 							<p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white whitespace-pre-wrap w-[102px]">
-								Receive Your Order
+								{steps[3].title}
 							</p>
 							<p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB] whitespace-pre-wrap w-[134px]">
-								We pack and ship your wood safely to your doorstep.
+								{steps[3].description}
 							</p>
 						</div>
 					</div>

@@ -2,17 +2,21 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { toLocalePath, type AppLocale } from '@/i18n/paths';
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const currentLocale: AppLocale = pathname.startsWith('/lt') ? 'lt' : 'en';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +42,8 @@ export default function LoginPage() {
         throw new Error('Neteisingas el. paštas arba slaptažodis');
       }
 
-      const redirectTo = searchParams.get('redirect') || '/account';
+      const defaultRedirect = toLocalePath('/account', currentLocale);
+      const redirectTo = searchParams.get('redirect') || defaultRedirect;
       router.push(redirectTo);
     } catch (e: any) {
       setError(e?.message || 'Nepavyko prisijungti');
@@ -78,7 +83,10 @@ export default function LoginPage() {
         throw new Error('Demo vartotojas nerastas Supabase. Paleiskite `npm run demo:bootstrap-users` arba susikurkite vartotojus Supabase Auth dalyje.');
       }
 
-      const redirectTo = searchParams.get('redirect') || (role === 'admin' ? '/admin' : '/account');
+      const defaultRedirect = role === 'admin'
+        ? toLocalePath('/admin', currentLocale)
+        : toLocalePath('/account', currentLocale);
+      const redirectTo = searchParams.get('redirect') || defaultRedirect;
       router.push(redirectTo);
     } catch (e: any) {
       setError(e?.message || 'Nepavyko prisijungti');
@@ -120,7 +128,7 @@ export default function LoginPage() {
             Neturite paskyros?
           </p>
           <Link
-            href="/register"
+            href={toLocalePath('/register', currentLocale)}
             className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:underline"
           >
             Registruotis

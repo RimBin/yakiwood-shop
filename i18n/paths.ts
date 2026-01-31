@@ -3,6 +3,18 @@ export type AppLocale = 'en' | 'lt';
 type PrefixMap = Array<{ from: string; to: string }>;
 
 const enToLt: PrefixMap = [
+  { from: '/admin/email-templates', to: '/administravimas/el-pasto-sablonai' },
+  { from: '/admin/orders', to: '/administravimas/uzsakymai' },
+  { from: '/admin/inventory', to: '/administravimas/sandelys' },
+  { from: '/admin/products', to: '/administravimas/produktai' },
+  { from: '/admin/projects', to: '/administravimas/projektai' },
+  { from: '/admin/posts', to: '/administravimas/straipsniai' },
+  { from: '/admin/options', to: '/administravimas/parinktys' },
+  { from: '/admin/users', to: '/administravimas/vartotojai' },
+  { from: '/admin/chatbot', to: '/administravimas/chatbot' },
+  { from: '/admin/seo', to: '/administravimas/seo' },
+  { from: '/admin/dashboard', to: '/administravimas/skydelis' },
+  { from: '/admin', to: '/administravimas' },
   { from: '/products', to: '/produktai' },
   { from: '/solutions', to: '/sprendimai' },
   { from: '/projects', to: '/projektai' },
