@@ -158,7 +158,7 @@ function FilterDropdown({
                         type="checkbox"
                         checked={selected.includes(option.value)}
                         onChange={() => onToggle(option.value)}
-                        className="accent-[#161616]"
+                        className="h-[16px] w-[16px] appearance-none rounded-[3px] border border-[#7C7C7C] bg-[#EAEAEA] text-[#161616] checked:bg-[#161616] checked:border-[#161616]"
                       />
                       <span>{option.label}</span>
                     </label>

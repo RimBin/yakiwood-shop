@@ -19,12 +19,12 @@ export function AdjustmentModal({ sku, onClose, onSuccess }: AdjustmentModalProp
     e.preventDefault();
     
     if (!reason) {
-      setError('Reason is required for adjustments');
+      setError('Pasirinkite koregavimo priežastį');
       return;
     }
 
     if (quantity === 0) {
-      setError('Adjustment quantity cannot be zero');
+      setError('Koregavimo kiekis negali būti nulis');
       return;
     }
 
@@ -46,12 +46,12 @@ export function AdjustmentModal({ sku, onClose, onSuccess }: AdjustmentModalProp
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to adjust inventory');
+        throw new Error(data.error || 'Nepavyko pakoreguoti atsargų');
       }
 
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to adjust inventory');
+      setError(err instanceof Error ? err.message : 'Nepavyko pakoreguoti atsargų');
     } finally {
       setLoading(false);
     }
@@ -62,7 +62,7 @@ export function AdjustmentModal({ sku, onClose, onSuccess }: AdjustmentModalProp
       <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] shadow-xl max-w-md w-full mx-4">
         <div className="p-6 border-b border-[#E1E1E1]">
           <div className="flex justify-between items-center">
-            <h2 className="font-['DM_Sans'] text-[24px] font-light tracking-[-0.96px] text-[#161616]">Adjust Inventory</h2>
+            <h2 className="font-['DM_Sans'] text-[24px] font-light tracking-[-0.96px] text-[#161616]">Koreguoti atsargas</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -82,24 +82,24 @@ export function AdjustmentModal({ sku, onClose, onSuccess }: AdjustmentModalProp
 
           <div>
             <label className="block font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mb-2">
-              Adjustment Quantity *
+              Koregavimo kiekis *
             </label>
             <input
               type="number"
               value={quantity || ''}
               onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
               className="w-full px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-[12px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616]"
-              placeholder="Positive to add, negative to subtract"
+              placeholder="Teigiamas – pridėti, neigiamas – atimti"
               required
             />
             <p className="font-['Outfit'] text-[12px] text-[#535353] mt-2">
-              Enter a positive number to add stock or negative to reduce stock
+              Įveskite teigiamą skaičių, kad pridėtumėte, arba neigiamą – kad sumažintumėte
             </p>
           </div>
 
           <div>
             <label className="block font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mb-2">
-              Reason *
+              Priežastis *
             </label>
             <select
               value={reason}
@@ -107,27 +107,27 @@ export function AdjustmentModal({ sku, onClose, onSuccess }: AdjustmentModalProp
               className="w-full px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-[12px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616] yw-select"
               required
             >
-              <option value="">Select a reason</option>
-              <option value="damaged">Damaged goods</option>
-              <option value="lost">Lost items</option>
-              <option value="found">Found items</option>
-              <option value="correction">Inventory count correction</option>
-              <option value="theft">Theft/shrinkage</option>
-              <option value="return">Customer return</option>
-              <option value="sample">Used as sample</option>
-              <option value="other">Other</option>
+              <option value="">Pasirinkite priežastį</option>
+              <option value="damaged">Sugadinta prekė</option>
+              <option value="lost">Prarasta prekė</option>
+              <option value="found">Rasta prekė</option>
+              <option value="correction">Inventoriaus korekcija</option>
+              <option value="theft">Nurašymai / vagystė</option>
+              <option value="return">Kliento grąžinimas</option>
+              <option value="sample">Panaudota kaip pavyzdys</option>
+              <option value="other">Kita</option>
             </select>
           </div>
 
           <div>
             <label className="block font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mb-2">
-              Notes
+              Pastabos
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-[12px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616]"
-              placeholder="Additional details about this adjustment..."
+              placeholder="Papildoma informacija apie korekciją..."
               rows={3}
             />
           </div>
@@ -139,14 +139,14 @@ export function AdjustmentModal({ sku, onClose, onSuccess }: AdjustmentModalProp
               className="flex-1 h-[48px] px-4 border border-[#E1E1E1] text-[#161616] bg-[#EAEAEA] rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-[#E1E1E1] transition"
               disabled={loading}
             >
-              Cancel
+              Atšaukti
             </button>
             <button
               type="submit"
               className="flex-1 h-[48px] px-4 bg-[#161616] text-white rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-[#2a2a2a] transition disabled:opacity-50"
               disabled={loading}
             >
-              {loading ? 'Adjusting...' : 'Adjust Inventory'}
+              {loading ? 'Koreguojama...' : 'Koreguoti atsargas'}
             </button>
           </div>
         </form>

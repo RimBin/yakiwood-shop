@@ -48,20 +48,20 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
     if (item.quantity_available === 0) {
       return (
         <span className="px-3 py-1 bg-[#EAEAEA] border border-red-200 text-red-700 text-sm font-medium rounded-full">
-          Out of Stock
+          Nėra
         </span>
       );
     }
     if (item.quantity_available <= item.reorder_point) {
       return (
         <span className="px-3 py-1 bg-[#EAEAEA] border border-yellow-200 text-yellow-700 text-sm font-medium rounded-full">
-          Low Stock
+          Mažai
         </span>
       );
     }
     return (
       <span className="px-3 py-1 bg-[#EAEAEA] border border-green-200 text-green-700 text-sm font-medium rounded-full">
-        In Stock
+        Turime
       </span>
     );
   };
@@ -78,56 +78,48 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
       <table className="w-full">
         <thead className="bg-[#EAEAEA] border-b border-[#E1E1E1]">
           <tr>
-            <th className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-              Product
+            <th className="px-4 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
+              Prekė
             </th>
             <th 
-              className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C] cursor-pointer hover:bg-[#E1E1E1]"
-              onClick={() => handleSort('sku')}
-            >
-              <div className="flex items-center gap-2">
-                SKU <SortIcon field="sku" />
-              </div>
-            </th>
-            <th 
-              className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C] cursor-pointer hover:bg-[#E1E1E1]"
+              className="px-4 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C] cursor-pointer hover:bg-[#E1E1E1]"
               onClick={() => handleSort('quantity_available')}
             >
               <div className="flex items-center gap-2">
-                Available <SortIcon field="quantity_available" />
+                Turime <SortIcon field="quantity_available" />
               </div>
             </th>
             <th 
-              className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C] cursor-pointer hover:bg-[#E1E1E1]"
+              className="px-4 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C] cursor-pointer hover:bg-[#E1E1E1]"
               onClick={() => handleSort('quantity_reserved')}
             >
               <div className="flex items-center gap-2">
-                Reserved <SortIcon field="quantity_reserved" />
+                Rezervuota <SortIcon field="quantity_reserved" />
               </div>
             </th>
             <th 
-              className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C] cursor-pointer hover:bg-[#E1E1E1]"
+              className="px-4 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C] cursor-pointer hover:bg-[#E1E1E1]"
               onClick={() => handleSort('quantity_sold')}
             >
               <div className="flex items-center gap-2">
-                Sold <SortIcon field="quantity_sold" />
+                Parduota <SortIcon field="quantity_sold" />
               </div>
             </th>
-            <th className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-              Location
+            <th className="px-4 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
+              Vieta
             </th>
-            <th className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-              Status
+            <th className="px-4 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
+              Statusas
             </th>
-            <th className="px-6 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
-              Actions
+            <th className="px-4 py-3 text-left font-['Outfit'] text-[11px] uppercase tracking-[0.6px] text-[#7C7C7C]">
+              Veiksmai
             </th>
           </tr>
         </thead>
         <tbody className="bg-[#EAEAEA] divide-y divide-[#E1E1E1]">
           {sortedItems.map((item) => (
             <tr key={item.id} className="hover:bg-[#E1E1E1]">
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap">
                 <div className="flex items-center gap-3">
                   {item.product?.image_url && (
                     <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#E1E1E1]">
@@ -141,50 +133,48 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
                   )}
                   <div>
                     <div className="text-sm font-medium text-[#161616]">
-                      {item.product?.name || 'Unknown Product'}
+                      {item.product?.name || 'Nežinoma prekė'}
                     </div>
+                    <div className="text-xs font-mono text-[#535353]">{item.sku}</div>
                     {item.product?.slug && (
                       <div className="text-sm text-[#535353]">{item.product.slug}</div>
                     )}
                   </div>
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-mono text-[#161616]">{item.sku}</div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap">
                 <div className="text-sm font-bold text-[#161616]">
                   {item.quantity_available}
                 </div>
                 <div className="text-xs text-[#535353]">
-                  Reorder: {item.reorder_point}
+                  Papildyti ties: {item.reorder_point}
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap">
                 <div className="text-sm text-[#161616]">{item.quantity_reserved}</div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap">
                 <div className="text-sm text-[#161616]">{item.quantity_sold}</div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap">
                 <div className="text-sm text-[#161616]">{item.location || '-'}</div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap">
                 {getStatusBadge(item)}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap">
                 <div className="flex gap-2">
                   <button
                     onClick={() => onRestock(item.sku)}
                     className="h-[36px] px-[14px] rounded-[100px] bg-[#161616] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-white hover:bg-[#535353] transition-colors"
-                    title="Restock"
+                    title="Papildyti"
                   >
                     Papildyti
                   </button>
                   <button
                     onClick={() => onAdjust(item.sku)}
                     className="h-[36px] px-[14px] rounded-[100px] bg-[#E1E1E1] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:bg-[#BBBBBB] transition-colors"
-                    title="Adjust"
+                    title="Koreguoti"
                   >
                     Koreguoti
                   </button>

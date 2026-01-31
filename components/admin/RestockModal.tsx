@@ -21,7 +21,7 @@ export function RestockModal({ sku: initialSku, onClose, onSuccess }: RestockMod
     e.preventDefault();
     
     if (!sku || quantity <= 0) {
-      setError('Please provide a valid SKU and positive quantity');
+      setError('Įveskite SKU ir teigiamą kiekį');
       return;
     }
 
@@ -44,12 +44,12 @@ export function RestockModal({ sku: initialSku, onClose, onSuccess }: RestockMod
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to restock');
+        throw new Error(data.error || 'Nepavyko papildyti atsargų');
       }
 
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to restock');
+      setError(err instanceof Error ? err.message : 'Nepavyko papildyti atsargų');
     } finally {
       setLoading(false);
     }
@@ -60,7 +60,7 @@ export function RestockModal({ sku: initialSku, onClose, onSuccess }: RestockMod
       <div className="bg-[#EAEAEA] border border-[#E1E1E1] rounded-[16px] shadow-xl max-w-md w-full mx-4">
         <div className="p-6 border-b border-[#E1E1E1]">
           <div className="flex justify-between items-center">
-            <h2 className="font-['DM_Sans'] text-[24px] font-light tracking-[-0.96px] text-[#161616]">Restock Inventory</h2>
+            <h2 className="font-['DM_Sans'] text-[24px] font-light tracking-[-0.96px] text-[#161616]">Papildyti atsargas</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -86,7 +86,7 @@ export function RestockModal({ sku: initialSku, onClose, onSuccess }: RestockMod
               value={sku}
               onChange={(e) => setSku(e.target.value)}
               className="w-full px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-[12px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616]"
-              placeholder="e.g., YAKI-001"
+              placeholder="pvz., YAKI-001"
               required
               disabled={!!initialSku}
             />
@@ -94,14 +94,14 @@ export function RestockModal({ sku: initialSku, onClose, onSuccess }: RestockMod
 
           <div>
             <label className="block font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mb-2">
-              Quantity to Add *
+              Kiekis papildymui *
             </label>
             <input
               type="number"
               value={quantity || ''}
               onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
               className="w-full px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-[12px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616]"
-              placeholder="e.g., 50"
+              placeholder="pvz., 50"
               min="1"
               required
             />
@@ -109,39 +109,39 @@ export function RestockModal({ sku: initialSku, onClose, onSuccess }: RestockMod
 
           <div>
             <label className="block font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mb-2">
-              Reason
+              Priežastis
             </label>
             <input
               type="text"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               className="w-full px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-[12px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616]"
-              placeholder="e.g., New shipment received"
+              placeholder="pvz., Gauta nauja siunta"
             />
           </div>
 
           <div>
             <label className="block font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mb-2">
-              Location
+              Vieta
             </label>
             <input
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="w-full px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-[12px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616]"
-              placeholder="e.g., Warehouse A, Shelf 12"
+              placeholder="pvz., Sandėlis A, lentyna 12"
             />
           </div>
 
           <div>
             <label className="block font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353] mb-2">
-              Notes
+              Pastabos
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-[12px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616]"
-              placeholder="Additional notes..."
+              placeholder="Papildomos pastabos..."
               rows={3}
             />
           </div>
@@ -153,14 +153,14 @@ export function RestockModal({ sku: initialSku, onClose, onSuccess }: RestockMod
               className="flex-1 h-[48px] px-4 border border-[#E1E1E1] text-[#161616] bg-[#EAEAEA] rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-[#E1E1E1] transition"
               disabled={loading}
             >
-              Cancel
+              Atšaukti
             </button>
             <button
               type="submit"
               className="flex-1 h-[48px] px-4 bg-[#161616] text-white rounded-[100px] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase hover:bg-[#2a2a2a] transition disabled:opacity-50"
               disabled={loading}
             >
-              {loading ? 'Restocking...' : 'Restock'}
+              {loading ? 'Papildoma...' : 'Papildyti'}
             </button>
           </div>
         </form>
