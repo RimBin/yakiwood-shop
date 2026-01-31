@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getOrderById, supabaseAdmin, updateOrderStatus } from '@/lib/supabase-admin'
+import { InvoicePDFGenerator } from '@/lib/invoice/pdf-generator'
+import { createInvoice } from '@/lib/invoice/utils'
+import type { InvoiceGenerateRequest } from '@/types/invoice'
+import { sendOrderConfirmation } from '@/lib/email'
+import { getOrderById, supabaseAdmin, updateOrderStatus, saveInvoiceToDatabase } from '@/lib/supabase-admin'
 
 function getPayPalBaseUrl(): string {
   const env = (process.env.PAYPAL_ENV || 'sandbox').toLowerCase()
@@ -101,6 +105,10 @@ export async function POST(req: NextRequest) {
     if (orderId && supabaseAdmin) {
       const existing = await getOrderById(orderId)
       if (existing) {
+        if (existing.payment_status === 'paid') {
+          return NextResponse.json({ ok: true, status, paypalOrderId, updatedOrder: true })
+        }
+
         const captured = extractCaptureAmount(captureData)
         if (captured) {
           const orderCurrency = (existing.currency || 'EUR').toUpperCase()
@@ -133,6 +141,58 @@ export async function POST(req: NextRequest) {
             .eq('id', existing.id)
         } catch (e) {
           console.error('PayPal note append skipped', e)
+        }
+
+        try {
+          if (existing.customer_email && updatedOrder) {
+            const invoiceRequest: InvoiceGenerateRequest = {
+              buyer: {
+                name: existing.customer_name,
+                email: existing.customer_email,
+                phone: existing.customer_phone || undefined,
+                address: existing.customer_address || 'Nenurodyta',
+                city: '',
+                postalCode: '',
+                country: 'Lietuva',
+              },
+              items: (Array.isArray(existing.items) ? existing.items : []).map((item: any, index: number) => ({
+                id: item.id || `item-${index}`,
+                name: item.name,
+                quantity: item.quantity,
+                unitPrice: item.basePrice,
+                vatRate: 0.21,
+                unit: item.unit || undefined,
+              })),
+              paymentMethod: 'paypal',
+              pricesIncludeVat: true,
+              dueInDays: 0,
+              orderId: existing.id,
+              orderNumber: existing.order_number,
+              documentTitle: 'Production - Shou sugi ban',
+              notes: `Order ${existing.order_number}. Paid via PayPal.`,
+            }
+
+            const invoice = createInvoice(invoiceRequest)
+            invoice.status = 'paid'
+            invoice.paymentDate = new Date().toISOString()
+
+            await saveInvoiceToDatabase(invoice, existing.id)
+
+            const pdfGenerator = new InvoicePDFGenerator(invoice)
+            const pdfBuffer = pdfGenerator.generate()
+
+            const emailResult = await sendOrderConfirmation(
+              existing.customer_email,
+              existing.order_number,
+              Buffer.from(pdfBuffer)
+            )
+
+            if (!emailResult.success) {
+              console.error(`PayPal email failed for ${existing.customer_email}:`, emailResult.error)
+            }
+          }
+        } catch (e) {
+          console.error('PayPal invoice/email processing failed', e)
         }
       }
     }

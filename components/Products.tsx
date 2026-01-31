@@ -141,20 +141,20 @@ function MobileProductCard({
   };
 
   return (
-    <div className="bg-[#eaeaea] rounded-[8px] pt-[12px] pb-[16px] px-[12px] w-full max-w-[360px] flex flex-col gap-[24px] items-center relative">
+    <div className="bg-[#eaeaea] rounded-[8px] pt-[12px] pb-[16px] px-[12px] w-full max-w-[360px] min-[520px]:max-w-none flex flex-col gap-[24px] items-center relative">
       {/* Background mask overlay */}
       <div className="absolute inset-0 pointer-events-none">
         <Image src={imgMask} alt="" fill className="object-cover" />
       </div>
 
-      {/* Product image slider - 271x260px on mobile */}
-      <div className="relative w-full max-w-[271px] aspect-[271/260] shrink-0 z-10 rounded-[8px] overflow-hidden">
+      {/* Product image slider - full width on mobile/tablet */}
+      <div className="relative w-[calc(100%+24px)] -mx-[12px] aspect-[4/3] shrink-0 z-10 rounded-[8px] overflow-hidden">
         <Image
           src={slides[currentIndex]?.image || product.image}
           alt={product.title}
           fill
           className="object-cover"
-          sizes="(max-width: 420px) calc(100vw - 56px), 271px"
+          sizes="(max-width: 1024px) 100vw, 395px"
         />
 
         {!!slides[currentIndex]?.label && (
@@ -435,11 +435,11 @@ export default function Products() {
         </div>
 
         {/* Stacked product cards (no horizontal scroll) */}
-        <div className="flex flex-col gap-[16px] px-[16px] pb-[24px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px] px-[16px] min-[520px]:px-0 pb-[24px]">
           {products.map((product, idx) => (
             <div
               key={idx}
-              className="w-full flex justify-center hero-seq-item hero-seq-right"
+              className="w-full hero-seq-item hero-seq-right"
               style={{ animationDelay: `${220 + idx * 180}ms` }}
             >
               <MobileProductCard

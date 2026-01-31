@@ -21,6 +21,8 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const items = useCartStore((state) => state.items);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const normalizedPathname = (pathname || '/').replace(/^\/(lt|en)(?=\/|$)/, '');
+  const isHome = normalizedPathname === '' || normalizedPathname === '';
   
   useEffect(() => {
     const handleScroll = () => {
@@ -114,7 +116,9 @@ export default function Header() {
       <div className={`transition-all duration-300 border-b border-solid ${
         isScrolled
           ? 'bg-[#E1E1E1]/80 backdrop-blur-md border-[#bbbbbb]/30 shadow-sm'
-          : 'bg-transparent border-transparent shadow-none backdrop-blur-none'
+          : isHome
+            ? 'bg-transparent border-transparent shadow-none backdrop-blur-none'
+            : 'bg-transparent border-[#bbbbbb] shadow-none backdrop-blur-none'
       }`}>
         <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[16px]">
           <div className="flex items-center gap-[16px]">

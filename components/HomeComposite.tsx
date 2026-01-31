@@ -228,10 +228,10 @@ export default function HomeComposite() {
         <p className="absolute left-[calc(25%+25px)] top-0 font-['DM_Sans:Light',sans-serif] text-[80px] tracking-[-4.4px] text-[#161616]">What our <span className="font-['Tiro_Tamil:Italic',sans-serif] italic">clients</span> say</p>
         <div className="absolute left-1/2 top-[144px] -translate-x-1/2 flex gap-[16px] w-[1440px] justify-center">
           {[img4,img5,img4].map((bg,i)=> (
-            <div key={i} className={`rounded-${i===1?'[8px]':'[16px]'} p-[24px] h-[451px] w-[673px] flex flex-col justify-between ${i===1?'bg-[#161616]':'border border-[#bbbbbb] opacity-30'} relative`}>
+            <div key={i} className={`rounded-${i===1?'[8px]':'[16px]'} p-[32px] h-[451px] w-[673px] flex flex-col justify-between ${i===1?'bg-[#161616]':'border border-[#bbbbbb] opacity-30'} relative`}>
               <img alt="review-bg" src={bg} className="absolute inset-0 w-full h-full object-cover rounded-inherit" />
-              <p className={`font-['DM_Sans:Light',sans-serif] text-[32px] tracking-[-1.28px] leading-[1.2] ${i===1?'text-white':'text-[#161616]'}`}>“Sample testimonial content for pixel-perfect layout.”</p>
-              <p className={`font-['DM_Sans:Medium',sans-serif] text-[18px] tracking-[-0.36px] ${i===1?'text-white':'text-[#161616]'}`}>— Mindaugas P., Architect</p>
+              <p className={`font-['DM_Sans:Medium',sans-serif] text-[18px] tracking-[-0.18px] leading-[1.55] ${i===1?'text-white':'text-[#161616]'}`}>“Sample testimonial content for pixel-perfect layout.”</p>
+              <p className={`font-['DM_Sans:Medium',sans-serif] text-[14px] tracking-[-0.14px] ${i===1?'text-white':'text-[#161616]'}`}>— Mindaugas P., Architect</p>
             </div>
           ))}
         </div>

@@ -57,7 +57,7 @@ export default function Testimonials() {
     return (
       <>
         <span>{before}</span>
-        <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]">{italicWord}</span>
+        <span className="font-['Tiro_Tamil'] italic tracking-[-1.6px]">{italicWord}</span>
         <span>{after}</span>
       </>
     );
@@ -83,7 +83,7 @@ export default function Testimonials() {
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
             {t('eyebrow')}
           </p>
-          <h2 className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[500px]" style={{ fontSize: 'clamp(32px, 5vw, 44px)', letterSpacing: 'clamp(-1.6px, -0.04em, -1.76px)' }}>
+          <h2 className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[520px]" style={{ fontSize: 'clamp(30px, 5vw, 40px)', letterSpacing: 'clamp(-1.2px, -0.04em, -1.6px)' }}>
             {renderHeading()}
           </h2>
         </div>
@@ -144,23 +144,23 @@ export default function Testimonials() {
         </div>
 
         {/* Navigation Arrows - Mobile */}
-        <div className="flex items-center justify-center gap-[16px] mt-[24px] px-[16px] hero-seq-item hero-seq-right" style={{ animationDelay: '760ms' }}>
+        <div className="flex items-center justify-center gap-[12px] mt-[24px] px-[16px] hero-seq-item hero-seq-right" style={{ animationDelay: '760ms' }}>
           <button
             onClick={handlePrev}
-            className="w-[40px] h-[40px] rounded-full border border-[#161616] flex items-center justify-center bg-transparent"
+            className="w-[32px] h-[32px] rounded-full border border-[#161616] flex items-center justify-center bg-transparent"
             aria-label={t('aria.previous')}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 6L9 12L15 18" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 6L9 12L15 18" stroke="#161616" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
           <button
             onClick={handleNext}
-            className="w-[40px] h-[40px] rounded-full bg-[#161616] flex items-center justify-center"
+            className="w-[32px] h-[32px] rounded-full bg-[#161616] flex items-center justify-center"
             aria-label={t('aria.next')}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 6L15 12L9 18" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 6L15 12L9 18" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         </div>
@@ -182,27 +182,27 @@ export default function Testimonials() {
               {t('eyebrow')}
             </p>
             {/* Main Heading */}
-            <p className="absolute left-[calc(25%+25px)] right-[120px] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] whitespace-nowrap">
+            <p className="absolute left-[calc(25%+25px)] right-[120px] top-0 font-['DM_Sans'] font-light text-[56px] leading-none tracking-[-2.24px] text-[#161616] whitespace-nowrap">
               {renderHeading()}
             </p>
             {/* Navigation buttons - positioned at far right */}
-            <div className="absolute right-0 top-[20px] flex items-center gap-[16px]">
+            <div className="absolute right-0 top-[20px] flex items-center gap-[12px]">
               <button
                 onClick={handlePrev}
-                className="w-[40px] h-[40px] rounded-full border border-[#161616] flex items-center justify-center bg-transparent hover:bg-[#161616]/5 transition-colors"
+                className="w-[32px] h-[32px] rounded-full border border-[#161616] flex items-center justify-center bg-transparent hover:bg-[#161616]/5 transition-colors"
                 aria-label={t('aria.previous')}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 6L9 12L15 18" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 6L9 12L15 18" stroke="#161616" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
               <button
                 onClick={handleNext}
-                className="w-[40px] h-[40px] rounded-full bg-[#161616] flex items-center justify-center hover:bg-[#0c0c0c] transition-colors"
+                className="w-[32px] h-[32px] rounded-full bg-[#161616] flex items-center justify-center hover:bg-[#0c0c0c] transition-colors"
                 aria-label={t('aria.next')}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 6L15 12L9 18" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 6L15 12L9 18" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </div>
@@ -237,15 +237,19 @@ export default function Testimonials() {
                   </div>
 
                   <div
-                    className={`relative z-10 flex h-full flex-col justify-between p-[40px] ${
+                    className={`relative z-10 flex h-full flex-col justify-between p-[32px] ${
                       isActive ? "text-white" : "text-[#b8b8b8]"
                     }`}
                   >
-                    <p className="font-['Outfit'] text-[20px] leading-[1.5] tracking-[0.14px]">
+                    <p
+                      className={`font-['DM_Sans'] text-[18px] leading-[1.55] tracking-[-0.18px] ${
+                        isActive ? "font-medium" : "font-normal"
+                      }`}
+                    >
                       &ldquo;{testimonial.quote}&rdquo;
                     </p>
                     <p
-                      className={`font-['DM_Sans'] font-medium text-[16px] tracking-[-0.32px] ${
+                      className={`font-['DM_Sans'] font-medium text-[14px] tracking-[-0.14px] ${
                         isActive ? "text-white" : "text-[#535353]"
                       }`}
                     >
