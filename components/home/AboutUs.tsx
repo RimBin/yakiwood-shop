@@ -8,6 +8,7 @@ import { assets } from '@/lib/assets';
 import ArrowRight from '@/components/icons/ArrowRight';
 import { toLocalePath } from '@/i18n/paths';
 import { getContainerPadding, getSectionSpacing } from '@/lib/design-system';
+import InView from '@/components/InView';
 
 const [imgProject1] = assets.projects;
 const imgAboutVideoThumb = '/assets/about/fire.png';
@@ -113,8 +114,8 @@ export default function AboutUs() {
   return (
     <section id="about-us" className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
-      <div className="xl:hidden pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0">
-        <div className={`${getContainerPadding()} mb-[24px]`}>
+      <InView className="xl:hidden pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0 hero-animate-root">
+        <div className={`${getContainerPadding()} mb-[24px] hero-seq-item hero-seq-right`} style={{ animationDelay: '0ms' }}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
             {t('eyebrow')}
           </p>
@@ -127,7 +128,7 @@ export default function AboutUs() {
         </div>
 
         <div className="px-[16px] md:px-[32px] flex flex-col gap-[24px]">
-          <div className="flex items-start gap-[16px]">
+          <div className="flex items-start gap-[16px] hero-seq-item hero-seq-right" style={{ animationDelay: '220ms' }}>
             <div className="relative w-[96px] h-[96px] rounded-[8px] overflow-hidden shrink-0">
               <Image src={imgProject1} alt="" fill className="object-cover" />
             </div>
@@ -136,7 +137,7 @@ export default function AboutUs() {
             </p>
           </div>
 
-          <div className="relative w-full h-[360px] rounded-[8px] overflow-hidden">
+          <div className="relative w-full h-[360px] rounded-[8px] overflow-hidden hero-seq-item hero-seq-right" style={{ animationDelay: '420ms' }}>
             <Image src={imgAboutVideoThumb} alt="" fill className="object-cover" />
             <div className="absolute inset-0 bg-black/20" />
             <div className="absolute inset-0 flex items-center justify-center">
@@ -151,7 +152,7 @@ export default function AboutUs() {
             </div>
           </div>
 
-          <Link href={aboutHref} className="flex gap-[8px] items-center h-[24px]">
+          <Link href={aboutHref} className="flex gap-[8px] items-center h-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '600ms' }}>
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
               {t('readAbout')}
             </p>
@@ -159,17 +160,17 @@ export default function AboutUs() {
           </Link>
         </div>
 
-        <div className="mt-[40px]">
+        <div className="mt-[40px] hero-seq-item hero-seq-right" style={{ animationDelay: '760ms' }}>
           <p className="px-[16px] md:px-[32px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[16px]">
             {t('partners')}
           </p>
           <PartnersMarquee items={partnerNames} durationSeconds={22} fullBleed />
         </div>
-      </div>
+      </InView>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden xl:block max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[120px]">
-        <div className="relative h-[160px]">
+      <InView className="hidden xl:block max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[120px] hero-animate-root">
+        <div className="relative h-[160px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <p className="absolute left-0 top-[26px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
             {t('eyebrow')}
           </p>
@@ -184,14 +185,14 @@ export default function AboutUs() {
 
         <div className="grid grid-cols-12 gap-[40px] mt-[64px]">
           {/* Left small image */}
-          <div className="col-span-2">
+          <div className="col-span-2 hero-seq-item hero-seq-right" style={{ animationDelay: '220ms' }}>
             <div className="relative w-[175px] h-[175px] rounded-[8px] overflow-hidden">
               <Image src={imgProject1} alt="" fill className="object-cover" />
             </div>
           </div>
 
           {/* Video tile */}
-          <div className="col-span-6 col-start-4">
+          <div className="col-span-6 col-start-4 hero-seq-item hero-seq-right" style={{ animationDelay: '420ms' }}>
             <div className="relative w-full h-[623px] rounded-[8px] overflow-hidden">
               <Image src={imgAboutVideoThumb} alt="" fill className="object-cover" />
               <div className="absolute inset-0 bg-black/15" />
@@ -209,7 +210,7 @@ export default function AboutUs() {
           </div>
 
           {/* Text column */}
-          <div className="col-span-3 col-start-10 flex flex-col gap-[40px]">
+          <div className="col-span-3 col-start-10 flex flex-col gap-[40px] hero-seq-item hero-seq-right" style={{ animationDelay: '620ms' }}>
             <div className="flex flex-col gap-[16px]">
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.4] tracking-[0.14px] text-[#535353]">
                 {t('description1')}
@@ -228,14 +229,14 @@ export default function AboutUs() {
           </div>
         </div>
 
-        <p className="mt-[64px] ml-[calc(25%+24px)] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
+        <p className="mt-[64px] ml-[calc(25%+24px)] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] hero-seq-item hero-seq-right" style={{ animationDelay: '820ms' }}>
           {t('partners')}
         </p>
 
-        <div className="mt-[24px]">
+        <div className="mt-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '980ms' }}>
           <PartnersMarquee items={partnerNames} durationSeconds={30} fullBleed />
         </div>
-      </div>
+      </InView>
 
       {isVideoOpen ? (
         <div

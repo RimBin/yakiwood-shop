@@ -10,6 +10,7 @@ import { toLocalePath, type AppLocale } from '@/i18n/paths';
 import { assets } from '@/lib/assets';
 import { Breadcrumbs } from '@/components/ui';
 import { PageLayout } from '@/components/shared/PageLayout';
+import InView from '@/components/InView';
 
 const POSTS_STORAGE_KEY = 'yakiwood_posts';
 
@@ -112,15 +113,16 @@ export default function BlogPostClient({
         ]}
       />
 
-      <PageLayout>
-        <div className="pt-[16px] pb-[120px]">
+      <InView className="hero-animate-root">
+        <PageLayout>
+          <div className="pt-[16px] pb-[120px]">
 
-        <div className="mt-[18px] relative h-[240px] md:h-[420px] lg:h-[560px] overflow-hidden">
+        <div className="mt-[18px] relative h-[240px] md:h-[420px] lg:h-[560px] overflow-hidden hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <BlogImage src={post.heroImage} alt={post.title} />
         </div>
 
         <div className="mt-[26px] grid grid-cols-1 lg:grid-cols-[520px_1fr] gap-[34px] lg:gap-[64px]">
-          <div className="flex flex-col">
+          <div className="flex flex-col hero-seq-item hero-seq-right" style={{ animationDelay: '180ms' }}>
             <h1 className="font-['DM_Sans'] font-light text-[40px] md:text-[64px] leading-[1.02] tracking-[-1.6px] text-[#161616]">
               {post.title}
             </h1>
@@ -144,7 +146,7 @@ export default function BlogPostClient({
             )}
           </div>
 
-          <div>
+          <div className="hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
             <p className="font-['Outfit'] text-[12px] md:text-[13px] leading-[1.75] text-[#535353]">
               {post.summary}
             </p>
@@ -175,7 +177,7 @@ export default function BlogPostClient({
         </div>
 
         {post.callout && (
-          <div className="mt-[56px] md:mt-[72px]">
+          <div className="mt-[56px] md:mt-[72px] hero-seq-item hero-seq-right" style={{ animationDelay: '520ms' }}>
             <p className="font-['DM_Sans'] font-light text-[22px] md:text-[32px] leading-[1.25] tracking-[-0.6px] text-[#161616] text-center max-w-[900px] mx-auto">
               {post.callout}
             </p>
@@ -183,7 +185,7 @@ export default function BlogPostClient({
         )}
 
         {post.excerpt && (
-          <div className="mt-[44px] md:mt-[54px]">
+          <div className="mt-[44px] md:mt-[54px] hero-seq-item hero-seq-right" style={{ animationDelay: '640ms' }}>
             <p className="font-['DM_Sans'] font-light text-[18px] md:text-[22px] leading-[1.35] tracking-[-0.4px] text-[#161616] text-center max-w-[980px] mx-auto">
               {post.excerpt}
             </p>
@@ -193,7 +195,11 @@ export default function BlogPostClient({
         {post.featureImages.length > 0 && (
           <div className="mt-[44px] grid grid-cols-1 md:grid-cols-2 gap-[16px]">
             {post.featureImages.slice(0, 2).map((src, index) => (
-              <div key={`${src}-${index}`} className="relative h-[240px] md:h-[360px] overflow-hidden">
+              <div
+                key={`${src}-${index}`}
+                className="relative h-[240px] md:h-[360px] overflow-hidden hero-seq-item hero-seq-right"
+                style={{ animationDelay: `${760 + index * 140}ms` }}
+              >
                 <BlogImage src={src} alt={`${post.title} feature ${index + 1}`} />
               </div>
             ))}
@@ -201,28 +207,32 @@ export default function BlogPostClient({
         )}
 
         {post.closing && (
-          <p className="mt-[32px] font-['Outfit'] text-[14px] leading-[1.6] text-[#535353] max-w-[760px]">
+          <p className="mt-[32px] font-['Outfit'] text-[14px] leading-[1.6] text-[#535353] max-w-[760px] hero-seq-item hero-seq-right" style={{ animationDelay: '900ms' }}>
             {post.closing}
           </p>
         )}
 
         {related.length > 0 && (
-          <div className="mt-[72px]">
+          <div className="mt-[72px] hero-seq-item hero-seq-right" style={{ animationDelay: '1040ms' }}>
             <div className="flex items-center justify-between mb-[24px]">
               <h2 className="font-['DM_Sans'] font-light text-[32px] md:text-[48px] text-[#161616]">
                 {t('related')}
               </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px]">
-              {related.map((item) => (
-                <RelatedCard key={item.id} post={item} locale={locale} />
+              {related.map((item, index) => (
+                <div key={item.id} className="hero-seq-item hero-seq-right" style={{ animationDelay: `${1180 + index * 140}ms` }}>
+                  <RelatedCard post={item} locale={locale} />
+                </div>
               ))}
             </div>
           </div>
         )}
         </div>
       </PageLayout>
+      </InView>
 
+      <InView className="hero-animate-root">
       <section className="relative pb-[140px] md:pb-[200px]">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-[480px] md:w-[900px] opacity-15">
@@ -230,14 +240,14 @@ export default function BlogPostClient({
           </div>
         </div>
         <div className="relative max-w-[960px] mx-auto px-[16px] text-center">
-          <h2 className="font-['DM_Sans'] font-light text-[48px] md:text-[96px] leading-[0.95] tracking-[-2px] text-[#161616]">
+          <h2 className="font-['DM_Sans'] font-light text-[48px] md:text-[96px] leading-[0.95] tracking-[-2px] text-[#161616] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             {t('ctaTitle')}
             <span className="font-['Tiro_Tamil'] italic"> {t('ctaHighlight')}</span>?
           </h2>
-          <p className="mt-[12px] font-['Outfit'] text-[14px] text-[#535353]">
+          <p className="mt-[12px] font-['Outfit'] text-[14px] text-[#535353] hero-seq-item hero-seq-right" style={{ animationDelay: '160ms' }}>
             {t('ctaSubtitle')}
           </p>
-          <div className="mt-[24px] flex flex-col md:flex-row items-center justify-center gap-[12px]">
+          <div className="mt-[24px] flex flex-col md:flex-row items-center justify-center gap-[12px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
             <Link
               href={toLocalePath('/contact', locale)}
               className="h-[46px] px-[30px] rounded-[100px] bg-[#161616] text-white font-['Outfit'] text-[12px] uppercase tracking-[0.6px] flex items-center justify-center"
@@ -253,6 +263,7 @@ export default function BlogPostClient({
           </div>
         </div>
       </section>
+      </InView>
     </main>
   );
 }

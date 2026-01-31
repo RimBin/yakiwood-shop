@@ -15,6 +15,7 @@ import { trackEvent, trackProductView } from '@/lib/analytics';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
 import type { UsageType } from '@/lib/pricing/configuration';
 import ModalOverlay from '@/components/modals/ModalOverlay';
+import InView from '@/components/InView';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -1391,10 +1392,11 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
       </div>
 
       {/* Product Section */}
+      <InView className="hero-animate-root">
       <main className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[16px] lg:py-[54px]">
         <div className="flex flex-col lg:flex-row gap-[24px] lg:gap-[36px]">
           {/* Left Column - Gallery */}
-          <div className="flex gap-[16px] order-2 lg:order-1">
+          <div className="flex gap-[16px] order-2 lg:order-1 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             {/* Thumbnails */}
             <div className="flex lg:flex-col gap-[12px] order-2 lg:order-1">
               {thumbs.map((thumb, index) => (
@@ -1459,7 +1461,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
           </div>
 
           {/* Right Column - Product Info */}
-          <div className="flex-1 flex flex-col gap-[24px] order-1 lg:order-2">
+          <div className="flex-1 flex flex-col gap-[24px] order-1 lg:order-2 hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
             {/* Title and Price */}
             <div className="flex flex-col gap-[8px]">
               <h1 className="font-['DM_Sans'] font-normal text-[28px] lg:text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616]">
@@ -1810,6 +1812,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
           </div>
         </div>
       </main>
+      </InView>
 
       <section className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[32px] lg:py-[48px]">
         <Accordion items={accordionItems} defaultOpen={0} />

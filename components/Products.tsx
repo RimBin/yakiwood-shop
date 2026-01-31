@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
 import { assets, getAsset } from '@/lib/assets';
+import InView from '@/components/InView';
 
 const imgMask = getAsset('imgMask');
 
@@ -420,9 +421,9 @@ export default function Products() {
   return (
     <section className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 803:13029 ===== */}
-      <div className="xl:hidden">
+      <InView className="xl:hidden hero-animate-root">
         {/* Title Section - Mobile */}
-        <div className="px-[16px] pt-[64px] pb-[24px]">
+        <div className="px-[16px] pt-[64px] pb-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
             {t('eyebrow')}
           </p>
@@ -436,7 +437,11 @@ export default function Products() {
         {/* Stacked product cards (no horizontal scroll) */}
         <div className="flex flex-col gap-[16px] px-[16px] pb-[24px]">
           {products.map((product, idx) => (
-            <div key={idx} className="w-full flex justify-center">
+            <div
+              key={idx}
+              className="w-full flex justify-center hero-seq-item hero-seq-right"
+              style={{ animationDelay: `${220 + idx * 180}ms` }}
+            >
               <MobileProductCard
                 product={product}
                 colorsLabel={colorsLabel}
@@ -450,12 +455,12 @@ export default function Products() {
         </div>
 
         {/* Removed mobile GET AN OFFER button per request */}
-      </div>
+      </InView>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden xl:block max-w-[1440px] mx-auto px-[40px] relative">
+      <InView className="hidden xl:block max-w-[1440px] mx-auto px-[40px] relative hero-animate-root">
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+14px)] */}
-        <div className="relative h-[160px] text-[#161616] z-10">
+        <div className="relative h-[160px] text-[#161616] z-10 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase left-[0px] top-[23px]">
             {t('eyebrow')}
           </p>
@@ -471,20 +476,25 @@ export default function Products() {
         {/* Products Grid - full-width so card edges align with content edges */}
         <div className="mt-[58px] flex w-full justify-between gap-[40px]">
           {products.map((product, idx) => (
-            <DesktopProductCard
+            <div
               key={idx}
-              product={product}
-              colorsLabel={colorsLabel}
-              selectColorAria={selectColorAria}
-              prevImageAria={prevImageAria}
-              nextImageAria={nextImageAria}
-              tSolutions={tSolutions}
-            />
+              className="flex-1 min-w-0 hero-seq-item hero-seq-right"
+              style={{ animationDelay: `${220 + idx * 180}ms` }}
+            >
+              <DesktopProductCard
+                product={product}
+                colorsLabel={colorsLabel}
+                selectColorAria={selectColorAria}
+                prevImageAria={prevImageAria}
+                nextImageAria={nextImageAria}
+                tSolutions={tSolutions}
+              />
+            </div>
           ))}
         </div>
 
         {/* View Catalog Button */}
-        <div className="mt-[48px] flex justify-center">
+        <div className="mt-[48px] flex justify-center hero-seq-item hero-seq-right" style={{ animationDelay: '680ms' }}>
           <Link
             href={shopHref}
             className="bg-[#161616] px-[40px] py-[10px] h-[48px] rounded-[100px] w-[296px] flex items-center justify-center gap-[10px]"
@@ -496,7 +506,7 @@ export default function Products() {
         </div>
 
         <div className="pb-[64px]" />
-      </div>
+      </InView>
     </section>
   );
 }

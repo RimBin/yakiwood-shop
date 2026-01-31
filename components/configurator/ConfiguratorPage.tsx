@@ -7,6 +7,7 @@ import { PageCover, PageSection } from '@/components/shared';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
 import { fetchProducts, type Product, type ProductColorVariant, type ProductProfileVariant } from '@/lib/products.supabase';
 import { toLocalePath } from '@/i18n/paths';
+import InView from '@/components/InView';
 
 type DropdownOption = { value: string; label: string };
 
@@ -408,22 +409,25 @@ export default function ConfiguratorPage() {
 
   return (
     <main className="min-h-screen bg-[#E1E1E1]">
-      <PageCover>
-        <div className="flex flex-col gap-[12px]">
-          <h1
-            className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] text-[#161616] tracking-[-2.8px] md:tracking-[-6.4px]"
-            style={{ fontVariationSettings: "'opsz' 14" }}
-          >
-            {locale === 'lt' ? t('nav.konfiguratorius3d') : t('nav.configurator3d')}
-          </h1>
-          <p className="max-w-[820px] font-['Outfit'] text-[14px] md:text-[16px] leading-[1.6] text-[#535353]">
-            {t('configurator.pageDescription')}
-          </p>
-        </div>
-      </PageCover>
+      <InView className="hero-animate-root">
+        <PageCover>
+          <div className="flex flex-col gap-[12px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+            <h1
+              className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] text-[#161616] tracking-[-2.8px] md:tracking-[-6.4px]"
+              style={{ fontVariationSettings: "'opsz' 14" }}
+            >
+              {locale === 'lt' ? t('nav.konfiguratorius3d') : t('nav.configurator3d')}
+            </h1>
+            <p className="max-w-[820px] font-['Outfit'] text-[14px] md:text-[16px] leading-[1.6] text-[#535353]">
+              {t('configurator.pageDescription')}
+            </p>
+          </div>
+        </PageCover>
+      </InView>
 
+      <InView className="hero-animate-root">
       <PageSection className="max-w-[1440px] mx-auto" centered={false}>
-        <div className="flex flex-col gap-4 mb-8">
+        <div className="flex flex-col gap-4 mb-8 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <div className="flex flex-wrap items-center gap-[10px]">
             <FilterDropdown
               id="usage"
@@ -493,7 +497,7 @@ export default function ConfiguratorPage() {
             />
           </div>
           {filteredProducts.length > 1 && (
-            <div className="w-full max-w-[420px]">
+            <div className="w-full max-w-[420px] hero-seq-item hero-seq-right" style={{ animationDelay: '160ms' }}>
               <label className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
                 {t('breadcrumbs.products')}
               </label>
@@ -517,14 +521,14 @@ export default function ConfiguratorPage() {
           )}
         </div>
         {error && (
-          <div className="w-full border border-[#BBBBBB] rounded-[24px] bg-white p-[24px]">
+          <div className="w-full border border-[#BBBBBB] rounded-[24px] bg-white p-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
             <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('configurator.loadError')}</p>
             <p className="mt-2 font-['Outfit'] text-[12px] text-[#7C7C7C]">{error}</p>
           </div>
         )}
 
         {!error && filteredProducts.length === 0 && !isLoading && (
-          <div className="w-full border border-[#BBBBBB] rounded-[24px] bg-white p-[24px]">
+          <div className="w-full border border-[#BBBBBB] rounded-[24px] bg-white p-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
             <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('productsPage.emptyTitle')}</p>
             <p className="mt-2 font-['Outfit'] text-[12px] text-[#7C7C7C]">
               {t('productsPage.emptyDescriptionPrefix')}{' '}
@@ -549,7 +553,7 @@ export default function ConfiguratorPage() {
         )}
 
         {!error && (product || isLoading) && (
-          <div className="w-full">
+          <div className="w-full hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
             <Konfiguratorius3D
               productId={product?.id ?? 'demo'}
               availableColors={availableColors}
@@ -559,6 +563,7 @@ export default function ConfiguratorPage() {
           </div>
         )}
       </PageSection>
+      </InView>
     </main>
   );
 }

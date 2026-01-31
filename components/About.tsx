@@ -9,6 +9,7 @@ import { PageCover } from '@/components/shared/PageLayout';
 import { Testimonials } from '@/components/home';
 import { toLocalePath } from '@/i18n/paths';
 import { assets } from '@/lib/assets';
+import InView from '@/components/InView';
 
 // Local image for the about video thumbnail
 const imgVideo = '/assets/about/fire.png';
@@ -48,31 +49,38 @@ export default function About() {
   return (
     <div className="w-full bg-[#E1E1E1]">
       {/* Cover Section */}
-      <PageCover>
-        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
-            style={{ fontVariationSettings: "'opsz' 14" }}>
-          {t('heroTitle')}
-        </h1>
-      </PageCover>
+      <InView className="hero-animate-root">
+        <PageCover>
+          <h1
+            className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616] hero-seq-item hero-seq-right"
+            style={{ fontVariationSettings: "'opsz' 14", animationDelay: '0ms' }}
+          >
+            {t('heroTitle')}
+          </h1>
+        </PageCover>
+      </InView>
 
       {/* About Us Description Section */}
+      <InView className="hero-animate-root">
       <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[24px] md:pt-[64px] lg:pt-[96px] pb-[24px] md:pb-[0px] lg:pb-[0px]">
         <div className="relative lg:min-h-[560px]">
           {/* Big heading text with leading spaces to create indent - matches Figma exactly */}
-          <p className="font-['DM_Sans'] font-light leading-[1] text-[#161616] lg:whitespace-pre-wrap m-0" style={{ fontSize: 'clamp(28px, 4vw, 52px)', letterSpacing: 'clamp(-1.28px, -0.04em, -2.08px)' }}>
+          <p className="font-['DM_Sans'] font-light leading-[1] text-[#161616] lg:whitespace-pre-wrap m-0 hero-seq-item hero-seq-right" style={{ fontSize: 'clamp(28px, 4vw, 52px)', letterSpacing: 'clamp(-1.28px, -0.04em, -2.08px)', animationDelay: '0ms' }}>
 {`${heroIndent}${t('heroLead')}`}
           </p>
-          <p className="font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full lg:max-w-[309px] mt-[32px] lg:mt-0 lg:absolute lg:bottom-0 lg:left-1/2 lg:translate-x-[96px]">
+          <p className="font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full lg:max-w-[309px] mt-[32px] lg:mt-0 lg:absolute lg:bottom-0 lg:left-1/2 lg:translate-x-[96px] hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
             {t('heroBody')}
           </p>
         </div>
       </section>
+      </InView>
 
       {/* Video Section */}
+      <InView className="hero-animate-root">
       <div className="relative md:pt-5 lg:pt-[56px]">
         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-[#161616]"></div>
         <div className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] relative z-10">
-          <div className="relative h-[200px] md:h-[450px] lg:h-[642px] w-full rounded-[8px] overflow-hidden">
+          <div className="relative h-[200px] md:h-[450px] lg:h-[642px] w-full rounded-[8px] overflow-hidden hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             <Image
               src={imgVideo}
               alt={t('videoAlt')}
@@ -92,12 +100,14 @@ export default function About() {
           </div>
         </div>
       </div>
+      </InView>
 
       {/* Foundations Section */}
+      <InView className="hero-animate-root">
       <div className="bg-[#161616] pt-[64px] md:pt-[80px] lg:pt-[180px] pb-[64px] md:pb-[80px] lg:pb-[200px] w-full">
         <div className="max-w-[1440px] mx-auto pl-[16px] pr-0 md:pl-[32px] md:pr-0 lg:pl-[40px] lg:pr-0 relative">
           {/* Title */}
-          <div className="mb-[32px] md:mb-[48px] grid grid-cols-1 gap-[12px] lg:grid-cols-[344px_auto] lg:items-start lg:gap-0">
+          <div className="mb-[32px] md:mb-[48px] grid grid-cols-1 gap-[12px] lg:grid-cols-[344px_auto] lg:items-start lg:gap-0 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-white lg:mt-[26px]">
               {t('foundationsEyebrow')}
             </p>
@@ -107,7 +117,7 @@ export default function About() {
           </div>
 
           {/* Cards Grid - 4 columns layout matching Figma */}
-          <div className="hidden lg:grid lg:grid-cols-4 gap-[16px]">
+          <div className="hidden lg:grid lg:grid-cols-4 gap-[16px] hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
             {/* Row 1: col1 bordered, col2 empty, col3 bordered, col4 no border */}
             <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
               <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
@@ -176,7 +186,7 @@ export default function About() {
           </div>
 
           {/* Mobile Cards - horizontal scroll (left padding matches page, cards peek on 320px) */}
-          <div className="lg:hidden">
+          <div className="lg:hidden hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
             <div className="flex snap-x snap-mandatory gap-[16px] overflow-x-auto px-[16px] pb-[8px] scrollbar-hide">
               <div className="snap-start shrink-0 w-[260px] border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
                 <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
@@ -225,12 +235,14 @@ export default function About() {
           </div>
         </div>
       </div>
+      </InView>
 
       {/* Process Section */}
+      <InView className="hero-animate-root">
       <div className="bg-[#E1E1E1] pt-[64px] md:pt-[80px] lg:pt-[200px] pb-[64px] md:pb-[80px] lg:pb-[80px] w-full">
         <div className="max-w-[1440px] mx-auto px-[16px] md:px-[40px]">
           {/* Title */}
-          <div className="mb-[32px] md:mb-[48px] grid grid-cols-1 gap-[12px] lg:grid-cols-[344px_auto] lg:items-start lg:gap-0">
+          <div className="mb-[32px] md:mb-[48px] grid grid-cols-1 gap-[12px] lg:grid-cols-[344px_auto] lg:items-start lg:gap-0 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] lg:mt-[26px]">
               {t('processEyebrow')}
             </p>
@@ -240,7 +252,7 @@ export default function About() {
           </div>
 
           {/* Description texts - Desktop positioned to match Figma */}
-          <div className="hidden lg:grid lg:grid-cols-[minmax(0,344px)_minmax(0,1fr)] lg:gap-0 mb-[48px]">
+          <div className="hidden lg:grid lg:grid-cols-[minmax(0,344px)_minmax(0,1fr)] lg:gap-0 mb-[48px] hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
             <div></div>
             <div className="flex gap-[68px]">
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[276px]">
@@ -253,14 +265,14 @@ export default function About() {
           </div>
 
           {/* Mobile description */}
-          <div className="lg:hidden mb-[32px]">
+          <div className="lg:hidden mb-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
             <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]">
               {t('processBodyMobile')}
             </p>
           </div>
 
           {/* Process steps - Desktop */}
-          <div className="hidden lg:grid lg:grid-cols-[minmax(0,344px)_minmax(0,1fr)] lg:gap-0">
+          <div className="hidden lg:grid lg:grid-cols-[minmax(0,344px)_minmax(0,1fr)] lg:gap-0 hero-seq-item hero-seq-right" style={{ animationDelay: '360ms' }}>
             <div></div>
             <div className="w-full max-w-[672px]">
               <div className="border-t border-[#7C7C7C] py-[16px] flex justify-between items-start gap-[24px]">
@@ -294,7 +306,7 @@ export default function About() {
           </div>
 
           {/* Process steps - Mobile */}
-          <div className="lg:hidden">
+          <div className="lg:hidden hero-seq-item hero-seq-right" style={{ animationDelay: '360ms' }}>
             <div className="border-t border-[#7C7C7C] py-[16px] flex flex-col gap-[8px]">
               <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-[#161616]">
                 {t('step1Title')}
@@ -323,6 +335,7 @@ export default function About() {
           </div>
         </div>
       </div>
+      </InView>
 
       {showTeamSection && (
         <>
@@ -453,6 +466,7 @@ export default function About() {
       <Testimonials />
 
       {/* CTA Section */}
+      <InView className="hero-animate-root">
       <div className="relative h-[523px] md:h-[1053px] w-full overflow-hidden bg-[#E1E1E1]">
         {/* Background image centered */}
         <div className="absolute inset-0 flex items-center justify-center">
@@ -466,10 +480,10 @@ export default function About() {
           </div>
         </div>
         <div className="relative max-w-[1440px] mx-auto px-[16px] md:px-[40px] h-full flex flex-col items-center justify-center">
-          <p className="font-['DM_Sans'] font-light text-[45px] md:text-[128px] leading-[45px] md:leading-[0.95] tracking-[-1.8px] md:tracking-[-6.4px] text-[#161616] text-center max-w-[358px] md:max-w-[861px] mb-[32px] md:mb-[80px]">
+          <p className="font-['DM_Sans'] font-light text-[45px] md:text-[128px] leading-[45px] md:leading-[0.95] tracking-[-1.8px] md:tracking-[-6.4px] text-[#161616] text-center max-w-[358px] md:max-w-[861px] mb-[32px] md:mb-[80px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             {t('ctaTitlePrefix')} <span className="font-['Tiro_Tamil'] italic">{t('ctaTitleItalic')}</span> {t('ctaTitleSuffix')}
           </p>
-          <div className="flex flex-col md:flex-row gap-[16px] items-center">
+          <div className="flex flex-col md:flex-row gap-[16px] items-center hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
             <Link
               href={toLocalePath('/products', currentLocale)}
               className="bg-[#161616] rounded-[100px] px-[40px] py-[10px] h-[48px] flex items-center justify-center"
@@ -489,6 +503,7 @@ export default function About() {
           </div>
         </div>
       </div>
+      </InView>
 
       {isVideoOpen ? (
         <div

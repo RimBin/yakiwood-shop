@@ -5,6 +5,7 @@ import { PageCover } from '@/components/shared/PageLayout';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { trackEvent } from '@/lib/analytics';
+import InView from '@/components/InView';
 
 export default function Contact() {
   const t = useTranslations('contact');
@@ -79,20 +80,25 @@ export default function Contact() {
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
       {/* Title */}
-      <PageCover>
-        <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
-            style={{ fontVariationSettings: "'opsz' 14" }}>
-          {t('title')}
-        </h1>
-      </PageCover>
+      <InView className="hero-animate-root">
+        <PageCover>
+          <h1
+            className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616] hero-seq-item hero-seq-right"
+            style={{ fontVariationSettings: "'opsz' 14", animationDelay: '0ms' }}
+          >
+            {t('title')}
+          </h1>
+        </PageCover>
+      </InView>
 
       {/* Subtitle + Form */}
+      <InView className="hero-animate-root">
       <div className="w-full flex flex-col items-center pt-[64px] md:pt-[80px] lg:pt-[100px] pb-[80px] md:pb-[100px] lg:pb-[120px] px-[16px] md:px-[32px] lg:px-[40px]">
-        <p className="font-['DM_Sans'] font-light leading-none text-[#161616] text-center mb-[40px] md:mb-[54px] lg:mb-[68px] max-w-[838px]" style={{ fontSize: 'clamp(32px, 5vw, 52px)', letterSpacing: 'clamp(-1.28px, -0.04em, -2.08px)', fontVariationSettings: "'opsz' 14" }}>
+        <p className="font-['DM_Sans'] font-light leading-none text-[#161616] text-center mb-[40px] md:mb-[54px] lg:mb-[68px] max-w-[838px] hero-seq-item hero-seq-right" style={{ fontSize: 'clamp(32px, 5vw, 52px)', letterSpacing: 'clamp(-1.28px, -0.04em, -2.08px)', fontVariationSettings: "'opsz' 14", animationDelay: '0ms' }}>
           {t('subtitle')}
         </p>
 
-        <div className="w-full max-w-[600px]">
+        <div className="w-full max-w-[600px] hero-seq-item hero-seq-right" style={{ animationDelay: '220ms' }}>
           {submitted ? (
             <div className="text-center py-[40px]">
               <p 
@@ -204,6 +210,7 @@ export default function Contact() {
           )}
         </div>
       </div>
+      </InView>
     </section>
   );
 }

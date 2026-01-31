@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Plus from '@/components/icons/Plus';
 import Minus from '@/components/icons/Minus';
+import InView from '@/components/InView';
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(0);
@@ -24,7 +25,7 @@ export default function FAQ() {
       {/* Header removed */}
       
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7586 ===== */}
-      <div className="xl:hidden py-[64px]">
+      <InView className="xl:hidden py-[64px] hero-animate-root">
         {/* Accordion - Mobile */}
 
         {/* Accordion - Mobile */}
@@ -32,7 +33,8 @@ export default function FAQ() {
           {faqs.map((faq, idx) => (
             <div
               key={idx}
-              className={`w-full ${openIndex === idx ? 'bg-[#161616]' : 'bg-[#E1E1E1]'} py-[16px] px-[16px] cursor-pointer border-t border-[#BBBBBB] last:border-b`}
+              className={`w-full ${openIndex === idx ? 'bg-[#161616]' : 'bg-[#E1E1E1]'} py-[16px] px-[16px] cursor-pointer border-t border-[#BBBBBB] last:border-b hero-seq-item hero-seq-right`}
+              style={{ animationDelay: `${idx * 140}ms` }}
               onClick={() => setOpenIndex(openIndex === idx ? -1 : idx)}
             >
               <div className="flex items-start justify-between gap-[16px]">
@@ -62,12 +64,12 @@ export default function FAQ() {
             </div>
           ))}
         </div>
-      </div>
+      </InView>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden xl:block">
+      <InView className="hidden xl:block hero-animate-root">
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+24px)] */}
-        <div className="max-w-[1440px] mx-auto px-[40px] pt-[120px] pb-[40px]">
+        <div className="max-w-[1440px] mx-auto px-[40px] pt-[120px] pb-[40px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <div className="relative h-[160px] text-[#161616]">
             <p className="absolute left-0 top-[25px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase">
               {t('eyebrow')}
@@ -85,7 +87,8 @@ export default function FAQ() {
           {faqs.map((faq, idx) => (
             <div
               key={idx}
-              className={`w-full ${openIndex === idx ? 'bg-[#161616] min-h-[173px]' : 'bg-[#e1e1e1] h-[70px]'} py-[24px] cursor-pointer border-t border-[#BBBBBB] last:border-b`}
+              className={`w-full ${openIndex === idx ? 'bg-[#161616] min-h-[173px]' : 'bg-[#e1e1e1] h-[70px]'} py-[24px] cursor-pointer border-t border-[#BBBBBB] last:border-b hero-seq-item hero-seq-right`}
+              style={{ animationDelay: `${220 + idx * 140}ms` }}
               onClick={() => setOpenIndex(openIndex === idx ? -1 : idx)}
             >
               <div className="max-w-[1440px] mx-auto px-[40px] w-full">
@@ -109,7 +112,7 @@ export default function FAQ() {
             </div>
           ))}
         </div>
-      </div>
+      </InView>
     </section>
   );
 }

@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import { assets } from '@/lib/assets';
 import { toLocalePath } from '@/i18n/paths';
 import { clamp } from '@/lib/design-system';
+import InView from '@/components/InView';
 
 const imgProductImage = assets.heroPlank;
 const certifications = assets.certificationsList;
@@ -28,8 +29,8 @@ export default async function Hero() {
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
-      <div className="lg:hidden flex flex-col relative z-10">
-        <div className="px-4 pt-4 pb-2 flex flex-col gap-2 md:max-w-[620px]">
+      <InView className="lg:hidden flex flex-col relative z-10 hero-animate-root">
+        <div className="px-4 pt-4 pb-2 flex flex-col gap-2 md:max-w-[620px] hero-seq-item hero-seq-right hero-ease-in hero-seq-1">
           <p
             className="font-['DM_Sans'] font-light leading-none text-[#161616] w-full max-w-full sm:max-w-[520px] md:max-w-[620px] whitespace-pre-line break-words"
             style={{ fontSize: heroHeadingSize, letterSpacing: heroHeadingTracking }}
@@ -46,7 +47,7 @@ export default async function Hero() {
         </div>
 
         <div className="relative w-full">
-          <div className="bg-[#bbab92] w-full h-[423px] md:h-[520px] relative">
+          <div className="bg-[#bbab92] w-full h-[423px] md:h-[520px] relative hero-seq-item hero-seq-right hero-seq-2">
             <div className="absolute inset-x-0 top-0 h-[309px] flex items-center justify-center">
               <div className="rotate-[333.068deg] w-full px-4 flex items-center justify-center">
                 <div className="w-full max-w-[340px] aspect-[317/185] relative">
@@ -63,7 +64,7 @@ export default async function Hero() {
             </div>
           </div>
 
-          <div className="absolute right-4 bottom-[80px] w-[280px] md:w-[360px] bg-white/10 backdrop-blur-[20px] border border-white/50 rounded-[16px] p-3 flex flex-col gap-3">
+          <div className="absolute right-4 bottom-[80px] w-[280px] md:w-[360px] bg-white/10 backdrop-blur-[20px] border border-white/50 rounded-[16px] p-3 flex flex-col gap-3 hero-seq-item hero-seq-right hero-seq-3">
             <div className="flex flex-col gap-2 w-full">
               <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white w-full">
                 {tHero('productName')}
@@ -110,7 +111,7 @@ export default async function Hero() {
           </div>
         </div>
 
-        <div className="absolute left-0 right-0 bottom-0 bg-[#161616] h-[64px] px-4 flex items-center z-20 lg:hidden">
+        <div className="absolute left-0 right-0 bottom-0 bg-[#161616] h-[64px] px-4 flex items-center z-20 lg:hidden hero-seq-item hero-seq-right hero-seq-4">
           <div className="flex w-full items-center justify-between gap-3">
             {certifications.map((src) => (
               <div key={src} className="relative h-[24px] flex-1 min-w-0">
@@ -119,12 +120,12 @@ export default async function Hero() {
             ))}
           </div>
         </div>
-      </div>
+      </InView>
 
-      <div className="hidden lg:block relative z-10 w-full min-h-[861px]">
+      <InView className="hidden lg:block relative z-10 w-full min-h-[861px] hero-animate-root">
         {/* Centered content container */}
         <div className="relative max-w-[1440px] mx-auto h-full">
-          <div className="absolute left-[40px] top-[190px] flex flex-col gap-[24px] z-10">
+          <div className="absolute left-[40px] top-[190px] flex flex-col gap-[24px] z-10 hero-seq-item hero-seq-right hero-ease-in hero-seq-1">
             <p
               className="font-['DM_Sans'] font-light leading-none text-[#161616] w-[606px] whitespace-pre-wrap"
               style={{ fontSize: heroHeadingSize, letterSpacing: heroHeadingTracking }}
@@ -154,7 +155,7 @@ export default async function Hero() {
             </div>
           </div>
 
-          <div className="absolute left-[calc(50%+10px)] top-[125px] z-10">
+          <div className="absolute left-[calc(50%+10px)] top-[125px] z-10 hero-seq-item hero-seq-right hero-seq-2">
             <div className="bg-[#bbab92] rounded-[24px] w-[670px] h-[654px]" />
 
             <div className="absolute left-[2px] top-[42.86px] w-[663.054px] h-[558.481px] flex items-center justify-center overflow-hidden">
@@ -172,7 +173,7 @@ export default async function Hero() {
               </div>
             </div>
 
-            <div className="absolute left-[311px] top-[352px] bg-white/10 backdrop-blur-[20px] border border-white/50 border-solid rounded-[24px] p-[16px] w-[351px] flex flex-col gap-[16px]">
+            <div className="absolute left-[311px] top-[352px] bg-white/10 backdrop-blur-[20px] border border-white/50 border-solid rounded-[24px] p-[16px] w-[351px] flex flex-col gap-[16px] hero-seq-item hero-seq-right hero-seq-3">
               <p className="font-['DM_Sans'] font-normal text-[24px] leading-[1.1] tracking-[-0.96px] text-white w-[292px] whitespace-pre-wrap">{tHero('productName')}</p>
 
               <div className="flex gap-[8px] items-center text-white">
@@ -219,15 +220,21 @@ export default async function Hero() {
         <div className="absolute left-0 right-0 bottom-0 w-full bg-[#161616] z-10">
           <div className="max-w-[1440px] mx-auto px-[40px] h-[80px] flex items-center">
             <div className="flex w-full items-center justify-between">
-              {certifications.map((src) => (
-                <div key={src} className="h-[32px] w-[120px] relative">
-                  <Image src={src} alt="" fill className="object-contain" sizes="120px" />
-                </div>
-              ))}
+              {certifications.map((src, index) => {
+                const isBigger = index === 0 || index === 2 || index === 3 || index === 4;
+                const width = isBigger ? 140 : 120;
+                const height = isBigger ? 40 : 32;
+
+                return (
+                  <div key={src} className="relative" style={{ width, height }}>
+                    <Image src={src} alt="" fill className="object-contain" sizes={`${width}px`} />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
-      </div>
+      </InView>
     </section>
   );
 }

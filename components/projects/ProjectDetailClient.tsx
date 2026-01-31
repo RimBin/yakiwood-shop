@@ -9,6 +9,7 @@ import RelatedProjects from '@/components/projects/RelatedProjects';
 import { projects as projectsData } from '@/data/projects';
 import type { Project } from '@/types/project';
 import { toLocalePath } from '@/i18n/paths';
+import InView from '@/components/InView';
 import {
   findProjectBySlug,
   getProjectDescription,
@@ -139,42 +140,46 @@ export default function ProjectDetailClient({
         ]}
       />
 
-      {/* Title */}
-      <div className="w-full py-8 lg:py-12">
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-10">
-          <h1 className="font-['DM_Sans'] font-light text-[40px] lg:text-[80px] leading-none tracking-[-1.6px] lg:tracking-[-4.4px] text-[#161616]">
-            {title}
-          </h1>
-        </div>
-      </div>
-
-      {/* Gallery */}
-      <div className="w-full mb-8 lg:mb-12">
-        <ProjectGallery images={project.images} title={title} />
-      </div>
-
-      {/* Project Information */}
-      <div className="w-full mb-8 lg:mb-12">
-        <ProjectInfo
-          title={title}
-          subtitle={subtitle}
-          location={location}
-          productsUsed={project.productsUsed}
-        />
-      </div>
-
-      {/* Description */}
-      <div className="w-full mb-16 lg:mb-24">
-        <div className="max-w-[671px] mx-auto px-4 lg:px-0">
-          <div className="font-['Outfit'] font-light text-sm leading-[1.2] tracking-[0.14px] text-[#161616] space-y-2.5">
-            <p>{description}</p>
-            {fullDescription && <p>{fullDescription}</p>}
+      <InView className="hero-animate-root">
+        {/* Title */}
+        <div className="w-full py-8 lg:py-12 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+          <div className="max-w-[1440px] mx-auto px-4 lg:px-10">
+            <h1 className="font-['DM_Sans'] font-light text-[40px] lg:text-[80px] leading-none tracking-[-1.6px] lg:tracking-[-4.4px] text-[#161616]">
+              {title}
+            </h1>
           </div>
         </div>
-      </div>
 
-      {/* Related Projects */}
-      <RelatedProjects projects={relatedProjects} basePath={basePath} />
+        {/* Gallery */}
+        <div className="w-full mb-8 lg:mb-12 hero-seq-item hero-seq-right" style={{ animationDelay: '180ms' }}>
+          <ProjectGallery images={project.images} title={title} />
+        </div>
+
+        {/* Project Information */}
+        <div className="w-full mb-8 lg:mb-12 hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
+          <ProjectInfo
+            title={title}
+            subtitle={subtitle}
+            location={location}
+            productsUsed={project.productsUsed}
+          />
+        </div>
+
+        {/* Description */}
+        <div className="w-full mb-16 lg:mb-24 hero-seq-item hero-seq-right" style={{ animationDelay: '460ms' }}>
+          <div className="max-w-[671px] mx-auto px-4 lg:px-0">
+            <div className="font-['Outfit'] font-light text-sm leading-[1.2] tracking-[0.14px] text-[#161616] space-y-2.5">
+              <p>{description}</p>
+              {fullDescription && <p>{fullDescription}</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Related Projects */}
+        <div className="hero-seq-item hero-seq-right" style={{ animationDelay: '620ms' }}>
+          <RelatedProjects projects={relatedProjects} basePath={basePath} />
+        </div>
+      </InView>
     </main>
   );
 }

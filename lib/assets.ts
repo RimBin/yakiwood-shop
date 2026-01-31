@@ -59,12 +59,12 @@ const localAssets = {
   certFsc: '/assets/footer/fsc.png',
   certEu: '/assets/footer/ES.png',
   // Additional logo files (exported from Figma) used in the hero certification bar
-  cert1: '/icons/ui/logos/Img.png',
-  cert2: '/icons/ui/logos/Img1.png',
-  cert3: '/icons/ui/logos/Img2.png',
-  cert4: '/icons/ui/logos/Img3.png',
-  cert5: '/icons/ui/logos/Img4.png',
-  cert6: '/icons/ui/logos/Img5.png',
+  cert1: '/icons/ui/logos/fsc.svg',
+  cert2: '/icons/ui/logos/accoya.svg',
+  cert3: '/icons/ui/logos/pefc.svg',
+  cert4: '/icons/ui/logos/epd.svg',
+  cert5: '/icons/ui/logos/iso.svg',
+  cert6: '/icons/ui/logos/ce.svg',
 
   // Payments
   imgPayments: '/assets/icons/payments.png',

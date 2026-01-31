@@ -135,6 +135,67 @@ body {
   animation: slide-in-right 0.3s ease-out;
 }
 
+@keyframes hero-seq-right {
+  from {
+    opacity: 0;
+    transform: translate3d(-64px, 0, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.hero-seq-item {
+  opacity: 0;
+  transform: translate3d(-64px, 0, 0) scale(0.96);
+  animation-duration: 1400ms;
+  animation-timing-function: cubic-bezier(0.2, 0.9, 0.2, 1);
+  animation-fill-mode: both;
+  will-change: transform, opacity;
+}
+
+.hero-seq-right {
+  animation-name: hero-seq-right;
+}
+
+.hero-ease-in {
+  animation-timing-function: ease-in;
+}
+
+.hero-animate-root .hero-seq-item {
+  animation-play-state: paused;
+}
+
+.hero-animate-root.is-inview .hero-seq-item {
+  animation-play-state: running;
+}
+
+.hero-seq-1 {
+  animation-delay: 0ms;
+  animation-duration: 900ms;
+}
+
+.hero-seq-2 {
+  animation-delay: 300ms;
+  animation-duration: 1100ms;
+}
+
+.hero-seq-3 {
+  animation-delay: 600ms;
+  animation-duration: 1250ms;
+}
+
+.hero-seq-4 {
+  animation-delay: 900ms;
+  animation-duration: 1400ms;
+}
+
+.hero-seq-5 {
+  animation-delay: 1200ms;
+  animation-duration: 1550ms;
+}
+
 /* Custom scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
   height: 6px;
@@ -192,6 +253,12 @@ body {
   .yw-marquee-track {
     animation: none;
     transform: translateX(0);
+  }
+
+  .hero-seq-item {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }
 

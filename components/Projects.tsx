@@ -10,6 +10,7 @@ import type { Project } from '@/types/project';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
 import { getProjectLocation, getProjectSlug, getProjectTitle, normalizeProjectLocale } from '@/lib/projects/i18n';
+import InView from '@/components/InView';
 
 const [imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6] = assets.projects;
 
@@ -130,9 +131,9 @@ export default function Projects() {
       {/* Header removed */}
 
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7712 ===== */}
-      <div className="xl:hidden">
+      <InView className="xl:hidden hero-animate-root">
         {/* Description text - Mobile */}
-        <p className="px-[16px] md:px-[32px] font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[600px] mb-[24px] md:mb-[32px]">
+        <p className="px-[16px] md:px-[32px] font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[600px] mb-[24px] md:mb-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           Žmonės, pasirinkę degintą medieną, dažnai dalinasi teigiamais įspūdžiais ir patirtimis. Jie pastebi ne tik išskirtinę išvaizdą, bet ir funkcionalumą bei ilgaamžiškumą.
         </p>
 
@@ -141,7 +142,8 @@ export default function Projects() {
           {/* Row 1: Big card (267x268px + text) */}
           <Link
             href={getProjectHrefLocalized(basePath, featuredProjects[0], currentLocale)}
-            className="flex flex-col gap-[8px] mb-[16px]"
+            className="flex flex-col gap-[8px] mb-[16px] hero-seq-item hero-seq-right"
+            style={{ animationDelay: '220ms' }}
           >
             <div className="h-[268px] w-full max-w-[267px] rounded-[8px] relative overflow-hidden">
               <Image
@@ -165,7 +167,8 @@ export default function Projects() {
           <div className="flex justify-end mb-[16px]">
             <Link
               href={getProjectHrefLocalized(basePath, featuredProjects[1], currentLocale)}
-              className="flex flex-col gap-[8px]"
+              className="flex flex-col gap-[8px] hero-seq-item hero-seq-right"
+              style={{ animationDelay: '380ms' }}
             >
               <div className="h-[176px] w-full max-w-[230px] rounded-[8px] relative overflow-hidden">
                 <Image
@@ -189,7 +192,8 @@ export default function Projects() {
           {/* Row 3: Large card (328x330px) - full width */}
           <Link
             href={getProjectHrefLocalized(basePath, featuredProjects[2], currentLocale)}
-            className="flex flex-col gap-[8px] mb-[16px]"
+            className="flex flex-col gap-[8px] mb-[16px] hero-seq-item hero-seq-right"
+            style={{ animationDelay: '540ms' }}
           >
             <div className="h-[330px] w-full max-w-[328px] rounded-[8px] relative overflow-hidden">
               <Image
@@ -213,7 +217,8 @@ export default function Projects() {
           <div className="flex justify-center mb-[16px]">
             <Link
               href={getProjectHrefLocalized(basePath, featuredProjects[3], currentLocale)}
-              className="flex flex-col gap-[8px]"
+              className="flex flex-col gap-[8px] hero-seq-item hero-seq-right"
+              style={{ animationDelay: '700ms' }}
             >
               <div className="h-[177px] w-full max-w-[175px] rounded-[8px] relative overflow-hidden">
                 <Image
@@ -235,7 +240,7 @@ export default function Projects() {
           </div>
 
           {/* Description between projects */}
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full max-w-[266px] mb-[24px]">
+          <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] w-full max-w-[266px] mb-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '860ms' }}>
             Žmonės, pasirinkę degintą medieną, dažnai dalinasi teigiamais įspūdžiais ir patirtimis. Jie pastebi ne tik išskirtinę išvaizdą, bet ir funkcionalumą bei ilgaamžiškumą.
           </p>
 
@@ -243,7 +248,8 @@ export default function Projects() {
           <div className="flex justify-end mb-[16px]">
             <Link
               href={getProjectHrefLocalized(basePath, featuredProjects[4], currentLocale)}
-              className="flex flex-col gap-[8px]"
+              className="flex flex-col gap-[8px] hero-seq-item hero-seq-right"
+              style={{ animationDelay: '1020ms' }}
             >
               <div className="h-[176px] w-full max-w-[230px] rounded-[8px] relative overflow-hidden">
                 <Image
@@ -267,7 +273,8 @@ export default function Projects() {
           {/* Row 6: Large card (328x330px) */}
           <Link
             href={getProjectHrefLocalized(basePath, featuredProjects[5], currentLocale)}
-            className="flex flex-col gap-[8px] mb-[24px]"
+            className="flex flex-col gap-[8px] mb-[24px] hero-seq-item hero-seq-right"
+            style={{ animationDelay: '1180ms' }}
           >
             <div className="h-[330px] w-full max-w-[328px] rounded-[8px] relative overflow-hidden">
               <Image
@@ -289,7 +296,7 @@ export default function Projects() {
         </div>
 
         {/* View All Projects Button - Mobile */}
-        <div className="flex justify-center pb-[64px]">
+        <div className="flex justify-center pb-[64px] hero-seq-item hero-seq-right" style={{ animationDelay: '1340ms' }}>
           <Link href={basePath} className="flex gap-[8px] items-center h-[24px]">
             <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
               {t('viewAll')}
@@ -297,12 +304,12 @@ export default function Projects() {
             <ArrowRight color="#161616" />
           </Link>
         </div>
-      </div>
+      </InView>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden xl:block max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[120px]">
+      <InView className="hidden xl:block max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[120px] hero-animate-root">
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+25px)] */}
-        <div className="relative h-[80px] mb-[64px]">
+        <div className="relative h-[80px] mb-[64px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <p className="absolute left-0 top-[22px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
             {t('eyebrow')}
           </p>
@@ -325,7 +332,8 @@ export default function Projects() {
             <Link
               key={idx}
               href={getProjectHrefLocalized(basePath, project, currentLocale)}
-              className="flex flex-col gap-[8px]"
+              className="flex flex-col gap-[8px] hero-seq-item hero-seq-right"
+              style={{ animationDelay: `${220 + idx * 140}ms` }}
             >
               <div
                 className={`relative w-full overflow-hidden rounded-[12px] ${(() => {
@@ -354,10 +362,10 @@ export default function Projects() {
           ))}
         </div>
 
-        <p className="mt-[48px] font-['Outfit'] text-[14px] font-light leading-[1.4] tracking-[0.14px] text-[#535353] w-[269px]">
+        <p className="mt-[48px] font-['Outfit'] text-[14px] font-light leading-[1.4] tracking-[0.14px] text-[#535353] w-[269px] hero-seq-item hero-seq-right" style={{ animationDelay: '980ms' }}>
           Žmonės, pasirinkę degintą medieną, dažnai dalinasi teigiamais įspūdžiais ir patirtimis. Jie pastebi ne tik išskirtinę išvaizdą, bet ir funkcionalumą bei ilgaamžiškumą.
         </p>
-      </div>
+      </InView>
     </section>
   );
 }

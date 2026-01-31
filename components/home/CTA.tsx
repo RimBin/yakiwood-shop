@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { getSectionPadding, getGap } from '@/lib/design-system';
 import { assets } from '@/lib/assets';
 import { toLocalePath } from '@/i18n/paths';
+import InView from '@/components/InView';
 
 // Shared background image for CTA section
 const backgroundImage = assets.ctaBackground;
@@ -24,16 +25,16 @@ export default async function CTA() {
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7625 ===== */}
-      <div className={`xl:hidden relative z-10 flex flex-col items-center justify-center h-[580px] ${getSectionPadding()}`}>
+      <InView className={`xl:hidden relative z-10 flex flex-col items-center justify-center h-[580px] ${getSectionPadding()} hero-animate-root`}>
         {/* Heading - Mobile/Tablet */}
-        <h2 className="font-['DM_Sans'] font-light text-center max-w-[600px] mb-[12px] md:mb-[40px]" style={{ fontSize: 'clamp(40px, 7vw, 64px)', lineHeight: 1, letterSpacing: 'clamp(-1.8px, -0.04em, -2.56px)' }}>
+        <h2 className="font-['DM_Sans'] font-light text-center max-w-[600px] mb-[12px] md:mb-[40px] hero-seq-item hero-seq-right" style={{ fontSize: 'clamp(40px, 7vw, 64px)', lineHeight: 1, letterSpacing: 'clamp(-1.8px, -0.04em, -2.56px)', animationDelay: '0ms' }}>
           <span>{t('headline.prefix')}</span>
           <span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
           <span>{t('headline.suffix')}</span>
         </h2>
 
         {/* Buttons - Mobile/Tablet */}
-        <div className="flex flex-col md:flex-row gap-[16px] w-full md:w-auto md:justify-center max-w-[358px] md:max-w-none">
+        <div className="flex flex-col md:flex-row gap-[16px] w-full md:w-auto md:justify-center max-w-[358px] md:max-w-none hero-seq-item hero-seq-right" style={{ animationDelay: '260ms' }}>
           {/* Primary Button - GET AN OFFER */}
           <Link
             href={toLocalePath('/produktai', currentLocale)}
@@ -54,19 +55,19 @@ export default async function CTA() {
             </span>
           </Link>
         </div>
-      </div>
+      </InView>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden xl:flex relative z-10 flex-col items-center justify-center min-h-[1053px] py-[113px] px-[40px]">
+      <InView className="hidden xl:flex relative z-10 flex-col items-center justify-center min-h-[1053px] py-[113px] px-[40px] hero-animate-root">
         {/* Heading - Desktop */}
-        <h2 className="font-['DM_Sans'] font-light text-[128px] leading-[0.95] tracking-[-6.4px] text-[#161616] text-center mb-[66px] w-[861px]">
+        <h2 className="font-['DM_Sans'] font-light text-[128px] leading-[0.95] tracking-[-6.4px] text-[#161616] text-center mb-[66px] w-[861px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <span>{t('headline.prefix')}</span>
           <span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
           <span>{t('headline.suffix')}</span>
         </h2>
 
         {/* Action Buttons - Desktop: Side by Side */}
-        <div className="flex gap-[16px] items-center justify-center">
+        <div className="flex gap-[16px] items-center justify-center hero-seq-item hero-seq-right" style={{ animationDelay: '260ms' }}>
           {/* Secondary Button - GET IN TOUCH */}
           <Link
             href={toLocalePath('/kontaktai', currentLocale)}
@@ -87,7 +88,7 @@ export default async function CTA() {
             </span>
           </Link>
         </div>
-      </div>
+      </InView>
     </section>
   );
 }

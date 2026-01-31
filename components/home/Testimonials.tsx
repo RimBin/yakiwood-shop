@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState, useRef, useEffect } from "react";
 import { getSectionSpacing, getContainerPadding } from '@/lib/design-system';
 import { assets } from '@/lib/assets';
+import InView from '@/components/InView';
 
 interface Testimonial {
   quote: string;
@@ -76,9 +77,9 @@ export default function Testimonials() {
   return (
     <section id="testimonials" className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7576 ===== */}
-      <div className="xl:hidden pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0">
+      <InView className="xl:hidden pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0 hero-animate-root">
         {/* Title Section - Mobile/Tablet */}
-        <div className={`${getContainerPadding()} mb-[24px] md:mb-[32px]`}>
+        <div className={`${getContainerPadding()} mb-[24px] md:mb-[32px] hero-seq-item hero-seq-right`} style={{ animationDelay: '0ms' }}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
             {t('eyebrow')}
           </p>
@@ -118,7 +119,8 @@ export default function Testimonials() {
           {testimonials.map((testimonial, index) => (
             <article
               key={testimonial.author}
-              className="relative flex-shrink-0 w-full md:w-full h-[450px] md:h-[480px] rounded-[16px] overflow-hidden snap-center"
+              className="relative flex-shrink-0 w-full md:w-full h-[450px] md:h-[480px] rounded-[16px] overflow-hidden snap-center hero-seq-item hero-seq-right"
+              style={{ animationDelay: `${220 + index * 160}ms` }}
             >
               <div className="absolute inset-0">
                 <Image
@@ -142,7 +144,7 @@ export default function Testimonials() {
         </div>
 
         {/* Navigation Arrows - Mobile */}
-        <div className="flex items-center justify-center gap-[16px] mt-[24px] px-[16px]">
+        <div className="flex items-center justify-center gap-[16px] mt-[24px] px-[16px] hero-seq-item hero-seq-right" style={{ animationDelay: '760ms' }}>
           <button
             onClick={handlePrev}
             className="w-[40px] h-[40px] rounded-full border border-[#161616] flex items-center justify-center bg-transparent"
@@ -162,7 +164,7 @@ export default function Testimonials() {
             </svg>
           </button>
         </div>
-      </div>
+      </InView>
 
       {/* keep mobile arrows in sync by scrolling container when activeIndex changes */}
       {
@@ -171,10 +173,10 @@ export default function Testimonials() {
       
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <div className="hidden xl:block max-w-[1440px] mx-auto px-[40px] py-[120px]">
+      <InView className="hidden xl:block max-w-[1440px] mx-auto px-[40px] py-[120px] hero-animate-root">
         <div className="flex flex-col gap-[48px]">
           {/* Title Row - Figma pattern: eyebrow at left-[40px], heading at left-[calc(25%+25px)] */}
-          <div className="relative h-[80px]">
+          <div className="relative h-[80px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             {/* Eyebrow */}
             <p className="absolute left-0 top-[25px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] leading-[1.2]">
               {t('eyebrow')}
@@ -212,9 +214,10 @@ export default function Testimonials() {
               return (
                 <article
                   key={testimonial.author}
-                  className={`relative overflow-hidden flex flex-col justify-between transition-all duration-500 ${
+                  className={`relative overflow-hidden flex flex-col justify-between transition-all duration-500 hero-seq-item hero-seq-right ${
                     isActive ? "w-[680px] rounded-[24px]" : "w-[520px] rounded-[24px]"
                   } h-[460px]`}
+                  style={{ animationDelay: `${220 + index * 160}ms` }}
                 >
                   <div className="absolute inset-0">
                     <Image
@@ -254,7 +257,7 @@ export default function Testimonials() {
             })}
           </div>
         </div>
-      </div>
+      </InView>
     </section>
   );
 }

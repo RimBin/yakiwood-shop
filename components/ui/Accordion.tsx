@@ -22,7 +22,11 @@ export default function Accordion({ items, defaultOpen = 0 }: AccordionProps) {
   return (
     <div className="flex flex-col w-full">
       {items.map((item, index) => (
-        <div key={index} className="border-t border-[#BBBBBB]">
+        <div
+          key={index}
+          className="border-t border-[#BBBBBB] hero-seq-item hero-seq-right"
+          style={{ animationDelay: `${index * 140}ms` }}
+        >
           <button
             onClick={() => toggleItem(index)}
             className="flex items-center justify-between w-full text-left py-[16px]"

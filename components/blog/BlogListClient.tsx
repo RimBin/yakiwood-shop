@@ -11,6 +11,7 @@ import { toLocalePath, type AppLocale } from '@/i18n/paths';
 import { getPaginationRange } from '@/lib/pagination';
 import { PageCover } from '@/components/shared';
 import { PageLayout } from '@/components/shared/PageLayout';
+import InView from '@/components/InView';
 
 const POSTS_STORAGE_KEY = 'yakiwood_posts';
 
@@ -76,34 +77,42 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
 
   return (
     <>
-      <PageCover>
-        <div className="flex items-start gap-[8px]">
-          <h1
-            className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] text-[#161616] tracking-[-2.8px] md:tracking-[-6.4px]"
-            style={{ fontVariationSettings: "'opsz' 14" }}
-          >
-            {t('title')}
-          </h1>
-          <p
-            className="font-['DM_Sans'] font-normal text-[18px] md:text-[32px] leading-[1.1] text-[#161616] tracking-[-0.72px] md:tracking-[-1.28px]"
-            style={{ fontVariationSettings: "'opsz' 14" }}
-          >
-            ({posts.length})
-          </p>
-        </div>
-      </PageCover>
+      <InView className="hero-animate-root">
+        <PageCover>
+          <div className="flex items-start gap-[8px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+            <h1
+              className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] text-[#161616] tracking-[-2.8px] md:tracking-[-6.4px]"
+              style={{ fontVariationSettings: "'opsz' 14" }}
+            >
+              {t('title')}
+            </h1>
+            <p
+              className="font-['DM_Sans'] font-normal text-[18px] md:text-[32px] leading-[1.1] text-[#161616] tracking-[-0.72px] md:tracking-[-1.28px]"
+              style={{ fontVariationSettings: "'opsz' 14" }}
+            >
+              ({posts.length})
+            </p>
+          </div>
+        </PageCover>
+      </InView>
 
-      <PageLayout>
-        <div className="pt-[24px] pb-[120px]">
+      <InView className="hero-animate-root">
+        <PageLayout>
+          <div className="pt-[24px] pb-[120px]">
           {posts.length ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[repeat(4,328px)] xl:justify-between gap-x-[16px] gap-y-[16px]">
                 {visiblePosts.map((post, index) => {
                   const tall = index % 2 === 1;
                   const imageHeight = tall ? 'h-[320px] md:h-[448px]' : 'h-[220px] md:h-[305px]';
+                  const delay = 180 + ((index % 4) * 120) + (Math.floor(index / 4) * 80);
 
                   return (
-                    <article key={post.id} className="overflow-hidden xl:w-[328px]">
+                    <article
+                      key={post.id}
+                      className="overflow-hidden xl:w-[328px] hero-seq-item hero-seq-right"
+                      style={{ animationDelay: `${delay}ms` }}
+                    >
                       <Link href={toLocalePath(`/blog/${post.slug}`, locale)} className="block">
                         <div className={`relative w-full ${imageHeight} overflow-hidden bg-[#D9D9D9]`}>
                           <BlogImage src={post.heroImage} alt={post.title} />
@@ -120,7 +129,7 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
               </div>
 
               {totalPages > 1 && (
-                <nav aria-label="Blog pagination" className="mt-[34px] flex items-center justify-center gap-[10px]">
+                <nav aria-label="Blog pagination" className="mt-[34px] flex items-center justify-center gap-[10px] hero-seq-item hero-seq-right" style={{ animationDelay: '520ms' }}>
                   <button
                     type="button"
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -175,8 +184,9 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
           ) : (
             <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('empty')}</p>
           )}
-        </div>
-      </PageLayout>
+          </div>
+        </PageLayout>
+      </InView>
     </>
   );
 }

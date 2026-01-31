@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
 import { assets } from '@/lib/assets';
+import InView from '@/components/InView';
 const { fence: imgFence, facades: imgFacades, terrace: imgTerrace, interior: imgInterior } = assets.categories;
 
 type SolutionId = 'terrace' | 'facade' | 'fence' | 'interior';
@@ -42,7 +43,7 @@ export default function Solutions() {
       {/* Removed duplicated header blocks as requested */}
       
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7698 ===== */}
-        <div className="xl:hidden">
+        <InView className="xl:hidden hero-animate-root">
         {/* Cards - Mobile: Full width accordion style like Figma 759:7702 */}
         <div className="w-full flex flex-col">
           {/* Top border */}
@@ -52,7 +53,8 @@ export default function Solutions() {
             <div key={idx}>
               {/* Card */}
               <div 
-                className={`w-full p-[16px] md:p-[24px] flex flex-col gap-[16px] cursor-pointer transition-colors ${openIndex === idx ? 'bg-[#161616]' : 'bg-[#e1e1e1]'}`}
+                className={`w-full p-[16px] md:p-[24px] flex flex-col gap-[16px] cursor-pointer transition-colors hero-seq-item hero-seq-right ${openIndex === idx ? 'bg-[#161616]' : 'bg-[#e1e1e1]'}`}
+                style={{ animationDelay: `${idx * 180}ms` }}
                 onClick={() => setOpenIndex(openIndex === idx ? -1 : idx)}
               >
                 {/* Title */}
@@ -98,7 +100,7 @@ export default function Solutions() {
         </div>
 
         {/* GET AN OFFER Button - Mobile: Figma 759:7710 */}
-        <div className="px-[16px] py-[48px]">
+        <div className="px-[16px] py-[48px] hero-seq-item hero-seq-right" style={{ animationDelay: '900ms' }}>
           <Link
             href={toLocalePath('/contact', currentLocale)}
             className="w-[358px] max-w-full mx-auto block bg-[#161616] rounded-[100px] h-[48px] flex items-center justify-center"
@@ -108,12 +110,12 @@ export default function Solutions() {
             </span>
           </Link>
         </div>
-      </div>
+      </InView>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-        <div className="hidden xl:block">
+        <InView className="hidden xl:block hero-animate-root">
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+24px)] */}
-        <div className="max-w-[1440px] mx-auto px-[40px] pt-[120px] pb-[40px]">
+        <div className="max-w-[1440px] mx-auto px-[40px] pt-[120px] pb-[40px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <div className="relative h-[160px] text-[#161616]">
             <p className="absolute left-0 top-[25px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase">
               {t('eyebrow')}
@@ -142,7 +144,8 @@ export default function Solutions() {
               <React.Fragment key={solution.id}>
                 <button
                   type="button"
-                  className={`${isOpen ? 'bg-[#161616]' : 'bg-[#e1e1e1]'} w-full text-left`}
+                  className={`${isOpen ? 'bg-[#161616]' : 'bg-[#e1e1e1]'} w-full text-left hero-seq-item hero-seq-right`}
+                  style={{ animationDelay: `${220 + idx * 160}ms` }}
                   aria-expanded={isOpen}
                   aria-controls={`solutions-accordion-panel-${idx}`}
                   onClick={() => setOpenIndex(isOpen ? -1 : idx)}
@@ -192,7 +195,7 @@ export default function Solutions() {
             );
           })}
         </div>
-      </div>
+      </InView>
     </section>
   );
 }

@@ -7,6 +7,7 @@ import { PageCover } from '@/components/shared/PageLayout';
 import { assets } from '@/lib/assets';
 import { useLocale } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
+import InView from '@/components/InView';
 
 export default function SolutionsPage() {
   const [openAccordionIndex, setOpenAccordionIndex] = useState<number | null>(0);
@@ -399,36 +400,39 @@ Do you want to give your building a distinctive and attractive appearance? Encou
   return (
     <div className="bg-transparent">
       {/* Hero Section */}
-      <PageCover>
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-[24px] lg:gap-0">
-          <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
-              style={{ fontVariationSettings: "'opsz' 14" }}>
-            Solutions
-          </h1>
+      <InView className="hero-animate-root">
+        <PageCover>
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-[24px] lg:gap-0 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+            <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+                style={{ fontVariationSettings: "'opsz' 14" }}>
+              Solutions
+            </h1>
 
-          {/* Desktop Chips */}
-          <div className="hidden lg:flex gap-[8px]">
-            {applicationNav.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => scrollToSection(item.id, item.label)}
-                className={`h-[32px] px-[12px] flex items-center justify-center rounded-[100px] font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase cursor-pointer transition-all ${
-                  activeFilter === item.label
-                    ? 'bg-[#161616] text-white'
-                    : 'bg-transparent border border-[#BBBBBB] text-[#161616]'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+            {/* Desktop Chips */}
+            <div className="hidden lg:flex gap-[8px]">
+              {applicationNav.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => scrollToSection(item.id, item.label)}
+                  className={`h-[32px] px-[12px] flex items-center justify-center rounded-[100px] font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase cursor-pointer transition-all ${
+                    activeFilter === item.label
+                      ? 'bg-[#161616] text-white'
+                      : 'bg-transparent border border-[#BBBBBB] text-[#161616]'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </PageCover>
+        </PageCover>
+      </InView>
 
       {/* Mobile Chips Below Header */}
+      <InView className="hero-animate-root">
       <div className="lg:hidden max-w-[1440px] mx-auto px-[16px] md:px-[40px] pt-[24px]">
-        <div className="flex gap-[8px] flex-wrap">
+        <div className="flex gap-[8px] flex-wrap hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             {applicationNav.map((item) => (
               <button
                 key={item.id}
@@ -445,16 +449,18 @@ Do you want to give your building a distinctive and attractive appearance? Encou
             ))}
         </div>
       </div>
+      </InView>
 
       {/* Content Section */}
+      <InView className="hero-animate-root">
       <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] py-[40px] lg:py-[80px]">
         {/* Big Text - left aligned with first line indent */}
-        <p className="font-['DM_Sans'] font-light text-[32px] lg:text-[52px] leading-none tracking-[-1.28px] lg:tracking-[-2.08px] text-[#161616] text-left indent-[80px] lg:indent-[200px] mb-[32px] lg:mb-[48px]">
+        <p className="font-['DM_Sans'] font-light text-[32px] lg:text-[52px] leading-none tracking-[-1.28px] lg:tracking-[-2.08px] text-[#161616] text-left indent-[80px] lg:indent-[200px] mb-[32px] lg:mb-[48px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           Burning wood is an ancient and unique technique that is becoming increasingly popular in modern architecture. The result is a finish of wooden cladding that provides a modern and robust appearance.
         </p>
 
         {/* Small Text - offset to right on desktop */}
-        <div className="lg:ml-[25%] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[557px] mb-[48px] lg:mb-[80px]">
+        <div className="lg:ml-[25%] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[557px] mb-[48px] lg:mb-[80px] hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
           <p className="mb-[10px]">
             Charred wood cladding not only provides a unique appearance but is also durable and resistant to weather conditions. By properly charring the wood, a modern, nature-inspired aesthetic can be created, suitable for all architectural styles. Furthermore, charred wood serves as a natural defence against external influences, such as pests or harmful ultraviolet rays from the sun.
           </p>
@@ -463,11 +469,13 @@ Do you want to give your building a distinctive and attractive appearance? Encou
 
         {/* Hero Image removed (no wood background) */}
       </section>
+      </InView>
 
       {/* Applications Sections (anchor targets) */}
+      <InView className="hero-animate-root">
       <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[80px] lg:pt-[120px] pb-[48px] lg:pb-[140px]">
         <div className="grid gap-[64px] lg:gap-[140px]">
-          <div className="grid gap-[24px] lg:gap-[32px]">
+          <div className="grid gap-[24px] lg:gap-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             <ApplicationSection
               id="facades"
               title="Facades"
@@ -481,7 +489,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
             <ModernApplicationCard type="facades" />
           </div>
 
-          <div className="grid gap-[24px] lg:gap-[32px]">
+          <div className="grid gap-[24px] lg:gap-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
             <ApplicationSection
               id="terraces"
               title="Terraces"
@@ -496,7 +504,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
             <ModernApplicationCard type="terraces" />
           </div>
 
-          <div className="grid gap-[24px] lg:gap-[32px]">
+          <div className="grid gap-[24px] lg:gap-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '400ms' }}>
             <ApplicationSection
               id="interior"
               title="Interior"
@@ -510,7 +518,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
             <ModernApplicationCard type="interior" />
           </div>
 
-          <div className="grid gap-[24px] lg:gap-[32px]">
+          <div className="grid gap-[24px] lg:gap-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '600ms' }}>
             <ApplicationSection
               id="fences"
               title="Fences"
@@ -523,12 +531,14 @@ Do you want to give your building a distinctive and attractive appearance? Encou
           </div>
         </div>
       </section>
+      </InView>
 
       {/* Accordion Section */}
+      <InView className="hero-animate-root">
       <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pb-[64px] lg:pb-[80px]">
         <div className="lg:flex">
           {/* FAQ Eyebrow - left column, same width as Products offset */}
-          <div className="hidden lg:block lg:w-[25%] flex-shrink-0">
+          <div className="hidden lg:block lg:w-[25%] flex-shrink-0 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
               FAQ
             </span>
@@ -537,14 +547,14 @@ Do you want to give your building a distinctive and attractive appearance? Encou
           {/* Accordion - right column, aligned with Products */}
           <div className="lg:w-[75%]">
             {/* Mobile eyebrow */}
-            <div className="lg:hidden mb-[24px]">
+            <div className="lg:hidden mb-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
               <span className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
                 FAQ
               </span>
             </div>
 
             {accordionData.map((item, index) => (
-              <div key={index}>
+              <div key={index} className="hero-seq-item hero-seq-right" style={{ animationDelay: `${180 + index * 120}ms` }}>
                 <div className="h-[1px] bg-[#BBBBBB] my-[8px]" />
               
               <button
@@ -578,10 +588,12 @@ Do you want to give your building a distinctive and attractive appearance? Encou
         </div>
         </div>
       </section>
+      </InView>
 
       {/* Products Section */}
+      <InView className="hero-animate-root">
       <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pb-[80px] lg:pb-[120px]">
-        <h2 className="font-['DM_Sans'] font-light text-[40px] lg:text-[80px] leading-none tracking-[-1.6px] lg:tracking-[-3.2px] text-[#161616] mb-[40px] lg:mb-[64px] lg:ml-[25%]">
+        <h2 className="font-['DM_Sans'] font-light text-[40px] lg:text-[80px] leading-none tracking-[-1.6px] lg:tracking-[-3.2px] text-[#161616] mb-[40px] lg:mb-[64px] lg:ml-[25%] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           Products
         </h2>
 
@@ -589,7 +601,8 @@ Do you want to give your building a distinctive and attractive appearance? Encou
           {products.map((product, index) => (
             <div
               key={index}
-              className="border border-[#BBBBBB] rounded-[8px] p-[16px] flex flex-col gap-[16px] lg:w-[328px]"
+              className="border border-[#BBBBBB] rounded-[8px] p-[16px] flex flex-col gap-[16px] lg:w-[328px] hero-seq-item hero-seq-right"
+              style={{ animationDelay: `${180 + (index % 4) * 120 + Math.floor(index / 4) * 80}ms` }}
             >
               <div className="relative w-full h-[250px] rounded-[8px] overflow-hidden">
                 <Image
@@ -612,8 +625,10 @@ Do you want to give your building a distinctive and attractive appearance? Encou
           ))}
         </div>
       </section>
+      </InView>
 
       {/* CTA Section */}
+      <InView className="hero-animate-root">
       <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[120px] lg:pt-[200px] pb-[200px] lg:pb-[350px] relative">
         {/* Background Image */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[625px] lg:w-[1099px] h-[599px] lg:h-[1053px] opacity-15 mix-blend-luminosity pointer-events-none">
@@ -627,13 +642,13 @@ Do you want to give your building a distinctive and attractive appearance? Encou
 
         {/* CTA Content */}
         <div className="relative z-10 flex flex-col items-center gap-[40px] lg:gap-[64px]">
-          <h2 className="font-['DM_Sans'] font-light text-[45px] lg:text-[128px] leading-[0.95] tracking-[-1.8px] lg:tracking-[-6.4px] text-[#161616] text-center max-w-[358px] lg:max-w-[861px] m-0">
+          <h2 className="font-['DM_Sans'] font-light text-[45px] lg:text-[128px] leading-[0.95] tracking-[-1.8px] lg:tracking-[-6.4px] text-[#161616] text-center max-w-[358px] lg:max-w-[861px] m-0 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             Ready to{' '}
             <span className="font-['Tiro_Tamil'] italic">build</span>{' '}
             with fire?
           </h2>
 
-          <div className="flex flex-col lg:flex-row gap-[16px] items-center w-full lg:w-auto">
+          <div className="flex flex-col lg:flex-row gap-[16px] items-center w-full lg:w-auto hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
             <button className="h-[48px] px-[40px] bg-[#161616] rounded-[100px] border-none font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase text-white cursor-pointer transition-colors hover:bg-[#2a2a2a] w-full lg:w-auto">
               Get an offer
             </button>
@@ -644,6 +659,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
           </div>
         </div>
       </section>
+      </InView>
     </div>
   );
 }

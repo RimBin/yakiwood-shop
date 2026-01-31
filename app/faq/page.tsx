@@ -6,6 +6,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { canonicalUrl } from '@/lib/seo/canonical';
 import { applySeoOverride } from '@/lib/seo/overrides';
 import { generateFAQSchema } from '@/lib/schema';
+import InView from '@/components/InView';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.faq');
@@ -59,11 +60,13 @@ export default async function FAQPage() {
       {/* Cover removed */}
 
       {/* FAQ Content */}
-      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[40px] pb-[80px] sm:pb-[120px]">
-        <div className="max-w-[1016px] mx-auto sm:ml-[384px]">
-          <Accordion items={faqItems} />
+      <InView className="hero-animate-root">
+        <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[40px] pb-[80px] sm:pb-[120px]">
+          <div className="max-w-[1016px] mx-auto sm:ml-[384px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+            <Accordion items={faqItems} />
+          </div>
         </div>
-      </div>
+      </InView>
     </main>
   );
 }

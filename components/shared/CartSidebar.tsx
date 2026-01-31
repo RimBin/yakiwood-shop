@@ -50,6 +50,12 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const totalNet = total > 0 ? total / (1 + VAT_RATE) : 0;
   const totalVat = total - totalNet;
 
+  const formatPrice = (value: number) => {
+    const rounded = Math.round(value);
+    const numberLocale = currentLocale === 'lt' ? 'lt-LT' : 'en-US';
+    return new Intl.NumberFormat(numberLocale).format(rounded);
+  };
+
   const formatFinishLabel = (finish?: string) => {
     if (!finish) return finish;
     if (currentLocale !== 'lt') return finish;
@@ -174,11 +180,11 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
                         <div className="flex items-center justify-between">
                           <div className="font-['DM_Sans'] font-light text-[20px] leading-[1.1] tracking-[-0.8px] text-[#161616]">
-                            {(
+                            {formatPrice(
                               typeof item.pricingSnapshot?.lineTotal === 'number'
                                 ? item.pricingSnapshot.lineTotal
                                 : item.basePrice * item.quantity
-                            ).toFixed(2)} €
+                            )} €
                           </div>
 
                           {/* Quantity Controls */}
@@ -229,7 +235,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     {t('cart.subtotal')}
                   </span>
                   <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616]">
-                    {subtotal.toFixed(2)} €
+                    {formatPrice(subtotal)} €
                   </span>
                 </div>
 
@@ -239,7 +245,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     {t('cart.shipping')}
                   </span>
                   <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616]">
-                    {shipping === 0 ? t('cart.free') : `${shipping.toFixed(2)} €`}
+                    {shipping === 0 ? t('cart.free') : `${formatPrice(shipping)} €`}
                   </span>
                 </div>
 
@@ -251,7 +257,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     {t('cart.subtotalExVat')}
                   </span>
                   <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616]">
-                    {totalNet.toFixed(2)} €
+                    {formatPrice(totalNet)} €
                   </span>
                 </div>
 
@@ -260,7 +266,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     {t('cart.vatAmount', { rate: Math.round(VAT_RATE * 100) })}
                   </span>
                   <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616]">
-                    {totalVat.toFixed(2)} €
+                    {formatPrice(totalVat)} €
                   </span>
                 </div>
 
@@ -270,7 +276,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     {t('cart.total')}
                   </span>
                   <span className="font-['DM_Sans'] font-light text-[24px] leading-[1.1] tracking-[-0.96px] text-[#161616]">
-                    {roundedTotal} €
+                    {formatPrice(roundedTotal)} €
                   </span>
                 </div>
 
