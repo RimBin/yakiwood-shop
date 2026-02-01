@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { projects as projectsData } from '@/data/projects';
 import type { Project } from '@/types/project';
 import { findProjectBySlug, getProjectSlug, normalizeProjectLocale } from '@/lib/projects/i18n';
+import { toLocalePath } from '@/i18n/paths';
 
 interface Language {
   code: string;
@@ -18,21 +19,6 @@ const languages: Language[] = [
   { code: 'lt', label: 'Lietuvių' },
   { code: 'en', label: 'English' },
 ];
-
-type PrefixMap = Array<{ from: string; to: string }>;
-
-const enToLt: PrefixMap = [
-  { from: '/products', to: '/produktai' },
-  { from: '/solutions', to: '/sprendimai' },
-  { from: '/projects', to: '/projektai' },
-  { from: '/blog', to: '/straipsniai' },
-  { from: '/about', to: '/apie' },
-  { from: '/contact', to: '/kontaktai' },
-  { from: '/faq', to: '/duk' },
-  { from: '/configurator3d', to: '/konfiguratorius3d' },
-];
-
-const ltToEn: PrefixMap = enToLt.map(({ from, to }) => ({ from: to, to: from }));
 
 const PROJECTS_STORAGE_KEY = 'yakiwood_projects';
 
@@ -98,32 +84,6 @@ function extractProjectSlugFromPath(pathname: string): string | null {
   return null;
 }
 
-function replaceLeadingPath(pathname: string, mapping: PrefixMap): string {
-  for (const { from, to } of mapping) {
-    if (pathname === from || pathname.startsWith(`${from}/`)) {
-      return pathname.replace(from, to);
-    }
-  }
-  return pathname;
-}
-
-function toLtPath(pathname: string): string {
-  if (pathname === '/lt' || pathname.startsWith('/lt/')) return pathname;
-  if (pathname === '/') return '/lt';
-
-  const mapped = replaceLeadingPath(pathname, enToLt);
-  return `/lt${mapped}`;
-}
-
-function toEnPath(pathname: string): string {
-  if (pathname === '/') return '/';
-  if (pathname === '/lt') return '/';
-  if (!pathname.startsWith('/lt/')) return pathname;
-
-  const withoutPrefix = pathname.slice(3);
-  return replaceLeadingPath(withoutPrefix, ltToEn);
-}
-
 export default function LanguageSwitcher({
   variant = 'light',
 }: {
@@ -172,7 +132,7 @@ export default function LanguageSwitcher({
     const targetLocale = normalizeProjectLocale(newLocale);
 
     // Default: just map route prefixes
-    let newPath = newLocale === 'lt' ? toLtPath(pathname) : toEnPath(pathname);
+    let newPath = toLocalePath(pathname || '/', targetLocale);
 
     // Special-case: project detail routes need slug translation too
     const currentProjectSlug = extractProjectSlugFromPath(pathname);

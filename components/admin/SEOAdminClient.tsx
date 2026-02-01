@@ -685,9 +685,9 @@ export default function SEOAdminClient() {
               size="md"
               variant={editorEnabled ? 'primary' : 'outline'}
               onClick={() => setEditorEnabled((v) => !v)}
-              title="Toggle SEO editor"
+              title={t('editor.toggleTitle')}
             >
-              Editor: {editorEnabled ? 'ON' : 'OFF'}
+              {t('editor.label')}: {editorEnabled ? t('editor.on') : t('editor.off')}
             </AdminButton>
 
             <AdminButton size="md" variant="outline" className="ml-auto" onClick={loadPages}>
@@ -741,11 +741,16 @@ export default function SEOAdminClient() {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className="flex items-center justify-center gap-2">
-                          {editorEnabled && (
-                            <AdminButton size="sm" variant="outline" onClick={() => openEditor(page)}>
-                              Edit
-                            </AdminButton>
-                          )}
+                          <AdminButton
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              if (!editorEnabled) setEditorEnabled(true);
+                              openEditor(page);
+                            }}
+                          >
+                            {t('actions.edit')}
+                          </AdminButton>
                           <AdminButton size="sm" variant="primary" onClick={() => setSelectedPage(page)}>
                             {t('actions.viewDetails')}
                           </AdminButton>
@@ -808,7 +813,7 @@ export default function SEOAdminClient() {
               >
                 <div className="sticky top-0 bg-[#EAEAEA] border-b border-[#E1E1E1] px-8 py-6 flex items-center justify-between rounded-t-[24px]">
                   <div>
-                    <h2 className="font-['DM_Sans'] text-2xl font-light tracking-[-0.96px] text-[#161616]">Edit SEO</h2>
+                    <h2 className="font-['DM_Sans'] text-2xl font-light tracking-[-0.96px] text-[#161616]">{t('editor.modalTitle')}</h2>
                     <p className="font-['Outfit'] text-sm text-[#535353] mt-1">{editingPage.path}</p>
                   </div>
                   <button

@@ -1632,9 +1632,17 @@
       },
       "actions": {
         "viewDetails": "View Details",
+        "edit": "Edit",
         "rescan": "Rescan",
         "exportFixes": "Export Fixes",
         "exportJson": "Export JSON"
+      },
+      "editor": {
+        "label": "Editor",
+        "on": "On",
+        "off": "Off",
+        "toggleTitle": "Toggle SEO editor",
+        "modalTitle": "Edit SEO"
       },
       "notScannedYet": "SEO scan has not been run yet. Click \"Rescan\" to start.",
       "noPages": "No pages match the selected filter",

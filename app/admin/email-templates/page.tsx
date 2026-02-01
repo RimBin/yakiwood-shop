@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useLocale } from 'next-intl';
 import {
   AdminBody,
   AdminButton,
@@ -34,6 +35,9 @@ const EMPTY_FIELDS: CmsTemplateFields = {
 };
 
 export default function EmailTemplatesAdmin() {
+  const locale = useLocale();
+  const isLt = locale === 'lt';
+
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [previewVars, setPreviewVars] = useState<Record<string, any>>({});
   const [testEmailTo, setTestEmailTo] = useState('');
@@ -44,6 +48,157 @@ export default function EmailTemplatesAdmin() {
   const [isLoadingCms, setIsLoadingCms] = useState(false);
   const [isSavingCms, setIsSavingCms] = useState(false);
   const [cmsStatus, setCmsStatus] = useState<null | { ok: boolean; message: string }>(null);
+
+  const labels = useMemo(
+    () =>
+      isLt
+        ? {
+            availableTemplates: 'Galimi šablonai',
+            subjectPreview: 'Temos eilutės (peržiūra)',
+            cmsEditor: 'CMS šablonų redaktorius',
+            loadDefaults: 'Įkelti numatytuosius',
+            saveToCms: 'Išsaugoti į CMS',
+            saving: 'Išsaugoma…',
+            cmsDescription:
+              'Pakeitimai saugomi Sanity ir naudojami produkcinėms žinutėms. Reikia admin sesijos ir SANITY write token.',
+            subjectLt: 'Tema (LT)',
+            subjectEn: 'Tema (EN)',
+            subjectLtPlaceholder: 'Pvz.: Užsakymo patvirtinimas #{{orderNumber}}',
+            subjectEnPlaceholder: 'Pvz.: Order Confirmation #{{orderNumber}}',
+            htmlLt: 'HTML (LT)',
+            htmlEn: 'HTML (EN)',
+            htmlLtPlaceholder: '<h1>Ačiū už užsakymą</h1> ...',
+            htmlEnPlaceholder: '<h1>Thanks for your order</h1> ...',
+            testRecipient: 'Testo gavėjas',
+            sending: 'Siunčiama…',
+            sendTest: 'Siųsti testinį laišką',
+            providerNote:
+              'Pastaba: siuntimui reikia el. pašto tiekėjo konfigūracijos (pvz. RESEND_API_KEY).',
+            htmlPreviewLt: 'HTML peržiūra (LT)',
+            htmlPreviewEn: 'HTML peržiūra (EN)',
+            copyHtml: 'Kopijuoti HTML',
+            sampleData: 'Pavyzdiniai duomenys',
+            selectTemplateTitle: 'Pasirinkite šabloną',
+            selectTemplateSubtitle: 'Pasirinkite el. laiško šabloną peržiūrai',
+            cmsLoadFail: 'Nepavyko užkrauti CMS šablono.',
+            cmsLoadUnexpected: 'Netikėta klaida kraunant CMS šabloną.',
+            cmsSaveFail: 'Nepavyko išsaugoti CMS šablono.',
+            cmsSaveOk: 'Šablonas išsaugotas į CMS.',
+            cmsSaveUnexpected: 'Netikėta klaida saugant CMS šabloną.',
+            cmsDefaultsMissing: 'Nerasti numatytieji dvikalbiai šablonai šiam tipui.',
+            cmsDefaultsLoaded: 'Įkelti numatytieji dvikalbiai šablonai.',
+            htmlCopied: 'HTML nukopijuotas!',
+            emailMissing: 'Įveskite gavėjo el. paštą.',
+            emailInvalid: 'Gavėjo el. paštas atrodo neteisingas.',
+            testSendFail: 'Nepavyko išsiųsti testinio laiško.',
+            testSendOk: 'Testinis laiškas sėkmingai įtrauktas į eilę.',
+            testSendUnexpected: 'Netikėta klaida siunčiant testinį laišką.',
+          }
+        : {
+            availableTemplates: 'Available Templates',
+            subjectPreview: 'Subject Lines (Preview)',
+            cmsEditor: 'CMS Template Editor',
+            loadDefaults: 'Load Defaults',
+            saveToCms: 'Save to CMS',
+            saving: 'Saving…',
+            cmsDescription:
+              'Changes are stored in Sanity and used for production emails. Requires admin session and SANITY write token.',
+            subjectLt: 'Subject (LT)',
+            subjectEn: 'Subject (EN)',
+            subjectLtPlaceholder: 'Example: Užsakymo patvirtinimas #{{orderNumber}}',
+            subjectEnPlaceholder: 'Example: Order Confirmation #{{orderNumber}}',
+            htmlLt: 'HTML (LT)',
+            htmlEn: 'HTML (EN)',
+            htmlLtPlaceholder: '<h1>Ačiū už užsakymą</h1> ...',
+            htmlEnPlaceholder: '<h1>Thanks for your order</h1> ...',
+            testRecipient: 'Test Recipient',
+            sending: 'Sending…',
+            sendTest: 'Send Test Email',
+            providerNote: 'Note: sending requires email provider config (e.g. RESEND_API_KEY).',
+            htmlPreviewLt: 'HTML Preview (LT)',
+            htmlPreviewEn: 'HTML Preview (EN)',
+            copyHtml: 'Copy HTML',
+            sampleData: 'Sample Data',
+            selectTemplateTitle: 'Select a Template',
+            selectTemplateSubtitle: 'Choose an email template from the list to preview',
+            cmsLoadFail: 'Failed to load CMS template.',
+            cmsLoadUnexpected: 'Unexpected error loading CMS template.',
+            cmsSaveFail: 'Failed to save CMS template.',
+            cmsSaveOk: 'Template saved to CMS.',
+            cmsSaveUnexpected: 'Unexpected error saving CMS template.',
+            cmsDefaultsMissing: 'No bilingual defaults found for this template.',
+            cmsDefaultsLoaded: 'Loaded default bilingual template.',
+            htmlCopied: 'HTML copied to clipboard!',
+            emailMissing: 'Please enter a recipient email address.',
+            emailInvalid: 'Recipient email address looks invalid.',
+            testSendFail: 'Failed to send test email.',
+            testSendOk: 'Test email queued successfully.',
+            testSendUnexpected: 'Unexpected error sending test email.',
+          },
+    [isLt]
+  );
+
+  const categoryLabels = useMemo(
+    () =>
+      isLt
+        ? {
+            transactional: 'Transakciniai',
+            marketing: 'Marketingo',
+            'customer-service': 'Klientų aptarnavimo',
+          }
+        : {
+            transactional: 'Transactional',
+            marketing: 'Marketing',
+            'customer-service': 'Customer Service',
+          },
+    [isLt]
+  );
+
+  const templateTranslations = useMemo(() => {
+    if (!isLt) return null;
+    return {
+      'order-confirmation': {
+        name: 'Užsakymo patvirtinimas',
+        description: 'Siunčiama po sėkmingo apmokėjimo',
+      },
+      'shipping-notification': {
+        name: 'Siuntos išsiuntimo pranešimas',
+        description: 'Siunčiama, kai užsakymas išsiunčiamas',
+      },
+      'abandoned-cart': {
+        name: 'Apleistas krepšelis',
+        description: 'Priminti apie nebaigtą pirkimą',
+      },
+      'back-in-stock': {
+        name: 'Vėl sandėlyje',
+        description: 'Siunčiama, kai prekė vėl pasiekiama',
+      },
+      newsletter: {
+        name: 'Naujienlaiškis',
+        description: 'Periodiniai naujienlaiškiai',
+      },
+      'password-reset': {
+        name: 'Slaptažodžio atstatymas',
+        description: 'Slaptažodžio atkūrimo nuoroda',
+      },
+      'review-request': {
+        name: 'Atsiliepimo prašymas',
+        description: 'Prašymas įvertinti po pristatymo',
+      },
+      'delivery-confirmation': {
+        name: 'Pristatymo patvirtinimas',
+        description: 'Siunčiama, kai užsakymas pristatytas',
+      },
+      welcome: {
+        name: 'Sveikinimo laiškas',
+        description: 'Pirmas laiškas po registracijos',
+      },
+      'refund-confirmation': {
+        name: 'Pinigų grąžinimo patvirtinimas',
+        description: 'Siunčiama, kai grąžinimas įvykdytas',
+      },
+    } as Record<string, { name: string; description: string }>;
+  }, [isLt]);
 
   const handlePreview = (template: EmailTemplate) => {
     setSelectedTemplate(template);
@@ -62,7 +217,7 @@ export default function EmailTemplatesAdmin() {
         const data = (await res.json().catch(() => ({}))) as any;
         if (!res.ok) {
           setCmsFields(EMPTY_FIELDS);
-          setCmsStatus({ ok: false, message: data?.error || 'Nepavyko užkrauti CMS šablono.' });
+          setCmsStatus({ ok: false, message: data?.error || labels.cmsLoadFail });
           return;
         }
 
@@ -75,7 +230,7 @@ export default function EmailTemplatesAdmin() {
         });
       } catch (e: any) {
         setCmsFields(EMPTY_FIELDS);
-        setCmsStatus({ ok: false, message: e?.message || 'Netikėta klaida kraunant CMS šabloną.' });
+        setCmsStatus({ ok: false, message: e?.message || labels.cmsLoadUnexpected });
       } finally {
         setIsLoadingCms(false);
       }
@@ -88,7 +243,7 @@ export default function EmailTemplatesAdmin() {
     }
 
     loadCmsTemplate(selectedTemplate.id);
-  }, [selectedTemplate]);
+  }, [labels, selectedTemplate]);
 
   const handleSaveCms = async () => {
     if (!selectedTemplate) return;
@@ -110,13 +265,13 @@ export default function EmailTemplatesAdmin() {
 
       const data = (await res.json().catch(() => ({}))) as any;
       if (!res.ok) {
-        setCmsStatus({ ok: false, message: data?.error || 'Nepavyko išsaugoti CMS šablono.' });
+        setCmsStatus({ ok: false, message: data?.error || labels.cmsSaveFail });
         return;
       }
 
-      setCmsStatus({ ok: true, message: 'Šablonas išsaugotas į CMS.' });
+      setCmsStatus({ ok: true, message: labels.cmsSaveOk });
     } catch (e: any) {
-      setCmsStatus({ ok: false, message: e?.message || 'Netikėta klaida saugant CMS šabloną.' });
+      setCmsStatus({ ok: false, message: e?.message || labels.cmsSaveUnexpected });
     } finally {
       setIsSavingCms(false);
     }
@@ -126,7 +281,7 @@ export default function EmailTemplatesAdmin() {
     if (!selectedTemplate) return;
     const defaults = getBilingualEmailTemplate(selectedTemplate.id);
     if (!defaults) {
-      setCmsStatus({ ok: false, message: 'Nerasti numatytieji dvikalbiai šablonai šiam tipui.' });
+      setCmsStatus({ ok: false, message: labels.cmsDefaultsMissing });
       return;
     }
 
@@ -136,14 +291,14 @@ export default function EmailTemplatesAdmin() {
       htmlLt: defaults.html.lt,
       htmlEn: defaults.html.en,
     });
-    setCmsStatus({ ok: true, message: 'Įkelti numatytieji dvikalbiai šablonai.' });
+    setCmsStatus({ ok: true, message: labels.cmsDefaultsLoaded });
   };
 
   const handleCopyHTML = () => {
     if (!selectedTemplate) return;
     const html = selectedTemplate.html(previewVars);
     navigator.clipboard.writeText(html);
-    alert('HTML nukopijuotas!');
+    alert(labels.htmlCopied);
   };
 
   const handleSendTest = async () => {
@@ -151,11 +306,11 @@ export default function EmailTemplatesAdmin() {
 
     const to = testEmailTo.trim();
     if (!to) {
-      setSendStatus({ ok: false, message: 'Įveskite gavėjo el. paštą.' });
+      setSendStatus({ ok: false, message: labels.emailMissing });
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
-      setSendStatus({ ok: false, message: 'Gavėjo el. paštas atrodo neteisingas.' });
+      setSendStatus({ ok: false, message: labels.emailInvalid });
       return;
     }
 
@@ -180,22 +335,22 @@ export default function EmailTemplatesAdmin() {
 
       const data = (await res.json().catch(() => ({}))) as any;
       if (!res.ok) {
-        setSendStatus({ ok: false, message: data?.error || 'Nepavyko išsiųsti testinio laiško.' });
+        setSendStatus({ ok: false, message: data?.error || labels.testSendFail });
         return;
       }
 
-      setSendStatus({ ok: true, message: 'Testinis laiškas sėkmingai įtrauktas į eilę.' });
+      setSendStatus({ ok: true, message: labels.testSendOk });
     } catch (e: any) {
-      setSendStatus({ ok: false, message: e?.message || 'Netikėta klaida siunčiant testinį laišką.' });
+      setSendStatus({ ok: false, message: e?.message || labels.testSendUnexpected });
     } finally {
       setIsSendingTest(false);
     }
   };
 
   const categories = [
-    { id: 'transactional' as const, name: 'Transakciniai', color: 'bg-blue-100 text-blue-800' },
-    { id: 'marketing' as const, name: 'Marketingo', color: 'bg-green-100 text-green-800' },
-    { id: 'customer-service' as const, name: 'Klientų aptarnavimo', color: 'bg-purple-100 text-purple-800' },
+    { id: 'transactional' as const, name: categoryLabels.transactional, color: 'bg-blue-100 text-blue-800' },
+    { id: 'marketing' as const, name: categoryLabels.marketing, color: 'bg-green-100 text-green-800' },
+    { id: 'customer-service' as const, name: categoryLabels['customer-service'], color: 'bg-purple-100 text-purple-800' },
   ];
 
   const renderedLt = useMemo(() => {
@@ -233,7 +388,7 @@ export default function EmailTemplatesAdmin() {
               <AdminCard>
                 <div className="mb-[24px]">
                   <h2 className="font-['Outfit'] text-[11px] font-medium text-[#535353] uppercase tracking-[0.55px]">
-                    Galimi šablonai ({EMAIL_TEMPLATES.length})
+                    {labels.availableTemplates} ({EMAIL_TEMPLATES.length})
                   </h2>
                 </div>
 
@@ -250,7 +405,11 @@ export default function EmailTemplatesAdmin() {
                         {category.name}
                       </h3>
                       <div className="space-y-[8px]">
-                        {templates.map((template: EmailTemplate) => (
+                        {templates.map((template: EmailTemplate) => {
+                          const translation = templateTranslations?.[template.id];
+                          const displayName = translation?.name || template.name;
+                          const displayDescription = translation?.description || template.description;
+                          return (
                           <button
                             key={template.id}
                             onClick={() => handlePreview(template)}
@@ -261,17 +420,18 @@ export default function EmailTemplatesAdmin() {
                             }`}
                           >
                             <div className="font-['DM_Sans'] font-medium text-[14px] mb-[4px] tracking-[-0.28px]">
-                              {template.name}
+                              {displayName}
                             </div>
                             <div
                               className={`font-['Outfit'] text-[12px] ${
                                 selectedTemplate?.id === template.id ? 'text-[#E1E1E1]' : 'text-[#535353]'
                               }`}
                             >
-                              {template.description}
+                              {displayDescription}
                             </div>
                           </button>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   );
@@ -287,21 +447,23 @@ export default function EmailTemplatesAdmin() {
                     <div className="flex items-start justify-between mb-[20px]">
                       <div className="flex-1">
                         <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] mb-[8px]">
-                          {selectedTemplate.name}
+                          {templateTranslations?.[selectedTemplate.id]?.name || selectedTemplate.name}
                         </h2>
-                        <p className="font-['Outfit'] text-[#E1E1E1] text-[14px]">{selectedTemplate.description}</p>
+                        <p className="font-['Outfit'] text-[#E1E1E1] text-[14px]">
+                          {templateTranslations?.[selectedTemplate.id]?.description || selectedTemplate.description}
+                        </p>
                       </div>
                       <div className={`px-[12px] py-[4px] rounded-[100px] text-[11px] font-['Outfit'] uppercase tracking-[0.55px] border ${
                         selectedTemplate.category === 'transactional' ? 'bg-[#EAEAEA] text-blue-700 border-blue-200' :
                         selectedTemplate.category === 'marketing' ? 'bg-[#EAEAEA] text-green-700 border-green-200' :
                         'bg-[#EAEAEA] text-purple-700 border-purple-200'
                       }`}>
-                        {selectedTemplate.category}
+                        {categoryLabels[selectedTemplate.category]}
                       </div>
                     </div>
                     <div className="bg-[#535353] rounded-[12px] p-[16px]">
                       <div className="font-['Outfit'] text-[#BBBBBB] text-[11px] uppercase tracking-[0.55px] mb-[8px]">
-                        Temos eilutės (peržiūra)
+                        {labels.subjectPreview}
                       </div>
                       <div className="space-y-[10px]">
                         <div>
@@ -328,56 +490,56 @@ export default function EmailTemplatesAdmin() {
                     <div className="mb-[24px]">
                       <div className="flex flex-col gap-[12px]">
                         <div className="flex items-center justify-between gap-[12px] flex-wrap">
-                          <AdminLabel>CMS šablonų redaktorius</AdminLabel>
+                          <AdminLabel>{labels.cmsEditor}</AdminLabel>
                           <div className="flex gap-[8px] flex-wrap">
                             <AdminButton variant="secondary" size="sm" onClick={handleLoadDefaults}>
-                              Įkelti numatytuosius
+                              {labels.loadDefaults}
                             </AdminButton>
                             <AdminButton onClick={handleSaveCms} size="sm" disabled={isSavingCms || isLoadingCms}>
-                              {isSavingCms ? 'Išsaugoma…' : 'Išsaugoti į CMS'}
+                              {isSavingCms ? labels.saving : labels.saveToCms}
                             </AdminButton>
                           </div>
                         </div>
                         <div className="text-[11px] text-[#535353] font-['Outfit']">
-                          Pakeitimai saugomi Sanity ir naudojami produkcinėms žinutėms. Reikia admin sesijos ir SANITY write token.
+                          {labels.cmsDescription}
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-[16px] mt-[16px]">
                         <div className="space-y-[12px]">
-                          <AdminLabel>Tema (LT)</AdminLabel>
+                          <AdminLabel>{labels.subjectLt}</AdminLabel>
                           <AdminInput
                             value={cmsFields.subjectLt}
                             onChange={(e) => setCmsFields((prev) => ({ ...prev, subjectLt: e.target.value }))}
-                            placeholder="Pvz.: Užsakymo patvirtinimas #{{orderNumber}}"
+                            placeholder={labels.subjectLtPlaceholder}
                           />
                         </div>
                         <div className="space-y-[12px]">
-                          <AdminLabel>Tema (EN)</AdminLabel>
+                          <AdminLabel>{labels.subjectEn}</AdminLabel>
                           <AdminInput
                             value={cmsFields.subjectEn}
                             onChange={(e) => setCmsFields((prev) => ({ ...prev, subjectEn: e.target.value }))}
-                            placeholder="Pvz.: Order Confirmation #{{orderNumber}}"
+                            placeholder={labels.subjectEnPlaceholder}
                           />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-[16px] mt-[16px]">
                         <div className="space-y-[12px]">
-                          <AdminLabel>HTML (LT)</AdminLabel>
+                          <AdminLabel>{labels.htmlLt}</AdminLabel>
                           <AdminTextarea
                             value={cmsFields.htmlLt}
                             onChange={(e) => setCmsFields((prev) => ({ ...prev, htmlLt: e.target.value }))}
-                            placeholder="&lt;h1&gt;Ačiū už užsakymą&lt;/h1&gt; ..."
+                            placeholder={labels.htmlLtPlaceholder}
                             rows={10}
                           />
                         </div>
                         <div className="space-y-[12px]">
-                          <AdminLabel>HTML (EN)</AdminLabel>
+                          <AdminLabel>{labels.htmlEn}</AdminLabel>
                           <AdminTextarea
                             value={cmsFields.htmlEn}
                             onChange={(e) => setCmsFields((prev) => ({ ...prev, htmlEn: e.target.value }))}
-                            placeholder="&lt;h1&gt;Thanks for your order&lt;/h1&gt; ..."
+                            placeholder={labels.htmlEnPlaceholder}
                             rows={10}
                           />
                         </div>
@@ -398,7 +560,7 @@ export default function EmailTemplatesAdmin() {
                     </div>
 
                     <div className="mb-[24px]">
-                      <AdminLabel className="mb-[8px]">Testo gavėjas</AdminLabel>
+                      <AdminLabel className="mb-[8px]">{labels.testRecipient}</AdminLabel>
                       <div className="flex flex-col sm:flex-row gap-[12px]">
                         <AdminInput
                           value={testEmailTo}
@@ -418,7 +580,7 @@ export default function EmailTemplatesAdmin() {
                           <option value="en">EN</option>
                         </AdminSelect>
                         <AdminButton onClick={handleSendTest} disabled={isSendingTest}>
-                          {isSendingTest ? 'Siunčiama…' : 'Siųsti testinį laišką'}
+                          {isSendingTest ? labels.sending : labels.sendTest}
                         </AdminButton>
                       </div>
 
@@ -434,7 +596,7 @@ export default function EmailTemplatesAdmin() {
                           {sendStatus.message}
                           {!sendStatus.ok ? (
                             <div className="mt-[6px] text-[11px] text-[#535353]">
-                              Pastaba: siuntimui reikia el. pašto tiekėjo konfigūracijos (pvz. <code>RESEND_API_KEY</code>).
+                              {labels.providerNote}
                             </div>
                           ) : null}
                         </div>
@@ -442,7 +604,7 @@ export default function EmailTemplatesAdmin() {
                     </div>
 
                     <div className="mb-[24px]">
-                      <AdminLabel className="mb-[12px]">HTML peržiūra (LT)</AdminLabel>
+                      <AdminLabel className="mb-[12px]">{labels.htmlPreviewLt}</AdminLabel>
                       <div className="border-2 border-[#E1E1E1] rounded-[12px] overflow-hidden mb-[16px]">
                         <iframe
                           srcDoc={renderedLt?.html || selectedTemplate.html(previewVars)}
@@ -450,7 +612,7 @@ export default function EmailTemplatesAdmin() {
                           title="Email Preview LT"
                         />
                       </div>
-                      <AdminLabel className="mb-[12px]">HTML peržiūra (EN)</AdminLabel>
+                      <AdminLabel className="mb-[12px]">{labels.htmlPreviewEn}</AdminLabel>
                       <div className="border-2 border-[#E1E1E1] rounded-[12px] overflow-hidden">
                         <iframe
                           srcDoc={renderedEn?.html || selectedTemplate.html(previewVars)}
@@ -462,14 +624,14 @@ export default function EmailTemplatesAdmin() {
 
                     <div className="flex gap-[12px] flex-wrap">
                       <AdminButton variant="secondary" onClick={handleCopyHTML}>
-                        Kopijuoti HTML
+                        {labels.copyHtml}
                       </AdminButton>
                     </div>
 
                     {/* Template Variables */}
                     <div className="mt-[24px] p-[20px] bg-[#EAEAEA] rounded-[16px] border border-[#E1E1E1]">
                       <h4 className="font-['Outfit'] text-[11px] font-medium text-[#535353] uppercase tracking-[0.55px] mb-[12px]">
-                        Pavyzdiniai duomenys
+                        {labels.sampleData}
                       </h4>
                       <pre className="font-['Outfit'] text-[11px] text-[#535353] overflow-x-auto">
                         {JSON.stringify(previewVars, null, 2)}
@@ -481,9 +643,9 @@ export default function EmailTemplatesAdmin() {
                 <AdminCard className="text-center p-[clamp(40px,6vw,80px)]">
                   <div className="text-[#BBBBBB] text-[clamp(48px,8vw,72px)] mb-[16px]">📧</div>
                   <h3 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616] mb-[8px]">
-                    Pasirinkite šabloną
+                    {labels.selectTemplateTitle}
                   </h3>
-                  <p className="font-['Outfit'] text-[14px] text-[#535353]">Pasirinkite el. laiško šabloną peržiūrai</p>
+                  <p className="font-['Outfit'] text-[14px] text-[#535353]">{labels.selectTemplateSubtitle}</p>
                 </AdminCard>
               )}
             </div>
@@ -506,7 +668,7 @@ export default function EmailTemplatesAdmin() {
                   <div className="space-y-[6px]">
                     {templates.map((template: EmailTemplate) => (
                       <div key={template.id} className="font-['Outfit'] text-[12px] text-[#535353]">
-                        • {template.name}
+                        • {templateTranslations?.[template.id]?.name || template.name}
                       </div>
                     ))}
                   </div>

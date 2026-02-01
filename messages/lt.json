@@ -1392,9 +1392,17 @@
       },
       "actions": {
         "viewDetails": "Peržiūrėti detaliai",
+        "edit": "Redaguoti",
         "exportJson": "Eksportuoti JSON",
         "rescan": "Perskenuoti",
         "exportFixes": "Eksportuoti taisymus"
+      },
+      "editor": {
+        "label": "Redaktorius",
+        "on": "Įjungtas",
+        "off": "Išjungtas",
+        "toggleTitle": "Perjungti SEO redaktorių",
+        "modalTitle": "Redaguoti SEO"
       },
       "errors": {
         "noSession": "Nėra prisijungimo sesijos",
