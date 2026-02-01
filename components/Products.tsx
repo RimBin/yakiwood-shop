@@ -147,30 +147,32 @@ function MobileProductCard({
         <Image src={imgMask} alt="" fill className="object-cover" />
       </div>
 
-      {/* Product image slider - full width on mobile/tablet */}
-      <div className="relative w-[calc(100%+24px)] -mx-[12px] aspect-[4/3] shrink-0 z-10 rounded-[8px] overflow-hidden">
-        <Image
-          src={slides[currentIndex]?.image || product.image}
-          alt={product.title}
-          fill
-          className="object-cover"
-          sizes="(max-width: 1024px) 100vw, 395px"
-        />
+      {/* Product image slider - full width on mobile, padded on tablet */}
+      <div className="relative w-[calc(100%+24px)] -mx-[12px] aspect-[4/3] shrink-0 z-10 md:mx-0 md:w-full md:px-[16px]">
+        <div className="relative w-full h-full rounded-[8px] overflow-hidden">
+          <Image
+            src={slides[currentIndex]?.image || product.image}
+            alt={product.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 1024px) 100vw, 395px"
+          />
 
-        {!!slides[currentIndex]?.label && (
-          <div className="absolute bottom-[12px] right-[12px] z-20">
-            <span className="font-['Outfit'] font-medium text-[14px] leading-[1.1] tracking-[1.2px] uppercase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]">
-              {slides[currentIndex].label}
-            </span>
-          </div>
-        )}
+          {!!slides[currentIndex]?.label && (
+            <div className="absolute bottom-[12px] right-[12px] z-20">
+              <span className="font-['Outfit'] font-medium text-[14px] leading-[1.1] tracking-[1.2px] uppercase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]">
+                {slides[currentIndex].label}
+              </span>
+            </div>
+          )}
 
-        <SliderArrows
-          onPrev={() => goTo(currentIndex - 1)}
-          onNext={() => goTo(currentIndex + 1)}
-          prevAriaLabel={prevImageAria}
-          nextAriaLabel={nextImageAria}
-        />
+          <SliderArrows
+            onPrev={() => goTo(currentIndex - 1)}
+            onNext={() => goTo(currentIndex + 1)}
+            prevAriaLabel={prevImageAria}
+            nextAriaLabel={nextImageAria}
+          />
+        </div>
       </div>
 
       {/* Content container - 279px width */}

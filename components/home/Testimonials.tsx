@@ -64,6 +64,16 @@ export default function Testimonials() {
     );
   };
 
+  // Ensure initial active card matches layout (first on tablet/mobile, middle on desktop)
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 1280px)');
+    const applyIndex = (matches: boolean) => setActiveIndex(matches ? 1 : 0);
+    applyIndex(media.matches);
+    const onChange = (event: MediaQueryListEvent) => applyIndex(event.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
   // Scroll the mobile container to the active item when activeIndex changes
   useEffect(() => {
     const container = scrollRef.current;
@@ -117,31 +127,34 @@ export default function Testimonials() {
           className={`${getContainerPadding()} flex gap-[16px] overflow-x-auto scrollbar-hide pb-[8px] snap-x snap-mandatory scroll-smooth`}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {testimonials.map((testimonial, index) => (
-            <article
-              key={testimonial.author}
-              className="relative flex-shrink-0 w-full md:w-[520px] h-[450px] md:h-[480px] rounded-[8px] overflow-hidden snap-center hero-seq-item hero-seq-right"
-              style={{ animationDelay: `${220 + index * 160}ms` }}
-            >
-              <div className="absolute inset-0">
-                <Image
-                  src={activeTexture}
-                  alt=""
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-[#3d3d3d]/90" />
-              </div>
-              <div className="relative z-10 flex flex-col justify-between h-full p-[24px]">
-                <p className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-0.04em] text-white">
-                  &ldquo;{testimonial.quote}&rdquo;
-                </p>
-                <p className="font-['DM_Sans'] font-medium text-[14px] tracking-[-0.28px] text-white">
-                  &mdash; {testimonial.author}, {testimonial.role}
-                </p>
-              </div>
-            </article>
-          ))}
+          {testimonials.map((testimonial, index) => {
+            const isActive = index === activeIndex;
+            return (
+              <article
+                key={testimonial.author}
+                className="relative flex-shrink-0 w-full md:w-[520px] h-[450px] md:h-[480px] rounded-[8px] overflow-hidden snap-center hero-seq-item hero-seq-right"
+                style={{ animationDelay: `${220 + index * 160}ms` }}
+              >
+                <div className="absolute inset-0">
+                  <Image
+                    src={activeTexture}
+                    alt=""
+                    fill
+                    className={`object-cover ${isActive ? "opacity-100" : "opacity-15 mix-blend-luminosity"}`}
+                  />
+                  <div className={`absolute inset-0 ${isActive ? "bg-[#3d3d3d]/90" : "bg-[#E1E1E1]"}`} />
+                </div>
+                <div className={`relative z-10 flex flex-col justify-between h-full p-[24px] ${isActive ? "text-white" : "text-[#b8b8b8]"}`}>
+                  <p className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-0.04em]">
+                    &ldquo;{testimonial.quote}&rdquo;
+                  </p>
+                  <p className={`font-['DM_Sans'] font-medium text-[14px] tracking-[-0.28px] ${isActive ? "text-white" : "text-[#9b9b9b]"}`}>
+                    &mdash; {testimonial.author}, {testimonial.role}
+                  </p>
+                </div>
+              </article>
+            );
+          })}
         </div>
 
         {/* Navigation Arrows - Mobile */}

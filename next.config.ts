@@ -220,6 +220,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: '/svetaines-zemelapis',
+        destination: '/lt/svetaines-zemelapis',
+        permanent: true,
+      },
+      {
         source: '/konfiguratorius3d/:path*',
         destination: '/lt/konfiguratorius3d/:path*',
         permanent: true,

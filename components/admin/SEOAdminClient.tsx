@@ -650,7 +650,7 @@ export default function SEOAdminClient() {
               className={
                 filter === 'good'
                   ? 'bg-green-600 hover:bg-green-700'
-                  : 'text-green-600 border-green-200 hover:border-green-600'
+                  : 'text-green-700 border-green-600 hover:border-green-700'
               }
               onClick={() => setFilter('good')}
             >
@@ -662,7 +662,7 @@ export default function SEOAdminClient() {
               className={
                 filter === 'warning'
                   ? 'bg-yellow-600 hover:bg-yellow-700'
-                  : 'text-yellow-600 border-yellow-200 hover:border-yellow-600'
+                  : 'text-yellow-700 border-yellow-600 hover:border-yellow-700'
               }
               onClick={() => setFilter('warning')}
             >
@@ -674,7 +674,7 @@ export default function SEOAdminClient() {
               className={
                 filter === 'error'
                   ? 'bg-red-600 hover:bg-red-700'
-                  : 'text-red-600 border-red-200 hover:border-red-600'
+                  : 'text-red-700 border-red-600 hover:border-red-700'
               }
               onClick={() => setFilter('error')}
             >

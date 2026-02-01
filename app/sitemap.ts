@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { projects } from '@/data/projects';
 
-const BASE_URL = 'https://shop.yakiwood.co.uk';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://yakiwood.lt';
 
 // Indexable variant landing pages (do not include preset/query URLs in sitemap)
 const SHOU_SUGI_BAN_VARIANT_SLUGS = ['larch-carbon', 'spruce-natural', 'accoya-black'] as const;
@@ -58,19 +58,13 @@ async function getSanityPages(): Promise<MetadataRoute.Sitemap> {
       const lastModified = doc._updatedAt ? new Date(doc._updatedAt) : new Date();
       const slug = doc.slug;
 
-      // Map Sanity docs to both English and Lithuanian routes where applicable
+      // Lithuanian-only routes for public sitemap to avoid locale redirects
       return [
-        {
-          url: `${BASE_URL}/${slug}`,
-          lastModified,
-          changeFrequency: 'monthly' as const,
-          priority: 0.5,
-        },
         {
           url: `${BASE_URL}/lt/${slug}`,
           lastModified,
           changeFrequency: 'monthly' as const,
-          priority: 0.45,
+          priority: 0.5,
         },
       ];
     });
@@ -88,58 +82,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     {
-      url: BASE_URL,
+      url: `${BASE_URL}/lt`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 1.0,
     },
     {
-      url: `${BASE_URL}/lt`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/products`,
+      url: `${BASE_URL}/lt/produktai`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/lt/produktai`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/projects`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
       url: `${BASE_URL}/lt/projektai`,
       lastModified: now,
       changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/solutions`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.7,
+      priority: 0.8,
     },
     {
       url: `${BASE_URL}/lt/sprendimai`,
       lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/about`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.6,
+      priority: 0.7,
     },
     {
       url: `${BASE_URL}/lt/apie`,
@@ -148,19 +112,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     },
     {
-      url: `${BASE_URL}/contact`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
       url: `${BASE_URL}/lt/kontaktai`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${BASE_URL}/faq`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.5,
@@ -169,13 +121,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE_URL}/lt/duk`,
       lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.4,
-    },
-    {
-      url: `${BASE_URL}/configurator3d`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.6,
+      priority: 0.45,
     },
     {
       url: `${BASE_URL}/lt/konfiguratorius3d`,
@@ -183,95 +129,56 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
-    // Add common legal/news pages that may be managed via CMS
-    {
-      url: `${BASE_URL}/terms`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${BASE_URL}/privacy`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
+    // Legal/news pages
     {
       url: `${BASE_URL}/lt/taisykles`,
       lastModified: now,
       changeFrequency: 'yearly',
-      priority: 0.25,
+      priority: 0.3,
     },
     {
       url: `${BASE_URL}/lt/privatumas`,
       lastModified: now,
       changeFrequency: 'yearly',
-      priority: 0.25,
-    },
-    {
-      url: `${BASE_URL}/news`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.5,
+      priority: 0.3,
     },
     {
       url: `${BASE_URL}/lt/naujienos`,
       lastModified: now,
       changeFrequency: 'weekly',
-      priority: 0.45,
+      priority: 0.5,
+    },
+    {
+      url: `${BASE_URL}/lt/svetaines-zemelapis`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.3,
     },
   ];
 
   // Dynamic product pages
-  const productPages: MetadataRoute.Sitemap = products.flatMap((product) => {
-    const enSlug = (product as any).slugEn ?? product.slug;
-    return [
-      {
-        url: `${BASE_URL}/products/${enSlug}`,
-        lastModified: product.updatedAt,
-        changeFrequency: 'weekly',
-        priority: 0.8,
-      },
-      {
-        url: `${BASE_URL}/lt/produktai/${product.slug}`,
-        lastModified: product.updatedAt,
-        changeFrequency: 'weekly',
-        priority: 0.7,
-      },
-    ];
-  });
+  const productPages: MetadataRoute.Sitemap = products.map((product) => ({
+    url: `${BASE_URL}/lt/produktai/${product.slug}`,
+    lastModified: product.updatedAt,
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }));
 
   // Dynamic project pages
-  const projectPages: MetadataRoute.Sitemap = projects.flatMap((project) => [
-    {
-      url: `${BASE_URL}/projects/${project.slug}`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/lt/projektai/${project.slug}`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-  ]);
+  const projectPages: MetadataRoute.Sitemap = projects.map((project) => ({
+    url: `${BASE_URL}/lt/projektai/${project.slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }));
 
   // Static SEO variant landing pages
-  const variantLandingPages: MetadataRoute.Sitemap = SHOU_SUGI_BAN_VARIANT_SLUGS.flatMap((slug) => [
-    {
-      url: `${BASE_URL}/shou-sugi-ban/${slug}`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/lt/shou-sugi-ban/${slug}`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-  ]);
+  const variantLandingPages: MetadataRoute.Sitemap = SHOU_SUGI_BAN_VARIANT_SLUGS.map((slug) => ({
+    url: `${BASE_URL}/lt/shou-sugi-ban/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }));
 
   return [...staticPages, ...productPages, ...variantLandingPages, ...projectPages, ...sanityPages];
 }
