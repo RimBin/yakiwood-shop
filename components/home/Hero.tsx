@@ -48,9 +48,9 @@ export default async function Hero() {
 
         <div className="relative w-full">
           <div className="bg-[#bbab92] w-full h-[423px] md:h-[520px] relative hero-seq-item hero-seq-right hero-seq-2">
-            <div className="absolute inset-x-0 top-0 h-[309px] flex items-center justify-center">
+            <div className="absolute inset-x-0 top-0 h-[309px] flex items-center justify-center md:inset-0 md:h-full">
               <div className="rotate-[333.068deg] w-full px-4 flex items-center justify-center">
-                <div className="w-full max-w-[340px] aspect-[317/185] relative">
+                <div className="w-full max-w-[510px] aspect-[317/185] relative">
                   <Image
                     src={imgProductImage}
                     alt="Shou Sugi Ban Plank"

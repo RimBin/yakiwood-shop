@@ -1,26 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from 'next-sanity'
-
-import { apiVersion, dataset, projectId } from '@/sanity/env'
-import { assertWriteToken, writeClient } from '@/sanity/lib/writeClient'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { AdminAuthError, requireAdmin } from '@/lib/supabase/admin'
 
 type EmailTemplateDoc = {
-  _id: string
-  _type: 'emailTemplate'
-  templateId: string
-  subjectLt?: string
-  subjectEn?: string
-  htmlLt?: string
-  htmlEn?: string
+  template_id: string
+  subject_lt?: string | null
+  subject_en?: string | null
+  html_lt?: string | null
+  html_en?: string | null
 }
-
-const readClient = createClient({
-  projectId,
-  dataset,
-  apiVersion,
-  useCdn: false,
-})
 
 export const dynamic = 'force-dynamic'
 
@@ -28,15 +16,34 @@ export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request)
 
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 })
+    }
+
     const templateId = request.nextUrl.searchParams.get('templateId')
     if (!templateId || templateId.trim().length === 0) {
       return NextResponse.json({ error: 'templateId is required' }, { status: 400 })
     }
 
-    const doc = await readClient.fetch<EmailTemplateDoc | null>(
-      `*[_type == "emailTemplate" && templateId == $templateId][0]{_id,_type,templateId,subjectLt,subjectEn,htmlLt,htmlEn}`,
-      { templateId }
-    )
+    const { data, error } = await supabaseAdmin
+      .from('email_templates')
+      .select('template_id,subject_lt,subject_en,html_lt,html_en')
+      .eq('template_id', templateId)
+      .maybeSingle()
+
+    if (error) {
+      return NextResponse.json({ error: 'Failed to fetch template' }, { status: 500 })
+    }
+
+    const doc = data
+      ? {
+          templateId: data.template_id,
+          subjectLt: data.subject_lt || '',
+          subjectEn: data.subject_en || '',
+          htmlLt: data.html_lt || '',
+          htmlEn: data.html_en || '',
+        }
+      : null
 
     return NextResponse.json({ success: true, data: doc })
   } catch (error) {
@@ -50,7 +57,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     await requireAdmin(request)
-    assertWriteToken()
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 })
+    }
 
     const body = (await request.json()) as Partial<
       Pick<EmailTemplateDoc, 'templateId' | 'subjectLt' | 'subjectEn' | 'htmlLt' | 'htmlEn'>
@@ -61,32 +71,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'templateId is required' }, { status: 400 })
     }
 
-    const _id = `emailTemplate.${templateId}`
+    const { data, error } = await supabaseAdmin
+      .from('email_templates')
+      .upsert(
+        {
+          template_id: templateId,
+          subject_lt: body.subjectLt ?? '',
+          subject_en: body.subjectEn ?? '',
+          html_lt: body.htmlLt ?? '',
+          html_en: body.htmlEn ?? '',
+        },
+        { onConflict: 'template_id' }
+      )
+      .select('template_id,subject_lt,subject_en,html_lt,html_en')
+      .single()
 
-    await writeClient.createIfNotExists({
-      _id,
-      _type: 'emailTemplate',
-      templateId,
+    if (error) {
+      return NextResponse.json({ error: 'Failed to save template' }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        templateId: data.template_id,
+        subjectLt: data.subject_lt || '',
+        subjectEn: data.subject_en || '',
+        htmlLt: data.html_lt || '',
+        htmlEn: data.html_en || '',
+      },
     })
-
-    const updated = await writeClient
-      .patch(_id)
-      .set({
-        templateId,
-        subjectLt: body.subjectLt ?? '',
-        subjectEn: body.subjectEn ?? '',
-        htmlLt: body.htmlLt ?? '',
-        htmlEn: body.htmlEn ?? '',
-      })
-      .commit({ autoGenerateArrayKeys: true })
-
-    return NextResponse.json({ success: true, data: updated })
   } catch (error: any) {
     if (error instanceof AdminAuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status })
-    }
-    if (typeof error?.message === 'string' && error.message.includes('SANITY_API_TOKEN')) {
-      return NextResponse.json({ error: error.message }, { status: 503 })
     }
     return NextResponse.json({ error: 'Unexpected server error' }, { status: 500 })
   }

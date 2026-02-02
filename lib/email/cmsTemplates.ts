@@ -1,11 +1,8 @@
 import 'server-only'
 
-import { createClient } from 'next-sanity'
-
-import { apiVersion, dataset, projectId } from '@/sanity/env'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export type EmailTemplateDoc = {
-  _id: string
   templateId: string
   subjectLt?: string
   subjectEn?: string
@@ -13,18 +10,24 @@ export type EmailTemplateDoc = {
   htmlEn?: string
 }
 
-const readClient = createClient({
-  projectId,
-  dataset,
-  apiVersion,
-  useCdn: false,
-})
-
 export async function getEmailTemplateDoc(templateId: string): Promise<EmailTemplateDoc | null> {
   if (!templateId || templateId.trim().length === 0) return null
 
-  return await readClient.fetch<EmailTemplateDoc | null>(
-    `*[_type == "emailTemplate" && templateId == $templateId][0]{_id,templateId,subjectLt,subjectEn,htmlLt,htmlEn}`,
-    { templateId }
-  )
+  if (!supabaseAdmin) return null
+
+  const { data, error } = await supabaseAdmin
+    .from('email_templates')
+    .select('template_id,subject_lt,subject_en,html_lt,html_en')
+    .eq('template_id', templateId)
+    .maybeSingle()
+
+  if (error || !data) return null
+
+  return {
+    templateId: data.template_id,
+    subjectLt: data.subject_lt || undefined,
+    subjectEn: data.subject_en || undefined,
+    htmlLt: data.html_lt || undefined,
+    htmlEn: data.html_en || undefined,
+  }
 }

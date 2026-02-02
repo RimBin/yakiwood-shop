@@ -140,6 +140,12 @@ function toNullableString(value: string): string | null {
   return trimmed ? trimmed : null;
 }
 
+function autoResizeTextarea(event: React.FormEvent<HTMLTextAreaElement>) {
+  const el = event.currentTarget;
+  el.style.height = 'auto';
+  el.style.height = `${el.scrollHeight}px`;
+}
+
 function robotsStateToNullable(value: SeoOverrideFormState['robotsIndex' | 'robotsFollow']): boolean | null {
   if (value === 'inherit') return null;
   if (value === 'index' || value === 'follow') return true;
@@ -225,7 +231,7 @@ export default function SEOAdminClient() {
   const [selectedPage, setSelectedPage] = useState<PageSEOResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [editorEnabled, setEditorEnabled] = useState(false);
+  const [editorEnabled, setEditorEnabled] = useState(true);
   const [editingPage, setEditingPage] = useState<PageSEOResult | null>(null);
   const [overrideRow, setOverrideRow] = useState<SeoOverrideRow | null>(null);
   const [overrideLoading, setOverrideLoading] = useState(false);
@@ -367,21 +373,8 @@ export default function SEOAdminClient() {
   }, []);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(SEO_EDITOR_ENABLED_KEY);
-      if (stored === '1') setEditorEnabled(true);
-    } catch {
-      // ignore
-    }
+    setEditorEnabled(true);
   }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(SEO_EDITOR_ENABLED_KEY, editorEnabled ? '1' : '0');
-    } catch {
-      // ignore
-    }
-  }, [editorEnabled]);
 
   const openEditor = async (page: PageSEOResult) => {
     setOverrideNotice(null);
@@ -408,13 +401,13 @@ export default function SEOAdminClient() {
       );
 
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || 'Failed to load override');
+      if (!res.ok) throw new Error(json?.error || t('errors.loadOverrideFailed'));
 
       const row = (json?.override ?? null) as SeoOverrideRow | null;
       setOverrideRow(row);
       setOverrideForm(overrideToFormState(page, row));
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to load override');
+      setError(e instanceof Error ? e.message : t('errors.loadOverrideFailed'));
       setEditingPage(null);
     } finally {
       setOverrideLoading(false);
@@ -466,13 +459,13 @@ export default function SEOAdminClient() {
       });
 
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || 'Failed to save override');
+      if (!res.ok) throw new Error(json?.error || t('errors.saveOverrideFailed'));
 
       const saved = (json?.override ?? null) as SeoOverrideRow | null;
       setOverrideRow(saved);
-      setOverrideNotice('Saved. Re-scan to see updated score.');
+      setOverrideNotice(t('editor.noticeSaved'));
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to save override');
+      setError(e instanceof Error ? e.message : t('errors.saveOverrideFailed'));
     } finally {
       setOverrideSaving(false);
     }
@@ -480,7 +473,7 @@ export default function SEOAdminClient() {
 
   const deleteOverride = async () => {
     if (!overrideForm) return;
-    if (!confirm('Delete this override?')) return;
+    if (!confirm(t('editor.confirmDelete'))) return;
 
     setOverrideNotice(null);
     setError(null);
@@ -503,13 +496,13 @@ export default function SEOAdminClient() {
       );
 
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || 'Failed to delete override');
+      if (!res.ok) throw new Error(json?.error || t('errors.deleteOverrideFailed'));
 
       setOverrideRow(null);
       if (editingPage) setOverrideForm(overrideToFormState(editingPage, null));
-      setOverrideNotice('Override deleted.');
+      setOverrideNotice(t('editor.noticeDeleted'));
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to delete override');
+      setError(e instanceof Error ? e.message : t('errors.deleteOverrideFailed'));
     } finally {
       setOverrideSaving(false);
     }
@@ -594,13 +587,13 @@ export default function SEOAdminClient() {
     <>
       <AdminStack>
           {error && (
-            <div className="bg-[#EAEAEA] border border-red-200 text-red-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
+            <div className="bg-[#FFF3F2] border border-red-300 text-red-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
               {error}
             </div>
           )}
 
           {!error && !hasAttemptedScan && pages.length === 0 && (
-            <div className="bg-[#EAEAEA] border border-[#E1E1E1] text-[#535353] rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
+            <div className="bg-[#F4F4F4] border border-[#BBBBBB] text-[#161616] rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
               {t('notScannedYet')}
             </div>
           )}
@@ -679,15 +672,6 @@ export default function SEOAdminClient() {
               onClick={() => setFilter('error')}
             >
               {t('filters.errors')} ({stats.error})
-            </AdminButton>
-
-            <AdminButton
-              size="md"
-              variant={editorEnabled ? 'primary' : 'outline'}
-              onClick={() => setEditorEnabled((v) => !v)}
-              title={t('editor.toggleTitle')}
-            >
-              {t('editor.label')}: {editorEnabled ? t('editor.on') : t('editor.off')}
             </AdminButton>
 
             <AdminButton size="md" variant="outline" className="ml-auto" onClick={loadPages}>
@@ -830,29 +814,32 @@ export default function SEOAdminClient() {
                   {overrideLoading || !overrideForm ? (
                     <div className="text-center py-12">
                       <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#161616] mx-auto mb-4" />
-                      <p className="font-['Outfit'] text-[#535353]">Loading override…</p>
+                      <p className="font-['Outfit'] text-[#535353]">{t('editor.loadingOverride')}</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                       <div className="space-y-6">
                         {overrideNotice && (
-                          <div className="bg-[#EAEAEA] border border-green-200 text-green-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
+                          <div className="bg-[#ECF8F1] border border-green-300 text-green-700 rounded-[16px] px-4 py-3 font-['Outfit'] text-sm">
                             {overrideNotice}
                           </div>
                         )}
 
-                        <div className="bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1] p-6">
+                          <div className="bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1] p-6">
                           <div className="flex items-center justify-between gap-4">
                             <div>
                               <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">
-                                Override
+                                {t('editor.overrideTitle')}
                               </div>
                               <div className="font-['Outfit'] text-xs text-[#535353] mt-1">
-                                canonical_path: {overrideForm.canonicalPath} • locale: {overrideForm.locale}
+                                {t('editor.overrideMeta', {
+                                  path: overrideForm.canonicalPath,
+                                  locale: overrideForm.locale,
+                                })}
                               </div>
                               {overrideRow && (
                                 <div className="font-['Outfit'] text-xs text-[#535353] mt-1">
-                                  Updated: {new Date(overrideRow.updated_at).toLocaleString()} ({overrideRow.updated_by_email || 'unknown'})
+                                  {t('editor.updatedLabel')}: {new Date(overrideRow.updated_at).toLocaleString()} ({overrideRow.updated_by_email || 'unknown'})
                                 </div>
                               )}
                             </div>
@@ -866,16 +853,16 @@ export default function SEOAdminClient() {
                                   )
                                 }
                               />
-                              Enabled
+                              {t('editor.enabled')}
                             </label>
                           </div>
                         </div>
 
                         <div className="bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1] p-6 space-y-4">
-                          <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">Basic</div>
+                          <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">{t('editor.basic')}</div>
 
                           <div>
-                            <AdminLabel className="mb-[6px]">Title</AdminLabel>
+                            <AdminLabel className="mb-[6px]">{t('editor.title')}</AdminLabel>
                             <AdminInput
                               value={overrideForm.title}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, title: e.target.value } : s))}
@@ -884,16 +871,19 @@ export default function SEOAdminClient() {
                           </div>
 
                           <div>
-                            <AdminLabel className="mb-[6px]">Description</AdminLabel>
+                            <AdminLabel className="mb-[6px]">{t('editor.description')}</AdminLabel>
                             <AdminTextarea
                               value={overrideForm.description}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, description: e.target.value } : s))}
+                              onInput={autoResizeTextarea}
+                              className="resize-none overflow-hidden"
+                              rows={3}
                               placeholder={editingPage.description || ''}
                             />
                           </div>
 
                           <div>
-                            <AdminLabel className="mb-[6px]">Canonical URL (optional)</AdminLabel>
+                            <AdminLabel className="mb-[6px]">{t('editor.canonicalUrl')}</AdminLabel>
                             <AdminInput
                               value={overrideForm.canonicalUrl}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, canonicalUrl: e.target.value } : s))}
@@ -903,7 +893,7 @@ export default function SEOAdminClient() {
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <AdminLabel className="mb-[6px]">Robots index</AdminLabel>
+                              <AdminLabel className="mb-[6px]">{t('editor.robotsIndex')}</AdminLabel>
                               <AdminSelect
                                 value={overrideForm.robotsIndex}
                                 onChange={(e) =>
@@ -912,14 +902,14 @@ export default function SEOAdminClient() {
                                   )
                                 }
                               >
-                                <option value="inherit">Inherit</option>
-                                <option value="index">index</option>
-                                <option value="noindex">noindex</option>
+                                <option value="inherit">{t('editor.robots.inherit')}</option>
+                                <option value="index">{t('editor.robots.index')}</option>
+                                <option value="noindex">{t('editor.robots.noindex')}</option>
                               </AdminSelect>
                             </div>
 
                             <div>
-                              <AdminLabel className="mb-[6px]">Robots follow</AdminLabel>
+                              <AdminLabel className="mb-[6px]">{t('editor.robotsFollow')}</AdminLabel>
                               <AdminSelect
                                 value={overrideForm.robotsFollow}
                                 onChange={(e) =>
@@ -928,19 +918,19 @@ export default function SEOAdminClient() {
                                   )
                                 }
                               >
-                                <option value="inherit">Inherit</option>
-                                <option value="follow">follow</option>
-                                <option value="nofollow">nofollow</option>
+                                <option value="inherit">{t('editor.robots.inherit')}</option>
+                                <option value="follow">{t('editor.robots.follow')}</option>
+                                <option value="nofollow">{t('editor.robots.nofollow')}</option>
                               </AdminSelect>
                             </div>
                           </div>
                         </div>
 
                         <div className="bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1] p-6 space-y-4">
-                          <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">Open Graph</div>
+                          <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">{t('editor.openGraph')}</div>
 
                           <div>
-                            <AdminLabel className="mb-[6px]">OG Title</AdminLabel>
+                            <AdminLabel className="mb-[6px]">{t('editor.ogTitle')}</AdminLabel>
                             <AdminInput
                               value={overrideForm.ogTitle}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, ogTitle: e.target.value } : s))}
@@ -948,15 +938,18 @@ export default function SEOAdminClient() {
                             />
                           </div>
                           <div>
-                            <AdminLabel className="mb-[6px]">OG Description</AdminLabel>
+                            <AdminLabel className="mb-[6px]">{t('editor.ogDescription')}</AdminLabel>
                             <AdminTextarea
                               value={overrideForm.ogDescription}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, ogDescription: e.target.value } : s))}
+                              onInput={autoResizeTextarea}
+                              className="resize-none overflow-hidden"
+                              rows={3}
                               placeholder={(editingPage.openGraph as any)?.description || editingPage.description || ''}
                             />
                           </div>
                           <div>
-                            <AdminLabel className="mb-[6px]">OG Image URL</AdminLabel>
+                            <AdminLabel className="mb-[6px]">{t('editor.ogImage')}</AdminLabel>
                             <AdminInput
                               value={overrideForm.ogImage}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, ogImage: e.target.value } : s))}
@@ -966,10 +959,10 @@ export default function SEOAdminClient() {
                         </div>
 
                         <div className="bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1] p-6 space-y-4">
-                          <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">Twitter</div>
+                          <div className="font-['DM_Sans'] text-lg font-light tracking-[-0.48px] text-[#161616]">{t('editor.twitter')}</div>
 
                           <div>
-                            <AdminLabel className="mb-[6px]">Twitter Title</AdminLabel>
+                            <AdminLabel className="mb-[6px]">{t('editor.twitterTitle')}</AdminLabel>
                             <AdminInput
                               value={overrideForm.twitterTitle}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, twitterTitle: e.target.value } : s))}
@@ -977,17 +970,20 @@ export default function SEOAdminClient() {
                             />
                           </div>
                           <div>
-                            <AdminLabel className="mb-[6px]">Twitter Description</AdminLabel>
+                            <AdminLabel className="mb-[6px]">{t('editor.twitterDescription')}</AdminLabel>
                             <AdminTextarea
                               value={overrideForm.twitterDescription}
                               onChange={(e) =>
                                 setOverrideForm((s) => (s ? { ...s, twitterDescription: e.target.value } : s))
                               }
+                              onInput={autoResizeTextarea}
+                              className="resize-none overflow-hidden"
+                              rows={3}
                               placeholder={(editingPage.twitter as any)?.description || editingPage.description || ''}
                             />
                           </div>
                           <div>
-                            <AdminLabel className="mb-[6px]">Twitter Image URL</AdminLabel>
+                            <AdminLabel className="mb-[6px]">{t('editor.twitterImage')}</AdminLabel>
                             <AdminInput
                               value={overrideForm.twitterImage}
                               onChange={(e) => setOverrideForm((s) => (s ? { ...s, twitterImage: e.target.value } : s))}
@@ -1002,24 +998,24 @@ export default function SEOAdminClient() {
 
                         <div className="flex items-center gap-3">
                           <AdminButton onClick={saveOverride} disabled={overrideSaving}>
-                            {overrideSaving ? 'Saving…' : 'Save'}
+                            {overrideSaving ? t('editor.saving') : t('editor.save')}
                           </AdminButton>
 
                           {overrideRow && (
                             <AdminButton variant="danger" onClick={deleteOverride} disabled={overrideSaving}>
-                              Delete override
+                              {t('editor.deleteOverride')}
                             </AdminButton>
                           )}
 
                           <AdminButton variant="outline" className="ml-auto" onClick={closeEditor}>
-                            Close
+                            {t('editor.close')}
                           </AdminButton>
                         </div>
                       </div>
 
                       <div className="space-y-6">
                         <div className="font-['DM_Sans'] text-2xl font-light tracking-[-0.96px] text-[#161616]">
-                          Preview
+                          {t('editor.preview')}
                         </div>
                         <SEOPreview metadata={applyFormOverrideToPreview(editingPage, overrideForm)} />
                       </div>

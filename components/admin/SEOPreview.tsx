@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import type { PageSEOResult } from '@/lib/seo/scanner';
 
 interface SEOPreviewProps {
@@ -11,13 +12,14 @@ interface SEOPreviewProps {
  * Google Search Result Preview
  */
 export function GoogleSearchPreview({ metadata }: SEOPreviewProps) {
-  const title = metadata.title || 'Untitled Page';
+  const t = useTranslations('admin.seo.preview');
+  const title = metadata.title || t('untitledPage');
   const description = metadata.description || '';
   const displayUrl = metadata.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
   return (
     <div className="border border-[#E1E1E1] rounded-[24px] p-6 bg-[#EAEAEA]">
-      <div className="font-['Outfit'] text-xs text-[#535353] mb-4">Google Search Preview</div>
+      <div className="font-['Outfit'] text-xs text-[#535353] mb-4">{t('googleTitle')}</div>
       <div className="max-w-[600px]">
         {/* URL breadcrumb */}
         <div className="flex items-center gap-2 mb-2">
@@ -34,17 +36,19 @@ export function GoogleSearchPreview({ metadata }: SEOPreviewProps) {
 
         {/* Description */}
         <div className="font-['Outfit'] text-sm text-[#535353] leading-relaxed">
-          {description.length > 160 ? description.substring(0, 160) + '...' : description || 'Description missing'}
+          {description.length > 160
+            ? description.substring(0, 160) + '...'
+            : description || t('descriptionMissing')}
         </div>
       </div>
 
       {/* Length indicators */}
       <div className="mt-4 flex gap-4 text-xs font-['Outfit']">
         <span className={title.length > 60 ? 'text-red-600 font-medium' : 'text-[#535353]'}>
-          Title: {title.length}/60
+          {t('titleLabel')}: {title.length}/60
         </span>
         <span className={description.length > 160 ? 'text-red-600 font-medium' : 'text-[#535353]'}>
-          Description: {description.length}/160
+          {t('descriptionLabel')}: {description.length}/160
         </span>
       </div>
     </div>
@@ -55,14 +59,15 @@ export function GoogleSearchPreview({ metadata }: SEOPreviewProps) {
  * Facebook Open Graph Preview
  */
 export function FacebookPreview({ metadata }: SEOPreviewProps) {
-  const ogTitle = metadata.openGraph?.title || metadata.title || 'Untitled';
+  const t = useTranslations('admin.seo.preview');
+  const ogTitle = metadata.openGraph?.title || metadata.title || t('untitled');
   const ogDescription = metadata.openGraph?.description || metadata.description || '';
   const ogImage = metadata.openGraph?.images?.[0]?.url;
   const displayUrl = metadata.url.replace(/^https?:\/\//, '');
 
   return (
     <div className="border border-[#E1E1E1] rounded-[24px] p-6 bg-[#EAEAEA]">
-      <div className="font-['Outfit'] text-xs text-[#535353] mb-4">Facebook / Open Graph Preview</div>
+      <div className="font-['Outfit'] text-xs text-[#535353] mb-4">{t('facebookTitle')}</div>
       <div className="max-w-[500px] border border-[#E1E1E1] rounded-[24px] overflow-hidden bg-[#EAEAEA] shadow-sm">
         {/* Image */}
         {ogImage ? (
@@ -71,7 +76,7 @@ export function FacebookPreview({ metadata }: SEOPreviewProps) {
           </div>
         ) : (
           <div className="w-full aspect-[1.91/1] bg-[#E1E1E1] flex items-center justify-center">
-            <span className="font-['Outfit'] text-[#BBBBBB] text-sm">Image missing</span>
+            <span className="font-['Outfit'] text-[#BBBBBB] text-sm">{t('imageMissing')}</span>
           </div>
         )}
 
@@ -90,14 +95,14 @@ export function FacebookPreview({ metadata }: SEOPreviewProps) {
       {/* Metadata info */}
       <div className="mt-4 space-y-1 text-xs font-['Outfit']">
         <div className={ogTitle.length > 95 ? 'text-red-600 font-medium' : 'text-[#535353]'}>
-          OG Title: {ogTitle.length}/95
+          {t('ogTitleLabel')}: {ogTitle.length}/95
         </div>
         <div className={ogDescription.length > 200 ? 'text-red-600 font-medium' : 'text-[#535353]'}>
-          OG Description: {ogDescription.length}/200
+          {t('ogDescriptionLabel')}: {ogDescription.length}/200
         </div>
         {metadata.openGraph?.images?.[0] && (
           <div className="text-[#535353]">
-            Image: {metadata.openGraph.images[0].width || '?'}x{metadata.openGraph.images[0].height || '?'}px
+            {t('imageLabel')}: {metadata.openGraph.images[0].width || '?'}x{metadata.openGraph.images[0].height || '?'}px
           </div>
         )}
       </div>
@@ -109,7 +114,8 @@ export function FacebookPreview({ metadata }: SEOPreviewProps) {
  * Twitter Card Preview
  */
 export function TwitterPreview({ metadata }: SEOPreviewProps) {
-  const twitterTitle = metadata.twitter?.title || metadata.title || 'Untitled';
+  const t = useTranslations('admin.seo.preview');
+  const twitterTitle = metadata.twitter?.title || metadata.title || t('untitled');
   const twitterDescription = metadata.twitter?.description || metadata.description || '';
   const twitterImage = 
     (Array.isArray(metadata.twitter?.images) ? metadata.twitter?.images[0] : metadata.twitter?.images) ||
@@ -117,7 +123,7 @@ export function TwitterPreview({ metadata }: SEOPreviewProps) {
 
   return (
     <div className="border border-[#E1E1E1] rounded-[24px] p-6 bg-[#EAEAEA]">
-      <div className="font-['Outfit'] text-xs text-[#535353] mb-4">Twitter Card Preview</div>
+      <div className="font-['Outfit'] text-xs text-[#535353] mb-4">{t('twitterTitle')}</div>
       <div className="max-w-[500px] border border-[#E1E1E1] rounded-[24px] overflow-hidden bg-[#EAEAEA] shadow-sm">
         {/* Image */}
         {twitterImage ? (
@@ -126,7 +132,7 @@ export function TwitterPreview({ metadata }: SEOPreviewProps) {
           </div>
         ) : (
           <div className="w-full aspect-[2/1] bg-[#E1E1E1] flex items-center justify-center">
-            <span className="font-['Outfit'] text-[#BBBBBB] text-sm">Image missing</span>
+            <span className="font-['Outfit'] text-[#BBBBBB] text-sm">{t('imageMissing')}</span>
           </div>
         )}
 
@@ -144,10 +150,10 @@ export function TwitterPreview({ metadata }: SEOPreviewProps) {
       {/* Metadata info */}
       <div className="mt-4 space-y-1 text-xs font-['Outfit']">
         <div className={twitterTitle.length > 70 ? 'text-red-600 font-medium' : 'text-[#535353]'}>
-          Twitter Title: {twitterTitle.length}/70
+          {t('twitterTitleLabel')}: {twitterTitle.length}/70
         </div>
         <div className={twitterDescription.length > 200 ? 'text-red-600 font-medium' : 'text-[#535353]'}>
-          Twitter Description: {twitterDescription.length}/200
+          {t('twitterDescriptionLabel')}: {twitterDescription.length}/200
         </div>
       </div>
     </div>
@@ -158,13 +164,86 @@ export function TwitterPreview({ metadata }: SEOPreviewProps) {
  * SEO Issues List Component
  */
 export function SEOIssuesList({ metadata }: SEOPreviewProps) {
+  const t = useTranslations('admin.seo.preview');
+  const locale = useLocale();
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'error': return 'text-red-600 bg-[#EAEAEA] border-red-200';
-      case 'warning': return 'text-yellow-600 bg-[#EAEAEA] border-yellow-200';
-      case 'info': return 'text-blue-600 bg-[#EAEAEA] border-blue-200';
-      default: return 'text-[#535353] bg-[#EAEAEA] border-[#E1E1E1]';
+      case 'error': return 'text-red-700 bg-[#EAEAEA] border-red-400';
+      case 'warning': return 'text-yellow-700 bg-[#EAEAEA] border-yellow-400';
+      case 'info': return 'text-blue-700 bg-[#EAEAEA] border-blue-400';
+      default: return 'text-[#535353] bg-[#EAEAEA] border-[#BBBBBB]';
     }
+  };
+
+  const fieldLabel = (field: string) => {
+    const map: Record<string, string> = {
+      title: 'fields.title',
+      description: 'fields.description',
+      openGraph: 'fields.openGraph',
+      'openGraph.title': 'fields.openGraphTitle',
+      'openGraph.description': 'fields.openGraphDescription',
+      'openGraph.images': 'fields.openGraphImages',
+      'openGraph.type': 'fields.openGraphType',
+      twitter: 'fields.twitter',
+      'twitter.card': 'fields.twitterCard',
+      'twitter.title': 'fields.twitterTitle',
+      'twitter.description': 'fields.twitterDescription',
+      canonical: 'fields.canonical',
+      robots: 'fields.robots',
+    };
+    const key = map[field];
+    return key ? t(key) : field;
+  };
+
+  const translateIssueMessage = (message: string) => {
+    if (locale === 'lt') {
+      const patterns: Array<[RegExp, (...m: string[]) => string]> = [
+        [/^Title is missing - this is a critical SEO element$/, () => 'Trūksta pavadinimo – tai kritinis SEO elementas'],
+        [/^Title too short \((\d+) chars\)\. Recommended: (\d+)-(\d+)$/, (_m, len, min, max) => `Pavadinimas per trumpas (${len} simbolių). Rekomenduojama: ${min}–${max}`],
+        [/^Title too long \((\d+) chars\)\. Recommended: (\d+)-(\d+)\. Google may truncate\.$/, (_m, len, min, max) => `Pavadinimas per ilgas (${len} simbolių). Rekomenduojama: ${min}–${max}. Google gali sutrumpinti.`],
+        [/^Title optimal length \((\d+) chars\) ✓$/, (_m, len) => `Pavadinimo ilgis optimalus (${len} simbolių) ✓`],
+        [/^Title has duplicate words - consider optimizing$/, () => 'Pavadinime yra pasikartojančių žodžių – verta optimizuoti'],
+        [/^Description is missing - this is a critical SEO element$/, () => 'Trūksta aprašymo – tai kritinis SEO elementas'],
+        [/^Description too short \((\d+) characters\)\. Recommended: (\d+)-(\d+)$/, (_m, len, min, max) => `Aprašymas per trumpas (${len} simbolių). Rekomenduojama: ${min}–${max}`],
+        [/^Description too long \((\d+) characters\)\. Recommended: (\d+)-(\d+)\. Google may truncate\.$/, (_m, len, min, max) => `Aprašymas per ilgas (${len} simbolių). Rekomenduojama: ${min}–${max}. Google gali sutrumpinti.`],
+        [/^Description optimal length \((\d+) characters\) ✓$/, (_m, len) => `Aprašymo ilgis optimalus (${len} simbolių) ✓`],
+        [/^Open Graph metadata missing - required for social media$/, () => 'Trūksta Open Graph metaduomenų – reikalinga socialiniams tinklams'],
+        [/^Open Graph title missing$/, () => 'Trūksta Open Graph pavadinimo'],
+        [/^OG title too long \((\d+) characters\)\. Max: (\d+)$/, (_m, len, max) => `OG pavadinimas per ilgas (${len} simbolių). Maks.: ${max}`],
+        [/^Open Graph description missing$/, () => 'Trūksta Open Graph aprašymo'],
+        [/^OG description too long \((\d+) characters\)\. Max: (\d+)$/, (_m, len, max) => `OG aprašymas per ilgas (${len} simbolių). Maks.: ${max}`],
+        [/^Open Graph image missing - recommended for social sharing$/, () => 'Trūksta Open Graph paveikslėlio – rekomenduojama dalijimuisi'],
+        [/^OG image too narrow \((\d+)px\)\. Recommended: (\d+)x(\d+)$/, (_m, w, rw, rh) => `OG paveikslėlis per siauras (${w}px). Rekomenduojama: ${rw}x${rh}`],
+        [/^OG image too short \((\d+)px\)\. Recommended: (\d+)x(\d+)$/, (_m, h, rw, rh) => `OG paveikslėlis per žemas (${h}px). Rekomenduojama: ${rw}x${rh}`],
+        [/^OG image missing alt text - recommended for accessibility$/, () => 'OG paveikslėliui trūksta alt teksto – rekomenduojama dėl prieinamumo'],
+        [/^OG type not set - default will be "website"$/, () => 'OG tipas nenustatytas – bus naudojama „website“'],
+        [/^Twitter Card metadata missing - will use OG as fallback$/, () => 'Trūksta Twitter Card metaduomenų – bus naudojamas OG'],
+        [/^Twitter card type not set$/, () => 'Twitter kortelės tipas nenustatytas'],
+        [/^Unknown Twitter card type: (.+)$/, (_m, type) => `Nežinomas Twitter kortelės tipas: ${type}`],
+        [/^Twitter title too long \((\d+) characters\)\. Max: (\d+)$/, (_m, len, max) => `Twitter pavadinimas per ilgas (${len} simbolių). Maks.: ${max}`],
+        [/^Twitter description too long \((\d+) characters\)\. Max: (\d+)$/, (_m, len, max) => `Twitter aprašymas per ilgas (${len} simbolių). Maks.: ${max}`],
+        [/^Canonical URL missing - recommended for duplicate prevention$/, () => 'Trūksta kanoninio URL – rekomenduojama dubliavimo prevencijai'],
+        [/^Invalid canonical URL format: (.+)$/, (_m, value) => `Neteisingas kanoninio URL formatas: ${value}`],
+        [/^Canonical URL should use HTTPS$/, () => 'Kanoninis URL turėtų naudoti HTTPS'],
+      ];
+
+      for (const [re, out] of patterns) {
+        const match = message.match(re);
+        if (match) return out(...match as unknown as string[]);
+      }
+      return message;
+    }
+
+    const ltToEn: Array<[RegExp, string | ((...m: string[]) => string)]> = [
+      [/^Robots meta tag nenustatytas - default bus index,follow$/, 'Robots meta tag not set - default will be index,follow'],
+      [/^Puslapis nustatytas neindeksuoti \(noindex\)$/, 'Page is set to noindex'],
+      [/^Nuorodos puslapyje nebebus sekamos \(nofollow\)$/, 'Links on the page will not be followed (nofollow)'],
+    ];
+    for (const [re, out] of ltToEn) {
+      const match = message.match(re);
+      if (match) return typeof out === 'function' ? out(...(match as unknown as string[])) : out;
+    }
+    return message;
   };
 
   if (metadata.issues.length === 0) {
@@ -174,7 +253,7 @@ export function SEOIssuesList({ metadata }: SEOPreviewProps) {
           <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
-          <span className="font-['Outfit'] text-green-600">No SEO issues found - excellent!</span>
+          <span className="font-['Outfit'] text-green-600">{t('noIssues')}</span>
         </div>
       </div>
     );
@@ -207,10 +286,10 @@ export function SEOIssuesList({ metadata }: SEOPreviewProps) {
             </div>
             <div className="flex-1">
               <div className="font-['Outfit'] font-medium text-sm mb-1">
-                {issue.field.charAt(0).toUpperCase() + issue.field.slice(1)}
+                {fieldLabel(issue.field)}
               </div>
               <div className="font-['Outfit'] text-sm">
-                {issue.message}
+                {translateIssueMessage(issue.message)}
               </div>
             </div>
           </div>
@@ -224,6 +303,7 @@ export function SEOIssuesList({ metadata }: SEOPreviewProps) {
  * Main SEO Preview Card
  */
 export function SEOPreview({ metadata }: SEOPreviewProps) {
+  const t = useTranslations('admin.seo.preview');
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600';
     if (score >= 50) return 'text-yellow-600';
@@ -235,13 +315,13 @@ export function SEOPreview({ metadata }: SEOPreviewProps) {
       {/* Score Overview */}
       <div className="flex items-center justify-between p-6 bg-[#EAEAEA] rounded-[24px] border border-[#E1E1E1]">
         <div>
-          <div className="font-['Outfit'] text-sm text-[#535353] mb-1">SEO Score</div>
+          <div className="font-['Outfit'] text-sm text-[#535353] mb-1">{t('seoScoreLabel')}</div>
           <div className={`font-['DM_Sans'] text-5xl font-light tracking-[-1.6px] ${getScoreColor(metadata.seoScore)}`}>
             {metadata.seoScore}%
           </div>
         </div>
         <div className="text-right">
-          <div className="font-['Outfit'] text-sm text-[#535353] mb-1">Issues Found</div>
+          <div className="font-['Outfit'] text-sm text-[#535353] mb-1">{t('issuesFoundLabel')}</div>
           <div className="font-['DM_Sans'] text-5xl font-light tracking-[-1.6px] text-[#161616]">
             {metadata.issues.length}
           </div>
@@ -252,7 +332,7 @@ export function SEOPreview({ metadata }: SEOPreviewProps) {
       {metadata.issues.length > 0 && (
         <div>
           <h3 className="font-['DM_Sans'] text-2xl font-light tracking-[-0.96px] text-[#161616] mb-4">
-            SEO Issues
+            {t('seoIssuesTitle')}
           </h3>
           <SEOIssuesList metadata={metadata} />
         </div>
@@ -261,7 +341,7 @@ export function SEOPreview({ metadata }: SEOPreviewProps) {
       {/* Previews */}
       <div>
         <h3 className="font-['DM_Sans'] text-2xl font-light tracking-[-0.96px] text-[#161616] mb-4">
-          Search & Social Previews
+          {t('searchSocialTitle')}
         </h3>
         <div className="space-y-6">
           <GoogleSearchPreview metadata={metadata} />

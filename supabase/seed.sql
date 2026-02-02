@@ -61,6 +61,16 @@ insert into product_variants (product_id, name, variant_type, hex_color, price_a
     true
   );
 
+-- Email templates storage (admin editable)
+create table if not exists public.email_templates (
+  template_id text primary key,
+  subject_lt text,
+  subject_en text,
+  html_lt text,
+  html_en text,
+  updated_at timestamptz default now()
+);
+
 -- Variants for Burnt Larch Decking
 insert into product_variants (product_id, name, variant_type, hex_color, price_adjustment, is_available) values
   (

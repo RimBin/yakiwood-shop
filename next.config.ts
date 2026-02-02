@@ -12,7 +12,7 @@ const contentSecurityPolicyValue = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.figma.com https://*.unsplash.com https://*.supabase.co https://www.google-analytics.com",
+  `img-src 'self' data: blob: https://*.figma.com https://*.unsplash.com https://*.supabase.co https://www.google-analytics.com https://yakiwood.lt https://shop.yakiwood.co.uk${isDev ? ' http://localhost:3000 http://127.0.0.1:3000' : ''}`,
   "font-src 'self' data:",
   "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://*.sanity.io https://*.apicdn.sanity.io https://registry.npmjs.org",
   "frame-src 'self' https://www.googletagmanager.com https://js.stripe.com https://hooks.stripe.com https://www.youtube.com https://www.youtube-nocookie.com",

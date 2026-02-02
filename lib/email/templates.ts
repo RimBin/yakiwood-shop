@@ -56,9 +56,9 @@ const emailWrapper = (content: string) => `
                 <strong>Contact Us</strong>
               </p>
               <p style="margin: 0; color: ${BRAND.darkGrey}; font-size: 13px; text-align: center; line-height: 1.6;">
-                Email: <a href="mailto:info@yakiwood.lt" style="color: ${BRAND.black}; text-decoration: none;">info@yakiwood.lt</a><br>
-                Phone: +370 XXX XXXXX<br>
-                <a href="https://yakiwood.lt" style="color: ${BRAND.black}; text-decoration: none;">yakiwood.lt</a>
+                Email: <a href="mailto:shop@yakiwood.co.uk" style="color: ${BRAND.black}; text-decoration: none;">shop@yakiwood.co.uk</a><br>
+                Phone: +370 675 64733<br>
+                <a href="https://shop.yakiwood.co.uk" style="color: ${BRAND.black}; text-decoration: none;">shop.yakiwood.co.uk</a>
               </p>
               <p style="margin: 20px 0 0; color: ${BRAND.lightGrey}; font-size: 11px; text-align: center;">
                 © ${new Date().getFullYear()} Yakiwood. All rights reserved.

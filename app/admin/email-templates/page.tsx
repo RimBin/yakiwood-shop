@@ -48,6 +48,8 @@ export default function EmailTemplatesAdmin() {
   const [isLoadingCms, setIsLoadingCms] = useState(false);
   const [isSavingCms, setIsSavingCms] = useState(false);
   const [cmsStatus, setCmsStatus] = useState<null | { ok: boolean; message: string }>(null);
+  const [previewSource, setPreviewSource] = useState<null | { type: 'order' | 'sample'; label: string }>(null);
+  const [isLoadingPreviewData, setIsLoadingPreviewData] = useState(false);
 
   const labels = useMemo(
     () =>
@@ -60,7 +62,7 @@ export default function EmailTemplatesAdmin() {
             saveToCms: 'Išsaugoti į CMS',
             saving: 'Išsaugoma…',
             cmsDescription:
-              'Pakeitimai saugomi Sanity ir naudojami produkcinėms žinutėms. Reikia admin sesijos ir SANITY write token.',
+              'Pakeitimai saugomi Supabase ir naudojami produkcinėms žinutėms. Reikia admin sesijos ir Supabase service key.',
             subjectLt: 'Tema (LT)',
             subjectEn: 'Tema (EN)',
             subjectLtPlaceholder: 'Pvz.: Užsakymo patvirtinimas #{{orderNumber}}',
@@ -102,14 +104,14 @@ export default function EmailTemplatesAdmin() {
             saveToCms: 'Save to CMS',
             saving: 'Saving…',
             cmsDescription:
-              'Changes are stored in Sanity and used for production emails. Requires admin session and SANITY write token.',
+              'Changes are stored in Supabase and used for production emails. Requires admin session and Supabase service key.',
             subjectLt: 'Subject (LT)',
             subjectEn: 'Subject (EN)',
-            subjectLtPlaceholder: 'Example: Užsakymo patvirtinimas #{{orderNumber}}',
+            subjectLtPlaceholder: 'Example (LT): Order Confirmation #{{orderNumber}}',
             subjectEnPlaceholder: 'Example: Order Confirmation #{{orderNumber}}',
             htmlLt: 'HTML (LT)',
             htmlEn: 'HTML (EN)',
-            htmlLtPlaceholder: '<h1>Ačiū už užsakymą</h1> ...',
+            htmlLtPlaceholder: '<h1>Order confirmation (LT)</h1> ...',
             htmlEnPlaceholder: '<h1>Thanks for your order</h1> ...',
             testRecipient: 'Test Recipient',
             sending: 'Sending…',
@@ -200,9 +202,72 @@ export default function EmailTemplatesAdmin() {
     } as Record<string, { name: string; description: string }>;
   }, [isLt]);
 
+  const buildOrderPreviewVars = (order: any) => {
+    const items = Array.isArray(order?.items) ? order.items : [];
+    const mappedItems = items.map((item: any) => ({
+      name: item?.name || item?.title || 'Product',
+      quantity: Number(item?.quantity || 1),
+      price: Number(item?.price || item?.unitPrice || item?.basePrice || 0),
+    }));
+
+    return {
+      orderNumber: order?.order_number || order?.orderNumber || order?.id || 'N/A',
+      orderDate: order?.created_at
+        ? new Date(order.created_at).toLocaleDateString(isLt ? 'lt-LT' : 'en-GB')
+        : '',
+      totalAmount: typeof order?.total === 'number' ? order.total.toFixed(2) : order?.total || '',
+      items: mappedItems,
+      customerName: order?.customer_name || '',
+      customerEmail: order?.customer_email || '',
+    };
+  };
+
+  const loadLatestOrderPreview = async (templateId: string, sampleVars: Record<string, any>) => {
+    setIsLoadingPreviewData(true);
+    try {
+      const res = await fetch('/api/admin/orders', { method: 'GET', credentials: 'include' });
+      const data = (await res.json().catch(() => ({}))) as any;
+      if (!res.ok || !Array.isArray(data?.orders) || data.orders.length === 0) {
+        setPreviewSource({
+          type: 'sample',
+          label: isLt ? 'Rodomi pavyzdiniai duomenys' : 'Showing sample data',
+        });
+        return;
+      }
+
+      const orders = [...data.orders].sort((a, b) => {
+        const aTime = new Date(a.created_at || 0).getTime();
+        const bTime = new Date(b.created_at || 0).getTime();
+        return bTime - aTime;
+      });
+      const latest = orders[0];
+      const orderVars = buildOrderPreviewVars(latest);
+      setPreviewVars({ ...sampleVars, ...orderVars });
+      setPreviewSource({
+        type: 'order',
+        label: isLt
+          ? `Rodomi realūs užsakymo duomenys: #${orderVars.orderNumber}`
+          : `Using real order data: #${orderVars.orderNumber}`,
+      });
+    } catch {
+      setPreviewSource({
+        type: 'sample',
+        label: isLt ? 'Rodomi pavyzdiniai duomenys' : 'Showing sample data',
+      });
+    } finally {
+      setIsLoadingPreviewData(false);
+    }
+  };
+
   const handlePreview = (template: EmailTemplate) => {
     setSelectedTemplate(template);
-    setPreviewVars(getSampleData(template.id));
+    const sampleVars = getSampleData(template.id);
+    setPreviewVars(sampleVars);
+    setPreviewSource({
+      type: 'sample',
+      label: isLt ? 'Rodomi pavyzdiniai duomenys' : 'Showing sample data',
+    });
+    void loadLatestOrderPreview(template.id, sampleVars);
   };
 
   useEffect(() => {
@@ -630,9 +695,18 @@ export default function EmailTemplatesAdmin() {
 
                     {/* Template Variables */}
                     <div className="mt-[24px] p-[20px] bg-[#EAEAEA] rounded-[16px] border border-[#E1E1E1]">
-                      <h4 className="font-['Outfit'] text-[11px] font-medium text-[#535353] uppercase tracking-[0.55px] mb-[12px]">
-                        {labels.sampleData}
-                      </h4>
+                      <div className="flex items-center justify-between gap-[12px] mb-[12px]">
+                        <h4 className="font-['Outfit'] text-[11px] font-medium text-[#535353] uppercase tracking-[0.55px]">
+                          {labels.sampleData}
+                        </h4>
+                        <div className="font-['Outfit'] text-[11px] text-[#535353]">
+                          {isLoadingPreviewData
+                            ? isLt
+                              ? 'Kraunama realių duomenų peržiūra…'
+                              : 'Loading real data preview…'
+                            : previewSource?.label}
+                        </div>
+                      </div>
                       <pre className="font-['Outfit'] text-[11px] text-[#535353] overflow-x-auto">
                         {JSON.stringify(previewVars, null, 2)}
                       </pre>

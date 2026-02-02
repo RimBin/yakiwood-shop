@@ -131,7 +131,7 @@ export default function Projects() {
       {/* Header removed */}
 
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7712 ===== */}
-      <InView className="xl:hidden hero-animate-root">
+      <InView className="lg:hidden hero-animate-root">
         {/* Description text - Mobile */}
         <p className="px-[16px] md:px-[32px] font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[600px] mb-[24px] md:mb-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           Žmonės, pasirinkę degintą medieną, dažnai dalinasi teigiamais įspūdžiais ir patirtimis. Jie pastebi ne tik išskirtinę išvaizdą, bet ir funkcionalumą bei ilgaamžiškumą.
@@ -307,7 +307,7 @@ export default function Projects() {
       </InView>
 
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <InView className="hidden xl:block max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[120px] hero-animate-root">
+      <InView className="hidden lg:block max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[120px] hero-animate-root">
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+25px)] */}
         <div className="relative h-[80px] mb-[64px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <p className="absolute left-0 top-[22px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">
