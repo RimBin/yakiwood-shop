@@ -32,6 +32,10 @@ export async function GET(req: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
   }
 
+  if ((data as DBInvoiceRow).buyer_email && (data as DBInvoiceRow).buyer_email !== user.email) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const invoice = convertDBInvoiceToInvoice(data as DBInvoiceRow);
   const pdfGenerator = new InvoicePDFGenerator(invoice);
   const pdfBytes = pdfGenerator.generate();

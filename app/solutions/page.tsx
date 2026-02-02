@@ -469,359 +469,65 @@ Do you want to give your building a distinctive and attractive appearance? Encou
       </section>
       </InView>
 
-      {/* Enhanced Visual Transition Section */}
+      {/* Products */}
       <InView className="hero-animate-root">
-        <section className="relative w-full py-[80px] lg:py-[120px] overflow-hidden bg-gradient-to-b from-transparent via-[#F5F5F5] to-transparent">
-          {/* Decorative Background Elements */}
-          <div className="absolute inset-0 pointer-events-none opacity-10">
-            <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] rounded-full bg-[#161616] blur-[100px]" />
-            <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[#161616] blur-[120px]" />
-          </div>
-
-          <div className="relative max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px]">
-            {/* Main Content Grid */}
-            <div className="grid lg:grid-cols-2 gap-[48px] lg:gap-[80px] items-center">
-              {/* Left: Tagline & CTA */}
-              <div className="hero-seq-item hero-seq-left" style={{ animationDelay: '0ms' }}>
-                <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#535353] mb-[16px]">
-                  Discover the possibilities
-                </p>
-                
-                <h2 className="font-['DM_Sans'] font-light text-[40px] lg:text-[64px] leading-[0.95] tracking-[-1.6px] lg:tracking-[-2.56px] text-[#161616] mb-[24px]">
-                  Four ways to{' '}
-                  <span className="font-['Tiro_Tamil'] italic">transform</span>{' '}
-                  your space
-                </h2>
-                
-                <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[480px] mb-[32px]">
-                  From exterior facades to interior accents, our charred wood solutions bring character, durability, and timeless beauty to every project.
-                </p>
-
-                <button
-                  onClick={() => scrollToSection('facades', 'Facades')}
-                  className="group inline-flex items-center gap-[12px] h-[56px] px-[32px] bg-[#161616] rounded-[100px] hover:bg-[#2a2a2a] transition-all cursor-pointer border-none"
-                >
-                  <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                    Explore Applications
-                  </span>
-                  <div className="w-[20px] h-[20px] rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-all">
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="group-hover:translate-y-[1px] transition-transform">
-                      <path d="M5 1L5 9M5 9L1 5M5 9L9 5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                </button>
+        <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pb-[80px] lg:pb-[120px]">
+          <h2 className="font-['DM_Sans'] font-light text-[32px] lg:text-[48px] leading-[1] tracking-[-1.28px] lg:tracking-[-1.92px] text-[#161616] mb-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+            Products
+          </h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-[12px]">
+            {products.map((product, index) => (
+              <div key={index} className="border border-[#BBBBBB] rounded-[10px] p-[10px] bg-white hero-seq-item hero-seq-right" style={{ animationDelay: `${120 + index * 80}ms` }}>
+                <div className="relative w-full h-[120px] rounded-[8px] overflow-hidden">
+                  <Image src={product.image} alt={product.name} fill className="object-cover" />
+                </div>
+                <div className="mt-[8px]">
+                  <p className="font-['DM_Sans'] font-medium text-[14px] tracking-[-0.28px] text-[#161616]">
+                    {product.name}
+                  </p>
+                  <p className="font-['Outfit'] font-normal text-[10px] tracking-[0.5px] uppercase text-[#535353]">
+                    {product.type}
+                  </p>
+                </div>
               </div>
-
-              {/* Right: Application Cards Grid */}
-              <div className="grid grid-cols-2 gap-[16px] lg:gap-[20px]">
-                {[
-                  { id: 'facades', label: 'Facades', icon: '🏢' },
-                  { id: 'terraces', label: 'Terraces', icon: '🌳' },
-                  { id: 'interior', label: 'Interior', icon: '🏠' },
-                  { id: 'fences', label: 'Fences', icon: '🚧' }
-                ].map((app, idx) => (
-                  <button
-                    key={app.id}
-                    onClick={() => scrollToSection(app.id, app.label)}
-                    className="group relative overflow-hidden rounded-[24px] border border-[#BBBBBB] bg-white hover:bg-[#161616] transition-all cursor-pointer p-[24px] lg:p-[32px] flex flex-col items-start justify-end h-[160px] lg:h-[200px] hero-seq-item hero-seq-right"
-                    style={{ animationDelay: `${200 + idx * 100}ms` }}
-                  >
-                    {/* Hover Background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#161616]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    
-                    {/* Icon */}
-                    <div className="text-[32px] lg:text-[40px] mb-[16px] transform group-hover:scale-110 transition-transform">
-                      {app.icon}
-                    </div>
-                    
-                    {/* Label */}
-                    <div className="relative z-10">
-                      <p className="font-['DM_Sans'] font-medium text-[18px] lg:text-[20px] leading-[1.1] tracking-[-0.36px] text-[#161616] group-hover:text-white transition-colors mb-[4px]">
-                        {app.label}
-                      </p>
-                      <div className="flex items-center gap-[6px] opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-white">
-                          Learn more
-                        </span>
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                          <path d="M2 6H10M10 6L6 2M10 6L6 10" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Bottom Scroll Indicator */}
-            <div className="flex justify-center mt-[64px] lg:mt-[96px] hero-seq-item hero-seq-up" style={{ animationDelay: '800ms' }}>
-              <div className="flex flex-col items-center gap-[8px]">
-                <div className="h-[40px] w-[1px] bg-gradient-to-b from-transparent via-[#BBBBBB] to-transparent" />
-                <div className="w-[6px] h-[6px] rounded-full bg-[#BBBBBB] animate-bounce" style={{ animationDuration: '2s' }} />
-              </div>
-            </div>
+            ))}
           </div>
         </section>
       </InView>
 
-      {/* Applications Sections (anchor targets) */}
+      {/* CTA Section */}
       <InView className="hero-animate-root">
-      <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[80px] lg:pt-[120px] pb-[48px] lg:pb-[140px]">
-        <div className="grid gap-[64px] lg:gap-[140px]">
-          <div className="grid gap-[24px] lg:gap-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-            <ApplicationSection
-              id="facades"
-              title="Facades"
-              description="For ventilated cladding, charred larch or spruce offers excellent weather resistance and a timeless, matte finish. Recommended thickness: 18/20 mm."
-              bullets={['Moisture & UV resistant', 'Certifications: EPD, FSC']}
-              images={[
-                { src: assets.projects[0], alt: 'Facades project example' },
-                { src: assets.projects[1], alt: 'Facades project detail example' },
-              ]}
-            />
-            <ModernApplicationCard type="facades" />
-          </div>
-
-          <div className="grid gap-[24px] lg:gap-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
-            <ApplicationSection
-              id="terraces"
-              title="Terraces"
-              description="Fire-treated decking that’s built for outdoor living, with natural grip and a premium feel."
-              bullets={['Durable surface for high traffic', 'Natural texture and warmth', 'Designed for seasonal changes']}
-              images={[
-                { src: assets.categories.terrace, alt: 'Terraces example' },
-                { src: assets.categories.terrace, alt: 'Terraces detail example' },
-              ]}
-              reverse
-            />
-            <ModernApplicationCard type="terraces" />
-          </div>
-
-          <div className="grid gap-[24px] lg:gap-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '400ms' }}>
-            <ApplicationSection
-              id="interior"
-              title="Interior"
-              description="Add depth and sophistication indoors with charred wood panels and feature walls."
-              bullets={['Warm, modern materiality', 'Unique patterning and tone', 'Works for walls, ceilings, details']}
-              images={[
-                { src: assets.categories.interior, alt: 'Interior example' },
-                { src: assets.categories.interior, alt: 'Interior detail example' },
-              ]}
-            />
-            <ModernApplicationCard type="interior" />
-          </div>
-
-          <div className="grid gap-[24px] lg:gap-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '600ms' }}>
-            <ApplicationSection
-              id="fences"
-              title="Fences"
-              description="Privacy with style — elegant fencing that endures and elevates outdoor spaces."
-              bullets={['Strong, stable, and durable', 'Distinctive charred finish', 'Great for modern landscapes']}
-              images={[{ src: assets.categories.fence, alt: 'Fences example' }]}
-              reverse
-            />
-            <ModernApplicationCard type="fences" />
-          </div>
-        </div>
-      </section>
-      </InView>
-
-      {/* FAQ Section - Modern Cards */}
-      <InView className="hero-animate-root">
-        <section className="w-full bg-white py-[80px] lg:py-[120px]">
-          <div className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px]">
-            <div className="mb-[48px] lg:mb-[64px] hero-seq-item hero-seq-up" style={{ animationDelay: '0ms' }}>
-              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#535353] mb-[16px]">
-                Common Questions
-              </p>
-              <h2 className="font-['DM_Sans'] font-light text-[40px] lg:text-[64px] leading-[0.9] tracking-[-1.6px] lg:tracking-[-2.56px] text-[#161616]">
-                Everything you need to know
-              </h2>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-[16px] lg:gap-[24px]">
-              {accordionData.slice(0, 4).map((item, index) => (
-                <button
-                  key={index}
-                  onClick={() => setOpenAccordionIndex(openAccordionIndex === index ? null : index)}
-                  className={`group text-left p-[24px] lg:p-[32px] rounded-[24px] border transition-all hero-seq-item hero-seq-up ${
-                    openAccordionIndex === index 
-                      ? 'bg-[#161616] border-[#161616]' 
-                      : 'bg-white border-[#E1E1E1] hover:border-[#BBBBBB]'
-                  }`}
-                  style={{ animationDelay: `${200 + index * 100}ms` }}
-                >
-                  <div className="flex items-start justify-between gap-[16px] mb-[16px]">
-                    <h3 className={`font-['DM_Sans'] font-medium text-[18px] lg:text-[20px] leading-[1.2] tracking-[-0.4px] transition-colors ${
-                      openAccordionIndex === index ? 'text-white' : 'text-[#161616]'
-                    }`}>
-                      {item.title}
-                    </h3>
-                    <div className={`w-[24px] h-[24px] rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
-                      openAccordionIndex === index ? 'bg-white/20 rotate-45' : 'bg-[#E1E1E1] group-hover:bg-[#D1D1D1]'
-                    }`}>
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path d="M6 2V10M2 6H10" stroke={openAccordionIndex === index ? 'white' : '#161616'} strokeWidth="1.5" strokeLinecap="round"/>
-                      </svg>
-                    </div>
-                  </div>
-                  <div className={`overflow-hidden transition-all ${
-                    openAccordionIndex === index ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'
-                  }`}>
-                    <p className="font-['Outfit'] font-light text-[14px] leading-[1.6] tracking-[0.14px] text-white/80">
-                      {item.content}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-      </InView>
-
-      {/* Featured Products Showcase */}
-      <InView className="hero-animate-root">
-        <section className="w-full bg-gradient-to-b from-[#FAFAFA] to-white py-[80px] lg:py-[120px]">
-          <div className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px]">
-            <div className="text-center mb-[48px] lg:mb-[64px] hero-seq-item hero-seq-up" style={{ animationDelay: '0ms' }}>
-              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#535353] mb-[16px]">
-                Our Range
-              </p>
-              <h2 className="font-['DM_Sans'] font-light text-[40px] lg:text-[64px] leading-[0.9] tracking-[-1.6px] lg:tracking-[-2.56px] text-[#161616]">
-                Featured{' '}<span className="font-['Tiro_Tamil'] italic">Products</span>
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[24px]">
-              {products.map((product, index) => (
-                <Link
-                  key={index}
-                  href={toLocalePath('/products', currentLocale)}
-                  className="group relative overflow-hidden rounded-[24px] border border-[#E1E1E1] hover:border-[#161616] transition-all hero-seq-item hero-seq-up"
-                  style={{ animationDelay: `${200 + index * 100}ms` }}
-                >
-                  <div className="relative h-[320px] overflow-hidden">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#161616]/80 via-[#161616]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                  
-                  <div className="p-[24px]">
-                    <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-[#161616] mb-[4px] group-hover:text-[#161616] transition-colors">
-                      {product.name}
-                    </p>
-                    <p className="font-['Outfit'] font-normal text-[11px] leading-[1.3] tracking-[0.55px] uppercase text-[#535353] mb-[16px]">
-                      {product.type}
-                    </p>
-                    <div className="flex items-center gap-[8px] opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-[#161616]">
-                        View Details
-                      </span>
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6H10M10 6L6 2M10 6L6 10" stroke="#161616" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            <div className="text-center mt-[48px] hero-seq-item hero-seq-up" style={{ animationDelay: '800ms' }}>
-              <Link
-                href={toLocalePath('/products', currentLocale)}
-                className="inline-flex items-center justify-center h-[52px] px-[40px] border border-[#161616] rounded-[100px] hover:bg-[#161616] group transition-all"
-              >
-                <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white transition-colors">
-                  View All Products
-                </span>
-              </Link>
-            </div>
-          </div>
-        </section>
-      </InView>
-
-      {/* Final CTA - Dramatic */}
-      <InView className="hero-animate-root">
-        <section className="relative w-full py-[120px] lg:py-[200px] overflow-hidden bg-[#161616]">
-          {/* Ambient Background */}
-          <div className="absolute inset-0 opacity-20">
+        <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[120px] lg:pt-[200px] pb-[200px] lg:pb-[350px] relative">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[625px] lg:w-[1099px] h-[599px] lg:h-[1053px] opacity-15 mix-blend-luminosity pointer-events-none">
             <Image
               src={assets.ctaBackground}
               alt=""
               fill
-              className="object-cover mix-blend-overlay"
+              className="object-contain"
             />
           </div>
 
-          {/* Gradient Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#161616] via-transparent to-[#161616]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#161616]/40 via-transparent to-[#161616]/40" />
+          <div className="relative z-10 flex flex-col items-center gap-[40px] lg:gap-[64px]">
+            <h2 className="font-['DM_Sans'] font-light text-[45px] lg:text-[128px] leading-[0.95] tracking-[-1.8px] lg:tracking-[-6.4px] text-[#161616] text-center max-w-[358px] lg:max-w-[861px] m-0 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+              Ready to{' '}
+              <span className="font-['Tiro_Tamil'] italic">build</span>{' '}
+              with fire?
+            </h2>
 
-          <div className="relative z-10 max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px]">
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-[32px] hero-seq-item hero-seq-up" style={{ animationDelay: '0ms' }}>
-                <div className="inline-block px-[20px] py-[10px] rounded-[100px] bg-white/10 backdrop-blur-sm">
-                  <span className="font-['Outfit'] font-normal text-[10px] leading-[1.3] tracking-[0.5px] uppercase text-white/80">
-                    Start Your Project Today
-                  </span>
-                </div>
-              </div>
+            <div className="flex flex-col lg:flex-row gap-[16px] items-center w-full lg:w-auto hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
+              <Link
+                href={toLocalePath('/kontaktai', currentLocale)}
+                className="h-[48px] px-[40px] bg-[#161616] rounded-[100px] border-none font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase text-white cursor-pointer transition-colors hover:bg-[#2a2a2a] w-full lg:w-auto flex items-center justify-center"
+              >
+                Get an offer
+              </Link>
 
-              <h2 className="font-['DM_Sans'] font-light text-[48px] lg:text-[96px] leading-[0.9] tracking-[-1.92px] lg:tracking-[-3.84px] text-white max-w-[900px] mb-[32px] hero-seq-item hero-seq-up" style={{ animationDelay: '100ms' }}>
-                Ready to{' '}
-                <span className="font-['Tiro_Tamil'] italic">transform</span>
-                <br className="hidden lg:block" />
-                your space?
-              </h2>
-
-              <p className="font-['Outfit'] font-light text-[16px] leading-[1.6] tracking-[0.16px] text-white/70 max-w-[600px] mb-[48px] hero-seq-item hero-seq-up" style={{ animationDelay: '200ms' }}>
-                Get expert guidance on charred wood solutions for your next project. Our team is ready to help you choose the perfect application and finish.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-[16px] items-center hero-seq-item hero-seq-up" style={{ animationDelay: '300ms' }}>
-                <Link
-                  href={toLocalePath('/kontaktai', currentLocale)}
-                  className="group inline-flex items-center justify-center h-[56px] px-[40px] bg-white rounded-[100px] hover:bg-white/90 transition-all"
-                >
-                  <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-                    Get an Offer
-                  </span>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="ml-[8px] group-hover:translate-x-[2px] transition-transform">
-                    <path d="M3 8H13M13 8L8 3M13 8L8 13" stroke="#161616" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </Link>
-
-                <Link
-                  href={toLocalePath('/projects', currentLocale)}
-                  className="inline-flex items-center justify-center h-[56px] px-[40px] border-2 border-white/30 rounded-[100px] hover:border-white hover:bg-white/10 transition-all"
-                >
-                  <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                    View Projects
-                  </span>
-                </Link>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="grid grid-cols-3 gap-[32px] lg:gap-[64px] mt-[80px] hero-seq-item hero-seq-up" style={{ animationDelay: '400ms' }}>
-                {[
-                  { label: 'Projects', value: '200+' },
-                  { label: 'Experience', value: '10Y' },
-                  { label: 'Quality', value: '100%' }
-                ].map((stat) => (
-                  <div key={stat.label} className="text-center">
-                    <p className="font-['DM_Sans'] font-light text-[32px] lg:text-[48px] leading-[0.9] tracking-[-1.28px] lg:tracking-[-1.92px] text-white mb-[8px]">
-                      {stat.value}
-                    </p>
-                    <p className="font-['Outfit'] font-normal text-[10px] leading-[1.3] tracking-[0.5px] uppercase text-white/60">
-                      {stat.label}
-                    </p>
-                  </div>
-                ))}
-              </div>
+              <Link
+                href={toLocalePath('/kontaktai', currentLocale)}
+                className="h-[48px] px-[40px] bg-transparent border border-[#161616] rounded-[100px] font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase text-[#161616] cursor-pointer transition-all hover:bg-[#161616] hover:text-white w-full lg:w-auto flex items-center justify-center"
+              >
+                Get in touch
+              </Link>
             </div>
           </div>
         </section>

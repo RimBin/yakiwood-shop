@@ -106,6 +106,14 @@
       "totalCost": "BENDRA KAINA",
       "actions": "VEIKSMAI"
     },
+    "invoiceActions": {
+      "download": "Atsisiųsti",
+      "resend": "Siųsti el. paštu"
+    },
+    "invoiceMessages": {
+      "resent": "Sąskaita išsiųsta el. paštu.",
+      "resendError": "Nepavyko išsiųsti sąskaitos. Bandykite vėliau."
+    },
     "details": {
       "dateOfDelivery": "PRISTATYMO DATA",
       "invalidRole": "Neteisingas rolės pavadinimas (naudokite raides, skaičius, _ arba -)",

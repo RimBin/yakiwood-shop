@@ -338,21 +338,10 @@ export default function ChatbotWidget() {
                       <div className="font-['DM_Sans'] text-[14px] font-semibold tracking-[-0.2px] text-white">
                         {t('title')}
                       </div>
-                      <div className="mt-[2px] max-w-[220px] font-['Outfit'] text-[11px] leading-[1.35] text-white/70">
-                        {t('subtitle')}
-                      </div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-[6px]">
-                    <button
-                      type="button"
-                      onClick={clearChat}
-                      className="h-[30px] rounded-full bg-white/10 px-[12px] text-[11px] font-['Outfit'] text-white/90 ring-1 ring-white/15 hover:bg-white/15"
-                      aria-label={t('clear')}
-                    >
-                      {t('clear')}
-                    </button>
                     <button
                       type="button"
                       onClick={() => setOpen(false)}

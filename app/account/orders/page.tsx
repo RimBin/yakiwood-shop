@@ -202,7 +202,7 @@ export default function OrdersPage() {
     return () => {
       isCancelled = true;
     };
-  }, [router, supabase]);
+  }, [router, supabase, t, tCommon]);
 
   const handleLogout = async () => {
     try {
@@ -407,9 +407,8 @@ export default function OrdersPage() {
                     <div className="font-['DM_Sans'] text-[16px] font-normal text-[#161616]">
                       {order.id}
                     </div>
-                    ) : null}
                     <div className="mt-1 font-['DM_Sans'] text-[14px] font-light text-[#535353]">
-                      {order.date} · {t('status.delivered')}
+                      {order.date} · {order.status}
                     </div>
                   </div>
                   <button
@@ -437,21 +436,25 @@ export default function OrdersPage() {
                       {order.items.map((item) => (
                         <div key={item.id} className="flex items-start justify-between gap-4">
                           <div className="flex items-start gap-3">
-                            <div className="relative h-[56px] w-[56px] overflow-hidden rounded-[12px] bg-white">
-                              <Image
-                                src={getAsset(item.imageKey)}
-                                alt={item.name}
-                                fill
-                                className="object-cover"
-                                sizes="56px"
-                              />
-                            </div>
+                            {item.imageKey ? (
+                              <div className="relative h-[56px] w-[56px] overflow-hidden rounded-[12px] bg-white">
+                                <Image
+                                  src={getAsset(item.imageKey)}
+                                  alt={item.name}
+                                  fill
+                                  className="object-cover"
+                                  sizes="56px"
+                                />
+                              </div>
+                            ) : (
+                              <div className="h-[56px] w-[56px] rounded-[12px] bg-white" />
+                            )}
                             <div>
                               <div className="font-['DM_Sans'] text-[15px] font-normal text-[#161616]">
                                 {item.name}
                               </div>
                               <div className="mt-1 font-['DM_Sans'] text-[13px] font-light text-[#535353]">
-                                {order.date} · {t('status.delivered')}
+                                {order.date} · {order.status}
                               </div>
                               <div className="font-['DM_Sans'] text-[13px] font-light text-[#535353]">
                                 {t('details.qty')} {item.qty}
@@ -484,10 +487,10 @@ export default function OrdersPage() {
                       </div>
                       <div className="flex items-start justify-between gap-4">
                         <div className="font-['Outfit'] text-[12px] font-normal uppercase tracking-[0.6px] text-[#535353]">
-                          {t('details.paymentMethod')}
+                          {t('details.paymentStatus')}
                         </div>
                         <div className="text-right font-['DM_Sans'] text-[15px] font-normal text-[#161616]">
-                          {order.details.paymentMethod}
+                          {order.details.paymentStatus}
                         </div>
                       </div>
                       <div className="flex items-start justify-between gap-4">
@@ -514,6 +517,7 @@ export default function OrdersPage() {
           })}
         </div>
       </div>
+      ) : null}
     </AccountLayout>
   );
 }

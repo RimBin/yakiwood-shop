@@ -16,9 +16,11 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const email = user.email || '';
   const { data, error } = await supabase
     .from('invoices')
     .select('*')
+    .eq('buyer_email', email)
     .order('issued_at', { ascending: false });
 
   if (error) {
