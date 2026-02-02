@@ -67,7 +67,7 @@ export default function Header() {
   ];
   
   return (
-    <header className="w-full fixed top-0 z-50">
+    <header className="w-full fixed top-0 z-50 overflow-x-clip">
       {/* Black Announcement Bar */}
       <div className="bg-[#161616] w-full py-[8px] px-[clamp(12px,4vw,40px)]">
         <div className="max-w-[1440px] mx-auto flex items-center w-full gap-[clamp(12px,5vw,200px)] justify-center">
@@ -98,7 +98,7 @@ export default function Header() {
           </div>
 
           {/* Eco-Friendly */}
-          <div className="hidden min-[1024px]:flex items-center gap-[8px]">
+          <div className="hidden min-[1280px]:flex items-center gap-[8px]">
             <div className="relative w-[24px] h-[24px] shrink-0">
               <Image src={getAsset('imgIconPlant')} alt={t('header.ecoFriendly')} width={24} height={24} />
             </div>
@@ -132,7 +132,7 @@ export default function Header() {
             </Link>
 
             {/* Navigation - hidden on mobile/tablet, shown on large screens */}
-            <nav className="hidden lg:flex flex-1 justify-center gap-[32px] xl:gap-[40px]">
+            <nav className="hidden xl:flex flex-1 justify-center gap-[32px] xl:gap-[40px]">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -179,7 +179,7 @@ export default function Header() {
               {/* Mobile Menu Button - visible only on mobile/tablet */}
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="lg:hidden border border-[#BBBBBB] border-solid rounded-[100px] w-[48px] h-[48px] flex items-center justify-center bg-transparent hover:bg-[#161616] transition-colors group"
+                className="xl:hidden border border-[#BBBBBB] border-solid rounded-[100px] w-[48px] h-[48px] flex items-center justify-center bg-transparent hover:bg-[#161616] transition-colors group"
                 aria-label={t(locale === 'lt' ? 'header.atidarykMenu' : 'header.openMenu')}
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:stroke-white transition-colors">

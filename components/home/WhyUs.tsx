@@ -29,8 +29,8 @@ export default async function WhyUs() {
 
   return (
     <section className="w-full bg-[#E1E1E1]">
-      {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7566 ===== */}
-      <InView className={`xl:hidden ${getSectionPadding('x')} pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0 hero-animate-root`}>
+      {/* ===== MOBILE LAYOUT (< 1536px) - Figma 759:7566 ===== */}
+      <InView className={`2xl:hidden ${getSectionPadding('x')} pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0 hero-animate-root`}>
         {/* Title Section - Mobile/Tablet */}
         <div
           className={`flex flex-col ${getGap('sm')} mb-[16px] md:mb-[24px] hero-seq-item hero-seq-right`}
@@ -82,8 +82,8 @@ export default async function WhyUs() {
         </div>
       </InView>
 
-      {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <InView className="hidden xl:block w-full max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[200px] hero-animate-root">
+      {/* ===== DESKTOP LAYOUT (>= 1536px) ===== */}
+      <InView className="hidden 2xl:block w-full max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[200px] hero-animate-root">
         {/* Label */}
         <p
           className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] -mb-[30px] hero-seq-item hero-seq-right"

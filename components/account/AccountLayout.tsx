@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { PageCover } from '@/components/shared/PageLayout';
 
-type Active = 'details' | 'orders';
+type Active = 'details' | 'orders' | 'invoices';
 
 export default function AccountLayout({
   active,
@@ -56,6 +56,16 @@ export default function AccountLayout({
                   }`}
                 >
                   {t('myOrders')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/account/invoices"
+                  className={`${linkBaseClass} ${
+                    active === 'invoices' ? 'text-[#161616]' : 'text-[#535353]'
+                  }`}
+                >
+                  {t('invoices')}
                 </Link>
               </li>
               <li>

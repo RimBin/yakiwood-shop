@@ -80,7 +80,7 @@ export default function Footer() {
   const mobileNavColumns = navColumns.filter((column) => column.title !== socialColumnTitle);
 
   return (
-    <footer className="w-full bg-[#161616]">
+    <footer className="w-full bg-[#161616] overflow-x-clip">
       {/* ===== MOBILE LAYOUT (< 1024px) - Figma 780:13408 ===== */}
       <div className="lg:hidden px-[16px] pt-[48px] pb-[32px]">
         {/* Navigation Columns - Mobile: Stacked */}
@@ -161,9 +161,9 @@ export default function Footer() {
       {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
       <div className="hidden lg:block max-w-[1440px] mx-auto px-[40px] pt-[48px] pb-0">
         <div className="flex flex-col gap-[24px]">
-          <div className="flex items-start justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-y-[32px]">
             {/* Navigation Columns - Desktop */}
-            <div className="flex flex-1 items-start gap-[110px] max-w-[1120px]">
+            <div className="flex flex-wrap items-start gap-x-[40px] xl:gap-x-[110px] gap-y-[24px]">
               {desktopNavColumns.map((column) => (
                 <div key={column.title}>
                   <h4
@@ -208,7 +208,7 @@ export default function Footer() {
             </div>
 
             {/* Certificates - Desktop */}
-            <div className="flex gap-[12px] items-center">
+            <div className="flex flex-wrap gap-[12px] items-center justify-end">
               {certificates.map((logo) => (
                 <div
                   key={logo.src}

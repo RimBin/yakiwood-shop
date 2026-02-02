@@ -85,25 +85,50 @@
     "creatingAccount": "Kuriama...",
     "accountDetails": "PASKYROS DUOMENYS",
     "myOrders": "MANO UŽSAKYMAI",
+    "invoices": "SĄSKAITOS",
     "logout": "ATSIJUNGTI",
+    "ordersEmpty": "Užsakymų dar nėra.",
+    "invoicesEmpty": "Sąskaitų dar nėra.",
+    "changePassword": "Keisti slaptažodį",
+    "currentPassword": "Dabartinis slaptažodis",
+    "newPassword": "Naujas slaptažodis",
+    "confirmPassword": "Pakartokite slaptažodį",
     "table": {
       "order": "UŽSAKYMAS",
       "date": "DATA",
       "status": "STATUSAS",
       "totalCost": "BENDRA KAINA"
     },
+    "invoicesTable": {
+      "invoice": "SĄSKAITA",
+      "date": "DATA",
+      "status": "STATUSAS",
+      "totalCost": "BENDRA KAINA",
+      "actions": "VEIKSMAI"
+    },
     "details": {
       "dateOfDelivery": "PRISTATYMO DATA",
       "invalidRole": "Neteisingas rolės pavadinimas (naudokite raides, skaičius, _ arba -)",
       "deliveryAddress": "PRISTATYMO ADRESAS",
       "paymentMethod": "MOKĖJIMO BŪDAS",
+      "paymentStatus": "MOKĖJIMO STATUSAS",
       "shipping": "PRISTATYMAS",
       "total": "VISO",
       "dimensions": "Matmenys:",
       "qty": "Kiekis:"
     },
     "status": {
-      "delivered": "Pristatyta"
+      "delivered": "Pristatyta",
+      "pending": "Laukiama",
+      "processing": "Vykdoma",
+      "completed": "Įvykdyta",
+      "cancelled": "Atšaukta",
+      "refunded": "Grąžinta",
+      "paid": "Apmokėta",
+      "failed": "Nepavyko",
+      "draft": "Juodraštis",
+      "issued": "Išrašyta",
+      "overdue": "Vėluoja"
     },
     "form": {
       "back": "Atgal",

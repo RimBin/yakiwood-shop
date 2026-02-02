@@ -130,8 +130,21 @@ export default function Projects() {
     <section className="w-full bg-[#E1E1E1] overflow-x-hidden">
       {/* Header removed */}
 
-      {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7712 ===== */}
-      <InView className="lg:hidden hero-animate-root">
+      {/* ===== MOBILE LAYOUT (< 1280px) - Figma 759:7712 ===== */}
+      <InView className="xl:hidden hero-animate-root">
+        {/* Title Section - Mobile/Tablet */}
+        <div className="px-[16px] md:px-[32px] pt-[64px] pb-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
+            {t('eyebrow')}
+          </p>
+          <p
+            className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[760px]"
+            style={{ fontSize: 'clamp(40px, 6vw, 80px)', letterSpacing: 'clamp(-1.6px, -0.04em, -4.4px)' }}
+          >
+            <span>{t('headline.prefix')}</span>
+            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]"> {t('headline.emphasis')}</span>
+          </p>
+        </div>
         {/* Description text - Mobile */}
         <p className="px-[16px] md:px-[32px] font-['Outfit'] font-light text-[14px] md:text-[15px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[600px] mb-[24px] md:mb-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           Žmonės, pasirinkę degintą medieną, dažnai dalinasi teigiamais įspūdžiais ir patirtimis. Jie pastebi ne tik išskirtinę išvaizdą, bet ir funkcionalumą bei ilgaamžiškumą.
@@ -306,8 +319,8 @@ export default function Projects() {
         </div>
       </InView>
 
-      {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <InView className="hidden lg:block max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[120px] hero-animate-root">
+      {/* ===== DESKTOP LAYOUT (>= 1280px) ===== */}
+      <InView className="hidden xl:block max-w-[1440px] mx-auto px-[40px] pt-[200px] pb-[120px] hero-animate-root">
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+25px)] */}
         <div className="relative h-[80px] mb-[64px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <p className="absolute left-0 top-[22px] font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616]">

@@ -22,14 +22,14 @@ export default async function Hero() {
   const heroDescriptionSize = clamp(14, 16);
 
   return (
-    <section className="w-full bg-[#E1E1E1] md:bg-[#EAEAEA] relative overflow-hidden lg:pb-0">
+    <section className="w-full bg-[#E1E1E1] md:bg-[#EAEAEA] relative overflow-hidden xl:pb-0">
       {/* Full-width hero vector background */}
       <div className="absolute inset-0 hidden md:block z-0 pointer-events-none">
         <Image src={assets.heroVector} alt="" fill className="object-cover" priority sizes="100vw" />
       </div>
 
-      {/* ===== MOBILE LAYOUT (< 1024px) ===== */}
-      <InView className="lg:hidden flex flex-col relative z-10 hero-animate-root pt-[120px] md:pt-[140px]">
+      {/* ===== MOBILE LAYOUT (< 1280px) ===== */}
+      <InView className="xl:hidden flex flex-col relative z-10 hero-animate-root pt-[120px] md:pt-[140px]">
         <div className="px-4 pt-4 pb-2 flex flex-col gap-2 md:max-w-[620px] hero-seq-item hero-seq-right hero-ease-in hero-seq-1">
           <p
             className="font-['DM_Sans'] font-light leading-none text-[#161616] w-full max-w-full sm:max-w-[520px] md:max-w-[620px] whitespace-pre-line break-words"
@@ -111,7 +111,7 @@ export default async function Hero() {
           </div>
         </div>
 
-        <div className="absolute left-0 right-0 bottom-0 bg-[#161616] h-[64px] px-4 flex items-center z-20 lg:hidden hero-seq-item hero-seq-right hero-seq-4">
+        <div className="absolute left-0 right-0 bottom-0 bg-[#161616] h-[64px] px-4 flex items-center z-20 xl:hidden hero-seq-item hero-seq-right hero-seq-4">
           <div className="flex w-full items-center justify-between gap-3">
             {certifications.map((src) => (
               <div key={src} className="relative h-[24px] flex-1 min-w-0">
@@ -122,7 +122,7 @@ export default async function Hero() {
         </div>
       </InView>
 
-      <InView className="hidden lg:block relative z-10 w-full min-h-[861px] hero-animate-root">
+      <InView className="hidden xl:block relative z-10 w-full min-h-[861px] hero-animate-root">
         {/* Centered content container */}
         <div className="relative max-w-[1440px] mx-auto h-full">
           <div className="absolute left-[40px] top-[190px] flex flex-col gap-[24px] z-10 hero-seq-item hero-seq-right hero-ease-in hero-seq-1">

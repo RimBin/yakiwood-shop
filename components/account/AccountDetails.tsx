@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { createClient } from '@/lib/supabase/client';
 
 type AccountDetailsData = {
   fullName: string;
@@ -108,6 +109,8 @@ export default function AccountDetails({
   userEmail: string;
 }) {
   const t = useTranslations('account');
+  const tCommon = useTranslations('common');
+  const supabase = useMemo(() => createClient(), []);
 
   const [data, setData] = useState<AccountDetailsData>(() => seedData(userEmail));
   const [isLoaded, setIsLoaded] = useState(false);
@@ -122,29 +125,96 @@ export default function AccountDetails({
   const [showNext, setShowNext] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
+  const [addressId, setAddressId] = useState<string | null>(null);
+  const [isSavingMyInfo, setIsSavingMyInfo] = useState(false);
+  const [isSavingDelivery, setIsSavingDelivery] = useState(false);
 
   const storageKey = useMemo(() => getStorageKey(userEmail), [userEmail]);
 
   useEffect(() => {
-    let next = seedData(userEmail);
+    let isCancelled = false;
 
-    try {
-      const raw = localStorage.getItem(storageKey);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Partial<AccountDetailsData>;
-        next = {
-          ...next,
-          ...parsed,
-          email: parsed.email ?? userEmail,
-        };
+    const load = async () => {
+      let next = seedData(userEmail);
+      let loadedFromSupabase = false;
+
+      const supabaseClient = supabase;
+      if (supabaseClient) {
+        try {
+          const {
+            data: { user },
+          } = await supabaseClient.auth.getUser();
+
+          if (user?.email) {
+            setAuthUserId(user.id);
+
+            const { data: profile } = await supabaseClient
+              .from('user_profiles')
+              .select('id,email,full_name,phone')
+              .eq('id', user.id)
+              .maybeSingle();
+
+            const { data: address } = await supabaseClient
+              .from('delivery_addresses')
+              .select('id,country,city,street_address,postal_code,is_default')
+              .eq('user_id', user.id)
+              .order('is_default', { ascending: false })
+              .order('updated_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            const companyNameRaw = (user.user_metadata as { company_name?: string } | null)?.company_name;
+            const fullNameMeta = (user.user_metadata as { full_name?: string } | null)?.full_name;
+
+            next = {
+              ...next,
+              email: user.email,
+              fullName: profile?.full_name || fullNameMeta || '',
+              companyName: typeof companyNameRaw === 'string' ? companyNameRaw : '',
+              phoneNumber: profile?.phone || '',
+              country: address?.country || '',
+              city: address?.city || '',
+              streetAddress: address?.street_address || '',
+              postcodeZip: address?.postal_code || '',
+            };
+
+            loadedFromSupabase = true;
+            setAddressId(address?.id ?? null);
+          }
+        } catch {
+          // ignore
+        }
       }
-    } catch {
-      // ignore
-    }
 
-    setData(next);
-    setIsLoaded(true);
-  }, [storageKey, userEmail]);
+      if (!loadedFromSupabase) {
+        try {
+          const raw = localStorage.getItem(storageKey);
+          if (raw) {
+            const parsed = JSON.parse(raw) as Partial<AccountDetailsData>;
+            next = {
+              ...next,
+              ...parsed,
+              email: parsed.email ?? userEmail,
+            };
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      if (!isCancelled) {
+        setData(next);
+        setIsLoaded(true);
+      }
+    };
+
+    void load();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [storageKey, userEmail, supabase]);
 
   const persist = (next: AccountDetailsData) => {
     setData(next);
@@ -155,7 +225,77 @@ export default function AccountDetails({
     }
   };
 
-  const handleSavePassword = () => {
+  const saveMyInfo = async () => {
+    const supabaseClient = supabase;
+    if (supabaseClient && authUserId) {
+      setIsSavingMyInfo(true);
+      try {
+        await supabaseClient
+          .from('user_profiles')
+          .upsert(
+            {
+              id: authUserId,
+              email: userEmail,
+              full_name: data.fullName,
+              phone: data.phoneNumber,
+            },
+            { onConflict: 'id' }
+          );
+
+        await supabaseClient.auth.updateUser({
+          data: {
+            company_name: data.companyName ?? '',
+            full_name: data.fullName || '',
+          },
+        });
+      } catch {
+        // ignore
+      } finally {
+        setIsSavingMyInfo(false);
+      }
+    }
+
+    persist(data);
+  };
+
+  const saveDelivery = async () => {
+    const supabaseClient = supabase;
+    if (supabaseClient && authUserId) {
+      setIsSavingDelivery(true);
+      try {
+        const payload = {
+          user_id: authUserId,
+          country: data.country,
+          city: data.city,
+          street_address: data.streetAddress,
+          postal_code: data.postcodeZip,
+          is_default: true,
+        };
+
+        if (addressId) {
+          await supabaseClient
+            .from('delivery_addresses')
+            .update(payload)
+            .eq('id', addressId);
+        } else {
+          const { data: inserted } = await supabaseClient
+            .from('delivery_addresses')
+            .insert(payload)
+            .select('id')
+            .single();
+          setAddressId(inserted?.id ?? null);
+        }
+      } catch {
+        // ignore
+      } finally {
+        setIsSavingDelivery(false);
+      }
+    }
+
+    persist(data);
+  };
+
+  const handleSavePassword = async () => {
     if (!passwordCurrent || !passwordNext || !passwordConfirm) {
       setPasswordError(t('form.passwordRequired'));
       return;
@@ -166,12 +306,24 @@ export default function AccountDetails({
       return;
     }
 
+    const supabaseClient = supabase;
+    if (supabaseClient) {
+      try {
+        const { error } = await supabaseClient.auth.updateUser({ password: passwordNext });
+        if (error) {
+          setPasswordError(error.message);
+          return;
+        }
+      } catch {
+        setPasswordError(tCommon('klaida'));
+        return;
+      }
+    }
+
     setPasswordError(null);
     setPasswordCurrent('');
     setPasswordNext('');
     setPasswordConfirm('');
-
-    // Demo-only. Real password update should be handled via Supabase.
   };
 
   if (!isLoaded) return null;
@@ -205,13 +357,13 @@ export default function AccountDetails({
                 type="button"
                 onClick={() => {
                   if (isEditingMyInfo) {
-                    persist(data);
-                    setIsEditingMyInfo(false);
+                    void saveMyInfo().then(() => setIsEditingMyInfo(false));
                   } else {
                     setIsEditingMyInfo(true);
                   }
                 }}
                 className={editButtonClass}
+                disabled={isSavingMyInfo}
               >
                 {isEditingMyInfo ? t('form.saveInline') : t('form.edit')}
               </button>
@@ -279,13 +431,13 @@ export default function AccountDetails({
                 type="button"
                 onClick={() => {
                   if (isEditingDelivery) {
-                    persist(data);
-                    setIsEditingDelivery(false);
+                    void saveDelivery().then(() => setIsEditingDelivery(false));
                   } else {
                     setIsEditingDelivery(true);
                   }
                 }}
                 className={editButtonClass}
+                disabled={isSavingDelivery}
               >
                 {isEditingDelivery ? t('form.saveInline') : t('form.edit')}
               </button>

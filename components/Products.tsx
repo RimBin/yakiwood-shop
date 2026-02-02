@@ -422,8 +422,8 @@ export default function Products() {
 
   return (
     <section className="w-full bg-[#E1E1E1]">
-      {/* ===== MOBILE LAYOUT (< 1024px) - Figma 803:13029 ===== */}
-      <InView className="xl:hidden hero-animate-root">
+      {/* ===== MOBILE LAYOUT (< 1536px) - Figma 803:13029 ===== */}
+      <InView className="2xl:hidden hero-animate-root">
         {/* Title Section - Mobile */}
         <div className="px-[16px] pt-[64px] pb-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
@@ -459,8 +459,8 @@ export default function Products() {
         {/* Removed mobile GET AN OFFER button per request */}
       </InView>
 
-      {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-      <InView className="hidden xl:block max-w-[1440px] mx-auto px-[40px] relative hero-animate-root">
+      {/* ===== DESKTOP LAYOUT (>= 1536px) ===== */}
+      <InView className="hidden 2xl:block max-w-[1440px] mx-auto px-[40px] relative hero-animate-root">
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+14px)] */}
         <div className="relative h-[160px] text-[#161616] z-10 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase left-[0px] top-[23px]">

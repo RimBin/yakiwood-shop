@@ -320,8 +320,8 @@ export default function ChatbotWidget() {
               <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(135deg,#0F0F0F_0%,#2A2A2A_40%,#161616_100%)]" />
                 <div className="absolute -right-[80px] -top-[90px] h-[200px] w-[200px] rounded-full bg-white/10 blur-2xl" />
-                <div className="relative flex items-center justify-between px-[16px] py-[14px]">
-                  <div className="flex items-center gap-[10px]">
+                <div className="relative flex items-start justify-between px-[16px] py-[14px]">
+                  <div className="flex items-start gap-[10px]">
                     <div className="h-[36px] w-[36px] rounded-full bg-white/10 ring-1 ring-white/15 grid place-items-center">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -338,10 +338,21 @@ export default function ChatbotWidget() {
                       <div className="font-['DM_Sans'] text-[14px] font-semibold tracking-[-0.2px] text-white">
                         {t('title')}
                       </div>
+                      <div className="mt-[2px] max-w-[220px] font-['Outfit'] text-[11px] leading-[1.35] text-white/70">
+                        {t('subtitle')}
+                      </div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-[6px]">
+                    <button
+                      type="button"
+                      onClick={clearChat}
+                      className="h-[30px] rounded-full bg-white/10 px-[12px] text-[11px] font-['Outfit'] text-white/90 ring-1 ring-white/15 hover:bg-white/15"
+                      aria-label={t('clear')}
+                    >
+                      {t('clear')}
+                    </button>
                     <button
                       type="button"
                       onClick={() => setOpen(false)}
@@ -361,8 +372,27 @@ export default function ChatbotWidget() {
                 </div>
               </div>
 
-              <div ref={listRef} className="flex-1 overflow-y-auto bg-[#FAFAFA] px-[12px] py-[12px]" aria-live="polite">
-                <div className="space-y-[10px]">
+              <div
+                ref={listRef}
+                className="flex-1 overflow-y-auto bg-[#FAFAFA] px-[12px] py-[12px]"
+                role="log"
+                aria-live="polite"
+                aria-relevant="additions text"
+                aria-busy={busy}
+              >
+                <div className="space-y-[12px]">
+                  <div className="rounded-[14px] border border-black/5 bg-white px-[12px] py-[10px] shadow-[0_6px_18px_rgba(0,0,0,0.04)]">
+                    <div className="mb-[6px] text-[10px] font-['Outfit'] uppercase tracking-[0.12em] text-[#7C7C7C]">
+                      {currentLocale === 'en' ? 'Important' : 'Svarbu'}
+                    </div>
+                    <p className="font-['Outfit'] text-[11px] leading-[1.4] text-[#535353]">{t('note')}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-[10px] font-['Outfit'] uppercase tracking-[0.12em] text-[#7C7C7C]">
+                      {currentLocale === 'en' ? 'Conversation' : 'Pokalbis'}
+                    </div>
+                  </div>
                   {messages.map((m, idx) => {
                     const prev = idx > 0 ? messages[idx - 1] : null;
                     const startsBlock = !prev || prev.role !== m.role;
@@ -426,7 +456,10 @@ export default function ChatbotWidget() {
                 </div>
 
                 {visibleSuggestions.length > 0 && (
-                  <div className="mt-[12px]">
+                  <div className="mt-[16px]">
+                    <div className="mb-[8px] text-[10px] font-['Outfit'] uppercase tracking-[0.12em] text-[#7C7C7C]">
+                      {currentLocale === 'en' ? 'Quick questions' : 'Greitieji klausimai'}
+                    </div>
                     {serverActions.length > 0 && (
                       <div className="mb-[10px] flex flex-wrap gap-[8px]">
                         {serverActions.map((a, idx) => (
@@ -480,12 +513,15 @@ export default function ChatbotWidget() {
                   }}
                   className="flex items-end gap-[10px]"
                 >
-                  <div className="flex-1 rounded-[999px] bg-[#FAFAFA] ring-1 ring-black/5 px-[14px] py-[10px]">
+                  <div className="flex-1 rounded-[999px] bg-[#FAFAFA] ring-1 ring-black/5 px-[14px] py-[10px] focus-within:ring-2 focus-within:ring-[#161616]/20">
                     <input
                       ref={inputRef}
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       placeholder={t('placeholder')}
+                      aria-label={t('placeholder')}
+                      autoComplete="off"
+                      enterKeyHint="send"
                       className="w-full bg-transparent font-['Outfit'] text-[13px] outline-none placeholder:text-[#7C7C7C]"
                       disabled={busy}
                     />
@@ -513,7 +549,7 @@ export default function ChatbotWidget() {
                   onClick={openHandoff}
                   className="mt-[10px] w-full text-left font-['Outfit'] text-[12px] text-[#535353] hover:text-[#161616]"
                 >
-                  <span className="underline underline-offset-4">Need human</span>
+                  <span className="underline underline-offset-4">{t('handoff')}</span>
                 </button>
               </div>
             </div>
@@ -527,6 +563,8 @@ export default function ChatbotWidget() {
           onClick={() => setOpen(true)}
           className="h-[56px] w-[56px] rounded-full border border-[#BBBBBB] bg-[#161616] text-white shadow-[0_18px_55px_rgba(0,0,0,0.28)] hover:opacity-90 grid place-items-center"
           aria-label={t('aria.open')}
+          aria-haspopup="dialog"
+          aria-expanded={open}
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path

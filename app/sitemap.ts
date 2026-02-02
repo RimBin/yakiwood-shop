@@ -3,8 +3,8 @@ import { projects } from '@/data/projects';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://yakiwood.lt';
 
-// Indexable variant landing pages (do not include preset/query URLs in sitemap)
-const SHOU_SUGI_BAN_VARIANT_SLUGS = ['larch-carbon', 'spruce-natural', 'accoya-black'] as const;
+// Indexable variant landing pages (disabled)
+const SHOU_SUGI_BAN_VARIANT_SLUGS: string[] = [];
 
 // Fallback products data when Supabase is not available
 const fallbackProducts = [

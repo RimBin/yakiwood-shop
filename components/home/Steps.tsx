@@ -36,8 +36,8 @@ export default async function Steps() {
 
 	return (
 		<section className="w-full bg-[#161616] overflow-hidden">
-			{/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7672 ===== */}
-			<InView className={`xl:hidden ${getSectionPadding()} hero-animate-root`}>
+			{/* ===== MOBILE LAYOUT (< 1536px) - Figma 759:7672 ===== */}
+			<InView className={`2xl:hidden ${getSectionPadding()} hero-animate-root`}>
 				{/* Title Section - Mobile/Tablet */}
 				<div className="mb-[32px] md:mb-[40px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
 					<p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-white mb-[8px]">
@@ -103,8 +103,8 @@ export default async function Steps() {
 				</div>
 			</InView>
 
-			{/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-			<InView className="hidden xl:block max-w-[1440px] mx-auto px-[40px] relative hero-animate-root">
+			{/* ===== DESKTOP LAYOUT (>= 1536px) ===== */}
+			<InView className="hidden 2xl:block max-w-[1440px] mx-auto px-[40px] relative hero-animate-root">
 				{/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+24px)] */}
 				<div className="absolute left-[40px] top-[120px] text-white font-normal z-10 w-full hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
 					<p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase left-[0px] top-[25px] whitespace-nowrap">

@@ -42,8 +42,22 @@ export default function Solutions() {
       {/* Page Header */}
       {/* Removed duplicated header blocks as requested */}
       
-      {/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7698 ===== */}
-        <InView className="lg:hidden hero-animate-root">
+      {/* ===== MOBILE LAYOUT (< 1280px) - Figma 759:7698 ===== */}
+        <InView className="xl:hidden hero-animate-root">
+        {/* Title Section - Mobile/Tablet */}
+        <div className="px-[16px] md:px-[32px] pt-[64px] pb-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
+            {t('eyebrow')}
+          </p>
+          <p
+            className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[760px]"
+            style={{ fontSize: 'clamp(40px, 6vw, 80px)', letterSpacing: 'clamp(-1.6px, -0.04em, -4.4px)' }}
+          >
+            <span>{t('headline.prefix')}</span>
+            <span className="font-['Tiro_Tamil'] italic tracking-[-2.4px]"> {t('headline.emphasis')}</span>
+            <span> {t('headline.suffix')}</span>
+          </p>
+        </div>
         {/* Cards - Mobile: Full width accordion style like Figma 759:7702 */}
         <div className="w-full flex flex-col">
           {/* Top border */}
@@ -112,8 +126,8 @@ export default function Solutions() {
         </div>
       </InView>
 
-      {/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
-        <InView className="hidden lg:block hero-animate-root">
+      {/* ===== DESKTOP LAYOUT (>= 1280px) ===== */}
+        <InView className="hidden xl:block hero-animate-root">
         {/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+24px)] */}
         <div className="max-w-[1440px] mx-auto px-[40px] pt-[120px] pb-[40px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <div className="relative h-[160px] text-[#161616]">
