@@ -313,10 +313,10 @@ export default function ChatbotWidget() {
               'absolute bottom-[18px] right-[18px] sm:static ' +
               'w-[calc(100vw-36px)] max-w-[420px] sm:w-[380px] ' +
               'rounded-[28px] border border-[#E1E1E1] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.22)] overflow-hidden ' +
-              'h-[calc(100vh-36px)] sm:h-[680px] '
+              'h-[calc(100dvh-72px)] max-h-[calc(100dvh-72px)] sm:h-[680px] sm:max-h-[680px] '
             }
           >
-            <div className="flex h-full flex-col sm:max-h-[640px]">
+            <div className="flex h-full flex-col sm:max-h-[640px] pb-[env(safe-area-inset-bottom)]">
               <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(135deg,#0F0F0F_0%,#2A2A2A_40%,#161616_100%)]" />
                 <div className="absolute -right-[80px] -top-[90px] h-[200px] w-[200px] rounded-full bg-white/10 blur-2xl" />
@@ -363,20 +363,13 @@ export default function ChatbotWidget() {
 
               <div
                 ref={listRef}
-                className="flex-1 overflow-y-auto bg-[#FAFAFA] px-[12px] py-[12px]"
+                className="flex-1 min-h-0 overflow-y-auto bg-[#FAFAFA] px-[12px] py-[12px]"
                 role="log"
                 aria-live="polite"
                 aria-relevant="additions text"
                 aria-busy={busy}
               >
                 <div className="space-y-[12px]">
-                  <div className="rounded-[14px] border border-black/5 bg-white px-[12px] py-[10px] shadow-[0_6px_18px_rgba(0,0,0,0.04)]">
-                    <div className="mb-[6px] text-[10px] font-['Outfit'] uppercase tracking-[0.12em] text-[#7C7C7C]">
-                      {currentLocale === 'en' ? 'Important' : 'Svarbu'}
-                    </div>
-                    <p className="font-['Outfit'] text-[11px] leading-[1.4] text-[#535353]">{t('note')}</p>
-                  </div>
-
                   <div className="flex items-center justify-between">
                     <div className="text-[10px] font-['Outfit'] uppercase tracking-[0.12em] text-[#7C7C7C]">
                       {currentLocale === 'en' ? 'Conversation' : 'Pokalbis'}
@@ -494,7 +487,9 @@ export default function ChatbotWidget() {
                 )}
               </div>
 
-              <div className="relative border-t border-[#EAEAEA] bg-white p-[12px]">
+            </div>
+
+              <div className="relative mt-auto border-t border-[#EAEAEA] bg-white p-[12px]">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -541,7 +536,6 @@ export default function ChatbotWidget() {
                   <span className="underline underline-offset-4">{t('handoff')}</span>
                 </button>
               </div>
-            </div>
           </div>
         </div>
       ) : null}

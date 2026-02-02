@@ -113,17 +113,6 @@ export default function Solutions() {
           <div className="h-[1px] bg-[#BBBBBB] w-full" />
         </div>
 
-        {/* GET AN OFFER Button - Mobile: Figma 759:7710 */}
-        <div className="px-[16px] py-[48px] hero-seq-item hero-seq-right" style={{ animationDelay: '900ms' }}>
-          <Link
-            href={toLocalePath('/contact', currentLocale)}
-            className="w-[358px] max-w-full mx-auto block bg-[#161616] rounded-[100px] h-[48px] flex items-center justify-center"
-          >
-            <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-              {t('cta.offer')}
-            </span>
-          </Link>
-        </div>
       </InView>
 
       {/* ===== DESKTOP LAYOUT (>= 1280px) ===== */}
