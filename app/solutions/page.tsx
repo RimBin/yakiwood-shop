@@ -504,12 +504,12 @@ Do you want to give your building a distinctive and attractive appearance? Encou
       {/* Purpose Section */}
       <InView className="hero-animate-root">
           <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[16px] lg:pt-[24px] pb-[48px] lg:pb-[72px]">
-            <div className="relative mt-[12px] lg:mt-[16px] h-[220px] sm:h-[320px] lg:h-[420px] rounded-[20px] overflow-hidden hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
+            <div className="relative mt-[12px] lg:mt-[16px] h-[260px] sm:h-[380px] lg:h-[520px] overflow-hidden hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
             <Image src={assets.projects[0]} alt="Purpose visual" fill className="object-cover" />
           </div>
 
-          <div className="mt-[16px] lg:mt-[24px] grid lg:grid-cols-[1fr_2fr] gap-[24px] lg:gap-[48px]">
-            <div className="hero-seq-item hero-seq-right" style={{ animationDelay: '420ms' }}>
+          <div className="mt-[16px] lg:mt-[24px] grid lg:grid-cols-[25%_1fr] gap-[24px] lg:gap-0">
+            <div className="hero-seq-item hero-seq-right lg:pr-[48px]" style={{ animationDelay: '420ms' }}>
               <p className="font-['Outfit'] font-normal text-[11px] leading-[1.3] tracking-[0.6px] uppercase text-[#535353] mb-[12px]">
                 Design goals
               </p>
@@ -518,7 +518,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
               </p>
             </div>
 
-            <div className="grid gap-[6px]">
+            <div className="grid gap-[6px] lg:pl-[14px]">
               {accordionData.map((item, index) => (
                 <button
                   key={index}
