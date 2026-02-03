@@ -114,6 +114,7 @@ export default function ProjectDetailClient({
             { label: labels.projects, href: resolvedBasePath },
             { label: notFoundTitle },
           ]}
+        align="left"
         />
         <div className="max-w-[1440px] mx-auto px-4 lg:px-10 py-16">
           <h1 className="font-['DM_Sans'] font-light text-[40px] lg:text-[80px] leading-none tracking-[-1.6px] lg:tracking-[-4.4px] text-[#161616]">
@@ -138,6 +139,7 @@ export default function ProjectDetailClient({
           { label: labels.projects, href: resolvedBasePath },
           { label: title },
         ]}
+        align="left"
       />
 
       <InView className="hero-animate-root">

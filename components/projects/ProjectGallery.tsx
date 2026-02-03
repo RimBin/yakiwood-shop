@@ -86,48 +86,48 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
       </div>
 
       {/* Slider Controls */}
-      <div className="flex items-center justify-center gap-3 mt-6">
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-6 px-4 lg:px-0">
         {/* Previous Button */}
         <button
           onClick={handlePrevious}
-          className="w-12 h-12 rounded-full border border-[#161616] flex items-center justify-center hover:bg-[#161616] hover:text-white transition-colors"
+          className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-[#161616] flex items-center justify-center hover:bg-[#161616] hover:text-white transition-colors"
           aria-label="Previous image"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="lg:w-6 lg:h-6">
             <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
 
         {/* Page Numbers */}
-        <span className="font-['DM_Sans'] font-medium text-[#7C7C7C] text-sm uppercase tracking-[0.42px]">
+        <span className="font-['DM_Sans'] font-medium text-[#7C7C7C] text-[11px] sm:text-sm uppercase tracking-[0.42px]">
           {currentIndex + 1}
         </span>
-        <span className="font-['DM_Sans'] font-medium text-[#161616] text-sm uppercase tracking-[0.42px]">
+        <span className="font-['DM_Sans'] font-medium text-[#161616] text-[11px] sm:text-sm uppercase tracking-[0.42px]">
           {Math.min(currentIndex + 2, images.length)}
         </span>
 
         {/* Progress Bar */}
-        <div className="w-[160px] h-[1.5px] bg-[#EAEAEA] relative">
+        <div className="w-[96px] sm:w-[140px] lg:w-[160px] h-[1.5px] bg-[#EAEAEA] relative">
           <div
             className="absolute top-0 left-0 h-full bg-[#161616] transition-all duration-300"
             style={{ width: `${((currentIndex + 1) / images.length) * 100}%` }}
           />
         </div>
 
-        <span className="font-['DM_Sans'] font-medium text-[#7C7C7C] text-sm uppercase tracking-[0.42px]">
+        <span className="font-['DM_Sans'] font-medium text-[#7C7C7C] text-[11px] sm:text-sm uppercase tracking-[0.42px]">
           {images.length - 1}
         </span>
-        <span className="font-['DM_Sans'] font-medium text-[#7C7C7C] text-sm uppercase tracking-[0.42px]">
+        <span className="font-['DM_Sans'] font-medium text-[#7C7C7C] text-[11px] sm:text-sm uppercase tracking-[0.42px]">
           {images.length}
         </span>
 
         {/* Next Button */}
         <button
           onClick={handleNext}
-          className="w-12 h-12 rounded-full border border-[#161616] flex items-center justify-center hover:bg-[#161616] hover:text-white transition-colors"
+          className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-[#161616] flex items-center justify-center hover:bg-[#161616] hover:text-white transition-colors"
           aria-label="Next image"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="lg:w-6 lg:h-6">
             <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>

@@ -61,18 +61,48 @@ export const blogPosts: BlogPost[] = [
       en: 'Shou Sugi Ban blends aesthetics with protection. This article shows how charred wood adds character and durability to both modern and classic projects.',
     },
     summary: {
-      lt: 'Deginta mediena nėra vien tik išvaizda. Tinkamai apdorotas paviršius tampa atsparesnis drėgmei, UV spinduliams ir kenkėjams, todėl fasadai bei terasos ilgiau išlaiko tvirtumą.',
-      en: 'Charred wood is not just about looks. Properly treated surfaces become more resistant to moisture, UV exposure, and pests, so facades and terraces keep their strength longer.',
+      lt: 'Deginta mediena nėra vien tik išvaizda. Tinkamai apdorotas paviršius tampa atsparesnis drėgmei, UV spinduliams ir kenkėjams, todėl fasadai bei terasos ilgiau išlaiko tvirtumą. Šis tradicinis japonų metodas, žinomas kaip Shou Sugi Ban arba Yakisugi, šimtmečius buvo naudojamas medinių pastatų apsaugai. Šiuolaikinėje architektūroje jis tampa vis populiaresnis dėl unikaliuų estetinių savybių ir ilgaamžiškumo.',
+      en: 'Charred wood is not just about looks. Properly treated surfaces become more resistant to moisture, UV exposure, and pests, so facades and terraces keep their strength longer. This traditional Japanese method, known as Shou Sugi Ban or Yakisugi, has been used for centuries to protect wooden structures. In modern architecture, it is becoming increasingly popular due to its unique aesthetic qualities and durability.',
     },
     sections: [
+      {
+        heading: {
+          lt: 'Įvadas į degintos medienos meną',
+          en: 'Introduction to the Art of Wood Burning',
+        },
+        body: {
+          lt: 'Shou Sugi Ban technologija kilo senovės Japonijoje, kur mediena buvo deginama atvirame liepsna, siekiant apsaugoti ją nuo drėgmės, vabzdžių ir ugnies. Šis metodas sukuria natūralų anglies sluoksnį, kuris veikia kaip barjeras, blokuojantis drėgmę ir kenksmingus organizmus. Šiandien ši technika naudojama ne tik praktiniais, bet ir estetiniais tikslais – sukuriamas gilus juodas ar rudo atspalvio paviršius su unikaliu grūdų raižiniu.',
+          en: 'The Shou Sugi Ban technique originated in ancient Japan, where wood was charred over open flames to protect it from moisture, insects, and fire. This method creates a natural carbon layer that acts as a barrier, blocking moisture and harmful organisms. Today, this technique is used not only for practical purposes but also for aesthetic appeal—creating deep black or brown surfaces with unique grain patterns.',
+        },
+      },
+      {
+        heading: {
+          lt: 'Degintos medienos naudojimo namuose privalumai',
+          en: 'The Benefits of Using Wood in Home Interiors, Facades, and Terraces',
+        },
+        body: {
+          lt: 'Deginta mediena siūlo daug privalumų, kurie daro ją idealiu pasirinkimu fasadams, terasoms ir interjerams. Pirma, ji yra labai atspari oro sąlygoms – anglies sluoksnis sumažina drėgmės įsigėrimą ir apsaugo nuo UV spindulių žalos. Antra, ši mediena pasižymi ilgaamžiškumu: tinkamai prižiūrimas paviršius gali tarnauti dešimtmečius be reikšmingų pakeitimų. Trečia, deginta mediena yra natūrali ir ekologiška – nereikalauja cheminių impregnantų, kurie gali būti kenksmingi aplinkai.',
+          en: 'Charred wood offers numerous benefits that make it an ideal choice for facades, terraces, and interiors. First, it is highly weather-resistant—the carbon layer reduces moisture absorption and protects against UV damage. Second, this wood is durable: a properly maintained surface can last for decades without significant changes. Third, charred wood is natural and eco-friendly—it does not require chemical preservatives that can harm the environment.',
+        },
+      },
+      {
+        heading: {
+          lt: 'Įvairūs degintos medienos metodai',
+          en: 'Various Burnt Wood Techniques',
+        },
+        body: {
+          lt: 'Egzistuoja kelios degintos medienos gamybos technikos, kiekviena suteikianti skirtingą estetinį ir funkcinį rezultatą. Klasikinis Shou Sugi Ban metodas apima medienos deginimą atvirame liepsna, po kurio paviršius šukuojamas, pašalinant silpnesnį anglies sluoksnį ir atskleidžiant gilesnes grūdų linijas. Kita populiari technika – „Yaki-sugi" kontroliuojamu intensyvumu, kurio metu mediena deginama skirtingais temperatūros lygiais.',
+          en: 'Several charred wood production techniques exist, each providing a different aesthetic and functional result. The classic Shou Sugi Ban method involves charring wood over an open flame, after which the surface is brushed to remove the weaker carbon layer and reveal deeper grain lines. Another popular technique is \"Yaki-sugi\" with controlled intensity, where wood is charred at different temperature levels.',
+        },
+      },
       {
         heading: {
           lt: 'Kodėl ši technologija veikia',
           en: 'Why This Technique Works',
         },
         body: {
-          lt: 'Apdeginimas uždaro medienos poras, o paviršius tampa tankesnis. Tai sumažina vandens įsigėrimą ir palengvina priežiūrą.',
-          en: 'Charring closes the wood pores and densifies the surface. This reduces water absorption and simplifies maintenance.',
+          lt: 'Apdeginimas uždaro medienos poras, o paviršius tampa tankesnis. Tai sumažina vandens įsigėrimą ir palengvina priežiūrą. Anglies sluoksnis, susidariusi per deginimo procesą, veikia kaip natūrali barjeras prieš drėgmę, grybus ir kenkėjus. Šis procesas taip pat pagerina medienos atsparumą ugniai, nes apanglintas paviršius degsta lėčiau nei neapdorota mediena.',
+          en: 'Charring closes the wood pores and densifies the surface. This reduces water absorption and simplifies maintenance. The carbon layer formed during the charring process acts as a natural barrier against moisture, fungi, and pests. This process also improves wood fire resistance, as the carbonized surface burns slower than untreated wood.',
         },
       },
       {
@@ -81,8 +111,8 @@ export const blogPosts: BlogPost[] = [
           en: 'Where It Shines Most',
         },
         body: {
-          lt: 'Ventiliuojami fasadai, terasos, akcentinės sienos ir detalės, kur svarbus gylis, tekstūra bei kontrastas.',
-          en: 'Ventilated facades, terraces, feature walls, and details where depth, texture, and contrast matter.',
+          lt: 'Ventiliuojami fasadai, terasos, akcentinės sienos ir detalės, kur svarbus gylis, tekstūra bei kontrastas. Deginta mediena idealiai tinka šiuolaikinei architektūrai, kur minimalistiniai sprendimai derinami su natūraliomis medžiagomis. Fasadai su degintos medienos apdaila sukuria stiprų vizualinį akcentą ir išsiskiria iš kitų pastatų.',
+          en: 'Ventilated facades, terraces, feature walls, and details where depth, texture, and contrast matter. Charred wood is ideal for modern architecture, where minimalist solutions are combined with natural materials. Facades with charred wood cladding create a strong visual accent and stand out from other buildings.',
         },
       },
       {
@@ -91,21 +121,31 @@ export const blogPosts: BlogPost[] = [
           en: 'Ordering Tips',
         },
         body: {
-          lt: 'Pasidalinkite projekto vieta, norimu profiliu ir spalvos nuorodomis. Tai leidžia pasiūlyti optimalų sprendimą ir kainą.',
-          en: 'Share the project location, preferred profile, and color references. This helps us propose the best solution and pricing.',
+          lt: 'Pasidalinkite projekto vieta, norimu profiliu ir spalvos nuorodomis. Tai leidžia pasiūlyti optimalų sprendimą ir kainą. Svarbu nurodyti fasado ar terasos plotą, medienos rūšies pageidavimus (eglė, pušis, maumedis) bei deginimo intensyvumą. Jei turite vizualinius pavyzdžius ar nuorodas, praneškite – tai padės tiksliau parinkti tinkamą apdailą.',
+          en: 'Share the project location, preferred profile, and color references. This helps us propose the best solution and pricing. It is important to specify the facade or terrace area, wood species preferences (spruce, pine, larch), and charring intensity. If you have visual examples or references, let us know—this will help accurately select the right finish.',
         },
       },
     ],
     body: {
       lt: [
-        'Deginta mediena suteikia architektūrai solidumo: tamsūs tonai išryškina formas, o šukuota tekstūra pabrėžia natūralią kilmę. Dėl to ji tinka tiek minimalistinėms, tiek tradicinėms kompozicijoms.',
-        'Renkantis apdailą verta įvertinti ekspoziciją saulėje ir drėgmę. Stipriai apdegintos lentos bus tamsesnės, o švelniai degintos – subtiliai rusvos.',
-        'Jei norite unikalios estetikos, derinkite skirtingus profilius ar kryptis. Tai sukuria ritmą ir išskirtinį šešėlių žaismą.',
+        'Deginta mediena suteikia architektūrai solidumo: tamsūs tonai išryškina formas, o šukuota tekstūra pabrėžia natūralią kilmę. Dėl to ji tinka tiek minimalistinėms, tiek tradicinėms kompozicijoms. Šiuolaikinė architektūra vis dažniau renkasi natūralias medžiagas, kurios ne tik gražiai atrodo, bet ir atitinka tvarumo principus. Deginta mediena yra vienas tokių sprendimų – ji ekologiška, ilgaamžiška ir estetiškai patraukli.',
+        'Degintos medienos unikalumas slypi jos tekstūroje ir spalvoje. Kiekviena lenta yra unikali, nes grūdų raštai ir deginimo intensyvumas gali skirtis. Tai leidžia sukurti individualų fasadą ar terasą, kuri neturi analogų. Be to, deginta mediena gerai dera su įvairiomis kitomis medžiagomis – betoną, akmeniu, stiklu, plienu.',
+        'Renkantis apdailą verta įvertinti ekspoziciją saulėje ir drėgmę. Stipriai apdegintos lentos bus tamsesnės, o švelniai degintos – subtiliai rusvos. Taip pat svarbu atsižvelgti į klimatinius veiksnius: pajūrio zonose rekomenduojama rinktis tamsesnes apdailas ir tankesnę medieną (maumedis), o kontinentinėse vietose gali tikti švelnesnė eglė ar pušis.',
+        'Jei norite unikalios estetikos, derinkite skirtingus profilius ar kryptis. Tai sukuria ritmą ir išskirtinį šešėlių žaismą. Pavyzdžiui, horizontaliai montuotos lentos fasadą daro vizualiai platesnį, o vertikalios – aukštesnį. Galima derinti ir skirtingų plotį lentas, siekiant sukurti dinamišką ritmą.',
+        'Svarbu nepamiršti ir techninių aspektų: tinkamas montavimas yra raktas į ilgą tarnavimo laiką. Būtina užtikrinti ventiliacijos tarpus tarp lentų ir pagrindo, kad drėgmė galėtų laisvai išgaruoti. Taip pat reikia naudoti atsparių korozijai tvirtinimo elementų – nerūdijančio plieno ar cinkuoto metalo.',
+        'Prieš pasirinkdami spalvą, peržiūrėkite pavyzdžius skirtingu paros metu – rytinė ir vakarinė šviesa atskleidžia skirtingą atspalvį.',
+        'Natūralus patamsėjimas laikui bėgant nėra defektas – tai patina, kuri suteikia fasadui dar daugiau charakterio.',
+        'Jei planuojate derinti su metalu ar stiklu, verta iš anksto suplanuoti mazgus, kad mediena galėtų kvėpuoti.',
       ],
       en: [
-        'Charred wood gives architecture a sense of weight: dark tones emphasize form, while brushed textures highlight its natural origin. It fits both minimalist and traditional compositions.',
-        'When choosing a finish, consider sun exposure and moisture. Heavily charred boards are darker, while lightly charred ones read warmer and softer.',
-        'If you want a unique aesthetic, mix profiles or orientations. This creates rhythm and distinctive shadow play.',
+        'Charred wood gives architecture a sense of weight: dark tones emphasize form, while brushed textures highlight its natural origin. It fits both minimalist and traditional compositions. Modern architecture increasingly chooses natural materials that not only look beautiful but also meet sustainability principles. Charred wood is one such solution—it is eco-friendly, durable, and aesthetically appealing.',
+        'The uniqueness of charred wood lies in its texture and color. Each board is unique because grain patterns and charring intensity can vary. This allows creating an individual facade or terrace that has no analogues. Moreover, charred wood pairs well with various other materials—concrete, stone, glass, steel.',
+        'When choosing a finish, consider sun exposure and moisture. Heavily charred boards are darker, while lightly charred ones read warmer and softer. It is also important to consider climatic factors: coastal areas recommend darker finishes and denser wood (larch), while continental locations may suit softer spruce or pine.',
+        'If you want a unique aesthetic, mix profiles or orientations. This creates rhythm and distinctive shadow play. For example, horizontally mounted boards make the facade visually wider, while vertical ones make it taller. You can also combine boards of different widths to create dynamic rhythm.',
+        'It is important not to forget the technical aspects: proper installation is key to long service life. Ventilation gaps must be ensured between boards and the substrate so moisture can evaporate freely. Corrosion-resistant fasteners must also be used—stainless steel or galvanized metal.',
+        'Before choosing a tone, view samples at different times of day—morning and evening light reveal different shades.',
+        'Natural darkening over time is not a defect—it is a patina that adds character to the facade.',
+        'If you plan to pair wood with metal or glass, detail the junctions early so the wood can breathe.',
       ],
     },
     callout: {
@@ -123,7 +163,7 @@ export const blogPosts: BlogPost[] = [
     date: '2024-11-05',
     category: { lt: 'Dizainas', en: 'Design' },
     published: true,
-    readTimeMinutes: 5,
+    readTimeMinutes: 7,
   },
   {
     id: 'yakisugi-vs-thermowood',
@@ -180,11 +220,17 @@ export const blogPosts: BlogPost[] = [
         'Svarbiausia – aiškiai įvardyti, ko tikitės: dramatiškos estetikos ar šiltesnio tono. Yakisugi labiau tinka, kai norite išskirtinio charakterio.',
         'Jei fasadas bus pietinėje pusėje ar pajūryje, apdailos atnaujinimo grafikas tampa svarbus. Yakisugi dažniausiai išlaiko spalvą ilgiau.',
         'Renkantis medienos rūšį (eglė, maumedis), įvertinkite ir profilio pasirinkimą – skirtingi profiliai keičia vizualų efektą.',
+        'Svarbu įvertinti ne tik pradinę kainą, bet ir atnaujinimo dažnį bei laiką.',
+        'Jei norite labai tamsaus fasado, Yakisugi suteikia gilesnį toną be dažų.',
+        'Termomediena gerai tinka, kai norite šilto atspalvio ir minimalios tekstūros.',
       ],
       en: [
         'First define the goal: bold contrast or warm natural tone. Yakisugi is the choice when you want an unmistakable character.',
         'For south-facing or coastal facades, maintenance schedules matter. Yakisugi typically holds its tone longer.',
         'When selecting species (spruce or larch), consider profile options too. Profiles change the overall visual rhythm.',
+        'Consider not only the upfront price but also how often and how long refreshes will take.',
+        'If you want a very dark facade, Yakisugi delivers a deeper tone without paint.',
+        'Thermowood is a strong fit when you want a warm hue and minimal texture.',
       ],
     },
     callout: {
@@ -202,7 +248,7 @@ export const blogPosts: BlogPost[] = [
     date: '2024-11-12',
     category: { lt: 'Medžiagos', en: 'Materials' },
     published: true,
-    readTimeMinutes: 6,
+    readTimeMinutes: 7,
   },
   {
     id: 'facade-rhythm',
@@ -259,11 +305,17 @@ export const blogPosts: BlogPost[] = [
         'Profilio pasirinkimą verta daryti kartu su architektu. Kartais pakanka nedidelės tekstūros, kad pastatas atrodytų prabangesnis.',
         'Svarbu ir montavimo kryptis – ji daro įtaką vizualiam pastato masteliui. Tai ypač aktualu mažesniems namams.',
         'Jei abejojate, rekomenduojame išbandyti kelis profilius ant realaus pavyzdžio. Taip sprendimas bus tikslus.',
+        'Ritmui kurti naudinga kartoti profilio modulį ties langais ir kampais.',
+        'Skirtingi profiliai gali būti derinami viename fasade, jei laikotės aiškios taisyklės.',
+        'Apšvietimas vakare dar labiau paryškina reljefą, todėl verta numatyti šviestuvų vietas.',
       ],
       en: [
         'Profile choices are best made with the architect. A subtle texture can elevate a facade instantly.',
         'Orientation also affects perceived scale, especially for smaller buildings.',
         'If you are unsure, test several profiles on real samples before deciding.',
+        'For rhythm, repeat the profile module around windows and corners.',
+        'Different profiles can be combined on one facade if you follow a clear rule.',
+        'Evening lighting highlights relief even more, so plan fixture placement early.',
       ],
     },
     callout: {
@@ -281,7 +333,7 @@ export const blogPosts: BlogPost[] = [
     date: '2024-11-20',
     category: { lt: 'Architektūra', en: 'Architecture' },
     published: true,
-    readTimeMinutes: 5,
+    readTimeMinutes: 6,
   },
   {
     id: 'maintenance-plan',
@@ -338,11 +390,17 @@ export const blogPosts: BlogPost[] = [
         'Pirmus metus rekomenduojame stebėti spalvos pokytį. Tai padeda laiku suplanuoti pirmąjį atnaujinimą.',
         'Jei fasadas yra šalia medžių, kartą per metus nuplaukite paviršių nuo dervų ar organinių apnašų.',
         'Turėdami aiškų planą, fasadą prižiūrėsite greitai ir be papildomų išlaidų.',
+        'Po stipresnių audrų verta apžiūrėti fasadą ir pašalinti prilipusius nešvarumus.',
+        'Plovimui naudokite neutralius, be chloro valiklius, o šepetį rinkitės minkštą.',
+        'Alyvą tepkite ant sausos, švarios medienos plonu sluoksniu, kad neatsirastų dėmių.',
       ],
       en: [
         'During the first year, observe color changes. This helps plan the first refresh.',
         'If the facade is close to trees, rinse it once a year to remove resin or organic buildup.',
         'With a clear plan, upkeep is quick and cost-effective.',
+        'After heavy storms, inspect the facade and remove any stuck debris.',
+        'Use neutral, chlorine-free cleaners and a soft brush for washing.',
+        'Apply oil on dry, clean wood in a thin layer to avoid blotches.',
       ],
     },
     callout: {
@@ -360,7 +418,7 @@ export const blogPosts: BlogPost[] = [
     date: '2024-12-03',
     category: { lt: 'Priežiūra', en: 'Maintenance' },
     published: true,
-    readTimeMinutes: 4,
+    readTimeMinutes: 6,
   },
   {
     id: 'terrace-performance',
@@ -417,11 +475,17 @@ export const blogPosts: BlogPost[] = [
         'Prieš montuojant terasą verta paruošti tvirtą pagrindą ir gerą ventiliaciją. Tai sumažina drėgmės kaupimąsi.',
         'Terasoms dažnai rekomenduojame maumedį dėl natūralaus tankio ir ilgaamžiškumo.',
         'Norėdami ilgesnio tarnavimo, rinkitės nerūdijančio plieno tvirtinimo elementus.',
+        'Jei terasa prie baseino, rinkitės mažiau šukuotą profilį, kad būtų lengviau valyti.',
+        'Laiptų pakopoms rekomenduojame storesnes lentas ir paslėptą tvirtinimą.',
+        'Šešėlinėse zonose periodiškai patikrinkite pelėsio riziką.',
       ],
       en: [
         'Before installation, ensure a solid substructure and proper ventilation. This limits moisture buildup.',
         'For terraces we often recommend larch for its density and durability.',
         'Use stainless steel fasteners for maximum service life.',
+        'If the terrace is near a pool, choose a less brushed profile for easier cleaning.',
+        'For stairs, we recommend thicker boards and concealed fastening.',
+        'In shaded zones, check periodically for mold risk.',
       ],
     },
     callout: {
@@ -439,7 +503,7 @@ export const blogPosts: BlogPost[] = [
     date: '2024-12-14',
     category: { lt: 'Terasa', en: 'Terrace' },
     published: true,
-    readTimeMinutes: 5,
+    readTimeMinutes: 6,
   },
   {
     id: 'interior-accents',
@@ -496,11 +560,17 @@ export const blogPosts: BlogPost[] = [
         'Jei norite minkštesnio efekto, rinkitės alyvuotą arba švelniai šukuotą paviršių.',
         'Vidaus erdvėse dažnai naudojame siauresnius profilius, kad tekstūra atrodytų subtiliau.',
         'Norint išlaikyti vientisumą, rekomenduojame užsakyti vienos partijos medieną.',
+        'Jei erdvėje daug šviesos, tamsi siena suteiks kontrastą ir gylį.',
+        'Virtuvėse ar komercinėse erdvėse rinkitės alyvuotą apdailą dėl lengvesnio valymo.',
+        'Nedideliuose kambariuose tinka vienas akcentinis plotas, kad erdvė neatrodytų per sunki.',
       ],
       en: [
         'For a softer feel, choose oiled or lightly brushed surfaces.',
         'Indoors, narrower profiles often look more refined.',
         'To keep the finish consistent, order from a single batch.',
+        'If the space has lots of light, a dark wall adds contrast and depth.',
+        'In kitchens or commercial areas, choose oiled finishes for easier cleaning.',
+        'In smaller rooms, a single accent wall keeps the space from feeling heavy.',
       ],
     },
     callout: {
@@ -518,7 +588,7 @@ export const blogPosts: BlogPost[] = [
     date: '2024-12-22',
     category: { lt: 'Interjeras', en: 'Interior' },
     published: true,
-    readTimeMinutes: 4,
+    readTimeMinutes: 6,
   },
   {
     id: 'sustainable-choice',
@@ -575,11 +645,17 @@ export const blogPosts: BlogPost[] = [
         'Tvari architektūra reikalauja sprendimų, kurie išlieka ilgai. Shou Sugi Ban atitinka šį kriterijų.',
         'Jei rūpinatės CO2 pėdsaku, rinkitės medieną iš atsakingų miškų ir tvarius apdirbimo būdus.',
         'Ilgalaikė investicija į tvarumą visada atsiperka – tiek estetikos, tiek eksploatacijos prasme.',
+        'Deginta mediena sumažina cheminių dangų poreikį, todėl patalpose yra mažiau lakiųjų junginių.',
+        'Ilgaamžiškumas reiškia mažiau transporto ir gamybos ciklų per pastato gyvenimą.',
+        'Rinkdamiesi vietinę medieną, papildomai mažinate logistikos pėdsaką.',
       ],
       en: [
         'Sustainable architecture needs solutions that last. Shou Sugi Ban meets that requirement.',
         'If you care about CO2 impact, select wood from responsible forests and sustainable processing.',
         'Long-term investment in sustainability pays off in both aesthetics and operations.',
+        'Charred wood reduces the need for chemical coatings, meaning fewer VOCs indoors.',
+        'Durability means fewer transport and production cycles over a building’s life.',
+        'Choosing local wood further reduces the logistics footprint.',
       ],
     },
     callout: {
@@ -597,7 +673,7 @@ export const blogPosts: BlogPost[] = [
     date: '2025-01-05',
     category: { lt: 'Tvarumas', en: 'Sustainability' },
     published: true,
-    readTimeMinutes: 4,
+    readTimeMinutes: 6,
   },
   {
     id: 'order-process',
@@ -654,11 +730,17 @@ export const blogPosts: BlogPost[] = [
         'Dauguma klientų sprendimą priima po pavyzdžių peržiūros. Tai greičiausias būdas pajusti tekstūrą ir spalvą.',
         'Jei turite projektą, atsiųskite brėžinius – galėsime tiksliau paskaičiuoti kiekį.',
         'Montavimo klausimais padedame rekomendacijomis, profilių pasirinkimu ir priežiūros instrukcijomis.',
+        'Kai turime aiškų kiekį, pateikiame kelias kainos alternatyvas skirtingoms rūšims.',
+        'Gamybos metu suderiname spalvos nuokrypius, kad partija būtų vientisa.',
+        'Prieš pristatymą suderiname sandėliavimą ir montavimo grafiką, kad viskas vyktų sklandžiai.',
       ],
       en: [
         'Most clients decide after seeing samples. It is the quickest way to feel the texture and tone.',
         'If you have a project, share drawings so we can calculate quantities accurately.',
         'We assist with installation guidance, profile selection, and maintenance instructions.',
+        'Once quantities are clear, we provide price options for different species.',
+        'During production, we align color variations to keep the batch consistent.',
+        'Before delivery, we coordinate storage and installation timing so everything runs smoothly.',
       ],
     },
     callout: {
@@ -676,7 +758,7 @@ export const blogPosts: BlogPost[] = [
     date: '2025-01-12',
     category: { lt: 'Procesas', en: 'Process' },
     published: true,
-    readTimeMinutes: 4,
+    readTimeMinutes: 6,
   },
   {
     id: 'coastal-projects',
@@ -733,11 +815,17 @@ export const blogPosts: BlogPost[] = [
         'Pajūrio objektuose rekomenduojame rinktis tamsesnes apdailas, kurios geriau maskuoja natūralius pokyčius.',
         'Svarbu vengti horizontalių detalių, kuriose gali kauptis vanduo.',
         'Kuo geresnis montavimas, tuo retesnės priežiūros reikės ateityje.',
+        'Druskos dalelės veikia paviršių kaip abrazyvas, todėl apsauginė alyva tampa dar svarbesnė.',
+        'Rekomenduojame tvirtinimus iš nerūdijančio plieno, kad išvengtumėte korozijos.',
+        'Fasadų mazguose numatykite papildomus vandens nubėgimo sprendimus.',
       ],
       en: [
         'For coastal projects, darker finishes often mask natural changes better.',
         'Avoid horizontal details where water can pool.',
         'The better the installation, the less maintenance you need later.',
+        'Salt particles act as a mild abrasive, so protective oil becomes even more important.',
+        'We recommend stainless steel fasteners to avoid corrosion.',
+        'At facade junctions, plan extra water runoff solutions.',
       ],
     },
     callout: {
@@ -755,7 +843,7 @@ export const blogPosts: BlogPost[] = [
     date: '2025-01-20',
     category: { lt: 'Aplinka', en: 'Environment' },
     published: true,
-    readTimeMinutes: 5,
+    readTimeMinutes: 6,
   },
   {
     id: 'fire-ready-surfaces',
@@ -812,11 +900,17 @@ export const blogPosts: BlogPost[] = [
         'Nors deginta mediena nėra visiškai nedegi, ji gali būti saugesnė nei neapdorota mediena.',
         'Projektuojant būtina laikytis statybinių normų ir derinti sprendimus su architektu.',
         'Papildomas privalumas – šis apsaugos sluoksnis atrodo estetiškai ir nereikalauja cheminių impregnantų.',
+        'Didesnis apdegimo gylis gali padidinti atsparumą, tačiau reikia išlaikyti struktūrinį tvirtumą.',
+        'Tokiems projektams verta rinktis tankesnę medieną ir tinkamą profilio geometriją.',
+        'Visada derinkite sprendimą su vietiniais reglamentais ir gaisrinės saugos reikalavimais.',
       ],
       en: [
         'Charred wood is not fireproof, but it can be safer than untreated wood.',
         'Designs must still comply with building codes and be coordinated with architects.',
         'A bonus: this protective layer is aesthetic and avoids harsh chemicals.',
+        'Deeper charring can improve resistance, but structural integrity must be preserved.',
+        'For such projects, choose denser species and the right profile geometry.',
+        'Always align the solution with local regulations and fire safety requirements.',
       ],
     },
     callout: {
@@ -834,7 +928,7 @@ export const blogPosts: BlogPost[] = [
     date: '2025-01-28',
     category: { lt: 'Saugumas', en: 'Safety' },
     published: true,
-    readTimeMinutes: 4,
+    readTimeMinutes: 6,
   },
 ];
 
