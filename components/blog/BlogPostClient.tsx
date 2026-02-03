@@ -42,13 +42,13 @@ function RelatedCard({ post, locale }: { post: LocalizedBlogPost; locale: AppLoc
       href={toLocalePath(`/blog/${post.slug}`, locale)}
       className="flex flex-col gap-[10px]"
     >
-      <div className="relative h-[180px] rounded-[16px] overflow-hidden">
+      <div className="relative h-[180px] md:h-[200px] overflow-hidden">
         <BlogImage src={post.heroImage} alt={post.title} />
       </div>
-      <div className="font-['DM_Sans'] text-[16px] text-[#161616] leading-[1.2]">
+      <div className="font-['DM_Sans'] text-[15px] md:text-[16px] text-[#161616] leading-[1.25]">
         {post.title}
       </div>
-      <div className="font-['Outfit'] text-[12px] text-[#535353]">
+      <div className="font-['Outfit'] text-[12px] leading-[1.6] text-[#535353]">
         {post.excerpt}
       </div>
     </Link>
@@ -63,6 +63,7 @@ export default function BlogPostClient({
   initialRelated: LocalizedBlogPost[];
 }) {
   const t = useTranslations('blog');
+  const tCommon = useTranslations('common');
   const tBreadcrumbs = useTranslations('breadcrumbs');
   const locale = useLocale() as AppLocale;
   const [post, setPost] = useState<LocalizedBlogPost>(initialPost);
@@ -115,7 +116,7 @@ export default function BlogPostClient({
 
       <InView className="hero-animate-root">
         <PageLayout>
-          <div className="pt-[16px] pb-[120px]">
+          <div className="pt-[12px] pb-[120px]">
 
         <div className="mt-[18px] relative h-[240px] md:h-[420px] lg:h-[560px] overflow-hidden hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <BlogImage src={post.heroImage} alt={post.title} />
@@ -123,7 +124,7 @@ export default function BlogPostClient({
 
         <div className="mt-[26px] grid grid-cols-1 lg:grid-cols-[520px_1fr] gap-[34px] lg:gap-[64px]">
           <div className="flex flex-col hero-seq-item hero-seq-right" style={{ animationDelay: '180ms' }}>
-            <h1 className="font-['DM_Sans'] font-light text-[40px] md:text-[64px] leading-[1.02] tracking-[-1.6px] text-[#161616]">
+            <h1 className="font-['DM_Sans'] font-light text-[32px] sm:text-[40px] md:text-[52px] lg:text-[64px] leading-[1.02] tracking-[-1.6px] text-[#161616]">
               {post.title}
             </h1>
 
@@ -133,11 +134,11 @@ export default function BlogPostClient({
             </div>
 
             {post.gallery.length > 0 && (
-              <div className="mt-[22px] flex flex-col gap-[16px] max-w-[360px]">
+              <div className="mt-[22px] grid grid-cols-2 gap-[12px] max-w-[360px]">
                 {post.gallery.slice(0, 2).map((src, index) => (
                   <div
                     key={`${src}-${index}`}
-                    className="relative h-[160px] md:h-[200px] overflow-hidden"
+                    className="relative h-[120px] sm:h-[130px] md:h-[150px] overflow-hidden"
                   >
                     <BlogImage src={src} alt={`${post.title} ${index + 1}`} />
                   </div>
@@ -151,7 +152,7 @@ export default function BlogPostClient({
               {post.summary}
             </p>
 
-            <div className="mt-[18px] space-y-[18px]">
+            <div className="mt-[18px] space-y-[20px]">
               {post.sections.map((section) => (
                 <div key={section.heading}>
                   <div className="font-['Outfit'] font-semibold text-[12px] md:text-[13px] leading-[1.35] text-[#161616]">
@@ -193,16 +194,28 @@ export default function BlogPostClient({
         )}
 
         {post.featureImages.length > 0 && (
-          <div className="mt-[44px] grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-            {post.featureImages.slice(0, 2).map((src, index) => (
-              <div
-                key={`${src}-${index}`}
-                className="relative h-[240px] md:h-[360px] overflow-hidden hero-seq-item hero-seq-right"
-                style={{ animationDelay: `${760 + index * 140}ms` }}
-              >
-                <BlogImage src={src} alt={`${post.title} feature ${index + 1}`} />
+          <div className="mt-[44px] hero-seq-item hero-seq-right" style={{ animationDelay: '760ms' }}>
+            {post.featureImages.length === 1 ? (
+              <div className="relative h-[260px] md:h-[380px] lg:h-[460px] overflow-hidden">
+                <BlogImage src={post.featureImages[0]} alt={`${post.title} feature 1`} />
               </div>
-            ))}
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-[16px]">
+                <div className="relative h-[260px] md:h-[380px] lg:h-[460px] overflow-hidden">
+                  <BlogImage src={post.featureImages[0]} alt={`${post.title} feature 1`} />
+                </div>
+                <div className="grid grid-cols-1 gap-[16px]">
+                  {post.featureImages.slice(1, 3).map((src, index) => (
+                    <div
+                      key={`${src}-${index}`}
+                      className="relative h-[200px] md:h-[240px] lg:h-[220px] overflow-hidden"
+                    >
+                      <BlogImage src={src} alt={`${post.title} feature ${index + 2}`} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -218,6 +231,12 @@ export default function BlogPostClient({
               <h2 className="font-['DM_Sans'] font-light text-[32px] md:text-[48px] text-[#161616]">
                 {t('related')}
               </h2>
+              <Link
+                href={toLocalePath('/blog', locale)}
+                className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]"
+              >
+                {tCommon('viewAll')}
+              </Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px]">
               {related.map((item, index) => (

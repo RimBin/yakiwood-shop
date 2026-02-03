@@ -1,14 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { localizeBlogPost, normalizeStoredPosts, type LocalizedBlogPost } from '@/data/blog-posts';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
-import { getPaginationRange } from '@/lib/pagination';
 import { PageCover } from '@/components/shared';
 import { PageLayout } from '@/components/shared/PageLayout';
 import InView from '@/components/InView';
@@ -33,16 +31,16 @@ function BlogImage({ src, alt }: { src: string; alt: string }) {
 
 export default function BlogListClient({ initialPosts }: { initialPosts: LocalizedBlogPost[] }) {
   const t = useTranslations('blog');
+  const tCommon = useTranslations('common');
   const locale = useLocale() as AppLocale;
   const [posts, setPosts] = useState<LocalizedBlogPost[]>(() => sortPosts(initialPosts));
-  const [page, setPage] = useState(1);
+  const [visibleCount, setVisibleCount] = useState(8);
+  const [isLoading, setIsLoading] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const itemsPerPage = 8;
-  const totalPages = Math.max(1, Math.ceil(posts.length / itemsPerPage));
-  const safePage = Math.max(1, Math.min(page, totalPages));
-  const startIndex = (safePage - 1) * itemsPerPage;
-  const visiblePosts = posts.slice(startIndex, startIndex + itemsPerPage);
-  const { pages } = getPaginationRange(safePage, totalPages, 5);
+  const visiblePosts = posts.slice(0, Math.min(visibleCount, posts.length));
+  const hasMore = visiblePosts.length < posts.length;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -71,9 +69,29 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
   }, [initialPosts, locale]);
 
   useEffect(() => {
-    // Keep page valid when posts set changes.
-    setPage((prev) => Math.max(1, Math.min(prev, Math.max(1, Math.ceil(posts.length / itemsPerPage)))));
-  }, [posts.length]);
+    setVisibleCount((prev) => Math.min(Math.max(itemsPerPage, prev), posts.length || itemsPerPage));
+  }, [posts.length, itemsPerPage]);
+
+  useEffect(() => {
+    if (!sentinelRef.current || !hasMore) return;
+    const sentinel = sentinelRef.current;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry?.isIntersecting || isLoading) return;
+        setIsLoading(true);
+        window.setTimeout(() => {
+          setVisibleCount((prev) => Math.min(prev + itemsPerPage, posts.length));
+          setIsLoading(false);
+        }, 220);
+      },
+      { rootMargin: '200px 0px 200px 0px' }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, isLoading, itemsPerPage, posts.length]);
 
   return (
     <>
@@ -128,58 +146,14 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
                 })}
               </div>
 
-              {totalPages > 1 && (
-                <nav aria-label="Blog pagination" className="mt-[34px] flex items-center justify-center gap-[10px] hero-seq-item hero-seq-right" style={{ animationDelay: '520ms' }}>
-                  <button
-                    type="button"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={safePage === 1}
-                    aria-label="Previous page"
-                    className="h-[32px] w-[32px] inline-flex items-center justify-center text-[#161616] disabled:opacity-40"
-                  >
-                    <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-                  </button>
-
-                  {pages.map((p, idx) => {
-                    if (p === 'ellipsis') {
-                      return (
-                        <span
-                          key={`ellipsis-${idx}`}
-                          className="h-[32px] min-w-[32px] inline-flex items-center justify-center text-[12px] font-['DM_Sans'] text-[#161616]/70 select-none"
-                          aria-hidden="true"
-                        >
-                          …
-                        </span>
-                      );
-                    }
-
-                    const active = p === safePage;
-                    return (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => setPage(p)}
-                        aria-current={active ? 'page' : undefined}
-                        className={`h-[32px] min-w-[32px] px-[10px] inline-flex items-center justify-center rounded-full text-[12px] font-['DM_Sans'] transition-colors ${
-                          active ? 'bg-[#161616] text-white' : 'text-[#161616] hover:bg-[#161616]/10'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    );
-                  })}
-
-                  <button
-                    type="button"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={safePage === totalPages}
-                    aria-label="Next page"
-                    className="h-[32px] w-[32px] inline-flex items-center justify-center text-[#161616] disabled:opacity-40"
-                  >
-                    <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                </nav>
-              )}
+              <div className="mt-[30px] flex items-center justify-center hero-seq-item hero-seq-right" style={{ animationDelay: '520ms' }}>
+                {hasMore ? (
+                  <div className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">
+                    {isLoading ? tCommon('kraunasi') : tCommon('rodytiDaugiau')}
+                  </div>
+                ) : null}
+                <div ref={sentinelRef} className="h-[1px] w-full" />
+              </div>
             </>
           ) : (
             <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('empty')}</p>
