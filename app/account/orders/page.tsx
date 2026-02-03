@@ -112,6 +112,13 @@ function buildAddress(order: OrderRow): string {
   return parts.length > 0 ? parts.join(', ') : '-';
 }
 
+function pickImageKey(item: OrderItem): 'imgLarch1' | 'imgSpruce' | undefined {
+  const name = (item.name || '').toLowerCase();
+  if (name.includes('maumed')) return 'imgLarch1';
+  if (name.includes('egl')) return 'imgSpruce';
+  return undefined;
+}
+
 export default function OrdersPage() {
   const t = useTranslations('account');
   const tCommon = useTranslations('common');
@@ -172,7 +179,7 @@ export default function OrdersPage() {
               dimensions: formatDimensions(item),
               qty: Number(item.quantity ?? 1),
               price: Number(item.basePrice ?? item.price ?? 0),
-              imageKey: item.imageKey,
+              imageKey: item.imageKey || pickImageKey(item),
             })),
             details: {
               dateOfDelivery: formatDate(order.completed_at),

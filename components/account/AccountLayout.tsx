@@ -24,7 +24,7 @@ export default function AccountLayout({
     "font-['Outfit'] uppercase text-[12px] tracking-[0.6px]";
 
   return (
-    <section className="w-full bg-[#E1E1E1] min-h-screen">
+    <section className="w-full bg-[#E1E1E1]">
       <PageCover>
         <h1
           className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
@@ -72,7 +72,7 @@ export default function AccountLayout({
                 <button
                   type="button"
                   onClick={onLogout}
-                  className={`${linkBaseClass} text-[#F63333]`}
+                  className={`${linkBaseClass} text-[#F63333] hover:underline cursor-pointer`}
                 >
                   {t('logout')}
                 </button>

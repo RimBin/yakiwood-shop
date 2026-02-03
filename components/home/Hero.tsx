@@ -47,8 +47,8 @@ export default async function Hero() {
         </div>
 
         <div className="relative w-full">
-          <div className="bg-[#bbab92] w-full h-[423px] md:h-[520px] relative hero-seq-item hero-seq-right hero-seq-2">
-            <div className="absolute inset-x-0 top-0 h-[309px] flex items-center justify-center md:inset-0 md:h-full">
+          <div className="bg-[#bbab92] w-full h-[550px] md:h-[520px] relative hero-seq-item hero-seq-right hero-seq-2">
+            <div className="absolute inset-x-0 top-0 h-[390px] flex items-center justify-center md:inset-0 md:h-full">
               <div className="rotate-[333.068deg] w-full px-4 flex items-center justify-center">
                 <div className="w-full max-w-[510px] aspect-[317/185] relative">
                   <Image
@@ -64,12 +64,12 @@ export default async function Hero() {
             </div>
           </div>
 
-          <div className="absolute right-4 bottom-[80px] w-[280px] md:w-[360px] bg-white/10 backdrop-blur-[20px] border border-white/50 rounded-[16px] p-3 flex flex-col gap-3 hero-seq-item hero-seq-right hero-seq-3">
-            <div className="flex flex-col gap-2 w-full">
-              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white w-full">
+          <div className="absolute left-1/2 bottom-[80px] -translate-x-1/2 w-[92%] max-w-[360px] md:left-auto md:translate-x-0 md:right-4 md:w-[360px] bg-white/10 backdrop-blur-[20px] border border-white/50 rounded-[16px] py-3 px-3 flex flex-col gap-3 hero-seq-item hero-seq-right hero-seq-3">
+            <div className="flex items-center justify-between gap-2 w-full">
+              <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white">
                 {tHero('productName')}
               </p>
-              <div className="flex gap-1 items-center text-white justify-end w-full">
+              <div className="flex gap-1 items-center text-white">
                 <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px]">{tHero('from')}</p>
                 <p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px]">89 €</p>
               </div>

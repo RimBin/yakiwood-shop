@@ -55,7 +55,11 @@ export async function POST(req: NextRequest, context: RouteContext) {
 
   const resend = new Resend(resendApiKey);
 
-  const pdfGenerator = new InvoicePDFGenerator(invoice);
+  const url = new URL(req.url);
+  const langParam = url.searchParams.get('lang');
+  const locale = langParam === 'en' ? 'en' : 'lt';
+
+  const pdfGenerator = new InvoicePDFGenerator(invoice, { locale });
   const pdfBytes = pdfGenerator.generate();
 
   const from =
@@ -64,21 +68,38 @@ export async function POST(req: NextRequest, context: RouteContext) {
     process.env.FROM_EMAIL ||
     'Yakiwood <noreply@yakiwood.lt>';
 
-  await resend.emails.send({
-    from,
-    to: [toEmail],
-    subject: `Sąskaita faktūra ${invoice.invoiceNumber}`,
-    html: `
+  const subject = locale === 'en'
+    ? `Invoice ${invoice.invoiceNumber}`
+    : `Sąskaita faktūra ${invoice.invoiceNumber}`;
+
+  const html = locale === 'en'
+    ? `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+        <h2>Invoice</h2>
+        <p>Hello,</p>
+        <p>Attached is invoice <strong>${invoice.invoiceNumber}</strong>.</p>
+        <p>Thank you,<br/>Yakiwood</p>
+      </div>
+    `
+    : `
       <div style="font-family: Arial, sans-serif; line-height: 1.5;">
         <h2>Sąskaita faktūra</h2>
         <p>Sveiki,</p>
         <p>Prisegta sąskaita faktūra <strong>${invoice.invoiceNumber}</strong>.</p>
         <p>Ačiū,<br/>Yakiwood</p>
       </div>
-    `,
+    `;
+
+  await resend.emails.send({
+    from,
+    to: [toEmail],
+    subject,
+    html,
     attachments: [
       {
-        filename: `saskaita_${invoice.invoiceNumber}.pdf`,
+        filename: locale === 'en'
+          ? `invoice_${invoice.invoiceNumber}_en.pdf`
+          : `saskaita_${invoice.invoiceNumber}_lt.pdf`,
         content: Buffer.from(pdfBytes),
       },
     ],

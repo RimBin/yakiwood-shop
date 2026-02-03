@@ -2,13 +2,19 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { toLocalePath, type AppLocale } from '@/i18n/paths';
+import { PageCover, PageSection } from '@/components/shared/PageLayout';
 
 export default function RegisterPage() {
+  const pathname = usePathname();
+  const currentLocale: AppLocale = pathname.startsWith('/lt') ? 'lt' : 'en';
+  const t = useTranslations('account');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -17,35 +23,41 @@ export default function RegisterPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+      alert(t('registerForm.passwordMismatch'));
       return;
     }
     if (!agreeTerms) {
-      alert('Please agree to Terms & Conditions');
+      alert(t('registerForm.termsRequired'));
       return;
     }
-    console.log('Register with:', { firstName, lastName, email, phone, password, receiveNews });
+    console.log('Register with:', { firstName, lastName, email, password, receiveNews });
   };
 
   return (
-    <main className="min-h-screen bg-[#E1E1E1] flex items-center justify-center px-[16px] py-[80px]">
-      <div className="w-full max-w-[640px]">
-        {/* Title */}
-        <div className="mb-[40px] text-center">
-          <h1 className="font-['DM_Sans'] font-light text-[56px] sm:text-[72px] leading-[0.95] tracking-[-2.24px] sm:tracking-[-2.88px] text-[#161616] mb-[16px]">
-            Create Account
-          </h1>
-          <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#535353]">
-            Join us to explore premium burnt wood products
-          </p>
-        </div>
+    <main className="w-full bg-[#E1E1E1]">
+      <PageCover>
+        <h1
+          className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+          style={{ fontVariationSettings: "'opsz' 14" }}
+        >
+          {t('registerForm.title')}
+        </h1>
+      </PageCover>
 
-        {/* Register Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-[16px] p-[32px] sm:p-[40px]">
+      <PageSection className="pt-[40px] md:pt-[56px] pb-[80px]">
+        <div className="w-full max-w-[640px] mx-auto">
+          <div className="mb-[24px] text-center">
+            <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#535353]">
+              {t('registerForm.subtitle')}
+            </p>
+          </div>
+
+          {/* Register Form */}
+          <form onSubmit={handleSubmit} className="bg-[#E1E1E1] rounded-[16px] p-[32px] sm:p-[40px] border border-[#BBBBBB]">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-[20px] mb-[20px]">
             <div>
               <label htmlFor="firstName" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                First Name
+                {t('registerForm.firstName')}
               </label>
               <input
                 type="text"
@@ -53,14 +65,14 @@ export default function RegisterPage() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
-                placeholder="John"
-                className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] placeholder:text-[#BBBBBB]"
+                placeholder={t('registerForm.firstNamePlaceholder')}
+                className="yw-input w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] bg-[#E1E1E1] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] placeholder:text-[#BBBBBB]"
               />
             </div>
 
             <div>
               <label htmlFor="lastName" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                Last Name
+                {t('registerForm.lastName')}
               </label>
               <input
                 type="text"
@@ -68,14 +80,14 @@ export default function RegisterPage() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 required
-                placeholder="Doe"
-                className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] placeholder:text-[#BBBBBB]"
+                placeholder={t('registerForm.lastNamePlaceholder')}
+                className="yw-input w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] bg-[#E1E1E1] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] placeholder:text-[#BBBBBB]"
               />
             </div>
 
             <div className="sm:col-span-2">
               <label htmlFor="email" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                Email Address
+                {t('emailAddress')}
               </label>
               <input
                 type="email"
@@ -83,29 +95,14 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="your.email@example.com"
-                className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] placeholder:text-[#BBBBBB]"
-              />
-            </div>
-
-            <div className="sm:col-span-2">
-              <label htmlFor="phone" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-                placeholder="+370 600 12345"
-                className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] placeholder:text-[#BBBBBB]"
+                placeholder={t('registerForm.emailPlaceholder')}
+                className="yw-input w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] bg-[#E1E1E1] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] placeholder:text-[#BBBBBB]"
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                Password
+                {t('password')}
               </label>
               <input
                 type="password"
@@ -113,14 +110,14 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Minimum 8 characters"
-                className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] placeholder:text-[#BBBBBB]"
+                placeholder={t('registerForm.passwordPlaceholder')}
+                className="yw-input w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] bg-[#E1E1E1] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] placeholder:text-[#BBBBBB]"
               />
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                Confirm Password
+                {t('confirmPassword')}
               </label>
               <input
                 type="password"
@@ -128,8 +125,8 @@ export default function RegisterPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                placeholder="Re-enter password"
-                className="w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] placeholder:text-[#BBBBBB]"
+                placeholder={t('registerForm.confirmPasswordPlaceholder')}
+                className="yw-input w-full h-[48px] px-[16px] rounded-[8px] border border-[#BBBBBB] bg-[#E1E1E1] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] placeholder:text-[#BBBBBB]"
               />
             </div>
           </div>
@@ -142,13 +139,13 @@ export default function RegisterPage() {
               onChange={setAgreeTerms}
               label={
                 <span className="font-['Outfit'] font-light text-[12px] leading-[1.5] text-[#161616]">
-                  I agree to the{' '}
-                  <Link href="/terms" className="underline hover:opacity-70">
-                    Term & Conditions
+                  {t('registerForm.termsPrefix')}{' '}
+                  <Link href={toLocalePath('/policies', currentLocale)} className="underline hover:opacity-70">
+                    {t('registerForm.termsLink')}
                   </Link>{' '}
-                  and{' '}
-                  <Link href="/privacy" className="underline hover:opacity-70">
-                    Privacy Policy
+                  {t('registerForm.termsMiddle')}{' '}
+                  <Link href={toLocalePath('/policies', currentLocale)} className="underline hover:opacity-70">
+                    {t('registerForm.privacyLink')}
                   </Link>
                 </span>
               }
@@ -160,7 +157,7 @@ export default function RegisterPage() {
               onChange={setReceiveNews}
               label={
                 <span className="font-['Outfit'] font-light text-[12px] leading-[1.5] text-[#161616]">
-                  I would like to receive news and special offers
+                  {t('registerForm.newsletter')}
                 </span>
               }
             />
@@ -171,7 +168,7 @@ export default function RegisterPage() {
             type="submit"
             className="w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors mb-[24px]"
           >
-            Create Account
+            {t('register')}
           </button>
 
           {/* Divider */}
@@ -180,8 +177,8 @@ export default function RegisterPage() {
               <div className="w-full border-t border-[#BBBBBB]"></div>
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-white px-[16px] font-['Outfit'] font-light text-[12px] leading-[1.5] text-[#535353]">
-                Already have an account?
+              <span className="bg-[#E1E1E1] px-[16px] font-['Outfit'] font-light text-[12px] leading-[1.5] text-[#535353]">
+                {t('alreadyHaveAccount')}
               </span>
             </div>
           </div>
@@ -189,14 +186,15 @@ export default function RegisterPage() {
           {/* Login Link */}
           <div className="text-center">
             <Link
-              href="/login"
-              className="inline-block w-full h-[48px] rounded-[100px] border border-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors flex items-center justify-center"
+              href={toLocalePath('/login', currentLocale)}
+              className="inline-flex w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors items-center justify-center"
             >
-              Login
+              {t('login')}
             </Link>
           </div>
-        </form>
-      </div>
+          </form>
+        </div>
+      </PageSection>
     </main>
   );
 }

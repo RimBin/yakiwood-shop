@@ -36,7 +36,6 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<InvoiceView[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
-  const [resendingId, setResendingId] = useState<string | null>(null);
 
   useEffect(() => {
     let isCancelled = false;
@@ -114,21 +113,7 @@ export default function InvoicesPage() {
     window.open(`/api/account/invoices/${invoiceId}/pdf`, '_blank');
   };
 
-  const handleResend = async (invoiceId: string) => {
-    setResendMessage(null);
-    setResendingId(invoiceId);
-    try {
-      const res = await fetch(`/api/account/invoices/${invoiceId}/resend`, { method: 'POST' });
-      if (!res.ok) {
-        throw new Error('Resend failed');
-      }
-      setResendMessage(t('invoiceMessages.resent'));
-    } catch {
-      setResendMessage(t('invoiceMessages.resendError'));
-    } finally {
-      setResendingId(null);
-    }
-  };
+
 
   if (isLoading) return null;
 
@@ -191,17 +176,9 @@ export default function InvoicesPage() {
                   <button
                     type="button"
                     onClick={() => handleDownload(invoice.id)}
-                    className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616]"
+                    className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:underline cursor-pointer"
                   >
                     {t('invoiceActions.download')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleResend(invoice.id)}
-                    className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616]"
-                    disabled={resendingId === invoice.id}
-                  >
-                    {t('invoiceActions.resend')}
                   </button>
                 </div>
               </div>
@@ -233,17 +210,9 @@ export default function InvoicesPage() {
                   <button
                     type="button"
                     onClick={() => handleDownload(invoice.id)}
-                    className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616]"
+                    className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] hover:underline cursor-pointer"
                   >
                     {t('invoiceActions.download')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleResend(invoice.id)}
-                    className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616]"
-                    disabled={resendingId === invoice.id}
-                  >
-                    {t('invoiceActions.resend')}
                   </button>
                 </div>
               </div>

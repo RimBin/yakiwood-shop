@@ -40,6 +40,17 @@ body {
   display: none;
 }
 
+/* Consistent input background + autofill */
+.yw-input:-webkit-autofill,
+.yw-input:-webkit-autofill:hover,
+.yw-input:-webkit-autofill:focus,
+.yw-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #E1E1E1 inset;
+  box-shadow: 0 0 0 1000px #E1E1E1 inset;
+  -webkit-text-fill-color: #161616;
+  caret-color: #161616;
+}
+
 /* Admin UI helpers (no white surfaces) */
 .yw-admin-surface {
   background: #E1E1E1;

@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
+import { PageCover, PageSection } from '@/components/shared/PageLayout';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,6 +17,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations('account');
 
   const currentLocale: AppLocale = pathname.startsWith('/lt') ? 'lt' : 'en';
 
@@ -94,44 +97,30 @@ export default function LoginPage() {
     }
   };
 
-  const handleClose = () => {
-    router.back();
-  };
-
   return (
-    <main className="min-h-screen bg-[#E1E1E1] flex items-center justify-center p-[20px]">
-      <div className="bg-[#E1E1E1] w-full max-w-[478px] flex flex-col gap-[24px] p-[40px]">
-        {/* Top bar with close button */}
-        <div className="flex items-start justify-end w-full">
-          <button
-            type="button"
-            onClick={handleClose}
-            className="w-[24px] h-[24px] flex items-center justify-center hover:opacity-70 transition-opacity"
-            aria-label="Close"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6l12 12" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </div>
+    <main className="w-full bg-[#E1E1E1]">
+      <PageCover>
+        <h1
+          className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
+          style={{ fontVariationSettings: "'opsz' 14" }}
+        >
+          {t('signIn')}
+        </h1>
+      </PageCover>
 
-        {/* Logo */}
-        <div className="flex justify-center">
-          <h1 className="font-['DM_Sans'] font-light text-[48px] leading-none tracking-tight text-[#161616]">
-            YAKIWOOD
-          </h1>
-        </div>
+      <PageSection className="pt-[40px] md:pt-[56px] pb-[80px]">
+        <div className="w-full max-w-[478px] mx-auto flex flex-col gap-[24px]">
 
         {/* Don't have account + Create account link */}
         <div className="flex gap-[8px] items-center justify-center">
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7C7C7C]">
-            Neturite paskyros?
+            {t('dontHaveAccount')}
           </p>
           <Link
             href={toLocalePath('/register', currentLocale)}
             className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:underline"
           >
-            Registruotis
+            {t('register')}
           </Link>
         </div>
 
@@ -147,7 +136,7 @@ export default function LoginPage() {
           {/* Email field */}
           <div className="flex flex-col gap-[4px] w-full">
             <label htmlFor="email" className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#7C7C7C]">
-              Email <span className="text-[#F63333]">*</span>
+              {t('emailAddress')} <span className="text-[#F63333]">*</span>
             </label>
             <input
               type="email"
@@ -155,14 +144,14 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="h-[48px] w-full border border-[#BBBBBB] px-[16px] font-['Outfit'] font-normal text-[14px] text-[#161616] focus:outline-none focus:border-[#161616] transition-colors"
+              className="yw-input h-[48px] w-full border border-[#BBBBBB] bg-[#E1E1E1] px-[16px] font-['Outfit'] font-normal text-[14px] text-[#161616] focus:outline-none focus:border-[#161616] transition-colors"
             />
           </div>
 
           {/* Password field */}
           <div className="flex flex-col gap-[4px] w-full">
             <label htmlFor="password" className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#7C7C7C]">
-              Password <span className="text-[#F63333]">*</span>
+              {t('password')} <span className="text-[#F63333]">*</span>
             </label>
             <div className="relative w-full">
               <input
@@ -171,13 +160,13 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-[48px] w-full border border-[#BBBBBB] px-[16px] pr-[48px] font-['Outfit'] font-normal text-[14px] text-[#161616] focus:outline-none focus:border-[#161616] transition-colors"
+                className="yw-input h-[48px] w-full border border-[#BBBBBB] bg-[#E1E1E1] px-[16px] pr-[48px] font-['Outfit'] font-normal text-[14px] text-[#161616] focus:outline-none focus:border-[#161616] transition-colors"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-[16px] top-1/2 -translate-y-1/2 w-[24px] h-[24px] flex items-center justify-center hover:opacity-70 transition-opacity"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? t('hidePassword') : t('showPassword')}
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -190,10 +179,10 @@ export default function LoginPage() {
           {/* Forgot password link */}
           <div className="flex justify-start">
             <Link
-              href="/forgot-password"
+              href={toLocalePath('/forgot-password', currentLocale)}
               className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:underline"
             >
-              Forgot your password?
+              {t('forgotPassword')}
             </Link>
           </div>
 
@@ -203,13 +192,13 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full h-[48px] bg-[#161616] rounded-[100px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors disabled:opacity-60"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? t('loggingIn') : t('signIn')}
           </button>
 
           {/* Demo logins */}
           <div className="flex flex-col gap-[8px] pt-[8px] border-t border-[#BBBBBB]">
             <p className="font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-[#7C7C7C] text-center">
-              Demo prisijungimas
+              {t('demoLogin')}
             </p>
             <div className="flex gap-[8px]">
               <button
@@ -218,7 +207,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="flex-1 h-[36px] border border-[#161616] rounded-[100px] font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors disabled:opacity-60"
               >
-                Administratorius
+                {t('admin')}
               </button>
               <button
                 type="button"
@@ -226,12 +215,13 @@ export default function LoginPage() {
                 disabled={loading}
                 className="flex-1 h-[36px] border border-[#161616] rounded-[100px] font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors disabled:opacity-60"
               >
-                Vartotojas
+                {t('user')}
               </button>
             </div>
           </div>
         </form>
-      </div>
+        </div>
+      </PageSection>
     </main>
   );
 }
