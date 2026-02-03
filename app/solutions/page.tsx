@@ -558,16 +558,11 @@ Do you want to give your building a distinctive and attractive appearance? Encou
       {/* Products */}
       <InView className="hero-animate-root">
         <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pb-[80px] lg:pb-[120px]">
-          <div className="flex items-end justify-between mb-[24px]">
+          <div className="flex items-end justify-between mb-[24px] w-full lg:ml-[25%] lg:pl-[14px] max-w-[980px]">
             <h2 className="font-['DM_Sans'] font-light text-[32px] lg:text-[48px] leading-[1] tracking-[-1.28px] lg:tracking-[-1.92px] text-[#161616] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
               Products
             </h2>
-            <Link
-              href={toLocalePath('/products', currentLocale)}
-              className="hidden sm:inline-flex items-center justify-center h-[40px] px-[18px] border border-[#161616] rounded-[100px] font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-all"
-            >
-              View all
-            </Link>
+            {/* 'View all' button removed per request */}
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-[16px]">
             {recommendedProducts.map((product, index) => {
