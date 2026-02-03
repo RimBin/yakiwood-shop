@@ -2083,6 +2083,7 @@
     "filtersSize": "Size",
     "filtersWidth": "Width",
     "filtersLength": "Length",
+    "filtersToggle": "Filters",
     "filtersAny": "All",
     "filtersAll": "All products",
     "filtersEmpty": "No options",

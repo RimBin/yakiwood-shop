@@ -197,6 +197,8 @@ export default function ProductsPageClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
   const [error, setError] = useState<string | null>(initialError);
+  const [showStickyFilters, setShowStickyFilters] = useState(false);
+  const [isStickyOpen, setIsStickyOpen] = useState(false);
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -205,6 +207,7 @@ export default function ProductsPageClient({
   const [hasTrackedListView, setHasTrackedListView] = useState(false);
 
   const baseProductsRef = useRef<Product[]>(initialProducts);
+  const filtersRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     baseProductsRef.current = initialProducts;
@@ -290,6 +293,26 @@ export default function ProductsPageClient({
     selectedLength,
     searchQuery,
   ]);
+
+  useEffect(() => {
+    const target = filtersRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const shouldShow = !entry.isIntersecting;
+        setShowStickyFilters(shouldShow);
+        if (!shouldShow) setIsStickyOpen(false);
+      },
+      { rootMargin: '-220px 0px 0px 0px', threshold: 0 }
+    );
+
+    observer.observe(target);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   const usageFilters = useMemo(
     () => [
@@ -570,6 +593,47 @@ export default function ProductsPageClient({
     );
   };
 
+  const renderSearchField = (wrapperClassName?: string) => (
+    <div className={`relative w-full ${wrapperClassName ?? ''}`.trim()}>
+      <label className="sr-only">{t('searchLabel')}</label>
+      <svg
+        className="absolute left-[14px] top-1/2 -translate-y-1/2"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"
+          stroke="#161616"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M21 21l-4.35-4.35"
+          stroke="#161616"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <input
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key !== 'Enter') return;
+          const q = searchQuery.trim();
+          if (!q) return;
+          trackSearch(q, orderedProducts.length);
+        }}
+        placeholder={t('searchPlaceholder')}
+        className="w-full h-[40px] pl-[42px] pr-[16px] rounded-[100px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-[#EAEAEA]"
+      />
+    </div>
+  );
+
   const toggleFilterValue = (
     list: string[],
     value: string,
@@ -828,49 +892,87 @@ export default function ProductsPageClient({
         </PageCover>
       </InView>
 
+      {/* Mobile Sticky Filters */}
+      <div
+        className={`sm:hidden fixed top-[120px] left-0 right-0 z-40 bg-[#E1E1E1]/95 backdrop-blur-md border-b border-[#BBBBBB]/60 shadow-sm transition-all duration-500 ease-out ${
+          showStickyFilters
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 -translate-y-3 pointer-events-none'
+        }`}
+      >
+        <div className="px-[16px] py-[12px]">
+          <div className="flex items-center gap-[8px]">
+            <div className="flex-1">{renderSearchField()}</div>
+            <button
+              type="button"
+              onClick={() => setIsStickyOpen((prev) => !prev)}
+              aria-expanded={isStickyOpen}
+              className="h-[40px] px-[16px] rounded-[100px] border border-[#161616] font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#161616]"
+            >
+              {t('filtersToggle')}
+            </button>
+          </div>
+          {isStickyOpen ? (
+            <div className="mt-[12px] flex flex-col gap-[12px]">
+              {renderDropdown(
+                'usage',
+                t('filtersUsage'),
+                usageOptions,
+                selectedUsage,
+                (value) => toggleFilterValue(selectedUsage, value, setSelectedUsage),
+                t('usageFilters.all')
+              )}
+              {renderDropdown(
+                'wood',
+                t('filtersWood'),
+                woodOptions,
+                selectedWood,
+                (value) => toggleFilterValue(selectedWood, value, setSelectedWood),
+                t('woodFilters.all')
+              )}
+              {renderDropdown(
+                'color',
+                t('filtersColor'),
+                colorOptions,
+                selectedColor,
+                (value) => toggleFilterValue(selectedColor, value, setSelectedColor),
+                t('colorFilterAll')
+              )}
+              {renderDropdown(
+                'profile',
+                t('filtersProfile'),
+                profileDropdownOptions,
+                selectedProfile,
+                (value) => toggleFilterValue(selectedProfile, value, setSelectedProfile),
+                t('profileFilterAll')
+              )}
+              {renderDropdown(
+                'width',
+                t('filtersWidth'),
+                sizeOptions.widths,
+                selectedWidth,
+                (value) => toggleFilterValue(selectedWidth, value, setSelectedWidth),
+                t('filtersAny')
+              )}
+              {renderDropdown(
+                'length',
+                t('filtersLength'),
+                sizeOptions.lengths,
+                selectedLength,
+                (value) => toggleFilterValue(selectedLength, value, setSelectedLength),
+                t('filtersAny')
+              )}
+            </div>
+          ) : null}
+        </div>
+      </div>
+
       {/* Filters */}
       <InView className="hero-animate-root">
         <PageLayout>
-          <div className="py-[24px] flex flex-col gap-4">
+          <div ref={filtersRef} className="py-[24px] flex flex-col gap-4">
             <div className="flex flex-col gap-[12px] sm:flex-row sm:flex-wrap sm:items-center hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-            <div className="relative w-full sm:flex-[1_1_260px] sm:min-w-[220px] sm:max-w-[520px]">
-              <label className="sr-only">{t('searchLabel')}</label>
-              <svg
-                className="absolute left-[14px] top-1/2 -translate-y-1/2"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"
-                  stroke="#161616"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M21 21l-4.35-4.35"
-                  stroke="#161616"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key !== 'Enter') return;
-                  const q = searchQuery.trim();
-                  if (!q) return;
-                  trackSearch(q, orderedProducts.length);
-                }}
-                placeholder={t('searchPlaceholder')}
-                className="w-full h-[40px] pl-[42px] pr-[16px] rounded-[100px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-[#EAEAEA]"
-              />
-            </div>
+            {renderSearchField('sm:flex-[1_1_260px] sm:min-w-[220px] sm:max-w-[520px]')}
             {renderDropdown(
               'usage',
               t('filtersUsage'),
@@ -925,7 +1027,7 @@ export default function ProductsPageClient({
       </InView>
 
       {/* Product Grid */}
-      <InView className="hero-animate-root">
+      <InView className="hero-animate-root is-inview">
         <PageLayout>
         <div className="pb-[80px]">
         {error ? (

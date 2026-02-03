@@ -1,7 +1,9 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { getLocale, getTranslations } from 'next-intl/server';
-import { getSectionPadding, getGap } from '@/lib/design-system';
+import { useLocale, useTranslations } from 'next-intl';
+import { getSectionPadding } from '@/lib/design-system';
 import { assets } from '@/lib/assets';
 import { toLocalePath } from '@/i18n/paths';
 import InView from '@/components/InView';
@@ -9,10 +11,10 @@ import InView from '@/components/InView';
 // Shared background image for CTA section
 const backgroundImage = assets.ctaBackground;
 
-export default async function CTA() {
-  const locale = await getLocale();
+export default function CTA() {
+  const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
-  const t = await getTranslations('home.cta');
+  const t = useTranslations('home.cta');
 
   return (
     <section className="relative w-full overflow-hidden bg-[#E1E1E1]">
@@ -38,7 +40,7 @@ export default async function CTA() {
           {/* Primary Button - GET AN OFFER */}
           <Link
             href={toLocalePath('/produktai', currentLocale)}
-            className="bg-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full md:w-auto md:px-[40px]"
+            className="bg-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full md:w-auto md:min-w-[240px] md:px-[40px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
               {t('buttons.offer')}
@@ -48,7 +50,7 @@ export default async function CTA() {
           {/* Secondary Button - GET IN TOUCH */}
           <Link
             href={toLocalePath('/kontaktai', currentLocale)}
-            className="border border-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full"
+            className="border border-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full md:w-auto md:min-w-[240px] md:px-[40px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
               {t('buttons.getInTouch')}

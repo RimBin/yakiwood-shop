@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { PageCover } from '@/components/shared/PageLayout';
+import { CTA } from '@/components/home';
 import { assets, getAsset } from '@/lib/assets';
 import { useLocale } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
@@ -430,7 +431,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
   ];
 
   return (
-    <div className="bg-transparent">
+    <div className="bg-transparent overflow-x-hidden">
       {/* Hero Section */}
       <InView className="hero-animate-root">
         <PageCover>
@@ -459,6 +460,22 @@ Do you want to give your building a distinctive and attractive appearance? Encou
             </div>
           </div>
         </PageCover>
+      </InView>
+
+      {/* Hero Image */}
+      <InView className="hero-animate-root">
+        <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[24px]">
+          <div className="relative w-full h-[260px] sm:h-[360px] lg:h-[520px] overflow-hidden rounded-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '160ms' }}>
+            <Image
+              src={assets.projects[2]}
+              alt="Charred wood facade"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+              priority
+            />
+          </div>
+        </section>
       </InView>
 
       {/* Mobile Chips Below Header */}
@@ -564,7 +581,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
             </h2>
             {/* 'View all' button removed per request */}
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-[16px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[16px]">
             {recommendedProducts.map((product, index) => {
               const safeSrc = product.image?.trim() || assets.finishSpruceGraphite || assets.wood.spruce;
               return (
@@ -606,43 +623,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
         </section>
       </InView>
 
-      {/* CTA Section */}
-      <InView className="hero-animate-root">
-        <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[120px] lg:pt-[200px] pb-[200px] lg:pb-[350px] relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[625px] lg:w-[1099px] h-[599px] lg:h-[1053px] opacity-15 mix-blend-luminosity pointer-events-none">
-            <Image
-              src={assets.ctaBackground}
-              alt=""
-              fill
-              className="object-contain"
-            />
-          </div>
-
-          <div className="relative z-10 flex flex-col items-center gap-[40px] lg:gap-[64px]">
-            <h2 className="font-['DM_Sans'] font-light text-[45px] lg:text-[128px] leading-[0.95] tracking-[-1.8px] lg:tracking-[-6.4px] text-[#161616] text-center max-w-[358px] lg:max-w-[861px] m-0 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-              Ready to{' '}
-              <span className="font-['Tiro_Tamil'] italic">build</span>{' '}
-              with fire?
-            </h2>
-
-            <div className="flex flex-col lg:flex-row gap-[16px] items-center w-full lg:w-auto hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
-              <Link
-                href={toLocalePath('/kontaktai', currentLocale)}
-                className="h-[48px] px-[40px] bg-[#161616] rounded-[100px] border-none font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase text-white cursor-pointer transition-colors hover:bg-[#2a2a2a] w-full lg:w-auto flex items-center justify-center"
-              >
-                Get an offer
-              </Link>
-
-              <Link
-                href={toLocalePath('/kontaktai', currentLocale)}
-                className="h-[48px] px-[40px] bg-transparent border border-[#161616] rounded-[100px] font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase text-[#161616] cursor-pointer transition-all hover:bg-[#161616] hover:text-white w-full lg:w-auto flex items-center justify-center"
-              >
-                Get in touch
-              </Link>
-            </div>
-          </div>
-        </section>
-      </InView>
+      <CTA />
     </div>
   );
 }

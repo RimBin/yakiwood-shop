@@ -39,7 +39,7 @@ export default async function Steps() {
 			{/* ===== MOBILE LAYOUT (< 1536px) - Figma 759:7672 ===== */}
 			<InView className={`2xl:hidden ${getSectionPadding()} hero-animate-root`}>
 				{/* Title Section - Mobile/Tablet */}
-				<div className="mb-[32px] md:mb-[40px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+				<div className="mb-[40px] md:mb-[48px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
 					<p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-white mb-[8px]">
 						{t('eyebrow')}
 					</p>
@@ -62,11 +62,11 @@ export default async function Steps() {
 					<div className="md:hidden absolute left-[15px] top-[24px] bottom-[24px] w-[1px] bg-[#535353]" />
 
 					{/* Steps */}
-					<div className="flex flex-col gap-[32px] md:contents">
+					<div className="flex flex-col gap-[56px] md:contents">
 						{steps.map((step, index) => (
 							<div
 								key={index}
-								className="relative flex flex-col gap-[16px] md:gap-[12px] hero-seq-item hero-seq-right"
+								className="relative flex flex-col gap-[24px] md:gap-[12px] hero-seq-item hero-seq-right"
 								style={{ animationDelay: `${220 + index * 160}ms` }}
 							>
 								{/* Step number circle */}
@@ -76,11 +76,11 @@ export default async function Steps() {
 									</p>
 								</div>
 								{/* Step content */}
-								<div className="flex flex-col gap-[8px]">
-									<p className="font-['DM_Sans'] font-medium text-[16px] md:text-[18px] leading-[1.2] tracking-[-0.36px] text-white">
+								<div className="flex flex-col gap-[12px]">
+									<p className="font-['DM_Sans'] font-medium text-[14px] md:text-[18px] leading-[1.2] tracking-[-0.28px] text-white">
 										{step.title}
 									</p>
-									<p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB] max-w-[280px] md:max-w-full">
+									<p className="font-['Outfit'] font-light text-[12px] leading-[1.35] tracking-[0.12px] text-[#BBBBBB] max-w-[280px] md:max-w-full">
 										{step.description}
 									</p>
 								</div>

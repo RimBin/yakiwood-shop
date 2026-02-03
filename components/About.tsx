@@ -1,13 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { useLocale } from 'next-intl';
 import { useTranslations } from 'next-intl';
 import { PageCover } from '@/components/shared/PageLayout';
-import { Testimonials } from '@/components/home';
-import { toLocalePath } from '@/i18n/paths';
+import { CTA, Testimonials } from '@/components/home';
 import { assets } from '@/lib/assets';
 import InView from '@/components/InView';
 
@@ -18,11 +15,8 @@ const imgTeam1 = assets.projects[0];
 const imgTeam2 = assets.projects[1];
 const imgTeam3 = assets.projects[2];
 const imgTeam4 = assets.projects[3];
-const imgCTA = assets.ctaBackground;
 
 export default function About() {
-  const locale = useLocale();
-  const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const t = useTranslations('about.page');
   const showTeamSection = false;
 
@@ -465,45 +459,7 @@ export default function About() {
 
       <Testimonials />
 
-      {/* CTA Section */}
-      <InView className="hero-animate-root">
-      <div className="relative h-[523px] md:h-[1053px] w-full overflow-hidden bg-[#E1E1E1]">
-        {/* Background image centered */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative w-[520px] md:w-[625px] lg:w-[1099px] h-[520px] md:h-[599px] lg:h-[1053px] opacity-[0.15] mix-blend-luminosity">
-            <Image
-              src={imgCTA}
-              alt="Background"
-              fill
-              className="object-contain"
-            />
-          </div>
-        </div>
-        <div className="relative max-w-[1440px] mx-auto px-[16px] md:px-[40px] h-full flex flex-col items-center justify-center">
-          <p className="font-['DM_Sans'] font-light text-[45px] md:text-[128px] leading-[45px] md:leading-[0.95] tracking-[-1.8px] md:tracking-[-6.4px] text-[#161616] text-center max-w-[358px] md:max-w-[861px] mb-[32px] md:mb-[80px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-            {t('ctaTitlePrefix')} <span className="font-['Tiro_Tamil'] italic">{t('ctaTitleItalic')}</span> {t('ctaTitleSuffix')}
-          </p>
-          <div className="flex flex-col md:flex-row gap-[16px] items-center hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
-            <Link
-              href={toLocalePath('/products', currentLocale)}
-              className="bg-[#161616] rounded-[100px] px-[40px] py-[10px] h-[48px] flex items-center justify-center"
-            >
-              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
-                {t('ctaShopNow')}
-              </p>
-            </Link>
-            <Link
-              href={toLocalePath('/kontaktai', currentLocale)}
-              className="border border-[#161616] rounded-[100px] px-[40px] py-[10px] h-[48px] flex items-center justify-center"
-            >
-              <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-                {t('ctaGetInTouch')}
-              </p>
-            </Link>
-          </div>
-        </div>
-      </div>
-      </InView>
+      <CTA />
 
       {isVideoOpen ? (
         <div

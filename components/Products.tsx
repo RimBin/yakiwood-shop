@@ -141,21 +141,21 @@ function MobileProductCard({
   };
 
   return (
-    <div className="bg-[#eaeaea] rounded-[8px] pt-[12px] pb-[16px] px-[12px] w-full max-w-[360px] min-[520px]:max-w-none flex flex-col gap-[24px] items-center relative">
+    <div className="bg-[#eaeaea] rounded-[8px] pt-[12px] pb-[16px] px-[16px] w-full flex flex-col gap-[24px] items-center relative">
       {/* Background mask overlay */}
       <div className="absolute inset-0 pointer-events-none">
         <Image src={imgMask} alt="" fill className="object-cover" />
       </div>
 
-      {/* Product image slider - full width on mobile, padded on tablet */}
-      <div className="relative w-[calc(100%+24px)] -mx-[12px] aspect-[4/3] shrink-0 z-10 md:mx-0 md:w-full md:px-[16px]">
+      {/* Product image slider - full bleed to screen edges on mobile */}
+      <div className="relative w-[calc(100%+32px)] -mx-[16px] aspect-[4/3] shrink-0 z-10 md:mx-0 md:w-full md:px-0">
         <div className="relative w-full h-full rounded-[8px] overflow-hidden">
           <Image
             src={slides[currentIndex]?.image || product.image}
             alt={product.title}
             fill
-            className="object-contain object-center"
-            sizes="(max-width: 1024px) 100vw, 395px"
+            className="object-cover object-center"
+            sizes="100vw"
           />
 
           {!!slides[currentIndex]?.label && (

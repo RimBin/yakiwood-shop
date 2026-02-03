@@ -2,16 +2,10 @@
 
 import React from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { useLocale } from 'next-intl';
-import ArrowRight from '@/components/icons/ArrowRight';
 import { PageCover } from '@/components/shared/PageLayout';
-import { toLocalePath } from '@/i18n/paths';
+import { CTA } from '@/components/home';
 
 export default function AboutNew() {
-  const locale = useLocale();
-  const currentLocale = locale === 'lt' ? 'lt' : 'en';
-
   return (
     <div className="w-full">
       {/* Hero Section */}
@@ -279,42 +273,7 @@ export default function AboutNew() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative w-full overflow-hidden bg-[#E1E1E1]">
-        <div className="mx-auto max-w-[1440px] px-[24px] py-[80px] lg:px-[40px] lg:py-[120px]">
-          <div className="relative z-10 flex flex-col items-center gap-[32px] text-center">
-            {/* Heading */}
-            <h2 className="font-['DM_Sans'] text-[40px] font-light leading-[1.1] tracking-[-1.6px] text-[#161616] lg:text-[64px] lg:tracking-[-2.56px]">
-              Ready to <span className="font-['Tiro_Tamil'] italic">build</span><br />
-              with fire?
-            </h2>
-
-            {/* Buttons */}
-            <div className="flex flex-col gap-[16px] sm:flex-row">
-              <Link
-                href={toLocalePath('/kontaktai', currentLocale)}
-                className="flex items-center justify-center gap-[12px] rounded-[100px] bg-[#161616] px-[32px] py-[16px] text-white transition-opacity hover:opacity-90"
-              >
-                <span className="font-['Outfit'] text-[14px] font-normal uppercase tracking-[0.7px]">
-                  Contact us
-                </span>
-                <ArrowRight color="#FFFFFF" />
-              </Link>
-              <Link
-                href={toLocalePath('/produktai', currentLocale)}
-                className="flex items-center justify-center gap-[12px] rounded-[100px] border border-[#161616] bg-transparent px-[32px] py-[16px] text-[#161616] transition-colors hover:bg-[#161616] hover:text-white"
-              >
-                <span className="font-['Outfit'] text-[14px] font-normal uppercase tracking-[0.7px]">
-                  View products
-                </span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Background Circle */}
-          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-radial from-[#D9D9D9]/30 to-transparent opacity-40 lg:h-[900px] lg:w-[900px]" />
-        </div>
-      </section>
+      <CTA />
     </div>
   );
 }

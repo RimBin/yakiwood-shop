@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import { toLocalePath } from '@/i18n/paths';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { getAsset } from '@/lib/assets';
@@ -17,16 +18,18 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const locale = useLocale();
   const t = useTranslations();
   const tm = useTranslations('mobileMenu');
+  const pathname = usePathname();
 
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const linkLocale = pathname?.startsWith('/lt') ? 'lt' : currentLocale;
 
   const blogLink = {
-    href: toLocalePath('/blog', currentLocale),
+    href: toLocalePath('/blog', linkLocale),
     label: t(locale === 'lt' ? 'nav.straipsniai' : 'nav.blog'),
   };
 
   const configuratorLink = {
-    href: toLocalePath('/configurator3d', currentLocale),
+    href: toLocalePath('/configurator3d', linkLocale),
     label: t(locale === 'lt' ? 'nav.konfiguratorius3d' : 'nav.configurator3d'),
   };
 
@@ -77,28 +80,28 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           {/* Navigation Links */}
           <nav className="flex flex-col gap-[12px] mb-auto">
             <Link
-              href={toLocalePath('/account', currentLocale)}
+              href={toLocalePath('/account', linkLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
               {t(locale === 'lt' ? 'nav.paskyra' : 'nav.account')}
             </Link>
             <Link
-              href={toLocalePath('/products', currentLocale)}
+              href={toLocalePath('/products', linkLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
               {t(locale === 'lt' ? 'nav.produktai' : 'nav.products')}
             </Link>
             <Link
-              href={toLocalePath('/solutions', currentLocale)}
+              href={toLocalePath('/solutions', linkLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
               {t(locale === 'lt' ? 'nav.sprendimai' : 'nav.solutions')}
             </Link>
             <Link
-              href={toLocalePath('/projects', currentLocale)}
+              href={toLocalePath('/projects', linkLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
@@ -121,14 +124,14 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               {configuratorLink.label}
             </Link>
             <Link
-              href={toLocalePath('/about', currentLocale)}
+              href={toLocalePath('/about', linkLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
               {t(locale === 'lt' ? 'nav.apie' : 'nav.about')}
             </Link>
             <Link
-              href={toLocalePath('/contact', currentLocale)}
+              href={toLocalePath('/contact', linkLocale)}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}
             >
