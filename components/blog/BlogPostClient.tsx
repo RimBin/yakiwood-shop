@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { localizeBlogPost, normalizeStoredPosts, type LocalizedBlogPost } from '@/data/blog-posts';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
-import { assets } from '@/lib/assets';
+import CTA from '@/components/home/CTA';
 import { Breadcrumbs } from '@/components/ui';
 import { PageLayout } from '@/components/shared/PageLayout';
 import InView from '@/components/InView';
@@ -251,38 +251,7 @@ export default function BlogPostClient({
       </PageLayout>
       </InView>
 
-      <InView className="hero-animate-root">
-      <section className="relative pb-[140px] md:pb-[200px]">
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-[480px] md:w-[900px] opacity-15">
-            <Image src={assets.ctaBackground} alt="" width={900} height={900} className="w-full h-auto" />
-          </div>
-        </div>
-        <div className="relative max-w-[960px] mx-auto px-[16px] text-center">
-          <h2 className="font-['DM_Sans'] font-light text-[48px] md:text-[96px] leading-[0.95] tracking-[-2px] text-[#161616] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-            {t('ctaTitle')}
-            <span className="font-['Tiro_Tamil'] italic"> {t('ctaHighlight')}</span>?
-          </h2>
-          <p className="mt-[12px] font-['Outfit'] text-[14px] text-[#535353] hero-seq-item hero-seq-right" style={{ animationDelay: '160ms' }}>
-            {t('ctaSubtitle')}
-          </p>
-          <div className="mt-[24px] flex flex-col md:flex-row items-center justify-center gap-[12px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
-            <Link
-              href={toLocalePath('/contact', locale)}
-              className="h-[46px] px-[30px] rounded-[100px] bg-[#161616] text-white font-['Outfit'] text-[12px] uppercase tracking-[0.6px] flex items-center justify-center"
-            >
-              {t('ctaPrimary')}
-            </Link>
-            <Link
-              href={toLocalePath('/products', locale)}
-              className="h-[46px] px-[30px] rounded-[100px] border border-[#161616] text-[#161616] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] flex items-center justify-center hover:bg-[#161616] hover:text-white transition-colors"
-            >
-              {t('ctaSecondary')}
-            </Link>
-          </div>
-        </div>
-      </section>
-      </InView>
+      <CTA />
     </main>
   );
 }

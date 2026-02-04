@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
 import { projects as projectsData } from '@/data/projects';
+import { blogPosts } from '@/data/blog-posts';
 import type { Project } from '@/types/project';
 import { findProjectBySlug, getProjectSlug, normalizeProjectLocale } from '@/lib/projects/i18n';
 import { toLocalePath } from '@/i18n/paths';
@@ -84,6 +85,21 @@ function extractProjectSlugFromPath(pathname: string): string | null {
   return null;
 }
 
+function extractBlogSlugFromPath(pathname: string): string | null {
+  const p = stripQueryAndHash(pathname);
+
+  const ltPrefix = '/lt/straipsniai/';
+  if (p.startsWith(ltPrefix)) return p.slice(ltPrefix.length).split('/')[0] || null;
+
+  const ltLegacy = '/straipsniai/';
+  if (p.startsWith(ltLegacy)) return p.slice(ltLegacy.length).split('/')[0] || null;
+
+  const enPrefix = '/blog/';
+  if (p.startsWith(enPrefix)) return p.slice(enPrefix.length).split('/')[0] || null;
+
+  return null;
+}
+
 export default function LanguageSwitcher({
   variant = 'light',
 }: {
@@ -143,6 +159,16 @@ export default function LanguageSwitcher({
         const translatedSlug = getProjectSlug(project, targetLocale);
         const targetBase = targetLocale === 'lt' ? '/lt/projektai' : '/projects';
         newPath = `${targetBase}/${translatedSlug}`;
+      }
+    }
+
+    // Special-case: blog/straipsniai detail routes need slug translation too
+    const currentBlogSlug = extractBlogSlugFromPath(pathname);
+    if (currentBlogSlug) {
+      const match = blogPosts.find((post) => post.slug[fromLocale] === currentBlogSlug);
+      if (match) {
+        const targetBase = targetLocale === 'lt' ? '/lt/straipsniai' : '/blog';
+        newPath = `${targetBase}/${match.slug[targetLocale]}`;
       }
     }
 

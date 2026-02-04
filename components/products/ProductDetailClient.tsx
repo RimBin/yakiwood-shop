@@ -1395,26 +1395,22 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
       <InView className="hero-animate-root">
       <main className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[16px] lg:py-[54px]">
         <div className="flex flex-col lg:flex-row gap-[24px] lg:gap-[36px]">
-          {/* Left Column - Gallery */}
-          <div className="flex gap-[16px] order-2 lg:order-1 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-            {/* Thumbnails */}
-            <div className="flex lg:flex-col gap-[12px] order-2 lg:order-1">
-              {thumbs.map((thumb, index) => (
-                <button
-                  key={thumb}
-                  onClick={() => setActiveThumb(index)}
-                  className={`relative w-[60px] h-[60px] lg:w-[80px] lg:h-[80px] rounded-[4px] overflow-hidden shrink-0 ${
-                    activeThumb === index ? 'ring-2 ring-[#161616]' : ''
-                  }`}
-                  aria-label={`Thumb ${index + 1}`}
-                >
-                  <Image src={thumb} alt={`${localizedDisplayName} view ${index + 1}`} fill className="object-cover" sizes="80px" />
-                </button>
-              ))}
-            </div>
-
+          {/* Left Column - Gallery (Desktop) */}
+          <div className="hidden lg:flex order-1 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             {/* Main Image */}
-            <div className="relative flex-1 lg:flex-none lg:w-[328px] xl:w-[500px] 2xl:w-[790px] aspect-square lg:aspect-auto lg:h-[400px] xl:h-[500px] 2xl:h-[729px] bg-[#EAEAEA] rounded-[4px] overflow-hidden order-1 lg:order-2">
+            <div className="relative w-full lg:w-[328px] xl:w-[500px] 2xl:w-[790px] aspect-square lg:aspect-auto lg:h-[400px] xl:h-[500px] 2xl:h-[729px] bg-[#EAEAEA] rounded-[4px] overflow-hidden">
+              {unitPricePerBoardDisplay ? (
+                <div className="absolute z-10 top-[16px] left-[16px] rounded-[6px] bg-[#161616] px-[10px] py-[6px]">
+                  <span className="font-['DM_Sans'] text-[14px] leading-[1] tracking-[-0.2px] text-white">
+                    {formatUnitPrice(unitPricePerBoardDisplay)}
+                    {typeof unitAreaM2Raw === 'number' && Number.isFinite(unitAreaM2Raw) ? (
+                      <span className="font-['Outfit'] text-[12px] tracking-[0.2px] text-white/90">
+                        {' '}· {unitAreaM2Raw.toFixed(2)} m²
+                      </span>
+                    ) : null}
+                  </span>
+                </div>
+              ) : null}
               <button
                 type="button"
                 onClick={() =>
@@ -1461,7 +1457,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
           </div>
 
           {/* Right Column - Product Info */}
-          <div className="flex-1 flex flex-col gap-[24px] order-1 lg:order-2 hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
+          <div className="flex-1 flex flex-col gap-[24px] order-2 lg:order-2 hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
             {/* Title and Price */}
             <div className="flex flex-col gap-[8px]">
               <h1 className="font-['DM_Sans'] font-normal text-[28px] lg:text-[32px] leading-[1.1] tracking-[-1.28px] text-[#161616]">
@@ -1472,14 +1468,14 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                   {attributeSummary}
                 </p>
               ) : null}
-              {typeof unitAreaM2Raw === 'number' && Number.isFinite(unitAreaM2Raw) ? (
-                <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
-                  {currentLocale === 'lt' ? 'Vienos lentos plotas' : 'Board area'}: {unitAreaM2Raw.toFixed(3)} m²
-                </p>
-              ) : null}
               {unitPricePerBoardDisplay ? (
                 <p className="font-['DM_Sans'] font-medium text-[22px] lg:text-[24px] leading-[1.15] tracking-[-0.6px] text-[#161616]">
                   {currentLocale === 'lt' ? 'Vienos lentos kaina' : 'Price per board'}: {formatUnitPrice(unitPricePerBoardDisplay)}
+                  {typeof unitAreaM2Raw === 'number' && Number.isFinite(unitAreaM2Raw) ? (
+                    <span className="font-['Outfit'] text-[14px] tracking-[0.2px] text-[#7C7C7C]">
+                      {' '}· {unitAreaM2Raw.toFixed(2)} m²
+                    </span>
+                  ) : null}
                 </p>
               ) : null}
               <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
@@ -1489,6 +1485,120 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                 <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">{quoteError}</p>
               ) : null}
             </div>
+
+            {/* Main Image (Tablet/Mobile) */}
+            <div className="lg:hidden">
+              <div className="relative w-full aspect-square bg-[#EAEAEA] rounded-[4px] overflow-hidden">
+                {unitPricePerBoardDisplay ? (
+                  <div className="absolute z-10 top-[16px] left-[16px] rounded-[6px] bg-[#161616] px-[10px] py-[6px]">
+                    <span className="font-['DM_Sans'] text-[14px] leading-[1] tracking-[-0.2px] text-white">
+                      {formatUnitPrice(unitPricePerBoardDisplay)}
+                      {typeof unitAreaM2Raw === 'number' && Number.isFinite(unitAreaM2Raw) ? (
+                        <span className="font-['Outfit'] text-[12px] tracking-[0.2px] text-white/90">
+                          {' '}· {unitAreaM2Raw.toFixed(2)} m²
+                        </span>
+                      ) : null}
+                    </span>
+                  </div>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShow3D((v) => {
+                      const next = !v;
+                      trackEvent('toggle_product_3d_view', {
+                        product_id: product.id,
+                        enabled: next,
+                      });
+                      return next;
+                    })
+                  }
+                  className="absolute z-10 top-[16px] right-[16px] h-[32px] px-[12px] rounded-[100px] border border-[#BBBBBB] bg-white/90 font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#161616]"
+                  aria-label={show3D ? t('toggleShowPhotoAria') : t('toggleShow3dAria')}
+                >
+                  {show3D ? t('photo') : t('view3d')}
+                </button>
+
+                {show3D ? (
+                  <div className="absolute inset-0">
+                    <Konfiguratorius3D
+                      productId={product.id}
+                      availableColors={colorOptions}
+                      availableFinishes={profileOptions}
+                      selectedColorId={selectedColor?.id}
+                      selectedFinishId={selectedFinish?.id}
+                      isLoading={loading3D}
+                      mode="viewport"
+                      className="h-full"
+                      canvasClassName="h-full"
+                    />
+                  </div>
+                ) : (
+                  <Image
+                    src={activeImage}
+                    alt={localizedDisplayName}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 1024px) 100vw, 60vw"
+                    priority
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Colors (immediately after image) */}
+            {colorOptions.length > 0 && (
+              <div className="flex flex-col gap-[8px]">
+                <div className="flex gap-[4px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase">
+                  <span className="text-[#7C7C7C]">{currentLocale === 'lt' ? 'Spalva:' : 'Color:'}</span>
+                  <span className="text-[#161616]">{effectiveSelectedColor?.name || t('selectColorPlaceholder')}</span>
+                </div>
+                <div className="flex gap-[8px] flex-wrap">
+                  {colorOptions.map((color) => {
+                    const swatchSrc = resolveColorSwatchSrc(color);
+                    const isActive = effectiveSelectedColor?.id === color.id;
+                    const colorToken = getColorToken(color);
+                    const isAvailable = !hasStockMatrix || stockMatrix.some((entry) =>
+                      entry.colorToken === colorToken &&
+                      entry.widthMm === selectedWidthMm &&
+                      entry.lengthMm === selectedLengthMm &&
+                      (!selectedProfileToken || entry.profileToken === selectedProfileToken)
+                    );
+                    const fallbackSrc = typeof color.image === 'string' ? color.image : null;
+                    const canUseNextImage = (src: string) => src.startsWith('/');
+
+                    return (
+                      <button
+                        key={color.id}
+                        type="button"
+                        onClick={() => {
+                          if (!isAvailable) return;
+                          setSelectedColor(color);
+                        }}
+                        disabled={!isAvailable}
+                        className={`relative w-[32px] h-[32px] rounded-full overflow-hidden border border-[#BBBBBB] ${
+                          isActive ? 'ring-2 ring-[#161616] ring-offset-2' : ''
+                        } ${!isAvailable ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        title={color.name}
+                        aria-pressed={isActive}
+                      >
+                        {swatchSrc ? (
+                          <Image src={swatchSrc} alt={color.name} fill className="object-cover" sizes="32px" />
+                        ) : fallbackSrc ? (
+                          canUseNextImage(fallbackSrc) ? (
+                            <Image src={fallbackSrc} alt={color.name} fill className="object-cover" sizes="18px" />
+                          ) : (
+                            <img src={fallbackSrc} alt={color.name} className="w-full h-full object-cover" />
+                          )
+                        ) : (
+                          <div style={{ backgroundColor: color.hex }} className="w-full h-full" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Description */}
             <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] max-w-[434px]">
@@ -1590,60 +1700,6 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                   })}
                 </div>
               </div>
-
-              {/* Colors */}
-              {colorOptions.length > 0 && (
-                <div className="flex flex-col gap-[8px]">
-                  <div className="flex gap-[4px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase">
-                    <span className="text-[#7C7C7C]">{currentLocale === 'lt' ? 'Spalva:' : 'Color:'}</span>
-                    <span className="text-[#161616]">{effectiveSelectedColor?.name || t('selectColorPlaceholder')}</span>
-                  </div>
-                  <div className="flex gap-[8px] flex-wrap">
-                    {colorOptions.map((color) => {
-                      const swatchSrc = resolveColorSwatchSrc(color);
-                      const isActive = effectiveSelectedColor?.id === color.id;
-                      const colorToken = getColorToken(color);
-                      const isAvailable = !hasStockMatrix || stockMatrix.some((entry) =>
-                        entry.colorToken === colorToken &&
-                        entry.widthMm === selectedWidthMm &&
-                        entry.lengthMm === selectedLengthMm &&
-                        (!selectedProfileToken || entry.profileToken === selectedProfileToken)
-                      );
-                      const fallbackSrc = typeof color.image === 'string' ? color.image : null;
-                      const canUseNextImage = (src: string) => src.startsWith('/');
-
-                      return (
-                        <button
-                          key={color.id}
-                          type="button"
-                          onClick={() => {
-                            if (!isAvailable) return;
-                            setSelectedColor(color);
-                          }}
-                          disabled={!isAvailable}
-                          className={`relative w-[32px] h-[32px] rounded-full overflow-hidden border border-[#BBBBBB] ${
-                            isActive ? 'ring-2 ring-[#161616] ring-offset-2' : ''
-                          } ${!isAvailable ? 'opacity-40 cursor-not-allowed' : ''}`}
-                          title={color.name}
-                          aria-pressed={isActive}
-                        >
-                          {swatchSrc ? (
-                            <Image src={swatchSrc} alt={color.name} fill className="object-cover" sizes="32px" />
-                          ) : fallbackSrc ? (
-                            canUseNextImage(fallbackSrc) ? (
-                              <Image src={fallbackSrc} alt={color.name} fill className="object-cover" sizes="18px" />
-                            ) : (
-                              <img src={fallbackSrc} alt={color.name} className="w-full h-full object-cover" />
-                            )
-                          ) : (
-                            <div style={{ backgroundColor: color.hex }} className="w-full h-full" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
 
               {/* Profile */}
               {profileOptions.length > 0 && (

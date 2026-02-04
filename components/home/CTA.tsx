@@ -21,15 +21,15 @@ export default function CTA() {
       {/* Background Image with opacity and luminosity blend */}
       <div className="absolute pointer-events-none mix-blend-luminosity opacity-[0.18] z-0 inset-0">
         {/* Mobile: large circular artwork centered behind the content */}
-        <div className="absolute left-1/2 top-[45%] -translate-x-1/2 -translate-y-1/2 w-[70vmax] h-[70vmax] md:w-[60vmax] md:h-[60vmax] lg:w-[700px] lg:h-[660px]">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vmin] h-[100vmin] md:w-[90vmin] md:h-[90vmin] lg:w-[1000px] lg:h-[1000px]">
           <Image src={backgroundImage} alt="" fill className="object-contain" sizes="100vw" />
         </div>
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1536px) - Figma 759:7625 ===== */}
-      <InView className={`2xl:hidden relative z-10 flex flex-col items-center justify-center h-[580px] ${getSectionPadding()} hero-animate-root`}>
+      <InView className={`2xl:hidden relative z-10 flex flex-col items-center justify-center h-[580px] ${getSectionPadding()} md:mt-[40px] md:mb-[40px] hero-animate-root`}>
         {/* Heading - Mobile/Tablet */}
-        <h2 className="font-['DM_Sans'] font-light text-center max-w-[600px] mb-[12px] md:mb-[40px] hero-seq-item hero-seq-right" style={{ fontSize: 'clamp(40px, 7vw, 64px)', lineHeight: 1, letterSpacing: 'clamp(-1.8px, -0.04em, -2.56px)', animationDelay: '0ms' }}>
+        <h2 className="-mt-[200px] md:mt-0 font-['DM_Sans'] font-light text-center max-w-[600px] mb-[12px] md:mb-[40px] hero-seq-item hero-seq-right" style={{ fontSize: 'clamp(40px, 7vw, 64px)', lineHeight: 1, letterSpacing: 'clamp(-1.8px, -0.04em, -2.56px)', animationDelay: '0ms' }}>
           <span>{t('headline.prefix')}</span>
           <span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
           <span>{t('headline.suffix')}</span>
@@ -40,7 +40,7 @@ export default function CTA() {
           {/* Primary Button - GET AN OFFER */}
           <Link
             href={toLocalePath('/produktai', currentLocale)}
-            className="bg-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full md:w-auto md:min-w-[240px] md:px-[40px]"
+            className="bg-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full md:w-[240px] md:px-[40px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
               {t('buttons.offer')}
@@ -50,7 +50,7 @@ export default function CTA() {
           {/* Secondary Button - GET IN TOUCH */}
           <Link
             href={toLocalePath('/kontaktai', currentLocale)}
-            className="border border-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full md:w-auto md:min-w-[240px] md:px-[40px]"
+            className="border border-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full md:w-[240px] md:px-[40px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
               {t('buttons.getInTouch')}
@@ -73,7 +73,7 @@ export default function CTA() {
           {/* Secondary Button - GET IN TOUCH */}
           <Link
             href={toLocalePath('/kontaktai', currentLocale)}
-            className="border border-[#161616] flex items-center justify-center h-[48px] px-[40px] py-[10px] rounded-[100px]"
+            className="border border-[#161616] flex items-center justify-center h-[48px] w-[240px] px-[40px] py-[10px] rounded-[100px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
               {t('buttons.getInTouch')}
@@ -83,7 +83,7 @@ export default function CTA() {
           {/* Primary Button - CHOOSE WOOD */}
           <Link
             href={toLocalePath('/produktai', currentLocale)}
-            className="bg-[#161616] flex items-center justify-center h-[48px] px-[40px] py-[10px] rounded-[100px]"
+            className="bg-[#161616] flex items-center justify-center h-[48px] w-[240px] px-[40px] py-[10px] rounded-[100px]"
           >
             <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
               {t('buttons.chooseWood')}
