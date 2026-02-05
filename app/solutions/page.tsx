@@ -462,21 +462,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
         </PageCover>
       </InView>
 
-      {/* Hero Image */}
-      <InView className="hero-animate-root">
-        <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[24px]">
-          <div className="relative w-full h-[260px] sm:h-[360px] lg:h-[520px] overflow-hidden rounded-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '160ms' }}>
-            <Image
-              src={assets.projects[2]}
-              alt="Charred wood facade"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
-              priority
-            />
-          </div>
-        </section>
-      </InView>
+      {/* Hero Image removed per request */}
 
       {/* Mobile Chips Below Header */}
       <InView className="hero-animate-root">

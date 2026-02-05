@@ -125,7 +125,7 @@ export default async function Hero() {
       <InView className="hidden xl:block relative z-10 w-full min-h-[861px] hero-animate-root">
         {/* Centered content container */}
         <div className="relative max-w-[1440px] mx-auto h-full">
-          <div className="absolute left-[40px] top-[190px] flex flex-col gap-[24px] pr-4 lg:pr-0 z-10 hero-seq-item hero-seq-right hero-ease-in hero-seq-1">
+          <div className="absolute left-[40px] top-[190px] flex flex-col gap-[24px] z-10 hero-seq-item hero-seq-right hero-ease-in hero-seq-1">
             <p
               className="font-['DM_Sans'] font-light leading-none text-[#161616] w-[606px] whitespace-pre-wrap"
               style={{ fontSize: heroHeadingSize, letterSpacing: heroHeadingTracking }}
@@ -155,7 +155,7 @@ export default async function Hero() {
             </div>
           </div>
 
-          <div className="absolute left-[calc(50%+10px)] top-[125px] z-10 hero-seq-item hero-seq-right hero-seq-2">
+          <div className="absolute right-[40px] top-[125px] z-10 hero-seq-item hero-seq-right hero-seq-2">
             <div className="bg-[#bbab92] rounded-[24px] w-[670px] h-[654px]" />
 
             <div className="absolute left-[2px] top-[42.86px] w-[663.054px] h-[558.481px] flex items-center justify-center overflow-hidden">
@@ -216,25 +216,26 @@ export default async function Hero() {
           </div>
         </div>
 
-        {/* Fullwidth certification bar */}
-        <div className="absolute left-0 right-0 bottom-0 w-full bg-[#161616] z-10">
-          <div className="max-w-[1440px] mx-auto px-[40px] h-[80px] flex items-center">
-            <div className="flex w-full items-center justify-between">
-              {certifications.map((src, index) => {
-                const isBigger = index === 0 || index === 2 || index === 3 || index === 4;
-                const width = isBigger ? 140 : 120;
-                const height = isBigger ? 40 : 32;
+      </InView>
 
-                return (
-                  <div key={src} className="relative" style={{ width, height }}>
-                    <Image src={src} alt="" fill className="object-contain" sizes={`${width}px`} />
-                  </div>
-                );
-              })}
-            </div>
+      {/* Fullwidth certification bar */}
+      <div className="hidden xl:block absolute left-0 right-0 bottom-0 w-full bg-[#161616] z-10">
+        <div className="max-w-[1440px] mx-auto px-[40px] h-[80px] flex items-center">
+          <div className="flex w-full items-center justify-between">
+            {certifications.map((src, index) => {
+              const isBigger = index === 0 || index === 2 || index === 3 || index === 4;
+              const width = isBigger ? 140 : 120;
+              const height = isBigger ? 40 : 32;
+
+              return (
+                <div key={src} className="relative" style={{ width, height }}>
+                  <Image src={src} alt="" fill className="object-contain" sizes={`${width}px`} />
+                </div>
+              );
+            })}
           </div>
         </div>
-      </InView>
+      </div>
     </section>
   );
 }

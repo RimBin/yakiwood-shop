@@ -137,46 +137,7 @@ export default function ProjectsPage() {
             })}
           </div>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-center gap-[8px] mt-[80px] pb-[120px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-          {/* Left Arrow */}
-          <button
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            className="w-[48px] h-[48px] flex items-center justify-center rounded-full disabled:opacity-30 hover:bg-black/5 transition-colors"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M15 18L9 12L15 6" stroke={currentPage === 1 ? "#535353" : "#161616"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-
-          {/* Page Numbers */}
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`w-[48px] h-[48px] flex items-center justify-center rounded-full font-['DM_Sans'] font-medium text-[14px] tracking-[0.42px] uppercase transition-colors ${
-                currentPage === page 
-                  ? 'bg-[#161616] text-white' 
-                  : 'text-[#535353] hover:bg-black/5'
-              }`}
-              style={{ fontVariationSettings: "'opsz' 14" }}
-            >
-              {page}
-            </button>
-          ))}
-
-          {/* Right Arrow */}
-          <button
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
-            className="w-[48px] h-[48px] flex items-center justify-center rounded-full disabled:opacity-30 hover:bg-black/5 transition-colors"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M9 18L15 12L9 6" stroke={currentPage === totalPages ? "#535353" : "#161616"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </div>
+          <div className="pb-[120px]" aria-hidden="true" />
 
 
         </div>
