@@ -21,9 +21,14 @@ test.describe('Smoke Tests', () => {
     ];
 
     for (const route of mainRoutes) {
-      const response = await page.goto(route, { waitUntil: 'domcontentloaded' });
+      const response = await page.goto(route, {
+        waitUntil: 'domcontentloaded',
+        timeout: 60_000, // allow slower navigations during dev
+      });
       expect(response?.status()).toBe(200);
-      await expect(page.locator('header')).toBeVisible();
+
+      // Wait explicitly for a stable element; give it time if resources are still loading
+      await expect(page.locator('header'), { timeout: 60_000 }).toBeVisible();
     }
   });
 

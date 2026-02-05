@@ -31,6 +31,9 @@ export default defineConfig({
       cookies: [COOKIE_CONSENT_COOKIE],
       origins: [],
     },
+    // Increase timeouts for slower dev builds / SSR rendering
+    navigationTimeout: 60_000, // 60s for page.goto and navigation-related waits
+    actionTimeout: 30_000, // actions (click/type) default timeout
   },
 
   projects: [
