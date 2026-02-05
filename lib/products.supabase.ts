@@ -5,6 +5,8 @@ import type { TypedObject } from '@portabletext/types'
 export interface ProductColorVariant {
   id: string
   name: string
+  nameLt?: string
+  nameEn?: string
   hex?: string
   image?: string
   description?: string
@@ -157,7 +159,10 @@ export function transformDbProduct(db: DbProduct): Product {
     .filter((v) => v.variant_type === 'color')
     .map((v) => ({
       id: v.id,
+      // Keep `name` as a stable fallback, but also preserve per-locale labels.
       name: v.label_en ?? v.name,
+      nameEn: v.label_en ?? v.name,
+      nameLt: v.label_lt ?? v.name,
       hex: v.hex_color ?? undefined,
       image: v.image_url ?? v.texture_url ?? undefined,
       priceModifier: v.price_adjustment === null ? undefined : toNumber(v.price_adjustment),
@@ -185,6 +190,8 @@ export function transformDbProduct(db: DbProduct): Product {
         {
           id: `stock-color:${parsedStock.color}`,
           name: humanizeSlugToken(parsedStock.color),
+          nameEn: humanizeSlugToken(parsedStock.color),
+          nameLt: humanizeSlugToken(parsedStock.color),
         },
       ]
     : []
@@ -244,19 +251,17 @@ function humanizeSlugToken(token: string): string {
 }
 
 const COLOR_LABELS: Record<string, { lt: string; en: string }> = {
-  black: { lt: 'Black', en: 'Black' },
-  silver: { lt: 'Silver', en: 'Silver' },
-  graphite: { lt: 'Graphite', en: 'Graphite' },
+  black: { lt: 'Juoda', en: 'Black' },
+  silver: { lt: 'Sidabrinė', en: 'Silver' },
+  graphite: { lt: 'Grafitas', en: 'Graphite' },
   latte: { lt: 'Latte', en: 'Latte' },
-  carbon: { lt: 'Carbon', en: 'Carbon' },
-  'carbon-light': { lt: 'Carbon Light', en: 'Carbon Light' },
-  'carbon-dark': { lt: 'Carbon Dark', en: 'Carbon Dark' },
-  brown: { lt: 'Brown', en: 'Brown' },
-  'dark-brown': { lt: 'Dark Brown', en: 'Dark Brown' },
+  carbon: { lt: 'Anglis', en: 'Carbon' },
+  'carbon-light': { lt: 'Šviesi anglis', en: 'Carbon Light' },
+  'carbon-dark': { lt: 'Tamsi anglis', en: 'Carbon Dark' },
+  brown: { lt: 'Ruda', en: 'Brown' },
+  'dark-brown': { lt: 'Tamsiai ruda', en: 'Dark Brown' },
 }
 
-// Some datasets/slugs use Lithuanian color tokens (e.g., "juoda").
-// We intentionally display color names in English even for LT UI.
 const COLOR_SYNONYMS: Record<string, keyof typeof COLOR_LABELS> = {
   juoda: 'black',
   sidabrine: 'silver',
@@ -272,6 +277,8 @@ function normalizeColorKey(input: string): string {
   return input
     .trim()
     .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
     .replace(/[_\s]+/g, '-')
     .replace(/[^a-z0-9-]/g, '')
     .replace(/-+/g, '-')
@@ -284,15 +291,65 @@ export function localizeColorLabel(input: string, locale: 'lt' | 'en'): string {
   if (!normalized) return input
 
   const direct = COLOR_LABELS[normalized]
-  if (direct) return direct.en
+  if (direct) return locale === 'lt' ? direct.lt : direct.en
 
   const parts = normalized.split('-').filter(Boolean)
   if (parts.length > 1) {
-    const mapped = parts.map((part) => COLOR_LABELS[part]?.en ?? humanizeSlugToken(part))
+    const mapped = parts.map((part) =>
+      COLOR_LABELS[part] ? (locale === 'lt' ? COLOR_LABELS[part].lt : COLOR_LABELS[part].en) : humanizeSlugToken(part)
+    )
     return mapped.join(' ')
   }
 
   return humanizeSlugToken(normalized)
+}
+
+const PROFILE_LABELS: Record<string, { lt: string; en: string }> = {
+  'half-taper': { lt: 'Pusė špunto', en: 'Half Taper' },
+  'half-taper-45': { lt: 'Pusė špunto 45°', en: 'Half Taper 45°' },
+  rectangle: { lt: 'Stačiakampis', en: 'Rectangle' },
+  rhombus: { lt: 'Rombas', en: 'Rhombus' },
+}
+
+function normalizeProfileKey(input: string): string {
+  return normalizeColorKey(input)
+}
+
+function normalizeProfileToken(input: string): string {
+  const token = normalizeProfileKey(input)
+  if (!token) return ''
+
+  const isHalf = token.includes('half') || token.includes('taper') || token.includes('pus') || token.includes('spunto')
+  if (isHalf && token.includes('45')) return 'half-taper-45'
+  if (isHalf) return 'half-taper'
+  if (token.includes('rhomb') || token.includes('romb')) return 'rhombus'
+  if (token.includes('rectangle') || token.includes('staciakamp')) return 'rectangle'
+  return token
+}
+
+export function localizeProfileLabel(input: string, locale: 'lt' | 'en'): string {
+  const normalized = normalizeProfileToken(input)
+  if (!normalized) return input
+  const mapped = PROFILE_LABELS[normalized]
+  if (mapped) return locale === 'lt' ? mapped.lt : mapped.en
+  return input
+}
+
+export function getLocalizedColorName(
+  color: Pick<ProductColorVariant, 'name' | 'nameLt' | 'nameEn'>,
+  locale: 'lt' | 'en'
+): string {
+  if (locale === 'lt') return color.nameLt ?? localizeColorLabel(color.name ?? '', 'lt')
+  return color.nameEn ?? localizeColorLabel(color.name ?? '', 'en')
+}
+
+export function getLocalizedProfileName(
+  profile: Pick<ProductProfileVariant, 'name' | 'nameLt' | 'nameEn' | 'code'>,
+  locale: 'lt' | 'en'
+): string {
+  const raw = [profile.name, profile.code].filter(Boolean).join(' ')
+  if (locale === 'lt') return profile.nameLt ?? localizeProfileLabel(raw, 'lt')
+  return profile.nameEn ?? localizeProfileLabel(raw, 'en')
 }
 
 function parseStockItemSlug(

@@ -119,7 +119,7 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
           <div className="pt-[24px] pb-[120px]">
           {posts.length ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[repeat(4,328px)] xl:justify-between gap-x-[16px] gap-y-[16px]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-[repeat(4,328px)] 2xl:justify-between gap-x-[16px] gap-y-[16px]">
                 {visiblePosts.map((post, index) => {
                   const tall = index % 2 === 1;
                   const imageHeight = tall ? 'h-[320px] md:h-[448px]' : 'h-[220px] md:h-[305px]';
@@ -128,7 +128,7 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
                   return (
                     <article
                       key={post.id}
-                      className="overflow-hidden xl:w-[328px] hero-seq-item hero-seq-right"
+                      className="overflow-hidden 2xl:w-[328px] hero-seq-item hero-seq-right"
                       style={{ animationDelay: `${delay}ms` }}
                     >
                       <Link href={toLocalePath(`/blog/${post.slug}`, locale)} className="block">

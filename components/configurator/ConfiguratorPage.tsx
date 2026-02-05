@@ -5,7 +5,14 @@ import { createPortal } from 'react-dom';
 import { useLocale, useTranslations } from 'next-intl';
 import { PageCover, PageSection } from '@/components/shared';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
-import { fetchProducts, type Product, type ProductColorVariant, type ProductProfileVariant } from '@/lib/products.supabase';
+import {
+  fetchProducts,
+  getLocalizedColorName,
+  getLocalizedProfileName,
+  type Product,
+  type ProductColorVariant,
+  type ProductProfileVariant,
+} from '@/lib/products.supabase';
 import { toLocalePath } from '@/i18n/paths';
 import InView from '@/components/InView';
 
@@ -156,43 +163,53 @@ function FilterDropdown({
   );
 }
 
-const FALLBACK_COLORS: ProductColorVariant[] = [
-  { id: 'demo-black', name: 'Black', hex: '#161616', priceModifier: 0 },
-  { id: 'demo-charcoal', name: 'Charcoal', hex: '#535353', priceModifier: 0 },
-  { id: 'demo-natural', name: 'Natural', hex: '#BBBBBB', priceModifier: 0 },
-];
-
-const FALLBACK_PROFILES: ProductProfileVariant[] = [
-  {
-    id: 'demo-half-taper-45',
-    name: 'Half taper 45°',
-    code: 'half_taper_45_deg',
-    description: 'Demo profilis (Half taper 45°)',
-    priceModifier: 0,
-    dimensions: {
-      width: 120,
-      thickness: 20,
-      length: 4000,
-    },
-  },
-  {
-    id: 'demo-rectangle',
-    name: 'Rectangle',
-    code: 'rectangle',
-    description: 'Demo profilis (stačiakampis)',
-    priceModifier: 0,
-    dimensions: {
-      width: 120,
-      thickness: 20,
-      length: 4000,
-    },
-  },
-];
-
 export default function ConfiguratorPage() {
   const t = useTranslations();
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+
+  const fallbackColors = useMemo<ProductColorVariant[]>(
+    () => [
+      { id: 'demo-black', name: 'Black', nameLt: 'Juoda', nameEn: 'Black', hex: '#161616', priceModifier: 0 },
+      { id: 'demo-charcoal', name: 'Charcoal', nameLt: 'Antracitas', nameEn: 'Charcoal', hex: '#535353', priceModifier: 0 },
+      { id: 'demo-natural', name: 'Natural', nameLt: 'Natūrali', nameEn: 'Natural', hex: '#BBBBBB', priceModifier: 0 },
+    ],
+    []
+  );
+
+  const fallbackProfiles = useMemo<ProductProfileVariant[]>(
+    () => [
+      {
+        id: 'demo-half-taper-45',
+        name: 'Half taper 45°',
+        nameLt: 'Pusė špunto 45°',
+        nameEn: 'Half taper 45°',
+        code: 'half_taper_45_deg',
+        description: currentLocale === 'lt' ? 'Demo profilis (Pusė špunto 45°)' : 'Demo profile (Half taper 45°)',
+        priceModifier: 0,
+        dimensions: {
+          width: 120,
+          thickness: 20,
+          length: 4000,
+        },
+      },
+      {
+        id: 'demo-rectangle',
+        name: 'Rectangle',
+        nameLt: 'Stačiakampis',
+        nameEn: 'Rectangle',
+        code: 'rectangle',
+        description: currentLocale === 'lt' ? 'Demo profilis (stačiakampis)' : 'Demo profile (rectangle)',
+        priceModifier: 0,
+        dimensions: {
+          width: 120,
+          thickness: 20,
+          length: 4000,
+        },
+      },
+    ],
+    [currentLocale]
+  );
 
   const [product, setProduct] = useState<Product | null>(null);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -289,28 +306,32 @@ export default function ConfiguratorPage() {
   );
 
   const colorOptions = useMemo(() => {
-    const set = new Set<string>();
+    const optionsByKey = new Map<string, string>();
     for (const p of allProducts) {
       for (const c of p.colors ?? []) {
-        if (c?.name) set.add(c.name);
+        const key = normalizeToken(c?.nameEn ?? c?.name ?? '');
+        if (!key) continue;
+        optionsByKey.set(key, getLocalizedColorName(c, currentLocale));
       }
     }
-    return Array.from(set)
-      .sort((a, b) => a.localeCompare(b))
-      .map((value) => ({ value: normalizeToken(value), label: value }));
-  }, [allProducts, normalizeToken]);
+    return Array.from(optionsByKey.entries())
+      .sort((a, b) => a[1].localeCompare(b[1]))
+      .map(([value, label]) => ({ value, label }));
+  }, [allProducts, normalizeToken, currentLocale]);
 
   const profileOptions = useMemo(() => {
-    const set = new Set<string>();
+    const optionsByKey = new Map<string, string>();
     for (const p of allProducts) {
       for (const prof of p.profiles ?? []) {
-        if (prof?.name) set.add(prof.name);
+        const key = normalizeToken(prof?.code ?? prof?.nameEn ?? prof?.name ?? '');
+        if (!key) continue;
+        optionsByKey.set(key, getLocalizedProfileName(prof, currentLocale));
       }
     }
-    return Array.from(set)
-      .sort((a, b) => a.localeCompare(b))
-      .map((value) => ({ value: normalizeToken(value), label: value }));
-  }, [allProducts, normalizeToken]);
+    return Array.from(optionsByKey.entries())
+      .sort((a, b) => a[1].localeCompare(b[1]))
+      .map(([value, label]) => ({ value, label }));
+  }, [allProducts, normalizeToken, currentLocale]);
 
   const sizeOptions = useMemo(() => {
     const widths = new Set<string>();
@@ -355,11 +376,15 @@ export default function ConfiguratorPage() {
       const woodId = normalizeWoodId(p.woodType);
       const matchesWood = selectedWood.length === 0 || (woodId ? selectedWood.includes(woodId) : false);
 
-      const normalizedColors = (p.colors ?? []).map((c) => normalizeToken(c?.name ?? '')).filter(Boolean);
+      const normalizedColors = (p.colors ?? [])
+        .map((c) => normalizeToken(c?.nameEn ?? c?.name ?? ''))
+        .filter(Boolean);
       const matchesColor =
         selectedColor.length === 0 || selectedColor.some((value) => normalizedColors.includes(normalizeToken(value)));
 
-      const normalizedProfiles = (p.profiles ?? []).map((prof) => normalizeToken(prof?.name ?? '')).filter(Boolean);
+      const normalizedProfiles = (p.profiles ?? [])
+        .map((prof) => normalizeToken(prof?.code ?? prof?.nameEn ?? prof?.name ?? ''))
+        .filter(Boolean);
       const matchesProfile =
         selectedProfile.length === 0 || selectedProfile.some((value) => normalizedProfiles.includes(normalizeToken(value)));
 
@@ -399,13 +424,13 @@ export default function ConfiguratorPage() {
 
   const availableColors = useMemo(() => {
     const colors = product?.colors ?? [];
-    return colors.length > 0 ? colors : FALLBACK_COLORS;
-  }, [product]);
+    return colors.length > 0 ? colors : fallbackColors;
+  }, [product, fallbackColors]);
 
   const availableFinishes = useMemo(() => {
     const profiles = product?.profiles ?? [];
-    return profiles.length > 0 ? profiles : FALLBACK_PROFILES;
-  }, [product]);
+    return profiles.length > 0 ? profiles : fallbackProfiles;
+  }, [product, fallbackProfiles]);
 
   return (
     <main className="min-h-screen bg-[#E1E1E1]">
@@ -513,7 +538,7 @@ export default function ConfiguratorPage() {
               >
                 {filteredProducts.map((item) => (
                   <option key={item.id} value={item.id}>
-                    {item.name}
+                    {currentLocale === 'en' && item.nameEn ? item.nameEn : item.name}
                   </option>
                 ))}
               </select>
@@ -539,12 +564,15 @@ export default function ConfiguratorPage() {
             </p>
 
             <div className="mt-[20px]">
-              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">Demo 3D (pavyzdys)</p>
+              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">
+                {t('configurator.demoExampleLabel')}
+              </p>
               <div className="mt-[10px]">
                 <Konfiguratorius3D
                   productId="demo"
-                  availableColors={FALLBACK_COLORS}
-                  availableFinishes={FALLBACK_PROFILES}
+                  availableColors={fallbackColors}
+                  availableFinishes={fallbackProfiles}
+                  basePrice={undefined}
                   isLoading={false}
                 />
               </div>
@@ -558,6 +586,7 @@ export default function ConfiguratorPage() {
               productId={product?.id ?? 'demo'}
               availableColors={availableColors}
               availableFinishes={availableFinishes}
+              basePrice={product?.price}
               isLoading={isLoading}
             />
           </div>

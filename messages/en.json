@@ -1218,6 +1218,7 @@
     "pageDescription": "Choose a color and profile to preview the product in 3D.",
     "loadError": "Failed to load products.",
     "fallbackNote": "Showing a demo configurator because product data was not found.",
+    "demoExampleLabel": "3D demo (example)",
     "loadingModel": "Loading 3D model...",
     "controlsHint": "Use your mouse to rotate, zoom, and pan",
     "colorLabel": "Color",
@@ -1225,6 +1226,7 @@
     "selectColorAria": "Select color {name}",
     "noteTitle": "Note:",
     "noteBody": "Actual color and texture may vary slightly from what you see here. Each board is unique due to the natural properties of wood.",
+    "basePriceLabel": "Base price",
 
     "pricingTitle": "Price",
     "inputModeLabel": "Calculate by",

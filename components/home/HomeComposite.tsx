@@ -1,3 +1,4 @@
+/*
 import { Product } from '@/types';
 import { ProductGrid } from '@/components/ProductGrid';
 import { ProductSlider } from '@/components/ProductSlider';
@@ -1094,3 +1095,10 @@ import { ProductSectionReviewsSummary } from '@/components/ProductSectionReviews
 import { ProductSectionStatsSummary } from '@/components/ProductSectionStatsSummary';
 import { ProductSectionNavigationSummary } from '@/components/ProductSectionNavigationSummary';
 import { ProductSectionPaginationSummary } from '@/components/ProductSectionPaginationSummary
+*/
+
+import React from 'react';
+
+export default function HomeComposite() {
+	return null;
+}

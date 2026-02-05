@@ -36,8 +36,8 @@ export default async function Steps() {
 
 	return (
 		<section className="w-full bg-[#161616] overflow-hidden">
-			{/* ===== MOBILE LAYOUT (< 1536px) - Figma 759:7672 ===== */}
-			<InView className={`2xl:hidden ${getSectionPadding()} hero-animate-root`}>
+			{/* ===== MOBILE LAYOUT (< 1024px) - Figma 759:7672 ===== */}
+			<InView className={`lg:hidden ${getSectionPadding()} hero-animate-root`}>
 				{/* Title Section - Mobile/Tablet */}
 				<div className="mb-[40px] md:mb-[48px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
 					<p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-white mb-[8px]">
@@ -103,111 +103,73 @@ export default async function Steps() {
 				</div>
 			</InView>
 
-			{/* ===== DESKTOP LAYOUT (>= 1536px) ===== */}
-			<InView className="hidden 2xl:block max-w-[1440px] mx-auto px-[40px] relative hero-animate-root">
-				{/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+24px)] */}
-				<div className="absolute left-[40px] top-[120px] text-white font-normal z-10 w-full hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-					<p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase left-[0px] top-[25px] whitespace-nowrap">
-						{t('eyebrow')}
-					</p>
-					<p className="absolute font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] left-[calc(25%+24px)] top-[0px] w-[760px] whitespace-pre-wrap">
-						<span className="block">{t('headline.prefix')}</span>
-						<span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
-						<span> {t('headline.suffix')}</span>
-					</p>
+			{/* ===== DESKTOP LAYOUT (>= 1024px) ===== */}
+			<InView className="hidden lg:block hero-animate-root">
+				<div className="relative max-w-[1440px] mx-auto">
+					{/* Title Section - Figma pattern: eyebrow at left-[0], heading at left-[calc(25%+24px)] */}
+					<div className="absolute left-0 right-0 top-[120px] px-[40px] text-white font-normal z-10 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+						<p className="absolute font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase left-0 top-[25px] whitespace-nowrap">
+							{t('eyebrow')}
+						</p>
+						<p className="absolute font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] left-[calc(25%+24px)] top-[0px] w-[760px] whitespace-pre-wrap">
+							<span className="block">{t('headline.prefix')}</span>
+							<span className="font-['Tiro_Tamil'] italic">{t('headline.emphasis')}</span>
+							<span> {t('headline.suffix')}</span>
+						</p>
+					</div>
+
+					{/* Steps Section */}
+					<div className="absolute left-0 right-0 top-[345px] px-[40px]">
+						{/* Connecting line */}
+						<div className="absolute h-0 left-0 right-0 top-[24px]">
+							<div className="w-full h-px bg-[#535353]" />
+						</div>
+
+						{/* Steps grid */}
+						<div
+							className="relative grid grid-cols-4"
+							style={{ columnGap: 'clamp(12px, 4vw, 88px)' }}
+						>
+							{steps.map((step, index) => (
+								<div
+									key={step.number}
+									className="flex flex-col gap-[16px] items-start min-w-0 hero-seq-item hero-seq-right"
+									style={{ animationDelay: `${260 + index * 160}ms` }}
+								>
+									<div className="bg-[#161616] border border-[#535353] border-solid flex items-center justify-center rounded-[100px] shrink-0 w-[48px] h-[48px]">
+										<p className="font-['DM_Sans'] font-medium text-[14px] leading-[1.1] tracking-[0.42px] uppercase text-white">
+											{step.number}
+										</p>
+									</div>
+									<div className="flex flex-col gap-[8px] items-start w-full">
+										<p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white whitespace-pre-wrap max-w-[160px]">
+											{step.title}
+										</p>
+										<p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB] whitespace-pre-wrap max-w-[220px]">
+											{step.description}
+										</p>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+
+					{/* CTA Button */}
+					<div className="absolute left-0 right-0 top-[584px] px-[40px] h-[48px] flex items-center justify-center hero-seq-item hero-seq-right" style={{ animationDelay: '900ms' }}>
+						<Link
+							href={shopHref}
+							className="bg-white flex items-center justify-center px-[40px] py-[10px] rounded-[100px] w-full h-full"
+							aria-label={t('cta.aria')}
+						>
+							<span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
+								{t('cta.label')}
+							</span>
+						</Link>
+					</div>
+
+					{/* Min height to accommodate absolute positioning */}
+					<div className="h-[752px]" />
 				</div>
-
-				{/* Steps Section */}
-				<div className="absolute left-[40px] top-[345px] w-[1306px]">
-					{/* Connecting line */}
-					<div className="absolute h-0 left-[22px] top-[24px] w-[1174px]">
-						<div className="w-[1174px] h-px bg-[#535353]" />
-					</div>
-
-					{/* Step 1 */}
-					<div className="absolute flex flex-col gap-[16px] items-start left-0 top-0 w-[198px] hero-seq-item hero-seq-right" style={{ animationDelay: '260ms' }}>
-						<div className="bg-[#161616] border border-[#535353] border-solid flex items-center justify-center rounded-[100px] shrink-0 w-[48px] h-[48px]">
-							<p className="font-['DM_Sans'] font-medium text-[14px] leading-[1.1] tracking-[0.42px] uppercase text-white">
-								1
-							</p>
-						</div>
-						<div className="flex flex-col gap-[8px] items-start w-full">
-							<p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white whitespace-pre-wrap w-[117px]">
-								{steps[0].title}
-							</p>
-							<p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB] whitespace-pre-wrap w-[198px]">
-								{steps[0].description}
-							</p>
-						</div>
-					</div>
-
-					{/* Step 2 */}
-					<div className="absolute flex flex-col gap-[16px] items-start left-[393px] top-0 w-[218px] hero-seq-item hero-seq-right" style={{ animationDelay: '420ms' }}>
-						<div className="bg-[#161616] border border-[#535353] border-solid flex items-center justify-center rounded-[100px] shrink-0 w-[48px] h-[48px]">
-							<p className="font-['DM_Sans'] font-medium text-[14px] leading-[1.1] tracking-[0.42px] uppercase text-white">
-								2
-							</p>
-						</div>
-						<div className="flex flex-col gap-[8px] items-start w-full">
-							<p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white whitespace-pre-wrap w-[138px]">
-								{steps[1].title}
-							</p>
-							<p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB] whitespace-pre-wrap w-[157px]">
-								{steps[1].description}
-							</p>
-						</div>
-					</div>
-
-					{/* Step 3 */}
-					<div className="absolute flex flex-col gap-[16px] items-start left-[804px] top-0 w-[106px] hero-seq-item hero-seq-right" style={{ animationDelay: '580ms' }}>
-						<div className="bg-[#161616] border border-[#535353] border-solid flex items-center justify-center rounded-[100px] shrink-0 w-[48px] h-[48px]">
-							<p className="font-['DM_Sans'] font-medium text-[14px] leading-[1.1] tracking-[0.42px] uppercase text-white">
-								3
-							</p>
-						</div>
-						<div className="flex flex-col gap-[8px] items-start w-full">
-							<p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white whitespace-pre-wrap w-[106px]">
-								{steps[2].title}
-							</p>
-							<p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB] whitespace-pre-wrap min-w-full">
-								{steps[2].description}
-							</p>
-						</div>
-					</div>
-
-					{/* Step 4 */}
-					<div className="absolute flex flex-col gap-[16px] items-start left-[1172px] top-0 w-[134px] hero-seq-item hero-seq-right" style={{ animationDelay: '740ms' }}>
-						<div className="bg-[#161616] border border-[#535353] border-solid flex items-center justify-center rounded-[100px] shrink-0 w-[48px] h-[48px]">
-							<p className="font-['DM_Sans'] font-medium text-[14px] leading-[1.1] tracking-[0.42px] uppercase text-white">
-								4
-							</p>
-						</div>
-						<div className="flex flex-col gap-[8px] items-start w-full">
-							<p className="font-['DM_Sans'] font-medium text-[18px] leading-[1.2] tracking-[-0.36px] text-white whitespace-pre-wrap w-[102px]">
-								{steps[3].title}
-							</p>
-							<p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB] whitespace-pre-wrap w-[134px]">
-								{steps[3].description}
-							</p>
-						</div>
-					</div>
-				</div>
-
-				{/* CTA Button */}
-				<div className="absolute left-[40px] top-[584px] w-[1360px] h-[48px] flex items-center justify-center hero-seq-item hero-seq-right" style={{ animationDelay: '900ms' }}>
-					<Link
-						href={shopHref}
-						className="bg-white flex items-center justify-center px-[40px] py-[10px] rounded-[100px] w-full h-full"
-						aria-label={t('cta.aria')}
-					>
-						<span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-							{t('cta.label')}
-						</span>
-					</Link>
-				</div>
-
-				{/* Min height to accommodate absolute positioning */}
-				<div className="h-[752px]" />
 			</InView>
 		</section>
 	);

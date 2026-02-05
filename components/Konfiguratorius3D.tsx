@@ -5,6 +5,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import type { ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
+import { getLocalizedColorName, getLocalizedProfileName } from '@/lib/products.supabase';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
 import { trackEvent } from '@/lib/analytics';
@@ -117,6 +118,7 @@ export interface Konfiguratorius3DProps {
   className?: string;
   isLoading?: boolean;
   canvasClassName?: string;
+  basePrice?: number;
 }
 
 export default function Konfiguratorius3D({ 
@@ -131,9 +133,11 @@ export default function Konfiguratorius3D({
   className = '',
   isLoading = false,
   canvasClassName,
+  basePrice,
 }: Konfiguratorius3DProps) {
   const t = useTranslations();
   const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const [selectedColor, setSelectedColor] = useState<ProductColorVariant | null>(
     availableColors[0] || null
   );
@@ -192,6 +196,12 @@ export default function Konfiguratorius3D({
       }),
     [locale]
   );
+
+  const basePriceLabel = useMemo(() => {
+    const key = 'configurator.basePriceLabel';
+    if (typeof t.has === 'function' && t.has(key)) return t(key);
+    return currentLocale === 'lt' ? 'Bazinė kaina' : 'Base price';
+  }, [t, currentLocale]);
 
   useEffect(() => {
     if (!selectedColorId) return;
@@ -424,12 +434,13 @@ export default function Konfiguratorius3D({
                 {t('configurator.colorLabel')}
                 {selectedColor && (
                   <span className="ml-2 font-['Outfit'] font-normal text-[#7C7C7C]">
-                    ({selectedColor.name})
+                    ({getLocalizedColorName(selectedColor, currentLocale)})
                   </span>
                 )}
               </label>
               <div className="flex flex-wrap gap-3">
                 {availableColors.map((color) => {
+                  const colorLabel = getLocalizedColorName(color, currentLocale);
                   const priceModifier = color.priceModifier ?? 0;
 
                   return (
@@ -439,14 +450,14 @@ export default function Konfiguratorius3D({
                       className={`relative group ${
                         selectedColor?.id === color.id ? 'ring-2 ring-[#161616] ring-offset-2' : ''
                       }`}
-                      aria-label={t('configurator.selectColorAria', { name: color.name })}
-                      title={color.name}
+                      aria-label={t('configurator.selectColorAria', { name: colorLabel })}
+                      title={colorLabel}
                     >
                     {color.image ? (
                       <div className="relative w-12 h-12 rounded-lg overflow-hidden border-2 border-[#EAEAEA] group-hover:border-[#BBBBBB] transition-colors">
                         <img 
                           src={color.image} 
-                          alt={color.name}
+                          alt={colorLabel}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -477,6 +488,7 @@ export default function Konfiguratorius3D({
               </label>
               <div className="grid grid-cols-1 gap-2">
                 {availableFinishes.map((finish) => {
+                  const finishLabel = getLocalizedProfileName(finish, currentLocale);
                   const priceModifier = finish.priceModifier ?? 0;
 
                   return (
@@ -499,7 +511,7 @@ export default function Konfiguratorius3D({
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <span className="font-['DM_Sans'] font-medium text-[#161616]">
-                          {finish.name}
+                          {finishLabel}
                         </span>
                         {priceModifier !== 0 && (
                           <span className="font-['Outfit'] text-sm text-[#535353]">
@@ -574,6 +586,12 @@ export default function Konfiguratorius3D({
             </div>
 
             <div className="mt-3">
+              {typeof basePrice === 'number' && Number.isFinite(basePrice) && basePrice > 0 && (
+                <div className="mb-3 flex items-center justify-between rounded-md bg-[#F9F9F9] px-3 py-2">
+                  <span className="font-['Outfit'] text-xs text-[#535353]">{basePriceLabel}</span>
+                  <span className="font-['Outfit'] text-xs text-[#161616]">{currency.format(basePrice)}</span>
+                </div>
+              )}
               {inputMode === 'boards' ? (
                 <label className="block">
                   <span className="block font-['Outfit'] text-xs text-[#535353] mb-1">{t('configurator.quantityBoardsLabel')}</span>

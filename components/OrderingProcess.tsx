@@ -27,23 +27,12 @@ const steps = [
 
 export default function OrderingProcess() {
   return (
-    <section
-      className="w-full bg-[#161616] relative overflow-hidden"
-      style={{
-        ['--process-scale' as React.CSSProperties['--process-scale']]: 'clamp(0.8, 100vw / 1440, 1)',
-        height: 'calc(752px * var(--process-scale))',
-      }}
-    >
+    <section className="w-full max-w-[1440px] mx-auto bg-[#161616] relative">
       {/* Background */}
-      <div className="absolute left-0 top-0 w-full h-full bg-[#161616]" />
+      <div className="absolute left-0 top-0 w-full h-[752px] bg-[#161616]" />
 
-      {/* Scaled desktop canvas */}
-      <div
-        className="absolute left-1/2 top-0 w-[1440px] -translate-x-1/2 origin-top-center"
-        style={{ transform: 'scale(var(--process-scale))' }}
-      >
-        {/* Container */}
-        <div className="relative px-[40px] py-[120px]">
+      {/* Container */}
+      <div className="relative px-[40px] py-[120px]">
         {/* Title Section */}
         <div className="absolute left-[40px] top-[120px]">
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-white mb-[25px]">
@@ -135,12 +124,11 @@ export default function OrderingProcess() {
           </div>
         </div>
 
-          {/* CTA Button - Exact positioning */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-[584px] bg-white px-[40px] py-[10px] h-[48px] rounded-[100px] w-[1360px] flex items-center justify-center gap-[10px]">
-            <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
-              make order
-            </p>
-          </div>
+        {/* CTA Button - Exact positioning */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-[584px] bg-white px-[40px] py-[10px] h-[48px] rounded-[100px] w-[1360px] flex items-center justify-center gap-[10px]">
+          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
+            make order
+          </p>
         </div>
       </div>
     </section>

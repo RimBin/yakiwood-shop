@@ -403,7 +403,7 @@ export default function ProductsPageClient({
     // Color names remain English even on LT pages.
     const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
     const colorName = product.colors?.[0]?.name ?? parsed?.color ?? '';
-    const colorLabel = colorName ? localizeColorLabel(colorName, 'en') : '';
+    const colorLabel = colorName ? localizeColorLabel(colorName, currentLocale) : '';
 
     const woodKey = typeof product.woodType === 'string' ? product.woodType.trim().toLowerCase() : '';
     const woodLabel =

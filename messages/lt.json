@@ -987,6 +987,7 @@
     "pageDescription": "Pasirinkite spalvą ir profilį, kad pamatytumėte produkto vaizdą 3D erdvėje.",
     "loadError": "Nepavyko įkelti produktų.",
     "fallbackNote": "Rodomas demonstracinis konfiguratorius, nes produktų duomenys nebuvo rasti.",
+    "demoExampleLabel": "Demo 3D (pavyzdys)",
     "loadingModel": "Kraunamas 3D modelis...",
     "controlsHint": "Naudokite pelę norėdami pasukti, priartinti ir perkelti",
     "colorLabel": "Spalva",
@@ -994,6 +995,7 @@
     "selectColorAria": "Pasirinkti spalvą {name}",
     "noteTitle": "Pastaba:",
     "noteBody": "Tikroji spalva ir tekstūra gali šiek tiek skirtis nuo čia rodomos. Kiekviena lentelė yra unikali dėl natūralios medienos savybių.",
+    "basePriceLabel": "Bazinė kaina",
 
     "pricingTitle": "Kaina",
     "inputModeLabel": "Skaičiuoti pagal",
