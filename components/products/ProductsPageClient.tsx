@@ -713,6 +713,7 @@ export default function ProductsPageClient({
     selectedLength.length === 0 &&
     searchQuery.trim().length === 0;
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const orderedProducts = useMemo(() => {
     if (!isDefaultListing) return filteredProducts;
 

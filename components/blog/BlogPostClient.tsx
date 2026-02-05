@@ -148,7 +148,7 @@ export default function BlogPostClient({
           </div>
 
           <div className="hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
-            <p className="font-['Outfit'] text-[12px] md:text-[13px] leading-[1.75] text-[#535353]">
+            <p className="font-['Outfit'] text-[12px] md:text-[13px] leading-[1.5] text-[#535353]">
               {post.summary}
             </p>
 
@@ -158,7 +158,7 @@ export default function BlogPostClient({
                   <div className="font-['Outfit'] font-semibold text-[12px] md:text-[13px] leading-[1.35] text-[#161616]">
                     {section.heading}
                   </div>
-                  <p className="mt-[6px] font-['Outfit'] text-[12px] md:text-[13px] leading-[1.75] text-[#535353]">
+                  <p className="mt-[6px] font-['Outfit'] text-[12px] md:text-[13px] leading-[1.5] text-[#535353]">
                     {section.body}
                   </p>
                 </div>
@@ -168,7 +168,7 @@ export default function BlogPostClient({
             {post.body.length > 0 && (
               <div className="mt-[18px] space-y-[14px]">
                 {post.body.map((paragraph, idx) => (
-                  <p key={`${post.id}-p-top-${idx}`} className="font-['Outfit'] text-[12px] md:text-[13px] leading-[1.75] text-[#535353]">
+                  <p key={`${post.id}-p-top-${idx}`} className="font-['Outfit'] text-[12px] md:text-[13px] leading-[1.5] text-[#535353]">
                     {paragraph}
                   </p>
                 ))}

@@ -1,9 +1,21 @@
 import { defineConfig, devices } from '@playwright/test';
+import { CONSENT_COOKIE_NAME } from './lib/cookies/consent';
 
 /**
  * Playwright configuration for yakiwood-website E2E tests
  * @see https://playwright.dev/docs/test-configuration
  */
+const COOKIE_CONSENT_VALUE = `v2:${JSON.stringify({ analytics: true, marketing: true })}`;
+const COOKIE_CONSENT_COOKIE = {
+  name: CONSENT_COOKIE_NAME,
+  value: COOKIE_CONSENT_VALUE,
+  domain: '127.0.0.1',
+  path: '/',
+  httpOnly: false,
+  secure: false,
+  sameSite: 'Lax' as const,
+};
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -15,6 +27,10 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    storageState: {
+      cookies: [COOKIE_CONSENT_COOKIE],
+      origins: [],
+    },
   },
 
   projects: [

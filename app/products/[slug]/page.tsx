@@ -39,15 +39,19 @@ function normalizeKey(value: string): string {
     .replace(/^-|-$/g, '');
 }
 
+type ProductSearchParams = Record<string, string | string[] | undefined>;
+type MaybeProductSearchParams = ProductSearchParams | Promise<ProductSearchParams | undefined> | undefined;
+
 interface ProductPageProps {
   params: { slug: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: MaybeProductSearchParams;
 }
 
-function buildQueryString(searchParams: ProductPageProps['searchParams']): string {
-  if (!searchParams) return '';
+async function buildQueryString(searchParams?: MaybeProductSearchParams): Promise<string> {
+  const resolved = searchParams ? await searchParams : null;
+  if (!resolved) return '';
   const qs = new URLSearchParams();
-  for (const [key, raw] of Object.entries(searchParams)) {
+  for (const [key, raw] of Object.entries(resolved)) {
     if (typeof raw === 'string') {
       if (raw !== '') qs.set(key, raw);
       continue;
@@ -166,7 +170,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   const canonicalSlug = currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug;
   if (!resolvedParams.slug.includes('--') && canonicalSlug && resolvedParams.slug !== canonicalSlug) {
     const target = toLocalePath(`/products/${canonicalSlug}`, currentLocale);
-    const qs = buildQueryString(searchParams);
+    const qs = await buildQueryString(searchParams);
     redirect(qs ? `${target}?${qs}` : target);
   }
 
