@@ -1,0 +1,15 @@
+/* existing global styles */
+:root {
+  /* theme variables */
+}
+/* Ensure page edge components keep minimal horizontal padding on small/tablet viewports */
+.page-edge-fix {
+  padding-left: 1rem; /* 16px */
+  padding-right: 1rem; /* 16px */
+}
+@media (min-width: 768px) {
+  .page-edge-fix {
+    padding-left: 2.5rem; /* 40px */
+    padding-right: 2.5rem; /* 40px */
+  }
+}

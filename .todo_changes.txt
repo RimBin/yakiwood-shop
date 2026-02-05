@@ -1,0 +1,1 @@
+Added global .page-edge-fix CSS to `styles/globals.css` to preserve horizontal padding on small/tablet. Next: apply `page-edge-fix` to product slider wrappers in homepage and product components.

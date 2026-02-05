@@ -89,3 +89,5 @@ export default async function Home() {
     </main>
   );
 }
+
+// Wrap product sections with `page-edge-fix` to ensure consistent horizontal padding

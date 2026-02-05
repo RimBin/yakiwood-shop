@@ -14,6 +14,8 @@ const COOKIE_CONSENT_COOKIE = {
   httpOnly: false,
   secure: false,
   sameSite: 'Lax' as const,
+  // Make sure Playwright storageState cookie has a numeric expiry (seconds since epoch)
+  expires: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365, // 1 year
 };
 
 export default defineConfig({
@@ -61,6 +63,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     url: 'http://127.0.0.1:3000',
+    // Reuse existing server when present (helps local dev workflows). In CI this becomes false.
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },

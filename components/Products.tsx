@@ -425,7 +425,7 @@ export default function Products() {
       {/* ===== MOBILE LAYOUT (< 1536px) - Figma 803:13029 ===== */}
       <InView className="2xl:hidden hero-animate-root">
         {/* Title Section - Mobile */}
-        <div className="px-[16px] pt-[64px] pb-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+        <div className="px-[16px] sm:px-[24px] lg:px-[40px] pt-[64px] pb-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
           <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
             {t('eyebrow')}
           </p>
@@ -437,7 +437,7 @@ export default function Products() {
         </div>
 
         {/* Stacked product cards (no horizontal scroll) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px] px-[16px] min-[520px]:px-0 pb-[24px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px] px-[16px] sm:px-[24px] lg:px-[40px] pb-[24px]">
           {products.map((product, idx) => (
             <div
               key={idx}

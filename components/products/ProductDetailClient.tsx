@@ -1396,9 +1396,9 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
       <main className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[16px] lg:py-[54px]">
         <div className="flex flex-col lg:flex-row gap-[24px] lg:gap-[36px]">
           {/* Left Column - Gallery (Desktop) */}
-          <div className="hidden lg:flex order-1 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+          <div className="hidden lg:flex lg:flex-[0_0_55%] order-1 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             {/* Main Image */}
-            <div className="relative w-full lg:w-[328px] xl:w-[500px] 2xl:w-[790px] aspect-square lg:aspect-auto lg:h-[400px] xl:h-[500px] 2xl:h-[729px] bg-[#EAEAEA] rounded-[4px] overflow-hidden">
+            <div className="relative w-full h-full bg-[#EAEAEA] rounded-[4px] overflow-hidden lg:min-h-[400px] xl:min-h-[500px] 2xl:min-h-[729px]">
               {unitPricePerBoardDisplay ? (
                 <div className="absolute z-10 top-[16px] left-[16px] rounded-[6px] bg-[#161616] px-[10px] py-[6px]">
                   <span className="font-['DM_Sans'] text-[14px] leading-[1] tracking-[-0.2px] text-white">
@@ -1448,7 +1448,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                   src={activeImage}
                   alt={localizedDisplayName}
                   fill
-                  className="object-contain"
+                  className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 60vw"
                   priority
                 />
@@ -1538,7 +1538,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                     src={activeImage}
                     alt={localizedDisplayName}
                     fill
-                    className="object-contain"
+                    className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 60vw"
                     priority
                   />
@@ -1601,7 +1601,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
             )}
 
             {/* Description */}
-            <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] max-w-[434px]">
+            <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] w-full">
               {displayDescription || t('descriptionFallback')}
             </p>
 
@@ -1804,7 +1804,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                     {currentLocale === 'lt' ? 'vnt' : 'pcs'}
                   </button>
                 </div>
-                <div className="h-[48px] px-[16px] border border-[#bbbbbb] flex items-center max-w-[438px]">
+                <div className="h-[48px] px-[16px] border border-[#bbbbbb] flex items-center w-full">
                   {inputMode === 'area' ? (
                     <input
                       type="number"
@@ -1839,7 +1839,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-[8px] items-center max-w-[434px]">
+            <div className="flex flex-col gap-[8px] items-stretch w-full">
               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#535353] text-center">
                 {needAssistanceLead}{' '}
                 <button

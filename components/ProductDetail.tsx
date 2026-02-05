@@ -117,7 +117,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 src={product.image || imgProduct} 
                 alt={product.name}
                 fill
-                className="object-contain"
+                className="object-cover"
                 priority
               />
             </div>
@@ -136,7 +136,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             </div>
 
             {/* Description */}
-            <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] max-w-[434px]">
+            <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616] w-full">
               {product.description}
             </p>
 
@@ -230,7 +230,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#7c7c7c]">
                   Quantity m2
                 </p>
-                <div className="h-[48px] px-[16px] border border-[#bbbbbb] flex items-center max-w-[438px]">
+                <div className="h-[48px] px-[16px] border border-[#bbbbbb] flex items-center w-full">
                   <input
                     type="number"
                     value={quantity}
@@ -242,7 +242,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-[8px] items-center max-w-[434px]">
+            <div className="flex flex-col gap-[8px] items-stretch w-full">
               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#535353] text-center">
                 Haven't found what you're looking for?{' '}
                 <Link href={toLocalePath('/kontaktai', currentLocale)} className="text-[#161616] underline">
