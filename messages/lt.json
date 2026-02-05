@@ -2135,5 +2135,241 @@
       "questionRequired": "Klausimas yra privalomas.",
       "answerRequired": "Atsakymas yra privalomas."
     }
+  },
+  "solutionsPage": {
+    "title": "Sprendimai",
+    "faqLabel": "Dažnai užduodami klausimai",
+    "productsTitle": "Produktai",
+    "nav": {
+      "facades": "Fasadai",
+      "terraces": "Terasos",
+      "interior": "Interjeras",
+      "fences": "Tvoros"
+    },
+    "cta": {
+      "getOffer": "Gauti pasiūlymą",
+      "seeProjects": "Žiūrėti projektus",
+      "viewProducts": "Žiūrėti produktus",
+      "seeInteriors": "Žiūrėti interjerus",
+      "seeFences": "Žiūrėti tvoras"
+    },
+    "products": {
+      "graphiteSpruce": {
+        "name": "Graphite Eglė",
+        "profile": "ROMBAS PROFILIS · 95×3000 mm",
+        "usage": "Fasadų sistemos · Deginta eglė"
+      },
+      "graphiteLarch": {
+        "name": "Graphite Maumedis",
+        "profile": "ROMBAS PROFILIS · 145×3600 mm",
+        "usage": "Fasadų sistemos · Degintas maumedis"
+      },
+      "latteSpruce": {
+        "name": "Latte Eglė",
+        "profile": "PUSĖ ŠPUNTO 45° PROFILIS · 95×3000 mm",
+        "usage": "Fasadų sistemos · Deginta eglė"
+      },
+      "latteLarch": {
+        "name": "Latte Maumedis",
+        "profile": "ROMBAS PROFILIS · 145×3600 mm",
+        "usage": "Fasadų sistemos · Degintas maumedis"
+      }
+    },
+    "facades": {
+      "eyebrow": "Fasadai / Greita specifikacija",
+      "title": {
+        "prefix": "Sukurti",
+        "italic": "ilgaamžiškumui",
+        "suffix": "lauke"
+      },
+      "description": "Moderni, vėdinama fasado sistema su deginta mediena – pritaikyta Baltijos klimatui, minimali priežiūra ir švari architektūrinė išvaizda.",
+      "intro": "Medienos deginimas yra senovinis ir unikalus metodas, kuris vis labiau populiarėja šiuolaikinėje architektūroje. Rezultatas – medinės fasado apdailos, suteikiančios modernią ir tvirtą išvaizdą.",
+      "detail": "Deginta mediena ne tik suteikia unikalią išvaizdą, bet taip pat yra atspari ir ilgaamžė. Tinkamai apdorota deginta mediena sukuria modernią, gamtos įkvėptą estetiką, tinkančią visiems architektūriniams stiliams. Be to, deginta mediena yra natūrali apsauga nuo išorinių veiksnių, tokių kaip kenkėjai ar kenksmingos ultravioletinės saulės spinduliuotės.",
+      "faqSubtitle": "Ar norite suteikti savo pastatui išskirtinę ir patrauklią išvaizdą? Skatinkite įvairius dizaino sprendimus su deginta mediena.",
+      "specs": {
+        "thickness": { "label": "Storis", "value": "18/20 mm" },
+        "wood": { "label": "Mediena", "value": "Maumedis / Eglė" },
+        "finish": { "label": "Apdaila", "value": "Matinė, UV stabili" }
+      },
+      "images": {
+        "topLeft": "Fasado projekto detalė",
+        "topRight": "Deginta mediena fasadui",
+        "wide": "Fasado lentos tekstūra"
+      },
+      "badges": {
+        "epd": "Aplinkosaugos produkto deklaracija",
+        "fsc": "Atsakingas miškų valdymas",
+        "uv": "Atsparumas blukimui"
+      },
+      "faq": {
+        "1": {
+          "title": "Įvadas į degintą medį fasado apdailai",
+          "content": "Deginta mediena yra senovinis ir unikalus metodas, vis labiau populiarėjantis šiuolaikinėje architektūroje. Rezultatas – medinė fasado apdaila, suteikianti modernią ir tvirtą išvaizdą. Deginta mediena ne tik suteikia unikalų matymą, bet taip pat yra atspari ir ilgaamžė, natūraliai apsauganti nuo kenkėjų ir UV spindulių."
+        },
+        "2": {
+          "title": "Degintos medienos fasado privalumai",
+          "content": "Deginta medienos fasado apdaila siūlo daugybę privalumų: padidintą ilgaamžiškumą, natūralų atsparumą oro sąlygoms ir išskirtinę estetinę išvaizdą. Be cheminių konservantų mediena tampa atspari pelėsiams, grybams ir kenkėjams."
+        },
+        "3": {
+          "title": "Populiariausios medienos rūšys fasado apdailai",
+          "content": "Dažniausiai naudojamos medienos rūšys degintai fasado apdailai yra maumedis, pušis, eglė ir ąžuolas. Kiekviena rūšis turi unikalias savybes ir vizualinę trauką. Maumedis pasižymi ypač geru atsparumu drėgmei."
+        },
+        "4": {
+          "title": "Degintos medienos fasado montavimo procesas",
+          "content": "Montavimo procesas apima tinkamą paviršiaus paruošimą, tinkamos tvirtinimo sistemos parinkimą ir tinkamos ventiliacijos užtikrinimą už apdailos. Ventiliuojamas fasadas yra būtinas norint užtikrinti ilgaamžiškumą."
+        },
+        "5": {
+          "title": "Degintos medienos fasado kainų aspektai",
+          "content": "Nors pradinės išlaidos gali būti didesnės nei tradicinių variantų, ilgalaikis patvarumas ir maži priežiūros reikalavimai daro degintą medieną ekonomišku pasirinkimu per visą eksploatavimo laikotarpį."
+        }
+      }
+    },
+    "terraces": {
+      "eyebrow": "Terasos / Greita specifikacija",
+      "title": {
+        "prefix": "Sukurta",
+        "italic": "komfortui",
+        "suffix": "lauke"
+      },
+      "description": "Ugnimi apdorota terasa su natūraliu sukibimu ir rafinuota tekstūra. Sukurta atlaikyti sezoninius pokyčius ir išlikti gražiai po kojomis.",
+      "intro": "Terasos iš degintos medienos – tai unikalus sprendimas lauko erdvėms. Šiuolaikinė Shou Sugi Ban technika suteikia terasoms ne tik išskirtinę išvaizdą, bet ir padidintą atsparumą drėgmei bei UV spinduliams.",
+      "detail": "Deginta terasa pasižymi natūraliu neslidžiu paviršiumi, kuris yra saugus net sudrėkęs. Ši apdaila yra draugiška basoms kojoms ir puikiai tinka prie baseino, pirties ar lauko poilsio zonų. Mediena tampa stabilesnė ir mažiau linkusi į deformacijas dėl drėgmės pokyčių.",
+      "faqSubtitle": "Ieškote ilgaamžio ir gražaus sprendimo jūsų lauko terasai? Deginta mediena – puikus pasirinkimas šiuolaikiškai erdvei.",
+      "specs": {
+        "use": { "label": "Naudojimas", "value": "Denio / terasos" },
+        "feel": { "label": "Pojūtis", "value": "Natūrali tekstūra, stabili" },
+        "care": { "label": "Priežiūra", "value": "Minimali priežiūra" }
+      },
+      "images": {
+        "topLeft": "Terasos denio apdaila",
+        "topRight": "Terasos projektas",
+        "wide": "Denio detalė"
+      },
+      "badges": {
+        "grip": "Patikimas sukibimas",
+        "drain": "Ventiliuojama sistema",
+        "season": "Paruošta orams"
+      },
+      "faq": {
+        "1": {
+          "title": "Kodėl verta rinktis degintą medieną terasai?",
+          "content": "Deginta mediena terasai siūlo unikalų derinį – natūralų grožį ir padidintą atsparumą. Deginimo procesas sukuria apsauginį sluoksnį, kuris apsaugo medieną nuo drėgmės, UV spindulių ir biologinių kenkėjų, kartu suteikdamas nepakartojamą estetiką."
+        },
+        "2": {
+          "title": "Ar deginta mediena tinka prie baseino?",
+          "content": "Taip, deginta mediena puikiai tinka prie baseino zonų. Jos natūralus paviršius išlieka neslidus net sudrėkęs, o padidinta atsparumas drėgmei užtikrina ilgaamžiškumą net nuolatinio vandens poveikio sąlygomis."
+        },
+        "3": {
+          "title": "Kaip prižiūrėti degintą terasą?",
+          "content": "Deginta terasa reikalauja minimalios priežiūros. Rekomenduojama reguliariai nuvalyti dulkes ir nešvarumus, o kartą per metus galima atnaujinti apsauginę alyvą. Nenaudokite aukšto slėgio plovimo, nes tai gali pažeisti paviršių."
+        },
+        "4": {
+          "title": "Koks degintos terasos tarnavimo laikas?",
+          "content": "Tinkamai prižiūrima deginta terasa gali tarnauti 25-30 metų ir ilgiau. Deginimo procesas žymiai padidina medienos atsparumą puvimui ir kenkėjams, todėl tarnavimo laikas yra ilgesnis nei standartinės medienos."
+        },
+        "5": {
+          "title": "Ar galima derinti skirtingas spalvas terasoje?",
+          "content": "Taip, siūlome įvairias degintos medienos spalvas ir tonus. Galite pasirinkti nuo gilios juodos iki šviesesnių atspalvių, priklausomai nuo deginimo intensyvumo ir apdailos. Tai leidžia sukurti individualų dizainą."
+        }
+      }
+    },
+    "interior": {
+      "eyebrow": "Interjeras / Greita specifikacija",
+      "title": {
+        "prefix": "Suteikite",
+        "italic": "gilumą",
+        "suffix": "viduje"
+      },
+      "description": "Deginti medienos plokštės moderniems interjerams – šiluma, kontrastas ir tekstūra akcentinėms sienoms, luboms ir detalėms.",
+      "intro": "Deginta mediena interjere atveria neribotus dizaino galimybes. Nuo akcentinių sienų iki lubų apdailos – Shou Sugi Ban technika suteikia erdvėms unikalų charakterį ir gilumą.",
+      "detail": "Interjero apdailai naudojama deginta mediena yra specialiai paruošta vidaus erdvėms – švelnesnė tekstūra, mažiau anglies likučių ir tobulai apdoroti paviršiai. Ji sukuria jaukią atmosferą ir puikiai dera su šiuolaikiniais bei minimalistiniais interjerais.",
+      "faqSubtitle": "Ieškote būdo suteikti savo interjerui šilumos ir unikalumo? Deginta mediena – tobulas pasirinkimas akcentinėms sienoms ir luboms.",
+      "specs": {
+        "applications": { "label": "Pritaikymas", "value": "Sienos / lubos" },
+        "look": { "label": "Išvaizda", "value": "Sodri tekstūra, matinė" },
+        "design": { "label": "Dizainas", "value": "Individualūs raštai" }
+      },
+      "images": {
+        "topLeft": "Interjero sienų plokštės",
+        "topRight": "Interjero projekto detalė",
+        "wide": "Plokštės tekstūros detalė"
+      },
+      "badges": {
+        "text": "Lytėjimui malonus paviršius",
+        "warm": "Natūrali atmosfera",
+        "detail": "Architektūrinė apdaila"
+      },
+      "faq": {
+        "1": {
+          "title": "Ar deginta mediena tinka vidaus erdvėms?",
+          "content": "Taip, deginta mediena puikiai tinka vidaus erdvėms. Interjero apdailai naudojama specialiai paruošta mediena su lengvesniu deginimu, mažiau anglies dulkių ir kruopščiai apdorotais paviršiais. Ji atitinka visus vidaus apdailos saugumo reikalavimus."
+        },
+        "2": {
+          "title": "Kokioms patalpoms tinka deginta mediena?",
+          "content": "Deginta mediena tinka daugumai patalpų: gyvenamieji kambariai, miegamieji, biurai, restoranai, viešbučiai. Ji ypač efektyviai atrodo kaip akcentinė siena, lubų apdaila ar baldų elementas. Drėgnoms patalpoms (vonios) rekomenduojama papildoma apsauga."
+        },
+        "3": {
+          "title": "Ar deginta mediena skleidžia kvapą?",
+          "content": "Naujai sumontuota deginta mediena gali turėti lengvą dūmų kvapą, kuris išsisklaido per kelias savaites. Galutinai apdoroti produktai su apsauginiu sluoksniu praktiškai neturi kvapo ir yra tinkami net jautriems žmonėms."
+        },
+        "4": {
+          "title": "Kaip prižiūrėti degintą medieną interjere?",
+          "content": "Interjero deginta mediena reikalauja minimalios priežiūros. Reguliariai nuvalykite dulkes sausa arba šiek tiek drėgna šluoste. Venkite agresyvių valymo priemonių. Rekomenduojama kartą per kelerius metus atnaujinti apsauginį sluoksnį."
+        },
+        "5": {
+          "title": "Ar galima derinti degintą medieną su kitomis medžiagomis?",
+          "content": "Deginta mediena puikiai dera su įvairiomis medžiagomis: betonu, metalu, stiklu, akmeniu ir natūraliais audiniais. Kontrastas tarp tamsioje degintos medienos ir šviesių elementų sukuria įspūdingą vizualinį efektą."
+        }
+      }
+    },
+    "fences": {
+      "eyebrow": "Tvoros / Greita specifikacija",
+      "title": {
+        "prefix": "Privatumas su",
+        "italic": "stiliumi",
+        "suffix": "integruotu"
+      },
+      "description": "Deginta medienos tvora, kuri išlieka stabili, atrodo prabangiai ir atlaiko stichijas – švarių linijų ir ilgalaikio patvarumo sprendimas.",
+      "intro": "Deginta medienos tvora – tai daugiau nei paprastas aptvaras. Tai architektūrinis elementas, kuris suteikia jūsų sklypui charakterį ir apsaugą, kartu pabrėžiant šiuolaikišką dizainą.",
+      "detail": "Mūsų tvoros iš degintos medienos pasižymi išskirtiniu ilgaamžiškumu ir minimalia priežiūra. Deginimo procesas sukuria natūralią apsaugą nuo puvimo, kenkėjų ir UV spindulių, todėl tvora išlaiko savo išvaizdą dešimtmečius.",
+      "faqSubtitle": "Ieškote tvoros, kuri būtų ne tik funkcionali, bet ir estetiška? Deginta mediena – sprendimas, kuris pavers jūsų sklypą unikaliu.",
+      "specs": {
+        "purpose": { "label": "Paskirtis", "value": "Privatumas / ribos" },
+        "build": { "label": "Konstrukcija", "value": "Tvirta ir stabili" },
+        "finish": { "label": "Apdaila", "value": "Išskirtinė deginta išvaizda" }
+      },
+      "images": {
+        "topLeft": "Deginta medienos tvora",
+        "topRight": "Tvoros projektas",
+        "wide": "Tvoros detalė"
+      },
+      "badges": {
+        "long": "Sukurta ištverti",
+        "clean": "Minimalistinis siluetas",
+        "care": "Maža priežiūra"
+      },
+      "faq": {
+        "1": {
+          "title": "Kuo deginta medienos tvora pranašesnė už įprastą?",
+          "content": "Deginta mediena siūlo kelis esminius pranašumus: padidintą atsparumą puvimui ir kenkėjams, ilgesnį tarnavimo laiką, mažesnę priežiūrą ir unikalią estetinę išvaizdą, kuri kiekvienais metais tampa vis įspūdingesnė."
+        },
+        "2": {
+          "title": "Koks degintos tvoros tarnavimo laikas?",
+          "content": "Tinkamai sumontuota ir minimali priežiūra prižiūrima deginta tvora gali tarnauti 30-40 metų ir ilgiau. Tai žymiai ilgiau nei standartinė medinė tvora, kuri paprastai tarnauja 10-15 metų."
+        },
+        "3": {
+          "title": "Ar reikia dažyti degintą tvorą?",
+          "content": "Ne, deginta tvora nereikalauja dažymo. Natūralus degintas paviršius yra pati apsauga. Galima periodiškai atnaujinti apsauginę alyvą, bet tai nėra būtina. Tvora natūraliai senėja įgaudama sidabrinį atspalvį arba išlieka tamsiai juoda su alyva."
+        },
+        "4": {
+          "title": "Kokie tvoros stiliaus variantai galimi?",
+          "content": "Siūlome įvairius tvoros stilius: horizontalias ir vertikalias lentas, rėminę konstrukciją, kombinuotus variantus su metalu. Taip pat galime pritaikyti individualius dizainus pagal jūsų pageidavimus ir sklypo architektūrą."
+        },
+        "5": {
+          "title": "Ar deginta tvora atlaiko lietuvišką klimatą?",
+          "content": "Taip, deginta mediena ypač gerai tinka Baltijos klimato sąlygoms. Deginimo procesas sukuria hidrofobinį sluoksnį, kuris atspirtu drėgmę. Tvora atlaikys lietų, sniegą, šaltį ir karštį be jokių problemų."
+        }
+      }
+    }
   }
 }

@@ -6,136 +6,135 @@ import Link from 'next/link';
 import { PageCover } from '@/components/shared/PageLayout';
 import { CTA } from '@/components/home';
 import { assets, getAsset } from '@/lib/assets';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
 import InView from '@/components/InView';
 
+type SolutionType = 'facades' | 'terraces' | 'interior' | 'fences';
+
 export default function SolutionsPage() {
   const [openAccordionIndex, setOpenAccordionIndex] = useState<number | null>(0);
-  const [activeFilter, setActiveFilter] = useState('Facades');
+  const [activeFilter, setActiveFilter] = useState<SolutionType>('facades');
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const t = useTranslations('solutionsPage');
 
   const ModernApplicationCard = ({
     type,
   }: {
-    type: 'facades' | 'terraces' | 'interior' | 'fences';
+    type: SolutionType;
   }) => {
     const dataByType = {
         facades: {
           bgColor: '#EAEAEA',
           overlayOpacity: 0.06,
-          eyebrow: 'Facades / Quick spec',
+          eyebrow: t('facades.eyebrow'),
           title: {
-            prefix: 'Designed to',
-            italic: 'last',
-            suffix: 'outside',
+            prefix: t('facades.title.prefix'),
+            italic: t('facades.title.italic'),
+            suffix: t('facades.title.suffix'),
           },
-          description:
-            'A modern, ventilated facade system with charred wood cladding — built for the Baltic climate, minimal maintenance, and a clean architectural finish.',
+          description: t('facades.description'),
           specs: [
-            { label: 'Thickness', value: '18/20 mm' },
-            { label: 'Wood', value: 'Larch / Spruce' },
-            { label: 'Finish', value: 'Matte, UV stable' },
+            { label: t('facades.specs.thickness.label'), value: t('facades.specs.thickness.value') },
+            { label: t('facades.specs.wood.label'), value: t('facades.specs.wood.value') },
+            { label: t('facades.specs.finish.label'), value: t('facades.specs.finish.value') },
           ],
-          primaryCta: { href: '/kontaktai', label: 'get an offer' },
-          secondaryCta: { href: '/projects', label: 'see projects' },
+          primaryCta: { href: '/kontaktai', label: t('cta.getOffer') },
+          secondaryCta: { href: '/projektai', label: t('cta.seeProjects') },
           images: {
-            topLeft: { src: assets.projects[2], alt: 'Facade project detail' },
-            topRight: { src: assets.categories.facades, alt: 'Charred wood facade' },
-            wide: { src: assets.projects[3], alt: 'Facade board texture' },
+            topLeft: { src: assets.projects[2], alt: t('facades.images.topLeft') },
+            topRight: { src: assets.categories.facades, alt: t('facades.images.topRight') },
+            wide: { src: assets.projects[3], alt: t('facades.images.wide') },
           },
           badges: [
-            { k: 'EPD', desc: 'Environmental Product Declaration' },
-            { k: 'FSC', desc: 'Responsible forestry' },
-            { k: 'UV', desc: 'Fade resistance' },
+            { k: 'EPD', desc: t('facades.badges.epd') },
+            { k: 'FSC', desc: t('facades.badges.fsc') },
+            { k: 'UV', desc: t('facades.badges.uv') },
           ],
         },
         terraces: {
           bgColor: '#EFECE7',
           overlayOpacity: 0.05,
-          eyebrow: 'Terraces / Quick spec',
+          eyebrow: t('terraces.eyebrow'),
           title: {
-            prefix: 'Made for',
-            italic: 'comfort',
-            suffix: 'outdoors',
+            prefix: t('terraces.title.prefix'),
+            italic: t('terraces.title.italic'),
+            suffix: t('terraces.title.suffix'),
           },
-          description:
-            'Fire-treated decking with natural grip and a refined texture. Built to handle seasonal changes while staying beautiful underfoot.',
+          description: t('terraces.description'),
           specs: [
-            { label: 'Use', value: 'Decking / terraces' },
-            { label: 'Feel', value: 'Natural texture, stable' },
-            { label: 'Care', value: 'Low maintenance' },
+            { label: t('terraces.specs.use.label'), value: t('terraces.specs.use.value') },
+            { label: t('terraces.specs.feel.label'), value: t('terraces.specs.feel.value') },
+            { label: t('terraces.specs.care.label'), value: t('terraces.specs.care.value') },
           ],
-          primaryCta: { href: '/kontaktai', label: 'get an offer' },
-          secondaryCta: { href: '/products', label: 'view products' },
+          primaryCta: { href: '/kontaktai', label: t('cta.getOffer') },
+          secondaryCta: { href: '/produktai', label: t('cta.viewProducts') },
           images: {
-            topLeft: { src: assets.categories.terrace, alt: 'Terrace decking' },
-            topRight: { src: assets.projects[4], alt: 'Terrace project' },
-            wide: { src: assets.projects[5], alt: 'Decking detail' },
+            topLeft: { src: assets.categories.terrace, alt: t('terraces.images.topLeft') },
+            topRight: { src: assets.projects[4], alt: t('terraces.images.topRight') },
+            wide: { src: assets.projects[5], alt: t('terraces.images.wide') },
           },
           badges: [
-            { k: 'GRIP', desc: 'Confident footing' },
-            { k: 'DRAIN', desc: 'Ventilated system' },
-            { k: 'SEASON', desc: 'Weather-ready' },
+            { k: 'GRIP', desc: t('terraces.badges.grip') },
+            { k: 'DRAIN', desc: t('terraces.badges.drain') },
+            { k: 'SEASON', desc: t('terraces.badges.season') },
           ],
         },
         interior: {
           bgColor: '#E9ECEF',
           overlayOpacity: 0.05,
-          eyebrow: 'Interior / Quick spec',
+          eyebrow: t('interior.eyebrow'),
           title: {
-            prefix: 'Bring',
-            italic: 'depth',
-            suffix: 'inside',
+            prefix: t('interior.title.prefix'),
+            italic: t('interior.title.italic'),
+            suffix: t('interior.title.suffix'),
           },
-          description:
-            'Charred wood panels for modern interiors — warmth, contrast, and texture for feature walls, ceilings, and details.',
+          description: t('interior.description'),
           specs: [
-            { label: 'Applications', value: 'Walls / ceilings' },
-            { label: 'Look', value: 'Rich texture, matte' },
-            { label: 'Design', value: 'Custom patterns' },
+            { label: t('interior.specs.applications.label'), value: t('interior.specs.applications.value') },
+            { label: t('interior.specs.look.label'), value: t('interior.specs.look.value') },
+            { label: t('interior.specs.design.label'), value: t('interior.specs.design.value') },
           ],
-          primaryCta: { href: '/kontaktai', label: 'get an offer' },
-          secondaryCta: { href: '/projects', label: 'see interiors' },
+          primaryCta: { href: '/kontaktai', label: t('cta.getOffer') },
+          secondaryCta: { href: '/projektai', label: t('cta.seeInteriors') },
           images: {
-            topLeft: { src: assets.categories.interior, alt: 'Interior wall panels' },
-            topRight: { src: assets.projects[1], alt: 'Interior project detail' },
-            wide: { src: assets.projects[0], alt: 'Panel texture detail' },
+            topLeft: { src: assets.categories.interior, alt: t('interior.images.topLeft') },
+            topRight: { src: assets.projects[1], alt: t('interior.images.topRight') },
+            wide: { src: assets.projects[0], alt: t('interior.images.wide') },
           },
           badges: [
-            { k: 'TEXT', desc: 'Tactile surface' },
-            { k: 'WARM', desc: 'Natural ambience' },
-            { k: 'DETAIL', desc: 'Architectural finish' },
+            { k: 'TEXT', desc: t('interior.badges.text') },
+            { k: 'WARM', desc: t('interior.badges.warm') },
+            { k: 'DETAIL', desc: t('interior.badges.detail') },
           ],
         },
         fences: {
           bgColor: '#EAEDE7',
           overlayOpacity: 0.05,
-          eyebrow: 'Fences / Quick spec',
+          eyebrow: t('fences.eyebrow'),
           title: {
-            prefix: 'Privacy with',
-            italic: 'style',
-            suffix: 'built in',
+            prefix: t('fences.title.prefix'),
+            italic: t('fences.title.italic'),
+            suffix: t('fences.title.suffix'),
           },
-          description:
-            'Charred wood fencing that stays stable, looks premium, and withstands the elements — for clean lines and long-term durability.',
+          description: t('fences.description'),
           specs: [
-            { label: 'Purpose', value: 'Privacy / boundaries' },
-            { label: 'Build', value: 'Strong & stable' },
-            { label: 'Finish', value: 'Distinct charred look' },
+            { label: t('fences.specs.purpose.label'), value: t('fences.specs.purpose.value') },
+            { label: t('fences.specs.build.label'), value: t('fences.specs.build.value') },
+            { label: t('fences.specs.finish.label'), value: t('fences.specs.finish.value') },
           ],
-          primaryCta: { href: '/kontaktai', label: 'get an offer' },
-          secondaryCta: { href: '/projects', label: 'see fences' },
+          primaryCta: { href: '/kontaktai', label: t('cta.getOffer') },
+          secondaryCta: { href: '/projektai', label: t('cta.seeFences') },
           images: {
-            topLeft: { src: assets.categories.fence, alt: 'Charred wood fence' },
-            topRight: { src: assets.projects[3], alt: 'Fence project' },
-            wide: { src: assets.projects[2], alt: 'Fence detail' },
+            topLeft: { src: assets.categories.fence, alt: t('fences.images.topLeft') },
+            topRight: { src: assets.projects[3], alt: t('fences.images.topRight') },
+            wide: { src: assets.projects[2], alt: t('fences.images.wide') },
           },
           badges: [
-            { k: 'LONG', desc: 'Built to endure' },
-            { k: 'CLEAN', desc: 'Minimal silhouette' },
-            { k: 'CARE', desc: 'Low upkeep' },
+            { k: 'LONG', desc: t('fences.badges.long') },
+            { k: 'CLEAN', desc: t('fences.badges.clean') },
+            { k: 'CARE', desc: t('fences.badges.care') },
           ],
         },
       };
@@ -241,194 +240,121 @@ export default function SolutionsPage() {
     );
   };
 
-  const ApplicationSection = ({
-    id,
-    title,
-    description,
-    bullets,
-    images,
-    reverse = false,
-  }: {
-    id: string;
-    title: string;
-    description: string;
-    bullets: string[];
-    images: Array<{ src: string; alt: string }>;
-    reverse?: boolean;
-  }) => {
-    const isSingleImage = images.length === 1;
-    const isFacades = id === 'facades';
-    const imageGridClass = isFacades
-      ? 'grid grid-cols-2 lg:grid-cols-[240px_320px] gap-[12px] md:gap-[16px] lg:gap-[24px] w-full lg:w-[584px]'
-      : (isSingleImage ? 'grid grid-cols-1 ' : 'grid grid-cols-2 ') +
-        'gap-[12px] md:gap-[16px] lg:gap-[24px] w-full lg:w-[520px]';
-    const imageHeightClass = isFacades
-      ? 'h-[180px] md:h-[240px] lg:h-[300px]'
-      : isSingleImage
-        ? 'h-[220px] md:h-[320px] lg:h-[240px]'
-        : 'h-[160px] md:h-[220px] lg:h-[240px]';
-    const titleClass = isFacades
-      ? "font-['DM_Sans'] font-light text-[40px] leading-none tracking-[-1.6px] text-[#161616]"
-      : "font-['DM_Sans'] font-light text-[32px] lg:text-[48px] leading-none tracking-[-1.28px] lg:tracking-[-1.92px] text-[#161616]";
-    const descriptionClass = isFacades
-      ? "mt-[12px] font-['Outfit'] font-light text-[12px] leading-[1.35] tracking-[0.12px] text-[#535353]"
-      : "mt-[12px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]";
-    const listClass = isFacades
-      ? "mt-[16px] grid gap-[12px] font-['Outfit'] font-light text-[12px] leading-[1.35] tracking-[0.12px] text-[#535353]"
-      : "mt-[16px] grid gap-[10px] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353]";
-
-    return (
-      <div id={id} className={`scroll-mt-[96px] ${isFacades ? 'py-[48px] lg:py-[96px]' : ''}`}>
-        <div
-          className={
-            `flex flex-col lg:flex-row ${isFacades ? 'items-start' : 'items-center'} ` +
-            (reverse ? 'lg:flex-row-reverse ' : '') +
-            'gap-[20px] md:gap-[28px] lg:gap-[120px]'
-          }
-        >
-          <div className={imageGridClass}>
-            {images.map((img, idx) => (
-              <div
-                key={`${img.src}-${idx}`}
-                className={
-                  `relative w-full overflow-hidden ${isFacades ? 'rounded-[16px]' : 'rounded-[24px]'} ${imageHeightClass}` +
-                  (isFacades && idx === 1 ? ' lg:mt-[12px]' : '')
-                }
-              >
-                <Image src={img.src} alt={img.alt} fill className="object-cover" />
-              </div>
-            ))}
-          </div>
-
-          <div className={`w-full ${isFacades ? 'lg:max-w-[360px]' : 'lg:max-w-[420px]'}`}>
-            <h3 className={titleClass}>
-              {title}
-            </h3>
-            <p className={descriptionClass}>
-              {description}
-            </p>
-            <ul className={listClass}>
-              {bullets.map((b) => (
-                <li key={b}>— {b}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   const applicationNav = useMemo(
     () =>
       [
-        { label: 'Facades', id: 'facades' },
-        { label: 'Terraces', id: 'terraces' },
-        { label: 'Interior', id: 'interior' },
-        { label: 'Fences', id: 'fences' },
+        { label: t('nav.facades'), id: 'facades' as SolutionType },
+        { label: t('nav.terraces'), id: 'terraces' as SolutionType },
+        { label: t('nav.interior'), id: 'interior' as SolutionType },
+        { label: t('nav.fences'), id: 'fences' as SolutionType },
       ] as const,
-    []
+    [t]
   );
 
-  const scrollToSection = (id: string, label?: string) => {
-    setActiveFilter(label ?? id);
-
-    const el = document.getElementById(id);
-    if (!el) return;
+  const scrollToSection = (id: SolutionType) => {
+    setActiveFilter(id);
+    setOpenAccordionIndex(0); // Reset accordion when switching tabs
 
     // Keep URL shareable without triggering a hard jump.
     if (typeof window !== 'undefined') {
       window.history.replaceState(null, '', `#${id}`);
     }
 
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Scroll to top of content
+    const el = document.getElementById('solution-content');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   useEffect(() => {
     const hash = typeof window !== 'undefined' ? window.location.hash : '';
     const id = hash?.startsWith('#') ? hash.slice(1) : '';
     if (!id) return;
-    const exists = applicationNav.some((x) => x.id === id);
-    if (!exists) return;
+    const validIds: SolutionType[] = ['facades', 'terraces', 'interior', 'fences'];
+    if (!validIds.includes(id as SolutionType)) return;
 
     // Wait a tick so layout is ready.
-    const t = window.setTimeout(() => scrollToSection(id), 0);
+    const t = window.setTimeout(() => setActiveFilter(id as SolutionType), 0);
     return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applicationNav]);
+  }, []);
+
+  // FAQ data for each solution type
+  const faqData: Record<SolutionType, Array<{ title: string; content: string }>> = {
+    facades: [
+      { title: t('facades.faq.1.title'), content: t('facades.faq.1.content') },
+      { title: t('facades.faq.2.title'), content: t('facades.faq.2.content') },
+      { title: t('facades.faq.3.title'), content: t('facades.faq.3.content') },
+      { title: t('facades.faq.4.title'), content: t('facades.faq.4.content') },
+      { title: t('facades.faq.5.title'), content: t('facades.faq.5.content') },
+    ],
+    terraces: [
+      { title: t('terraces.faq.1.title'), content: t('terraces.faq.1.content') },
+      { title: t('terraces.faq.2.title'), content: t('terraces.faq.2.content') },
+      { title: t('terraces.faq.3.title'), content: t('terraces.faq.3.content') },
+      { title: t('terraces.faq.4.title'), content: t('terraces.faq.4.content') },
+      { title: t('terraces.faq.5.title'), content: t('terraces.faq.5.content') },
+    ],
+    interior: [
+      { title: t('interior.faq.1.title'), content: t('interior.faq.1.content') },
+      { title: t('interior.faq.2.title'), content: t('interior.faq.2.content') },
+      { title: t('interior.faq.3.title'), content: t('interior.faq.3.content') },
+      { title: t('interior.faq.4.title'), content: t('interior.faq.4.content') },
+      { title: t('interior.faq.5.title'), content: t('interior.faq.5.content') },
+    ],
+    fences: [
+      { title: t('fences.faq.1.title'), content: t('fences.faq.1.content') },
+      { title: t('fences.faq.2.title'), content: t('fences.faq.2.content') },
+      { title: t('fences.faq.3.title'), content: t('fences.faq.3.content') },
+      { title: t('fences.faq.4.title'), content: t('fences.faq.4.content') },
+      { title: t('fences.faq.5.title'), content: t('fences.faq.5.content') },
+    ],
+  };
+
+  const currentFaq = faqData[activeFilter];
 
   const recommendedProducts = [
     {
       id: 'rec-graphite-spruce',
-      name: 'Graphite Eglė',
+      name: t('products.graphiteSpruce.name'),
       image: getAsset('finishSpruceGraphite'),
       priceTop: '28.22 €/vnt',
-      profile: 'ROMBAS PROFILIS · 95×3000 mm',
-      usage: 'Fasadų sistemos · Deginta eglė',
+      profile: t('products.graphiteSpruce.profile'),
+      usage: t('products.graphiteSpruce.usage'),
       price: '99 €/m²',
     },
     {
       id: 'rec-graphite-larch',
-      name: 'Graphite Maumedis',
+      name: t('products.graphiteLarch.name'),
       image: getAsset('finishLarchGraphite'),
       priceTop: '67.34 €/vnt',
-      profile: 'ROMBAS PROFILIS · 145×3600 mm',
-      usage: 'Fasadų sistemos · Degintas maumedis',
+      profile: t('products.graphiteLarch.profile'),
+      usage: t('products.graphiteLarch.usage'),
       price: '129 €/m²',
     },
     {
       id: 'rec-latte-spruce',
-      name: 'Latte Eglė',
+      name: t('products.latteSpruce.name'),
       image: getAsset('finishSpruceLatte'),
       priceTop: '28.22 €/vnt',
-      profile: 'PUSĖ ŠPUNTO 45° PROFILIS · 95×3000 mm',
-      usage: 'Fasadų sistemos · Deginta eglė',
+      profile: t('products.latteSpruce.profile'),
+      usage: t('products.latteSpruce.usage'),
       price: '99 €/m²',
     },
     {
       id: 'rec-latte-larch',
-      name: 'Latte Maumedis',
+      name: t('products.latteLarch.name'),
       image: getAsset('finishLarchLatte'),
       priceTop: '67.34 €/vnt',
-      profile: 'ROMBAS PROFILIS · 145×3600 mm',
-      usage: 'Fasadų sistemos · Degintas maumedis',
+      profile: t('products.latteLarch.profile'),
+      usage: t('products.latteLarch.usage'),
       price: '129 €/m²',
     },
   ];
 
-  const accordionData = [
-    {
-      title: 'Introduction to Burnt Wood Facade Cladding',
-      content: `Burnt wood is an ancient and unique technique that is becoming increasingly popular in modern architecture. The result is wooden facade cladding that provides a modern and robust appearance. This article, "Burnt Wood for Facades: A Modern and Durable Choice," presents the advantages of burnt wood facade cladding and offers recommendations on how to incorporate this technique into your projects.
-
-Burnt wood not only provides a unique look but is also durable and weather-resistant. Wrapping wood with burnt wood facade cladding can recreate an ancient, natural appearance that is adaptable to all architectural styles. Additionally, burnt wood serves as a natural protection against external factors such as pests and harmful ultraviolet rays from the sun.
-
-Do you want to give your building a distinctive and attractive appearance? Encourage various design solutions with burnt wood. Read this article to learn more about the benefits of burnt wood facades and tips on how to implement it in your projects.`,
-    },
-    {
-      title: 'Advantages of Burnt Wood Facade Cladding',
-      content: 'Burnt wood facade cladding offers numerous benefits including enhanced durability, natural weather resistance, and a distinctive aesthetic appeal.',
-    },
-    {
-      title: 'Most Popular Wood Types for Burnt Wood Facade Cladding',
-      content: 'Common wood types used for burnt wood cladding include larch, pine, spruce, and oak, each offering unique characteristics and visual appeal.',
-    },
-    {
-      title: 'Installation Process of Burnt Wood Facade Cladding',
-      content: 'The installation process involves proper surface preparation, selecting the right mounting system, and ensuring adequate ventilation behind the cladding.',
-    },
-    {
-      title: 'Cost Aspects of Burnt Wood Facade Cladding',
-      content: 'While initial costs may be higher than traditional options, the long-term durability and low maintenance requirements make burnt wood an economical choice.',
-    },
-    {
-      title: 'Sustainability and Environmental Protection of Burnt Wood Facade Cladding',
-      content: 'Burnt wood is an environmentally friendly option, using natural preservation methods and often sourced from sustainably managed forests.',
-    },
-    {
-      title: 'Conclusion: Is Burnt Wood Board Facade Cladding the Right Choice for Your Project?',
-      content: 'Consider your aesthetic preferences, budget, and long-term maintenance plans when deciding if burnt wood cladding is the right choice for your project.',
-    },
-  ];
+  // Get dynamic content for active filter
+  const introText = t(`${activeFilter}.intro`);
+  const detailText = t(`${activeFilter}.detail`);
 
   return (
     <div className="bg-transparent overflow-x-hidden">
@@ -438,7 +364,7 @@ Do you want to give your building a distinctive and attractive appearance? Encou
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-[24px] lg:gap-0 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"
                 style={{ fontVariationSettings: "'opsz' 14" }}>
-              Solutions
+              {t('title')}
             </h1>
 
             {/* Desktop Chips */}
@@ -447,9 +373,9 @@ Do you want to give your building a distinctive and attractive appearance? Encou
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => scrollToSection(item.id, item.label)}
+                  onClick={() => scrollToSection(item.id)}
                   className={`h-[32px] px-[12px] flex items-center justify-center rounded-[100px] font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase cursor-pointer transition-all ${
-                    activeFilter === item.label
+                    activeFilter === item.id
                       ? 'bg-[#161616] text-white'
                       : 'bg-transparent border border-[#BBBBBB] text-[#161616]'
                   }`}
@@ -472,9 +398,9 @@ Do you want to give your building a distinctive and attractive appearance? Encou
               <button
                 key={item.id}
                 type="button"
-                onClick={() => scrollToSection(item.id, item.label)}
+                onClick={() => scrollToSection(item.id)}
                 className={`h-[32px] px-[12px] flex items-center justify-center rounded-[100px] font-['Outfit'] text-[12px] font-normal tracking-[0.6px] uppercase cursor-pointer transition-all ${
-                  activeFilter === item.label
+                  activeFilter === item.id
                     ? 'bg-[#161616] text-white'
                     : 'bg-transparent border border-[#BBBBBB] text-[#161616]'
                 }`}
@@ -488,18 +414,15 @@ Do you want to give your building a distinctive and attractive appearance? Encou
 
       {/* Content Section */}
       <InView className="hero-animate-root">
-      <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[32px] lg:pt-[56px] pb-[16px] lg:pb-[24px]">
+      <section id="solution-content" className="scroll-mt-[96px] max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[32px] lg:pt-[56px] pb-[16px] lg:pb-[24px]">
         {/* Big Text - left aligned with first line indent */}
         <p className="font-['DM_Sans'] font-light text-[32px] lg:text-[52px] leading-none tracking-[-1.28px] lg:tracking-[-2.08px] text-[#161616] text-left indent-[80px] lg:indent-[200px] mb-[32px] lg:mb-[48px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-          Burning wood is an ancient and unique technique that is becoming increasingly popular in modern architecture. The result is a finish of wooden cladding that provides a modern and robust appearance.
+          {introText}
         </p>
 
         {/* Small Text - offset to right on desktop */}
         <div className="lg:ml-[25%] font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#535353] max-w-[557px] hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
-          <p className="mb-[10px]">
-            Charred wood cladding not only provides a unique appearance but is also durable and resistant to weather conditions. By properly charring the wood, a modern, nature-inspired aesthetic can be created, suitable for all architectural styles. Furthermore, charred wood serves as a natural defence against external influences, such as pests or harmful ultraviolet rays from the sun.
-          </p>
-          <p>Do you want to give your building a distinctive and appealing look? Encourage diverse design solutions with charred wood.</p>
+          <p>{detailText}</p>
         </div>
       </section>
       </InView>
@@ -507,22 +430,23 @@ Do you want to give your building a distinctive and attractive appearance? Encou
       {/* Purpose Section */}
       <InView className="hero-animate-root">
           <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[16px] lg:pt-[24px] pb-[48px] lg:pb-[72px]">
-            <div className="relative mt-[12px] lg:mt-[16px] h-[260px] sm:h-[380px] lg:h-[520px] overflow-hidden hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
-            <Image src={assets.projects[0]} alt="Purpose visual" fill className="object-cover" />
-          </div>
+            {/* Modern Application Card */}
+            <div className="mb-[48px] lg:mb-[72px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
+              <ModernApplicationCard type={activeFilter} />
+            </div>
 
           <div className="mt-[16px] lg:mt-[24px] grid lg:grid-cols-[25%_1fr] gap-[24px] lg:gap-0">
             <div className="hero-seq-item hero-seq-right lg:pr-[48px]" style={{ animationDelay: '420ms' }}>
               <p className="font-['Outfit'] font-normal text-[11px] leading-[1.3] tracking-[0.6px] uppercase text-[#535353] mb-[12px]">
-                Design goals
+                {t('faqLabel')}
               </p>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] tracking-[0.14px] text-[#535353]">
-                Do you want to give your building a distinctive and appealing look? Encourage diverse design solutions with charred wood.
+                {t(`${activeFilter}.faqSubtitle`)}
               </p>
             </div>
 
             <div className="grid gap-[6px] lg:pl-[14px]">
-              {accordionData.map((item, index) => (
+              {currentFaq.map((item, index) => (
                 <button
                   key={index}
                   onClick={() => setOpenAccordionIndex(openAccordionIndex === index ? null : index)}
@@ -548,13 +472,6 @@ Do you want to give your building a distinctive and attractive appearance? Encou
               ))}
             </div>
           </div>
-
-          <div className="hidden">
-            <div id="facades" className="scroll-mt-[96px]" />
-            <div id="terraces" className="scroll-mt-[96px]" />
-            <div id="interior" className="scroll-mt-[96px]" />
-            <div id="fences" className="scroll-mt-[96px]" />
-          </div>
         </section>
       </InView>
 
@@ -563,13 +480,13 @@ Do you want to give your building a distinctive and attractive appearance? Encou
         <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pb-[80px] lg:pb-[120px]">
           <div className="flex items-end justify-between mb-[24px] w-full lg:ml-[25%] lg:pl-[14px] max-w-[980px]">
             <h2 className="font-['DM_Sans'] font-light text-[32px] lg:text-[48px] leading-[1] tracking-[-1.28px] lg:tracking-[-1.92px] text-[#161616] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-              Products
+              {t('productsTitle')}
             </h2>
             {/* 'View all' button removed per request */}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[16px]">
             {recommendedProducts.map((product, index) => {
-              const safeSrc = product.image?.trim() || assets.finishSpruceGraphite || assets.wood.spruce;
+              const safeSrc = product.image?.trim() || assets.finishes.spruce.graphite || assets.wood.spruce;
               return (
                 <Link
                   key={product.id}

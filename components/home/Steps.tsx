@@ -121,14 +121,22 @@ export default async function Steps() {
 					{/* Steps Section */}
 					<div className="absolute left-0 right-0 top-[345px] px-[40px]">
 						{/* Connecting line */}
-						<div className="absolute h-0 left-0 right-0 top-[24px]">
+						<div
+							className="absolute h-0 left-[24px] top-[24px]"
+							style={{ width: 'calc(75% + (var(--steps-gap) * 0.75))' }}
+						>
 							<div className="w-full h-px bg-[#535353]" />
 						</div>
 
 						{/* Steps grid */}
 						<div
 							className="relative grid grid-cols-4"
-							style={{ columnGap: 'clamp(12px, 4vw, 88px)' }}
+							style={
+								{
+									['--steps-gap' as const]: 'clamp(12px, 4vw, 88px)',
+									columnGap: 'var(--steps-gap)',
+								} as React.CSSProperties
+							}
 						>
 							{steps.map((step, index) => (
 								<div
