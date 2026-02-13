@@ -186,7 +186,7 @@ export default function LanguageSwitcher({
         className={`group border border-solid rounded-[100px] flex gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[16px] md:px-[20px] py-[10px] bg-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
           isDark
             ? 'border-white/20 hover:bg-white/10 focus-visible:ring-white focus-visible:ring-offset-[#161616]'
-            : 'border-[#BBBBBB] hover:bg-[#161616] focus-visible:ring-[#161616]'
+            : 'border-[#535353] hover:bg-[#161616] hover:border-white focus-visible:ring-[#161616]'
         }`}
         aria-expanded={isOpen}
         aria-haspopup="listbox"

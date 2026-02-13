@@ -78,7 +78,7 @@ export default function Contact() {
   };
 
   return (
-    <section className="w-full bg-[#E1E1E1] min-h-screen">
+    <section className="w-full bg-[#E1E1E1]">
       {/* Title */}
       <InView className="hero-animate-root">
         <PageCover>

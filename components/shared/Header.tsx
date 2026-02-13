@@ -153,7 +153,7 @@ export default function Header() {
               
               <button 
                 onClick={() => setIsCartOpen(true)}
-                className="border border-[#BBBBBB] border-solid rounded-[100px] flex gap-[0px] md:gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[12px] md:px-[24px] py-[10px] bg-transparent hover:bg-[#161616] hover:text-white transition-colors group relative"
+                className="border border-[#535353] border-solid rounded-[100px] flex gap-[0px] md:gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[12px] md:px-[24px] py-[10px] bg-transparent hover:bg-[#161616] hover:border-white hover:text-white transition-colors group relative"
               >
                 <div className="relative h-[24px] w-[32px] shrink-0">
                   <div className="absolute left-0 top-0 h-[24px] w-[24px]">
@@ -179,7 +179,7 @@ export default function Header() {
               {/* Mobile Menu Button - visible only on mobile/tablet */}
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="xl:hidden border border-[#BBBBBB] border-solid rounded-[100px] w-[48px] h-[48px] flex items-center justify-center bg-transparent hover:bg-[#161616] transition-colors group"
+                className="xl:hidden border border-[#535353] border-solid rounded-[100px] w-[48px] h-[48px] flex items-center justify-center bg-transparent hover:bg-[#161616] hover:border-white transition-colors group"
                 aria-label={t(locale === 'lt' ? 'header.atidarykMenu' : 'header.openMenu')}
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:stroke-white transition-colors">

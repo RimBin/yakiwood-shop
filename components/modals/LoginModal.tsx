@@ -50,6 +50,33 @@ export default function LoginModal({
     setLoading(false);
   };
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setError(null);
+
+    if (!supabase) {
+      setError('Supabase is not configured.');
+      setLoading(false);
+      return;
+    }
+
+    const nextPath = `${window.location.pathname}${window.location.search}`;
+    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    callbackUrl.searchParams.set('next', nextPath || '/checkout');
+
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: callbackUrl.toString(),
+      },
+    });
+
+    if (oauthError) {
+      setError(oauthError.message);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="relative w-[479px] bg-[#E1E1E1] p-10 flex flex-col gap-6 items-center">
       {/* Close button */}
@@ -135,6 +162,17 @@ export default function LoginModal({
         >
           <span className="font-['Outfit'] font-normal text-xs text-white uppercase tracking-[0.6px]">
             {loading ? t('loggingIn') : t('login')}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={loading}
+          className="w-full h-12 border border-[#161616] rounded-[100px] flex items-center justify-center hover:bg-[#161616] hover:text-white transition-colors disabled:opacity-60"
+        >
+          <span className="font-['Outfit'] font-normal text-xs uppercase tracking-[0.6px]">
+            {t('continueWithGoogle')}
           </span>
         </button>
 

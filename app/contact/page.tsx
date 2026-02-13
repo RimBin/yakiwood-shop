@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function ContactPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="bg-white">
       <Contact />
     </main>
   );

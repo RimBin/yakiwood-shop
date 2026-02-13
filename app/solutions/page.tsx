@@ -198,7 +198,7 @@ export default function SolutionsPage() {
 
                 <Link
                   href={toLocalePath(data.secondaryCta.href, currentLocale)}
-                  className="group border border-[#161616] h-[48px] px-[40px] rounded-[100px] flex items-center justify-center hover:bg-[#161616] transition-colors"
+                  className="group border border-[#161616] h-[48px] px-[40px] rounded-[100px] flex items-center justify-center hover:bg-[#535353] transition-colors"
                 >
                   <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white transition-colors">
                     {data.secondaryCta.label}

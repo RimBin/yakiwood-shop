@@ -968,6 +968,11 @@
     "register": "Register",
     "login": "Log in",
     "loggingIn": "Logging in...",
+    "continueWithGoogle": "Continue with Google",
+    "oauthErrorGeneric": "Could not sign in with Google",
+    "completeRegistrationDescription": "To continue, confirm that you agree to the Terms & Conditions and Privacy Policy.",
+    "completeRegistrationCta": "Complete registration",
+    "completeRegistrationSuccess": "Consent saved.",
     "demoLogin": "Demo login",
     "admin": "Administrator",
     "user": "User",
@@ -2360,6 +2365,242 @@
       "deleteFailed": "Failed to delete.",
       "questionRequired": "Question is required.",
       "answerRequired": "Answer is required."
+    }
+  },
+  "solutionsPage": {
+    "title": "Solutions",
+    "faqLabel": "Frequently asked questions",
+    "productsTitle": "Products",
+    "nav": {
+      "facades": "Facades",
+      "terraces": "Terraces",
+      "interior": "Interior",
+      "fences": "Fences"
+    },
+    "cta": {
+      "getOffer": "Get an offer",
+      "seeProjects": "See projects",
+      "viewProducts": "View products",
+      "seeInteriors": "See interiors",
+      "seeFences": "See fences"
+    },
+    "products": {
+      "graphiteSpruce": {
+        "name": "Graphite Spruce",
+        "profile": "RHOMBUS PROFILE · 95×3000 mm",
+        "usage": "Facade systems · Charred spruce"
+      },
+      "graphiteLarch": {
+        "name": "Graphite Larch",
+        "profile": "RHOMBUS PROFILE · 145×3600 mm",
+        "usage": "Facade systems · Charred larch"
+      },
+      "latteSpruce": {
+        "name": "Latte Spruce",
+        "profile": "HALF TAPER 45° PROFILE · 95×3000 mm",
+        "usage": "Facade systems · Charred spruce"
+      },
+      "latteLarch": {
+        "name": "Latte Larch",
+        "profile": "RHOMBUS PROFILE · 145×3600 mm",
+        "usage": "Facade systems · Charred larch"
+      }
+    },
+    "facades": {
+      "eyebrow": "Facades / Quick spec",
+      "title": {
+        "prefix": "Designed to",
+        "italic": "last",
+        "suffix": "outside"
+      },
+      "description": "A modern, ventilated facade system with charred wood cladding — built for the Baltic climate, minimal maintenance, and a clean architectural finish.",
+      "intro": "Burning wood is an ancient and unique technique that is becoming increasingly popular in modern architecture. The result is wooden facade cladding that provides a modern and robust appearance.",
+      "detail": "Charred wood cladding not only provides a unique appearance but is also durable and resistant to weather conditions. By properly charring the wood, a modern, nature-inspired aesthetic can be created, suitable for all architectural styles. Furthermore, charred wood serves as a natural defence against external influences, such as pests or harmful ultraviolet rays from the sun.",
+      "faqSubtitle": "Do you want to give your building a distinctive and appealing look? Encourage diverse design solutions with charred wood.",
+      "specs": {
+        "thickness": { "label": "Thickness", "value": "18/20 mm" },
+        "wood": { "label": "Wood", "value": "Larch / Spruce" },
+        "finish": { "label": "Finish", "value": "Matte, UV stable" }
+      },
+      "images": {
+        "topLeft": "Facade project detail",
+        "topRight": "Charred wood facade",
+        "wide": "Facade board texture"
+      },
+      "badges": {
+        "epd": "Environmental Product Declaration",
+        "fsc": "Responsible forestry",
+        "uv": "Fade resistance"
+      },
+      "faq": {
+        "1": {
+          "title": "Introduction to burnt wood facade cladding",
+          "content": "Burnt wood is an ancient and unique technique becoming increasingly popular in modern architecture. The result is wooden facade cladding that provides a modern and robust appearance. Burnt wood not only provides a unique look but is also durable and resistant, naturally protecting against pests and UV rays."
+        },
+        "2": {
+          "title": "Advantages of burnt wood facade cladding",
+          "content": "Burnt wood facade cladding offers numerous benefits: enhanced durability, natural weather resistance, and distinctive aesthetic appeal. Without chemical preservatives, the wood becomes resistant to mold, fungi, and pests."
+        },
+        "3": {
+          "title": "Most popular wood types for facade cladding",
+          "content": "Common wood types used for charred facade cladding include larch, pine, spruce, and oak. Each species has unique characteristics and visual appeal. Larch is particularly noted for its excellent moisture resistance."
+        },
+        "4": {
+          "title": "Burnt wood facade installation process",
+          "content": "The installation process involves proper surface preparation, selecting the right mounting system, and ensuring adequate ventilation behind the cladding. A ventilated facade is essential for ensuring longevity."
+        },
+        "5": {
+          "title": "Cost aspects of burnt wood facade cladding",
+          "content": "While initial costs may be higher than traditional options, the long-term durability and low maintenance requirements make burnt wood an economical choice over the entire lifespan."
+        }
+      }
+    },
+    "terraces": {
+      "eyebrow": "Terraces / Quick spec",
+      "title": {
+        "prefix": "Made for",
+        "italic": "comfort",
+        "suffix": "outdoors"
+      },
+      "description": "Fire-treated decking with natural grip and a refined texture. Built to handle seasonal changes while staying beautiful underfoot.",
+      "intro": "Charred wood terraces are a unique solution for outdoor spaces. Modern Shou Sugi Ban technique gives terraces not only a distinctive appearance but also increased resistance to moisture and UV rays.",
+      "detail": "A charred terrace features a natural non-slip surface that remains safe even when wet. This finish is barefoot-friendly and perfect for poolside, sauna, or outdoor relaxation areas. The wood becomes more stable and less prone to deformation due to moisture changes.",
+      "faqSubtitle": "Looking for a durable and beautiful solution for your outdoor terrace? Charred wood is an excellent choice for a modern space.",
+      "specs": {
+        "use": { "label": "Use", "value": "Decking / terraces" },
+        "feel": { "label": "Feel", "value": "Natural texture, stable" },
+        "care": { "label": "Care", "value": "Low maintenance" }
+      },
+      "images": {
+        "topLeft": "Terrace decking",
+        "topRight": "Terrace project",
+        "wide": "Decking detail"
+      },
+      "badges": {
+        "grip": "Confident footing",
+        "drain": "Ventilated system",
+        "season": "Weather-ready"
+      },
+      "faq": {
+        "1": {
+          "title": "Why choose charred wood for a terrace?",
+          "content": "Charred wood offers a unique combination for terraces – natural beauty and increased durability. The charring process creates a protective layer that shields the wood from moisture, UV rays, and biological pests, while providing an unparalleled aesthetic."
+        },
+        "2": {
+          "title": "Is charred wood suitable for pool areas?",
+          "content": "Yes, charred wood is excellent for pool zones. Its natural surface remains non-slip even when wet, and the increased moisture resistance ensures longevity even under constant water exposure."
+        },
+        "3": {
+          "title": "How to maintain a charred terrace?",
+          "content": "A charred terrace requires minimal maintenance. Regular dust and debris removal is recommended, and protective oil can be renewed once a year. Avoid high-pressure washing as it may damage the surface."
+        },
+        "4": {
+          "title": "What is the lifespan of a charred terrace?",
+          "content": "A properly maintained charred terrace can last 25-30 years and longer. The charring process significantly increases wood resistance to rot and pests, resulting in a longer lifespan than standard wood."
+        },
+        "5": {
+          "title": "Can different colors be combined on a terrace?",
+          "content": "Yes, we offer various charred wood colors and tones. You can choose from deep black to lighter shades, depending on the charring intensity and finish. This allows for creating an individual design."
+        }
+      }
+    },
+    "interior": {
+      "eyebrow": "Interior / Quick spec",
+      "title": {
+        "prefix": "Bring",
+        "italic": "depth",
+        "suffix": "inside"
+      },
+      "description": "Charred wood panels for modern interiors — warmth, contrast, and texture for feature walls, ceilings, and details.",
+      "intro": "Charred wood in interiors opens unlimited design possibilities. From accent walls to ceiling finishes – Shou Sugi Ban technique gives spaces a unique character and depth.",
+      "detail": "Charred wood used for interior finishing is specially prepared for indoor spaces – softer texture, fewer carbon residues, and perfectly treated surfaces. It creates a cozy atmosphere and pairs beautifully with modern and minimalist interiors.",
+      "faqSubtitle": "Looking for a way to add warmth and uniqueness to your interior? Charred wood is the perfect choice for accent walls and ceilings.",
+      "specs": {
+        "applications": { "label": "Applications", "value": "Walls / ceilings" },
+        "look": { "label": "Look", "value": "Rich texture, matte" },
+        "design": { "label": "Design", "value": "Custom patterns" }
+      },
+      "images": {
+        "topLeft": "Interior wall panels",
+        "topRight": "Interior project detail",
+        "wide": "Panel texture detail"
+      },
+      "badges": {
+        "text": "Tactile surface",
+        "warm": "Natural ambience",
+        "detail": "Architectural finish"
+      },
+      "faq": {
+        "1": {
+          "title": "Is charred wood suitable for indoor spaces?",
+          "content": "Yes, charred wood is excellent for indoor spaces. Wood used for interior finishing is specially prepared with lighter charring, fewer carbon particles, and meticulously treated surfaces. It meets all indoor finishing safety requirements."
+        },
+        "2": {
+          "title": "What rooms are suitable for charred wood?",
+          "content": "Charred wood suits most rooms: living rooms, bedrooms, offices, restaurants, hotels. It looks particularly effective as an accent wall, ceiling finish, or furniture element. For wet rooms (bathrooms), additional protection is recommended."
+        },
+        "3": {
+          "title": "Does charred wood emit odor?",
+          "content": "Newly installed charred wood may have a slight smoky scent that dissipates within a few weeks. Fully finished products with a protective layer have virtually no odor and are suitable even for sensitive individuals."
+        },
+        "4": {
+          "title": "How to maintain charred wood indoors?",
+          "content": "Interior charred wood requires minimal maintenance. Regularly remove dust with a dry or slightly damp cloth. Avoid aggressive cleaning agents. It's recommended to renew the protective layer every few years."
+        },
+        "5": {
+          "title": "Can charred wood be combined with other materials?",
+          "content": "Charred wood pairs beautifully with various materials: concrete, metal, glass, stone, and natural fabrics. The contrast between dark charred wood and light elements creates a stunning visual effect."
+        }
+      }
+    },
+    "fences": {
+      "eyebrow": "Fences / Quick spec",
+      "title": {
+        "prefix": "Privacy with",
+        "italic": "style",
+        "suffix": "built in"
+      },
+      "description": "Charred wood fencing that stays stable, looks premium, and withstands the elements — for clean lines and long-term durability.",
+      "intro": "A charred wood fence is more than just a barrier. It's an architectural element that gives your property character and protection while emphasizing contemporary design.",
+      "detail": "Our charred wood fences feature exceptional longevity and minimal maintenance. The charring process creates natural protection against rot, pests, and UV rays, so the fence maintains its appearance for decades.",
+      "faqSubtitle": "Looking for a fence that's both functional and aesthetic? Charred wood is the solution that will make your property unique.",
+      "specs": {
+        "purpose": { "label": "Purpose", "value": "Privacy / boundaries" },
+        "build": { "label": "Build", "value": "Strong & stable" },
+        "finish": { "label": "Finish", "value": "Distinct charred look" }
+      },
+      "images": {
+        "topLeft": "Charred wood fence",
+        "topRight": "Fence project",
+        "wide": "Fence detail"
+      },
+      "badges": {
+        "long": "Built to endure",
+        "clean": "Minimal silhouette",
+        "care": "Low upkeep"
+      },
+      "faq": {
+        "1": {
+          "title": "Why is a charred wood fence better than standard?",
+          "content": "Charred wood offers several key advantages: increased resistance to rot and pests, longer service life, less maintenance, and a unique aesthetic appearance that becomes even more impressive with each passing year."
+        },
+        "2": {
+          "title": "What is the lifespan of a charred fence?",
+          "content": "A properly installed and minimally maintained charred fence can serve 30-40 years and longer. This is significantly longer than a standard wooden fence, which typically lasts 10-15 years."
+        },
+        "3": {
+          "title": "Does the charred fence need painting?",
+          "content": "No, a charred fence does not require painting. The natural charred surface is the protection itself. Protective oil can be periodically renewed, but it's not necessary. The fence naturally ages to a silver tone or remains deep black with oil."
+        },
+        "4": {
+          "title": "What fence style options are available?",
+          "content": "We offer various fence styles: horizontal and vertical planks, framed construction, combined options with metal. We can also create custom designs according to your preferences and property architecture."
+        },
+        "5": {
+          "title": "Can a charred fence withstand Baltic climate?",
+          "content": "Yes, charred wood is particularly well suited for Baltic climate conditions. The charring process creates a hydrophobic layer that repels moisture. The fence will withstand rain, snow, cold, and heat without any problems."
+        }
+      }
     }
   }
 }

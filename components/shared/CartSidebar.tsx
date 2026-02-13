@@ -289,7 +289,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                   <Link
                     href={productsHref}
                     onClick={onClose}
-                    className="block w-full h-[48px] rounded-[100px] border border-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors flex items-center justify-center"
+                    className="block w-full h-[48px] rounded-[100px] border border-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#535353] hover:text-white transition-colors flex items-center justify-center"
                   >
                     {t('cart.continueShopping')}
                   </Link>

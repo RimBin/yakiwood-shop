@@ -31,7 +31,6 @@ const enToLt: PrefixMap = [
   { from: '/projects', to: '/projektai' },
   { from: '/configurator3d', to: '/konfiguratorius3d' },
   { from: '/blog', to: '/irasai' },
-  { from: '/sitemap', to: '/svetaines-zemelapis' },
 ]
 
 const ltToEn: PrefixMap = [
@@ -55,7 +54,6 @@ const ltToEn: PrefixMap = [
   { from: '/projektai', to: '/projects' },
   { from: '/konfiguratorius3d', to: '/configurator3d' },
   { from: '/irasai', to: '/blog' },
-  { from: '/svetaines-zemelapis', to: '/sitemap' },
 ]
 
 function replaceLeadingPath(pathname: string, mapping: PrefixMap): string {

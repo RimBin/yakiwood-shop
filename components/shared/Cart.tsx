@@ -142,7 +142,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
             <Link
               href={toLocalePath('/products', currentLocale)}
               onClick={onClose}
-              className="border border-[#161616] rounded-[100px] px-[40px] py-[14px] font-['Outfit'] font-normal text-[#161616] text-[12px] tracking-[0.6px] uppercase leading-[1.2] hover:bg-[#161616] hover:text-white transition-colors"
+              className="border border-[#161616] rounded-[100px] px-[40px] py-[14px] font-['Outfit'] font-normal text-[#161616] text-[12px] tracking-[0.6px] uppercase leading-[1.2] hover:bg-[#535353] hover:text-white transition-colors"
             >
               Return to shop
             </Link>
@@ -345,7 +345,7 @@ export default function Cart() {
           </p>
           <Link
             href={toLocalePath('/products', currentLocale)}
-            className="border border-[#161616] rounded-[100px] px-[40px] py-[14px] font-['Outfit'] font-normal text-[#161616] text-[12px] tracking-[0.6px] uppercase leading-[1.2] hover:bg-[#161616] hover:text-white transition-colors"
+            className="border border-[#161616] rounded-[100px] px-[40px] py-[14px] font-['Outfit'] font-normal text-[#161616] text-[12px] tracking-[0.6px] uppercase leading-[1.2] hover:bg-[#535353] hover:text-white transition-colors"
           >
             Return to shop
           </Link>

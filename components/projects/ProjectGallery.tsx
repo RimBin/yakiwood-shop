@@ -90,7 +90,7 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
         {/* Previous Button */}
         <button
           onClick={handlePrevious}
-          className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-[#161616] flex items-center justify-center hover:bg-[#161616] hover:text-white transition-colors"
+          className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-[#161616] flex items-center justify-center hover:bg-[#535353] hover:text-white transition-colors"
           aria-label="Previous image"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="lg:w-6 lg:h-6">
@@ -124,7 +124,7 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
         {/* Next Button */}
         <button
           onClick={handleNext}
-          className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-[#161616] flex items-center justify-center hover:bg-[#161616] hover:text-white transition-colors"
+          className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-[#161616] flex items-center justify-center hover:bg-[#535353] hover:text-white transition-colors"
           aria-label="Next image"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="lg:w-6 lg:h-6">

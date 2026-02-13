@@ -1,15 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { createClient } from '@/lib/supabase/client';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
 import { PageCover, PageSection } from '@/components/shared/PageLayout';
 
 export default function RegisterPage() {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const supabase = useMemo(() => createClient(), []);
   const currentLocale: AppLocale = pathname.startsWith('/lt') ? 'lt' : 'en';
   const t = useTranslations('account');
   const [firstName, setFirstName] = useState('');
@@ -19,18 +23,174 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [receiveNews, setReceiveNews] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const isCompleteMode = searchParams.get('complete') === '1';
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const defaultRedirect = toLocalePath('/account', currentLocale);
+  const nextRaw = searchParams.get('next');
+  const nextPath = nextRaw && nextRaw.startsWith('/') && !nextRaw.startsWith('//') ? nextRaw : defaultRedirect;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
     if (password !== confirmPassword) {
-      alert(t('registerForm.passwordMismatch'));
+      setError(t('registerForm.passwordMismatch'));
       return;
     }
     if (!agreeTerms) {
-      alert(t('registerForm.termsRequired'));
+      setError(t('registerForm.termsRequired'));
       return;
     }
-    console.log('Register with:', { firstName, lastName, email, password, receiveNews });
+
+    if (!supabase) {
+      setError(t('forgotPasswordForm.errorSupabase'));
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            firstName,
+            lastName,
+            receiveNews,
+          },
+        },
+      });
+
+      if (signUpError) {
+        setError(signUpError.message || t('forgotPasswordForm.errorGeneric'));
+        return;
+      }
+
+      if (data.user) {
+        const { error: profileError } = await supabase.from('user_profiles').upsert(
+          {
+            id: data.user.id,
+            email: data.user.email || email,
+            full_name: `${firstName} ${lastName}`.trim() || null,
+            terms_accepted_at: new Date().toISOString(),
+          },
+          { onConflict: 'id' }
+        );
+
+        if (profileError) {
+          setError(profileError.message);
+          return;
+        }
+      }
+
+      router.push(nextPath);
+    } catch (err: any) {
+      setError(err?.message || t('forgotPasswordForm.errorGeneric'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    setSuccess(null);
+
+    if (!agreeTerms) {
+      setError(t('registerForm.termsRequired'));
+      return;
+    }
+
+    if (!supabase) {
+      setError(t('forgotPasswordForm.errorSupabase'));
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const callbackUrl = new URL('/auth/callback', window.location.origin);
+      callbackUrl.searchParams.set('next', nextPath);
+      callbackUrl.searchParams.set('consent', '1');
+
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: callbackUrl.toString(),
+        },
+      });
+
+      if (oauthError) {
+        setError(oauthError.message || t('oauthErrorGeneric'));
+        setIsSubmitting(false);
+      }
+    } catch (err: any) {
+      setError(err?.message || t('oauthErrorGeneric'));
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCompleteConsent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    if (!agreeTerms) {
+      setError(t('registerForm.termsRequired'));
+      return;
+    }
+
+    if (!supabase) {
+      setError(t('forgotPasswordForm.errorSupabase'));
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        setError(userError?.message || t('loginRequired'));
+        setIsSubmitting(false);
+        router.push(toLocalePath('/login', currentLocale));
+        return;
+      }
+
+      const fullName =
+        typeof user.user_metadata?.full_name === 'string'
+          ? user.user_metadata.full_name
+          : `${user.user_metadata?.firstName || ''} ${user.user_metadata?.lastName || ''}`.trim() || null;
+
+      const { error: profileError } = await supabase.from('user_profiles').upsert(
+        {
+          id: user.id,
+          email: user.email || '',
+          full_name: fullName,
+          terms_accepted_at: new Date().toISOString(),
+        },
+        { onConflict: 'id' }
+      );
+
+      if (profileError) {
+        setError(profileError.message || t('forgotPasswordForm.errorGeneric'));
+        return;
+      }
+
+      setSuccess(t('completeRegistrationSuccess'));
+      router.push(nextPath);
+    } catch (err: any) {
+      setError(err?.message || t('forgotPasswordForm.errorGeneric'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -53,7 +213,16 @@ export default function RegisterPage() {
           </div>
 
           {/* Register Form */}
-          <form onSubmit={handleSubmit} className="bg-[#E1E1E1] rounded-[16px] p-[32px] sm:p-[40px] border border-[#BBBBBB]">
+          <form onSubmit={isCompleteMode ? handleCompleteConsent : handleSubmit} className="bg-[#E1E1E1] rounded-[16px] p-[32px] sm:p-[40px] border border-[#BBBBBB]">
+          {error ? (
+            <p className="mb-[16px] font-['Outfit'] text-[12px] leading-[1.4] text-[#F63333]">{error}</p>
+          ) : null}
+          {success ? (
+            <p className="mb-[16px] font-['Outfit'] text-[12px] leading-[1.4] text-[#161616]">{success}</p>
+          ) : null}
+
+          {!isCompleteMode ? (
+          <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-[20px] mb-[20px]">
             <div>
               <label htmlFor="firstName" className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
@@ -130,6 +299,14 @@ export default function RegisterPage() {
               />
             </div>
           </div>
+          </>
+          ) : (
+            <div className="mb-[20px]">
+              <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#535353]">
+                {t('completeRegistrationDescription')}
+              </p>
+            </div>
+          )}
 
           {/* Checkboxes */}
           <div className="space-y-[16px] mb-[32px]">
@@ -166,10 +343,22 @@ export default function RegisterPage() {
           {/* Create Account Button */}
           <button
             type="submit"
-            className="w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors mb-[24px]"
+            disabled={isSubmitting}
+            className="w-full h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors mb-[24px] disabled:opacity-60"
           >
-            {t('register')}
+            {isCompleteMode ? t('completeRegistrationCta') : isSubmitting ? t('creatingAccount') : t('register')}
           </button>
+
+          {!isCompleteMode ? (
+            <>
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={!agreeTerms || isSubmitting}
+              className="w-full h-[48px] rounded-[100px] border border-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors mb-[24px] disabled:opacity-60"
+            >
+              {t('continueWithGoogle')}
+            </button>
 
           {/* Divider */}
           <div className="relative mb-[24px]">
@@ -192,6 +381,8 @@ export default function RegisterPage() {
               {t('login')}
             </Link>
           </div>
+          </>
+          ) : null}
           </form>
         </div>
       </PageSection>

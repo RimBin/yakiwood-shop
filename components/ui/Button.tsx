@@ -29,7 +29,7 @@ export default function Button({
   
   const variantStyles = {
     primary: 'bg-[#161616] text-white hover:bg-[#333333]',
-    secondary: 'bg-transparent border border-[#161616] text-[#161616] hover:bg-[#161616] hover:text-white',
+    secondary: 'bg-transparent border border-[#161616] text-[#161616] hover:bg-[#535353] hover:text-white',
     link: 'bg-transparent text-[#161616] hover:opacity-70 px-0 py-2',
   };
 

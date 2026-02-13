@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -20,6 +20,44 @@ export default function LoginPage() {
   const t = useTranslations('account');
 
   const currentLocale: AppLocale = pathname.startsWith('/lt') ? 'lt' : 'en';
+
+  useEffect(() => {
+    const oauthError = searchParams.get('error');
+    if (oauthError) {
+      setError(oauthError);
+    }
+  }, [searchParams]);
+
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    setLoading(true);
+
+    try {
+      const supabase = createClient();
+      if (!supabase) {
+        throw new Error('Supabase nesukonfigūruotas arba raktai neteisingi (.env.local).');
+      }
+
+      const defaultRedirect = toLocalePath('/account', currentLocale);
+      const redirectPath = searchParams.get('redirect') || defaultRedirect;
+      const callbackUrl = new URL('/auth/callback', window.location.origin);
+      callbackUrl.searchParams.set('next', redirectPath);
+
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: callbackUrl.toString(),
+        },
+      });
+
+      if (oauthError) {
+        throw new Error(oauthError.message || 'Nepavyko prisijungti su Google');
+      }
+    } catch (e: any) {
+      setError(e?.message || 'Nepavyko prisijungti su Google');
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,6 +233,15 @@ export default function LoginPage() {
             {loading ? t('loggingIn') : t('signIn')}
           </button>
 
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="w-full h-[48px] border border-[#161616] rounded-[100px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#535353] hover:text-white transition-colors disabled:opacity-60"
+          >
+            {t('continueWithGoogle')}
+          </button>
+
           {/* Demo logins */}
           <div className="flex flex-col gap-[8px] pt-[8px] border-t border-[#BBBBBB]">
             <p className="font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-[#7C7C7C] text-center">
@@ -205,7 +252,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => handleDemoLogin('admin')}
                 disabled={loading}
-                className="flex-1 h-[36px] border border-[#161616] rounded-[100px] font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors disabled:opacity-60"
+                className="flex-1 h-[36px] border border-[#161616] rounded-[100px] font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-[#161616] hover:bg-[#535353] hover:text-white transition-colors disabled:opacity-60"
               >
                 {t('admin')}
               </button>
@@ -213,7 +260,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => handleDemoLogin('user')}
                 disabled={loading}
-                className="flex-1 h-[36px] border border-[#161616] rounded-[100px] font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-[#161616] hover:bg-[#161616] hover:text-white transition-colors disabled:opacity-60"
+                className="flex-1 h-[36px] border border-[#161616] rounded-[100px] font-['Outfit'] font-normal text-[10px] leading-[1.2] tracking-[0.5px] uppercase text-[#161616] hover:bg-[#535353] hover:text-white transition-colors disabled:opacity-60"
               >
                 {t('user')}
               </button>

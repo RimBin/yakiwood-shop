@@ -14,7 +14,7 @@ export function Stepper({ currentPage, totalPages, onPageChange }: StepperProps)
       <button
         onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="w-[48px] h-[48px] rounded-full border border-[#BBBBBB] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#161616] hover:border-[#161616] group transition-colors"
+        className="w-[48px] h-[48px] rounded-full border border-[#BBBBBB] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#535353] hover:border-[#161616] group transition-colors"
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M15 18L9 12L15 6" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:stroke-white"/>
@@ -40,7 +40,7 @@ export function Stepper({ currentPage, totalPages, onPageChange }: StepperProps)
       <button
         onClick={() => onPageChange?.(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
-        className="w-[48px] h-[48px] rounded-full border border-[#BBBBBB] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#161616] hover:border-[#161616] group transition-colors"
+        className="w-[48px] h-[48px] rounded-full border border-[#BBBBBB] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#535353] hover:border-[#161616] group transition-colors"
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M9 18L15 12L9 6" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:stroke-white"/>

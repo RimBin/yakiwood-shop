@@ -65,6 +65,39 @@ export default function RegisterModal({
     setLoading(false);
   };
 
+  const handleGoogleSignUp = async () => {
+    setError(null);
+    if (!agreeTerms) {
+      setError(t('agreeToTermsError'));
+      return;
+    }
+
+    setLoading(true);
+
+    if (!supabase) {
+      setError('Supabase is not configured.');
+      setLoading(false);
+      return;
+    }
+
+    const nextPath = `${window.location.pathname}${window.location.search}`;
+    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    callbackUrl.searchParams.set('next', nextPath || '/account');
+    callbackUrl.searchParams.set('consent', '1');
+
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: callbackUrl.toString(),
+      },
+    });
+
+    if (oauthError) {
+      setError(oauthError.message);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="relative w-[479px] bg-[#E1E1E1] p-10 flex flex-col gap-6 items-center">
       {/* Close button */}
@@ -168,6 +201,17 @@ export default function RegisterModal({
         >
           <span className="font-['Outfit'] font-normal text-xs text-white uppercase tracking-[0.6px]">
             {loading ? t('creatingAccount') : t('register')}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleGoogleSignUp}
+          disabled={loading || !agreeTerms}
+          className="w-full h-12 border border-[#161616] rounded-[100px] flex items-center justify-center hover:bg-[#161616] hover:text-white transition-colors disabled:opacity-60"
+        >
+          <span className="font-['Outfit'] font-normal text-xs uppercase tracking-[0.6px]">
+            {t('continueWithGoogle')}
           </span>
         </button>
 
