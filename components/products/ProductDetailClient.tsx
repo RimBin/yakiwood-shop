@@ -13,6 +13,8 @@ import { Accordion } from '@/components/ui';
 import { useCartStore } from '@/lib/cart/store';
 import { trackEvent, trackProductView } from '@/lib/analytics';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
+
+type InputMode = 'area' | 'boards';
 import type { UsageType } from '@/lib/pricing/configuration';
 import ModalOverlay from '@/components/modals/ModalOverlay';
 import InView from '@/components/InView';

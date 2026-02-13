@@ -2,7 +2,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { generateBreadcrumbSchema, generateProductSchema } from '@/lib/seo/structured-data';
-import { fetchProductBySlug, fetchProducts, transformDbProduct } from '@/lib/products.supabase';
+import { fetchProductBySlug, fetchProducts, transformDbProduct, type Product } from '@/lib/products.supabase';
 import ProductDetailClient from '@/components/products/ProductDetailClient';
 import { getProductOgImage } from '@/lib/og-image';
 import { toLocalePath } from '@/i18n/paths';

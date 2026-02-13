@@ -307,13 +307,13 @@ const getThicknessValueForUsage = (usageType: string) => {
 
 export default function ProductForm({ product, mode }: Props) {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = createClient()!;
   const locale = useLocale() as AppLocale;
   const t = useTranslations('admin.products.form');
 
   async function getAdminToken(): Promise<string | null> {
     if (!supabase) return null;
-    const { data } = await supabase!.auth.getSession();
+    const { data } = await supabase.auth.getSession();
     return data.session?.access_token ?? null;
   }
 
@@ -528,7 +528,7 @@ export default function ProductForm({ product, mode }: Props) {
               const code = (row.value_text as string | null) ?? '';
               const labelEn = (row.label_en as string | null) || undefined;
               const labelLt = (row.label_lt as string | null) || undefined;
-              const label = labelEn || code || labelLt;
+              const label = labelEn || code || labelLt || '';
               return { code, label, hex: (row.hex_color as string | null) ?? undefined };
             })
             .filter((x) => x.code);
@@ -869,7 +869,7 @@ export default function ProductForm({ product, mode }: Props) {
         const code = (row.value_text as string | null) ?? '';
         const labelEn = (row.label_en as string | null) || undefined;
         const labelLt = (row.label_lt as string | null) || undefined;
-        const label = labelEn || code || labelLt;
+        const label = labelEn || code || labelLt || '';
         return { code, label };
       })
       .filter((x) => x.code);
@@ -918,7 +918,7 @@ export default function ProductForm({ product, mode }: Props) {
   };
 
   const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return null;
+    if (!imageFile || !supabase) return null;
 
     try {
       const fileExt = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
@@ -1022,6 +1022,11 @@ export default function ProductForm({ product, mode }: Props) {
     setSaveWarning(null);
 
     if (!validateForm()) {
+      return;
+    }
+
+    if (!supabase) {
+      setSaveError('Supabase neprijungtas. Patikrinkite aplinkos kintamuosius.');
       return;
     }
 
@@ -1469,6 +1474,10 @@ export default function ProductForm({ product, mode }: Props) {
         return;
       }
 
+      if (!supabase) {
+        setVariantGeneratorError('Supabase neprijungtas.');
+        return;
+      }
       const { error } = await supabase.from('products').insert(rows);
       if (error) {
         const message = formatUnknownError(error);

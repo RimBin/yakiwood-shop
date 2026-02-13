@@ -64,7 +64,8 @@ export async function GET(request: Request) {
     return NextResponse.redirect(getErrorRedirectUrl(request, 'Nepavyko nustatyti vartotojo el. pašto'))
   }
 
-  const { data: profile, error: profileError } = await supabase
+  // Upsert user profile (without selecting terms_accepted_at to avoid column issues)
+  const { error: upsertError } = await supabase
     .from('user_profiles')
     .upsert(
       {
@@ -74,14 +75,26 @@ export async function GET(request: Request) {
       },
       { onConflict: 'id' }
     )
-    .select('terms_accepted_at')
-    .maybeSingle()
 
-  if (profileError) {
-    return NextResponse.redirect(getErrorRedirectUrl(request, profileError.message || 'Nepavyko sukurti vartotojo profilio'))
+  if (upsertError) {
+    return NextResponse.redirect(getErrorRedirectUrl(request, upsertError.message || 'Nepavyko sukurti vartotojo profilio'))
   }
 
-  if (consentGiven && !profile?.terms_accepted_at) {
+  // Separately check terms acceptance
+  let termsAccepted = false
+  try {
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('terms_accepted_at')
+      .eq('id', user.id)
+      .maybeSingle()
+    termsAccepted = !!profile?.terms_accepted_at
+  } catch {
+    // If column doesn't exist yet, treat as not accepted
+    termsAccepted = false
+  }
+
+  if (consentGiven && !termsAccepted) {
     const acceptedAt = new Date().toISOString()
     const { error: consentError } = await supabase
       .from('user_profiles')
@@ -95,7 +108,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL(nextPath, origin))
   }
 
-  if (!profile?.terms_accepted_at) {
+  if (!termsAccepted) {
     const registerPath = getLocaleAwareRegisterPath(nextPath)
     const registerUrl = new URL(registerPath, origin)
     registerUrl.searchParams.set('complete', '1')

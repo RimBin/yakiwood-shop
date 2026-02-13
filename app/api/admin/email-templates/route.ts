@@ -62,9 +62,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 503 })
     }
 
-    const body = (await request.json()) as Partial<
-      Pick<EmailTemplateDoc, 'templateId' | 'subjectLt' | 'subjectEn' | 'htmlLt' | 'htmlEn'>
-    >
+    const body = (await request.json()) as Partial<{
+      templateId: string
+      subjectLt: string
+      subjectEn: string
+      htmlLt: string
+      htmlEn: string
+    }>
 
     const templateId = typeof body.templateId === 'string' ? body.templateId.trim() : ''
     if (!templateId) {
