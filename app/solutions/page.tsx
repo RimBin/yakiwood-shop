@@ -186,10 +186,10 @@ export default function SolutionsPage() {
                 ))}
               </div>
 
-              <div className="mt-[24px] flex flex-col sm:flex-row gap-[12px]">
+              <div className="mt-[24px] flex flex-col sm:flex-row gap-[16px] w-full sm:w-auto">
                 <Link
                   href={toLocalePath(data.primaryCta.href, currentLocale)}
-                  className="bg-[#161616] h-[48px] px-[40px] rounded-[100px] flex items-center justify-center"
+                  className="bg-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full sm:w-[240px] sm:px-[40px]"
                 >
                   <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
                     {data.primaryCta.label}
@@ -198,9 +198,9 @@ export default function SolutionsPage() {
 
                 <Link
                   href={toLocalePath(data.secondaryCta.href, currentLocale)}
-                  className="group border border-[#161616] h-[48px] px-[40px] rounded-[100px] flex items-center justify-center hover:bg-[#535353] transition-colors"
+                  className="border border-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full sm:w-[240px] sm:px-[40px]"
                 >
-                  <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white transition-colors">
+                  <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
                     {data.secondaryCta.label}
                   </span>
                 </Link>

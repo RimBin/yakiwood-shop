@@ -96,7 +96,7 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
   return (
     <>
       <InView className="hero-animate-root">
-        <PageCover>
+        <PageCover innerClassName="px-0">
           <div className="flex items-start gap-[8px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             <h1
               className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] text-[#161616] tracking-[-2.8px] md:tracking-[-6.4px]"
@@ -135,7 +135,7 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
                         <div className={`relative w-full ${imageHeight} overflow-hidden bg-[#D9D9D9]`}>
                           <BlogImage src={post.heroImage} alt={post.title} />
                         </div>
-                        <div className="px-[12px] py-[10px]">
+                        <div className="pr-[12px] py-[10px]">
                           <div className="font-['DM_Sans'] text-[18px] leading-[1.25] text-[#161616]">
                             {post.title}
                           </div>

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { PageCover } from '@/components/shared/PageLayout';
 import { CTA, Testimonials } from '@/components/home';
+import FAQ from '@/components/FAQ';
 import { assets } from '@/lib/assets';
 import InView from '@/components/InView';
 
@@ -57,7 +58,7 @@ export default function About() {
       {/* About Us Description Section */}
       <InView className="hero-animate-root">
       <section className="max-w-[1440px] mx-auto px-[16px] md:px-[32px] lg:px-[40px] pt-[24px] md:pt-[64px] lg:pt-[96px] pb-[24px] md:pb-[0px] lg:pb-[0px]">
-        <div className="relative lg:min-h-[560px]">
+        <div className="relative lg:min-h-[clamp(460px,34vw,560px)]">
           {/* Big heading text with leading spaces to create indent - matches Figma exactly */}
           <p className="font-['DM_Sans'] font-light leading-[1] text-[#161616] lg:whitespace-pre-wrap m-0 hero-seq-item hero-seq-right" style={{ fontSize: 'clamp(28px, 4vw, 52px)', letterSpacing: 'clamp(-1.28px, -0.04em, -2.08px)', animationDelay: '0ms' }}>
 {`${heroIndent}${t('heroLead')}`}
@@ -458,6 +459,8 @@ export default function About() {
       )}
 
       <Testimonials />
+
+      <FAQ />
 
       <CTA />
 
