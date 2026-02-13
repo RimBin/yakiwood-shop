@@ -23,7 +23,7 @@ export default function ProductCard({ product, href }: ProductCardProps) {
     const parsed = product.slug.includes('--') ? product.slug.split('--') : null;
     const parsedColor = parsed && parsed.length >= 3 ? parsed[2] : '';
     const colorName = product.colors?.[0]?.name ?? parsedColor ?? '';
-    const colorLabel = colorName ? localizeColorLabel(colorName, currentLocale) : '';
+    const colorLabel = colorName ? localizeColorLabel(colorName, 'en') : '';
 
     const woodKey = typeof product.woodType === 'string' ? product.woodType.trim().toLowerCase() : '';
     const woodLabel =

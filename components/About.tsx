@@ -84,10 +84,10 @@ export default function About() {
             <button
               type="button"
               onClick={() => setIsVideoOpen(true)}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[rgba(255,255,255,0.22)] rounded-full w-[80px] h-[80px] md:w-[140px] md:h-[140px] flex items-center justify-center z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#161616]"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[rgba(255,255,255,0.2)] rounded-[100px] w-[59px] h-[59px] md:w-[100px] md:h-[100px] flex items-center justify-center z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#161616]"
               aria-label={t('videoAria')}
             >
-              <span className="font-['Outfit'] font-normal text-[14px] md:text-[18px] leading-[1.1] tracking-[0.6px] uppercase text-white">
+              <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
                 {t('videoWatch')}
               </span>
             </button>
@@ -179,55 +179,8 @@ export default function About() {
             <div className="h-[300px]"></div>
           </div>
 
-          {/* Tablet Cards - full grid */}
-          <div className="hidden md:grid lg:hidden grid-cols-2 gap-[16px] pr-[16px] md:pr-[32px] hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
-            <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px] min-h-[280px]">
-              <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                {t('missionTitle')}
-              </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                {t('missionBody')}
-              </p>
-            </div>
-
-            <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px] min-h-[280px]">
-              <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                {t('visionTitle')}
-              </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                {t('visionBodyMobile')}
-              </p>
-            </div>
-
-            <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px] min-h-[280px]">
-              <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                {t('promiseTitle')}
-              </p>
-              <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                {t('promiseBody')}
-              </p>
-            </div>
-
-            <div className="border border-[#535353] p-[24px] flex flex-col gap-[16px] min-h-[280px]">
-              <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">
-                {t('valuesTitle')}
-              </p>
-              <div className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
-                <p className="mb-[10px]">
-                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueCraftsmanshipTitle')}</span> – {t('valueCraftsmanshipBodyMobile')}
-                </p>
-                <p className="mb-[10px]">
-                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueSustainabilityTitle')}</span> – {t('valueSustainabilityBodyMobile')}
-                </p>
-                <p>
-                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueAuthenticityTitle')}</span> – {t('valueAuthenticityBodyMobile')}
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* Mobile Cards - horizontal scroll (left padding matches page, cards peek on 320px) */}
-          <div className="md:hidden hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
+          <div className="lg:hidden hero-seq-item hero-seq-right" style={{ animationDelay: '200ms' }}>
             <div className="flex snap-x snap-mandatory gap-[16px] overflow-x-auto px-[16px] pb-[8px] scrollbar-hide">
               <div className="snap-start shrink-0 w-[260px] border border-[#535353] p-[24px] flex flex-col gap-[16px] h-[300px]">
                 <p className="font-['Outfit'] font-normal text-[14px] leading-[1.1] uppercase tracking-[0.42px] text-white">

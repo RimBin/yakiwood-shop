@@ -163,6 +163,28 @@ body {
   animation: slide-in-right 0.3s ease-out;
 }
 
+@keyframes yaki-letter-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.yaki-loader-letter {
+  display: inline-block;
+  animation: yaki-letter-bounce 850ms ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yaki-loader-letter {
+    animation: none;
+  }
+}
+
 @keyframes hero-seq-right {
   from {
     opacity: 0;

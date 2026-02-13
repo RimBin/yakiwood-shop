@@ -6,6 +6,7 @@
  */
 
 import dynamic from 'next/dynamic';
+import AnimatedLogoLoader from '@/components/ui/AnimatedLogoLoader';
 
 /**
  * 3D Configurator
@@ -16,12 +17,10 @@ export const DynamicKonfiguratorius3D = dynamic(
   () => import('@/components/Konfiguratorius3D'),
   {
     loading: () => (
-      <div className="w-full h-[600px] bg-gray-100 flex items-center justify-center rounded-lg">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-gray-300 border-t-black rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading 3D viewer...</p>
-        </div>
-      </div>
+      <AnimatedLogoLoader
+        className="h-[600px] rounded-lg"
+        text="Kraunama 3D peržiūra..."
+      />
     ),
     ssr: false, // Disable SSR for Three.js
   }

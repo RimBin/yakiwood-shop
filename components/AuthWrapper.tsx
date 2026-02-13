@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Header, Footer } from '@/components/shared';
 import { usePathname } from 'next/navigation';
+import AnimatedLogoLoader from '@/components/ui/AnimatedLogoLoader';
 
 function UnderMaintenanceScreen({
   onAuthenticate,
@@ -138,7 +139,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   };
 
   if (isLoading) {
-    return null;
+    return <AnimatedLogoLoader fullScreen text="Kraunama..." />;
   }
 
   if (!isAuthenticated) {

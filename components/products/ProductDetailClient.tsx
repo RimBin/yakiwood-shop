@@ -369,7 +369,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
     () => (item: Product) => {
       const parsed = item.slug.includes('--') ? parseStockItemSlug(item.slug) : null;
       const colorName = item.colors?.[0]?.name ?? parsed?.color ?? '';
-      const colorLabel = colorName ? localizeColorLabel(colorName, currentLocale) : '';
+      const colorLabel = colorName ? localizeColorLabel(colorName, 'en') : '';
 
       const woodKey = typeof item.woodType === 'string' ? item.woodType.trim().toLowerCase() : '';
       const woodLabel =
