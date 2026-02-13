@@ -38,6 +38,13 @@ interface ProductSales {
   revenue: number;
 }
 
+const toFiniteNumber = (value: unknown, fallback = 0) => {
+  const numeric = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numeric) ? numeric : fallback;
+};
+
+const formatCurrencyEur = (value: unknown) => `€${toFiniteNumber(value).toFixed(2)}`;
+
 export default function DashboardPage() {
   const t = useTranslations('admin.dashboard');
   const tCommon = useTranslations('common');
@@ -86,7 +93,7 @@ export default function DashboardPage() {
       const filteredOrders = applyFilters(orders);
 
       // Calculate stats
-      const totalRevenue = filteredOrders.reduce((sum, order) => sum + Number(order.total), 0);
+      const totalRevenue = filteredOrders.reduce((sum, order) => sum + toFiniteNumber(order.total), 0);
       const pendingOrders = filteredOrders.filter(o => o.status === 'pending').length;
       const completedOrders = filteredOrders.filter(o => o.status === 'completed').length;
 
@@ -99,10 +106,13 @@ export default function DashboardPage() {
       const salesMap = new Map<string, { quantity: number; revenue: number }>();
       filteredOrders.forEach(order => {
         order.items.forEach((item: any) => {
-          const existing = salesMap.get(item.name) || { quantity: 0, revenue: 0 };
-          salesMap.set(item.name, {
-            quantity: existing.quantity + (item.quantity || 1),
-            revenue: existing.revenue + (item.price * (item.quantity || 1)),
+          const productName = item?.name || '—';
+          const quantity = Math.max(1, toFiniteNumber(item?.quantity, 1));
+          const price = toFiniteNumber(item?.price, 0);
+          const existing = salesMap.get(productName) || { quantity: 0, revenue: 0 };
+          salesMap.set(productName, {
+            quantity: existing.quantity + quantity,
+            revenue: existing.revenue + (price * quantity),
           });
         });
       });
@@ -382,13 +392,13 @@ export default function DashboardPage() {
           <StatCard
             title={t('stats.todayOrders')}
             value={stats.todayOrders}
-            subtitle={`${tCommon('valiuta')}${stats.todayRevenue.toFixed(2)}`}
+            subtitle={`${tCommon('valiuta')}${toFiniteNumber(stats.todayRevenue).toFixed(2)}`}
             icon="📦"
           />
           <StatCard
             title={t('stats.totalOrders')}
             value={stats.totalOrders}
-            subtitle={t('stats.totalOrdersSubtitle', { revenue: stats.totalRevenue.toFixed(2), currency: tCommon('valiuta') })}
+            subtitle={t('stats.totalOrdersSubtitle', { revenue: toFiniteNumber(stats.totalRevenue).toFixed(2), currency: tCommon('valiuta') })}
             icon="🛒"
           />
           <StatCard
@@ -421,7 +431,7 @@ export default function DashboardPage() {
           />
           <StatCard
             title={t('stats.avgOrder')}
-            value={`€${stats.totalOrders > 0 ? (stats.totalRevenue / stats.totalOrders).toFixed(2) : 0}`}
+            value={formatCurrencyEur(stats.totalOrders > 0 ? stats.totalRevenue / stats.totalOrders : 0)}
             icon="💰"
           />
           <StatCard
@@ -437,31 +447,44 @@ export default function DashboardPage() {
           <div className="p-[24px] border-b border-[#E1E1E1]">
             <AdminSectionTitle className="text-[24px] tracking-[-0.96px]">{t('topProducts.title')}</AdminSectionTitle>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full table-fixed">
-              <colgroup>
-                <col className="w-[30%]" />
-                <col className="w-[20%]" />
-                <col className="w-[20%]" />
-                <col className="w-[15%]" />
-                <col className="w-[15%]" />
-              </colgroup>
+          <div className="md:hidden px-[16px] py-[12px]">
+            {productSales.length > 0 ? (
+              <div className="space-y-[10px]">
+                {productSales.map((product, index) => (
+                  <div key={index} className="rounded-[16px] border border-[#E1E1E1] p-[12px] bg-white">
+                    <div className="flex items-start justify-between gap-[12px]">
+                      <p className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">#{index + 1}</p>
+                      <p className="font-['Outfit'] text-[14px] text-[#161616] font-medium text-right whitespace-nowrap">{formatCurrencyEur(product.revenue)}</p>
+                    </div>
+                    <p className="mt-[6px] font-['Outfit'] text-[14px] text-[#161616]">{product.productName}</p>
+                    <p className="mt-[4px] font-['Outfit'] text-[12px] text-[#535353]">{t('topProducts.table.sold')}: {product.quantitySold} {t('units')}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-[20px] text-center font-['Outfit'] text-[14px] text-[#BBBBBB]">
+                {t('topProducts.empty')}
+              </div>
+            )}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full min-w-[560px]">
               <thead>
                 <tr className="border-b border-[#E1E1E1]">
-                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">#</th>
-                  <th className="text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('topProducts.table.product')}</th>
-                  <th className="text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('topProducts.table.sold')}</th>
-                  <th className="text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('topProducts.table.revenue')}</th>
+                  <th className="px-[16px] text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">#</th>
+                  <th className="px-[16px] text-left py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353]">{t('topProducts.table.product')}</th>
+                  <th className="px-[16px] text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] whitespace-nowrap">{t('topProducts.table.sold')}</th>
+                  <th className="px-[16px] text-right py-[12px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] whitespace-nowrap">{t('topProducts.table.revenue')}</th>
                 </tr>
               </thead>
               <tbody>
                 {productSales.length > 0 ? (
                   productSales.map((product, index) => (
                     <tr key={index} className="border-b border-[#E1E1E1] hover:bg-[#E1E1E1]">
-                      <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616]">{index + 1}</td>
-                      <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616]">{product.productName}</td>
-                      <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right">{product.quantitySold} {t('units')}</td>
-                      <td className="py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right font-medium">€{product.revenue.toFixed(2)}</td>
+                      <td className="px-[16px] py-[16px] font-['Outfit'] text-[14px] text-[#161616]">{index + 1}</td>
+                      <td className="px-[16px] py-[16px] font-['Outfit'] text-[14px] text-[#161616]">{product.productName}</td>
+                      <td className="px-[16px] py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right whitespace-nowrap">{product.quantitySold} {t('units')}</td>
+                      <td className="px-[16px] py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right font-medium whitespace-nowrap">{formatCurrencyEur(product.revenue)}</td>
                     </tr>
                   ))
                 ) : (
@@ -487,7 +510,37 @@ export default function DashboardPage() {
               {t('recentOrders.allOrders')} →
             </Link>
           </div>
-          <div className="overflow-x-auto">
+          <div className="md:hidden px-[16px] py-[12px]">
+            {recentOrders.length > 0 ? (
+              <div className="space-y-[10px]">
+                {recentOrders.map((order) => (
+                  <div key={order.id} className="rounded-[16px] border border-[#E1E1E1] p-[12px] bg-white">
+                    <div className="flex items-start justify-between gap-[12px]">
+                      <p className="font-['Outfit'] text-[13px] text-[#161616] font-medium">{order.order_number}</p>
+                      <p className="font-['Outfit'] text-[13px] text-[#161616] font-medium whitespace-nowrap">{formatCurrencyEur(order.total)}</p>
+                    </div>
+                    <p className="mt-[6px] font-['Outfit'] text-[13px] text-[#161616]">{order.customer_name}</p>
+                    <p className="mt-[4px] font-['Outfit'] text-[12px] text-[#535353]">{format(new Date(order.created_at), 'yyyy-MM-dd HH:mm')}</p>
+                    <div className="mt-[8px]">
+                      <span className={`px-[10px] py-[4px] rounded-[100px] font-['Outfit'] text-[11px] uppercase tracking-[0.6px] ${
+                        order.status === 'completed' ? 'bg-[#EAEAEA] border border-green-500 text-green-700' :
+                        order.status === 'processing' ? 'bg-[#EAEAEA] border border-blue-500 text-blue-700' :
+                        order.status === 'pending' ? 'bg-[#EAEAEA] border border-yellow-500 text-yellow-700' :
+                        'bg-[#EAEAEA] border border-[#7C7C7C] text-[#535353]'
+                      }`}>
+                        {getOrderStatusLabel(order.status)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-[20px] text-center font-['Outfit'] text-[14px] text-[#BBBBBB]">
+                {t('recentOrders.empty')}
+              </div>
+            )}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#E1E1E1]">
@@ -507,7 +560,7 @@ export default function DashboardPage() {
                       <td className="px-[16px] py-[16px] font-['Outfit'] text-[14px] text-[#535353]">
                         {format(new Date(order.created_at), 'yyyy-MM-dd HH:mm')}
                       </td>
-                      <td className="px-[16px] py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right font-medium">€{Number(order.total).toFixed(2)}</td>
+                      <td className="px-[16px] py-[16px] font-['Outfit'] text-[14px] text-[#161616] text-right font-medium">{formatCurrencyEur(order.total)}</td>
                       <td className="px-[16px] py-[16px] text-right">
                         <span className={`px-[12px] py-[4px] rounded-[100px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] ${
                           order.status === 'completed' ? 'bg-[#EAEAEA] border border-green-500 text-green-700' :

@@ -279,11 +279,11 @@ export default function AdminPanelHeader() {
     <>
       {/* Full-width breadcrumb bar */}
       <div className="w-full bg-[#E1E1E1] border-t border-[#BBBBBB]">
-        <Breadcrumbs items={breadcrumbsItems} showDivider />
+        <Breadcrumbs items={breadcrumbsItems} showDivider align="left" containerClassName="lg:px-[200px]" />
       </div>
 
       <div className="bg-[#E1E1E1] pt-[clamp(28px,4vw,56px)]">
-        <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px]">
+        <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[200px]">
           <div className="mb-[clamp(24px,3vw,40px)]">
             <h1 className="font-['DM_Sans'] font-light text-[clamp(40px,6vw,72px)] leading-none tracking-[clamp(-1.6px,-0.025em,-2.88px)] text-[#161616]">
               {pageTitle}

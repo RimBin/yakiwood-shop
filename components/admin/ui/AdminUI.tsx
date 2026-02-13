@@ -19,7 +19,7 @@ function cx(...values: ClassValue[]) {
 export function AdminBody({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <main className={cx('pb-[clamp(32px,5vw,64px)]', className)}>
-      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px]">{children}</div>
+      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[200px]">{children}</div>
     </main>
   )
 }

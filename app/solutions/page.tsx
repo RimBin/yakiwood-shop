@@ -189,7 +189,7 @@ export default function SolutionsPage() {
               <div className="mt-[24px] flex flex-col sm:flex-row gap-[16px] w-full sm:w-auto">
                 <Link
                   href={toLocalePath(data.primaryCta.href, currentLocale)}
-                  className="bg-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full sm:w-[240px] sm:px-[40px]"
+                  className="bg-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full sm:w-[240px] sm:px-[40px] py-[10px]"
                 >
                   <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white">
                     {data.primaryCta.label}
@@ -198,7 +198,7 @@ export default function SolutionsPage() {
 
                 <Link
                   href={toLocalePath(data.secondaryCta.href, currentLocale)}
-                  className="border border-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full sm:w-[240px] sm:px-[40px]"
+                  className="border border-[#161616] flex items-center justify-center h-[48px] rounded-[100px] w-full sm:w-[240px] sm:px-[40px] py-[10px]"
                 >
                   <span className="font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616]">
                     {data.secondaryCta.label}

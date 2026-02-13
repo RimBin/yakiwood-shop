@@ -958,7 +958,7 @@ export default function ProjectsAdminClient() {
       )}
 
       <AdminCard>
-        <div className="flex items-end justify-between gap-[16px]">
+        <div className="flex flex-col items-start gap-[16px] sm:flex-row sm:items-end sm:justify-between">
           <div>
             <AdminSectionTitle>{t('breadcrumb.projects')}</AdminSectionTitle>
             <p className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353]">{t('main.subtitle')}</p>
@@ -966,6 +966,7 @@ export default function ProjectsAdminClient() {
 
           <AdminButton
             size="sm"
+            className="w-full sm:w-auto"
             onClick={() => {
               setShowAddForm((prev) => !prev)
               setEditingProjectId(null)
@@ -1294,11 +1295,11 @@ export default function ProjectsAdminClient() {
       </AdminCard>
 
       <AdminCard>
-        <div className="flex justify-between items-center mb-[24px]">
-          <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616]">
+        <div className="mb-[24px] flex flex-col gap-[12px] xl:flex-row xl:items-center xl:justify-between">
+          <h2 className="font-['DM_Sans'] font-light text-[clamp(24px,3vw,32px)] tracking-[-1.28px] text-[#161616] whitespace-nowrap">
             Projektai ({projects.length})
           </h2>
-          <div className="flex gap-[8px]">
+          <div className="flex flex-wrap gap-[8px]">
             <label
               htmlFor="projectImportInput"
               className="h-[40px] px-[16px] rounded-[100px] bg-[#E1E1E1] text-[#161616] hover:bg-[#BBBBBB] transition-colors cursor-pointer flex items-center font-['Outfit'] text-[12px] tracking-[0.6px] uppercase"
@@ -1327,9 +1328,9 @@ export default function ProjectsAdminClient() {
             {projects.map((project) => (
               <div key={project.id} className="border border-[#BBBBBB] rounded-[16px] overflow-hidden">
                 <div className="p-[20px]">
-                  <div className="flex gap-[16px]">
+                  <div className="flex flex-col gap-[16px] sm:flex-row">
                     {project.images && project.images.length > 0 && (
-                      <div className="w-[120px] h-[80px] relative rounded-[8px] overflow-hidden flex-shrink-0">
+                      <div className="relative w-full h-[180px] sm:w-[120px] sm:h-[80px] rounded-[8px] overflow-hidden flex-shrink-0">
                         <Image
                           src={typeof project.images[0] === 'string' ? project.images[0] : (project.images[0] as any).url || ''}
                           alt={getProjectTitle(project, currentLocale) || 'Projektas'}
@@ -1338,10 +1339,10 @@ export default function ProjectsAdminClient() {
                         />
                       </div>
                     )}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-['DM_Sans'] text-[20px] tracking-[-0.8px]">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col gap-[12px] sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                          <h3 className="font-['DM_Sans'] text-[20px] tracking-[-0.8px] break-words">
                             {getProjectTitle(project, currentLocale)}
                             {getProjectSubtitle(project, currentLocale) && (
                               <span className="text-[#535353] ml-[8px]">— {getProjectSubtitle(project, currentLocale)}</span>
@@ -1365,15 +1366,16 @@ export default function ProjectsAdminClient() {
                             </p>
                           )}
                         </div>
-                        <div className="flex gap-[8px]">
+                        <div className="flex flex-wrap gap-[8px]">
                           <AdminButton
                             size="sm"
                             variant={editingProjectId === project.id ? 'secondary' : 'outline'}
                             onClick={() => handleProjectEdit(project)}
+                            className="w-[136px]"
                           >
                             {editingProjectId === project.id ? t('ui.cancel') : t('projects.actions.edit')}
                           </AdminButton>
-                          <AdminButton size="sm" variant="danger" onClick={() => handleProjectDelete(project.id)}>
+                          <AdminButton size="sm" variant="danger" onClick={() => handleProjectDelete(project.id)} className="w-[136px]">
                             {t('projects.actions.delete')}
                           </AdminButton>
                         </div>
