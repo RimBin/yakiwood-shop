@@ -293,17 +293,17 @@ export default function PostsAdminClient() {
 
   return (
     <div className="py-[24px] md:py-[40px]">
-      <div className="flex items-center justify-between gap-[10px] mb-[16px]">
+      <div className="mb-[16px] flex flex-col gap-[10px] sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-['DM_Sans'] text-[24px] text-[#161616]">{t('posts.title')}</h2>
           <p className="font-['Outfit'] text-[13px] text-[#535353]">{t('posts.subtitle')}</p>
         </div>
-        <button onClick={handleNew} className={buttonSecondary}>
+        <button onClick={handleNew} className={buttonSecondary + ' w-full justify-center sm:w-auto'}>
           {t('posts.new')}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-[16px]">
+      <div className="grid grid-cols-1 gap-[16px] xl:grid-cols-[minmax(280px,360px)_minmax(0,1fr)]">
         <div className={panelClass}>
           <div className="font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#535353] mb-[12px]">
             {t('posts.listTitle', { count: posts.length })}
@@ -342,9 +342,9 @@ export default function PostsAdminClient() {
         </div>
 
         <div className={panelClass}>
-          <div className="flex items-center justify-between gap-[10px]">
+          <div className="flex flex-col gap-[10px] sm:flex-row sm:items-center sm:justify-between">
             <div className="font-['DM_Sans'] text-[18px] text-[#161616]">{t('posts.editorTitle')}</div>
-            <div className="flex items-center gap-[8px]">
+            <div className="flex w-full flex-wrap gap-[8px] sm:w-auto sm:justify-end">
               <button onClick={handleSave} className={buttonSecondary}>
                 {t('posts.save')}
               </button>
@@ -489,7 +489,7 @@ export default function PostsAdminClient() {
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-[10px]">
+              <div className="mb-[10px] flex flex-col gap-[8px] sm:flex-row sm:items-center sm:justify-between">
                 <div className="font-['Outfit'] text-[12px] text-[#161616] uppercase tracking-[0.6px]">
                   {t('posts.fields.sections')}
                 </div>
@@ -712,15 +712,15 @@ export default function PostsAdminClient() {
               ) : null}
             </div>
             <div>
-              <div className="flex items-center justify-between gap-[10px]">
+              <div className="flex flex-col gap-[8px] sm:flex-row sm:items-center sm:justify-between">
                 <label className="block font-['Outfit'] text-[12px] text-[#161616] mb-[6px]">
                   {t('posts.images.gallery')}
                 </label>
-                <div className="flex items-center gap-[8px]">
+                <div className="flex w-full flex-col items-stretch gap-[8px] sm:w-auto sm:flex-row sm:items-center">
                   <input
                     value={galleryUrl}
                     onChange={(e) => setGalleryUrl(e.target.value)}
-                    className="h-[30px] rounded-[10px] border border-[#BBBBBB] px-[8px] font-['Outfit'] text-[12px]"
+                    className="h-[30px] w-full rounded-[10px] border border-[#BBBBBB] px-[8px] font-['Outfit'] text-[12px] sm:w-[240px]"
                     placeholder={t('posts.placeholders.imageUrl')}
                   />
                   <button
@@ -730,7 +730,7 @@ export default function PostsAdminClient() {
                       setDraft((prev) => ({ ...prev, gallery: [...prev.gallery, galleryUrl.trim()] }));
                       setGalleryUrl('');
                     }}
-                    className={buttonSecondary + ' h-[30px] px-[10px]'}
+                    className={buttonSecondary + ' h-[30px] w-full px-[10px] sm:w-auto'}
                   >
                     {t('posts.images.addUrl')}
                   </button>
@@ -749,7 +749,7 @@ export default function PostsAdminClient() {
                 {t('posts.images.upload')}
               </label>
               {draft.gallery.length > 0 && (
-                <div className="mt-[10px] grid grid-cols-4 gap-[8px]">
+                <div className="mt-[10px] grid grid-cols-2 gap-[8px] sm:grid-cols-4">
                   {draft.gallery.map((img, idx) => (
                     <div key={`${img}-${idx}`} className="relative h-[70px] rounded-[8px] overflow-hidden border border-[#BBBBBB]">
                       {isDataUrl(img) ? (
@@ -776,15 +776,15 @@ export default function PostsAdminClient() {
             </div>
 
             <div>
-              <div className="flex items-center justify-between gap-[10px]">
+              <div className="flex flex-col gap-[8px] sm:flex-row sm:items-center sm:justify-between">
                 <label className="block font-['Outfit'] text-[12px] text-[#161616] mb-[6px]">
                   {t('posts.images.feature')}
                 </label>
-                <div className="flex items-center gap-[8px]">
+                <div className="flex w-full flex-col items-stretch gap-[8px] sm:w-auto sm:flex-row sm:items-center">
                   <input
                     value={featureUrl}
                     onChange={(e) => setFeatureUrl(e.target.value)}
-                    className="h-[30px] rounded-[10px] border border-[#BBBBBB] px-[8px] font-['Outfit'] text-[12px]"
+                    className="h-[30px] w-full rounded-[10px] border border-[#BBBBBB] px-[8px] font-['Outfit'] text-[12px] sm:w-[240px]"
                     placeholder={t('posts.placeholders.imageUrl')}
                   />
                   <button
@@ -794,7 +794,7 @@ export default function PostsAdminClient() {
                       setDraft((prev) => ({ ...prev, featureImages: [...prev.featureImages, featureUrl.trim()] }));
                       setFeatureUrl('');
                     }}
-                    className={buttonSecondary + ' h-[30px] px-[10px]'}
+                    className={buttonSecondary + ' h-[30px] w-full px-[10px] sm:w-auto'}
                   >
                     {t('posts.images.addUrl')}
                   </button>
@@ -813,7 +813,7 @@ export default function PostsAdminClient() {
                 {t('posts.images.upload')}
               </label>
               {draft.featureImages.length > 0 && (
-                <div className="mt-[10px] grid grid-cols-4 gap-[8px]">
+                <div className="mt-[10px] grid grid-cols-2 gap-[8px] sm:grid-cols-4">
                   {draft.featureImages.map((img, idx) => (
                     <div key={`${img}-${idx}`} className="relative h-[70px] rounded-[8px] overflow-hidden border border-[#BBBBBB]">
                       {isDataUrl(img) ? (

@@ -58,7 +58,7 @@ export default function Testimonials() {
     return (
       <>
         <span>{before}</span>
-        <span className="font-['Tiro_Tamil'] italic tracking-[-1.6px]">{italicWord}</span>
+        <span className="font-['Tiro_Tamil'] italic">{italicWord}</span>
         <span>{after}</span>
       </>
     );
@@ -88,13 +88,13 @@ export default function Testimonials() {
   return (
     <section id="testimonials" className="w-full bg-[#E1E1E1]">
       {/* ===== MOBILE LAYOUT (< 1536px) - Figma 759:7576 ===== */}
-      <InView className="2xl:hidden pt-[64px] md:pt-[80px] lg:pt-[120px] pb-0 hero-animate-root">
+      <InView className="lg:hidden pt-[64px] md:pt-[80px] pb-0 hero-animate-root">
         {/* Title Section - Mobile/Tablet */}
         <div className={`${getContainerPadding()} mb-[24px] md:mb-[32px] hero-seq-item hero-seq-right`} style={{ animationDelay: '0ms' }}>
-          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
+          <p className="font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[12px]">
             {t('eyebrow')}
           </p>
-          <h2 className="font-['DM_Sans'] font-light leading-none text-[#161616] max-w-[520px]" style={{ fontSize: 'clamp(34px, 6vw, 44px)', letterSpacing: 'clamp(-1.6px, -0.04em, -1.76px)' }}>
+          <h2 className="font-['DM_Sans'] font-light text-[40px] md:text-[80px] leading-none tracking-[-2px] md:tracking-[-4.4px] text-[#161616] max-w-[767px]">
             {renderHeading()}
           </h2>
         </div>
@@ -183,34 +183,32 @@ export default function Testimonials() {
       
 
       {/* ===== DESKTOP LAYOUT (>= 1536px) ===== */}
-      <InView className="hidden 2xl:block max-w-[1440px] mx-auto px-[40px] py-[120px] hero-animate-root">
+      <InView className="hidden lg:block max-w-[1440px] mx-auto px-[40px] py-[120px] hero-animate-root">
         <div className="flex flex-col gap-[48px]">
-          {/* Title Row - Figma pattern: eyebrow at left-[40px], heading at left-[calc(25%+25px)] */}
-          <div className="relative h-[80px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-            {/* Eyebrow */}
-            <p className="absolute left-0 top-[25px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] leading-[1.2]">
+          <div className="grid grid-cols-[25%_1fr] items-start gap-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
+            <p className="mt-[25px] font-['Outfit'] text-[12px] uppercase tracking-[0.6px] text-[#161616] leading-[1.3]">
               {t('eyebrow')}
             </p>
-            {/* Main Heading */}
-            <p className="absolute left-[calc(25%+25px)] right-[120px] top-0 font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] whitespace-nowrap">
-              {renderHeading()}
-            </p>
-            {/* Navigation buttons - positioned at far right */}
-            <div className="absolute right-0 top-[20px] flex items-center gap-[12px]">
-              <button
-                onClick={handlePrev}
-                className="w-[56px] h-[36px] px-[14px] rounded-full border border-[#161616] flex items-center justify-center bg-transparent hover:bg-[#161616]/5 transition-colors"
-                aria-label={t('aria.previous')}
-              >
-                <ArrowRight color="#161616" className="w-[20px] h-[16px] rotate-180" />
-              </button>
-              <button
-                onClick={handleNext}
-                className="w-[56px] h-[36px] px-[14px] rounded-full bg-[#161616] flex items-center justify-center hover:bg-[#0c0c0c] transition-colors"
-                aria-label={t('aria.next')}
-              >
-                <ArrowRight color="#FFFFFF" className="w-[20px] h-[16px]" />
-              </button>
+            <div className="flex items-start justify-between gap-[24px]">
+              <p className="font-['DM_Sans'] font-light text-[80px] leading-none tracking-[-4.4px] text-[#161616] w-[760px] whitespace-pre-wrap">
+                {renderHeading()}
+              </p>
+              <div className="mt-[20px] flex items-center gap-[12px]">
+                <button
+                  onClick={handlePrev}
+                  className="w-[56px] h-[36px] px-[14px] rounded-full border border-[#161616] flex items-center justify-center bg-transparent hover:bg-[#161616]/5 transition-colors"
+                  aria-label={t('aria.previous')}
+                >
+                  <ArrowRight color="#161616" className="w-[20px] h-[16px] rotate-180" />
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="w-[56px] h-[36px] px-[14px] rounded-full bg-[#161616] flex items-center justify-center hover:bg-[#0c0c0c] transition-colors"
+                  aria-label={t('aria.next')}
+                >
+                  <ArrowRight color="#FFFFFF" className="w-[20px] h-[16px]" />
+                </button>
+              </div>
             </div>
           </div>
 
