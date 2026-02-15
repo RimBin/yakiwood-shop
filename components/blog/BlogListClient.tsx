@@ -21,12 +21,12 @@ function sortPosts(posts: LocalizedBlogPost[]) {
   return posts.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
-function BlogImage({ src, alt }: { src: string; alt: string }) {
+function BlogImage({ src, alt, sizes = '100vw' }: { src: string; alt: string; sizes?: string }) {
   if (!src) return null;
   if (isDataUrl(src)) {
     return <img src={src} alt={alt} className="w-full h-full object-cover" />;
   }
-  return <Image src={src} alt={alt} fill className="object-cover" />;
+  return <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" />;
 }
 
 export default function BlogListClient({ initialPosts }: { initialPosts: LocalizedBlogPost[] }) {
@@ -133,7 +133,11 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
                     >
                       <Link href={toLocalePath(`/blog/${post.slug}`, locale)} className="block">
                         <div className={`relative w-full ${imageHeight} overflow-hidden bg-[#D9D9D9]`}>
-                          <BlogImage src={post.heroImage} alt={post.title} />
+                          <BlogImage
+                            src={post.heroImage}
+                            alt={post.title}
+                            sizes="(min-width: 1536px) 328px, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                          />
                         </div>
                         <div className="pr-[12px] py-[10px]">
                           <div className="font-['DM_Sans'] text-[18px] leading-[1.25] text-[#161616]">

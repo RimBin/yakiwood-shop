@@ -140,6 +140,7 @@ export default function Testimonials() {
                     src={activeTexture}
                     alt=""
                     fill
+                    sizes="(min-width: 768px) 520px, 100vw"
                     className={`object-cover ${isActive ? "opacity-100" : "opacity-15 mix-blend-luminosity"}`}
                   />
                   <div className={`absolute inset-0 ${isActive ? "bg-[#3d3d3d]/90" : "bg-[#E1E1E1]"}`} />
@@ -228,6 +229,7 @@ export default function Testimonials() {
                       src={isActive ? activeTexture : mutedTexture}
                       alt=""
                       fill
+                      sizes={isActive ? '680px' : '520px'}
                       className={`object-cover ${
                         isActive ? "opacity-100" : "opacity-15 mix-blend-luminosity"
                       }`}

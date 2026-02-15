@@ -1209,7 +1209,7 @@ export default function ProjectsAdminClient() {
 
               {featuredImageFile && (
                 <div className="relative w-full aspect-[16/9] rounded-[12px] overflow-hidden border-2 border-[#161616]">
-                  <Image src={featuredImageFile} alt="Featured preview" fill className="object-cover" />
+                  <Image src={featuredImageFile} alt="Featured preview" fill sizes="100vw" className="object-cover" />
                   <button
                     type="button"
                     onClick={() => {
@@ -1258,7 +1258,7 @@ export default function ProjectsAdminClient() {
                 <div className="grid grid-cols-4 gap-[12px] mt-[12px]">
                   {projectImageFiles.map((img, idx) => (
                     <div key={idx} className="relative aspect-square rounded-[8px] overflow-hidden border border-[#BBBBBB]">
-                      <Image src={img} alt={`Preview ${idx + 1}`} fill className="object-cover" />
+                      <Image src={img} alt={`Preview ${idx + 1}`} fill sizes="120px" className="object-cover" />
                       <button
                         type="button"
                         onClick={() => setProjectImageFiles((prev) => prev.filter((_, i) => i !== idx))}
@@ -1335,6 +1335,7 @@ export default function ProjectsAdminClient() {
                           src={typeof project.images[0] === 'string' ? project.images[0] : (project.images[0] as any).url || ''}
                           alt={getProjectTitle(project, currentLocale) || 'Projektas'}
                           fill
+                          sizes="(min-width: 640px) 120px, 100vw"
                           className="object-cover"
                         />
                       </div>
@@ -1608,7 +1609,7 @@ export default function ProjectsAdminClient() {
 
                         {featuredImageFile && (
                           <div className="relative w-full aspect-[16/9] rounded-[12px] overflow-hidden border-2 border-[#161616]">
-                            <Image src={featuredImageFile} alt="Featured preview" fill className="object-cover" />
+                            <Image src={featuredImageFile} alt="Featured preview" fill sizes="100vw" className="object-cover" />
                             <button
                               type="button"
                               onClick={() => {
@@ -1651,7 +1652,7 @@ export default function ProjectsAdminClient() {
                           <div className="grid grid-cols-4 gap-[8px] mt-[12px]">
                             {projectImageFiles.map((img, i) => (
                               <div key={i} className="relative aspect-square rounded-[8px] overflow-hidden border border-[#BBBBBB]">
-                                <Image src={img} alt={`Preview ${i + 1}`} fill className="object-cover" />
+                                <Image src={img} alt={`Preview ${i + 1}`} fill sizes="120px" className="object-cover" />
                                 <button
                                   type="button"
                                   onClick={() => setProjectImageFiles((prev) => prev.filter((_, idx) => idx !== i))}

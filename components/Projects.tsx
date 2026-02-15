@@ -163,6 +163,7 @@ export default function Projects() {
                 src={getProjectCardImage(featuredProjects[0]) || fallbackImages[0]}
                   alt={getProjectTitle(featuredProjects[0], currentLocale) || t('fallback.project')}
                 fill
+                sizes="267px"
                 className="object-cover"
               />
             </div>
@@ -188,6 +189,7 @@ export default function Projects() {
                   src={getProjectCardImage(featuredProjects[1]) || fallbackImages[1]}
                   alt={getProjectTitle(featuredProjects[1], currentLocale) || t('fallback.project')}
                   fill
+                  sizes="230px"
                   className="object-cover"
                 />
               </div>
@@ -213,6 +215,7 @@ export default function Projects() {
                 src={getProjectCardImage(featuredProjects[2]) || fallbackImages[2]}
                 alt={getProjectTitle(featuredProjects[2], currentLocale) || t('fallback.project')}
                 fill
+                sizes="328px"
                 className="object-cover"
               />
             </div>
@@ -238,6 +241,7 @@ export default function Projects() {
                   src={getProjectCardImage(featuredProjects[3]) || fallbackImages[3]}
                   alt={getProjectTitle(featuredProjects[3], currentLocale) || t('fallback.project')}
                   fill
+                  sizes="175px"
                   className="object-cover"
                 />
               </div>
@@ -269,6 +273,7 @@ export default function Projects() {
                   src={getProjectCardImage(featuredProjects[4]) || fallbackImages[5]}
                   alt={getProjectTitle(featuredProjects[4], currentLocale) || t('fallback.project')}
                   fill
+                  sizes="230px"
                   className="object-cover"
                 />
               </div>
@@ -294,6 +299,7 @@ export default function Projects() {
                 src={getProjectCardImage(featuredProjects[5]) || fallbackImages[4]}
                 alt={getProjectTitle(featuredProjects[5], currentLocale) || t('fallback.project')}
                 fill
+                sizes="328px"
                 className="object-cover"
               />
             </div>
@@ -360,6 +366,7 @@ export default function Projects() {
                   src={getProjectCardImage(project) || fallbackImages[idx % fallbackImages.length]}
                   alt={getProjectTitle(project, currentLocale) || t('fallback.project')}
                   fill
+                  sizes="(min-width: 1280px) 432px, 100vw"
                   className="object-cover"
                 />
               </div>

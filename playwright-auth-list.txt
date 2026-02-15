@@ -1,0 +1,12 @@
+
+Running 7 tests using 1 worker
+
+  ✓  1 [chromium] › e2e\auth.spec.ts:6:7 › Authentication › should display login form (18.9s)
+  ✓  2 [chromium] › e2e\auth.spec.ts:14:7 › Authentication › should show error for invalid credentials (39.1s)
+  ✓  3 [chromium] › e2e\auth.spec.ts:35:7 › Authentication › should login with valid credentials (20.0s)
+  ✓  4 [chromium] › e2e\auth.spec.ts:56:7 › Authentication › should display register form (12.8s)
+  ✓  5 [chromium] › e2e\auth.spec.ts:70:7 › Authentication › should have link to register from login (16.7s)
+  ✓  6 [chromium] › e2e\auth.spec.ts:81:7 › Authentication › should have forgot password link (15.3s)
+  ✓  7 [chromium] › e2e\auth.spec.ts:98:7 › Authentication › should logout user (22.1s)
+
+  7 passed (2.7m)

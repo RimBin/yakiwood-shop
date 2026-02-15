@@ -130,11 +130,11 @@ export default function AboutUs() {
         <div className="px-[16px] md:px-[32px] flex flex-col gap-[24px]">
           <div className="flex items-start gap-[16px] hero-seq-item hero-seq-right" style={{ animationDelay: '220ms' }}>
             <div className="relative w-[96px] h-[96px] rounded-[8px] overflow-hidden shrink-0">
-              <Image src={imgProject1} alt="" fill className="object-cover" />
+              <Image src={imgProject1} alt="" fill sizes="96px" className="object-cover" />
             </div>
 
             <div className="relative w-full h-[220px] md:h-[360px] rounded-[8px] overflow-hidden">
-              <Image src={imgAboutVideoThumb} alt="" fill className="object-cover" />
+              <Image src={imgAboutVideoThumb} alt="" fill sizes="100vw" className="object-cover" />
               <div className="absolute inset-0 bg-black/20" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <button
@@ -193,14 +193,14 @@ export default function AboutUs() {
           {/* Left small image */}
           <div className="col-span-2 hero-seq-item hero-seq-right" style={{ animationDelay: '220ms' }}>
             <div className="relative w-[175px] h-[175px] rounded-[8px] overflow-hidden">
-              <Image src={imgProject1} alt="" fill className="object-cover" />
+              <Image src={imgProject1} alt="" fill sizes="175px" className="object-cover" />
             </div>
           </div>
 
           {/* Video tile */}
           <div className="col-span-6 col-start-4 hero-seq-item hero-seq-right" style={{ animationDelay: '420ms' }}>
             <div className="relative w-full h-[623px] rounded-[8px] overflow-hidden">
-              <Image src={imgAboutVideoThumb} alt="" fill className="object-cover" />
+              <Image src={imgAboutVideoThumb} alt="" fill sizes="(min-width: 1280px) 672px, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-black/15" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <button

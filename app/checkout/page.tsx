@@ -329,10 +329,10 @@ export default function CheckoutPage() {
     try {
       const paymentsDisabled = process.env.NEXT_PUBLIC_PAYMENTS_DISABLED === 'true' || process.env.NODE_ENV !== 'production';
       if (paymentsDisabled) {
-        setSuccessMessage(t('success.withoutNumber'));
-        setShowSuccessModal(true);
+        const demoSessionId = `demo_${Date.now()}`;
         clearCart();
         setIsProcessing(false);
+        window.location.assign(`/order-confirmation?session_id=${encodeURIComponent(demoSessionId)}`);
         return;
       }
 
@@ -1139,7 +1139,7 @@ export default function CheckoutPage() {
               <div className="flex flex-col w-full">
                 <div className="h-px bg-[#535353]" />
                 {items.map((item) => (
-                  <div key={`${item.id}-${item.color}-${item.finish}`} className="py-[16px]">
+                  <div key={item.lineId} className="py-[16px]">
                     <div className="flex gap-[14px] w-full">
                       <div className="relative w-[111px] h-[125px] overflow-hidden shrink-0">
                         <Image
@@ -1176,12 +1176,40 @@ export default function CheckoutPage() {
                               </p>
                             )}
                             {typeof item.configuration?.widthMm === 'number' && typeof item.configuration?.lengthMm === 'number' && (
-                              <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">
-                                {t('summary.dimensions', {
-                                  widthMm: item.configuration.widthMm,
-                                  lengthMm: item.configuration.lengthMm,
-                                })}
-                              </p>
+                              <div className="flex flex-col gap-[6px]">
+                                <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">
+                                  {t('summary.dimensions', {
+                                    widthMm: item.configuration.widthMm,
+                                    lengthMm: item.configuration.lengthMm,
+                                  })}
+                                </p>
+                                <div className="flex gap-[8px]">
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    value={item.configuration.widthMm}
+                                    onChange={(event) => {
+                                      const nextWidth = Number(event.target.value);
+                                      if (!Number.isFinite(nextWidth) || nextWidth <= 0) return;
+                                      updateItemConfiguration(item.lineId, { widthMm: nextWidth });
+                                    }}
+                                    className="h-[32px] w-[88px] border border-[#535353] bg-transparent px-[8px] text-[12px] text-white outline-none"
+                                    aria-label="Width mm"
+                                  />
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    value={item.configuration.lengthMm}
+                                    onChange={(event) => {
+                                      const nextLength = Number(event.target.value);
+                                      if (!Number.isFinite(nextLength) || nextLength <= 0) return;
+                                      updateItemConfiguration(item.lineId, { lengthMm: nextLength });
+                                    }}
+                                    className="h-[32px] w-[88px] border border-[#535353] bg-transparent px-[8px] text-[12px] text-white outline-none"
+                                    aria-label="Length mm"
+                                  />
+                                </div>
+                              </div>
                             )}
                             <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">
                               {t('summary.quantity', { count: item.quantity })}

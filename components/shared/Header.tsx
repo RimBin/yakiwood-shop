@@ -128,7 +128,7 @@ export default function Header() {
               aria-label="Yakiwood homepage"
               className="h-[48px] w-[126px] relative shrink-0"
             >
-              <Image src={getAsset('imgLogo')} alt="Yakiwood Logo" fill style={{ objectFit: 'contain' }} />
+              <Image src={getAsset('imgLogo')} alt="Yakiwood Logo" fill sizes="126px" style={{ objectFit: 'contain' }} />
             </Link>
 
             {/* Navigation - hidden on mobile/tablet, shown on large screens */}
@@ -163,14 +163,14 @@ export default function Header() {
                     height={24}
                     className="transition-colors group-hover:invert"
                   />
-                  {itemCount > 0 && (
-                    <span className="absolute -top-[6px] right-0 min-w-[18px] h-[18px] px-[4px] rounded-full bg-[#161616] border border-[#E1E1E1] flex items-center justify-center font-['Outfit'] text-[10px] leading-none text-white">
-                      {itemCount > 9 ? '9+' : itemCount}
-                    </span>
-                  )}
                 </div>
+                {itemCount > 0 && (
+                  <span className="absolute -top-[6px] right-[8px] md:right-[12px] min-w-[18px] h-[18px] px-[4px] rounded-full bg-[#161616] border border-[#E1E1E1] flex items-center justify-center font-['Outfit'] text-[10px] leading-none text-white">
+                    {itemCount}
+                  </span>
+                )}
                 <span className="hidden md:inline font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white shrink-0">
-                  {t(locale === 'lt' ? 'header.krepselis' : 'header.cart')} {itemCount > 0 && `(${itemCount})`}
+                  {t(locale === 'lt' ? 'header.krepselis' : 'header.cart')}
                 </span>
               </button>
 

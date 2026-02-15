@@ -78,7 +78,7 @@ export default function Solutions() {
                 
                 {/* Image - responsive height */}
                 <div className={`w-full rounded-[8px] relative overflow-hidden transition-all ${openIndex === idx ? 'h-[160px] md:h-[220px]' : 'h-[56px] md:h-[80px]'}`}>
-                  <Image src={solution.image} alt={t(`items.${solution.id}.title`)} fill className="object-cover" />
+                  <Image src={solution.image} alt={t(`items.${solution.id}.title`)} fill sizes="100vw" className="object-cover" />
                 </div>
                 
                 {/* Description + Learn More - only when open */}
@@ -168,7 +168,7 @@ export default function Solutions() {
                     <div
                       className={`w-[672px] relative overflow-hidden ${isOpen ? 'h-[300px] rounded-[8px]' : 'h-[100px] rounded-tl-[8px] rounded-tr-[8px]'}`}
                     >
-                      <Image src={solution.image} alt={t(`items.${solution.id}.title`)} fill className="object-cover" />
+                      <Image src={solution.image} alt={t(`items.${solution.id}.title`)} fill sizes="(min-width: 1280px) 672px, 100vw" className="object-cover" />
                     </div>
 
                     {isOpen && (

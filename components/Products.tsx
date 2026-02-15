@@ -144,7 +144,7 @@ function MobileProductCard({
     <div className="bg-[#eaeaea] rounded-[8px] pt-[12px] pb-[16px] px-[16px] w-full flex flex-col gap-[24px] items-center relative">
       {/* Background mask overlay */}
       <div className="absolute inset-0 pointer-events-none">
-        <Image src={imgMask} alt="" fill className="object-cover" />
+        <Image src={imgMask} alt="" fill sizes="100vw" className="object-cover" />
       </div>
 
       {/* Product image slider - full bleed to screen edges on mobile */}
@@ -278,7 +278,7 @@ function DesktopProductCard({
   return (
     <div className="bg-[#eaeaea] rounded-[8px] pt-[24px] pb-[40px] px-[24px] flex-1 min-w-0 flex flex-col gap-[24px] items-center relative">
       <div className="absolute inset-0 pointer-events-none">
-        <Image src={imgMask} alt="" fill className="object-cover" />
+        <Image src={imgMask} alt="" fill sizes="(min-width: 1024px) 395px, 100vw" className="object-cover" />
       </div>
 
       <div className="relative w-full aspect-[395/311] shrink-0 z-10 rounded-[8px] overflow-hidden">

@@ -106,7 +106,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     activeThumb === index ? 'ring-2 ring-[#161616]' : ''
                   }`}
                 >
-                  <Image src={thumb} alt={`Product view ${index + 1}`} fill className="object-cover" />
+                  <Image src={thumb} alt={`Product view ${index + 1}`} fill sizes="(min-width: 1024px) 80px, 60px" className="object-cover" />
                 </button>
               ))}
             </div>
@@ -117,6 +117,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 src={product.image || imgProduct} 
                 alt={product.name}
                 fill
+                sizes="(min-width: 1536px) 790px, (min-width: 1280px) 500px, (min-width: 1024px) 328px, 100vw"
                 className="object-cover"
                 priority
               />

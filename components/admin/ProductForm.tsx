@@ -1543,6 +1543,7 @@ export default function ProductForm({ product, mode }: Props) {
                   src={imagePreview}
                   alt={t('image.previewAlt')}
                   fill
+                  sizes="(min-width: 1024px) 360px, 100vw"
                   className="object-cover"
                 />
               </div>

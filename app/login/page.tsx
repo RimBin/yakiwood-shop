@@ -21,6 +21,18 @@ export default function LoginPage() {
 
   const currentLocale: AppLocale = pathname.startsWith('/lt') ? 'lt' : 'en';
 
+  const withTimeout = async <T,>(promise: Promise<T>, timeoutMs = 3500): Promise<T> => {
+    return await Promise.race<T>([
+      promise,
+      new Promise<T>((_, reject) => {
+        const timer = setTimeout(() => {
+          clearTimeout(timer);
+          reject(new Error('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.'));
+        }, timeoutMs);
+      }),
+    ]);
+  };
+
   useEffect(() => {
     const oauthError = searchParams.get('error');
     if (oauthError) {
@@ -63,6 +75,12 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+    let didTimeout = false;
+    const failSafeTimer = window.setTimeout(() => {
+      didTimeout = true;
+      setError('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.');
+      setLoading(false);
+    }, 4000);
 
     try {
       const supabase = createClient();
@@ -70,10 +88,15 @@ export default function LoginPage() {
         throw new Error('Supabase nesukonfigūruotas arba raktai neteisingi (.env.local).');
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await withTimeout(supabase.auth.signInWithPassword({
         email,
         password,
-      });
+      }));
+
+      if (didTimeout) {
+        return;
+      }
+      clearTimeout(failSafeTimer);
 
       if (signInError) {
         const msg = String(signInError.message || '')
@@ -87,6 +110,7 @@ export default function LoginPage() {
       const redirectTo = searchParams.get('redirect') || defaultRedirect;
       router.push(redirectTo);
     } catch (e: any) {
+      clearTimeout(failSafeTimer);
       setError(e?.message || 'Nepavyko prisijungti');
       setLoading(false);
     }
@@ -95,6 +119,12 @@ export default function LoginPage() {
   const handleDemoLogin = async (role: 'admin' | 'user') => {
     setError(null);
     setLoading(true);
+    let didTimeout = false;
+    const failSafeTimer = window.setTimeout(() => {
+      didTimeout = true;
+      setError('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.');
+      setLoading(false);
+    }, 4000);
 
     const demoCredentials = {
       admin: { email: 'admin@yakiwood.lt', password: 'demo123', name: 'Admin User' },
@@ -111,10 +141,15 @@ export default function LoginPage() {
         throw new Error('Supabase nesukonfigūruotas arba raktai neteisingi (.env.local).');
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await withTimeout(supabase.auth.signInWithPassword({
         email: demo.email,
         password: demo.password,
-      });
+      }));
+
+      if (didTimeout) {
+        return;
+      }
+      clearTimeout(failSafeTimer);
 
       if (signInError) {
         const msg = String(signInError.message || '')
@@ -130,6 +165,7 @@ export default function LoginPage() {
       const redirectTo = searchParams.get('redirect') || defaultRedirect;
       router.push(redirectTo);
     } catch (e: any) {
+      clearTimeout(failSafeTimer);
       setError(e?.message || 'Nepavyko prisijungti');
       setLoading(false);
     }

@@ -48,6 +48,7 @@ export default function ProductCard({
           src={image}
           alt={name}
           fill
+          sizes="(min-width: 1024px) 395px, 100vw"
           className="object-cover rounded-[4px]"
         />
       </div>
@@ -99,6 +100,7 @@ export default function ProductCard({
                     src={color.image}
                     alt={color.name}
                     fill
+                    sizes="32px"
                     className="object-cover rounded-[4px]"
                   />
                 </div>

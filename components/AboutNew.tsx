@@ -33,6 +33,7 @@ export default function AboutNew() {
                 src="https://s3-alpha-sig.figma.com/img/a7d5/d8ee/1f9e3c1e0a7c5b4d8f9e6a3c2b1d0e9f?Expires=1735516800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=placeholder"
                 alt="Burnt wood craftsmanship"
                 fill
+                sizes="100vw"
                 className="object-cover"
                 priority
               />
@@ -196,6 +197,7 @@ export default function AboutNew() {
                     src="https://s3-alpha-sig.figma.com/img/placeholder1?Expires=1735516800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=placeholder"
                     alt="Team member"
                     fill
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
                     className="object-cover"
                   />
                 </div>
@@ -216,6 +218,7 @@ export default function AboutNew() {
                     src="https://s3-alpha-sig.figma.com/img/placeholder2?Expires=1735516800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=placeholder"
                     alt="Team member"
                     fill
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
                     className="object-cover"
                   />
                 </div>
@@ -236,6 +239,7 @@ export default function AboutNew() {
                     src="https://s3-alpha-sig.figma.com/img/placeholder3?Expires=1735516800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=placeholder"
                     alt="Team member"
                     fill
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
                     className="object-cover"
                   />
                 </div>
@@ -256,6 +260,7 @@ export default function AboutNew() {
                     src="https://s3-alpha-sig.figma.com/img/placeholder4?Expires=1735516800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=placeholder"
                     alt="Team member"
                     fill
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
                     className="object-cover"
                   />
                 </div>

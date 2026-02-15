@@ -49,6 +49,7 @@ function CartItemCard({ item, onRemove, size = 'small' }: CartItemCardProps) {
           src={productPlaceholder}
           alt={item.name}
           fill
+          sizes={isSmall ? '72px' : '111px'}
           className="object-cover"
         />
       </div>
@@ -264,7 +265,7 @@ export function CartButton({ onClick, variant = 'desktop' }: CartButtonProps) {
       >
         <CartIcon />
         {itemCount > 0 && (
-          <div className="absolute -top-[2px] left-[34px] bg-[#161616] rounded-full w-[16px] h-[16px] flex items-center justify-center">
+          <div className="absolute -top-[2px] right-[8px] bg-[#161616] rounded-full w-[16px] h-[16px] flex items-center justify-center">
             <span className="font-['Outfit'] font-normal text-white text-[10px] tracking-[0.6px] uppercase">
               {itemCount}
             </span>
@@ -284,7 +285,7 @@ export function CartButton({ onClick, variant = 'desktop' }: CartButtonProps) {
         Cart
       </span>
       {itemCount > 0 && (
-        <div className="absolute top-[6px] left-[38px] bg-[#161616] rounded-full w-[16px] h-[16px] flex items-center justify-center">
+        <div className="absolute top-[6px] right-[12px] bg-[#161616] rounded-full w-[16px] h-[16px] flex items-center justify-center">
           <span className="font-['Outfit'] font-normal text-white text-[10px] tracking-[0.6px] uppercase">
             {itemCount}
           </span>

@@ -21,14 +21,14 @@ export default function CTA() {
       {/* Background Image with opacity and luminosity blend */}
       <div className="absolute pointer-events-none mix-blend-luminosity opacity-[0.18] z-0 inset-0">
         {/* Mobile: large circular artwork centered behind the content */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[160vmin] h-[160vmin] md:w-[120vmin] md:h-[120vmin] lg:w-[1000px] lg:h-[1000px]">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[208vmin] h-[208vmin] md:w-[120vmin] md:h-[120vmin] lg:w-[1000px] lg:h-[1000px]">
           <Image src={backgroundImage} alt="" fill className="object-contain" sizes="100vw" />
         </div>
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1280px) - Figma 759:7625 ===== */}
       <InView
-        className={`xl:hidden relative z-10 flex flex-col items-center justify-center ${getSectionPadding('x')} py-[32px] md:py-[48px] hero-animate-root`}
+        className={`xl:hidden relative z-10 flex flex-col items-center justify-center ${getSectionPadding('x')} pt-[100px] pb-[300px] md:py-[48px] hero-animate-root`}
       >
         {/* Heading - Mobile/Tablet */}
         <h2

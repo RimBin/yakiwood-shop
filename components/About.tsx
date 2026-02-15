@@ -80,6 +80,7 @@ export default function About() {
               src={imgVideo}
               alt={t('videoAlt')}
               fill
+              sizes="100vw"
               className="object-cover"
             />
             <button
@@ -356,6 +357,7 @@ export default function About() {
                       src={imgTeam1}
                       alt={t('teamMemberAlt')}
                       fill
+                      sizes="328px"
                       className="object-cover"
                     />
                   </div>
@@ -374,6 +376,7 @@ export default function About() {
                       src={imgTeam2}
                       alt={t('teamMemberAlt')}
                       fill
+                      sizes="328px"
                       className="object-cover"
                     />
                   </div>
@@ -392,6 +395,7 @@ export default function About() {
                       src={imgTeam3}
                       alt={t('teamMemberAlt')}
                       fill
+                      sizes="328px"
                       className="object-cover"
                     />
                   </div>
@@ -410,6 +414,7 @@ export default function About() {
                       src={imgTeam4}
                       alt={t('teamMemberAlt')}
                       fill
+                      sizes="328px"
                       className="object-cover"
                     />
                   </div>
@@ -426,28 +431,28 @@ export default function About() {
               <div className="lg:hidden grid grid-cols-2 gap-[16px]">
                 <div className="flex flex-col gap-[8px]">
                   <div className="relative h-[218px] w-full overflow-hidden">
-                    <Image src={imgTeam1} alt={t('teamMemberAlt')} fill className="object-cover" />
+                    <Image src={imgTeam1} alt={t('teamMemberAlt')} fill sizes="(min-width: 1024px) 328px, 50vw" className="object-cover" />
                   </div>
                   <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">{t('teamMemberName')}</p>
                   <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">{t('teamMemberRole')}</p>
                 </div>
                 <div className="flex flex-col gap-[8px]">
                   <div className="relative h-[218px] w-full overflow-hidden">
-                    <Image src={imgTeam2} alt={t('teamMemberAlt')} fill className="object-cover" />
+                    <Image src={imgTeam2} alt={t('teamMemberAlt')} fill sizes="(min-width: 1024px) 328px, 50vw" className="object-cover" />
                   </div>
                   <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">{t('teamMemberName')}</p>
                   <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">{t('teamMemberRole')}</p>
                 </div>
                 <div className="flex flex-col gap-[8px]">
                   <div className="relative h-[218px] w-full overflow-hidden">
-                    <Image src={imgTeam3} alt={t('teamMemberAlt')} fill className="object-cover" />
+                    <Image src={imgTeam3} alt={t('teamMemberAlt')} fill sizes="(min-width: 1024px) 328px, 50vw" className="object-cover" />
                   </div>
                   <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">{t('teamMemberName')}</p>
                   <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">{t('teamMemberRole')}</p>
                 </div>
                 <div className="flex flex-col gap-[8px]">
                   <div className="relative h-[218px] w-full overflow-hidden">
-                    <Image src={imgTeam4} alt={t('teamMemberAlt')} fill className="object-cover" />
+                    <Image src={imgTeam4} alt={t('teamMemberAlt')} fill sizes="(min-width: 1024px) 328px, 50vw" className="object-cover" />
                   </div>
                   <p className="font-['DM_Sans'] font-medium text-[16px] leading-[1.2] tracking-[-0.32px] text-[#161616]">{t('teamMemberName')}</p>
                   <p className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#161616]">{t('teamMemberRole')}</p>

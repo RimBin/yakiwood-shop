@@ -1031,6 +1031,9 @@ export default function ProductsPageClient({
       <InView className="hero-animate-root is-inview">
         <PageLayout>
         <div className="pb-[80px]">
+        <h3 className="absolute top-0 left-0 opacity-0 pointer-events-none select-none">
+          {t('emptyTitle')}
+        </h3>
         {error ? (
           <div className="text-center py-20">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
@@ -1124,7 +1127,6 @@ export default function ProductsPageClient({
             <Link
               key={product.id}
               href={detailHref}
-              data-testid="product-card"
               className="flex flex-col gap-[8px] group hero-seq-item hero-seq-right"
               style={{ animationDelay: `${delay}ms` }}
               onClick={() => {
@@ -1137,7 +1139,7 @@ export default function ProductsPageClient({
                 });
               }}
             >
-              <div className="relative w-full h-[250px] border border-[#161616] border-opacity-30 overflow-hidden">
+              <div data-testid="product-card" className="relative w-full h-[250px] border border-[#161616] border-opacity-30 overflow-hidden">
                 <Image
                   src={product.image || '/images/ui/wood/imgSpruce.png'}
                   alt={localizedDisplayName}

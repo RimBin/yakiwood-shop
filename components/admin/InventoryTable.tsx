@@ -127,6 +127,7 @@ export function InventoryTable({ items, onRestock, onAdjust, onRefresh }: Invent
                         src={item.product.image_url}
                         alt={item.product.name}
                         fill
+                        sizes="48px"
                         className="object-cover"
                       />
                     </div>

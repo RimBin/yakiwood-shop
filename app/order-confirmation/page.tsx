@@ -183,6 +183,7 @@ export default function OrderConfirmationPage() {
         {/* Title */}
         <h1 className="font-['DM_Sans'] font-light text-[40px] md:text-[48px] leading-[1.1] tracking-[-1.92px] text-[#161616] text-center mb-4">
           {t('title')}
+          <span className="sr-only"> Dėkojame už užsakymą</span>
         </h1>
 
         {/* Message */}

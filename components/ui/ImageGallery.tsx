@@ -33,6 +33,7 @@ export default function ImageGallery({ images, backgroundColor = '#bbab92' }: Im
                 src={image.src}
                 alt={image.alt}
                 fill
+                sizes="(min-width: 1024px) 100vw, 328px"
                 className="object-contain"
                 priority={index === 0}
               />

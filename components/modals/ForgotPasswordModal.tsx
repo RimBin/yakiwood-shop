@@ -71,7 +71,7 @@ export default function ForgotPasswordModal({
 
       {/* Logo */}
       <div className="w-[126px] h-12 relative">
-        <Image src={getAsset('imgLogo')} alt="Yakiwood Logo" fill style={{ objectFit: 'contain' }} />
+        <Image src={getAsset('imgLogo')} alt="Yakiwood Logo" fill sizes="126px" style={{ objectFit: 'contain' }} />
       </div>
 
       {/* Title container */}

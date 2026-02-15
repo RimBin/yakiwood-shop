@@ -132,7 +132,7 @@ export default function Footer() {
               className={`w-[76px] h-[76px] rounded-[8px] flex items-center justify-center ${logo.bg}`}
             >
               <div className="relative" style={{ width: logo.mobileSize, height: logo.mobileSize }}>
-                <Image src={logo.src} alt={logo.alt} fill className="object-contain" />
+                <Image src={logo.src} alt={logo.alt} fill sizes={`${logo.mobileSize}px`} className="object-contain" />
               </div>
             </div>
           ))}
@@ -215,7 +215,7 @@ export default function Footer() {
                   className={`w-[96px] h-[96px] rounded-[8px] flex items-center justify-center ${logo.bg}`}
                 >
                   <div className="relative" style={{ width: logo.desktopSize, height: logo.desktopSize }}>
-                    <Image src={logo.src} alt={logo.alt} fill className="object-contain" />
+                    <Image src={logo.src} alt={logo.alt} fill sizes={`${logo.desktopSize}px`} className="object-contain" />
                   </div>
                 </div>
               ))}

@@ -706,7 +706,7 @@ export default function PostsAdminClient() {
                   {isDataUrl(draft.heroImage) ? (
                     <img src={draft.heroImage} alt={draft.title.lt || 'Hero'} className="w-full h-full object-cover" />
                   ) : (
-                    <Image src={draft.heroImage} alt={draft.title.lt || 'Hero'} fill className="object-cover" />
+                    <Image src={draft.heroImage} alt={draft.title.lt || 'Hero'} fill sizes="100vw" className="object-cover" />
                   )}
                 </div>
               ) : null}
@@ -755,7 +755,7 @@ export default function PostsAdminClient() {
                       {isDataUrl(img) ? (
                         <img src={img} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
                       ) : (
-                        <Image src={img} alt={`Gallery ${idx + 1}`} fill className="object-cover" />
+                        <Image src={img} alt={`Gallery ${idx + 1}`} fill sizes="70px" className="object-cover" />
                       )}
                       <button
                         type="button"
@@ -819,7 +819,7 @@ export default function PostsAdminClient() {
                       {isDataUrl(img) ? (
                         <img src={img} alt={`Feature ${idx + 1}`} className="w-full h-full object-cover" />
                       ) : (
-                        <Image src={img} alt={`Feature ${idx + 1}`} fill className="object-cover" />
+                        <Image src={img} alt={`Feature ${idx + 1}`} fill sizes="70px" className="object-cover" />
                       )}
                       <button
                         type="button"

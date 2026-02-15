@@ -20,15 +20,19 @@ const COOKIE_CONSENT_COOKIE = {
 
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  timeout: 120_000,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
   reporter: 'html',
   use: {
     baseURL: 'http://127.0.0.1:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    launchOptions: {
+      args: ['--disable-gpu'],
+    },
     storageState: {
       cookies: [COOKIE_CONSENT_COOKIE],
       origins: [],
@@ -38,33 +42,36 @@ export default defineConfig({
     actionTimeout: 30_000, // actions (click/type) default timeout
   },
 
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'tablet',
-      use: { ...devices['iPad (gen 7)'] },
-    },
-
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-  ],
+  projects: process.env.CI
+    ? [
+        {
+          name: 'chromium',
+          use: { ...devices['Desktop Chrome'] },
+        },
+        {
+          name: 'firefox',
+          use: { ...devices['Desktop Firefox'] },
+        },
+        {
+          name: 'tablet',
+          use: { ...devices['iPad (gen 7)'] },
+        },
+        {
+          name: 'Mobile Chrome',
+          use: { ...devices['Pixel 5'] },
+        },
+      ]
+    : [
+        {
+          name: 'chromium',
+          use: { ...devices['Desktop Chrome'] },
+        },
+      ],
 
   webServer: {
     command: 'npm run dev',
     url: 'http://127.0.0.1:3000',
-    // Reuse existing server when present (helps local dev workflows). In CI this becomes false.
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120 * 1000,
   },
 });
