@@ -310,13 +310,13 @@ export default function ChatbotWidget() {
           <div
             ref={panelRef}
             className={
-              'absolute top-[18px] bottom-[calc(env(safe-area-inset-bottom)+18px)] right-[18px] sm:static ' +
+              'absolute top-[18px] bottom-[18px] right-[18px] sm:static ' +
               'w-[calc(100vw-36px)] max-w-[420px] sm:w-[380px] ' +
               'rounded-[28px] border border-[#E1E1E1] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.22)] overflow-hidden ' +
               'sm:h-[680px] sm:max-h-[680px] '
             }
           >
-            <div className="flex h-full flex-col sm:max-h-[640px] pb-[env(safe-area-inset-bottom)]">
+            <div className="flex h-full flex-col">
               <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(135deg,#0F0F0F_0%,#2A2A2A_40%,#161616_100%)]" />
                 <div className="absolute -right-[80px] -top-[90px] h-[200px] w-[200px] rounded-full bg-white/10 blur-2xl" />
@@ -486,9 +486,7 @@ export default function ChatbotWidget() {
                 )}
               </div>
 
-            </div>
-
-              <div className="relative mt-auto border-t border-[#EAEAEA] bg-white p-[12px] pb-[calc(env(safe-area-inset-bottom)+22px)]">
+              <div className="shrink-0 border-t border-[#EAEAEA] bg-white p-[12px]">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -535,6 +533,7 @@ export default function ChatbotWidget() {
                   <span className="underline underline-offset-4">{t('handoff')}</span>
                 </button>
               </div>
+            </div>
           </div>
         </div>
       ) : null}
