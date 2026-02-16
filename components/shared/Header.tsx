@@ -49,6 +49,10 @@ export default function Header() {
       label: t(locale === 'lt' ? 'nav.projektai' : 'nav.projects'),
     },
     {
+      href: toLocalePath('/eu-projects', currentLocale),
+      label: t(locale === 'lt' ? 'nav.euProjektai' : 'nav.euProjects'),
+    },
+    {
       href: toLocalePath('/blog', currentLocale),
       label: t(locale === 'lt' ? 'nav.straipsniai' : 'nav.blog'),
     },

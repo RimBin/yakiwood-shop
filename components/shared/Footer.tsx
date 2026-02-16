@@ -15,6 +15,8 @@ const certificates = [
     bg: 'bg-white/10',
     mobileSize: 64,
     desktopSize: 88,
+    href: 'https://www.environdec.com/library/epd10564',
+    external: true,
   },
   {
     src: assets.certifications.fsc,
@@ -22,6 +24,8 @@ const certificates = [
     bg: 'bg-white/10',
     mobileSize: 64,
     desktopSize: 88,
+    href: 'https://app.powerbi.com/view?r=eyJrIjoiN2U3NGMyNWEtZTAxNS00MzVhLWExNmMtOThhZjdiYjQ4MWNkIiwidCI6IjEyNGU2OWRiLWVmNjUtNDk2Yi05NmE5LTVkNTZiZWMxZDI5MSIsImMiOjl9',
+    external: true,
   },
   {
     src: assets.certifications.eu,
@@ -29,6 +33,8 @@ const certificates = [
     bg: 'bg-white',
     mobileSize: 72,
     desktopSize: 96,
+    href: '/eu-projects',
+    external: false,
   },
 ];
 
@@ -126,16 +132,37 @@ export default function Footer() {
 
         {/* Certificates - Mobile: Horizontal row */}
         <div className="flex gap-[10px] mb-[32px]">
-          {certificates.map((logo) => (
-            <div
-              key={logo.src}
-              className={`w-[76px] h-[76px] rounded-[8px] flex items-center justify-center ${logo.bg}`}
-            >
-              <div className="relative" style={{ width: logo.mobileSize, height: logo.mobileSize }}>
-                <Image src={logo.src} alt={logo.alt} fill sizes={`${logo.mobileSize}px`} className="object-contain" />
+          {certificates.map((logo) => {
+            const card = (
+              <div
+                className={`w-[76px] h-[76px] rounded-[8px] flex items-center justify-center ${logo.bg}`}
+              >
+                <div className="relative" style={{ width: logo.mobileSize, height: logo.mobileSize }}>
+                  <Image src={logo.src} alt={logo.alt} fill sizes={`${logo.mobileSize}px`} className="object-contain" />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+
+            if (logo.external) {
+              return (
+                <a
+                  key={logo.src}
+                  href={logo.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={logo.alt}
+                >
+                  {card}
+                </a>
+              );
+            }
+
+            return (
+              <Link key={logo.src} href={toLocalePath(logo.href, currentLocale)} aria-label={logo.alt}>
+                {card}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Divider */}
@@ -209,16 +236,37 @@ export default function Footer() {
 
             {/* Certificates - Desktop */}
             <div className="flex flex-wrap gap-[12px] items-center justify-end">
-              {certificates.map((logo) => (
-                <div
-                  key={logo.src}
-                  className={`w-[96px] h-[96px] rounded-[8px] flex items-center justify-center ${logo.bg}`}
-                >
-                  <div className="relative" style={{ width: logo.desktopSize, height: logo.desktopSize }}>
-                    <Image src={logo.src} alt={logo.alt} fill sizes={`${logo.desktopSize}px`} className="object-contain" />
+              {certificates.map((logo) => {
+                const card = (
+                  <div
+                    className={`w-[96px] h-[96px] rounded-[8px] flex items-center justify-center ${logo.bg}`}
+                  >
+                    <div className="relative" style={{ width: logo.desktopSize, height: logo.desktopSize }}>
+                      <Image src={logo.src} alt={logo.alt} fill sizes={`${logo.desktopSize}px`} className="object-contain" />
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+
+                if (logo.external) {
+                  return (
+                    <a
+                      key={logo.src}
+                      href={logo.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={logo.alt}
+                    >
+                      {card}
+                    </a>
+                  );
+                }
+
+                return (
+                  <Link key={logo.src} href={toLocalePath(logo.href, currentLocale)} aria-label={logo.alt}>
+                    {card}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 

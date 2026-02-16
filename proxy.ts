@@ -29,6 +29,7 @@ const enToLt: PrefixMap = [
   { from: '/products', to: '/produktai' },
   { from: '/solutions', to: '/sprendimai' },
   { from: '/projects', to: '/projektai' },
+  { from: '/eu-projects', to: '/eu-projektai' },
   { from: '/configurator3d', to: '/konfiguratorius3d' },
   { from: '/blog', to: '/irasai' },
 ]
@@ -52,6 +53,7 @@ const ltToEn: PrefixMap = [
   { from: '/produktai', to: '/products' },
   { from: '/sprendimai', to: '/solutions' },
   { from: '/projektai', to: '/projects' },
+  { from: '/eu-projektai', to: '/eu-projects' },
   { from: '/konfiguratorius3d', to: '/configurator3d' },
   { from: '/irasai', to: '/blog' },
 ]
@@ -204,6 +206,7 @@ export async function proxy(request: NextRequest) {
     { from: '/produktai', to: '/lt/produktai' },
     { from: '/sprendimai', to: '/lt/sprendimai' },
     { from: '/projektai', to: '/lt/projektai' },
+    { from: '/eu-projektai', to: '/lt/eu-projektai' },
     { from: '/konfiguratorius3d', to: '/lt/konfiguratorius3d' },
     { from: '/svetaines-zemelapis', to: '/lt/svetaines-zemelapis' },
   ]

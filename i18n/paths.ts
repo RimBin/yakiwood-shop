@@ -18,6 +18,7 @@ const enToLt: PrefixMap = [
   { from: '/products', to: '/produktai' },
   { from: '/solutions', to: '/sprendimai' },
   { from: '/projects', to: '/projektai' },
+  { from: '/eu-projects', to: '/eu-projektai' },
   { from: '/blog', to: '/straipsniai' },
   { from: '/about', to: '/apie' },
   { from: '/contact', to: '/kontaktai' },

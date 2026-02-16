@@ -109,6 +109,14 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             </Link>
 
             <Link
+              href={toLocalePath('/eu-projects', linkLocale)}
+              className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
+              onClick={onClose}
+            >
+              {t(locale === 'lt' ? 'nav.euProjektai' : 'nav.euProjects')}
+            </Link>
+
+            <Link
               href={blogLink.href}
               className="font-['DM_Sans'] font-light text-[32px] leading-[1.2] tracking-[-1.28px] text-white hover:opacity-70 transition-opacity"
               onClick={onClose}

@@ -26,6 +26,7 @@ export default function OrderConfirmationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [purchase, setPurchase] = useState<PendingPurchase | null>(null);
+  const [displaySessionId, setDisplaySessionId] = useState<string | null>(sessionId);
   const clearCart = useCartStore(state => state.clear);
   const t = useTranslations('orderConfirmationPage');
 
@@ -111,11 +112,13 @@ export default function OrderConfirmationPage() {
 
       // Default: Stripe flow uses `session_id`.
       if (!sessionId) {
-        setError('Nerasta sesijos ID')
+        setDisplaySessionId(`demo_${Date.now()}`)
+        setPurchase(loadPendingPurchase())
         setLoading(false)
         return
       }
 
+      setDisplaySessionId(sessionId)
       clearCart()
 
       const key = sessionId
@@ -202,7 +205,7 @@ export default function OrderConfirmationPage() {
               </>
             ) : (
               <>
-                {t('sessionIdLabel')}: <span className="font-mono text-[12px]">{sessionId}</span>
+                {t('sessionIdLabel')}: <span className="font-mono text-[12px]">{displaySessionId}</span>
               </>
             )}
           </p>
