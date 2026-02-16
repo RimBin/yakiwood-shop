@@ -623,9 +623,9 @@ export default function CheckoutPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-[1440px] mx-auto px-[16px] sm:px-[40px] pb-[80px] sm:pb-[120px] pt-[64px]">
-        <div className="grid grid-cols-1 lg:grid-cols-[672px_648px] gap-[32px] items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] xl:grid-cols-[minmax(0,1fr)_minmax(0,480px)] 2xl:grid-cols-[672px_648px] gap-[20px] xl:gap-[24px] 2xl:gap-[32px] items-start">
           {/* Left Column */}
-          <div className="flex flex-col gap-[64px]">
+          <div className="order-2 lg:order-1 flex flex-col gap-[64px]">
 
             {/* Contact information */}
             <section className="flex flex-col gap-[24px]">
@@ -1102,11 +1102,11 @@ export default function CheckoutPage() {
                 )}
 
                 {/* Actions */}
-                <div className="flex flex-col sm:flex-row gap-[16px]">
+                <div className="flex flex-col md:flex-row gap-[16px]">
                   <button
                     type="button"
                     onClick={() => window.history.back()}
-                    className="border border-[#161616] border-solid h-[48px] px-[40px] py-[10px] rounded-[100px] w-full sm:w-[328px] flex items-center justify-center"
+                    className="border border-[#161616] border-solid h-[48px] px-[40px] py-[10px] rounded-[100px] w-full md:w-[328px] flex items-center justify-center"
                   >
                     <span className="font-['Outfit'] font-normal leading-[1.2] text-[#161616] text-[12px] tracking-[0.6px] uppercase">
                       {t('actions.backToCart')}
@@ -1115,7 +1115,7 @@ export default function CheckoutPage() {
                   <button
                     type="submit"
                     disabled={isProcessing}
-                    className="bg-[#161616] h-[48px] px-[40px] py-[10px] rounded-[100px] w-full sm:w-[328px] flex items-center justify-center disabled:bg-[#BBBBBB] disabled:cursor-not-allowed"
+                    className="bg-[#161616] h-[48px] px-[40px] py-[10px] rounded-[100px] w-full md:w-[328px] flex items-center justify-center disabled:bg-[#BBBBBB] disabled:cursor-not-allowed"
                   >
                     <span className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase">
                       {isProcessing ? t('actions.processing') : t('actions.submitOrder')}
@@ -1127,8 +1127,8 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right Column - Order summary */}
-          <aside className="w-full max-w-[648px]">
-            <div className="bg-[#161616] p-[24px] sm:p-[40px] flex flex-col gap-[32px]">
+          <aside className="order-1 lg:order-2 w-full max-w-[648px]">
+            <div className="bg-[#161616] p-[16px] sm:p-[24px] lg:p-[40px] flex flex-col gap-[24px] sm:gap-[32px]">
               <p
                 className="font-['DM_Sans'] font-normal leading-[1.1] text-[24px] text-white tracking-[-0.96px]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
@@ -1140,33 +1140,33 @@ export default function CheckoutPage() {
                 <div className="h-px bg-[#535353]" />
                 {items.map((item) => (
                   <div key={item.lineId} className="py-[16px]">
-                    <div className="flex gap-[14px] w-full">
-                      <div className="relative w-[111px] h-[125px] overflow-hidden shrink-0">
+                    <div className="flex gap-[12px] sm:gap-[14px] w-full">
+                      <div className="relative w-[84px] h-[96px] sm:w-[111px] sm:h-[125px] overflow-hidden shrink-0">
                         <Image
                           src={getItemImage(item.slug, item.id)}
                           alt={item.name}
                           fill
                           className="object-cover"
-                          sizes="111px"
+                          sizes="(max-width: 640px) 84px, 111px"
                         />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-[16px]">
                           <p
-                            className="font-['DM_Sans'] font-medium leading-[1.2] text-[18px] text-white tracking-[-0.36px] max-w-[224px]"
+                            className="font-['DM_Sans'] font-medium leading-[1.2] text-[16px] sm:text-[18px] text-white tracking-[-0.36px] min-w-0"
                             style={{ fontVariationSettings: "'opsz' 14" }}
                           >
                             {item.name}
                           </p>
                           <p
-                            className="font-['DM_Sans'] font-medium leading-[1.2] text-[18px] text-white tracking-[-0.36px]"
+                            className="font-['DM_Sans'] font-medium leading-[1.2] text-[16px] sm:text-[18px] text-white tracking-[-0.36px] whitespace-nowrap shrink-0"
                             style={{ fontVariationSettings: "'opsz' 14" }}
                           >
                             {formatMoney(item.basePrice * item.quantity, locale)}
                           </p>
                         </div>
 
-                        <div className="mt-[8px] flex items-end justify-between">
+                        <div className="mt-[8px] flex flex-col gap-[8px] sm:flex-row sm:items-end sm:justify-between">
                           <div className="flex flex-col gap-[4px]">
                             {(item.color || item.finish) && (
                               <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">
@@ -1191,7 +1191,7 @@ export default function CheckoutPage() {
                           <button
                             type="button"
                             onClick={() => removeItem(item.lineId)}
-                            className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase hover:opacity-70 transition-opacity"
+                            className="self-start sm:self-auto font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase hover:opacity-70 transition-opacity"
                           >
                             {t('summary.remove')}
                           </button>
@@ -1235,7 +1235,7 @@ export default function CheckoutPage() {
                   <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">{t('summary.includingTaxes')}</p>
                 </div>
                 <p
-                  className="font-['DM_Sans'] font-normal leading-[1.1] text-[24px] text-white tracking-[-0.96px]"
+                  className="font-['DM_Sans'] font-normal leading-[1.1] text-[24px] text-white tracking-[-0.96px] whitespace-nowrap"
                   style={{ fontVariationSettings: "'opsz' 14" }}
                 >
                   {formatMoney(total, locale)}
@@ -1244,15 +1244,15 @@ export default function CheckoutPage() {
             </div>
 
             {/* Coupon pill */}
-            <div className="mt-[16px] border border-[#BBBBBB] border-solid h-[56px] rounded-[100px] flex items-center justify-between pl-[24px] pr-[8px] py-[16px]">
+            <div className="mt-[16px] border border-[#BBBBBB] border-solid h-[56px] rounded-[100px] flex items-center justify-between pl-[12px] sm:pl-[24px] pr-[8px] py-[8px] sm:py-[16px] gap-[8px]">
               <input
                 type="text"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
                 placeholder={t('coupon.placeholder')}
-                className="bg-transparent outline-none font-['Outfit'] font-normal leading-[1.2] text-[#7C7C7C] text-[12px] tracking-[0.6px] uppercase flex-1 placeholder:text-[#7C7C7C]"
+                className="bg-transparent outline-none font-['Outfit'] font-normal leading-[1.2] text-[#7C7C7C] text-[11px] sm:text-[12px] tracking-[0.3px] sm:tracking-[0.6px] uppercase flex-1 min-w-0 placeholder:text-[#7C7C7C]"
               />
-              <button type="button" className="bg-[#161616] h-[48px] px-[40px] py-[10px] rounded-[100px] w-[118px] flex items-center justify-center">
+              <button type="button" className="bg-[#161616] h-[40px] sm:h-[48px] px-[18px] sm:px-[40px] py-[10px] rounded-[100px] min-w-[92px] sm:w-[118px] flex items-center justify-center shrink-0">
                 <span className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase">{t('coupon.apply')}</span>
               </button>
             </div>

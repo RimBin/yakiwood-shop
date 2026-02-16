@@ -135,7 +135,7 @@ export default function OrderConfirmationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center">
+      <div className="min-h-screen bg-[#EAEAEA] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#161616] mx-auto mb-4"></div>
           <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('loading')}</p>
@@ -146,8 +146,8 @@ export default function OrderConfirmationPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-[24px] p-8 text-center">
+      <div className="min-h-screen bg-[#EAEAEA] flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-[#E1E1E1] border border-[#BBBBBB] rounded-[24px] p-8 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -161,7 +161,7 @@ export default function OrderConfirmationPage() {
           </p>
           <Link
             href="/"
-            className="inline-block h-[48px] px-[24px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors flex items-center justify-center"
+            className="inline-block h-[48px] px-[24px] rounded-[100px] border border-[#161616] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:opacity-90 transition-opacity flex items-center justify-center"
           >
             {t('backHome')}
           </Link>
@@ -171,8 +171,8 @@ export default function OrderConfirmationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#E1E1E1] flex items-center justify-center px-4 py-12">
-      <div className="max-w-2xl w-full bg-white rounded-[24px] p-8 md:p-12">
+    <div className="min-h-screen bg-[#EAEAEA] flex items-center justify-center px-4 py-12">
+      <div className="max-w-2xl w-full bg-[#E1E1E1] border border-[#BBBBBB] rounded-[24px] p-8 md:p-12">
         {/* Success Icon */}
         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -209,7 +209,7 @@ export default function OrderConfirmationPage() {
         </div>
 
         {/* Order Summary */}
-        <div className="border border-[#E1E1E1] rounded-[16px] p-6 mb-8">
+        <div className="bg-[#EAEAEA] border border-[#BBBBBB] rounded-[16px] p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-['DM_Sans'] font-light text-[20px] leading-[1.1] tracking-[-0.8px] text-[#161616]">
               {t('summaryTitle')}
@@ -255,7 +255,7 @@ export default function OrderConfirmationPage() {
         </div>
 
         {/* Info Box */}
-        <div className="bg-[#F5F5F5] rounded-[16px] p-6 mb-8">
+        <div className="bg-[#EAEAEA] rounded-[16px] p-6 mb-8">
           <h2 className="font-['DM_Sans'] font-light text-[20px] leading-[1.1] tracking-[-0.8px] text-[#161616] mb-4">
             {t('nextStepsTitle')}
           </h2>
@@ -299,13 +299,13 @@ export default function OrderConfirmationPage() {
         <div className="flex flex-col sm:flex-row gap-4">
           <Link
             href={toLocalePath('/account', currentLocale)}
-            className="flex-1 h-[48px] rounded-[100px] bg-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-white hover:bg-[#535353] transition-colors flex items-center justify-center"
+            className="w-full sm:flex-1 min-h-[56px] rounded-[100px] border border-[#161616] bg-[#161616] px-[24px] py-[14px] font-['Outfit'] font-normal text-[13px] leading-none tracking-[0.6px] uppercase text-white hover:opacity-90 transition-opacity flex items-center justify-center"
           >
             {t('viewOrders')}
           </Link>
           <Link
             href={toLocalePath('/products', currentLocale)}
-            className="flex-1 h-[48px] rounded-[100px] border border-[#161616] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] hover:bg-[#535353] hover:text-white transition-colors flex items-center justify-center"
+            className="w-full sm:flex-1 min-h-[56px] rounded-[100px] border border-[#161616] bg-[#E1E1E1] px-[24px] py-[14px] font-['Outfit'] font-normal text-[13px] leading-none tracking-[0.6px] uppercase text-[#161616] hover:bg-[#EAEAEA] transition-colors flex items-center justify-center"
           >
             {t('continueShopping')}
           </Link>
