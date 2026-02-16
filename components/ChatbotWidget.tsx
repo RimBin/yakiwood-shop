@@ -294,7 +294,7 @@ export default function ChatbotWidget() {
   if (shouldHide) return null;
 
   return (
-    <div className="fixed bottom-[18px] right-[18px] z-50">
+    <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+18px)] right-[18px] z-50">
       {open ? (
         <div
           className="fixed inset-0 z-50 sm:inset-auto sm:static"
@@ -310,18 +310,18 @@ export default function ChatbotWidget() {
           <div
             ref={panelRef}
             className={
-              'absolute bottom-[18px] right-[18px] sm:static ' +
+              'absolute top-[18px] bottom-[calc(env(safe-area-inset-bottom)+18px)] right-[18px] sm:static ' +
               'w-[calc(100vw-36px)] max-w-[420px] sm:w-[380px] ' +
               'rounded-[28px] border border-[#E1E1E1] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.22)] overflow-hidden ' +
-              'h-[calc(100dvh-72px)] max-h-[calc(100dvh-72px)] sm:h-[680px] sm:max-h-[680px] '
+              'sm:h-[680px] sm:max-h-[680px] '
             }
           >
             <div className="flex h-full flex-col sm:max-h-[640px] pb-[env(safe-area-inset-bottom)]">
               <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(135deg,#0F0F0F_0%,#2A2A2A_40%,#161616_100%)]" />
                 <div className="absolute -right-[80px] -top-[90px] h-[200px] w-[200px] rounded-full bg-white/10 blur-2xl" />
-                <div className="relative flex items-start justify-between px-[16px] py-[14px]">
-                  <div className="flex items-start gap-[10px]">
+                <div className="relative flex items-center justify-between px-[16px] py-[14px]">
+                  <div className="flex items-center gap-[10px]">
                     <div className="h-[36px] w-[36px] rounded-full bg-white/10 ring-1 ring-white/15 grid place-items-center">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -334,11 +334,10 @@ export default function ChatbotWidget() {
                         <path d="M8 12H14" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
                       </svg>
                     </div>
-                    <div>
-                      <div className="font-['DM_Sans'] text-[14px] font-semibold tracking-[-0.2px] text-white">
-                        {t('title')}
-                      </div>
-                    </div>
+                  </div>
+
+                  <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 px-[56px] text-center font-['DM_Sans'] text-[14px] font-semibold tracking-[-0.2px] text-white">
+                    {t('title')}
                   </div>
 
                   <div className="flex items-center gap-[6px]">
@@ -489,7 +488,7 @@ export default function ChatbotWidget() {
 
             </div>
 
-              <div className="relative mt-auto border-t border-[#EAEAEA] bg-white p-[12px]">
+              <div className="relative mt-auto border-t border-[#EAEAEA] bg-white p-[12px] pb-[calc(env(safe-area-inset-bottom)+22px)]">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();

@@ -21,7 +21,7 @@ export default async function EuProjectsPage() {
         <div className="w-full flex items-center">
           <div className="relative w-[220px] h-[86px] md:w-[320px] md:h-[128px]">
             <Image
-              src={assets.certifications.eu}
+              src="/assets/eu/eu-funded-logo.webp"
               alt={content.logoAlt}
               fill
               sizes="(min-width: 768px) 320px, 220px"

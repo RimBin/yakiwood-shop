@@ -57,7 +57,7 @@ const localAssets = {
   // Certifications
   certEpd: '/assets/footer/epd.png',
   certFsc: '/assets/footer/fsc.png',
-  certEu: '/assets/eu/eu-funded-logo.webp',
+  certEu: '/assets/footer/ES.png',
   // Additional logo files (exported from Figma) used in the hero certification bar
   cert1: '/icons/ui/logos/fsc.svg',
   cert2: '/icons/ui/logos/accoya.svg',
