@@ -28,12 +28,13 @@ export function PageLayout({ children, className = '' }: PageLayoutProps) {
 interface PageCoverProps {
   children: React.ReactNode;
   className?: string;
+  innerClassName?: string;
 }
 
-export function PageCover({ children, className = '' }: PageCoverProps) {
+export function PageCover({ children, className = '', innerClassName = '' }: PageCoverProps) {
   return (
     <div className={`w-full border-b border-[#BBBBBB] pt-[32px] pb-[32px] bg-[#E1E1E1] flex justify-center ${className}`}>
-      <div className="w-full max-w-[1440px] px-[16px] md:px-[40px]">
+      <div className={`w-full max-w-[1440px] px-[16px] md:px-[40px] ${innerClassName}`}>
         {children}
       </div>
     </div>
