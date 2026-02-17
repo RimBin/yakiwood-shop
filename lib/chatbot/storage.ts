@@ -19,6 +19,27 @@ export type ChatSessionSummary = {
   lastMessagePreview: string;
 };
 
+type ReadOptions = {
+  preferFallback?: boolean;
+};
+
+function hasSupabaseError(result: { error?: { message?: string } | null } | null | undefined): boolean {
+  return Boolean(result?.error);
+}
+
+function isMissingSupabaseTableError(message: string | null | undefined): boolean {
+  const m = String(message || '').toLowerCase();
+  return (
+    m.includes('could not find the table') ||
+    (m.includes('schema cache') && m.includes('table')) ||
+    (m.includes('relation') && m.includes('does not exist'))
+  );
+}
+
+function shouldFallback(options?: ReadOptions): boolean {
+  return options?.preferFallback !== false;
+}
+
 type InMemoryStore = {
   sessions: Map<string, { createdAt: string; events: ChatEvent[] }>;
 };
@@ -134,17 +155,23 @@ export async function appendEvent(event: {
 
   if (supabaseAdmin) {
     try {
-      await supabaseAdmin
+      const upsertSession = await supabaseAdmin
         .from('chatbot_sessions')
         .upsert({ session_id: event.sessionId, updated_at: createdAt }, { onConflict: 'session_id' });
+      if (hasSupabaseError(upsertSession)) {
+        throw new Error(upsertSession.error?.message || 'Failed to upsert chatbot session');
+      }
 
-      await supabaseAdmin.from('chatbot_events').insert({
+      const insertEvent = await supabaseAdmin.from('chatbot_events').insert({
         session_id: event.sessionId,
         role: event.role,
         message: event.message,
         meta: event.meta ?? {},
         created_at: createdAt,
       });
+      if (hasSupabaseError(insertEvent)) {
+        throw new Error(insertEvent.error?.message || 'Failed to insert chatbot event');
+      }
 
       return { id, createdAt };
     } catch {
@@ -173,14 +200,24 @@ export async function appendEvent(event: {
   return { id, createdAt };
 }
 
-export async function listSessions(limit = 50): Promise<ChatSessionSummary[]> {
+export async function listSessions(limit = 50, options?: ReadOptions): Promise<ChatSessionSummary[]> {
+  const allowFallback = shouldFallback(options);
+
   if (supabaseAdmin) {
     try {
-      const { data } = await supabaseAdmin
+      const sessionsResult = await supabaseAdmin
         .from('chatbot_sessions')
         .select('session_id, created_at, updated_at')
         .order('updated_at', { ascending: false })
         .limit(limit);
+      if (hasSupabaseError(sessionsResult)) {
+        if (!allowFallback && isMissingSupabaseTableError(sessionsResult.error?.message)) {
+          throw new Error('ERR_SUPABASE_MISSING_TABLE:chatbot_sessions');
+        }
+        throw new Error(sessionsResult.error?.message || 'Failed to load chatbot sessions');
+      }
+
+      const data = sessionsResult.data;
 
       const sessions = (data ?? []).map((s) => ({
         sessionId: s.session_id as string,
@@ -191,24 +228,37 @@ export async function listSessions(limit = 50): Promise<ChatSessionSummary[]> {
       }));
 
       for (const session of sessions) {
-        const { data: last } = await supabaseAdmin
+        const lastResult = await supabaseAdmin
           .from('chatbot_events')
           .select('message, created_at')
           .eq('session_id', session.sessionId)
           .order('created_at', { ascending: false })
           .limit(1);
+        if (hasSupabaseError(lastResult)) {
+          if (!allowFallback && isMissingSupabaseTableError(lastResult.error?.message)) {
+            throw new Error('ERR_SUPABASE_MISSING_TABLE:chatbot_events');
+          }
+          throw new Error(lastResult.error?.message || 'Failed to load last chatbot event');
+        }
 
-        const { count } = await supabaseAdmin
+        const countResult = await supabaseAdmin
           .from('chatbot_events')
           .select('*', { count: 'exact', head: true })
           .eq('session_id', session.sessionId);
+        if (hasSupabaseError(countResult)) {
+          if (!allowFallback && isMissingSupabaseTableError(countResult.error?.message)) {
+            throw new Error('ERR_SUPABASE_MISSING_TABLE:chatbot_events');
+          }
+          throw new Error(countResult.error?.message || 'Failed to count chatbot events');
+        }
 
-        session.eventCount = count ?? 0;
-        session.lastMessagePreview = (last?.[0]?.message as string | undefined)?.slice(0, 120) ?? '';
+        session.eventCount = countResult.count ?? 0;
+        session.lastMessagePreview = (lastResult.data?.[0]?.message as string | undefined)?.slice(0, 120) ?? '';
       }
 
       return sessions;
-    } catch {
+    } catch (error) {
+      if (!allowFallback) throw error;
       // fall back
     }
   }
@@ -231,15 +281,25 @@ export async function listSessions(limit = 50): Promise<ChatSessionSummary[]> {
   return summaries.slice(0, limit);
 }
 
-export async function getSessionEvents(sessionId: string, limit = 200): Promise<ChatEvent[]> {
+export async function getSessionEvents(sessionId: string, limit = 200, options?: ReadOptions): Promise<ChatEvent[]> {
+  const allowFallback = shouldFallback(options);
+
   if (supabaseAdmin) {
     try {
-      const { data } = await supabaseAdmin
+      const eventsResult = await supabaseAdmin
         .from('chatbot_events')
         .select('id, session_id, role, message, meta, created_at')
         .eq('session_id', sessionId)
         .order('created_at', { ascending: true })
         .limit(limit);
+      if (hasSupabaseError(eventsResult)) {
+        if (!allowFallback && isMissingSupabaseTableError(eventsResult.error?.message)) {
+          throw new Error('ERR_SUPABASE_MISSING_TABLE:chatbot_events');
+        }
+        throw new Error(eventsResult.error?.message || 'Failed to load chatbot events');
+      }
+
+      const data = eventsResult.data;
 
       return (data ?? []).map((row) => ({
         id: (row.id as string) ?? makeId(),
@@ -249,7 +309,8 @@ export async function getSessionEvents(sessionId: string, limit = 200): Promise<
         meta: (row.meta as Record<string, unknown> | null) ?? {},
         createdAt: row.created_at as string,
       }));
-    } catch {
+    } catch (error) {
+      if (!allowFallback) throw error;
       // fall back
     }
   }

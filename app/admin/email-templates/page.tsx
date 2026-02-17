@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
+import { createClient } from '@/lib/supabase/client';
 import {
   AdminBody,
   AdminButton,
@@ -33,6 +34,13 @@ const EMPTY_FIELDS: CmsTemplateFields = {
   htmlLt: '',
   htmlEn: '',
 };
+
+async function getAdminToken(): Promise<string | null> {
+  const supabase = createClient();
+  if (!supabase) return null;
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
+}
 
 export default function EmailTemplatesAdmin() {
   const locale = useLocale();
@@ -275,8 +283,16 @@ export default function EmailTemplatesAdmin() {
       setIsLoadingCms(true);
       setCmsStatus(null);
       try {
+        const token = await getAdminToken();
+        if (!token) {
+          setCmsFields(EMPTY_FIELDS);
+          setCmsStatus({ ok: false, message: 'Missing admin token' });
+          return;
+        }
+
         const res = await fetch(`/api/admin/email-templates?templateId=${encodeURIComponent(templateId)}`, {
           method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
           credentials: 'include',
         });
         const data = (await res.json().catch(() => ({}))) as any;
@@ -315,9 +331,18 @@ export default function EmailTemplatesAdmin() {
     setIsSavingCms(true);
     setCmsStatus(null);
     try {
+      const token = await getAdminToken();
+      if (!token) {
+        setCmsStatus({ ok: false, message: 'Missing admin token' });
+        return;
+      }
+
       const res = await fetch('/api/admin/email-templates', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         credentials: 'include',
         body: JSON.stringify({
           templateId: selectedTemplate.id,
@@ -383,13 +408,22 @@ export default function EmailTemplatesAdmin() {
     setSendStatus(null);
 
     try {
+      const token = await getAdminToken();
+      if (!token) {
+        setSendStatus({ ok: false, message: 'Missing admin token' });
+        return;
+      }
+
       const rendered = testLocale === 'en' ? renderedEn : renderedLt;
       const subject = rendered?.subject || selectedTemplate.subject(previewVars);
       const html = rendered?.html || selectedTemplate.html(previewVars);
 
       const res = await fetch('/api/admin/email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         credentials: 'include',
         body: JSON.stringify({
           to,

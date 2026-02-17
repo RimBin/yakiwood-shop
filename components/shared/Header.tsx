@@ -136,12 +136,12 @@ export default function Header() {
             </Link>
 
             {/* Navigation - hidden on mobile/tablet, shown on large screens */}
-            <nav className="hidden xl:flex flex-1 justify-center gap-[32px] xl:gap-[40px]">
+            <nav className="hidden xl:flex flex-1 justify-center gap-[20px] min-[1500px]:gap-[32px] 2xl:gap-[40px]">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="font-['Outfit'] font-normal text-[12px] leading-[1.2] text-center tracking-[0.6px] uppercase text-[#161616] hover:opacity-70 transition-opacity whitespace-nowrap"
+                  className="font-['Outfit'] font-normal text-[11px] min-[1400px]:text-[12px] leading-[1.2] text-center tracking-[0.6px] uppercase text-[#161616] hover:opacity-70 transition-opacity whitespace-nowrap"
                 >
                   {item.label}
                 </Link>
@@ -157,7 +157,7 @@ export default function Header() {
               
               <button 
                 onClick={() => setIsCartOpen(true)}
-                className="border border-[#535353] border-solid rounded-[100px] flex gap-[0px] md:gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[12px] md:px-[24px] py-[10px] bg-transparent hover:bg-[#161616] hover:border-white hover:text-white transition-colors group relative"
+                className="border border-[#535353] border-solid rounded-[100px] flex gap-[0px] md:gap-[8px] h-[40px] md:h-[48px] items-center justify-center px-[12px] md:px-[20px] min-[1400px]:px-[24px] py-[10px] bg-transparent hover:bg-[#161616] hover:border-white hover:text-white transition-colors group relative"
               >
                 <div className="relative h-[24px] w-[32px] shrink-0 flex items-center justify-center">
                   <Image
@@ -173,7 +173,7 @@ export default function Header() {
                     {itemCount}
                   </span>
                 )}
-                <span className="hidden md:inline font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white shrink-0">
+                <span className="hidden min-[1400px]:inline font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#161616] group-hover:text-white shrink-0">
                   {t(locale === 'lt' ? 'header.krepselis' : 'header.cart')}
                 </span>
               </button>

@@ -316,7 +316,7 @@ export default function ChatbotWidget() {
               'sm:h-[680px] sm:max-h-[680px] '
             }
           >
-            <div className="flex h-full flex-col sm:max-h-[640px] pb-[env(safe-area-inset-bottom)]">
+            <div className="flex h-full flex-col">
               <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(135deg,#0F0F0F_0%,#2A2A2A_40%,#161616_100%)]" />
                 <div className="absolute -right-[80px] -top-[90px] h-[200px] w-[200px] rounded-full bg-white/10 blur-2xl" />
@@ -486,9 +486,7 @@ export default function ChatbotWidget() {
                 )}
               </div>
 
-            </div>
-
-              <div className="relative mt-auto border-t border-[#EAEAEA] bg-white p-[12px] pb-[calc(env(safe-area-inset-bottom)+40px)]">
+              <div className="relative mt-auto border-t border-[#EAEAEA] bg-white p-[12px] pb-[calc(12px+env(safe-area-inset-bottom))]">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -535,6 +533,7 @@ export default function ChatbotWidget() {
                   <span className="underline underline-offset-4">{t('handoff')}</span>
                 </button>
               </div>
+            </div>
           </div>
         </div>
       ) : null}
