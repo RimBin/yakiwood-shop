@@ -23,12 +23,97 @@ type InMemoryStore = {
   sessions: Map<string, { createdAt: string; events: ChatEvent[] }>;
 };
 
+type PersistedStore = {
+  sessions: Record<string, { createdAt: string; events: ChatEvent[] }>;
+};
+
+const FALLBACK_FILE = '.next/cache/chatbot-sessions.json';
+
 function getStore(): InMemoryStore {
   const g = globalThis as unknown as { __ywChatbotStore?: InMemoryStore };
   if (!g.__ywChatbotStore) {
     g.__ywChatbotStore = { sessions: new Map() };
   }
   return g.__ywChatbotStore;
+}
+
+function toSerializableStore(store: InMemoryStore): PersistedStore {
+  const sessions: PersistedStore['sessions'] = {};
+  for (const [sessionId, session] of store.sessions.entries()) {
+    sessions[sessionId] = {
+      createdAt: session.createdAt,
+      events: session.events,
+    };
+  }
+  return { sessions };
+}
+
+function fromSerializableStore(input: unknown): InMemoryStore {
+  const sessionsMap = new Map<string, { createdAt: string; events: ChatEvent[] }>();
+  if (!input || typeof input !== 'object') {
+    return { sessions: sessionsMap };
+  }
+
+  const root = input as { sessions?: Record<string, { createdAt?: unknown; events?: unknown }> };
+  const sessions = root.sessions;
+  if (!sessions || typeof sessions !== 'object') {
+    return { sessions: sessionsMap };
+  }
+
+  for (const [sessionId, rawSession] of Object.entries(sessions)) {
+    if (!rawSession || typeof rawSession !== 'object') continue;
+    const createdAt = typeof rawSession.createdAt === 'string' ? rawSession.createdAt : new Date().toISOString();
+    const eventsRaw = Array.isArray(rawSession.events) ? rawSession.events : [];
+    const events: ChatEvent[] = eventsRaw
+      .filter((item) => item && typeof item === 'object')
+      .map((item) => {
+        const row = item as Partial<ChatEvent>;
+        return {
+          id: typeof row.id === 'string' ? row.id : makeId(),
+          sessionId: typeof row.sessionId === 'string' ? row.sessionId : sessionId,
+          role: row.role === 'user' || row.role === 'assistant' ? row.role : 'system',
+          message: typeof row.message === 'string' ? row.message : '',
+          meta: row.meta && typeof row.meta === 'object' ? row.meta : {},
+          createdAt: typeof row.createdAt === 'string' ? row.createdAt : createdAt,
+        };
+      });
+
+    sessionsMap.set(sessionId, { createdAt, events });
+  }
+
+  return { sessions: sessionsMap };
+}
+
+async function loadFallbackStore(): Promise<InMemoryStore> {
+  const store = getStore();
+  if (store.sessions.size > 0) return store;
+
+  try {
+    const [{ readFile }, path] = await Promise.all([import('fs/promises'), import('path')]);
+    const file = path.join(process.cwd(), FALLBACK_FILE);
+    const raw = await readFile(file, 'utf8');
+    const parsed = JSON.parse(raw) as unknown;
+    const loaded = fromSerializableStore(parsed);
+    if (loaded.sessions.size > 0) {
+      store.sessions = loaded.sessions;
+    }
+  } catch {
+    // ignore fallback file read errors
+  }
+
+  return store;
+}
+
+async function persistFallbackStore(store: InMemoryStore): Promise<void> {
+  try {
+    const [{ mkdir, writeFile }, path] = await Promise.all([import('fs/promises'), import('path')]);
+    const file = path.join(process.cwd(), FALLBACK_FILE);
+    const dir = path.dirname(file);
+    await mkdir(dir, { recursive: true });
+    await writeFile(file, JSON.stringify(toSerializableStore(store)), 'utf8');
+  } catch {
+    // ignore fallback file write errors (read-only fs, etc.)
+  }
 }
 
 function makeId() {
@@ -67,7 +152,7 @@ export async function appendEvent(event: {
     }
   }
 
-  const store = getStore();
+  const store = await loadFallbackStore();
   const existing = store.sessions.get(event.sessionId);
   if (!existing) {
     store.sessions.set(event.sessionId, { createdAt, events: [] });
@@ -82,6 +167,8 @@ export async function appendEvent(event: {
     meta: event.meta,
     createdAt,
   });
+
+  await persistFallbackStore(store);
 
   return { id, createdAt };
 }
@@ -126,7 +213,7 @@ export async function listSessions(limit = 50): Promise<ChatSessionSummary[]> {
     }
   }
 
-  const store = getStore();
+  const store = await loadFallbackStore();
   const summaries: ChatSessionSummary[] = [];
 
   for (const [sessionId, session] of store.sessions.entries()) {
@@ -167,6 +254,6 @@ export async function getSessionEvents(sessionId: string, limit = 200): Promise<
     }
   }
 
-  const store = getStore();
+  const store = await loadFallbackStore();
   return store.sessions.get(sessionId)?.events.slice(-limit) ?? [];
 }

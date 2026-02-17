@@ -2105,6 +2105,7 @@
     "dbSetup": {
       "title": "Duomenų bazės paruošimas",
       "subtitle": "Jei trūksta lentelių, įklijuokite SQL į Supabase SQL Editor, tada vykdykite schema reload.",
+      "copySessions": "Kopijuoti sesijų lentelių SQL",
       "copyFaq": "Kopijuoti FAQ lentelės SQL",
       "copySettings": "Kopijuoti settings SQL",
       "copyReload": "Kopijuoti reload schema",

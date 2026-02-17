@@ -7,6 +7,10 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const MIGRATIONS: Record<string, { name: string; file: string }> = {
+  chatbot_sessions_events: {
+    name: 'chatbot_sessions_events',
+    file: 'supabase/migrations/20260216_chatbot_sessions_events.sql',
+  },
   chatbot_faq_entries: {
     name: 'chatbot_faq_entries',
     file: 'supabase/migrations/20260111_chatbot_faq_entries.sql',

@@ -187,6 +187,7 @@ export default function AdminChatbotPage() {
   const [events, setEvents] = useState<ChatEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
+  const [sessionsErrorCode, setSessionsErrorCode] = useState<string | null>(null);
 
   const [faqLocale, setFaqLocale] = useState<Locale>('lt');
   const [faqEntries, setFaqEntries] = useState<FaqEntry[]>([]);
@@ -237,15 +238,19 @@ export default function AdminChatbotPage() {
   const loadSessions = useCallback(async () => {
     setLoading(true);
     setSessionsError(null);
+    setSessionsErrorCode(null);
     try {
       const resp = await fetchAdmin('/api/admin/chatbot?action=sessions&limit=50');
       const json = await safeJson<SessionSummary[]>(resp);
-      const errorMsg = translateApiError(getErrorMessageKey(resp, json.error));
+      const rawError = getErrorMessageKey(resp, json.error);
+      setSessionsErrorCode(rawError);
+      const errorMsg = translateApiError(rawError);
       if (errorMsg) {
         setSessionsError(errorMsg);
         setSessions([]);
         return;
       }
+      setSessionsErrorCode(null);
       setSessions(json.data || []);
     } finally {
       setLoading(false);
@@ -414,7 +419,7 @@ export default function AdminChatbotPage() {
   }, []);
 
   const copyMigrationSql = useCallback(
-    async (name: 'chatbot_faq_entries' | 'chatbot_settings' | 'reload-schema') => {
+    async (name: 'chatbot_sessions_events' | 'chatbot_faq_entries' | 'chatbot_settings' | 'reload-schema') => {
       setDbHelpBusy(true);
       setDbHelpNotice(null);
       try {
@@ -756,6 +761,9 @@ export default function AdminChatbotPage() {
     if (entry) setDraftFromEntry(entry);
   }, [faqEntries, faqSelectedId, setDraftFromEntry]);
 
+  const isSessionsTableMissing =
+    sessionsErrorCode === 'ERR_SUPABASE_MISSING_TABLE:chatbot_sessions' ||
+    sessionsErrorCode === 'ERR_SUPABASE_MISSING_TABLE:chatbot_events';
   const isFaqTableMissing = faqErrorCode === 'ERR_SUPABASE_MISSING_TABLE:chatbot_faq_entries';
   const isSettingsTableMissing = settingsErrorCode === 'ERR_SUPABASE_MISSING_TABLE:chatbot_settings';
 
@@ -790,6 +798,34 @@ export default function AdminChatbotPage() {
                     {t('common.refresh')}
                   </AdminButton>
                 </div>
+
+                {isSessionsTableMissing ? (
+                  <div className="mt-[12px] rounded-[16px] border border-[#BBBBBB] bg-[#E1E1E1] p-[12px]">
+                    <div className="font-['DM_Sans'] text-[13px] font-medium text-[#161616]">{t('dbSetup.title')}</div>
+                    <div className="mt-[6px] font-['Outfit'] text-[12px] text-[#535353]">{t('dbSetup.subtitle')}</div>
+                    <div className="mt-[10px] flex flex-wrap items-center gap-[10px]">
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void copyMigrationSql('chatbot_sessions_events')}
+                        disabled={dbHelpBusy}
+                      >
+                        {t('dbSetup.copySessions')}
+                      </AdminButton>
+                      <AdminButton
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void copyMigrationSql('reload-schema')}
+                        disabled={dbHelpBusy}
+                      >
+                        {t('dbSetup.copyReload')}
+                      </AdminButton>
+                    </div>
+                    {dbHelpNotice ? (
+                      <div className="mt-[8px] font-['Outfit'] text-[12px] text-[#161616]">{dbHelpNotice}</div>
+                    ) : null}
+                  </div>
+                ) : null}
 
                 {sessionsError ? (
                   <p className="mt-[12px] font-['Outfit'] text-[13px] text-red-600">{sessionsError}</p>

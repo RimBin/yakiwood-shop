@@ -2356,6 +2356,7 @@
     "dbSetup": {
       "title": "Database setup",
       "subtitle": "If tables are missing, paste the SQL into Supabase SQL Editor, then reload the schema.",
+      "copySessions": "Copy sessions tables SQL",
       "copyFaq": "Copy FAQ table SQL",
       "copySettings": "Copy settings SQL",
       "copyReload": "Copy reload schema",
