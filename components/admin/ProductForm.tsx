@@ -2331,7 +2331,7 @@ export default function ProductForm({ product, mode }: Props) {
                       <td className="px-3 py-2">
                         {typeof draft.widthMm === 'number' && typeof draft.lengthMm === 'number'
                           ? ((draft.widthMm / 1000) * (draft.lengthMm / 1000)).toFixed(3)
-                          : '—'}
+                          : '-'}
                       </td>
                       <td className="px-3 py-2">
                         <input
@@ -2351,7 +2351,7 @@ export default function ProductForm({ product, mode }: Props) {
                         />
                       </td>
                       <td className="px-3 py-2 text-xs text-[#535353]">
-                        {draft.imageUrl ? 'Pagal spalvą' : '—'}
+                        {draft.imageUrl ? 'Pagal spalvą' : '-'}
                       </td>
                     </tr>
                   ))}
@@ -2414,21 +2414,21 @@ export default function ProductForm({ product, mode }: Props) {
                         <Fragment key={item.id}>
                           <tr className="border-t border-[#E1E1E1]">
                             <td className="px-3 py-2">{item.slug}</td>
-                            <td className="px-3 py-2">{item.sku || '—'}</td>
-                            <td className="px-3 py-2">{typeof item.base_price === 'number' ? item.base_price.toFixed(2) : '—'}</td>
+                            <td className="px-3 py-2">{item.sku || '-'}</td>
+                            <td className="px-3 py-2">{typeof item.base_price === 'number' ? item.base_price.toFixed(2) : '-'}</td>
                             <td className="px-3 py-2">
                               {(() => {
-                                if (typeof item.base_price !== 'number' || typeof item.sale_price !== 'number') return '—';
+                                if (typeof item.base_price !== 'number' || typeof item.sale_price !== 'number') return '-';
                                 const percent = computeDiscountPercent(item.base_price, item.sale_price);
-                                return percent ? `${formatPercent(percent)}%` : '—';
+                                return percent ? `${formatPercent(percent)}%` : '-';
                               })()}
                             </td>
                             <td className="px-3 py-2">
                               {typeof item.width === 'number' && typeof item.depth === 'number'
                                 ? ((item.width / 1000) * (item.depth / 1000)).toFixed(3)
-                                : '—'}
+                                : '-'}
                             </td>
-                            <td className="px-3 py-2">{typeof item.stock_quantity === 'number' ? item.stock_quantity : '—'}</td>
+                            <td className="px-3 py-2">{typeof item.stock_quantity === 'number' ? item.stock_quantity : '-'}</td>
                             <td className="px-3 py-2">
                               <button
                                 type="button"

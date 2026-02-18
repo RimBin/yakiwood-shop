@@ -127,7 +127,7 @@ export default async function Hero() {
         <div className="relative max-w-[1440px] mx-auto h-full">
           <div className="absolute left-[40px] top-[190px] flex flex-col gap-[24px] z-10 hero-seq-item hero-seq-right hero-ease-in hero-seq-1">
             <p
-              className="font-['DM_Sans'] font-light leading-none text-[#161616] w-[606px] whitespace-pre-wrap"
+              className="font-['DM_Sans'] font-light leading-none text-[#161616] w-[clamp(500px,42vw,606px)] whitespace-pre-wrap"
               style={{ fontSize: heroHeadingSize, letterSpacing: heroHeadingTracking }}
             >
               {tHero('mainHeading')}

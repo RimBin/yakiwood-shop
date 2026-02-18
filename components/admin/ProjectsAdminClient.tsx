@@ -1070,7 +1070,7 @@ export default function ProjectsAdminClient() {
 
             <div className="rounded-[16px] border border-[#BBBBBB] bg-[#EAEAEA] p-[16px]">
               <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">English (optional)</p>
-              <p className="mt-[4px] font-['Outfit'] text-[12px] text-[#535353]">Palikite tuščia — bus naudojamas LT tekstas.</p>
+              <p className="mt-[4px] font-['Outfit'] text-[12px] text-[#535353]">Palikite tuščia - bus naudojamas LT tekstas.</p>
 
               <div className="mt-[12px] grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                 <div>
@@ -1346,7 +1346,7 @@ export default function ProjectsAdminClient() {
                           <h3 className="font-['DM_Sans'] text-[20px] tracking-[-0.8px] break-words">
                             {getProjectTitle(project, currentLocale)}
                             {getProjectSubtitle(project, currentLocale) && (
-                              <span className="text-[#535353] ml-[8px]">— {getProjectSubtitle(project, currentLocale)}</span>
+                              <span className="text-[#535353] ml-[8px]">- {getProjectSubtitle(project, currentLocale)}</span>
                             )}
                             {project.featured && (
                               <span className="ml-[8px]">
@@ -1472,7 +1472,7 @@ export default function ProjectsAdminClient() {
 
                       <div className="rounded-[16px] border border-[#BBBBBB] bg-white/50 p-[16px]">
                         <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#535353]">English (optional)</p>
-                        <p className="mt-[4px] font-['Outfit'] text-[12px] text-[#535353]">Palikite tuščia — bus naudojamas LT tekstas.</p>
+                        <p className="mt-[4px] font-['Outfit'] text-[12px] text-[#535353]">Palikite tuščia - bus naudojamas LT tekstas.</p>
 
                         <div className="mt-[12px] grid grid-cols-1 md:grid-cols-2 gap-[20px]">
                           <div>

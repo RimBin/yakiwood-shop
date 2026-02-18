@@ -80,7 +80,7 @@ AI agent guide for this Next.js e-commerce site with Sanity CMS, Lithuanian loca
   - Client components: Mark with `"use client"` directive (e.g., `Solutions.tsx`, `Konfiguratorius3D.tsx`)
   - Server components: Default in `app/` router (no directive needed)
 - **Translation keys**: Use nested dot-notation (`t('nav.produktai')`) but store as nested objects in `messages/lt.json` (`{"nav": {"produktai": "..."}}`)
-- **Cart logic**: Add items via `useCartStore().addItem()` with `id`, `color`, `finish` – duplicate combos merge quantities
+- **Cart logic**: Add items via `useCartStore().addItem()` with `id`, `color`, `finish` - duplicate combos merge quantities
 - **Styling patterns**:
   - Font families: `font-['DM_Sans']`, `font-['Outfit']`, `font-['Tiro_Tamil']` (loaded as CSS vars in layout)
   - Colors: `#161616` (black), `#FFFFFF` (white), `#E1E1E1` (grey), `#BBBBBB` (light-grey), `#535353` (dark-grey), `#EAEAEA` (bg-grey)
@@ -176,7 +176,7 @@ Export & static builds:
   - Convert the app to the `pages` router and avoid dynamic server rendering features, or
   - Deploy to a platform that supports server-side rendering like Vercel (recommended). Vercel can serve this app as a static site where possible and handle server components.
 
-CI/deployment tip: the included workflow performs `npm run build` — if you use Vercel, it will automatically build and deploy on push. If you need to export static assets via `next export`, we can add instructions but it may require router changes.
+CI/deployment tip: the included workflow performs `npm run build` - if you use Vercel, it will automatically build and deploy on push. If you need to export static assets via `next export`, we can add instructions but it may require router changes.
 
 ## When to ask the repo owner
 - If you need real Supabase credentials or want to re-enable database integration

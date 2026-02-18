@@ -20,7 +20,7 @@ export const projects: Project[] = [
     description:
       'Lelijų Apartments sujungia modernią architektūrą ir natūralius akcentus: aukštos kokybės medžiagos, tvarūs sprendimai ir išraiškingas degintos medienos charakteris.',
     fullDescription:
-      'Lelijų Apartments — šiuolaikiško dizaino ir organiškos estetikos dermė. Architektūroje degintos medienos plokštumos subtiliai kontrastuoja su dideliais stiklo fasadais, sukurdamos modernų, bet harmoningą įvaizdį. Butai projektuoti galvojant apie komfortą ir funkcionalumą: daug natūralios šviesos, erdvūs balkonai ir kokybiška apdaila. Kompleksas įsikūręs žalioje ir ramioje aplinkoje, todėl patogiai suderina miesto privalumus su gamtos artumu — puikus pasirinkimas ieškantiems stilingų ir ilgaamžių sprendimų.',
+      'Lelijų Apartments - šiuolaikiško dizaino ir organiškos estetikos dermė. Architektūroje degintos medienos plokštumos subtiliai kontrastuoja su dideliais stiklo fasadais, sukurdamos modernų, bet harmoningą įvaizdį. Butai projektuoti galvojant apie komfortą ir funkcionalumą: daug natūralios šviesos, erdvūs balkonai ir kokybiška apdaila. Kompleksas įsikūręs žalioje ir ramioje aplinkoje, todėl patogiai suderina miesto privalumus su gamtos artumu - puikus pasirinkimas ieškantiems stilingų ir ilgaamžių sprendimų.',
     i18n: {
       lt: {
         title: 'Lelijų Apartments',
@@ -30,7 +30,7 @@ export const projects: Project[] = [
         description:
           'Lelijų Apartments sujungia modernią architektūrą ir natūralius akcentus: aukštos kokybės medžiagos, tvarūs sprendimai ir išraiškingas degintos medienos charakteris.',
         fullDescription:
-          'Lelijų Apartments — šiuolaikiško dizaino ir organiškos estetikos dermė. Architektūroje degintos medienos plokštumos subtiliai kontrastuoja su dideliais stiklo fasadais, sukurdamos modernų, bet harmoningą įvaizdį. Butai projektuoti galvojant apie komfortą ir funkcionalumą: daug natūralios šviesos, erdvūs balkonai ir kokybiška apdaila. Kompleksas įsikūręs žalioje ir ramioje aplinkoje, todėl patogiai suderina miesto privalumus su gamtos artumu — puikus pasirinkimas ieškantiems stilingų ir ilgaamžių sprendimų.',
+          'Lelijų Apartments - šiuolaikiško dizaino ir organiškos estetikos dermė. Architektūroje degintos medienos plokštumos subtiliai kontrastuoja su dideliais stiklo fasadais, sukurdamos modernų, bet harmoningą įvaizdį. Butai projektuoti galvojant apie komfortą ir funkcionalumą: daug natūralios šviesos, erdvūs balkonai ir kokybiška apdaila. Kompleksas įsikūręs žalioje ir ramioje aplinkoje, todėl patogiai suderina miesto privalumus su gamtos artumu - puikus pasirinkimas ieškantiems stilingų ir ilgaamžių sprendimų.',
       },
       en: {
         title: 'Lelijų Apartments',
@@ -160,7 +160,7 @@ export const projects: Project[] = [
       { name: 'Brown larch', slug: 'brown-larch' },
     ],
     description:
-      '„Forestline harmonijos rezidencijos“ — gyvenamasis kompleksas su natūralios medienos estetika ir degintos medienos apdaila.',
+      '„Forestline harmonijos rezidencijos“ - gyvenamasis kompleksas su natūralios medienos estetika ir degintos medienos apdaila.',
     fullDescription:
       'Gyvenamasis kompleksas harmoningai įsiliejęs į miško aplinką, naudojant premium degintos medienos fasadą. Natūrali tekstūra ir medienos šiluma sukuria tvirtą ryšį tarp architektūros ir gamtos.',
     i18n: {
@@ -169,7 +169,7 @@ export const projects: Project[] = [
         slug: 'forestline-harmonijos-rezidencijos',
         location: 'Lietuva',
         description:
-          '„Forestline harmonijos rezidencijos“ — gyvenamasis kompleksas su natūralios medienos estetika ir degintos medienos apdaila.',
+          '„Forestline harmonijos rezidencijos“ - gyvenamasis kompleksas su natūralios medienos estetika ir degintos medienos apdaila.',
         fullDescription:
           'Gyvenamasis kompleksas harmoningai įsiliejęs į miško aplinką, naudojant aukščiausios kokybės degintos medienos fasadą. Natūrali tekstūra ir medienos šiluma sukuria tvirtą ryšį tarp architektūros ir gamtos.',
       },
@@ -234,7 +234,7 @@ export const projects: Project[] = [
       { name: 'Black larch', slug: 'black-larch' },
     ],
     description:
-      'Pajūrio gyvenimo nuotaika ir Šiaurės šalių dizaino principai — su atspariu degintos medienos fasadu.',
+      'Pajūrio gyvenimo nuotaika ir Šiaurės šalių dizaino principai - su atspariu degintos medienos fasadu.',
     fullDescription:
       'Moderni pajūrio rezidencija su orui atspariu degintos medienos fasadu, įkvėptu Šiaurės šalių architektūros. Tamsi apsauginė apdaila suteikia ilgaamžiškumo ir išsaugo natūralų medienos grožį.',
     i18n: {
@@ -243,7 +243,7 @@ export const projects: Project[] = [
         slug: 'siaurietiskas-pajurio-gyvenimas',
         location: 'Lietuva',
         description:
-          'Pajūrio gyvenimo nuotaika ir Šiaurės šalių dizaino principai — su atspariu degintos medienos fasadu.',
+          'Pajūrio gyvenimo nuotaika ir Šiaurės šalių dizaino principai - su atspariu degintos medienos fasadu.',
         fullDescription:
           'Moderni pajūrio rezidencija su orui atspariu degintos medienos fasadu, įkvėptu Šiaurės šalių architektūros. Tamsi apsauginė apdaila suteikia ilgaamžiškumo ir išsaugo natūralų medienos grožį.',
       },
@@ -348,7 +348,7 @@ export const projects: Project[] = [
       { name: 'Carbon larch', slug: 'carbon-larch' },
     ],
     description:
-      'Privataus namo fasadas su matine degintos medienos apdaila – aiškios linijos, gili tekstūra ir ilgaamžė apsauga nuo aplinkos poveikio.',
+      'Privataus namo fasadas su matine degintos medienos apdaila - aiškios linijos, gili tekstūra ir ilgaamžė apsauga nuo aplinkos poveikio.',
     fullDescription:
       'Šiame projekte pasirinkta Shou Sugi Ban technika padėjo sukurti išraiškingą, tačiau santūrų fasadą. Deginta mediena suteikia natūralią UV ir drėgmės apsaugą, o matinis paviršius gražiai „sugeria“ šviesą ir dera su modernia architektūra. Sprendimas parinktas taip, kad būtų lengva prižiūrėti ir ilgai išlaikytų vienodą estetiką Lietuvos klimato sąlygomis.',
     i18n: {
@@ -358,7 +358,7 @@ export const projects: Project[] = [
         slug: 'tamsaus-fasado-namas',
         location: 'Klaipėda, Lietuva',
         description:
-          'Privataus namo fasadas su matine degintos medienos apdaila – aiškios linijos, gili tekstūra ir ilgaamžė apsauga nuo aplinkos poveikio.',
+          'Privataus namo fasadas su matine degintos medienos apdaila - aiškios linijos, gili tekstūra ir ilgaamžė apsauga nuo aplinkos poveikio.',
         fullDescription:
           'Šiame projekte pasirinkta Shou Sugi Ban technika padėjo sukurti išraiškingą, tačiau santūrų fasadą. Deginta mediena suteikia natūralią UV ir drėgmės apsaugą, o matinis paviršius gražiai „sugeria“ šviesą ir dera su modernia architektūra. Sprendimas parinktas taip, kad būtų lengva prižiūrėti ir ilgai išlaikytų vienodą estetiką Lietuvos klimato sąlygomis.',
       },
@@ -368,7 +368,7 @@ export const projects: Project[] = [
         slug: 'dark-facade-house',
         location: 'Klaipėda, Lithuania',
         description:
-          'Private house facade finished with matte burnt wood cladding – clean lines, deep texture, and long-lasting protection against the elements.',
+          'Private house facade finished with matte burnt wood cladding - clean lines, deep texture, and long-lasting protection against the elements.',
         fullDescription:
           'In this project, the Shou Sugi Ban technique was used to create a distinctive yet minimal facade. Burnt wood provides natural UV and moisture resistance, while the matte surface absorbs light beautifully and complements modern architecture. The system was selected for easy maintenance and consistent aesthetics in Lithuania’s climate.',
       },

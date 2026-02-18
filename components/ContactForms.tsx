@@ -31,7 +31,7 @@ const copy = {
     infoTitle: 'We reply within one business day.',
     infoEmail: 'hello@yakiwood.lt',
     infoPhone: '+370 600 00000',
-    infoHours: 'Mon–Fri 9:00–18:00',
+    infoHours: 'Mon-Fri 9:00-18:00',
     infoAddress: 'Vilnius, Lithuania',
   },
   lt: {
@@ -62,7 +62,7 @@ const copy = {
     infoTitle: 'Atsakome per 1 darbo dieną.',
     infoEmail: 'hello@yakiwood.lt',
     infoPhone: '+370 600 00000',
-    infoHours: 'I–V 9:00–18:00',
+    infoHours: 'I-V 9:00-18:00',
     infoAddress: 'Vilnius, Lietuva',
   },
 };
@@ -189,8 +189,8 @@ export default function ContactForms({ locale }: { locale: Locale }) {
             <Field label={t.timeline}>
               <select className="h-[44px] bg-[#F3F3F3] border border-[#BBBBBB] rounded-[6px] px-[12px] font-['DM_Sans'] text-[14px] text-[#161616] focus:outline-none focus:border-[#161616] yw-select">
                 <option>{t.placeholderTimeline}</option>
-                <option>{locale === 'lt' ? 'Skubiai (2–4 sav.)' : 'Urgent (2–4 weeks)'}</option>
-                <option>{locale === 'lt' ? 'Artimiausi 2–3 mėn.' : 'Next 2–3 months'}</option>
+                <option>{locale === 'lt' ? 'Skubiai (2-4 sav.)' : 'Urgent (2-4 weeks)'}</option>
+                <option>{locale === 'lt' ? 'Artimiausi 2-3 mėn.' : 'Next 2-3 months'}</option>
                 <option>{locale === 'lt' ? 'Vėliau' : 'Later this year'}</option>
               </select>
             </Field>

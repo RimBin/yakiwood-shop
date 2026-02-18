@@ -1,5 +1,5 @@
 ---
-description: 'Planner-Supervisor – centrinis projekto valdymo agentas. Supranta tikslą, planuoja, deleguoja ir tikrina progresą.'
+description: 'Planner-Supervisor - centrinis projekto valdymo agentas. Supranta tikslą, planuoja, deleguoja ir tikrina progresą.'
 tools: ['read/problems', 'read/readFile', 'search', 'agent', 'todo']
 ---
 
@@ -53,7 +53,7 @@ Jei vartotojas nepateikia aiškaus tikslo:
 - Venk refactor be reikalo
 - Leidžiami **minimalūs perrašymai**, jei būtini teisingam sprendimui
 - Nekurk failų be reikalo
-- Jei matai klaidą ar regresiją – įtrauk tests-agent
+- Jei matai klaidą ar regresiją - įtrauk tests-agent
 - NIEKADA nevykdyk kelių žingsnių iš karto
 
 ---

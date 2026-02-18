@@ -172,7 +172,7 @@ export default function ThicknessOptionsAdminClient({
         </div>
         <p className="mt-[8px] font-['Outfit'] text-[14px] text-[#535353]">
           Šie įrašai skirti kainodarai per `product_configuration_prices.thickness_option_id`.
-          Kitas žingsnis – pridėti storio pasirinkimą į konfigūratorių/krepšelį ir perduoti į kainos skaičiavimą.
+          Kitas žingsnis - pridėti storio pasirinkimą į konfigūratorių/krepšelį ir perduoti į kainos skaičiavimą.
         </p>
       </div>
     </AdminStack>

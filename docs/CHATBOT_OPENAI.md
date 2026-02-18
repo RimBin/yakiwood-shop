@@ -10,7 +10,7 @@ Add to `.env.local`:
 OPENAI_API_KEY=your_key_here
 ```
 
-That’s it — when configured, the API can run in one of three modes (see below).
+That’s it - when configured, the API can run in one of three modes (see below).
 
 ## Optional tuning (recommended)
 

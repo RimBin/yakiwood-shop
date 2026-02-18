@@ -5,11 +5,11 @@ Data: 2026-01-05
 Ši ataskaita palygina tavo pateiktą apimties sąrašą su tuo, kas realiai įgyvendinta repozitorijoje.
 
 Legenda:
-- **DONE** – įgyvendinta ir naudojama.
-- **PARTIAL** – yra bazė arba dalis funkcionalumo, bet trūksta pilno reikalavimo.
-- **TODO** – nėra įgyvendinta (arba tik placeholder / dokumentacija / asset’ai).
+- **DONE** - įgyvendinta ir naudojama.
+- **PARTIAL** - yra bazė arba dalis funkcionalumo, bet trūksta pilno reikalavimo.
+- **TODO** - nėra įgyvendinta (arba tik placeholder / dokumentacija / asset’ai).
 
-> Pastaba: procentai – apytikslis įgyvendinimo lygis *to konkretaus punkto*.
+> Pastaba: procentai - apytikslis įgyvendinimo lygis *to konkretaus punkto*.
 
 ---
 
@@ -28,7 +28,7 @@ Legenda:
 ### 1.3 Vizualinio stiliaus suderinimas su prekės ženklo identitetu
 - Statusas: **PARTIAL (~50%)**
 - Yra: techninė bazė ir vientisa estetika.
-- Trūksta: formalaus brand guideline suderinimo (sprendimas – dizaino peržiūra / Figma patvirtinimas).
+- Trūksta: formalaus brand guideline suderinimo (sprendimas - dizaino peržiūra / Figma patvirtinimas).
 
 ---
 
@@ -113,7 +113,7 @@ Legenda:
 - Statusas: **PARTIAL (~35%)**
 - Yra: Stripe.
 - TODO: PayPal/Paysera reali integracija (šiuo metu yra tik asset/logotipas ir paminėjimai).
-- Įrodymai: Stripe – `app/api/checkout/route.ts`, `app/api/webhooks/stripe/route.ts`; PayPal – `public/assets/payments/paypal.svg` (tik asset)
+- Įrodymai: Stripe - `app/api/checkout/route.ts`, `app/api/webhooks/stripe/route.ts`; PayPal - `public/assets/payments/paypal.svg` (tik asset)
 
 ### 6.2 Automatiniai mokėjimo patvirtinimai ir ataskaitos
 - Statusas: **PARTIAL (~60%)**
@@ -133,7 +133,7 @@ Legenda:
 ### 7.2 Socialinių tinklų ir trečiųjų šalių platformų integracija
 - Statusas: **PARTIAL (~50%)**
 - Yra: share funkcijos + social link’ai.
-- Trūksta: realūs profilių URL (dabar yra placeholder’ai), jei reikia – Pixel/Conversions API.
+- Trūksta: realūs profilių URL (dabar yra placeholder’ai), jei reikia - Pixel/Conversions API.
 - Įrodymai: `components/products/ProductDetailClient.tsx`, `components/shared/Footer.tsx`, `components/shared/MobileMenu.tsx`
 
 ---
@@ -217,7 +217,7 @@ Legenda:
 - Pastaba: realiai sprendžia hostingas (Vercel/Cloudflare). Kode yra HSTS.
 
 ### 11.3 Atsarginių kopijų kūrimas ir atkūrimo modulio integracija
-- Statusas: **TODO (~0–20%)**
+- Statusas: **TODO (~0-20%)**
 - Yra: dokumentacija ir atskirų servisų (Sanity/Supabase) galimybės, bet nėra integruoto „backup/restore modulio“ aplikacijos lygyje.
 
 ---

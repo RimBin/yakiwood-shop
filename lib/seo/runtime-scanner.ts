@@ -453,22 +453,22 @@ function descriptionFromPath(path: string): string {
 		return 'Peržiūrėkite Shou Sugi Ban degintos medienos produktus: fasadams, terasai, tvorai ir interjerui. Skirtingos spalvos ir profiliai.'
 	}
 	if (path.includes('/projektai') || path.includes('/projects')) {
-		return 'Įkvėpimui – Yakiwood projektų galerija su Shou Sugi Ban degintos medienos sprendimais ir realiais įgyvendinimais.'
+		return 'Įkvėpimui - Yakiwood projektų galerija su Shou Sugi Ban degintos medienos sprendimais ir realiais įgyvendinimais.'
 	}
 	if (path.includes('/sprendimai') || path.includes('/solutions')) {
 		return 'Shou Sugi Ban degintos medienos sprendimai fasadams, interjerui, terasoms ir tvoroms. Ilgaamžiai ir estetiški paviršiai.'
 	}
 	if (path.includes('/kontaktai') || path.includes('/contact')) {
-		return 'Susisiekite su Yakiwood komanda – konsultacijos dėl Shou Sugi Ban degintos medienos, kainų ir projektų.'
+		return 'Susisiekite su Yakiwood komanda - konsultacijos dėl Shou Sugi Ban degintos medienos, kainų ir projektų.'
 	}
 	if (path.includes('/apie') || path.includes('/about')) {
-		return 'Sužinokite apie Yakiwood – Shou Sugi Ban (japoniškos degintos medienos) technologiją, vertybes ir gamybos procesą.'
+		return 'Sužinokite apie Yakiwood - Shou Sugi Ban (japoniškos degintos medienos) technologiją, vertybes ir gamybos procesą.'
 	}
 	if (path.includes('/faq') || path.includes('/duk')) {
 		return 'Dažniausiai užduodami klausimai apie Shou Sugi Ban degintos medienos produktus, montavimą, priežiūrą ir naudojimą.'
 	}
 
-	return 'Yakiwood – Shou Sugi Ban deginta mediena fasadams, terasoms, tvoroms ir interjerui. Ekologiški ir ilgaamžiai sprendimai.'
+	return 'Yakiwood - Shou Sugi Ban deginta mediena fasadams, terasoms, tvoroms ir interjerui. Ekologiški ir ilgaamžiai sprendimai.'
 }
 
 export async function suggestSeoFixes(params: { origin: string; paths?: string[] }): Promise<SEOAutoFixSuggestion[]> {

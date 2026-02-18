@@ -144,7 +144,13 @@ function MobileProductCard({
     <div className="bg-[#eaeaea] rounded-[8px] pt-[12px] pb-[16px] px-[16px] w-full flex flex-col gap-[24px] items-center relative">
       {/* Background mask overlay */}
       <div className="absolute inset-0 pointer-events-none">
-        <Image src={imgMask} alt="" fill sizes="100vw" className="object-cover" />
+        <Image
+          src={imgMask}
+          alt=""
+          fill
+          sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 767px) calc(100vw - 48px), (max-width: 1023px) calc((100vw - 64px) / 2), (max-width: 1535px) calc((100vw - 96px) / 2)"
+          className="object-cover"
+        />
       </div>
 
       {/* Product image slider - full bleed to screen edges on mobile */}
@@ -155,7 +161,7 @@ function MobileProductCard({
             alt={product.title}
             fill
             className="object-cover object-center"
-            sizes="100vw"
+            sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 767px) calc(100vw - 48px), (max-width: 1023px) calc((100vw - 128px) / 2), (max-width: 1535px) calc((100vw - 160px) / 2)"
           />
 
           {!!slides[currentIndex]?.label && (

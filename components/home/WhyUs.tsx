@@ -65,7 +65,7 @@ export default async function WhyUs() {
               {/* Icon */}
               <div className="border-[#bbbbbb] border-[0.5px] border-solid rounded-[100px] w-[48px] h-[48px] relative overflow-hidden">
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[24px] h-[24px]">
-                  <Image src={benefit.primary} alt={t(`benefits.${benefit.id}.alt`)} width={24} height={24} />
+                  <Image src={benefit.primary} alt={t(`benefits.${benefit.id}.alt`)} width={24} height={24} className="w-[24px] h-[24px]" />
                 </div>
               </div>
               {/* Text */}
@@ -120,7 +120,7 @@ export default async function WhyUs() {
             >
               <div className="border-[#bbbbbb] border-[0.5px] border-solid rounded-[100px] w-[48px] h-[48px] relative overflow-hidden">
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[24px] h-[24px]">
-                  <Image src={benefit.primary} alt={t(`benefits.${benefit.id}.alt`)} width={24} height={24} />
+                  <Image src={benefit.primary} alt={t(`benefits.${benefit.id}.alt`)} width={24} height={24} className="w-[24px] h-[24px]" />
                 </div>
               </div>
               <div className="flex flex-col gap-[8px] items-start w-full">

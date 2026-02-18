@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { assets } from '@/lib/assets';
 
-// Asset constants (subset – extend if more needed during refinement)
+// Asset constants (subset - extend if more needed during refinement)
 const img = "https://www.figma.com/api/mcp/asset/03940b92-c1db-419a-9e1e-cc8ac1144d96";
 const img1 = "https://www.figma.com/api/mcp/asset/fe73766a-cbcd-4084-ba9e-f7ba4004d5d7";
 const img2 = "https://www.figma.com/api/mcp/asset/e9c985b7-e63f-4602-8bb8-e405000368b4";
@@ -231,7 +231,7 @@ export default function HomeComposite() {
             <div key={i} className={`rounded-${i===1?'[8px]':'[16px]'} p-[32px] h-[451px] w-[673px] flex flex-col justify-between ${i===1?'bg-[#161616]':'border border-[#bbbbbb] opacity-30'} relative`}>
               <img alt="review-bg" src={bg} className="absolute inset-0 w-full h-full object-cover rounded-inherit" />
               <p className={`font-['DM_Sans:Medium',sans-serif] text-[18px] tracking-[-0.18px] leading-[1.55] ${i===1?'text-white':'text-[#161616]'}`}>“Sample testimonial content for pixel-perfect layout.”</p>
-              <p className={`font-['DM_Sans:Medium',sans-serif] text-[14px] tracking-[-0.14px] ${i===1?'text-white':'text-[#161616]'}`}>— Mindaugas P., Architect</p>
+              <p className={`font-['DM_Sans:Medium',sans-serif] text-[14px] tracking-[-0.14px] ${i===1?'text-white':'text-[#161616]'}`}>- Mindaugas P., Architect</p>
             </div>
           ))}
         </div>

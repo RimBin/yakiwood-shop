@@ -76,9 +76,9 @@
     "priceLabel": "Price",
     "nextStepsTitle": "What happens next?",
     "nextStep1": "You'll receive an order confirmation email with the invoice",
-    "nextStep2": "Your order will be processed within 1–2 business days",
+    "nextStep2": "Your order will be processed within 1-2 business days",
     "nextStep3": "You'll get a notification when the order ships",
-    "nextStep4": "Delivery in 3–5 business days (free over €500)",
+    "nextStep4": "Delivery in 3-5 business days (free over €500)",
     "viewOrders": "View orders",
     "continueShopping": "Continue shopping",
     "supportTitle": "Have questions about your order?",
@@ -296,7 +296,7 @@
     "whyUs": {
       "eyebrow": "Yakiwood",
       "headline": "We are experts in the preparation of <italic>burnt wood</italic>, with many years of <italic>successful</italic> experience in preparing wood for facades, terraces, fences and interiors, and we guarantee a <italic>high quality</italic> and long-lasting <italic>result</italic>.",
-      "description": "Shou Sugi Ban is not just a striking look — it is a proven way to improve durability and reduce maintenance over time.",
+      "description": "Shou Sugi Ban is not just a striking look - it is a proven way to improve durability and reduce maintenance over time.",
       "benefits": {
         "aesthetics": {
           "title": "Beautiful natural aesthetics",
@@ -342,7 +342,7 @@
         },
         "fence": {
           "title": "Fence",
-          "description": "Private, elegant, and built to last — charred wood fencing that withstands every season."
+          "description": "Private, elegant, and built to last - charred wood fencing that withstands every season."
         },
         "interior": {
           "title": "Interior",
@@ -451,11 +451,11 @@
         },
         "02": {
           "question": "How do I maintain Shou Sugi Ban wood?",
-          "answer": "Shou Sugi Ban surfaces are typically low-maintenance. There’s no need for daily cleaning—an occasional gentle rinse to remove dust and dirt (as needed or seasonally) is usually enough. Avoid high-pressure washing and abrasive cleaners, as they can damage the surface texture. If the surface is oiled, refreshing the oil every ~2–5 years is typically sufficient (depending on sun exposure, rain, and facade orientation)."
+          "answer": "Shou Sugi Ban surfaces are typically low-maintenance. There’s no need for daily cleaning-an occasional gentle rinse to remove dust and dirt (as needed or seasonally) is usually enough. Avoid high-pressure washing and abrasive cleaners, as they can damage the surface texture. If the surface is oiled, refreshing the oil every ~2-5 years is typically sufficient (depending on sun exposure, rain, and facade orientation)."
         },
         "03": {
           "question": "Where can charred wood products be used?",
-          "answer": "Charred wood (yakisugi) is well-suited for ventilated facades, wall and ceiling cladding, decorative partitions, fences, gates, and exterior accents. Indoors it’s often used for feature walls and furniture details—choose an appropriate finish (e.g., oil or lacquer) to reduce rub-off and make cleaning easier. For outdoor use, longevity depends heavily on correct detailing: ventilation, proper fasteners, and avoiding areas where water can sit on the surface."
+          "answer": "Charred wood (yakisugi) is well-suited for ventilated facades, wall and ceiling cladding, decorative partitions, fences, gates, and exterior accents. Indoors it’s often used for feature walls and furniture details-choose an appropriate finish (e.g., oil or lacquer) to reduce rub-off and make cleaning easier. For outdoor use, longevity depends heavily on correct detailing: ventilation, proper fasteners, and avoiding areas where water can sit on the surface."
         },
         "04": {
           "question": "How is Shou Sugi Ban installed?",
@@ -463,7 +463,7 @@
         },
         "05": {
           "question": "Is Shou Sugi Ban suitable for interior use?",
-          "answer": "Yes—Shou Sugi Ban works well indoors for feature walls, ceilings, niches, and furniture details. For interior applications we recommend an oiled finish: when properly processed and oiled, the surface does not rub off and does not shed, and it’s easy to maintain."
+          "answer": "Yes-Shou Sugi Ban works well indoors for feature walls, ceilings, niches, and furniture details. For interior applications we recommend an oiled finish: when properly processed and oiled, the surface does not rub off and does not shed, and it’s easy to maintain."
         },
         "06": {
           "question": "Is Yakisugi suitable for all climates?",
@@ -471,7 +471,7 @@
         },
         "07": {
           "question": "What are the standard dimensions for Shou Sugi Ban planks?",
-          "answer": "Typical facade board widths are 95–145 mm, with common lengths of 3–6 m (depending on the selected profile and wood species). Exact dimensions depend on your profile choice and project requirements—custom options are also possible."
+          "answer": "Typical facade board widths are 95-145 mm, with common lengths of 3-6 m (depending on the selected profile and wood species). Exact dimensions depend on your profile choice and project requirements-custom options are also possible."
         }
       }
     }
@@ -567,7 +567,7 @@
       },
       "maintenance": {
         "title": "LOW MAINTENANCE, LONG SERVICE",
-        "content": "Minimal upkeep and long lifetime – ideal for both facades and terraces."
+        "content": "Minimal upkeep and long lifetime - ideal for both facades and terraces."
       }
     }
   },
@@ -663,7 +663,7 @@
       "foundationsTitleItalic": "purpose",
 
       "missionTitle": "Our mission",
-      "missionBody": "Our goal is to help you create a cosy and sustainable environment by using Yakisugi (Shou Sugi Ban)—a traditional Japanese wood-burning technique that enhances both the protection and aesthetics of wood.",
+      "missionBody": "Our goal is to help you create a cosy and sustainable environment by using Yakisugi (Shou Sugi Ban)-a traditional Japanese wood-burning technique that enhances both the protection and aesthetics of wood.",
 
       "visionTitle": "Our Vision",
       "visionBody": "To become the leading provider of sustainable burnt wood solutions in Lithuania and beyond, inspiring people to embrace natural, durable, and eco-friendly materials in architecture and interior design. We strive to preserve tradition while innovating for a greener future.",
@@ -684,7 +684,7 @@
       "valueAuthenticityBodyMobile": "We honor the centuries-old Yakisugi tradition.",
 
       "foundationsBlurbA": "We produce burnt wood products using the centuries-old Japanese method that naturally strengthens and preserves wood by shrinking its pores. This process enhances durability while maintaining the wood's natural texture, pattern, and color.",
-      "foundationsBlurbB": "Our skilled craftsmen are meticulous in their work, ensuring every detail meets the highest quality standards. We use the most durable woods—spruce and larch—treated with natural oils to achieve exceptional colours and protection.",
+      "foundationsBlurbB": "Our skilled craftsmen are meticulous in their work, ensuring every detail meets the highest quality standards. We use the most durable woods-spruce and larch-treated with natural oils to achieve exceptional colours and protection.",
 
       "processEyebrow": "Our process",
       "processTitlePrefix": "The art of",
@@ -1684,9 +1684,9 @@
       "priceLabel": "Price",
       "nextStepsTitle": "What happens next?",
       "nextStep1": "You'll receive an order confirmation email with the invoice",
-      "nextStep2": "Your order will be processed within 1–2 business days",
+      "nextStep2": "Your order will be processed within 1-2 business days",
       "nextStep3": "You'll get a notification when the order ships",
-      "nextStep4": "Delivery in 3–5 business days (free over €500)",
+      "nextStep4": "Delivery in 3-5 business days (free over €500)",
       "viewOrders": "View orders",
       "continueShopping": "Continue shopping",
       "supportTitle": "Have questions about your order?",
@@ -2240,7 +2240,7 @@
         "button": "Create role",
         "errors": {
           "invalidRole": "Invalid role name. Use letters, numbers, _ or -, up to 64 characters.",
-          "roleExists": "Role already exists — selected the existing role."
+          "roleExists": "Role already exists - selected the existing role."
         }
       }
     },
@@ -2437,7 +2437,7 @@
         "italic": "last",
         "suffix": "outside"
       },
-      "description": "A modern, ventilated facade system with charred wood cladding — built for the Baltic climate, minimal maintenance, and a clean architectural finish.",
+      "description": "A modern, ventilated facade system with charred wood cladding - built for the Baltic climate, minimal maintenance, and a clean architectural finish.",
       "intro": "Burning wood is an ancient and unique technique that is becoming increasingly popular in modern architecture. The result is wooden facade cladding that provides a modern and robust appearance.",
       "detail": "Charred wood cladding not only provides a unique appearance but is also durable and resistant to weather conditions. By properly charring the wood, a modern, nature-inspired aesthetic can be created, suitable for all architectural styles. Furthermore, charred wood serves as a natural defence against external influences, such as pests or harmful ultraviolet rays from the sun.",
       "faqSubtitle": "Do you want to give your building a distinctive and appealing look? Encourage diverse design solutions with charred wood.",
@@ -2508,7 +2508,7 @@
       "faq": {
         "1": {
           "title": "Why choose charred wood for a terrace?",
-          "content": "Charred wood offers a unique combination for terraces – natural beauty and increased durability. The charring process creates a protective layer that shields the wood from moisture, UV rays, and biological pests, while providing an unparalleled aesthetic."
+          "content": "Charred wood offers a unique combination for terraces - natural beauty and increased durability. The charring process creates a protective layer that shields the wood from moisture, UV rays, and biological pests, while providing an unparalleled aesthetic."
         },
         "2": {
           "title": "Is charred wood suitable for pool areas?",
@@ -2535,9 +2535,9 @@
         "italic": "depth",
         "suffix": "inside"
       },
-      "description": "Charred wood panels for modern interiors — warmth, contrast, and texture for feature walls, ceilings, and details.",
-      "intro": "Charred wood in interiors opens unlimited design possibilities. From accent walls to ceiling finishes – Shou Sugi Ban technique gives spaces a unique character and depth.",
-      "detail": "Charred wood used for interior finishing is specially prepared for indoor spaces – softer texture, fewer carbon residues, and perfectly treated surfaces. It creates a cozy atmosphere and pairs beautifully with modern and minimalist interiors.",
+      "description": "Charred wood panels for modern interiors - warmth, contrast, and texture for feature walls, ceilings, and details.",
+      "intro": "Charred wood in interiors opens unlimited design possibilities. From accent walls to ceiling finishes - Shou Sugi Ban technique gives spaces a unique character and depth.",
+      "detail": "Charred wood used for interior finishing is specially prepared for indoor spaces - softer texture, fewer carbon residues, and perfectly treated surfaces. It creates a cozy atmosphere and pairs beautifully with modern and minimalist interiors.",
       "faqSubtitle": "Looking for a way to add warmth and uniqueness to your interior? Charred wood is the perfect choice for accent walls and ceilings.",
       "specs": {
         "applications": { "label": "Applications", "value": "Walls / ceilings" },
@@ -2584,7 +2584,7 @@
         "italic": "style",
         "suffix": "built in"
       },
-      "description": "Charred wood fencing that stays stable, looks premium, and withstands the elements — for clean lines and long-term durability.",
+      "description": "Charred wood fencing that stays stable, looks premium, and withstands the elements - for clean lines and long-term durability.",
       "intro": "A charred wood fence is more than just a barrier. It's an architectural element that gives your property character and protection while emphasizing contemporary design.",
       "detail": "Our charred wood fences feature exceptional longevity and minimal maintenance. The charring process creates natural protection against rot, pests, and UV rays, so the fence maintains its appearance for decades.",
       "faqSubtitle": "Looking for a fence that's both functional and aesthetic? Charred wood is the solution that will make your property unique.",

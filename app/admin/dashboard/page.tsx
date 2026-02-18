@@ -106,7 +106,7 @@ export default function DashboardPage() {
       const salesMap = new Map<string, { quantity: number; revenue: number }>();
       filteredOrders.forEach(order => {
         order.items.forEach((item: any) => {
-          const productName = item?.name || '—';
+          const productName = item?.name || '-';
           const quantity = Math.max(1, toFiniteNumber(item?.quantity, 1));
           const price = toFiniteNumber(item?.price, 0);
           const existing = salesMap.get(productName) || { quantity: 0, revenue: 0 };

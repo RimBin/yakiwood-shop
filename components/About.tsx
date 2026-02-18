@@ -166,13 +166,13 @@ export default function About() {
               </p>
               <div className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
                 <p className="mb-[10px]">
-                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueCraftsmanshipTitle')}</span><span className="font-['Outfit'] font-light text-[14px]"> – {t('valueCraftsmanshipBody')}</span>
+                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueCraftsmanshipTitle')}</span><span className="font-['Outfit'] font-light text-[14px]"> - {t('valueCraftsmanshipBody')}</span>
                 </p>
                 <p className="mb-[10px]">
-                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueSustainabilityTitle')}</span><span className="font-['Outfit'] font-light text-[14px]"> – {t('valueSustainabilityBody')}</span>
+                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueSustainabilityTitle')}</span><span className="font-['Outfit'] font-light text-[14px]"> - {t('valueSustainabilityBody')}</span>
                 </p>
                 <p>
-                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueAuthenticityTitle')}</span><span className="font-['Outfit'] font-light text-[14px]"> – {t('valueAuthenticityBody')}</span>
+                  <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueAuthenticityTitle')}</span><span className="font-['Outfit'] font-light text-[14px]"> - {t('valueAuthenticityBody')}</span>
                 </p>
               </div>
             </div>
@@ -217,13 +217,13 @@ export default function About() {
                 </p>
                 <div className="font-['Outfit'] font-light text-[14px] leading-[1.2] tracking-[0.14px] text-[#BBBBBB]">
                   <p className="mb-[10px]">
-                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueCraftsmanshipTitle')}</span> – {t('valueCraftsmanshipBodyMobile')}
+                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueCraftsmanshipTitle')}</span> - {t('valueCraftsmanshipBodyMobile')}
                   </p>
                   <p className="mb-[10px]">
-                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueSustainabilityTitle')}</span> – {t('valueSustainabilityBodyMobile')}
+                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueSustainabilityTitle')}</span> - {t('valueSustainabilityBodyMobile')}
                   </p>
                   <p>
-                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueAuthenticityTitle')}</span> – {t('valueAuthenticityBodyMobile')}
+                    <span className="font-['DM_Sans'] font-medium text-[16px] leading-[1.1] tracking-[-0.64px]">{t('valueAuthenticityTitle')}</span> - {t('valueAuthenticityBodyMobile')}
                   </p>
                 </div>
               </div>

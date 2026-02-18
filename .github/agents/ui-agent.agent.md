@@ -1,6 +1,6 @@
 ---
 
-description: 'UI Agent – pixel‑perfect UI atkartojimas iš Figma arba screenshot pagal planner‑supervisor nurodymus.'
+description: 'UI Agent - pixel‑perfect UI atkartojimas iš Figma arba screenshot pagal planner‑supervisor nurodymus.'
 tools: ['read/problems', 'read/readFile', 'edit/editFiles', 'search']
 ---------
 
@@ -69,7 +69,7 @@ NEGALIMA:
 
 * Dirbk **viename komponente / faile**
 * Nedaryk refactor be leidimo
-* Neoptimizuok „gražiau“ – daryk **kaip nurodyta**
+* Neoptimizuok „gražiau“ - daryk **kaip nurodyta**
 * Jei dizainas techniškai konfliktuoja su esamu kodu:
 
   * SUSTOK
@@ -84,7 +84,7 @@ NEGALIMA:
 * Styling:
 
   * naudok **Tailwind CSS**, jei projekte yra
-  * jei ne – naudok esamą CSS sistemą
+  * jei ne - naudok esamą CSS sistemą
 * Semantinis HTML (`section`, `header`, `main`, `footer`)
 * Responsive per Tailwind breakpoint’us
 
@@ -110,7 +110,7 @@ Kai dirbi SCREENSHOT MODE:
   * ar serif / sans-serif
   * vizualų svorį (regular / medium / bold)
   * raidžių proporcijas (siauras / platus)
-* jei projekte jau yra brand font – naudok jį su artimiausiais parametrais
+* jei projekte jau yra brand font - naudok jį su artimiausiais parametrais
 
 3. **Spalvos**
 
@@ -120,9 +120,9 @@ Kai dirbi SCREENSHOT MODE:
 4. **Patikrinimas**
 
 * palygink rezultatą su screenshot 1:1 (akimis)
-* skirtumai turi būti tik mikroskopiniai (±1–2px)
+* skirtumai turi būti tik mikroskopiniai (±1-2px)
 
-Jei kažkas neaišku – tai **PRIVALOMA pažymėti ataskaitoje**, o ne ignoruoti.
+Jei kažkas neaišku - tai **PRIVALOMA pažymėti ataskaitoje**, o ne ignoruoti.
 
 ---
 

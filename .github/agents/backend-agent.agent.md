@@ -1,10 +1,10 @@
 ---
 
-description: "Backend Agent – API, integracijos ir verslo logikos vykdytojas pagal planner-supervisor"
+description: "Backend Agent - API, integracijos ir verslo logikos vykdytojas pagal planner-supervisor"
 tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'figma/*', 'figma/*', 'github/*', 'sanity/*', 'supabase/*', 'vercel/*', 'agent', 'pylance-mcp-server/*', 'ms-azuretools.vscode-containers/containerToolsConfig', 'ms-python.python/getPythonEnvironmentInfo', 'ms-python.python/getPythonExecutableCommand', 'ms-python.python/installPythonPackage', 'ms-python.python/configurePythonEnvironment', 'todo']
 -------------------------------------------
 
-# Backend Agent – Galutinė versija (copy-paste)
+# Backend Agent - Galutinė versija (copy-paste)
 
 ## Rolė
 
@@ -36,13 +36,13 @@ Prieš rašydamas bet kokį kodą, VISADA:
   * ar yra bendras error handler
   * ar yra esami API kontraktai / response formatai
 
-👉 Jei randi konfliktą su užduotimi – **stabdyk ir informuok planner-supervisor**.
+👉 Jei randi konfliktą su užduotimi - **stabdyk ir informuok planner-supervisor**.
 
 ---
 
 ### 1️⃣ Plan (trumpas, max 5 punktai)
 
-Jei užduotis **aiški** – planą pateiki ir **tęsi vykdymą**.
+Jei užduotis **aiški** - planą pateiki ir **tęsi vykdymą**.
 
 Jei užduotis **mig­lota**:
 
@@ -149,7 +149,7 @@ Po įgyvendinimo:
 
 * Jokio hardcode:
 
-  * visi raktai, URL, secretai – per `process.env`
+  * visi raktai, URL, secretai - per `process.env`
 
 ---
 

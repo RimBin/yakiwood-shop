@@ -74,7 +74,7 @@ export const chatbotFaqEntryType = defineType({
       const status = enabled ? 'enabled' : 'disabled'
       return {
         title: question,
-        subtitle: `${locale} • ${status} • order ${order ?? '—'}`,
+        subtitle: `${locale} • ${status} • order ${order ?? '-'}`,
       }
     },
   },

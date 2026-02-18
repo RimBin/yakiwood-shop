@@ -79,7 +79,7 @@ export const postType = defineType({
         ...selection,
         subtitle: [author ? `by ${author}` : undefined, titleEn ? `EN: ${titleEn}` : undefined]
           .filter(Boolean)
-          .join(' — '),
+          .join(' - '),
       }
     },
   },

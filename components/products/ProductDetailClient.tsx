@@ -224,7 +224,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
             {
               title: 'Produkto priežiūra',
               content:
-                'Kiekviena situacija yra unikali, todėl jei turite klausimų dėl priežiūros, susisiekite – įvertinsime jūsų poreikius ir pasiūlysime tinkamiausią sprendimą.',
+                'Kiekviena situacija yra unikali, todėl jei turite klausimų dėl priežiūros, susisiekite - įvertinsime jūsų poreikius ir pasiūlysime tinkamiausią sprendimą.',
             },
             {
               title: 'Spalvų išlyga',

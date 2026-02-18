@@ -44,7 +44,7 @@ export const productType = defineType({
     defineField({
       name: 'category',
       title: 'Usage Type',
-      description: 'Primary customer choice – fasadas (cladding) or terasa (decking)',
+      description: 'Primary customer choice - fasadas (cladding) or terasa (decking)',
       type: 'string',
       options: {
         list: [
@@ -265,7 +265,7 @@ export const productType = defineType({
           titleEn ? `EN: ${titleEn}` : undefined,
         ]
           .filter(Boolean)
-          .join(' — '),
+          .join(' - '),
         media,
       };
     },

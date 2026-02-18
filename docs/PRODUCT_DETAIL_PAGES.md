@@ -6,15 +6,15 @@ Comprehensive product detail pages with 3D configurator integration, image galle
 ## Created/Updated Files
 
 ### Core Library Functions
-- **`lib/products.sanity.ts`** – Sanity-backed product helpers
-  - `fetchProducts()` – Fetch all public products from Sanity
-  - `fetchProductBySlug()` – Resolve a single product (used by product detail pages)
-  - `fetchRelatedProducts()` – Filter related inventory by usage/wood type
-  - `transformSanityProduct()` + `blocksToPlainText()` – Map GROQ responses into strongly typed objects
-- **`lib/pricing.ts`** – Pricing helper utilities
-  - `calculateProductPrice()` – Combine base price + color/profile modifiers + quantity
-- **`lib/seo/structured-data.ts`** – SEO schema helpers
-  - `generateProductSchema()` and `generateBreadcrumbSchema()` – JSON-LD builders consumed inside the product route
+- **`lib/products.sanity.ts`** - Sanity-backed product helpers
+  - `fetchProducts()` - Fetch all public products from Sanity
+  - `fetchProductBySlug()` - Resolve a single product (used by product detail pages)
+  - `fetchRelatedProducts()` - Filter related inventory by usage/wood type
+  - `transformSanityProduct()` + `blocksToPlainText()` - Map GROQ responses into strongly typed objects
+- **`lib/pricing.ts`** - Pricing helper utilities
+  - `calculateProductPrice()` - Combine base price + color/profile modifiers + quantity
+- **`lib/seo/structured-data.ts`** - SEO schema helpers
+  - `generateProductSchema()` and `generateBreadcrumbSchema()` - JSON-LD builders consumed inside the product route
 
 ### Components
 
@@ -144,30 +144,30 @@ Comprehensive product detail pages with 3D configurator integration, image galle
 Products now live entirely in **Sanity** (`sanity/schemaTypes/productType.ts`). Each document represents a single "usage + wood" combination and exposes all UI-ready data needed for the configurator, pricing, and SEO.
 
 ### Product fields
-- `name` – Marketing title, displayed throughout UI and structured data.
-- `slug` – Auto-generated from the name; used for `/produktai/[slug]` routes.
-- `description` – Portable Text block content. Both plain text (for previews/meta) and rich text (ProductTabs) are derived from it.
-- `category` – Usage type (`facade` or `terrace`). Drives filtering, related products, and localized labels.
-- `woodType` – `larch` or `spruce`. Used in filters, labels, and related product matching.
-- `basePrice` – Entry-level EUR price per unit before modifiers.
-- `images` – Array of product/gallery assets. The first image becomes the OG preview.
-- `dimensions` – Optional width/length/thickness metadata shown beside specifications.
-- `specifications` – Array of `{ label, value }` rows rendered inside the Specifications tab.
-- `featured` / `inStock` – Flags powering marketing placements and button states.
+- `name` - Marketing title, displayed throughout UI and structured data.
+- `slug` - Auto-generated from the name; used for `/produktai/[slug]` routes.
+- `description` - Portable Text block content. Both plain text (for previews/meta) and rich text (ProductTabs) are derived from it.
+- `category` - Usage type (`facade` or `terrace`). Drives filtering, related products, and localized labels.
+- `woodType` - `larch` or `spruce`. Used in filters, labels, and related product matching.
+- `basePrice` - Entry-level EUR price per unit before modifiers.
+- `images` - Array of product/gallery assets. The first image becomes the OG preview.
+- `dimensions` - Optional width/length/thickness metadata shown beside specifications.
+- `specifications` - Array of `{ label, value }` rows rendered inside the Specifications tab.
+- `featured` / `inStock` - Flags powering marketing placements and button states.
 
 ### Color variants (`colorVariants` array)
-- `name`, optional `slug` – Display label + unique identifier.
-- `hex` – Used for swatch fallback when no image is provided.
-- `image` – Texture/swatch image displayed in the configurator and selectors.
-- `description` – Short marketing note.
-- `priceModifier` – EUR delta applied on top of `basePrice` via `calculateProductPrice()`.
+- `name`, optional `slug` - Display label + unique identifier.
+- `hex` - Used for swatch fallback when no image is provided.
+- `image` - Texture/swatch image displayed in the configurator and selectors.
+- `description` - Short marketing note.
+- `priceModifier` - EUR delta applied on top of `basePrice` via `calculateProductPrice()`.
 
 ### Profile variants (`profiles` array)
-- `name` + optional `code` – Display label and SKU reference.
-- `description` – Rounded-up marketing text; combined with dimension info in the UI.
-- `dimensions` – Width / thickness / length numbers rendered inline.
-- `image` – Diagram or silhouette for richer selectors.
-- `priceModifier` – EUR delta stacked with the color modifier.
+- `name` + optional `code` - Display label and SKU reference.
+- `description` - Rounded-up marketing text; combined with dimension info in the UI.
+- `dimensions` - Width / thickness / length numbers rendered inline.
+- `image` - Diagram or silhouette for richer selectors.
+- `priceModifier` - EUR delta stacked with the color modifier.
 
 All of the above fields are fetched via GROQ and transformed by `lib/products.sanity.ts`, ensuring frontend components only depend on one strongly typed Product interface.
 
@@ -200,7 +200,7 @@ if (product) {
 1. Open **/studio** (embedded Sanity Studio) and pick the product document.
 2. Use the **Color Variants** array to add or reorder swatches (name, slug, hex/image, modifier).
 3. Use the **Profile Variants** array to maintain dimensional profiles (name, code, dimensions, modifier).
-4. Publish the document – GROQ queries automatically surface the updated entries in `fetchProductBySlug()` results.
+4. Publish the document - GROQ queries automatically surface the updated entries in `fetchProductBySlug()` results.
 
 ## Configuration
 

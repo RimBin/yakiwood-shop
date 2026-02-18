@@ -89,11 +89,11 @@ export function AdjustmentModal({ sku, onClose, onSuccess }: AdjustmentModalProp
               value={quantity || ''}
               onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
               className="w-full px-4 py-2 border border-[#E1E1E1] bg-[#EAEAEA] rounded-[12px] font-['Outfit'] text-[14px] focus:outline-none focus:border-[#161616]"
-              placeholder="Teigiamas – pridėti, neigiamas – atimti"
+              placeholder="Teigiamas - pridėti, neigiamas - atimti"
               required
             />
             <p className="font-['Outfit'] text-[12px] text-[#535353] mt-2">
-              Įveskite teigiamą skaičių, kad pridėtumėte, arba neigiamą – kad sumažintumėte
+              Įveskite teigiamą skaičių, kad pridėtumėte, arba neigiamą - kad sumažintumėte
             </p>
           </div>
 
