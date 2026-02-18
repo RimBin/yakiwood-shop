@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { toLocalePath } from '@/i18n/paths';
@@ -134,9 +134,10 @@ export default function ChatbotWidget() {
       t('suggestions.cart'),
       t('suggestions.productionTime'),
       t('suggestions.maintenance'),
-      t('suggestions.samples'),
     ];
   }, [t]);
+
+  const hasActiveConversation = messages.length > 1;
 
   const handoff = useMemo(() => {
     return (
@@ -284,11 +285,43 @@ export default function ChatbotWidget() {
         ...prev,
         {
           role: 'assistant',
-          text: currentLocale === 'en' ? 'Added to cart.' : 'Įdėjau į krepšelį.',
+          text: t('cartAdded'),
         },
       ]);
       return;
     }
+  }
+
+  function renderMessageText(text: string) {
+    const internalPathRegex = /(\/(?:produktai|products|policies|checkout|kontaktai|contact)(?:\/[a-z0-9-_/]*)?)/gi;
+    const nodes: ReactNode[] = [];
+    let cursor = 0;
+
+    for (const match of text.matchAll(internalPathRegex)) {
+      const path = match[1];
+      const start = match.index ?? 0;
+
+      if (start > cursor) nodes.push(text.slice(cursor, start));
+
+      nodes.push(
+        <button
+          key={`${path}:${start}`}
+          type="button"
+          onClick={() => {
+            router.push(toLocalePath(path, currentLocale));
+            setOpen(false);
+          }}
+          className="underline underline-offset-2 hover:opacity-80"
+        >
+          {path}
+        </button>
+      );
+
+      cursor = start + path.length;
+    }
+
+    if (cursor < text.length) nodes.push(text.slice(cursor));
+    return nodes.length > 0 ? nodes : text;
   }
 
   if (shouldHide) return null;
@@ -371,7 +404,7 @@ export default function ChatbotWidget() {
                 <div className="space-y-[12px]">
                   <div className="flex items-center justify-between">
                     <div className="text-[10px] font-['Outfit'] uppercase tracking-[0.12em] text-[#7C7C7C]">
-                      {currentLocale === 'en' ? 'Conversation' : 'Pokalbis'}
+                      {t('conversationLabel')}
                     </div>
                   </div>
                   {messages.map((m, idx) => {
@@ -404,7 +437,7 @@ export default function ChatbotWidget() {
                               : 'bg-white text-[#161616] rounded-bl-[8px]'
                           )}
                         >
-                          <p className="font-['Outfit'] text-[13px] leading-[1.45] whitespace-pre-line">{m.text}</p>
+                          <p className="font-['Outfit'] text-[13px] leading-[1.45] whitespace-pre-line">{renderMessageText(m.text)}</p>
                         </div>
                       </div>
                     );
@@ -439,7 +472,7 @@ export default function ChatbotWidget() {
                 {visibleSuggestions.length > 0 && (
                   <div className="mt-[16px]">
                     <div className="mb-[8px] text-[10px] font-['Outfit'] uppercase tracking-[0.12em] text-[#7C7C7C]">
-                      {currentLocale === 'en' ? 'Quick questions' : 'Greitieji klausimai'}
+                      {t('quickQuestions')}
                     </div>
                     {serverActions.length > 0 && (
                       <div className="mb-[10px] flex flex-wrap gap-[8px]">
@@ -467,12 +500,6 @@ export default function ChatbotWidget() {
                           key={s}
                           type="button"
                           onClick={() => {
-                            // Built-in "chat with human" handoff.
-                            // Reuse the existing translated suggestion label (EN: "Contact support").
-                            if (s === t('suggestions.samples')) {
-                              openHandoff();
-                              return;
-                            }
                             void send(s);
                           }}
                           disabled={busy}
@@ -542,11 +569,17 @@ export default function ChatbotWidget() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="h-[56px] w-[56px] rounded-full border border-[#BBBBBB] bg-[#161616] text-white shadow-[0_18px_55px_rgba(0,0,0,0.28)] hover:opacity-90 grid place-items-center"
+          className="relative h-[56px] w-[56px] rounded-full border border-[#BBBBBB] bg-[#161616] text-white shadow-[0_18px_55px_rgba(0,0,0,0.28)] hover:opacity-90 grid place-items-center"
           aria-label={t('aria.open')}
           aria-haspopup="dialog"
           aria-expanded={open}
         >
+          {hasActiveConversation ? (
+            <span
+              className="absolute -right-[2px] -top-[2px] h-[12px] w-[12px] rounded-full bg-emerald-500 ring-2 ring-white"
+              aria-hidden="true"
+            />
+          ) : null}
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path
               d="M7 18L4 21V6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V16C20 17.1046 19.1046 18 18 18H7Z"

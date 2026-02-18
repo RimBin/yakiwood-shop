@@ -121,7 +121,13 @@ export default function ProjectsPage() {
                   style={{ animationDelay: `${delay}ms` }}
                 >
                   <div className={`relative w-full overflow-hidden rounded-[12px] ${idx % 2 === 0 ? 'h-[520px]' : 'h-[330px]'}`}>
-                    <Image src={project.image} alt={project.title} fill className="object-cover" />
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
                   </div>
                   <div className="flex flex-col gap-[4px]">
                     <p className="font-['DM_Sans'] text-[18px] font-medium tracking-[-0.36px] text-[#161616]" style={{ fontVariationSettings: "'opsz' 14" }}>

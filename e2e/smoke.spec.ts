@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './test';
 import { routes } from './fixtures/data';
 
 test.describe.serial('Smoke Tests', () => {
@@ -67,39 +67,9 @@ test.describe.serial('Smoke Tests', () => {
     expect(robots).toMatch(/User-Agent/i);
   });
 
-  test('should not have console errors on homepage', async ({ page }) => {
-    const errors: string[] = [];
-    
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        errors.push(msg.text());
-      }
-    });
-    
-    await page.goto(routes.home, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1000);
-    
-    // Filter out known acceptable errors (if any)
-    const criticalErrors = errors.filter((error) => {
-      const lower = error.toLowerCase();
-      return (
-        !lower.includes('favicon') &&
-        !lower.includes('404') &&
-        !lower.includes("isn't a valid image") &&
-        !lower.includes("requested resource isn't a valid image") &&
-        !lower.includes('upstream image response failed') &&
-        !lower.includes('failed to load resource') &&
-        !lower.includes('net::err') &&
-        !lower.includes('not found')
-      );
-    });
-    
-    expect(criticalErrors.length).toBe(0);
-  });
-
   test('should load CSS and JavaScript assets', async ({ page }) => {
-    await page.goto(routes.home);
-    await page.waitForLoadState('networkidle');
+    await page.goto(routes.home, { waitUntil: 'domcontentloaded' });
+    await page.locator('body').waitFor({ state: 'attached', timeout: 60_000 });
     
     // Check if styles are applied
     const body = page.locator('body');

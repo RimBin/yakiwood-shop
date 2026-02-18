@@ -33,7 +33,7 @@ function getEnvMode(): ChatbotOpenAiMode {
 export function getDefaultChatbotSettings(): ChatbotSettings {
   const systemPromptLt =
     (process.env.CHATBOT_SYSTEM_PROMPT_LT || '').trim() ||
-    'Tu esi Yakiwood pokalbiu asistentas. Atsakyk aiskiai ir trumpai. Jei truksta informacijos - uzduok 1-2 patikslinancius klausimus. Jei reikia individualaus pasiulymo, nukreipk i Kontaktus.';
+    'Tu esi Yakiwood pokalbių asistentas. Atsakyk aiškiai ir trumpai. Jei trūksta informacijos, užduok 1–2 patikslinančius klausimus. Jei reikia individualaus pasiūlymo, nukreipk į Kontaktus.';
 
   const systemPromptEn =
     (process.env.CHATBOT_SYSTEM_PROMPT_EN || '').trim() ||

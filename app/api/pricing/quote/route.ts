@@ -86,10 +86,17 @@ export async function POST(req: NextRequest) {
     })
 
     if (!quote) {
-      return NextResponse.json({ error: 'Kaina nerasta šiai konfigūracijai' }, { status: 404 })
+      return NextResponse.json(
+        {
+          available: false,
+          error: 'Kaina šiai konfigūracijai šiuo metu neprieinama',
+        },
+        { status: 200 }
+      )
     }
 
     return NextResponse.json({
+      available: true,
       unitPricePerM2: quote.unitPricePerM2,
       areaM2: quote.areaM2,
       totalAreaM2: quote.totalAreaM2,

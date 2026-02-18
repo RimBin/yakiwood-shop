@@ -132,7 +132,15 @@ export default function Header() {
               aria-label="Yakiwood homepage"
               className="h-[48px] w-[126px] relative shrink-0"
             >
-              <Image src={getAsset('imgLogo')} alt="Yakiwood Logo" fill sizes="126px" style={{ objectFit: 'contain' }} />
+              <Image
+                src={getAsset('imgLogo')}
+                alt="Yakiwood Logo"
+                fill
+                sizes="126px"
+                priority
+                loading="eager"
+                style={{ objectFit: 'contain' }}
+              />
             </Link>
 
             {/* Navigation - hidden on mobile/tablet, shown on large screens */}

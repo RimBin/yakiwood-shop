@@ -22,6 +22,9 @@
     "welcome": "Sveiki! Esu Yakiwood asistentas. Galiu padėti su produktais, tiksliomis kainomis, pristatymu ir užsakymu.",
     "note": "Pastaba: nerašykite jautrios informacijos (pvz., asmens kodo). Pokalbis gali būti naudojamas aptarnavimui gerinti.",
     "handoff": "Reikia žmogaus? Susisiekime per Kontaktus",
+    "conversationLabel": "Pokalbis",
+    "quickQuestions": "Greitieji klausimai",
+    "cartAdded": "Įdėjau į krepšelį.",
     "placeholder": "Parašykite žinutę...",
     "send": "Siųsti",
     "clear": "Išvalyti",
@@ -35,20 +38,13 @@
       "network": "Klaida. Pabandykite vėliau."
     },
     "suggestions": {
-      "price": "Parodyk produktus / kainas",
+      "price": "Parodyk produktus ir kainas",
       "delivery": "Pristatymo kaina ir terminas",
       "payment": "Apmokėjimo būdai",
       "returns": "Grąžinimas ir garantija",
-      "cart": "Kaip veikia krepšelis?",
-      "createRole": {
-        "title": "Sukurti naują rolę",
-        "label": "Nauja rolė",
-        "placeholder": "pvz. partneris",
-        "button": "Sukurti rolę"
-      },
-      "productionTime": "Kada gausiu užsakymą?",
-      "maintenance": "Kaip prižiūrėti degintą medieną?",
-      "samples": "Susisiekti su konsultantu"
+      "cart": "Kaip pateikti užsakymą?",
+      "productionTime": "Kiek trunka gamyba ir pristatymas?",
+      "maintenance": "Kaip prižiūrėti degintą medieną?"
     }
   },
   "blog": {

@@ -150,7 +150,13 @@ export default function SolutionsPage() {
           className="absolute inset-0 mix-blend-multiply pointer-events-none"
           style={{ opacity: data.overlayOpacity }}
         >
-          <Image src={assets.ctaBackground} alt="" fill className="object-cover" />
+          <Image
+            src={assets.ctaBackground}
+            alt=""
+            fill
+            className="object-cover"
+            sizes="(max-width: 1024px) 100vw, 1200px"
+          />
         </div>
 
         <div className="relative p-[16px] md:p-[24px] lg:p-[40px]">
@@ -210,15 +216,33 @@ export default function SolutionsPage() {
             <div className="grid gap-[12px] md:gap-[16px] lg:gap-[24px]">
               <div className="grid grid-cols-2 gap-[12px] md:gap-[16px] lg:gap-[24px]">
                 <div className="relative overflow-hidden rounded-[24px] h-[220px] md:h-[280px] lg:h-[320px]">
-                  <Image src={data.images.topLeft.src} alt={data.images.topLeft.alt} fill className="object-cover" />
+                  <Image
+                    src={data.images.topLeft.src}
+                    alt={data.images.topLeft.alt}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 50vw, 30vw"
+                  />
                 </div>
                 <div className="relative overflow-hidden rounded-[24px] h-[220px] md:h-[280px] lg:h-[320px]">
-                  <Image src={data.images.topRight.src} alt={data.images.topRight.alt} fill className="object-cover" />
+                  <Image
+                    src={data.images.topRight.src}
+                    alt={data.images.topRight.alt}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 50vw, 30vw"
+                  />
                 </div>
               </div>
 
               <div className="relative overflow-hidden rounded-[24px] h-[180px] md:h-[220px] lg:h-[240px]">
-                <Image src={data.images.wide.src} alt={data.images.wide.alt} fill className="object-cover" />
+                <Image
+                  src={data.images.wide.src}
+                  alt={data.images.wide.alt}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                />
               </div>
 
               <div className="grid grid-cols-3 gap-[12px] md:gap-[16px] lg:gap-[24px]">

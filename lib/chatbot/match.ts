@@ -1,19 +1,8 @@
 import type { FaqEntry } from './faq';
-
-function normalizeLt(input: string): string {
-  return input
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9ąčęėįšųūž\s-]/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+import { tokenizeText } from './utils';
 
 function tokenize(input: string): string[] {
-  const normalized = normalizeLt(input);
-  if (!normalized) return [];
-  return normalized.split(' ').filter((w) => w.length >= 2);
+  return tokenizeText(input, 2);
 }
 
 function scoreEntry(messageTokens: string[], entry: FaqEntry): number {

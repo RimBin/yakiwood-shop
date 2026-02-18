@@ -42,36 +42,37 @@ export default defineConfig({
     actionTimeout: 30_000, // actions (click/type) default timeout
   },
 
-  projects: process.env.CI
-    ? [
-        {
-          name: 'chromium',
-          use: { ...devices['Desktop Chrome'] },
-        },
-        {
-          name: 'firefox',
-          use: { ...devices['Desktop Firefox'] },
-        },
-        {
-          name: 'tablet',
-          use: { ...devices['iPad (gen 7)'] },
-        },
-        {
-          name: 'Mobile Chrome',
-          use: { ...devices['Pixel 5'] },
-        },
-      ]
-    : [
-        {
-          name: 'chromium',
-          use: { ...devices['Desktop Chrome'] },
-        },
-      ],
+  projects:
+    process.env.CI && process.env.PLAYWRIGHT_FULL === '1'
+      ? [
+          {
+            name: 'chromium',
+            use: { ...devices['Desktop Chrome'] },
+          },
+          {
+            name: 'firefox',
+            use: { ...devices['Desktop Firefox'] },
+          },
+          {
+            name: 'tablet',
+            use: { ...devices['iPad (gen 7)'] },
+          },
+          {
+            name: 'Mobile Chrome',
+            use: { ...devices['Pixel 5'] },
+          },
+        ]
+      : [
+          {
+            name: 'chromium',
+            use: { ...devices['Desktop Chrome'] },
+          },
+        ],
 
   webServer: {
     command: 'npm run dev',
     url: 'http://127.0.0.1:3000',
-    reuseExistingServer: false,
+    reuseExistingServer: true,
     timeout: 120 * 1000,
   },
 });

@@ -131,7 +131,7 @@ function getRateLimiterStore(): Map<string, RateLimitEntry> {
 }
 
 function getRateLimitMessage(locale: 'lt' | 'en') {
-  return locale === 'en' ? 'Too many requests. Please try again later.' : 'Per daug uzklausu. Pabandykite veliau.';
+  return locale === 'en' ? 'Too many requests. Please try again later.' : 'Per daug užklausų. Pabandykite vėliau.';
 }
 
 function checkRateLimit(key: string, now: number) {

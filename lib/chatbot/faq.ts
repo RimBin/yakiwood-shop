@@ -9,17 +9,17 @@ export type FaqEntry = {
 const FAQ_ENTRIES_LT: FaqEntry[] = [
   {
     id: 'delivery',
-    question: 'Ar pristatote Jungtinėje Karalystėje (JK)?',
+    question: 'Ar pristatote Lietuvoje?',
     answer:
-      'Taip, pristatome visoje Jungtinėje Karalystėje (JK). Pristatymo kaina ir terminas priklauso nuo kiekio ir lokacijos. Parašykite, kur pristatyti ir kokio kiekio reikia – pateiksime tikslų pasiūlymą.',
-    keywords: ['pristatymas', 'siuntimas', 'kurjeris', 'terminas', 'kaina', 'jk', 'jungtine karalyste', 'uk', 'miestas'],
+      'Taip, pristatome visoje Lietuvoje. Tiksli kaina ir terminas priklauso nuo miesto bei kiekio. Parašykite miestą ir preliminarų kiekį – iškart paskaičiuosime.',
+    keywords: ['pristatymas', 'siuntimas', 'kurjeris', 'terminas', 'kaina', 'lietuva', 'vilnius', 'kaunas', 'klaipeda', 'miestas'],
     suggestions: ['Kiek kainuoja pristatymas?', 'Kiek laiko trunka gamyba?'],
   },
   {
     id: 'production-time',
     question: 'Kiek laiko trunka gamyba?',
     answer:
-      'Gamybos terminas priklauso nuo produkto profilio, pasirinkto paviršiaus apdirbimo ir kiekio. Dažniausiai terminą pateikiame per 1 darbo dieną po užklausos.',
+      'Terminas priklauso nuo profilio, apdirbimo ir kiekio. Dažniausiai tikslų gamybos terminą patvirtiname per 1 darbo dieną nuo užklausos.',
     keywords: ['gamyba', 'terminas', 'kiek laiko', 'užsakymas', 'eile'],
     suggestions: ['Ar turite sandėlyje?', 'Ar galima atsiimti patiems?'],
   },
@@ -27,7 +27,7 @@ const FAQ_ENTRIES_LT: FaqEntry[] = [
     id: 'price',
     question: 'Kaip sužinoti kainą?',
     answer:
-      'Kaina priklauso nuo medienos rūšies, profilio, apdirbimo ir kiekio. Geriausia – pateikti projektą arba reikalingus m² ir norimą profilį/spalvą. Tada paruošime tikslų pasiūlymą.',
+      'Kaina priklauso nuo medienos rūšies, profilio, apdirbimo ir kiekio. Atsiųskite reikalingą plotą (m²), profilį ir spalvą – paruošime tikslų pasiūlymą.',
     keywords: ['kaina', 'kainos', 'pasiulymas', 'samata', 'm2', 'kiek kainuoja'],
     suggestions: ['Kokius profilius siūlote?', 'Ar darote sąmatas projektams?'],
   },
@@ -35,7 +35,7 @@ const FAQ_ENTRIES_LT: FaqEntry[] = [
     id: 'installation',
     question: 'Ar montuojate (įrengiate) patys?',
     answer:
-      'Galime rekomenduoti montuotojus arba suderinti montavimo darbų organizavimą – tai priklauso nuo projekto vietos ir apimties. Parašykite projekto vietą ir apimtį.',
+      'Galime rekomenduoti montuotojus arba padėti suorganizuoti montavimą. Parašykite projekto vietą ir apimtį – pasiūlysime tinkamiausią variantą.',
     keywords: ['montavimas', 'irengimas', 'meistrai', 'darbas', 'fasadas', 'terasos'],
     suggestions: ['Kokie tvirtinimo sprendimai?', 'Kaip prižiūrėti paviršių?'],
   },
@@ -43,7 +43,7 @@ const FAQ_ENTRIES_LT: FaqEntry[] = [
     id: 'maintenance',
     question: 'Kaip prižiūrėti Shou Sugi Ban paviršių?',
     answer:
-      'Priežiūra priklauso nuo pasirinkto apdirbimo (šukuotas/alyvuotas ir pan.) ir eksploatacijos sąlygų. Paprastai rekomenduojame periodinę apžiūrą ir atnaujinimą pagal poreikį. Parašykite, kur naudosite (lauke/viduje) ir kokį apdirbimą pasirinkote.',
+      'Priežiūra priklauso nuo apdirbimo ir naudojimo sąlygų (lauke ar viduje). Paprastai rekomenduojame periodinę apžiūrą ir atnaujinimą pagal poreikį. Parašykite, kur naudosite – pateiksime konkrečias rekomendacijas.',
     keywords: ['prieziura', 'alyva', 'atnaujinimas', 'valymas', 'lauke', 'viduje'],
     suggestions: ['Ar spalva keičiasi laikui bėgant?', 'Ar tinka prie jūros?'],
   },
@@ -51,7 +51,7 @@ const FAQ_ENTRIES_LT: FaqEntry[] = [
     id: 'samples',
     question: 'Ar galima gauti pavyzdžių?',
     answer:
-      'Taip, dažnai galime pateikti pavyzdžius (priklauso nuo profilio ir apdirbimo). Parašykite, kokio profilio/spalvos norite ir kur pristatyti.',
+      'Taip, daugeliu atvejų galime pateikti pavyzdžius (priklauso nuo profilio ir apdirbimo). Parašykite norimą profilį, spalvą ir pristatymo miestą.',
     keywords: ['pavyzdys', 'pavyzdziai', 'sample', 'pavyzdiniai', 'pavizdys'],
     suggestions: ['Kokios spalvos galimos?', 'Kaip užsisakyti?'],
   },
@@ -59,7 +59,7 @@ const FAQ_ENTRIES_LT: FaqEntry[] = [
     id: 'colors',
     question: 'Kokios spalvos ir apdirbimai galimi?',
     answer:
-      'Galimi keli atspalviai ir apdirbimo variantai (nuo švelniai iki stipriai deginto, su alyva ar be). Patogiausia – parašyti, kur bus naudojama, ir atsiųsti norimą estetiką (nuotraukas).',
+      'Siūlome kelis atspalvius ir apdirbimo variantus: nuo švelniai iki stipriai deginto, su alyva arba be jos. Atsiųskite norimą stilių ar nuotrauką – padėsime parinkti geriausią variantą.',
     keywords: ['spalvos', 'atspalviai', 'apdirbimas', 'degintas', 'yakisugi', 'shou', 'sugi', 'ban'],
     suggestions: ['Ar galima suderinti spalvą pagal pavyzdį?', 'Ar darote individualų apdirbimą?'],
   },
@@ -67,7 +67,7 @@ const FAQ_ENTRIES_LT: FaqEntry[] = [
     id: 'invoices',
     question: 'Ar išrašote sąskaitas?',
     answer:
-      'Taip, išrašome sąskaitas (fiziniams ir juridiniams). Parašykite rekvizitus ir pristatymo adresą.',
+      'Taip, išrašome sąskaitas tiek fiziniams, tiek juridiniams asmenims. Atsiųskite rekvizitus ir pristatymo adresą.',
     keywords: ['saskaita', 'faktura', 'invoice', 'rekvizitai', 'pvm'],
     suggestions: ['Kokie apmokėjimo būdai?', 'Ar galima avansas?'],
   },
@@ -75,7 +75,7 @@ const FAQ_ENTRIES_LT: FaqEntry[] = [
     id: 'contact',
     question: 'Kaip su jumis susisiekti?',
     answer:
-      'Grečiausia – parašyti per kontaktų formą puslapyje „Kontaktai“. Jei nurodysite projekto lokaciją ir apimtį (m²), atsakysime greičiau.',
+      'Greičiausia – parašyti per kontaktų formą puslapyje „Kontaktai“. Jei nurodysite projekto vietą ir apimtį (m²), atsakysime greičiau.',
     keywords: ['kontaktai', 'susisiekti', 'telefonas', 'el', 'pastas', 'email', 'uzklausa'],
     suggestions: ['Noriu pasiūlymo projektui', 'Noriu pavyzdžių'],
   },
@@ -83,7 +83,7 @@ const FAQ_ENTRIES_LT: FaqEntry[] = [
     id: 'fallback',
     question: 'Bendra pagalba',
     answer:
-      'Galiu padėti su dažniausiais klausimais: kaina, terminai, pristatymas, priežiūra, pavyzdžiai. Parašyk, kas aktualu, arba palik užklausą per „Kontaktai“.',
+      'Galiu padėti dėl kainų, terminų, pristatymo, priežiūros ir pavyzdžių. Parašykite, kas aktualu, arba palikite užklausą per „Kontaktai“.',
     keywords: [],
     suggestions: ['Kiek kainuoja?', 'Ar pristatote?', 'Kaip prižiūrėti?', 'Ar galima pavyzdžių?'],
   },

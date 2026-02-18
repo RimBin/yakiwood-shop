@@ -198,7 +198,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 alt="Payments"
                 width={260}
                 height={24}
-                className="h-[24px] w-auto"
+                className="w-[260px] h-[24px]"
               />
             </div>
 

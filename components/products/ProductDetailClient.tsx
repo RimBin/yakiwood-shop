@@ -1721,7 +1721,6 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                       );
                       const profileIconSrc = resolveProfileIconSrc(finish) ?? PROFILE_ICON_FALLBACK_BY_INDEX[index] ?? null;
                       const fallbackSrc = typeof finish.image === 'string' ? finish.image : null;
-                      const canUseNextImage = (src: string) => src.startsWith('/');
 
                       return (
                         <button
@@ -1750,13 +1749,9 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                             </span>
                           ) : null}
                           {profileIconSrc ? (
-                            <Image src={profileIconSrc} alt={finish.name} width={70} height={12} className={active ? 'invert' : ''} />
+                            <img src={profileIconSrc} alt={finish.name} className={`w-[70px] h-[12px] object-contain ${active ? 'invert' : ''}`} />
                           ) : fallbackSrc ? (
-                            canUseNextImage(fallbackSrc) ? (
-                              <Image src={fallbackSrc} alt={finish.name} width={70} height={12} className={active ? 'invert' : ''} />
-                            ) : (
-                              <img src={fallbackSrc} alt={finish.name} className={`w-[70px] h-[12px] object-contain ${active ? 'invert' : ''}`} />
-                            )
+                            <img src={fallbackSrc} alt={finish.name} className={`w-[70px] h-[12px] object-contain ${active ? 'invert' : ''}`} />
                           ) : (
                             <svg width="70" height="12" viewBox="0 0 70 12" fill="none" className={active ? 'stroke-white' : 'stroke-[#161616]'}>
                               <path d="M0 11L35 0V11H70" strokeWidth="1.5" />

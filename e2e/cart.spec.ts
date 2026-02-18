@@ -73,6 +73,6 @@ test.describe('Shopping Cart', () => {
     await page.getByRole('button', { name: /cart|krepš/i }).first().click();
     await expect(page.getByRole('heading', { name: /your cart|jūsų krepšelis/i })).toBeVisible();
 
-    await expect(page.locator('text=/\bTotal\b|\bViso\b/i')).toBeVisible();
+    await expect(page.getByText(/^(total|viso)$/i)).toBeVisible();
   });
 });

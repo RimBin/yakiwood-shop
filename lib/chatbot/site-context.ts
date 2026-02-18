@@ -3,21 +3,14 @@ import {
   formatDeliverySummaryEn,
   formatDeliverySummaryLt,
 } from '@/lib/shipping/policy'
+import { normalizeText, tokenizeText } from './utils'
 
 function normalize(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, ' ')
+  return normalizeText(value)
 }
 
 function tokenize(value: string): string[] {
-  return normalize(value)
-    .split(/[^a-z0-9]+/g)
-    .map((t) => t.trim())
-    .filter((t) => t.length >= 4)
+  return tokenizeText(value, 4)
 }
 
 function uniqStrings(values: string[]): string[] {
@@ -48,9 +41,91 @@ function productDisplayName(p: Product, locale: 'lt' | 'en'): string {
   return p.name
 }
 
+function parseStockItemSlug(slug: string): { baseSlug: string; profile: string; color: string; size: string } | null {
+  const parts = String(slug || '').split('--')
+  if (parts.length < 4) return null
+  const [baseSlug, profile, color, size] = parts
+  if (!baseSlug || !profile || !color || !size) return null
+  return { baseSlug, profile, color, size }
+}
+
+function parseSizeToken(size: string | undefined | null): { widthMm: number; lengthMm: number } | null {
+  if (!size) return null
+  const match = String(size).trim().match(/(\d+)\s*[x×]\s*(\d+)/i)
+  if (!match) return null
+  const widthMm = Number(match[1])
+  const lengthMm = Number(match[2])
+  if (!Number.isFinite(widthMm) || !Number.isFinite(lengthMm) || widthMm <= 0 || lengthMm <= 0) return null
+  return { widthMm, lengthMm }
+}
+
+function toLtWoodGenitive(value: string): string {
+  const normalized = normalize(value)
+  if (normalized === 'egle') return 'eglės'
+  if (normalized === 'maumedis') return 'maumedžio'
+  return value.trim().toLowerCase()
+}
+
+function toLtProductGenitive(value: string): string {
+  const normalized = normalize(value)
+  if (normalized === 'fasadine dailylente') return 'fasadinės dailylentės'
+  if (normalized === 'terasine lenta') return 'terasinės lentos'
+  return value.trim().toLowerCase()
+}
+
+function buildLtProductPriceQuestion(name: string): string {
+  const trimmed = String(name || '').trim()
+  if (!trimmed) return 'Kokia produkto kaina?'
+
+  const parts = trimmed
+    .split('/')
+    .map((part) => part.trim())
+    .filter(Boolean)
+
+  if (parts.length === 2) {
+    const product = toLtProductGenitive(parts[0]!)
+    const wood = toLtWoodGenitive(parts[1]!)
+    return `Kokia ${wood} ${product} kaina?`
+  }
+
+  return `Kokia ${trimmed.toLowerCase()} kaina?`
+}
+
 export function productPathForLocale(p: Product, locale: 'lt' | 'en'): string {
-  if (locale === 'en') return `/products/${p.slugEn || p.slug}`
-  return `/produktai/${p.slug}`
+  const slug = locale === 'en' ? (p.slugEn || p.slug) : p.slug
+  const basePath = locale === 'en' ? `/products/${slug}` : `/produktai/${slug}`
+
+  const query = new URLSearchParams()
+
+  const stock = parseStockItemSlug(slug)
+  if (stock) {
+    const size = parseSizeToken(stock.size)
+    if (size) {
+      query.set('w', String(size.widthMm))
+      query.set('l', String(size.lengthMm))
+    }
+    query.set('ct', normalize(stock.color))
+    query.set('ft', normalize(stock.profile))
+  }
+
+  const firstColor = Array.isArray(p.colors) ? p.colors[0] : null
+  if (firstColor?.id) query.set('c', firstColor.id)
+  if (firstColor?.name && !query.get('ct')) query.set('ct', normalize(firstColor.name))
+
+  const firstProfile = Array.isArray(p.profiles) ? p.profiles[0] : null
+  if (firstProfile?.id) query.set('f', firstProfile.id)
+  if ((firstProfile?.code || firstProfile?.name) && !query.get('ft')) {
+    query.set('ft', normalize(String(firstProfile.code || firstProfile.name)))
+  }
+
+  if (!query.get('w')) query.set('w', '95')
+  if (!query.get('l')) query.set('l', '3000')
+  if (!query.get('t')) {
+    query.set('t', String(String(p.category || '').toLowerCase() === 'terrace' ? 28 : 20))
+  }
+
+  const qs = query.toString()
+  return qs ? `${basePath}?${qs}` : basePath
 }
 
 export function matchProductFromMessage(args: {
@@ -159,7 +234,7 @@ export function buildDynamicSuggestions(products: Product[], locale: 'lt' | 'en'
           'Delivery price and timeline',
           'Payment methods',
           'Returns and warranty',
-          'How does the cart work?',
+          'How do I place an order?',
           'Can you help me choose a product?',
         ]
       : [
@@ -167,13 +242,13 @@ export function buildDynamicSuggestions(products: Product[], locale: 'lt' | 'en'
           'Pristatymo kaina ir terminas',
           'Apmokėjimo būdai',
           'Grąžinimas ir garantija',
-          'Kaip veikia krepšelis?',
+          'Kaip pateikti užsakymą?',
           'Padėkite išsirinkti produktą',
         ]
 
   const productQs = products.slice(0, 6).map((p) => {
     const name = productDisplayName(p, locale)
-    return locale === 'en' ? `Price of ${name}` : `Kokia ${name} kaina?`
+    return locale === 'en' ? `Price of ${name}` : buildLtProductPriceQuestion(name)
   })
 
   return uniqStrings([...productQs, ...base]).slice(0, 10)
@@ -190,7 +265,7 @@ export function tryReplyWithLiveSiteData(args: {
   const isProducts =
     msg.includes('parodyk produkt') ||
     msg.includes('rodyk produkt') ||
-    msg.includes('produkt') && (msg.includes('saras') || msg.includes('katalog') || msg.includes('parodyk') || msg.includes('rodyk')) ||
+    (msg.includes('produkt') && (msg.includes('saras') || msg.includes('katalog') || msg.includes('parodyk') || msg.includes('rodyk'))) ||
     msg.includes('show products') ||
     msg.includes('product list') ||
     msg.includes('catalog')
@@ -258,21 +333,21 @@ export function tryReplyWithLiveSiteData(args: {
     if (args.locale === 'en') {
       return 'Payment methods (UK): card via Stripe (incl. Apple Pay / Google Pay where supported) and PayPal (when available). You can choose the payment method at checkout. More: /policies'
     }
-    return 'Apmokėjimas (JK): kortele per Stripe (kai palaikoma – Apple Pay / Google Pay) ir (kai aktyvuota) PayPal. Mokėjimo būdą pasirinksite atsiskaitymo metu. Daugiau: /policies'
+    return 'Apmokėjimas: kortele per Stripe (kai palaikoma – Apple Pay / Google Pay) ir, kai aktyvuota, PayPal. Mokėjimo būdą pasirinksite atsiskaitymo metu. Daugiau: /policies'
   }
 
   if (isReturns) {
     if (args.locale === 'en') {
       return 'Returns: 30-day return policy for unused products in original packaging. Custom/cut-to-size items are non-refundable unless defective. Details: /policies'
     }
-    return 'Grąžinimas: 30 dienų grąžinimas nenaudotoms prekėms originalioje pakuotėje. Nestandartinės / pagal matmenis pagamintos prekės negrąžinamos, nebent yra gamybos defektas. Detalės: /policies'
+    return 'Grąžinimas: per 30 dienų galite grąžinti nenaudotas prekes originalioje pakuotėje. Nestandartinės ar pagal matmenis pagamintos prekės negrąžinamos, nebent nustatomas defektas. Detalės: /policies'
   }
 
   if (isCart) {
     if (args.locale === 'en') {
       return 'Cart: add products from the catalog, adjust quantities, then continue to /checkout to pay and complete the order. Delivery cost is calculated during checkout.'
     }
-    return 'Krepšelis: pridėkite prekes iš katalogo, pakoreguokite kiekius ir eikite į /checkout atsiskaityti. Pristatymo kaina paskaičiuojama atsiskaitymo metu.'
+    return 'Kaip pateikti užsakymą: įsidėkite prekes į krepšelį, pakoreguokite kiekius ir tęskite į /checkout. Ten matysite galutinę sumą, pristatymo kainą ir galėsite saugiai apmokėti.'
   }
 
   const isPrice = msg.includes('kain') || msg.includes('price') || msg.includes('cost') || msg.includes('€')

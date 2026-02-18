@@ -19,6 +19,9 @@
     "welcome": "Hi! I'm the Yakiwood assistant. I can help with products, exact prices, delivery, and ordering.",
     "note": "Note: please do not share sensitive personal data (e.g., personal ID). This chat may be used to improve support.",
     "handoff": "Need a human? Contact us",
+    "conversationLabel": "Conversation",
+    "quickQuestions": "Quick questions",
+    "cartAdded": "Added to cart.",
     "placeholder": "Type your message...",
     "send": "Send",
     "clear": "Clear",
@@ -32,20 +35,13 @@
       "network": "Network error. Please try again later."
     },
     "suggestions": {
-      "price": "Show products / pricing",
+      "price": "Show products and pricing",
       "delivery": "Delivery price and timeline",
       "payment": "Payment methods",
       "returns": "Returns and warranty",
-      "cart": "How does the cart work?",
-      "createRole": {
-        "title": "Create new role",
-        "label": "New role",
-        "placeholder": "e.g. partner",
-        "button": "Create role"
-      },
-      "productionTime": "When will my order arrive?",
-      "maintenance": "How do I maintain the surface?",
-      "samples": "Contact support"
+      "cart": "How do I place an order?",
+      "productionTime": "How long do production and delivery take?",
+      "maintenance": "How do I maintain the surface?"
     }
   },
   "blog": {
