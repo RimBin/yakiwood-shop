@@ -19,12 +19,12 @@ export type SeoOverride = {
   twitter_image: string | null
 }
 
-function ensureServiceRoleClient(): SupabaseClient {
+function ensureServiceRoleClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!url || !key) {
-    throw new Error('Supabase service role credentials are not configured')
+    return null
   }
 
   return createClient(url, key, {
@@ -39,6 +39,7 @@ const getServiceClient = cache(() => ensureServiceRoleClient())
 
 const fetchSeoOverride = cache(async (canonicalPath: string, locale: 'en' | 'lt'): Promise<SeoOverride | null> => {
   const supabase = getServiceClient()
+  if (!supabase) return null
 
   const { data, error } = await supabase
     .from('seo_overrides')

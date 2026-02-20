@@ -144,7 +144,7 @@ export default function Header() {
             </Link>
 
             {/* Navigation - hidden on mobile/tablet, shown on large screens */}
-            <nav className="hidden xl:flex flex-1 justify-center gap-[14px] min-[1500px]:gap-[20px] 2xl:gap-[24px]">
+            <nav className="hidden xl:flex flex-1 justify-center gap-[18px] min-[1500px]:gap-[22px] 2xl:gap-[24px]">
               {navItems.map((item) => (
                 <Link
                   key={item.href}

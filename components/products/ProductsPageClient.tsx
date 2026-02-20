@@ -893,9 +893,9 @@ export default function ProductsPageClient({
         </PageCover>
       </InView>
 
-      {/* Mobile Sticky Filters */}
+      {/* Mobile + Tablet Sticky Filters */}
       <div
-        className={`sm:hidden fixed top-[120px] left-0 right-0 z-40 bg-[#E1E1E1]/95 backdrop-blur-md border-b border-[#BBBBBB]/60 shadow-sm transition-all duration-500 ease-out ${
+        className={`lg:hidden fixed top-[120px] left-0 right-0 z-40 bg-[#E1E1E1]/95 backdrop-blur-md border-b border-[#BBBBBB]/60 shadow-sm transition-all duration-500 ease-out ${
           showStickyFilters
             ? 'opacity-100 translate-y-0 pointer-events-auto'
             : 'opacity-0 -translate-y-3 pointer-events-none'
