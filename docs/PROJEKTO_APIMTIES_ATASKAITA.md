@@ -157,20 +157,14 @@ Legenda:
 
 ### 9.1 Turinio redaktoriaus integracija
 - Statusas: **DONE (~75%)**
-- Yra: Sanity Studio `/studio`.
-- Įrodymai: `app/studio/[[...tool]]/*`, `sanity.config.ts`
 
 ### 9.2 Vartotojo teisių ir prieigos valdymas
 - Statusas: **PARTIAL (~40%)**
-- Yra: Sanity token support server-side.
-- Trūksta: aiškiai aprašytas roles modelis (dažniausiai sprendžiama per Sanity role nustatymus ir Vercel env).
-- Įrodymai: `sanity/lib/client.ts`
 
 ### 9.3 Skirtingų turinio tipų valdymo galimybės
 - Statusas: **PARTIAL (~60%)**
 - Yra: `product`, `project`, blog (post/category/author).
 - Trūksta: pilnesnis `project` schema (dabar minimalus: title+slug).
-- Įrodymai: `sanity/schemaTypes/productType.ts`, `sanity/schemaTypes/projectType.ts`, `sanity/schemaTypes/index.ts`
 
 ---
 
@@ -218,7 +212,6 @@ Legenda:
 
 ### 11.3 Atsarginių kopijų kūrimas ir atkūrimo modulio integracija
 - Statusas: **TODO (~0-20%)**
-- Yra: dokumentacija ir atskirų servisų (Sanity/Supabase) galimybės, bet nėra integruoto „backup/restore modulio“ aplikacijos lygyje.
 
 ---
 

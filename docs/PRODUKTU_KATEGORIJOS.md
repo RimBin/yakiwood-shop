@@ -8,9 +8,7 @@ Produktai dabar turi medienos tipo (`woodType`) kategoriją su dviem pasirinkima
 
 ## Kaip pridėti produktą su kategorija?
 
-### 1. Atidarykite Sanity Studio
 ```
-http://localhost:3000/studio
 ```
 
 ### 2. Sukurkite naują produktą
@@ -55,9 +53,7 @@ Jei produktų nėra, produktų puslapis rodys:
 - Draugišką pranešimą "Produktų kol kas nėra"
 - Nuorodą į kontaktų puslapį
 
-## Sanity Schema
 
-Schema lokacija: `sanity/schemaTypes/productType.ts`
 
 woodType laukas:
 ```typescript
@@ -93,17 +89,14 @@ export const WOOD_TYPES: { value: WoodType; label: string }[] = [
 ### Produktai nerodomi
 1. Patikrinkite ar produktai publikuoti (ne draft)
 2. Ar užpildytas `woodType` laukas
-3. Ar Sanity Studio veikia
 
 ### Filtrai neveikia
 - Patikrinkite ar produktuose yra `woodType` reikšmė
 - Perkraukite puslapį
 
 ### Deprecation Warning
-Jei matote Sanity image-url deprecation warning - tai normalu, jis netrukdo veikimui ir bus pašalintas ateityje.
 
 ## Dokumentacija
 
 Daugiau informacijos:
-- [SANITY_PRODUCTS.md](./SANITY_PRODUCTS.md) - Kaip pridėti produktus
 - [README.md](../README.md) - Pagrindinis projekto README

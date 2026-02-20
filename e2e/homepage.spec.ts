@@ -6,7 +6,8 @@ test.describe('Homepage', () => {
     await page.goto(routes.home);
     await expect(page).toHaveTitle(/Yakiwood/i);
     // Hero uses styled <p> text; assert a stable hero asset exists.
-    await expect(page.getByAltText(/Shou Sugi Ban Plank/i).first()).toBeVisible();
+    // Responsive layout renders both mobile+desktop images; use :visible to find the one shown at this viewport.
+    await expect(page.locator('img[alt*="Shou Sugi Ban" i]:visible').first()).toBeVisible();
   });
 
   test('should have working navigation links', async ({ page }) => {

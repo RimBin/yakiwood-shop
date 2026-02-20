@@ -26,12 +26,7 @@ Email (choose one):
 - Resend: `RESEND_API_KEY` + `SYSTEM_EMAIL_FROM`
 - SMTP: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` (+ optional `SMTP_FROM`)
 
-Sanity (if using CMS content):
 
-- `NEXT_PUBLIC_SANITY_PROJECT_ID`
-- `NEXT_PUBLIC_SANITY_DATASET`
-- `NEXT_PUBLIC_SANITY_API_VERSION`
-- Optional: `SANITY_API_TOKEN` (private dataset / authenticated requests)
 
 reCAPTCHA (contact form spam protection):
 

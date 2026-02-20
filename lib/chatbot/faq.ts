@@ -176,7 +176,7 @@ export type SupportedChatbotLocale = 'lt' | 'en';
 
 type FaqCacheEntry = {
   expiresAt: number;
-  entries: FaqEntry[]; // may be empty if Sanity query returned empty
+  entries: FaqEntry[]; // may be empty if CMS query returned empty
 };
 
 type FaqCacheStore = {

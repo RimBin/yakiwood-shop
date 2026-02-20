@@ -19,6 +19,21 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const t = useTranslations('account');
 
+  const normalizeAuthError = (message?: string | null) => {
+    const fallback = 'Klaida: Nepavyko prisijungti';
+    const raw = String(message || '').trim();
+    if (!raw) {
+      return fallback;
+    }
+
+    const lower = raw.toLowerCase();
+    if (lower.includes('klaida') || lower.includes('error')) {
+      return raw;
+    }
+
+    return `Klaida: ${raw}`;
+  };
+
   const currentLocale: AppLocale = pathname.startsWith('/lt') ? 'lt' : 'en';
 
   const withTimeout = async <T,>(promise: Promise<T>, timeoutMs = 3500): Promise<T> => {
@@ -36,7 +51,7 @@ export default function LoginPage() {
   useEffect(() => {
     const oauthError = searchParams.get('error');
     if (oauthError) {
-      setError(oauthError);
+      setError(normalizeAuthError(oauthError));
     }
   }, [searchParams]);
 
@@ -66,7 +81,7 @@ export default function LoginPage() {
         throw new Error(oauthError.message || 'Nepavyko prisijungti su Google');
       }
     } catch (e: any) {
-      setError(e?.message || 'Nepavyko prisijungti su Google');
+      setError(normalizeAuthError(e?.message || 'Nepavyko prisijungti su Google'));
       setLoading(false);
     }
   };
@@ -78,7 +93,7 @@ export default function LoginPage() {
     let didTimeout = false;
     const failSafeTimer = window.setTimeout(() => {
       didTimeout = true;
-      setError('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.');
+      setError(normalizeAuthError('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.'));
       setLoading(false);
     }, 4000);
 
@@ -111,7 +126,7 @@ export default function LoginPage() {
       router.push(redirectTo);
     } catch (e: any) {
       clearTimeout(failSafeTimer);
-      setError(e?.message || 'Nepavyko prisijungti');
+      setError(normalizeAuthError(e?.message || 'Nepavyko prisijungti'));
       setLoading(false);
     }
   };
@@ -122,7 +137,7 @@ export default function LoginPage() {
     let didTimeout = false;
     const failSafeTimer = window.setTimeout(() => {
       didTimeout = true;
-      setError('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.');
+      setError(normalizeAuthError('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.'));
       setLoading(false);
     }, 4000);
 
@@ -166,7 +181,7 @@ export default function LoginPage() {
       router.push(redirectTo);
     } catch (e: any) {
       clearTimeout(failSafeTimer);
-      setError(e?.message || 'Nepavyko prisijungti');
+      setError(normalizeAuthError(e?.message || 'Nepavyko prisijungti'));
       setLoading(false);
     }
   };

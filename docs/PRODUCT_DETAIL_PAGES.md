@@ -6,11 +6,8 @@ Comprehensive product detail pages with 3D configurator integration, image galle
 ## Created/Updated Files
 
 ### Core Library Functions
-- **`lib/products.sanity.ts`** - Sanity-backed product helpers
-  - `fetchProducts()` - Fetch all public products from Sanity
   - `fetchProductBySlug()` - Resolve a single product (used by product detail pages)
   - `fetchRelatedProducts()` - Filter related inventory by usage/wood type
-  - `transformSanityProduct()` + `blocksToPlainText()` - Map GROQ responses into strongly typed objects
 - **`lib/pricing.ts`** - Pricing helper utilities
   - `calculateProductPrice()` - Combine base price + color/profile modifiers + quantity
 - **`lib/seo/structured-data.ts`** - SEO schema helpers
@@ -141,7 +138,6 @@ Comprehensive product detail pages with 3D configurator integration, image galle
 
 ## Content Schema Requirements
 
-Products now live entirely in **Sanity** (`sanity/schemaTypes/productType.ts`). Each document represents a single "usage + wood" combination and exposes all UI-ready data needed for the configurator, pricing, and SEO.
 
 ### Product fields
 - `name` - Marketing title, displayed throughout UI and structured data.
@@ -169,7 +165,6 @@ Products now live entirely in **Sanity** (`sanity/schemaTypes/productType.ts`). 
 - `image` - Diagram or silhouette for richer selectors.
 - `priceModifier` - EUR delta stacked with the color modifier.
 
-All of the above fields are fetched via GROQ and transformed by `lib/products.sanity.ts`, ensuring frontend components only depend on one strongly typed Product interface.
 
 ## Usage
 
@@ -181,7 +176,6 @@ All of the above fields are fetched via GROQ and transformed by `lib/products.sa
 
 ### Programmatic Usage
 ```tsx
-import { fetchProductBySlug, fetchRelatedProducts } from '@/lib/products.sanity';
 
 const product = await fetchProductBySlug('product-slug');
 
@@ -197,7 +191,6 @@ if (product) {
 ```
 
 ### Add / Update Colors & Profiles
-1. Open **/studio** (embedded Sanity Studio) and pick the product document.
 2. Use the **Color Variants** array to add or reorder swatches (name, slug, hex/image, modifier).
 3. Use the **Profile Variants** array to maintain dimensional profiles (name, code, dimensions, modifier).
 4. Publish the document - GROQ queries automatically surface the updated entries in `fetchProductBySlug()` results.
@@ -206,10 +199,6 @@ if (product) {
 
 ### Environment Variables
 ```env
-NEXT_PUBLIC_SANITY_PROJECT_ID=your-project-id
-NEXT_PUBLIC_SANITY_DATASET=production
-NEXT_PUBLIC_SANITY_API_VERSION=2025-12-10
-SANITY_API_TOKEN=write-token-for-server-side-queries
 ```
 
 ### Google Analytics (Optional)
@@ -274,12 +263,9 @@ All components use the brand design system:
 ## Troubleshooting
 
 ### Product Not Found
-- Confirm the product document exists and is published in Sanity
 - Ensure the `slug` matches the route and that `category` / `woodType` are set
-- Verify Sanity env variables (`NEXT_PUBLIC_SANITY_*`, `SANITY_API_TOKEN`) are loaded
 
 ### Images Not Loading
-- Inspect the `images` array in Sanity and confirm assets are published (or use local `/public/assets` placeholders)
 - Verify Next.js remote patterns / local asset paths match the new URLs
 - Re-run `npm run assets:download` if referencing manifest-driven local files
 
@@ -312,7 +298,6 @@ All components use the brand design system:
 ## Support
 
 For issues or questions:
-1. Check Sanity Studio content & publish state
 2. Verify environment variables
 3. Check browser console for errors
 4. Review component props

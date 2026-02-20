@@ -292,7 +292,9 @@ export const components = {
     padding: `16px ${spacing.p2xl}`,
     logoWidth: '126px',
     logoHeight: '48px',
-    navGap: spacing.p2xl,
+    // Further reduce nav gap for desktop menu: 16px (was 24px)
+    // This tightens the horizontal spacing between main nav items on desktop
+    navGap: spacing.gapMd,
     cartButtonHeight: '48px',
     cartBadgeSize: '16px',
   },

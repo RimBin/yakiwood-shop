@@ -225,6 +225,5 @@ Jūsų e-parduotuvė dabar turi:
 Liko tik:
 - Pridėti tikrus produktų paveikslėlius
 - Pridėti 3D modelius (jei norite)
-- Užpildyti produktų katalogą per Sanity CMS
 
 **Sėkmės! 🚀**

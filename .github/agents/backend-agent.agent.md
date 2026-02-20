@@ -1,7 +1,6 @@
 ---
 
 description: "Backend Agent - API, integracijos ir verslo logikos vykdytojas pagal planner-supervisor"
-tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'figma/*', 'figma/*', 'github/*', 'sanity/*', 'supabase/*', 'vercel/*', 'agent', 'pylance-mcp-server/*', 'ms-azuretools.vscode-containers/containerToolsConfig', 'ms-python.python/getPythonEnvironmentInfo', 'ms-python.python/getPythonExecutableCommand', 'ms-python.python/installPythonPackage', 'ms-python.python/configurePythonEnvironment', 'todo']
 -------------------------------------------
 
 # Backend Agent - Galutinė versija (copy-paste)

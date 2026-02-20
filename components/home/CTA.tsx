@@ -21,14 +21,14 @@ export default function CTA() {
       {/* Background Image with opacity and luminosity blend */}
       <div className="absolute pointer-events-none mix-blend-luminosity opacity-[0.18] z-0 inset-0">
         {/* Mobile: large circular artwork centered behind the content */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[208vmin] h-[208vmin] md:w-[120vmin] md:h-[120vmin] lg:w-[1000px] lg:h-[1000px]">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[208vmin] h-[208vmin] md:left-0 md:top-0 md:right-0 md:bottom-0 md:w-auto md:h-auto md:translate-x-0 md:translate-y-0 xl:left-1/2 xl:top-1/2 xl:right-auto xl:bottom-auto xl:w-[1000px] xl:h-[1000px] xl:-translate-x-1/2 xl:-translate-y-1/2">
           <Image src={backgroundImage} alt="" fill className="object-contain" sizes="100vw" />
         </div>
       </div>
 
       {/* ===== MOBILE LAYOUT (< 1280px) - Figma 759:7625 ===== */}
       <InView
-        className={`xl:hidden relative z-10 flex flex-col items-center justify-center ${getSectionPadding('x')} pt-[100px] pb-[300px] md:py-[48px] hero-animate-root`}
+        className={`xl:hidden relative z-10 flex flex-col items-center justify-center ${getSectionPadding('x')} pt-[140px] pb-[340px] md:pt-[180px] md:pb-[180px] hero-animate-root`}
       >
         {/* Heading - Mobile/Tablet */}
         <h2
@@ -65,7 +65,7 @@ export default function CTA() {
       </InView>
 
       {/* ===== DESKTOP LAYOUT (>= 1280px) ===== */}
-      <InView className="hidden xl:flex relative z-10 flex-col items-center justify-center min-h-[1053px] py-[113px] px-[40px] hero-animate-root">
+      <InView className="hidden xl:flex relative z-10 flex-col items-center justify-center min-h-[1200px] py-[160px] px-[40px] hero-animate-root">
         {/* Heading - Desktop */}
         <h2 className="font-['DM_Sans'] font-light leading-[0.95] text-[#161616] text-center mb-[66px] w-full max-w-[861px] hero-seq-item hero-seq-right" style={{ fontSize: 'clamp(64px, 8vw, 128px)', letterSpacing: 'clamp(-3.2px, -0.05em, -6.4px)', animationDelay: '0ms' }}>
           <span>{t('headline.prefix')}</span>

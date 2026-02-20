@@ -178,9 +178,6 @@ RESEND_API_KEY=re_...
 NEXT_PUBLIC_SITE_URL=http://localhost:3000  # Development
 # NEXT_PUBLIC_SITE_URL=https://yakiwood.lt  # Production
 
-# Sanity CMS (if not already configured)
-NEXT_PUBLIC_SANITY_PROJECT_ID=...
-NEXT_PUBLIC_SANITY_DATASET=production
 ```
 
 ### 3.3 Optional Variables

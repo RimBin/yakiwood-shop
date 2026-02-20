@@ -13,7 +13,129 @@ import { trackEvent } from '@/lib/analytics';
 interface ProfileModelProps {
   color: string;
   finish: ProductProfileVariant | null;
+  variantKey: string;
   autoRotate?: boolean;
+}
+
+function hashStringToSeed(value: string): number {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function createSeededRandom(seedValue: number): () => number {
+  let seed = seedValue || 1;
+  return () => {
+    seed += 0x6d2b79f5;
+    let t = seed;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function createLongGrainTexture(variantKey: string): THREE.CanvasTexture {
+  const size = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  }
+
+  const random = createSeededRandom(hashStringToSeed(`long:${variantKey}`));
+
+  const light = 125 + Math.round(random() * 18);
+  const mid = 98 + Math.round(random() * 16);
+  const dark = 72 + Math.round(random() * 16);
+  ctx.fillStyle = `rgb(${light}, ${mid}, ${dark})`;
+  ctx.fillRect(0, 0, size, size);
+
+  for (let x = 0; x < size; x += 2) {
+    const wave = Math.sin((x / size) * Math.PI * (7 + random() * 3));
+    const stripeStrength = 0.12 + random() * 0.2 + Math.abs(wave) * 0.18;
+    const line = Math.max(20, Math.min(235, Math.round(125 - stripeStrength * 80)));
+    ctx.fillStyle = `rgba(${line}, ${line - 12}, ${line - 26}, ${0.2 + random() * 0.25})`;
+    ctx.fillRect(x, 0, 1, size);
+  }
+
+  for (let i = 0; i < 90; i += 1) {
+    const knotX = Math.floor(random() * size);
+    const knotY = Math.floor(random() * size);
+    const knotW = 8 + random() * 24;
+    const knotH = 2 + random() * 5;
+    ctx.fillStyle = `rgba(60, 42, 28, ${0.03 + random() * 0.06})`;
+    ctx.fillRect(knotX, knotY, knotW, knotH);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(2.6, 2.6);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+function createEndGrainTexture(variantKey: string): THREE.CanvasTexture {
+  const size = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  }
+
+  const random = createSeededRandom(hashStringToSeed(`end:${variantKey}`));
+  ctx.fillStyle = `rgb(${112 + Math.round(random() * 20)}, ${89 + Math.round(random() * 16)}, ${68 + Math.round(random() * 14)})`;
+  ctx.fillRect(0, 0, size, size);
+
+  const centerX = size * (0.42 + random() * 0.16);
+  const centerY = size * (0.42 + random() * 0.16);
+
+  for (let r = 8; r < size * 0.7; r += 6 + random() * 5) {
+    const jitter = (random() - 0.5) * 8;
+    const alpha = 0.08 + random() * 0.18;
+    const ring = 54 + Math.round(random() * 34);
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(${ring}, ${ring - 10}, ${ring - 24}, ${alpha})`;
+    ctx.lineWidth = 1 + random() * 2;
+    ctx.arc(centerX + jitter, centerY - jitter, r, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  for (let i = 0; i < 120; i += 1) {
+    const dotX = random() * size;
+    const dotY = random() * size;
+    const dotR = 0.6 + random() * 1.5;
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(50, 37, 27, ${0.08 + random() * 0.2})`;
+    ctx.arc(dotX, dotY, dotR, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(1.8, 1.8);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
 }
 
 function normalizeProfileHint(value: string): string {
@@ -43,30 +165,27 @@ function createCenteredExtrudeGeometry(shape: THREE.Shape, depth: number): THREE
     steps: 1,
   });
 
-  geometry.computeBoundingBox();
-  const box = geometry.boundingBox;
-  if (box) {
-    const center = new THREE.Vector3();
-    box.getCenter(center);
-    geometry.translate(-center.x, -center.y, -center.z);
-  }
-
+  // Center geometry so rotations happen around its own axis.
+  geometry.center();
   geometry.computeVertexNormals();
+  geometry.computeBoundingBox();
+  geometry.computeBoundingSphere();
   return geometry;
 }
 
-function ProfileModel({ color, finish, autoRotate = true }: ProfileModelProps) {
+function ProfileModel({ color, finish, variantKey, autoRotate = true }: ProfileModelProps) {
   const groupRef = useRef<THREE.Group | null>(null);
 
   const geometry = useMemo(() => {
     const widthMm = finish?.dimensions?.width;
     const thicknessMm = finish?.dimensions?.thickness;
+    const lengthMm = finish?.dimensions?.length;
 
     // Keep the model roughly in the same scale as the previous placeholder box: [2, 0.2, 1].
-    // width 120mm -> ~2 units, thickness 20mm -> ~0.2 units.
+    // width 120mm -> ~2 units, thickness 20mm -> ~0.2 units, length 1000mm -> ~1 unit.
     const widthUnits = (typeof widthMm === 'number' && widthMm > 0 ? widthMm : 120) / 60;
     const thicknessUnits = (typeof thicknessMm === 'number' && thicknessMm > 0 ? thicknessMm : 20) / 100;
-    const depthUnits = 1;
+    const depthUnits = (typeof lengthMm === 'number' && lengthMm > 0 ? lengthMm : 1000) / 1000;
 
     if (isHalfTaper45(finish)) {
       // Simple “half taper 45°” approximation:
@@ -91,6 +210,40 @@ function ProfileModel({ color, finish, autoRotate = true }: ProfileModelProps) {
     return createCenteredExtrudeGeometry(shape, depthUnits);
   }, [finish]);
 
+  const longGrainMap = useMemo(() => createLongGrainTexture(variantKey), [variantKey]);
+  const endGrainMap = useMemo(() => createEndGrainTexture(variantKey), [variantKey]);
+
+  useEffect(() => {
+    return () => {
+      longGrainMap.dispose();
+      endGrainMap.dispose();
+    };
+  }, [longGrainMap, endGrainMap]);
+
+  const materials = useMemo(() => {
+    const capMaterial = new THREE.MeshStandardMaterial({
+      color,
+      roughness: 0.84,
+      metalness: 0.06,
+      map: endGrainMap,
+    });
+
+    const sideMaterial = new THREE.MeshStandardMaterial({
+      color,
+      roughness: 0.78,
+      metalness: 0.08,
+      map: longGrainMap,
+    });
+
+    return [capMaterial, sideMaterial] as THREE.Material[];
+  }, [color, endGrainMap, longGrainMap]);
+
+  useEffect(() => {
+    return () => {
+      materials.forEach((material) => material.dispose());
+    };
+  }, [materials]);
+
   useFrame((_, delta) => {
     if (!autoRotate) return;
     if (!groupRef.current) return;
@@ -99,9 +252,7 @@ function ProfileModel({ color, finish, autoRotate = true }: ProfileModelProps) {
 
   return (
     <group ref={groupRef}>
-      <mesh geometry={geometry} castShadow receiveShadow>
-        <meshStandardMaterial color={color} roughness={0.8} metalness={0.08} />
-      </mesh>
+      <mesh geometry={geometry} material={materials} castShadow receiveShadow frustumCulled={false} />
     </group>
   );
 }
@@ -145,6 +296,16 @@ export default function Konfiguratorius3D({
     availableFinishes[0] || null
   );
   const [modelColor, setModelColor] = useState('#444444');
+  const textureVariantKey = useMemo(
+    () => [
+      selectedColor?.id ?? 'default-color',
+      selectedColor?.image ?? 'no-image',
+      selectedColor?.name ?? 'no-name',
+      selectedFinish?.id ?? 'default-finish',
+      selectedFinish?.code ?? 'no-code',
+    ].join('|'),
+    [selectedColor?.id, selectedColor?.image, selectedColor?.name, selectedFinish?.id, selectedFinish?.code]
+  );
 
   const [inputMode, setInputMode] = useState<'boards' | 'area'>('boards');
   const [quantityBoards, setQuantityBoards] = useState<number>(1);
@@ -407,7 +568,7 @@ export default function Konfiguratorius3D({
           <ambientLight intensity={0.6} />
           <directionalLight position={[5, 5, 5]} intensity={1} />
           <Suspense fallback={null}>
-            <ProfileModel color={modelColor} finish={selectedFinish} autoRotate={true} />
+            <ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} />
           </Suspense>
           <OrbitControls 
             enablePan={true} 

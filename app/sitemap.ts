@@ -45,38 +45,8 @@ async function getProducts(): Promise<{ slug: string; updatedAt: Date }[]> {
   return fallbackProducts;
 }
 
-async function getSanityPages(): Promise<MetadataRoute.Sitemap> {
-  try {
-    // Import Sanity client if available in the project
-    const { client } = await import('@/sanity/lib/client');
-    const query = '*[_type in ["page","post","news"] && defined(slug.current)]{ "slug": slug.current, _updatedAt, _type }';
-    const docs = await client.fetch(query);
-
-    if (!docs || docs.length === 0) return [];
-
-    return docs.flatMap((doc: any) => {
-      const lastModified = doc._updatedAt ? new Date(doc._updatedAt) : new Date();
-      const slug = doc.slug;
-
-      // Lithuanian-only routes for public sitemap to avoid locale redirects
-      return [
-        {
-          url: `${BASE_URL}/lt/${slug}`,
-          lastModified,
-          changeFrequency: 'monthly' as const,
-          priority: 0.5,
-        },
-      ];
-    });
-  } catch (err) {
-    console.warn('Sanity not available or query failed, skipping Sanity pages for sitemap');
-    return [];
-  }
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const products = await getProducts();
-  const sanityPages = await getSanityPages();
   const now = new Date();
 
   // Static pages
@@ -180,5 +150,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...productPages, ...variantLandingPages, ...projectPages, ...sanityPages];
+  return [...staticPages, ...productPages, ...variantLandingPages, ...projectPages];
 }

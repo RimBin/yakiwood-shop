@@ -342,41 +342,6 @@ const envVars = {
     category: 'Admin',
   },
 
-  // Sanity CMS
-  NEXT_PUBLIC_SANITY_PROJECT_ID: {
-    required: 'conditional',
-    condition: 'cms',
-    type: 'string',
-    description: 'Sanity project ID',
-    example: 'abc123de',
-    category: 'Sanity CMS',
-    getLink: 'https://www.sanity.io/manage',
-  },
-  NEXT_PUBLIC_SANITY_DATASET: {
-    required: 'conditional',
-    condition: 'cms',
-    type: 'string',
-    description: 'Sanity dataset name',
-    example: 'production',
-    default: 'production',
-    category: 'Sanity CMS',
-  },
-  NEXT_PUBLIC_SANITY_API_VERSION: {
-    required: false,
-    type: 'date',
-    pattern: /^\d{4}-\d{2}-\d{2}$/,
-    description: 'Sanity API version (YYYY-MM-DD)',
-    default: '2025-12-10',
-    category: 'Sanity CMS',
-  },
-  SANITY_API_TOKEN: {
-    required: false,
-    type: 'string',
-    description: 'Sanity API token (for private datasets)',
-    category: 'Sanity CMS',
-    sensitive: true,
-  },
-
   // Image CDN
   NEXT_PUBLIC_CDN_URL: {
     required: false,

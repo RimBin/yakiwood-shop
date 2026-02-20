@@ -168,9 +168,6 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000 # Base URL for redirects
 # Email Service (Resend)
 RESEND_API_KEY=re_...                      # Resend API key
 
-# Sanity CMS (if used for product data)
-NEXT_PUBLIC_SANITY_PROJECT_ID=...
-NEXT_PUBLIC_SANITY_DATASET=production
 ```
 
 ## Testing the Flow

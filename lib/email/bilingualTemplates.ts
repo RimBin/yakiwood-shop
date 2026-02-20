@@ -2,7 +2,7 @@
  * Bilingual email template defaults (LT + EN)
  *
  * These are the app defaults and also serve as the seed content
- * for CMS-edited templates in Sanity.
+ * for CMS-edited templates.
  */
 
 export type EmailLocale = 'lt' | 'en'

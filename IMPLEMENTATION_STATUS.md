@@ -140,7 +140,6 @@ These systems are **implemented but require environment variables** to function:
 4. **Content & Assets**
    - Add real product images
    - Upload 3D models (GLTF format)
-   - Populate product catalog via Sanity
 
 5. **Testing**
    - E2E tests for checkout flow

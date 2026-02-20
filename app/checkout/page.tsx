@@ -1176,12 +1176,42 @@ export default function CheckoutPage() {
                               </p>
                             )}
                             {typeof item.configuration?.widthMm === 'number' && typeof item.configuration?.lengthMm === 'number' && (
-                              <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">
-                                {t('summary.dimensions', {
-                                  widthMm: item.configuration.widthMm,
-                                  lengthMm: item.configuration.lengthMm,
-                                })}
-                              </p>
+                              <>
+                                <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">
+                                  {t('summary.dimensions', {
+                                    widthMm: item.configuration.widthMm,
+                                    lengthMm: item.configuration.lengthMm,
+                                  })}
+                                </p>
+                                <div className="mt-[2px] flex items-center gap-[6px]">
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    step={1}
+                                    value={item.configuration.widthMm}
+                                    onChange={(event) => {
+                                      const rawValue = event.target.value.trim();
+                                      const parsedValue = Number(rawValue);
+                                      if (!rawValue || !Number.isFinite(parsedValue) || parsedValue <= 0) return;
+                                      updateItemConfiguration(item.lineId, { widthMm: parsedValue });
+                                    }}
+                                    className="h-[24px] w-[72px] border border-[#535353] bg-transparent px-[6px] text-[12px] text-white outline-none"
+                                  />
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    step={1}
+                                    value={item.configuration.lengthMm}
+                                    onChange={(event) => {
+                                      const rawValue = event.target.value.trim();
+                                      const parsedValue = Number(rawValue);
+                                      if (!rawValue || !Number.isFinite(parsedValue) || parsedValue <= 0) return;
+                                      updateItemConfiguration(item.lineId, { lengthMm: parsedValue });
+                                    }}
+                                    className="h-[24px] w-[72px] border border-[#535353] bg-transparent px-[6px] text-[12px] text-white outline-none"
+                                  />
+                                </div>
+                              </>
                             )}
                             <p className="font-['Outfit'] font-normal leading-[1.3] text-[#BBBBBB] text-[12px]">
                               {t('summary.quantity', { count: item.quantity })}

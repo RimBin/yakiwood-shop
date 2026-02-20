@@ -47,7 +47,7 @@ export function getProductOgImage(imageUrl?: string): string {
   const baseUrl = envBase && envBase.startsWith('https://') ? envBase : 'https://yakiwood.lt';
   
   if (imageUrl) {
-    // If Sanity image URL or external URL, return it directly
+    // If external URL, return it directly
     if (imageUrl.startsWith('http')) {
       return imageUrl;
     }
