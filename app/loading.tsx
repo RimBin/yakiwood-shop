@@ -1,12 +1,11 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useLocale } from 'next-intl';
 import AnimatedLogoLoader from '@/components/ui/AnimatedLogoLoader';
 
 export default function Loading() {
-  const pathname = usePathname() || "";
-  const isEn = pathname.startsWith("/en") || pathname === "/en";
-  const text = isEn ? "Loading..." : "Kraunama...";
+  const locale = useLocale();
+  const text = locale === 'en' ? 'Loading...' : 'Kraunama...';
 
   return <AnimatedLogoLoader fullScreen text={text} />;
 }

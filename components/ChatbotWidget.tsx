@@ -114,6 +114,7 @@ export default function ChatbotWidget() {
   const [serverSuggestions, setServerSuggestions] = useState<string[]>([]);
   const [serverActions, setServerActions] = useState<BotAction[]>([]);
   const [serverHandoff, setServerHandoff] = useState<{ label: string; href: string } | null>(null);
+  const [quickRepliesOpen, setQuickRepliesOpen] = useState(false);
 
   useEffect(() => {
     // Default welcome (used when there is no persisted history)
@@ -189,9 +190,27 @@ export default function ChatbotWidget() {
   }, [open]);
 
   const visibleSuggestions = useMemo(() => {
-    const next = serverSuggestions.length > 0 ? serverSuggestions : suggestions;
-    return next.slice(0, 10);
-  }, [serverSuggestions, suggestions]);
+    if (serverSuggestions.length > 0) return serverSuggestions.slice(0, 10);
+    return suggestions.slice(0, 10);
+  }, [hasActiveConversation, serverSuggestions, suggestions]);
+
+  const showQuickReplies = useMemo(() => {
+    if (!open) return false;
+    if (visibleSuggestions.length === 0 && serverActions.length === 0) return false;
+    return true;
+  }, [open, serverActions.length, visibleSuggestions.length]);
+
+  useEffect(() => {
+    if (!showQuickReplies) setQuickRepliesOpen(false);
+  }, [showQuickReplies]);
+
+  useEffect(() => {
+    // Auto-open the default quick questions only before the user starts a conversation.
+    if (!open) return;
+    if (hasActiveConversation) return;
+    if (!showQuickReplies) return;
+    setQuickRepliesOpen(true);
+  }, [hasActiveConversation, open, showQuickReplies]);
 
   async function send(text: string) {
     const trimmed = text.trim();
@@ -199,7 +218,9 @@ export default function ChatbotWidget() {
     if (!sessionId) return;
 
     setBusy(true);
+    setQuickRepliesOpen(false);
     setServerActions([]);
+    setServerSuggestions([]);
     const historyForApi = messages
       .filter((m) => m.text && m.text.trim().length > 0)
       .slice(-16)
@@ -468,52 +489,90 @@ export default function ChatbotWidget() {
                     </div>
                   )}
                 </div>
-
-                {visibleSuggestions.length > 0 && (
-                  <div className="mt-[16px]">
-                    <div className="mb-[8px] text-[10px] font-['Outfit'] uppercase tracking-[0.12em] text-[#7C7C7C]">
-                      {t('quickQuestions')}
-                    </div>
-                    {serverActions.length > 0 && (
-                      <div className="mb-[10px] flex flex-wrap gap-[8px]">
-                        {serverActions.map((a, idx) => (
-                          <button
-                            key={`${a.type}:${idx}`}
-                            type="button"
-                            onClick={() => runAction(a)}
-                            disabled={busy}
-                            className={cx(
-                              'rounded-[999px] px-[14px] py-[10px] ring-1 ring-black/5 font-[\'Outfit\'] text-[12px] shadow-sm disabled:opacity-60',
-                              a.type === 'add_to_cart'
-                                ? 'bg-[#161616] text-white hover:opacity-90'
-                                : 'bg-white text-[#161616] hover:bg-[#F5F5F5]'
-                            )}
-                          >
-                            {a.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-[8px]">
-                      {visibleSuggestions.map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          onClick={() => {
-                            void send(s);
-                          }}
-                          disabled={busy}
-                          className="w-full text-left rounded-[16px] bg-white px-[12px] py-[10px] ring-1 ring-black/5 font-['Outfit'] text-[12px] text-[#161616] hover:bg-[#F5F5F5] disabled:opacity-60"
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="relative mt-auto border-t border-[#EAEAEA] bg-white p-[12px] pb-[calc(12px+env(safe-area-inset-bottom))]">
+                {showQuickReplies && (
+                  <div className="absolute inset-x-0 bottom-full px-[12px] pb-[10px] z-10">
+                    <div className="rounded-[18px] bg-white ring-1 ring-black/5 shadow-[0_6px_18px_rgba(0,0,0,0.06)] overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setQuickRepliesOpen((v) => !v)}
+                        className={cx(
+                          'w-full flex items-center justify-between px-[12px] py-[10px] bg-white hover:bg-[#F5F5F5]',
+                          busy && 'opacity-70'
+                        )}
+                        aria-expanded={quickRepliesOpen}
+                        disabled={busy}
+                      >
+                        <span className="text-[10px] font-['Outfit'] uppercase tracking-[0.12em] text-[#7C7C7C]">
+                          {t('quickQuestions')}
+                        </span>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className={cx('text-[#7C7C7C]', quickRepliesOpen && 'rotate-180')}
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M6 9L12 15L18 9"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
+
+                      {quickRepliesOpen && (
+                        <div className="px-[12px] pb-[12px]">
+                          {serverActions.length > 0 && (
+                            <div className="mb-[10px] flex flex-wrap gap-[8px]">
+                              {serverActions.map((a, idx) => (
+                                <button
+                                  key={`${a.type}:${idx}`}
+                                  type="button"
+                                  onClick={() => runAction(a)}
+                                  className={cx(
+                                    'rounded-[999px] px-[14px] py-[10px] ring-1 ring-black/5 font-[\'Outfit\'] text-[12px] shadow-sm',
+                                    a.type === 'add_to_cart'
+                                      ? 'bg-[#161616] text-white hover:opacity-90'
+                                      : 'bg-white text-[#161616] hover:bg-[#F5F5F5]'
+                                  )}
+                                >
+                                  {a.label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {visibleSuggestions.length > 0 && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-[8px] max-h-[240px] overflow-auto pr-[2px]">
+                              {visibleSuggestions.map((s) => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => {
+                                    setQuickRepliesOpen(false);
+                                    void send(s);
+                                  }}
+                                  disabled={busy}
+                                  className="w-full text-left rounded-[16px] bg-[#FAFAFA] px-[12px] py-[10px] ring-1 ring-black/5 font-['Outfit'] text-[12px] text-[#161616] hover:bg-[#F5F5F5] disabled:opacity-60"
+                                >
+                                  {s}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();

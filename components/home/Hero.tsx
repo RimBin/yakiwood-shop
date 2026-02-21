@@ -22,7 +22,7 @@ export default async function Hero() {
   const heroDescriptionSize = clamp(14, 16);
 
   return (
-    <section className="w-full bg-[#E1E1E1] md:bg-[#EAEAEA] relative overflow-hidden xl:pb-0">
+    <section className="w-full bg-[#E1E1E1] md:bg-[#EAEAEA] relative overflow-hidden xl:pb-0 xl:min-h-screen">
       {/* Full-width hero vector background */}
       <div className="absolute inset-0 hidden md:block z-0 pointer-events-none">
         <Image src={assets.heroVector} alt="" fill className="object-cover" priority sizes="100vw" />
@@ -220,12 +220,12 @@ export default async function Hero() {
 
       {/* Fullwidth certification bar */}
       <div className="hidden xl:block absolute left-0 right-0 bottom-0 w-full bg-[#161616] z-10">
-        <div className="max-w-[1440px] mx-auto px-[40px] h-[80px] flex items-center">
+        <div className="max-w-[1440px] mx-auto px-[40px] h-[96px] flex items-center">
           <div className="flex w-full items-center justify-between">
             {certifications.map((src, index) => {
               const isBigger = index === 0 || index === 2 || index === 3 || index === 4;
-              const width = isBigger ? 140 : 120;
-              const height = isBigger ? 40 : 32;
+              const width = isBigger ? 168 : 146;
+              const height = isBigger ? 48 : 40;
 
               return (
                 <div key={src} className="relative" style={{ width, height }}>
