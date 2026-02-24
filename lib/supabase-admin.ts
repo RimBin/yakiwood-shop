@@ -107,34 +107,59 @@ export async function createOrder(data: {
     console.warn('Supabase not configured, skipping order creation');
     return null;
   }
-  const { data: order, error } = await supabaseAdmin
-    .from('orders')
-    .insert({
-      order_number: data.orderNumber,
-      stripe_session_id: data.stripeSessionId,
-      quote_id: data.quoteId,
-      customer_email: data.customerEmail,
-      customer_name: data.customerName,
-      customer_phone: data.customerPhone,
-      customer_address: data.customerAddress,
-      items: data.items,
-      subtotal: data.subtotal,
-      vat_amount: data.vatAmount,
-      total: data.total,
-      currency: data.currency || 'EUR',
-      status: 'pending',
-      payment_status: 'pending',
-      notes: data.notes
-    })
-    .select()
-    .single();
+  const baseInsert = {
+    order_number: data.orderNumber,
+    stripe_session_id: data.stripeSessionId,
+    quote_id: data.quoteId,
+    customer_email: data.customerEmail,
+    customer_name: data.customerName,
+    customer_phone: data.customerPhone,
+    customer_address: data.customerAddress,
+    items: data.items,
+    subtotal: data.subtotal,
+    vat_amount: data.vatAmount,
+    total: data.total,
+    currency: data.currency || 'EUR',
+    status: 'pending',
+    payment_status: 'pending',
+    notes: data.notes,
+  };
 
-  if (error) {
-    console.error('Error creating order:', error);
+  const firstAttempt = await supabaseAdmin.from('orders').insert(baseInsert).select().single();
+  if (!firstAttempt.error) {
+    return firstAttempt.data;
+  }
+
+  const firstMessage = String((firstAttempt.error as any)?.message || '').toLowerCase();
+  const shouldTryLegacyFallback =
+    firstMessage.includes('column "email"') ||
+    firstMessage.includes('column "total_amount"') ||
+    firstMessage.includes('column "shipping_name"');
+
+  if (!shouldTryLegacyFallback) {
+    console.error('Error creating order:', firstAttempt.error);
     return null;
   }
 
-  return order;
+  const legacyInsert = {
+    ...baseInsert,
+    email: data.customerEmail,
+    total_amount: data.total,
+    shipping_name: data.customerName || 'Klientas',
+    shipping_address: data.customerAddress || '',
+    shipping_city: '',
+    shipping_postal_code: '',
+    shipping_country: 'LT',
+    shipping_phone: data.customerPhone || '',
+  };
+
+  const secondAttempt = await supabaseAdmin.from('orders').insert(legacyInsert).select().single();
+  if (secondAttempt.error) {
+    console.error('Error creating order:', secondAttempt.error);
+    return null;
+  }
+
+  return secondAttempt.data;
 }
 
 export async function getOrderByStripeSession(sessionId: string): Promise<Order | null> {

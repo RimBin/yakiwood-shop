@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -10,6 +10,7 @@ import type { Product, ProductColorVariant, ProductProfileVariant } from '@/lib/
 import { localizeColorLabel } from '@/lib/products.supabase';
 import { assets, getAsset } from '@/lib/assets';
 import { Accordion } from '@/components/ui';
+import { useToast } from '@/components/ui/Toast';
 import { useCartStore } from '@/lib/cart/store';
 import { trackEvent, trackProductView } from '@/lib/analytics';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
@@ -22,6 +23,7 @@ import InView from '@/components/InView';
 interface ProductDetailClientProps {
   product: Product;
   relatedProducts?: Product[];
+  prefetchedStockItems?: Array<{ slug: string; image?: string | null }>;
 }
 
 function normalizeLabel(value: string): string {
@@ -147,6 +149,83 @@ type StockMatrixEntry = {
   lengthMm: number;
 };
 
+function buildStockOptionsFromItems(
+  items: Array<{ slug?: string | null; image?: string | null; image_url?: string | null }>,
+  baseSlug: string,
+  locale: 'lt' | 'en'
+): { derived: StockDerivedOptions; matrix: StockMatrixEntry[] } | null {
+  if (!Array.isArray(items) || items.length === 0 || !baseSlug) return null;
+
+  const baseKey = normalizeColorKey(baseSlug);
+  if (!baseKey) return null;
+
+  const colors = new Map<string, ProductColorVariant>();
+  const profiles = new Map<string, ProductProfileVariant>();
+  const widths = new Set<number>();
+  const lengths = new Set<number>();
+  const matrix: StockMatrixEntry[] = [];
+
+  for (const item of items) {
+    const slug = typeof item?.slug === 'string' ? item.slug : '';
+    if (!slug.includes('--')) continue;
+
+    const parsed = parseStockItemSlug(slug);
+    if (!parsed) continue;
+    if (normalizeColorKey(parsed.baseSlug) !== baseKey) continue;
+
+    const itemImage =
+      typeof item?.image_url === 'string'
+        ? item.image_url
+        : typeof item?.image === 'string'
+          ? item.image
+          : null;
+
+    const colorToken = normalizeColorKey(parsed.color);
+    if (colorToken && !colors.has(colorToken)) {
+      colors.set(colorToken, {
+        id: `stock-color:${colorToken}`,
+        name: localizeColorLabel(parsed.color, locale),
+        hex: undefined,
+        image: itemImage ?? undefined,
+        priceModifier: 0,
+      });
+    }
+
+    const profileToken = normalizeProfileToken(parsed.profile);
+    if (profileToken && !profiles.has(profileToken)) {
+      profiles.set(profileToken, {
+        id: `stock-profile:${profileToken}`,
+        name: localizeProfileLabel(parsed.profile.replace(/[-_]+/g, ' '), locale),
+        code: parsed.profile,
+        priceModifier: 0,
+      });
+    }
+
+    const size = parseSizeToken(parsed.size);
+    if (size?.widthMm) widths.add(size.widthMm);
+    if (size?.lengthMm) lengths.add(size.lengthMm);
+
+    if (colorToken && profileToken && size?.widthMm && size?.lengthMm) {
+      matrix.push({
+        colorToken,
+        profileToken,
+        widthMm: size.widthMm,
+        lengthMm: size.lengthMm,
+      });
+    }
+  }
+
+  return {
+    derived: {
+      colors: Array.from(colors.values()),
+      profiles: Array.from(profiles.values()),
+      widths: Array.from(widths.values()).sort((a, b) => a - b),
+      lengths: Array.from(lengths.values()).sort((a, b) => a - b),
+    },
+    matrix,
+  };
+}
+
 const PROFILE_ICON_FALLBACK_BY_INDEX = [
   assets.profiles.halfTaper45Deg,
   assets.profiles.halfTaper,
@@ -189,7 +268,7 @@ function isFallbackProfileId(id: string | undefined | null): boolean {
   return typeof id === 'string' && id.startsWith('fallback-profile-');
 }
 
-export default function ProductDetailClient({ product, relatedProducts = [] }: ProductDetailClientProps) {
+export default function ProductDetailClient({ product, relatedProducts = [], prefetchedStockItems = [] }: ProductDetailClientProps) {
   const t = useTranslations('productPage');
   const tProducts = useTranslations('productsPage');
   const tBreadcrumbs = useTranslations('breadcrumbs');
@@ -200,10 +279,17 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchParamsKey = searchParams.toString();
+  const toast = useToast();
   const addItem = useCartStore((state) => state.addItem);
   const cartItems = useCartStore((state) => state.items);
-  const [stockDerivedOptions, setStockDerivedOptions] = useState<StockDerivedOptions | null>(null);
-  const [stockMatrix, setStockMatrix] = useState<StockMatrixEntry[]>([]);
+  const [stockDerivedOptions, setStockDerivedOptions] = useState<StockDerivedOptions | null>(() => {
+    const baseSlug = String(product.slug || '').split('--')[0] || String(product.slug || '');
+    return buildStockOptionsFromItems(prefetchedStockItems, baseSlug, currentLocale)?.derived ?? null;
+  });
+  const [stockMatrix, setStockMatrix] = useState<StockMatrixEntry[]>(() => {
+    const baseSlug = String(product.slug || '').split('--')[0] || String(product.slug || '');
+    return buildStockOptionsFromItems(prefetchedStockItems, baseSlug, currentLocale)?.matrix ?? [];
+  });
   const [isNeedAssistanceOpen, setIsNeedAssistanceOpen] = useState(false);
   const [needAssistanceSubmitted, setNeedAssistanceSubmitted] = useState(false);
   const [needAssistanceSubmitting, setNeedAssistanceSubmitting] = useState(false);
@@ -602,6 +688,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
 
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
+  const preloadedColorImagesRef = useRef<Set<string>>(new Set());
   const [quotedPricing, setQuotedPricing] = useState<null | {
     unitPricePerBoard: number;
     unitPricePerM2: number;
@@ -614,6 +701,17 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
   const baseSlugForSelection = useMemo(() => {
     return String(product.slug || '').split('--')[0] || String(product.slug || '');
   }, [product.slug]);
+
+  useEffect(() => {
+    const prefetched = buildStockOptionsFromItems(prefetchedStockItems, baseSlugForSelection, currentLocale);
+    if (prefetched) {
+      setStockDerivedOptions(prefetched.derived);
+      setStockMatrix(prefetched.matrix);
+      return;
+    }
+    setStockDerivedOptions(null);
+    setStockMatrix([]);
+  }, [prefetchedStockItems, baseSlugForSelection, currentLocale]);
 
   const getColorToken = (color?: ProductColorVariant | null) => {
     if (!color) return '';
@@ -634,6 +732,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
 
   useEffect(() => {
     if (!baseSlugForSelection) return;
+    if (prefetchedStockItems.length > 0) return;
 
     let isMounted = true;
     const controller = new AbortController();
@@ -649,72 +748,11 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
         const json = await res.json();
         if (!Array.isArray(json)) return;
 
-        const baseKey = normalizeColorKey(baseSlugForSelection);
-        const colors = new Map<string, ProductColorVariant>();
-        const profiles = new Map<string, ProductProfileVariant>();
-        const widths = new Set<number>();
-        const lengths = new Set<number>();
-        const matrix: StockMatrixEntry[] = [];
-
-        for (const item of json) {
-          const slug = typeof item?.slug === 'string' ? item.slug : '';
-          if (!slug.includes('--')) continue;
-          const parsed = parseStockItemSlug(slug);
-          if (!parsed) continue;
-          if (normalizeColorKey(parsed.baseSlug) !== baseKey) continue;
-
-          const itemImage =
-            typeof item?.image_url === 'string'
-              ? item.image_url
-              : typeof item?.image === 'string'
-                ? item.image
-                : null;
-
-          const colorToken = normalizeColorKey(parsed.color);
-          if (colorToken && !colors.has(colorToken)) {
-            colors.set(colorToken, {
-              id: `stock-color:${colorToken}`,
-              name: localizeColorLabel(parsed.color, currentLocale),
-              hex: undefined,
-              image: itemImage ?? undefined,
-              priceModifier: 0,
-            });
-          }
-
-          const profileToken = normalizeProfileToken(parsed.profile);
-          if (profileToken && !profiles.has(profileToken)) {
-            profiles.set(profileToken, {
-              id: `stock-profile:${profileToken}`,
-              name: localizeProfileLabel(parsed.profile.replace(/[-_]+/g, ' '), currentLocale),
-              code: parsed.profile,
-              priceModifier: 0,
-            });
-          }
-
-          const size = parseSizeToken(parsed.size);
-          if (size?.widthMm) widths.add(size.widthMm);
-          if (size?.lengthMm) lengths.add(size.lengthMm);
-
-          if (colorToken && profileToken && size?.widthMm && size?.lengthMm) {
-            matrix.push({
-              colorToken,
-              profileToken,
-              widthMm: size.widthMm,
-              lengthMm: size.lengthMm,
-            });
-          }
-        }
-
-        const derived: StockDerivedOptions = {
-          colors: Array.from(colors.values()),
-          profiles: Array.from(profiles.values()),
-          widths: Array.from(widths.values()).sort((a, b) => a - b),
-          lengths: Array.from(lengths.values()).sort((a, b) => a - b),
-        };
+        const built = buildStockOptionsFromItems(json, baseSlugForSelection, currentLocale);
 
         if (isMounted) {
-          setStockDerivedOptions(derived);
-          setStockMatrix(matrix);
+          setStockDerivedOptions(built?.derived ?? null);
+          setStockMatrix(built?.matrix ?? []);
         }
       } catch (e: any) {
         if (e?.name === 'AbortError') return;
@@ -726,7 +764,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
       isMounted = false;
       controller.abort();
     };
-  }, [baseSlugForSelection, currentLocale]);
+  }, [baseSlugForSelection, currentLocale, prefetchedStockItems]);
 
   const selectedColorToken = useMemo(() => {
     return getColorToken(effectiveSelectedColor);
@@ -1180,6 +1218,8 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
               }
             : undefined,
     });
+
+              toast.success(t('itemAdded'));
   };
 
   useEffect(() => {
@@ -1304,6 +1344,23 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
     if (srcs.length === 0) srcs.push(product.image);
     return srcs;
   }, [product.image, product.images]);
+
+  const preloadColorImage = useCallback((src: string | null | undefined) => {
+    if (typeof window === 'undefined') return;
+    if (typeof src !== 'string' || !src) return;
+    if (preloadedColorImagesRef.current.has(src)) return;
+
+    const img = new window.Image();
+    img.decoding = 'async';
+    img.src = src;
+    preloadedColorImagesRef.current.add(src);
+  }, []);
+
+  useEffect(() => {
+    for (const color of colorOptions) {
+      preloadColorImage(typeof color.image === 'string' ? color.image : null);
+    }
+  }, [colorOptions, preloadColorImage]);
 
   const urlImageOverride = searchParams.get('img');
   const colorPreviewImage =
@@ -1573,6 +1630,8 @@ export default function ProductDetailClient({ product, relatedProducts = [] }: P
                       <button
                         key={color.id}
                         type="button"
+                        onMouseEnter={() => preloadColorImage(fallbackSrc)}
+                        onFocus={() => preloadColorImage(fallbackSrc)}
                         onClick={() => {
                           if (!isAvailable) return;
                           setSelectedColor(color);

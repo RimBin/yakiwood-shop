@@ -330,15 +330,6 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
-      const paymentsDisabled = process.env.NEXT_PUBLIC_PAYMENTS_DISABLED === 'true' || process.env.NODE_ENV !== 'production';
-      if (paymentsDisabled) {
-        const demoSessionId = `demo_${Date.now()}`;
-        clearCart();
-        setIsProcessing(false);
-        window.location.assign(`/order-confirmation?session_id=${encodeURIComponent(demoSessionId)}`);
-        return;
-      }
-
       const productItems = items.map((item) => ({
         id: item.id,
         name: item.name,
@@ -395,6 +386,7 @@ export default function CheckoutPage() {
       const shippingCity = deliverDifferentAddress ? altCity : city;
       const shippingAddress = deliverDifferentAddress ? altAddress : address;
       const shippingPostalCode = deliverDifferentAddress ? altPostalCode : postalCode;
+      const resolvedPaymentProvider = paymentMethod === 'paypal' ? 'paypal' : 'paysera';
 
       const orderRes = await fetch('/api/orders/create', {
         method: 'POST',
@@ -415,7 +407,7 @@ export default function CheckoutPage() {
           },
           deliveryNotes,
           couponCode: couponCode?.trim() ? couponCode.trim() : undefined,
-          paymentProvider: paymentMethod === 'paysera' ? 'paysera' : paymentMethod === 'paypal' ? 'paypal' : 'stripe',
+          paymentProvider: resolvedPaymentProvider,
         }),
       });
 
@@ -457,7 +449,7 @@ export default function CheckoutPage() {
 
       savePendingPurchase({
         id: orderId,
-        provider: paymentMethod === 'paysera' ? 'paysera' : paymentMethod === 'paypal' ? 'paypal' : 'stripe',
+        provider: resolvedPaymentProvider,
         orderId,
         total,
         currency: 'EUR',
@@ -470,58 +462,8 @@ export default function CheckoutPage() {
         })),
       });
 
-      // 2) If Stripe/cards selected, create Stripe Checkout Session and redirect
-      if (paymentMethod === 'stripe' || paymentMethod === 'cards') {
-        const itemsForPayment = shipping > 0
-          ? [
-              ...productItems,
-              {
-                id: 'shipping',
-                name: t('summary.shipping'),
-                slug: 'shipping',
-                basePrice: shipping,
-                quantity: 1,
-              },
-            ]
-          : productItems;
-
-        const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          orderId,
-          items: productItems,
-          customer: {
-            email,
-            name: fullName,
-            phone,
-            address: shippingAddress,
-            city: shippingCity,
-            postalCode: shippingPostalCode,
-            country: shippingCountry,
-          },
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || t('errors.paymentSessionFailed'));
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(t('errors.paymentUrlMissing'));
-      }
-
-        return;
-      }
-
-      // 2b) PayPal: create PayPal checkout and redirect
-      if (paymentMethod === 'paypal') {
+      // 2) PayPal: create PayPal checkout and redirect
+      if (resolvedPaymentProvider === 'paypal') {
         const itemsForPayment = shipping > 0
           ? [
               ...productItems,
@@ -565,8 +507,8 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 2c) Paysera: init Paysera checkout and redirect
-      if (paymentMethod === 'paysera') {
+      // 2b) Paysera: init Paysera checkout and redirect
+      if (resolvedPaymentProvider === 'paysera') {
         const response = await fetch('/api/paysera/init', {
           method: 'POST',
           headers: {

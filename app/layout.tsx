@@ -6,6 +6,7 @@ import AuthWrapper from '@/components/AuthWrapper';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
 import ChatbotLoader from '@/components/ChatbotLoader';
+import { ToastProvider } from '@/components/ui/Toast';
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
 
@@ -138,12 +139,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased bg-[#e1e1e1]`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <GoogleAnalytics />
-          <AuthWrapper>
-            {children}
-            <ChatbotLoader />
-          </AuthWrapper>
-          <CookieConsentBanner />
+          <ToastProvider>
+            <GoogleAnalytics />
+            <AuthWrapper>
+              {children}
+              <ChatbotLoader />
+            </AuthWrapper>
+            <CookieConsentBanner />
+          </ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

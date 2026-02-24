@@ -231,13 +231,27 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   });
 
   let allProducts: Product[] = [];
+  let stockItemsForPrefetch: Product[] = [];
   try {
     const stockItems = await fetchProducts({ mode: 'stock-items' });
+    stockItemsForPrefetch = stockItems;
     allProducts = stockItems.length > 0 ? stockItems : await fetchProducts({ mode: 'active' });
   } catch (stockError) {
     console.warn('Stock items unavailable, falling back to active products.', stockError);
     allProducts = await fetchProducts({ mode: 'active' });
   }
+  const baseSlugForSelection = String(product.slug || '').split('--')[0] || String(product.slug || '');
+  const baseSlugKey = normalizeKey(baseSlugForSelection);
+  const prefetchedStockItems = stockItemsForPrefetch
+    .filter((item) => {
+      const parsed = parseStockItemSlug(String(item.slug || ''));
+      if (!parsed) return false;
+      return normalizeKey(parsed.baseSlug) === baseSlugKey;
+    })
+    .map((item) => ({
+      slug: String(item.slug || ''),
+      image: item.image ?? null,
+    }));
   const sameCategoryOrWood = allProducts.filter((item) => {
     if (item.id === product.id) return false;
     const sameCategory = product.category && item.category === product.category;
@@ -279,7 +293,11 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
       />
 
       {/* Client Component with product data */}
-      <ProductDetailClient product={product} relatedProducts={relatedProducts} />
+      <ProductDetailClient
+        product={product}
+        relatedProducts={relatedProducts}
+        prefetchedStockItems={prefetchedStockItems}
+      />
     </>
   );
 }

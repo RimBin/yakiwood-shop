@@ -588,6 +588,7 @@
     "profilesLabel": "Profiliai",
     "benefitsLabel": "Privalumai",
     "descriptionFallback": "Produkto aprašymas ruošiamas.",
+    "itemAdded": "Produktas pridėtas į krepšelį",
     "colorLabelInline": "Spalva:",
     "selectColorPlaceholder": "Pasirinkite spalvą",
     "ctaQuote": "Gauti pasiūlymą",
@@ -681,7 +682,7 @@
       "agreeTo": "Sutinku su <terms>Taisyklėmis ir sąlygomis</terms> bei <privacy>Privatumo politika</privacy>",
       "terms": "Taisyklėmis ir sąlygomis",
       "privacy": "Privatumo politika",
-      "customMadeAcknowledgement": "I understand that custom-made products cannot be cancelled once production begins."
+      "customMadeAcknowledgement": "Suprantu, kad individualiai gaminamų produktų negalima atšaukti, kai gamyba jau pradėta."
     },
     "termsAccordion": {
       "termsTitle": "Taisyklės ir sąlygos",
@@ -743,10 +744,10 @@
     "qtyLabel": "Kiekis",
     "priceLabel": "Kaina",
     "nextStepsTitle": "Kas toliau?",
-    "nextStep1": "Gausite užsakymo patvirtinimo el. laišką su sąskaita faktūra",
-    "nextStep2": "Jūsų užsakymas bus apdorotas per 1-2 darbo dienas",
-    "nextStep3": "Gausite pranešimą, kai užsakymas bus išsiųstas",
-    "nextStep4": "Pristatymas per 3-5 darbo dienas (nemokamas virš 500€)",
+    "nextStep1": "Užsakymas patvirtinamas po sėkmingo apmokėjimo. Individualių gaminių gamyba pradedama per 24-48 val., o JK sandėlyje esančios prekės išsiunčiamos per 2-3 darbo dienas.",
+    "nextStep2": "Pristatymas vykdomas visoje Didžiosios Britanijos žemyninėje dalyje. Į Šiaurės Airiją, Highlands ir salų teritorijas gali būti taikomi papildomi mokesčiai.",
+    "nextStep3": "Pristatymas vykdomas tik iki sklypo ribos (kerbside). Būkite pristatymo vietoje, apžiūrėkite prekes ir apie pažeidimus praneškite per 48 val. su nuotraukomis.",
+    "nextStep4": "Individualiai gaminamų produktų negalima atšaukti po gamybos pradžios. Standartinių (ne individualių) prekių atsisakyti galima per 14 dienų nuo pristatymo.",
     "viewOrders": "Peržiūrėti užsakymus",
     "continueShopping": "Tęsti apsipirkimą",
     "supportTitle": "Turite klausimų apie užsakymą?",
