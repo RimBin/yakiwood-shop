@@ -674,6 +674,7 @@
       "expiryDate": "Galiojimo data ",
       "cvc": "CVC kodas ",
       "paypalInfo": "Apmokėjimas vyks per PayPal - po pateikimo būsite nukreipti į PayPal langą.",
+      "paypalUnavailable": "Šiuo metu atsiskaityti per PayPal negalima.",
       "payseraInfo": "Apmokėjimas vyks per Paysera - po pateikimo būsite nukreipti į Paysera langą.",
       "saveInfo": "Išsaugoti šią informaciją kitam kartui",
       "creditDebitCard": "Kreditinė / debetinė kortelė"

@@ -150,14 +150,10 @@ export default function CheckoutPage() {
   const [autofillReady, setAutofillReady] = useState(false);
 
   // UI-only: payment + coupon
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'cards' | 'paypal' | 'paysera'>('paysera');
+  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'paysera'>('paysera');
   const [couponCode, setCouponCode] = useState('');
-  const [savePaymentInfo, setSavePaymentInfo] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [agreedToCustomMadePolicy, setAgreedToCustomMadePolicy] = useState(false);
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvc, setCardCvc] = useState('');
   const [openPolicy, setOpenPolicy] = useState<'terms' | 'privacy' | null>(null);
 
   // Payment Method
@@ -747,169 +743,6 @@ export default function CheckoutPage() {
                     <input
                       type="radio"
                       name="paymentMethod"
-                      value="stripe"
-                      checked={paymentMethod === 'stripe'}
-                      onChange={() => setPaymentMethod('stripe')}
-                      className={[
-                        'size-[24px]',
-                        'appearance-none',
-                        'rounded-[100px]',
-                        'border border-[#161616] border-solid',
-                        'grid place-items-center',
-                        "checked:after:content-['']",
-                        'checked:after:size-[10px] checked:after:rounded-full checked:after:bg-[#161616]',
-                      ].join(' ')}
-                    />
-                    <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
-                      {t('payment.stripeCard')}
-                    </span>
-                  </span>
-                  <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
-                    stripe
-                  </span>
-                </label>
-                {paymentMethod === 'stripe' && (
-                  <div className="flex flex-col gap-[16px]">
-                    <div className="flex flex-wrap gap-[16px]">
-                      <div className="flex flex-col gap-[4px] w-full">
-                        <FieldLabel>
-                          <span>{t('payment.cardNumber')}</span>
-                          <span className="text-[#F63333]">*</span>
-                        </FieldLabel>
-                        <TextField
-                          value={cardNumber}
-                          onChange={(e) => setCardNumber(e.target.value)}
-                          placeholder=""
-                          autoComplete="cc-number"
-                          inputMode="numeric"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
-                        <FieldLabel>
-                          <span>{t('payment.expiryDate')}</span>
-                          <span className="text-[#F63333]">*</span>
-                        </FieldLabel>
-                        <TextField
-                          value={cardExpiry}
-                          onChange={(e) => setCardExpiry(e.target.value)}
-                          placeholder=""
-                          autoComplete="cc-exp"
-                          inputMode="numeric"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
-                        <FieldLabel>
-                          <span>{t('payment.cvc')}</span>
-                          <span className="text-[#F63333]">*</span>
-                        </FieldLabel>
-                        <TextField
-                          value={cardCvc}
-                          onChange={(e) => setCardCvc(e.target.value)}
-                          placeholder=""
-                          autoComplete="cc-csc"
-                          inputMode="numeric"
-                        />
-                      </div>
-                    </div>
-
-                    <FigmaCheckbox
-                      id="savePayment"
-                      checked={savePaymentInfo}
-                      onChange={setSavePaymentInfo}
-                      label={t('payment.saveInfo')}
-                    />
-                  </div>
-                )}
-
-                <div className="h-px bg-[#BBBBBB]" />
-
-                <label className="flex items-center justify-between w-full">
-                  <span className="flex items-center gap-[8px]">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="cards"
-                      checked={paymentMethod === 'cards'}
-                      onChange={() => setPaymentMethod('cards')}
-                      className={[
-                        'size-[24px]',
-                        'appearance-none',
-                        'rounded-[100px]',
-                        'border border-[#161616] border-solid',
-                        'grid place-items-center',
-                        "checked:after:content-['']",
-                        'checked:after:size-[10px] checked:after:rounded-full checked:after:bg-[#161616]',
-                      ].join(' ')}
-                    />
-                    <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
-                      {t('payment.creditDebitCard')}
-                    </span>
-                  </span>
-                  <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
-                    visa
-                  </span>
-                </label>
-
-                {paymentMethod === 'cards' && (
-                  <div className="flex flex-col gap-[16px]">
-                    <div className="flex flex-wrap gap-[16px]">
-                      <div className="flex flex-col gap-[4px] w-full">
-                        <FieldLabel>
-                          <span>{t('payment.cardNumber')}</span>
-                          <span className="text-[#F63333]">*</span>
-                        </FieldLabel>
-                        <TextField
-                          value={cardNumber}
-                          onChange={(e) => setCardNumber(e.target.value)}
-                          placeholder=""
-                          autoComplete="cc-number"
-                          inputMode="numeric"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
-                        <FieldLabel>
-                          <span>{t('payment.expiryDate')}</span>
-                          <span className="text-[#F63333]">*</span>
-                        </FieldLabel>
-                        <TextField
-                          value={cardExpiry}
-                          onChange={(e) => setCardExpiry(e.target.value)}
-                          placeholder=""
-                          autoComplete="cc-exp"
-                          inputMode="numeric"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-[4px] w-full sm:w-[328px]">
-                        <FieldLabel>
-                          <span>{t('payment.cvc')}</span>
-                          <span className="text-[#F63333]">*</span>
-                        </FieldLabel>
-                        <TextField
-                          value={cardCvc}
-                          onChange={(e) => setCardCvc(e.target.value)}
-                          placeholder=""
-                          autoComplete="cc-csc"
-                          inputMode="numeric"
-                        />
-                      </div>
-                    </div>
-
-                    <FigmaCheckbox
-                      id="savePaymentCards"
-                      checked={savePaymentInfo}
-                      onChange={setSavePaymentInfo}
-                      label={t('payment.saveInfo')}
-                    />
-                  </div>
-                )}
-
-                <div className="h-px bg-[#BBBBBB]" />
-
-                <label className="flex items-center justify-between w-full">
-                  <span className="flex items-center gap-[8px]">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
                       value="paypal"
                       checked={paymentMethod === 'paypal'}
                       onChange={() => setPaymentMethod('paypal')}
@@ -935,7 +768,7 @@ export default function CheckoutPage() {
                 {paymentMethod === 'paypal' && (
                   <div className="border border-[#BBBBBB] bg-white/40 px-[16px] py-[12px]">
                     <p className="font-['Outfit'] text-[12px] leading-[1.4] text-[#535353]">
-                      {t('payment.paypalInfo')}
+                      {t('payment.paypalUnavailable')}
                     </p>
                   </div>
                 )}
@@ -1066,7 +899,7 @@ export default function CheckoutPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={isProcessing}
+                    disabled={isProcessing || paymentMethod === 'paypal'}
                     className="bg-[#161616] h-[48px] px-[40px] py-[10px] rounded-[100px] w-full md:w-[328px] flex items-center justify-center disabled:bg-[#BBBBBB] disabled:cursor-not-allowed"
                   >
                     <span className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase">

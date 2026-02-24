@@ -852,6 +852,7 @@
       "expiryDate": "Expiry date ",
       "cvc": "CVC ",
       "paypalInfo": "You will be redirected to PayPal after placing the order.",
+      "paypalUnavailable": "At the moment, payment with PayPal is not available.",
       "payseraInfo": "You will be redirected to Paysera after placing the order.",
       "saveInfo": "Save this information for next time",
       "creditDebitCard": "Credit / debit card"

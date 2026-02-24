@@ -109,13 +109,10 @@ export async function POST(req: NextRequest) {
     };
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-    if (process.env.NODE_ENV === 'production' && (!siteUrl || !siteUrl.trim())) {
-      return NextResponse.json(
-        { error: 'NEXT_PUBLIC_SITE_URL privalomas production aplinkoje' },
-        { status: 500 }
-      );
-    }
-    const resolvedSiteUrl = siteUrl || 'http://localhost:3000';
+    const resolvedSiteUrl =
+      (typeof siteUrl === 'string' && siteUrl.trim().length > 0 ? siteUrl.trim() : '') ||
+      req.nextUrl.origin ||
+      'http://localhost:3000';
 
     const stripe = getStripeClient();
     if (!stripe || (forceDemo && process.env.NODE_ENV !== 'production')) {
