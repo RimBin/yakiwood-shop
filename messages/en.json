@@ -227,6 +227,7 @@
         "blog": "Blog",
         "faqs": "FAQs",
         "policies": "Policies",
+        "terms": "Terms & conditions",
         "cookiePolicy": "Cookie policy",
         "facebook": "Facebook",
         "instagram": "Instagram",
@@ -857,7 +858,8 @@
     "terms": {
       "agreeTo": "I agree to the <terms>Terms and conditions</terms> and <privacy>Privacy policy</privacy>",
       "terms": "Terms and conditions",
-      "privacy": "Privacy policy"
+      "privacy": "Privacy policy",
+      "customMadeAcknowledgement": "I understand that custom-made products cannot be cancelled once production begins."
     },
     "termsAccordion": {
       "termsTitle": "Terms and conditions",

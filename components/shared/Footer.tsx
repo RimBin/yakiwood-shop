@@ -61,6 +61,7 @@ export default function Footer() {
       links: [
         { label: t('links.faqs'), href: '/faq' },
         { label: t('links.policies'), href: '/policies' },
+        { label: t('links.terms'), href: '/policies/terms' },
         { label: t('links.cookiePolicy'), href: '/cookie-policy' },
       ],
     },

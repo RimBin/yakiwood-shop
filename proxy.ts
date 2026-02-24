@@ -11,6 +11,10 @@ const PUBLIC_FILE = /\.[^/]+$/
 type PrefixMap = Array<{ from: string; to: string }>
 
 const enToLt: PrefixMap = [
+  { from: '/policies/terms', to: '/politikos/taisykles-ir-salygos' },
+  { from: '/policies/shipping', to: '/politikos/pristatymas' },
+  { from: '/policies/refund', to: '/politikos/grazinimas' },
+  { from: '/policies', to: '/politikos' },
   { from: '/admin/email-templates', to: '/administravimas/el-pasto-sablonai' },
   { from: '/admin/orders', to: '/administravimas/uzsakymai' },
   { from: '/admin/inventory', to: '/administravimas/sandelys' },
@@ -35,6 +39,10 @@ const enToLt: PrefixMap = [
 ]
 
 const ltToEn: PrefixMap = [
+  { from: '/politikos/taisykles-ir-salygos', to: '/policies/terms' },
+  { from: '/politikos/pristatymas', to: '/policies/shipping' },
+  { from: '/politikos/grazinimas', to: '/policies/refund' },
+  { from: '/politikos', to: '/policies' },
   { from: '/administravimas/el-pasto-sablonai', to: '/admin/email-templates' },
   { from: '/administravimas/uzsakymai', to: '/admin/orders' },
   { from: '/administravimas/sandelys', to: '/admin/inventory' },
@@ -200,6 +208,7 @@ export async function proxy(request: NextRequest) {
 
   // Legacy Lithuanian slugs without /lt should redirect to the new /lt/* canonical URLs.
   const legacyLtPrefixes: PrefixMap = [
+    { from: '/politikos', to: '/lt/politikos' },
     { from: '/apie', to: '/lt/apie' },
     { from: '/kontaktai', to: '/lt/kontaktai' },
     { from: '/duk', to: '/lt/duk' },

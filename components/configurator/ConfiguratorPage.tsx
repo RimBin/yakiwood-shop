@@ -17,6 +17,7 @@ import { toLocalePath } from '@/i18n/paths';
 import InView from '@/components/InView';
 
 type DropdownOption = { value: string; label: string };
+const CONFIGURATOR_MODEL_URL = '/models/configurator/model.glb?v=20260223a';
 
 function FilterDropdown({
   id,
@@ -572,6 +573,7 @@ export default function ConfiguratorPage() {
                   productId="demo"
                   availableColors={fallbackColors}
                   availableFinishes={fallbackProfiles}
+                  modelUrl={CONFIGURATOR_MODEL_URL}
                   basePrice={undefined}
                   isLoading={false}
                 />
@@ -586,6 +588,7 @@ export default function ConfiguratorPage() {
               productId={product?.id ?? 'demo'}
               availableColors={availableColors}
               availableFinishes={availableFinishes}
+              modelUrl={CONFIGURATOR_MODEL_URL}
               basePrice={product?.price}
               isLoading={isLoading}
             />

@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { seedProducts } from '@/data/seed-products';
 import { useLocale, useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
+import { toLocalePath } from '@/i18n/paths';
 
 function formatMoney(value: number, locale: string): string {
   const rounded = Math.round(value);
@@ -114,6 +115,7 @@ function FigmaCheckbox({
 export default function CheckoutPage() {
   const locale = useLocale();
   const t = useTranslations('checkout');
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const supabase = useMemo(() => createClient(), []);
   const VAT_RATE = 0.21;
 
@@ -149,10 +151,11 @@ export default function CheckoutPage() {
   const [autofillReady, setAutofillReady] = useState(false);
 
   // UI-only: payment + coupon
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'cards' | 'paypal' | 'paysera'>('stripe');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'cards' | 'paypal' | 'paysera'>('paysera');
   const [couponCode, setCouponCode] = useState('');
   const [savePaymentInfo, setSavePaymentInfo] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToCustomMadePolicy, setAgreedToCustomMadePolicy] = useState(false);
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvc, setCardCvc] = useState('');
@@ -1088,11 +1091,19 @@ export default function CheckoutPage() {
                           : t('termsAccordion.privacyBody')}
                       </p>
                     </div>
-                    <Link href="/policies" className="mt-[8px] inline-block underline text-[12px]">
+                    <Link href={toLocalePath('/policies/terms', currentLocale)} className="mt-[8px] inline-block underline text-[12px]">
                       {t('termsAccordion.fullPolicyLink')}
                     </Link>
                   </div>
                 )}
+
+                <FigmaCheckbox
+                  id="custom-made-policy"
+                  checked={agreedToCustomMadePolicy}
+                  onChange={setAgreedToCustomMadePolicy}
+                  required
+                  label={t('terms.customMadeAcknowledgement')}
+                />
 
                 {/* Error Message (kept from existing flow) */}
                 {error && (

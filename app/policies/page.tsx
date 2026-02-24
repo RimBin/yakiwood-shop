@@ -1,7 +1,68 @@
 import { PageCover } from '@/components/shared/PageLayout';
 import InView from '@/components/InView';
+import Link from 'next/link';
+import { getLocale } from 'next-intl/server';
+import { toLocalePath } from '@/i18n/paths';
 
-export default function PoliciesPage() {
+export default async function PoliciesPage() {
+  const locale = await getLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const isLt = currentLocale === 'lt';
+
+  const content = isLt
+    ? {
+        pageTitle: 'Politikos',
+        deliveryTitle: 'Pristatymas',
+        standardDeliveryTitle: 'Standartinis pristatymas',
+        standardDeliveryBody: 'Standartinis pristatymas paprastai trunka 3-5 darbo dienas.',
+        expressDeliveryTitle: 'Skubus pristatymas',
+        expressDeliveryBody:
+          'Skubus pristatymas galimas pasirinktose vietovėse. Pristatymo terminas 2-3 darbo dienos, taikomas papildomas mokestis.',
+        shippingCostsTitle: 'Pristatymo kaina',
+        shippingCostsBody:
+          'Pristatymo kaina apskaičiuojama pagal užsakymo svorį, matmenis ir pristatymo adresą. Tiksli suma pateikiama atsiskaitymo metu.',
+        paymentTitle: 'Apmokėjimas',
+        acceptedMethodsTitle: 'Priimami apmokėjimo būdai',
+        acceptedMethodsBody:
+          'Priimame Visa, Mastercard, Apple Pay / Google Pay (per Stripe), PayPal ir bankinį pavedimą (pagal užklausą).',
+        paymentSecurityTitle: 'Mokėjimo saugumas',
+        paymentSecurityBody:
+          'Visi mokėjimai apdorojami per saugias mokėjimo sistemas, naudojant SSL šifravimą. Jūsų kortelės duomenų nesaugome.',
+        invoicesTitle: 'Sąskaitos faktūros',
+        invoicesBody:
+          'Sąskaita faktūra išsiunčiama el. paštu po mokėjimo patvirtinimo. Jei reikalinga PVM sąskaita įmonei, susisiekite su mumis ir pateikite įmonės duomenis.',
+        refundTitle: 'Grąžinimas',
+        refundBody:
+          'Nenaudotas prekes originalioje pakuotėje galima grąžinti per 30 kalendorinių dienų. Individualūs ir pagal matmenis gaminami užsakymai negrąžinami, išskyrus gamybinio broko atvejus. Norėdami inicijuoti grąžinimą, susisiekite su klientų aptarnavimo komanda ir pateikite užsakymo numerį bei grąžinimo priežastį. Patvirtinus grąžinimą, atsiųsime tolesnes instrukcijas. Lėšos grąžinamos per 5-7 darbo dienas nuo grąžintos prekės gavimo.',
+        termsLinkLabel: 'Taisyklės ir sąlygos',
+      }
+    : {
+        pageTitle: 'Policies',
+        deliveryTitle: 'Delivery',
+        standardDeliveryTitle: 'Standard Delivery',
+        standardDeliveryBody: 'Standard delivery usually takes 3-5 business days.',
+        expressDeliveryTitle: 'Express Delivery',
+        expressDeliveryBody:
+          'Express delivery is available for select locations. Delivery time is 2-3 business days with additional fees.',
+        shippingCostsTitle: 'Shipping Costs',
+        shippingCostsBody:
+          'Shipping costs are calculated based on order weight, dimensions, and destination. Final cost is shown at checkout.',
+        paymentTitle: 'Payment',
+        acceptedMethodsTitle: 'Accepted Payment Methods',
+        acceptedMethodsBody:
+          'We accept Visa, Mastercard, Apple Pay / Google Pay (via Stripe), PayPal, and bank transfers (on request).',
+        paymentSecurityTitle: 'Payment Security',
+        paymentSecurityBody:
+          'All payments are processed through secure payment gateways using SSL encryption. We do not store your credit card information.',
+        invoicesTitle: 'Invoices',
+        invoicesBody:
+          'An invoice is sent to your email after payment confirmation. For businesses requiring VAT invoices, please contact us with your company details.',
+        refundTitle: 'Refund',
+        refundBody:
+          'We offer a 30-day return policy for unused products in their original packaging. Custom orders and cut-to-size products are non-refundable unless there is a manufacturing defect. To initiate a return, contact our customer service team with your order number and reason for return. Once approved, you will receive return instructions. Refunds are processed within 5-7 business days after we receive the returned items.',
+        termsLinkLabel: 'Terms & Conditions',
+      };
+
   return (
     <main className="min-h-screen bg-[#E1E1E1]">
       {/* Cover Section */}
@@ -11,44 +72,44 @@ export default function PoliciesPage() {
             className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616] hero-seq-item hero-seq-right"
             style={{ fontVariationSettings: "'opsz' 14", animationDelay: '0ms' }}
           >
-            Policies
+            {content.pageTitle}
           </h1>
         </PageCover>
       </InView>
 
       {/* Content */}
       <InView className="hero-animate-root">
-      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[40px] pb-[80px] sm:pb-[120px]">
+      <div className="max-w-[1440px] mx-auto px-[16px] sm:px-[40px] pt-[20px] sm:pt-[24px] pb-[80px] sm:pb-[120px]">
         <div className="grid grid-cols-1 sm:grid-cols-[344px_1fr] gap-[24px] sm:gap-[40px]">
           {/* Delivery Section */}
           <div className="sm:col-start-1 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             <h2 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.3] tracking-[0.14px] sm:tracking-[0.16px] uppercase text-[#161616]">
-              Delivery
+              {content.deliveryTitle}
             </h2>
           </div>
           <div className="sm:col-start-2 space-y-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '160ms' }}>
             <div>
               <h3 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.5] text-[#161616] mb-[8px]">
-                Standard Delivery
+                {content.standardDeliveryTitle}
               </h3>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                Standard delivery takes 3-5 business days within the UK.
+                {content.standardDeliveryBody}
               </p>
             </div>
             <div>
               <h3 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.5] text-[#161616] mb-[8px]">
-                Express Delivery
+                {content.expressDeliveryTitle}
               </h3>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                Express delivery is available for select locations. Delivery time is 2-3 business days with additional fees.
+                {content.expressDeliveryBody}
               </p>
             </div>
             <div>
               <h3 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.5] text-[#161616] mb-[8px]">
-                Shipping Costs
+                {content.shippingCostsTitle}
               </h3>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                Shipping costs are calculated based on order weight, dimensions, and destination. Free shipping is available for orders over €500 within the UK (mainland).
+                {content.shippingCostsBody}
               </p>
             </div>
           </div>
@@ -59,32 +120,32 @@ export default function PoliciesPage() {
           {/* Payment Section */}
           <div className="sm:col-start-1 hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
             <h2 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.3] tracking-[0.14px] sm:tracking-[0.16px] uppercase text-[#161616]">
-              Payment
+              {content.paymentTitle}
             </h2>
           </div>
           <div className="sm:col-start-2 space-y-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '480ms' }}>
             <div>
               <h3 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.5] text-[#161616] mb-[8px]">
-                Accepted Payment Methods
+                {content.acceptedMethodsTitle}
               </h3>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                We accept Visa, Mastercard, Apple Pay / Google Pay (via Stripe), PayPal, and bank transfers (on request).
+                {content.acceptedMethodsBody}
               </p>
             </div>
             <div>
               <h3 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.5] text-[#161616] mb-[8px]">
-                Payment Security
+                {content.paymentSecurityTitle}
               </h3>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                All payments are processed through secure payment gateways using SSL encryption. We do not store your credit card information.
+                {content.paymentSecurityBody}
               </p>
             </div>
             <div>
               <h3 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.5] text-[#161616] mb-[8px]">
-                Invoices
+                {content.invoicesTitle}
               </h3>
               <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-                An invoice will be sent to your email after payment confirmation. For businesses requiring VAT invoices, please contact us with your company details.
+                {content.invoicesBody}
               </p>
             </div>
           </div>
@@ -95,13 +156,19 @@ export default function PoliciesPage() {
           {/* Refund Section */}
           <div className="sm:col-start-1 hero-seq-item hero-seq-right" style={{ animationDelay: '640ms' }}>
             <h2 className="font-['Outfit'] font-normal text-[14px] sm:text-[16px] leading-[1.3] tracking-[0.14px] sm:tracking-[0.16px] uppercase text-[#161616]">
-              Refund
+              {content.refundTitle}
             </h2>
           </div>
           <div className="sm:col-start-2 hero-seq-item hero-seq-right" style={{ animationDelay: '800ms' }}>
             <p className="font-['Outfit'] font-light text-[14px] leading-[1.5] text-[#161616]">
-              We offer a 30-day return policy for unused products in their original packaging. Custom orders and cut-to-size products are non-refundable unless there is a manufacturing defect. To initiate a return, contact our customer service team with your order number and reason for return. Once approved, you will receive instructions for shipping the items back. Refunds are processed within 5-7 business days after we receive the returned items. Shipping costs for returns are the responsibility of the customer unless the return is due to our error or a defective product. Items must be returned in the same condition as received, with all original packaging and documentation.
+              {content.refundBody}
             </p>
+            <Link
+              href={toLocalePath('/policies/terms', currentLocale)}
+              className="mt-[12px] inline-block font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] underline"
+            >
+              {content.termsLinkLabel}
+            </Link>
           </div>
         </div>
       </div>

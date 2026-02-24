@@ -128,6 +128,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale}>
       <head>
+        <meta name="verify-paysera" content="ab9428f402b9ca4c535e6f0fde7b1986" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

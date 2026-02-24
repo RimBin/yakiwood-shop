@@ -2,7 +2,7 @@
 
 import React, { Suspense, useMemo, useState, useEffect, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
 import { getLocalizedColorName, getLocalizedProfileName } from '@/lib/products.supabase';
@@ -16,6 +16,8 @@ interface ProfileModelProps {
   variantKey: string;
   autoRotate?: boolean;
 }
+
+const DEFAULT_CONFIGURATOR_GLB_PATH = '/models/configurator/model.glb';
 
 function hashStringToSeed(value: string): number {
   let hash = 2166136261;
@@ -257,10 +259,104 @@ function ProfileModel({ color, finish, variantKey, autoRotate = true }: ProfileM
   );
 }
 
+function cloneSceneWithUniqueMaterials(scene: THREE.Group): THREE.Group {
+  const cloned = scene.clone(true);
+
+  cloned.traverse((object) => {
+    const mesh = object as THREE.Mesh;
+    if (!mesh.isMesh || !mesh.material) return;
+
+    if (Array.isArray(mesh.material)) {
+      mesh.material = mesh.material.map((material) => material.clone());
+      return;
+    }
+
+    mesh.material = mesh.material.clone();
+  });
+
+  return cloned;
+}
+
+function getFinishSurfacePreset(finish: ProductProfileVariant | null): { roughness: number; metalness: number } {
+  if (!finish) return { roughness: 0.78, metalness: 0.08 };
+
+  const token = normalizeProfileHint([finish.code, finish.name, finish.nameEn, finish.nameLt].filter(Boolean).join(' '));
+
+  if (token.includes('matte') || token.includes('mat') || token.includes('natur')) {
+    return { roughness: 0.86, metalness: 0.04 };
+  }
+
+  if (token.includes('semi') || token.includes('sat')) {
+    return { roughness: 0.62, metalness: 0.08 };
+  }
+
+  if (token.includes('gloss') || token.includes('polish')) {
+    return { roughness: 0.42, metalness: 0.12 };
+  }
+
+  return { roughness: 0.74, metalness: 0.08 };
+}
+
+interface GLBProfileModelProps {
+  modelUrl: string;
+  color: string;
+  finish: ProductProfileVariant | null;
+  autoRotate?: boolean;
+}
+
+function GLBProfileModel({ modelUrl, color, finish, autoRotate = true }: GLBProfileModelProps) {
+  const groupRef = useRef<THREE.Group | null>(null);
+  const gltf = useGLTF(modelUrl) as { scene: THREE.Group };
+
+  const modelScene = useMemo(() => cloneSceneWithUniqueMaterials(gltf.scene), [gltf.scene]);
+
+  useEffect(() => {
+    const surface = getFinishSurfacePreset(finish);
+
+    modelScene.traverse((object) => {
+      const mesh = object as THREE.Mesh;
+      if (!mesh.isMesh || !mesh.material) return;
+
+      const applyMaterial = (material: THREE.Material) => {
+        const standardMaterial = material as THREE.MeshStandardMaterial;
+
+        if ('color' in standardMaterial && standardMaterial.color) {
+          standardMaterial.color.set(color);
+        }
+
+        if ('roughness' in standardMaterial) {
+          standardMaterial.roughness = surface.roughness;
+        }
+
+        if ('metalness' in standardMaterial) {
+          standardMaterial.metalness = surface.metalness;
+        }
+
+        standardMaterial.needsUpdate = true;
+      };
+
+      if (Array.isArray(mesh.material)) {
+        mesh.material.forEach(applyMaterial);
+      } else {
+        applyMaterial(mesh.material);
+      }
+    });
+  }, [color, finish, modelScene]);
+
+  useFrame((_, delta) => {
+    if (!autoRotate) return;
+    if (!groupRef.current) return;
+    groupRef.current.rotation.y += delta * 0.35;
+  });
+
+  return <primitive ref={groupRef} object={modelScene} />;
+}
+
 export interface Konfiguratorius3DProps {
   productId: string;
   availableColors: ProductColorVariant[];
   availableFinishes: ProductProfileVariant[];
+  modelUrl?: string;
   mode?: 'full' | 'viewport';
   selectedColorId?: string;
   selectedFinishId?: string;
@@ -276,6 +372,7 @@ export default function Konfiguratorius3D({
   productId,
   availableColors, 
   availableFinishes,
+  modelUrl = DEFAULT_CONFIGURATOR_GLB_PATH,
   mode = 'full',
   selectedColorId,
   selectedFinishId,
@@ -296,6 +393,8 @@ export default function Konfiguratorius3D({
     availableFinishes[0] || null
   );
   const [modelColor, setModelColor] = useState('#444444');
+  const [resolvedModelUrl, setResolvedModelUrl] = useState<string | null>(null);
+  const [isModelResolved, setIsModelResolved] = useState(false);
   const textureVariantKey = useMemo(
     () => [
       selectedColor?.id ?? 'default-color',
@@ -381,6 +480,47 @@ export default function Konfiguratorius3D({
       setModelColor(selectedColor.hex);
     }
   }, [selectedColor]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!modelUrl) {
+      setResolvedModelUrl(null);
+      setIsModelResolved(true);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    setIsModelResolved(false);
+
+    const resolve = async () => {
+      try {
+        const response = await fetch(modelUrl, { method: 'HEAD' });
+
+        if (!isMounted) return;
+
+        if (response.ok) {
+          setResolvedModelUrl(modelUrl);
+          useGLTF.preload(modelUrl);
+        } else {
+          setResolvedModelUrl(null);
+        }
+      } catch {
+        if (!isMounted) return;
+        setResolvedModelUrl(null);
+      } finally {
+        if (!isMounted) return;
+        setIsModelResolved(true);
+      }
+    };
+
+    resolve();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [modelUrl]);
 
   useEffect(() => {
     if (!productId) return;
@@ -555,7 +695,7 @@ export default function Konfiguratorius3D({
           canvasClassName ?? (mode === 'viewport' ? 'h-full' : 'h-[400px] md:h-[500px]')
         }`}
       >
-        {isLoading && (
+        {(isLoading || !isModelResolved) && (
           <div className="absolute inset-0 flex items-center justify-center bg-[#EAEAEA] z-10">
             <div className="flex flex-col items-center gap-3">
               <div className="w-12 h-12 border-4 border-[#BBBBBB] border-t-[#161616] rounded-full animate-spin" />
@@ -568,7 +708,11 @@ export default function Konfiguratorius3D({
           <ambientLight intensity={0.6} />
           <directionalLight position={[5, 5, 5]} intensity={1} />
           <Suspense fallback={null}>
-            <ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} />
+            {resolvedModelUrl ? (
+              <GLBProfileModel modelUrl={resolvedModelUrl} color={modelColor} finish={selectedFinish} autoRotate={true} />
+            ) : (
+              <ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} />
+            )}
           </Suspense>
           <OrbitControls 
             enablePan={true} 

@@ -300,6 +300,7 @@ export default function Cart() {
   const { items, removeItem, total, clear } = useCartStore();
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
+  const checkoutPath = toLocalePath('/checkout', currentLocale);
   const [couponCode, setCouponCode] = useState('');
   
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -307,21 +308,8 @@ export default function Cart() {
   const shipping = 0;
   const totalAmount = subtotal + shipping;
   
-  const handleCheckout = async () => {
-    try {
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items }),
-      });
-      
-      const { url } = await response.json();
-      if (url) {
-        window.location.href = url;
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-    }
+  const handleCheckout = () => {
+    window.location.href = checkoutPath;
   };
   
   return (

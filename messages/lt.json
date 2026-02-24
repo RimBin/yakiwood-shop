@@ -276,6 +276,7 @@
         "blog": "Straipsniai",
         "faqs": "DUK",
         "policies": "Politikos",
+        "terms": "Taisyklės ir sąlygos",
         "cookiePolicy": "Slapukų politika",
         "facebook": "Facebook",
         "instagram": "Instagram",
@@ -679,7 +680,8 @@
     "terms": {
       "agreeTo": "Sutinku su <terms>Taisyklėmis ir sąlygomis</terms> bei <privacy>Privatumo politika</privacy>",
       "terms": "Taisyklėmis ir sąlygomis",
-      "privacy": "Privatumo politika"
+      "privacy": "Privatumo politika",
+      "customMadeAcknowledgement": "I understand that custom-made products cannot be cancelled once production begins."
     },
     "termsAccordion": {
       "termsTitle": "Taisyklės ir sąlygos",

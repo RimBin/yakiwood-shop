@@ -3,6 +3,10 @@ export type AppLocale = 'en' | 'lt';
 type PrefixMap = Array<{ from: string; to: string }>;
 
 const enToLt: PrefixMap = [
+  { from: '/policies/terms', to: '/politikos/taisykles-ir-salygos' },
+  { from: '/policies/shipping', to: '/politikos/pristatymas' },
+  { from: '/policies/refund', to: '/politikos/grazinimas' },
+  { from: '/policies', to: '/politikos' },
   { from: '/admin/email-templates', to: '/administravimas/el-pasto-sablonai' },
   { from: '/admin/orders', to: '/administravimas/uzsakymai' },
   { from: '/admin/inventory', to: '/administravimas/sandelys' },
