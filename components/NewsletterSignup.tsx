@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { trackEvent } from '@/lib/analytics';
 
 interface NewsletterSignupProps {
@@ -15,6 +16,8 @@ export default function NewsletterSignup({
   showTitle = true,
   className = '',
 }: NewsletterSignupProps) {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [consent, setConsent] = useState(false);
@@ -37,12 +40,12 @@ export default function NewsletterSignup({
 
     // Validation
     if (!email || !validateEmail(email)) {
-      setMessage({ type: 'error', text: 'Prašome įvesti galiojantį el. pašto adresą' });
+      setMessage({ type: 'error', text: isEn ? 'Please enter a valid email address' : 'Prašome įvesti galiojantį el. pašto adresą' });
       return;
     }
 
     if (!consent) {
-      setMessage({ type: 'error', text: 'Prašome sutikti gauti naujienas' });
+      setMessage({ type: 'error', text: isEn ? 'Please agree to receive updates' : 'Prašome sutikti gauti naujienas' });
       return;
     }
 
@@ -70,7 +73,7 @@ export default function NewsletterSignup({
           source: variant,
         });
 
-        setMessage({ type: 'success', text: 'Sėkmingai užsiprenumeravote naujienas!' });
+        setMessage({ type: 'success', text: isEn ? 'Successfully subscribed to updates!' : 'Sėkmingai užsiprenumeravote naujienas!' });
         setEmail('');
         setName('');
         setConsent(false);
@@ -82,7 +85,7 @@ export default function NewsletterSignup({
 
         setMessage({ 
           type: 'error', 
-          text: data.error || 'Įvyko klaida. Bandykite dar kartą.' 
+          text: data.error || (isEn ? 'Something went wrong. Please try again.' : 'Įvyko klaida. Bandykite dar kartą.') 
         });
       }
     } catch (error) {
@@ -90,7 +93,7 @@ export default function NewsletterSignup({
         source: variant,
         status: 'network_error',
       });
-      setMessage({ type: 'error', text: 'Įvyko klaida. Bandykite dar kartą.' });
+      setMessage({ type: 'error', text: isEn ? 'Something went wrong. Please try again.' : 'Įvyko klaida. Bandykite dar kartą.' });
     } finally {
       setLoading(false);
     }
@@ -107,10 +110,10 @@ export default function NewsletterSignup({
       {showTitle && (
         <div className="mb-4">
           <h3 className="text-2xl font-['DM_Sans'] font-medium tracking-[-0.96px] text-[#161616] mb-2">
-            Gaukite naujienas
+            {isEn ? 'Get updates' : 'Gaukite naujienas'}
           </h3>
           <p className="text-sm font-['DM_Sans'] text-[#535353]">
-            Sužinokite apie naujus produktus ir pasiūlymus
+            {isEn ? 'Be the first to hear about new products and offers' : 'Sužinokite apie naujus produktus ir pasiūlymus'}
           </p>
         </div>
       )}
@@ -119,14 +122,14 @@ export default function NewsletterSignup({
         {/* Name field (optional) */}
         <div>
           <label htmlFor="newsletter-name" className="sr-only">
-            Vardas
+            {isEn ? 'Name' : 'Vardas'}
           </label>
           <input
             type="text"
             id="newsletter-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Vardas (neprivaloma)"
+            placeholder={isEn ? 'Name (optional)' : 'Vardas (neprivaloma)'}
             className="w-full px-4 py-3 border border-[#E1E1E1] rounded-[12px] font-['DM_Sans'] text-[#161616] placeholder:text-[#BBBBBB] focus:outline-none focus:ring-2 focus:ring-[#161616] focus:border-transparent"
           />
         </div>
@@ -134,14 +137,14 @@ export default function NewsletterSignup({
         {/* Email field */}
         <div>
           <label htmlFor="newsletter-email" className="sr-only">
-            El. paštas
+            {isEn ? 'Email' : 'El. paštas'}
           </label>
           <input
             type="email"
             id="newsletter-email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Jūsų el. paštas"
+            placeholder={isEn ? 'Your email' : 'Jūsų el. paštas'}
             required
             className="w-full px-4 py-3 border border-[#E1E1E1] rounded-[12px] font-['DM_Sans'] text-[#161616] placeholder:text-[#BBBBBB] focus:outline-none focus:ring-2 focus:ring-[#161616] focus:border-transparent"
           />
@@ -161,12 +164,12 @@ export default function NewsletterSignup({
             htmlFor="newsletter-consent"
             className="text-sm font-['DM_Sans'] text-[#535353] leading-tight"
           >
-            Sutinku gauti naujienas ir sutinku su{' '}
+            {isEn ? 'I agree to receive updates and accept the ' : 'Sutinku gauti naujienas ir sutinku su '}
             <Link
               href="/policies"
               className="text-[#161616] underline hover:no-underline"
             >
-              privatumo politika
+              {isEn ? 'privacy policy' : 'privatumo politika'}
             </Link>
           </label>
         </div>
@@ -177,7 +180,7 @@ export default function NewsletterSignup({
           disabled={loading}
           className="w-full px-6 py-3 bg-[#161616] text-white rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#2a2a2a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Prenumeruojama...' : 'Prenumeruoti'}
+          {loading ? (isEn ? 'Subscribing...' : 'Prenumeruojama...') : (isEn ? 'Subscribe' : 'Prenumeruoti')}
         </button>
 
         {/* Message display */}

@@ -18,9 +18,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const t = useTranslations('account');
+  const currentLocale: AppLocale = pathname.startsWith('/lt') ? 'lt' : 'en';
+  const tr = (lt: string, en: string) => (currentLocale === 'en' ? en : lt);
 
   const normalizeAuthError = (message?: string | null) => {
-    const fallback = 'Klaida: Nepavyko prisijungti';
+    const fallback = tr('Klaida: Nepavyko prisijungti', 'Error: Failed to sign in');
     const raw = String(message || '').trim();
     if (!raw) {
       return fallback;
@@ -31,10 +33,8 @@ export default function LoginPage() {
       return raw;
     }
 
-    return `Klaida: ${raw}`;
+    return `${currentLocale === 'en' ? 'Error' : 'Klaida'}: ${raw}`;
   };
-
-  const currentLocale: AppLocale = pathname.startsWith('/lt') ? 'lt' : 'en';
 
   const withTimeout = async <T,>(promise: Promise<T>, timeoutMs = 3500): Promise<T> => {
     return await Promise.race<T>([
@@ -42,7 +42,7 @@ export default function LoginPage() {
       new Promise<T>((_, reject) => {
         const timer = setTimeout(() => {
           clearTimeout(timer);
-          reject(new Error('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.'));
+          reject(new Error(tr('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.', 'Sign-in request timed out. Please try again.')));
         }, timeoutMs);
       }),
     ]);
@@ -62,7 +62,7 @@ export default function LoginPage() {
     try {
       const supabase = createClient();
       if (!supabase) {
-        throw new Error('Supabase nesukonfigūruotas arba raktai neteisingi (.env.local).');
+        throw new Error(tr('Supabase nesukonfigūruotas arba raktai neteisingi (.env.local).', 'Supabase is not configured or keys are invalid (.env.local).'));
       }
 
       const defaultRedirect = toLocalePath('/account', currentLocale);
@@ -78,10 +78,10 @@ export default function LoginPage() {
       });
 
       if (oauthError) {
-        throw new Error(oauthError.message || 'Nepavyko prisijungti su Google');
+        throw new Error(oauthError.message || tr('Nepavyko prisijungti su Google', 'Failed to sign in with Google'));
       }
     } catch (e: any) {
-      setError(normalizeAuthError(e?.message || 'Nepavyko prisijungti su Google'));
+      setError(normalizeAuthError(e?.message || tr('Nepavyko prisijungti su Google', 'Failed to sign in with Google')));
       setLoading(false);
     }
   };
@@ -93,14 +93,14 @@ export default function LoginPage() {
     let didTimeout = false;
     const failSafeTimer = window.setTimeout(() => {
       didTimeout = true;
-      setError(normalizeAuthError('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.'));
+      setError(normalizeAuthError(tr('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.', 'Sign-in request timed out. Please try again.')));
       setLoading(false);
     }, 4000);
 
     try {
       const supabase = createClient();
       if (!supabase) {
-        throw new Error('Supabase nesukonfigūruotas arba raktai neteisingi (.env.local).');
+        throw new Error(tr('Supabase nesukonfigūruotas arba raktai neteisingi (.env.local).', 'Supabase is not configured or keys are invalid (.env.local).'));
       }
 
       const { error: signInError } = await withTimeout(supabase.auth.signInWithPassword({
@@ -116,9 +116,9 @@ export default function LoginPage() {
       if (signInError) {
         const msg = String(signInError.message || '')
         if (msg.toLowerCase().includes('invalid api key')) {
-          throw new Error('Supabase raktai neteisingi (Invalid API key). Patikrinkite NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+          throw new Error(tr('Supabase raktai neteisingi (Invalid API key). Patikrinkite NEXT_PUBLIC_SUPABASE_ANON_KEY.', 'Supabase keys are invalid (Invalid API key). Check NEXT_PUBLIC_SUPABASE_ANON_KEY.'));
         }
-        throw new Error('Neteisingas el. paštas arba slaptažodis');
+        throw new Error(tr('Neteisingas el. paštas arba slaptažodis', 'Incorrect email or password'));
       }
 
       const defaultRedirect = toLocalePath('/account', currentLocale);
@@ -126,7 +126,7 @@ export default function LoginPage() {
       router.push(redirectTo);
     } catch (e: any) {
       clearTimeout(failSafeTimer);
-      setError(normalizeAuthError(e?.message || 'Nepavyko prisijungti'));
+      setError(normalizeAuthError(e?.message || tr('Nepavyko prisijungti', 'Failed to sign in')));
       setLoading(false);
     }
   };
@@ -137,7 +137,7 @@ export default function LoginPage() {
     let didTimeout = false;
     const failSafeTimer = window.setTimeout(() => {
       didTimeout = true;
-      setError(normalizeAuthError('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.'));
+      setError(normalizeAuthError(tr('Prisijungimo užklausa užtruko per ilgai. Bandykite dar kartą.', 'Sign-in request timed out. Please try again.')));
       setLoading(false);
     }, 4000);
 
@@ -153,7 +153,7 @@ export default function LoginPage() {
     try {
       const supabase = createClient();
       if (!supabase) {
-        throw new Error('Supabase nesukonfigūruotas arba raktai neteisingi (.env.local).');
+        throw new Error(tr('Supabase nesukonfigūruotas arba raktai neteisingi (.env.local).', 'Supabase is not configured or keys are invalid (.env.local).'));
       }
 
       const { error: signInError } = await withTimeout(supabase.auth.signInWithPassword({
@@ -169,9 +169,9 @@ export default function LoginPage() {
       if (signInError) {
         const msg = String(signInError.message || '')
         if (msg.toLowerCase().includes('invalid api key')) {
-          throw new Error('Supabase raktai neteisingi (Invalid API key). Patikrinkite NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+          throw new Error(tr('Supabase raktai neteisingi (Invalid API key). Patikrinkite NEXT_PUBLIC_SUPABASE_ANON_KEY.', 'Supabase keys are invalid (Invalid API key). Check NEXT_PUBLIC_SUPABASE_ANON_KEY.'));
         }
-        throw new Error('Demo vartotojas nerastas Supabase. Paleiskite `npm run demo:bootstrap-users` arba susikurkite vartotojus Supabase Auth dalyje.');
+        throw new Error(tr('Demo vartotojas nerastas Supabase. Paleiskite `npm run demo:bootstrap-users` arba susikurkite vartotojus Supabase Auth dalyje.', 'Demo user not found in Supabase. Run `npm run demo:bootstrap-users` or create users in Supabase Auth.'));
       }
 
       const defaultRedirect = role === 'admin'
@@ -181,7 +181,7 @@ export default function LoginPage() {
       router.push(redirectTo);
     } catch (e: any) {
       clearTimeout(failSafeTimer);
-      setError(normalizeAuthError(e?.message || 'Nepavyko prisijungti'));
+      setError(normalizeAuthError(e?.message || tr('Nepavyko prisijungti', 'Failed to sign in')));
       setLoading(false);
     }
   };

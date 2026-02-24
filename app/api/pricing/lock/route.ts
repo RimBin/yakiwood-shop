@@ -209,11 +209,20 @@ export async function POST(req: NextRequest) {
           })
 
           if (!quote) {
-            return { error: 'Kaina nerasta šiai konfigūracijai', itemId: item.id }
-          }
+            const base = product ? Number(product.base_price) : NaN
+            const sale = product && product.sale_price !== null && product.sale_price !== undefined ? Number(product.sale_price) : NaN
+            const fallbackUnit = Number.isFinite(sale) && sale > 0 ? sale : Number.isFinite(base) ? base : 0
 
-          unitPriceEur = quote.unitPricePerBoard
-          resolvedBy = quote.resolvedBy
+            if (!(Number.isFinite(fallbackUnit) && fallbackUnit > 0)) {
+              return { error: 'Kaina nerasta šiai konfigūracijai', itemId: item.id }
+            }
+
+            unitPriceEur = fallbackUnit
+            resolvedBy = { source: 'fallback_product_price' }
+          } else {
+            unitPriceEur = quote.unitPricePerBoard
+            resolvedBy = quote.resolvedBy
+          }
         } else {
           // Standard product pricing from catalog.
           const base = product ? Number(product.base_price) : NaN

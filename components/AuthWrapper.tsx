@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Header, Footer } from '@/components/shared';
 import { usePathname } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import AnimatedLogoLoader from '@/components/ui/AnimatedLogoLoader';
 
 function UnderMaintenanceScreen({
@@ -104,6 +105,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
+  const locale = useLocale();
 
   // Preview gate is disabled by default (including production). Enable explicitly via env.
   // NOTE: This is a client component; only NEXT_PUBLIC_* env vars are available.
@@ -139,7 +141,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   };
 
   if (isLoading) {
-    return <AnimatedLogoLoader fullScreen text="Kraunama..." />;
+    return <AnimatedLogoLoader fullScreen text={locale === 'en' ? 'Loading...' : 'Kraunama...'} />;
   }
 
   if (!isAuthenticated) {

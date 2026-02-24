@@ -1,21 +1,47 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { Breadcrumbs } from '@/components/ui';
 
 function UnsubscribeContent() {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
-  
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
+  const t = {
+    missingEmail: isEn ? 'Email address not found' : 'El. pašto adresas nerastas',
+    unsubscribeFailed: isEn ? 'Failed to unsubscribe' : 'Nepavyko atsisakyti prenumeratos',
+    genericError: isEn ? 'Something went wrong. Please try again.' : 'Įvyko klaida. Bandykite dar kartą.',
+    invalidLinkTitle: isEn ? 'Invalid link' : 'Neteisinga nuoroda',
+    invalidLinkBody: isEn
+      ? 'To unsubscribe, please use the link from the email message.'
+      : 'Norėdami atsisakyti prenumeratos, naudokite nuorodą iš el. laiško.',
+    backHome: isEn ? 'Back to home' : 'Grįžti į pradžią',
+    successTitle: isEn ? 'Subscription canceled' : 'Prenumerata atšaukta',
+    successBody: isEn ? 'No more newsletters will be sent to:' : 'Daugiau nebebus siunčiami naujienlaiškiai į:',
+    resubscribePrefix: isEn ? 'Changed your mind? You can ' : 'Persigalvojote? Galite ',
+    resubscribeAction: isEn ? 'subscribe again' : 'vėl prenumeruoti',
+    pageTitle: isEn ? 'Unsubscribe' : 'Atsisakyti prenumeratos',
+    confirmQuestion: isEn ? 'Are you sure you want to unsubscribe from updates?' : 'Ar tikrai norite atsisakyti naujienų prenumeratos?',
+    working: isEn ? 'Processing...' : 'Vykdoma...',
+    confirmAction: isEn ? 'Yes, unsubscribe me' : 'Taip, atsisakyti prenumeratos',
+    cancelAction: isEn ? 'No, go back' : 'Ne, grįžti atgal',
+    footer: isEn
+      ? 'After unsubscribing, you will no longer receive Yakiwood updates. You can subscribe again anytime.'
+      : 'Atsisakius prenumeratos, nebegausite naujienų iš Yakiwood. Galite bet kada grįžti ir vėl prenumeruoti.',
+  };
+
   const handleUnsubscribe = async () => {
     if (!email) {
-      setError('El. pašto adresas nerastas');
+      setError(t.missingEmail);
       return;
     }
 
@@ -36,10 +62,10 @@ function UnsubscribeContent() {
       if (response.ok && data.success) {
         setSuccess(true);
       } else {
-        setError(data.error || 'Nepavyko atsisakyti prenumeratos');
+        setError(data.error || t.unsubscribeFailed);
       }
-    } catch (error) {
-      setError('Įvyko klaida. Bandykite dar kartą.');
+    } catch {
+      setError(t.genericError);
     } finally {
       setLoading(false);
     }
@@ -50,16 +76,14 @@ function UnsubscribeContent() {
       <div className="min-h-screen flex items-center justify-center px-6 bg-[#E1E1E1]">
         <div className="max-w-md w-full bg-white p-8 rounded-[24px] shadow-lg text-center">
           <h1 className="text-3xl font-['DM_Sans'] font-medium tracking-[-1.2px] text-[#161616] mb-4">
-            Neteisingas nuoroda
+            {t.invalidLinkTitle}
           </h1>
-          <p className="text-base font-['DM_Sans'] text-[#535353] mb-6">
-            Norėdami atsisakyti prenumeratos, naudokite nuorodą iš el. laiško.
-          </p>
+          <p className="text-base font-['DM_Sans'] text-[#535353] mb-6">{t.invalidLinkBody}</p>
           <Link
             href="/"
             className="inline-block px-6 py-3 bg-[#161616] text-white rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#2a2a2a] transition-colors"
           >
-            Grįžti į pradžią
+            {t.backHome}
           </Link>
         </div>
       </div>
@@ -71,43 +95,31 @@ function UnsubscribeContent() {
       <div className="min-h-screen flex items-center justify-center px-6 bg-[#E1E1E1]">
         <div className="max-w-md w-full bg-white p-8 rounded-[24px] shadow-lg text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-8 h-8 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
           <h1 className="text-3xl font-['DM_Sans'] font-medium tracking-[-1.2px] text-[#161616] mb-4">
-            Prenumerata atšaukta
+            {t.successTitle}
           </h1>
-          <p className="text-base font-['DM_Sans'] text-[#535353] mb-2">
-            Daugiau nebebus siunčiami naujienlaiškiai į:
-          </p>
-          <p className="text-base font-['DM_Sans'] font-medium text-[#161616] mb-6">
-            {email}
-          </p>
+          <p className="text-base font-['DM_Sans'] text-[#535353] mb-2">{t.successBody}</p>
+          <p className="text-base font-['DM_Sans'] font-medium text-[#161616] mb-6">{email}</p>
           <p className="text-sm font-['DM_Sans'] text-[#535353] mb-6">
-            Persidomėjote? Galite{' '}
+            {t.resubscribePrefix}
             <button
-              onClick={() => window.location.href = `/?resubscribe=${email}`}
+              onClick={() => {
+                window.location.href = `/?resubscribe=${email}`;
+              }}
               className="text-[#161616] underline hover:no-underline"
             >
-              vėl prenumeruoti
+              {t.resubscribeAction}
             </button>
           </p>
           <Link
             href="/"
             className="inline-block px-6 py-3 bg-[#161616] text-white rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#2a2a2a] transition-colors"
           >
-            Grįžti į pradžią
+            {t.backHome}
           </Link>
         </div>
       </div>
@@ -118,14 +130,10 @@ function UnsubscribeContent() {
     <div className="min-h-screen flex items-center justify-center px-6 bg-[#E1E1E1]">
       <div className="max-w-md w-full bg-white p-8 rounded-[24px] shadow-lg">
         <h1 className="text-3xl font-['DM_Sans'] font-medium tracking-[-1.2px] text-[#161616] mb-4 text-center">
-          Atsisakyti prenumeratos
+          {t.pageTitle}
         </h1>
-        <p className="text-base font-['DM_Sans'] text-[#535353] mb-2 text-center">
-          Ar tikrai norite atsisakyti naujienų prenumeratos?
-        </p>
-        <p className="text-base font-['DM_Sans'] font-medium text-[#161616] mb-6 text-center">
-          {email}
-        </p>
+        <p className="text-base font-['DM_Sans'] text-[#535353] mb-2 text-center">{t.confirmQuestion}</p>
+        <p className="text-base font-['DM_Sans'] font-medium text-[#161616] mb-6 text-center">{email}</p>
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-[12px]">
@@ -139,37 +147,49 @@ function UnsubscribeContent() {
             disabled={loading}
             className="w-full px-6 py-3 bg-[#161616] text-white rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#2a2a2a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Vykdoma...' : 'Taip, atsisakyti prenumeratos'}
+            {loading ? t.working : t.confirmAction}
           </button>
           <Link
             href="/"
             className="block w-full px-6 py-3 bg-white text-[#161616] border border-[#E1E1E1] rounded-[100px] font-['DM_Sans'] font-medium hover:bg-[#EAEAEA] transition-colors text-center"
           >
-            Ne, grįžti atgal
+            {t.cancelAction}
           </Link>
         </div>
 
-        <p className="text-xs font-['DM_Sans'] text-[#BBBBBB] text-center mt-6">
-          Atsisakius prenumeratos, nebegausite naujienų iš Yakiwood. Galite bet kada grįžti ir vėl prenumeruoti.
-        </p>
+        <p className="text-xs font-['DM_Sans'] text-[#BBBBBB] text-center mt-6">{t.footer}</p>
       </div>
     </div>
   );
 }
+
 export default function UnsubscribePage() {
+  const locale = useLocale();
+  const isEn = locale === 'en';
+
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center px-6 bg-[#E1E1E1]">
-        <div className="font-['Outfit'] text-[16px] text-[#161616]">Kraunama...</div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center px-6 bg-[#E1E1E1]">
+          <div className="font-['Outfit'] text-[16px] text-[#161616]">{isEn ? 'Loading...' : 'Kraunama...'}</div>
+        </div>
+      }
+    >
       <>
         <Breadcrumbs
-          items={[
-            { label: 'Pagrindinis', href: '/' },
-            { label: 'Naujienos', href: '/naujienos' },
-            { label: 'Atsisakyti' },
-          ]}
+          items={
+            isEn
+              ? [
+                  { label: 'Home', href: '/' },
+                  { label: 'News', href: '/naujienos' },
+                  { label: 'Unsubscribe' },
+                ]
+              : [
+                  { label: 'Pagrindinis', href: '/' },
+                  { label: 'Naujienos', href: '/naujienos' },
+                  { label: 'Atsisakyti' },
+                ]
+          }
         />
         <UnsubscribeContent />
       </>
