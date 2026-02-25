@@ -37,6 +37,10 @@ export default function Header() {
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const navItems = [
     {
+      href: toLocalePath('/configurator3d', currentLocale),
+      label: t(locale === 'lt' ? 'nav.konfiguratorius3d' : 'nav.configurator3d'),
+    },
+    {
       href: toLocalePath('/products', currentLocale),
       label: t(locale === 'lt' ? 'nav.produktai' : 'nav.products'),
     },
@@ -55,10 +59,6 @@ export default function Header() {
     {
       href: toLocalePath('/blog', currentLocale),
       label: t(locale === 'lt' ? 'nav.straipsniai' : 'nav.blog'),
-    },
-    {
-      href: toLocalePath('/configurator3d', currentLocale),
-      label: t(locale === 'lt' ? 'nav.konfiguratorius3d' : 'nav.configurator3d'),
     },
     {
       href: toLocalePath('/about', currentLocale),
