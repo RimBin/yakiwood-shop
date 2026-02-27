@@ -746,6 +746,12 @@
     "messageError": "Failed to send message. Please try again.",
     "getInTouch": "Get in touch",
     "contactInfo": "Contact information",
+    "companyNameLabel": "Company name",
+    "addressLabel": "Address",
+    "companyCodeLabel": "Company code",
+    "vatCodeLabel": "VAT code",
+    "emailLabel": "Email",
+    "phoneLabel": "Phone",
     "officeAddress": "Office address",
     "businessHours": "Business hours",
     "privacyConsent": "I agree that my data will be processed directly by Yakiwood or shared with a sales agent located in my area in accordance with Yakiwood",
@@ -1289,7 +1295,10 @@
     "zoomOut": "Zoom out",
     "viewMode": "View mode",
     "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit fullscreen"
+    "exitFullscreen": "Exit fullscreen",
+    "downloadPdf": "Download PDF",
+    "downloadingPdf": "Generating PDF...",
+    "pdfError": "Failed to generate PDF"
   },
   "newsletter": {
     "title": "Newsletter",

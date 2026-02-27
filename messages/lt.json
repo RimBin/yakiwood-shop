@@ -938,6 +938,12 @@
     "messageError": "Nepavyko išsiųsti. Bandykite dar kartą.",
     "getInTouch": "Susisiekite",
     "contactInfo": "Kontaktinė informacija",
+    "companyNameLabel": "Įmonės pavadinimas",
+    "addressLabel": "Adresas",
+    "companyCodeLabel": "Įmonės kodas",
+    "vatCodeLabel": "PVM kodas",
+    "emailLabel": "El. paštas",
+    "phoneLabel": "Telefonas",
     "officeAddress": "Biuro adresas",
     "businessHours": "Darbo valandos",
     "privacyConsent": "Sutinku, kad mano duomenys būtų tvarkomi tiesiogiai Yakiwood arba bendrinami su pardavimo agentu, esančiu mano rajone, pagal Yakiwood",
@@ -1033,7 +1039,10 @@
     "nutolinti": "Nutolinti",
     "ziurejimoRezimas": "Žiūrėjimo režimas",
     "visoEkrano": "Visas ekranas",
-    "iseiti IsVisoEkrano": "Išeiti iš viso ekrano"
+    "iseiti IsVisoEkrano": "Išeiti iš viso ekrano",
+    "downloadPdf": "Atsisiųsti PDF",
+    "downloadingPdf": "Generuojamas PDF...",
+    "pdfError": "Nepavyko sugeneruoti PDF"
   },
   "newsletter": {
     "pavadinimas": "Naujienlaiškis",

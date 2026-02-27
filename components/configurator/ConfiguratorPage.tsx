@@ -14,10 +14,11 @@ import {
   type ProductProfileVariant,
 } from '@/lib/products.supabase';
 import { toLocalePath } from '@/i18n/paths';
+import { getProductModelUrl, getGenericModelUrl } from '@/lib/models';
 import InView from '@/components/InView';
 
 type DropdownOption = { value: string; label: string };
-const CONFIGURATOR_MODEL_URL = '/models/configurator/model.glb?v=20260223a';
+const CONFIGURATOR_MODEL_URL = getGenericModelUrl();
 
 function FilterDropdown({
   id,
@@ -433,6 +434,14 @@ export default function ConfiguratorPage() {
     return profiles.length > 0 ? profiles : fallbackProfiles;
   }, [product, fallbackProfiles]);
 
+  const productModelUrl = useMemo(
+    () =>
+      product
+        ? getProductModelUrl({ slug: product.slug, category: product.category, woodType: product.woodType })
+        : CONFIGURATOR_MODEL_URL,
+    [product]
+  );
+
   return (
     <main className="min-h-screen bg-[#E1E1E1]">
       <InView className="hero-animate-root">
@@ -588,7 +597,7 @@ export default function ConfiguratorPage() {
               productId={product?.id ?? 'demo'}
               availableColors={availableColors}
               availableFinishes={availableFinishes}
-              modelUrl={CONFIGURATOR_MODEL_URL}
+              modelUrl={productModelUrl}
               basePrice={product?.price}
               isLoading={isLoading}
             />

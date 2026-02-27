@@ -14,6 +14,8 @@ import { useToast } from '@/components/ui/Toast';
 import { useCartStore } from '@/lib/cart/store';
 import { trackEvent, trackProductView } from '@/lib/analytics';
 import Konfiguratorius3D from '@/components/Konfiguratorius3D';
+import type { Konfiguratorius3DHandle } from '@/components/Konfiguratorius3D';
+import { getProductModelUrl } from '@/lib/models';
 
 type InputMode = 'area' | 'boards';
 import type { UsageType } from '@/lib/pricing/configuration';
@@ -1498,6 +1500,7 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
                     selectedFinishId={selectedFinish?.id}
                     isLoading={loading3D}
                     mode="viewport"
+                    modelUrl={getProductModelUrl({ slug: product.slug, category: product.category, woodType: product.woodType })}
                     className="h-full"
                     canvasClassName="h-full"
                   />
@@ -1588,6 +1591,7 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
                       selectedFinishId={selectedFinish?.id}
                       isLoading={loading3D}
                       mode="viewport"
+                      modelUrl={getProductModelUrl({ slug: product.slug, category: product.category, woodType: product.woodType })}
                       className="h-full"
                       canvasClassName="h-full"
                     />

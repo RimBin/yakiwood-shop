@@ -1,7 +1,7 @@
 "use client";
 
-import React, { Suspense, useMemo, useState, useEffect, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import React, { Suspense, useMemo, useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
@@ -9,6 +9,7 @@ import { getLocalizedColorName, getLocalizedProfileName } from '@/lib/products.s
 import { useLocale, useTranslations } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
 import { trackEvent } from '@/lib/analytics';
+import { downloadConfigurationPDF, type ConfigurationPDFData } from '@/lib/configurator/pdf-generator';
 
 interface ProfileModelProps {
   color: string;
@@ -352,6 +353,12 @@ function GLBProfileModel({ modelUrl, color, finish, autoRotate = true }: GLBProf
   return <primitive ref={groupRef} object={modelScene} />;
 }
 
+/** Handle exposed by Konfiguratorius3D via React ref. */
+export interface Konfiguratorius3DHandle {
+  /** Capture the current 3D canvas as a PNG data-URL. */
+  takeScreenshot: () => string | null;
+}
+
 export interface Konfiguratorius3DProps {
   productId: string;
   availableColors: ProductColorVariant[];
@@ -368,7 +375,17 @@ export interface Konfiguratorius3DProps {
   basePrice?: number;
 }
 
-export default function Konfiguratorius3D({ 
+/**
+ * Internal helper rendered inside <Canvas> to expose the WebGL renderer
+ * so the parent can call `renderer.domElement.toDataURL()`.
+ */
+function RendererBridge({ onRenderer }: { onRenderer: (gl: THREE.WebGLRenderer) => void }) {
+  const { gl } = useThree();
+  useEffect(() => { onRenderer(gl); }, [gl, onRenderer]);
+  return null;
+}
+
+const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DProps>(function Konfiguratorius3D({
   productId,
   availableColors, 
   availableFinishes,
@@ -382,7 +399,7 @@ export default function Konfiguratorius3D({
   isLoading = false,
   canvasClassName,
   basePrice,
-}: Konfiguratorius3DProps) {
+}, ref) {
   const t = useTranslations();
   const locale = useLocale();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
@@ -406,6 +423,24 @@ export default function Konfiguratorius3D({
     [selectedColor?.id, selectedColor?.image, selectedColor?.name, selectedFinish?.id, selectedFinish?.code]
   );
 
+  // -- Screenshot support -------------------------------------------------
+  const glRef = useRef<THREE.WebGLRenderer | null>(null);
+  const handleRendererReady = useCallback((gl: THREE.WebGLRenderer) => {
+    glRef.current = gl;
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    takeScreenshot(): string | null {
+      const gl = glRef.current;
+      if (!gl) return null;
+      try {
+        return gl.domElement.toDataURL('image/png');
+      } catch {
+        return null;
+      }
+    },
+  }), []);
+
   const [inputMode, setInputMode] = useState<'boards' | 'area'>('boards');
   const [quantityBoards, setQuantityBoards] = useState<number>(1);
   const [targetAreaM2, setTargetAreaM2] = useState<number>(1);
@@ -427,6 +462,54 @@ export default function Konfiguratorius3D({
       rounding: 'ceil' | 'round' | 'floor';
     };
   }>(null);
+
+  // -- PDF download ---------------------------------------------------------
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const handleDownloadPdf = useCallback(async () => {
+    setPdfLoading(true);
+    try {
+      // Capture 3D screenshot
+      const gl = glRef.current;
+      let screenshotDataUrl: string | null = null;
+      if (gl) {
+        try { screenshotDataUrl = gl.domElement.toDataURL('image/png'); } catch { /* ignore */ }
+      }
+
+      const pdfData: ConfigurationPDFData = {
+        productName: productId,
+        colorName: selectedColor
+          ? getLocalizedColorName(selectedColor, currentLocale)
+          : '',
+        colorHex: selectedColor?.hex,
+        profileName: selectedFinish
+          ? getLocalizedProfileName(selectedFinish, currentLocale)
+          : '',
+        widthMm: selectedFinish?.dimensions?.width,
+        lengthMm: selectedFinish?.dimensions?.length,
+        thicknessMm: selectedFinish?.dimensions?.thickness,
+        pricePerM2: quote?.unitPricePerM2,
+        pricePerBoard: quote?.unitPricePerBoard,
+        quantityBoards: quote?.quantityBoards,
+        totalAreaM2: quote?.totalAreaM2,
+        lineTotal: quote?.lineTotal,
+        screenshotDataUrl,
+        configUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+      };
+
+      await downloadConfigurationPDF(pdfData, currentLocale);
+
+      trackEvent('configurator_download_pdf', {
+        product_id: productId,
+        color: selectedColor?.name,
+        profile: selectedFinish?.name,
+      });
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+    } finally {
+      setPdfLoading(false);
+    }
+  }, [productId, selectedColor, selectedFinish, quote, currentLocale]);
 
   const cartItems = useCartStore((state) => state.items);
 
@@ -704,7 +787,8 @@ export default function Konfiguratorius3D({
           </div>
         )}
         
-        <Canvas camera={{ position: [3, 2, 3], fov: 50 }}>
+        <Canvas camera={{ position: [3, 2, 3], fov: 50 }} gl={{ preserveDrawingBuffer: true }}>
+          <RendererBridge onRenderer={handleRendererReady} />
           <ambientLight intensity={0.6} />
           <directionalLight position={[5, 5, 5]} intensity={1} />
           <Suspense fallback={null}>
@@ -967,9 +1051,38 @@ export default function Konfiguratorius3D({
                 </div>
               </div>
             )}
+
+            {/* PDF download button */}
+            {selectedColor && selectedFinish && (
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={pdfLoading}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-[100px] border border-[#BBBBBB] bg-white px-6 py-3 font-['DM_Sans'] text-sm font-medium text-[#161616] transition-colors hover:bg-[#F9F9F9] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {pdfLoading ? (
+                  <>
+                    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    {t('configurator.downloadingPdf')}
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {t('configurator.downloadPdf')}
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </>
       )}
     </div>
   );
-}
+});
+
+export default Konfiguratorius3D;

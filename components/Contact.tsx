@@ -4,11 +4,24 @@ import React, { useState } from 'react';
 import { PageCover } from '@/components/shared/PageLayout';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import { trackEvent } from '@/lib/analytics';
 import InView from '@/components/InView';
 
 export default function Contact() {
   const t = useTranslations('contact');
+  const locale = useLocale();
+  const isLt = locale === 'lt';
+  const companyDetails = {
+    name: isLt ? 'UAB YAKIWOOD' : 'YAKIWOOD, LLC',
+    companyCode: '305636457',
+    vatCode: 'LT100013670911',
+    address: isLt
+      ? 'Butrimonių g. 7, LT-50218 Kaunas, Lietuva'
+      : 'Butrimoniu str. 7, LT-50218 Kaunas, Lithuania',
+    email: isLt ? 'info@yakiwood.lt' : 'shop@yakiwood.co.uk',
+    phone: '+370 675 64733',
+  };
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -98,7 +111,43 @@ export default function Contact() {
           {t('subtitle')}
         </p>
 
-        <div className="w-full max-w-[600px] hero-seq-item hero-seq-right" style={{ animationDelay: '220ms' }}>
+        <div className="w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-2 gap-[20px] md:gap-[24px] mb-[32px] md:mb-[40px]">
+          <div className="border border-[#BBBBBB] p-[20px] md:p-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '160ms' }}>
+            <h2 className="font-['DM_Sans'] font-normal text-[24px] md:text-[28px] leading-[1.1] tracking-[-0.8px] text-[#161616] mb-[16px]">
+              {t('contactInfo')}
+            </h2>
+            <div className="flex flex-col gap-[10px] font-['Outfit'] font-light text-[14px] md:text-[16px] leading-[1.4] tracking-[0.14px] text-[#161616]">
+              <p>
+                <span className="font-normal">{t('companyNameLabel')}: </span>
+                {companyDetails.name}
+              </p>
+              <p>
+                <span className="font-normal">{t('addressLabel')}: </span>
+                {companyDetails.address}
+              </p>
+              <p>
+                <span className="font-normal">{t('companyCodeLabel')}: </span>
+                {companyDetails.companyCode}
+              </p>
+              <p>
+                <span className="font-normal">{t('vatCodeLabel')}: </span>
+                {companyDetails.vatCode}
+              </p>
+              <p>
+                <span className="font-normal">{t('emailLabel')}: </span>
+                <a href={`mailto:${companyDetails.email}`} className="underline">
+                  {companyDetails.email}
+                </a>
+              </p>
+              <p>
+                <span className="font-normal">{t('phoneLabel')}: </span>
+                <a href={`tel:${companyDetails.phone.replace(/\s+/g, '')}`} className="underline">
+                  {companyDetails.phone}
+                </a>
+              </p>
+            </div>
+          </div>
+          <div className="w-full border border-[#BBBBBB] p-[20px] md:p-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '220ms' }}>
           {submitted ? (
             <div className="text-center py-[40px]">
               <p 
@@ -208,6 +257,7 @@ export default function Contact() {
               )}
             </form>
           )}
+          </div>
         </div>
       </div>
       </InView>
