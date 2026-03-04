@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="lt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Yakiwood projekto atitikties auditas (2026-03-03)</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      body {
+        margin: 24px;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        line-height: 1.45;
+      }
+      h1,
+      h2,
+      h3 {
+        line-height: 1.2;
+      }
+      hr {
+        margin: 24px 0;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+          "Courier New", monospace;
+        font-size: 0.95em;
+      }
+      a {
+        color: inherit;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 980px;
+      }
+      th,
+      td {
+        border: 1px solid;
+        padding: 8px 10px;
+        vertical-align: top;
+      }
+      th {
+        font-weight: 600;
+      }
+      .num {
+        text-align: right;
+        white-space: nowrap;
+      }
+      ul {
+        margin: 8px 0 8px 18px;
+      }
+      .tight {
+        margin: 0;
+        padding-left: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Yakiwood projekto atitikties auditas pagal numatomus darbus</h1>
+
+    <p><strong>Data:</strong> 2026-03-03<br />
+    <strong>Repo:</strong> <code>yakiwood-website</code> (Next.js App Router)</p>
+
+    <h2>Kaip vertinta</h2>
+
+    <p>
+      Šis auditas tikrina <strong>repo artefaktus</strong> (kodas, maršrutai, konfigūracija,
+      dokumentacija) prieš pateiktą darbų apimtį.
+    </p>
+
+    <ul>
+      <li><strong>Įgyvendinta</strong> – funkcionalumas/artefaktas yra repozitorijoje ir logiškai uždengia reikalavimą.</li>
+      <li><strong>Dalinai</strong> – dalis yra (pvz., UI be serverinės persistencijos, arba veikia tik su vienu mokėjimo provideriu).</li>
+      <li><strong>Nėra</strong> – repozitorijoje nerasta.</li>
+    </ul>
+
+    <p><strong>Pastabos:</strong></p>
+    <ul>
+      <li>“Valandų plausibility” yra <strong>heuristika</strong> (be timesheet negalima patvirtinti tikslių valandų).</li>
+      <li>Kai kurie punktai yra <strong>infra atsakomybė</strong> (SSL sertifikatas) – repozitorija gali tik parodyti pasiruošimą (HSTS, CSP) ir dokumentaciją.</li>
+    </ul>
+
+    <hr />
+
+    <h2>Sužymėjimas pagal įvykdymo statusą (greita santrauka)</h2>
+
+    <h3>A) E. pardavimo sandorio sprendimas</h3>
+
+    <p><strong>Pilnai įgyvendinta (6/11):</strong></p>
+    <ul class="tight">
+      <li>1) Dizaino adaptacija</li>
+      <li>3) Puslapių struktūros kūrimas</li>
+      <li>5) Parduotuvės filtrų konfigūracija</li>
+      <li>6) Mokėjimų būdų integracija</li>
+      <li>8) Daugiakalbiškumas (LT + EN)</li>
+      <li>10) Vidinis SEO</li>
+    </ul>
+
+    <p><strong>Dalinai įgyvendinta (5/11):</strong></p>
+    <ul class="tight">
+      <li>2) Mobilumas: UI yra, bet trūksta testavimo ataskaitų/protokolų kaip įrodymo</li>
+      <li>4) E‑commerce modulis: branduolys yra, bet inventorius/mokėjimų provider’ių srautai ne visur suvienodinti</li>
+      <li>7) Išorinės integracijos: newsletter yra, kitos 3rd‑party priklauso nuo poreikių</li>
+      <li>9) CMS: yra admin UI, bet serverinė persistencija/workflow nėra pilnai patvirtinti</li>
+      <li>11) Saugumas: security headers + backup planas yra, SSL provisioning yra hosting’o dalis</li>
+    </ul>
+
+    <p><strong>Nėra (0/11):</strong></p>
+    <ul class="tight">
+      <li>Nerasta punktų, kurie repo lygiu būtų visiškai neįgyvendinti (visi turi bent dalinį padengimą).</li>
+    </ul>
+
+    <h3>B) Vaizdinės konfigūracijos sprendimas</h3>
+
+    <p><strong>Pilnai įgyvendinta (1/3):</strong></p>
+    <ul class="tight">
+      <li>2) Produktų vizualizacija (real‑time savybių keitimas)</li>
+    </ul>
+
+    <p><strong>Dalinai įgyvendinta (2/3):</strong></p>
+    <ul class="tight">
+      <li>1) Produkto modeliavimas: modeliai/pipeline yra, bet “eksportas į skirtingus formatus” labiau procesas nei aplikacijos modulis</li>
+      <li>3) Duomenų sujungimas: užsakymų sistema yra, bet dalis darbo yra duomenų/asset’ų užpildymas (ne vien kodas)</li>
+    </ul>
+
+    <p><strong>Nėra (0/3):</strong></p>
+    <ul class="tight">
+      <li>Nerasta punktų, kurie repo lygiu būtų visiškai neįgyvendinti (visi turi bent dalinį padengimą).</li>
+    </ul>
+
+    <hr />
+
+    <h2>A) Yakiwood įmonės e. pardavimo sandorio sprendimas – atitiktis</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="num">Nr.</th>
+            <th>Darbas (santrauka)</th>
+            <th class="num">Val. kiekis (C)</th>
+            <th class="num">Įkainis (EUR/val be PVM) (B)</th>
+            <th class="num">Suma (C×B) be PVM (D)</th>
+            <th>Statusas</th>
+            <th>Repo įrodymai</th>
+            <th>Pastabos / spragos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num">1</td>
+            <td>Dizaino adaptacija (analizė + adaptacija, spalvos/šriftai/grafika, brand suderinimas)</td>
+            <td class="num">120</td>
+            <td class="num">50</td>
+            <td class="num">6000</td>
+            <td>Įgyvendinta (repo lygiu)</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../app/layout.tsx">app/layout.tsx</a></li>
+                <li><a href="../app/globals.css">app/globals.css</a></li>
+                <li><a href="../components/PageLayout.tsx">components/PageLayout.tsx</a></li>
+              </ul>
+            </td>
+            <td>Reali “adaptacija pagal kliento pasirinktus pavyzdžius” reikalauja dizaino peržiūros/acceptance už repo ribų.</td>
+          </tr>
+          <tr>
+            <td class="num">2</td>
+            <td>Svetainės mobilumo užtikrinimas (mobile/tablet adaptacija + cross‑browser testai)</td>
+            <td class="num">110</td>
+            <td class="num">50</td>
+            <td class="num">5500</td>
+            <td>Įgyvendinta (UI) / Dalinai (testavimo įrodymai)</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../components/shared/MobileMenu.tsx">components/shared/MobileMenu.tsx</a></li>
+                <li><a href="../components/products/ProductsPageClient.tsx">components/products/ProductsPageClient.tsx</a></li>
+                <li><a href="../e2e/smoke.spec.ts">e2e/smoke.spec.ts</a></li>
+              </ul>
+            </td>
+            <td>Cross‑browser/device matrica (Safari/iOS realūs įrodymai) repo viduje nėra pilnai dokumentuota (reikėtų test protokolo/ataskaitų).</td>
+          </tr>
+          <tr>
+            <td class="num">3</td>
+            <td>Puslapių struktūros kūrimas (menu, navigacija, interaktyvumas, programavimo darbai)</td>
+            <td class="num">120</td>
+            <td class="num">50</td>
+            <td class="num">6000</td>
+            <td>Įgyvendinta</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../app/layout.tsx">app/layout.tsx</a></li>
+                <li><a href="../components/shared/Footer.tsx">components/shared/Footer.tsx</a></li>
+                <li><a href="../components/HomeComposite.tsx">components/HomeComposite.tsx</a></li>
+              </ul>
+            </td>
+            <td>Interaktyvumo apimtis priklauso nuo to, ką laikai “interaktyviais elementais” (pvz., filtrai, konfigūratorius – tie yra).</td>
+          </tr>
+          <tr>
+            <td class="num">4</td>
+            <td>Elektroninės komercijos modulio integracija (pardavimų procesai, atsargos, krepšelis + užsakymas)</td>
+            <td class="num">140</td>
+            <td class="num">50</td>
+            <td class="num">7000</td>
+            <td>Įgyvendinta (branduolys) / Dalinai (providerių vienodinimas)</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../lib/cart/store.ts">lib/cart/store.ts</a></li>
+                <li><a href="../app/checkout/page.tsx">app/checkout/page.tsx</a></li>
+                <li><a href="../app/api/orders/create/route.ts">app/api/orders/create/route.ts</a></li>
+                <li><a href="../app/api/checkout/route.ts">app/api/checkout/route.ts</a></li>
+              </ul>
+            </td>
+            <td>Inventoriaus patvirtinimas aiškus Stripe webhook’e; Paysera/PayPal srautai inventoriaus prasme turi būti suvienodinti.</td>
+          </tr>
+          <tr>
+            <td class="num">4.1</td>
+            <td>Pardavimų procesų įdiegimas/automatizavimas/optimizavimas (įtraukta į 4)</td>
+            <td class="num">–</td>
+            <td class="num">–</td>
+            <td class="num">–</td>
+            <td>Įgyvendinta (order‑first + webhooks)</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../app/api/pricing/lock/route.ts">app/api/pricing/lock/route.ts</a></li>
+                <li><a href="../app/api/orders/create/route.ts">app/api/orders/create/route.ts</a></li>
+                <li><a href="../app/api/webhooks/stripe/route.ts">app/api/webhooks/stripe/route.ts</a></li>
+              </ul>
+            </td>
+            <td>Yra ir alternatyvus Stripe webhook endpoint’as <a href="../app/api/webhook/route.ts">app/api/webhook/route.ts</a> – production verta standartizuoti, kad nebūtų dvigubo kelio.</td>
+          </tr>
+          <tr>
+            <td class="num">4.2</td>
+            <td>Automatinis prekių atsargų valdymas (įtraukta į 4)</td>
+            <td class="num">–</td>
+            <td class="num">–</td>
+            <td class="num">–</td>
+            <td>Dalinai</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../lib/inventory/manager.ts">lib/inventory/manager.ts</a></li>
+                <li><a href="../app/api/webhooks/stripe/route.ts">app/api/webhooks/stripe/route.ts</a></li>
+                <li><a href="../app/api/inventory/route.ts">app/api/inventory/route.ts</a></li>
+              </ul>
+            </td>
+            <td>Stripe webhook’e yra <code>reserveStock</code>/<code>confirmSale</code>. Paysera/PayPal callback’uose inventoriaus patvirtinimas nėra aiškiai suvienodintas.</td>
+          </tr>
+          <tr>
+            <td class="num">4.4</td>
+            <td>Prekių krepšelio ir užsakymo puslapių kūrimas (įtraukta į 4)</td>
+            <td class="num">–</td>
+            <td class="num">–</td>
+            <td class="num">–</td>
+            <td>Įgyvendinta</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../lib/cart/store.ts">lib/cart/store.ts</a></li>
+                <li><a href="../app/checkout/page.tsx">app/checkout/page.tsx</a></li>
+                <li><a href="../app/order-confirmation/page.tsx">app/order-confirmation/page.tsx</a></li>
+              </ul>
+            </td>
+            <td>Checkout UX dalis priklauso nuo dizaino/teksto patvirtinimo.</td>
+          </tr>
+          <tr>
+            <td class="num">5</td>
+            <td>Parduotuvės filtrų konfigūracija (paieška + filtrai)</td>
+            <td class="num">35</td>
+            <td class="num">50</td>
+            <td class="num">1750</td>
+            <td>Įgyvendinta</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../components/products/ProductsPageClient.tsx">components/products/ProductsPageClient.tsx</a></li>
+                <li><a href="../app/products/page.tsx">app/products/page.tsx</a></li>
+              </ul>
+            </td>
+            <td>Jei reikalinga server‑side faceted paieška dideliems katalogams – to čia greičiausiai nėra.</td>
+          </tr>
+          <tr>
+            <td class="num">6</td>
+            <td>Mokėjimų būdų integracija (PayPal/Paysera/Stripe + patvirtinimai/ataskaitos)</td>
+            <td class="num">70</td>
+            <td class="num">50</td>
+            <td class="num">3500</td>
+            <td>Įgyvendinta</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../app/api/checkout/route.ts">app/api/checkout/route.ts</a></li>
+                <li><a href="../app/api/webhooks/stripe/route.ts">app/api/webhooks/stripe/route.ts</a></li>
+                <li><a href="../app/api/paysera/init/route.ts">app/api/paysera/init/route.ts</a></li>
+                <li><a href="../app/api/webhooks/paysera/route.ts">app/api/webhooks/paysera/route.ts</a></li>
+                <li><a href="../app/api/paypal/checkout/route.ts">app/api/paypal/checkout/route.ts</a></li>
+                <li><a href="../app/api/paypal/capture/route.ts">app/api/paypal/capture/route.ts</a></li>
+              </ul>
+            </td>
+            <td>“Ataskaitos” repo lygiu matosi per admin užsakymus/inventorių/invoice PDF; BI/eksportai gali būti atskiras poreikis.</td>
+          </tr>
+          <tr>
+            <td class="num">7</td>
+            <td>Integracijos su išorinėmis sistemomis (email marketing, social, 3rd party)</td>
+            <td class="num">100</td>
+            <td class="num">50</td>
+            <td class="num">5000</td>
+            <td>Įgyvendinta (newsletter) / Dalinai (kitos 3rd party)</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../lib/newsletter/providers.ts">lib/newsletter/providers.ts</a></li>
+                <li><a href="../app/api/newsletter/route.ts">app/api/newsletter/route.ts</a></li>
+                <li><a href="../components/GoogleAnalytics.tsx">components/GoogleAnalytics.tsx</a></li>
+                <li><a href="../app/layout.tsx">app/layout.tsx</a></li>
+              </ul>
+            </td>
+            <td>Social integracijos daugiausia yra “nuorodos + schema.org sameAs”; “deep” integracijoms reikėtų tikslinti.</td>
+          </tr>
+          <tr>
+            <td class="num">8</td>
+            <td>Daugiakalbiškumas (modulis + kalbos perjungimas) – LT + EN</td>
+            <td class="num">75</td>
+            <td class="num">50</td>
+            <td class="num">3750</td>
+            <td>Įgyvendinta</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../i18n/routing.ts">i18n/routing.ts</a></li>
+                <li><a href="../i18n/paths.ts">i18n/paths.ts</a></li>
+                <li><a href="../components/LanguageSwitcher.tsx">components/LanguageSwitcher.tsx</a></li>
+                <li><a href="../messages/en.json">messages/en.json</a></li>
+                <li><a href="../messages/lt.json">messages/lt.json</a></li>
+              </ul>
+            </td>
+            <td>Canonical default locale yra EN be prefikso, LT su <code>/lt</code> (tai svarbu SEO/URL strategijai).</td>
+          </tr>
+          <tr>
+            <td class="num">9</td>
+            <td>Turinio valdymo sistemos integracija (redaktorius, teisės, turinio tipai)</td>
+            <td class="num">110</td>
+            <td class="num">50</td>
+            <td class="num">5500</td>
+            <td>Dalinai</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../app/admin/posts/page.tsx">app/admin/posts/page.tsx</a></li>
+                <li><a href="../components/admin/PostsAdminClient.tsx">components/admin/PostsAdminClient.tsx</a></li>
+                <li><a href="../app/admin/projects/page.tsx">app/admin/projects/page.tsx</a></li>
+                <li><a href="../components/admin/ProjectsAdminClient.tsx">components/admin/ProjectsAdminClient.tsx</a></li>
+              </ul>
+            </td>
+            <td>Supabase projekte yra (pvz., produktų/užsakymų/inventoriaus dalyse; projektų nuotraukų įkėlimas į Supabase Storage), bet šiame admin turinio modulyje <strong>straipsnių turinys</strong> saugomas naršyklėje (<code>localStorage</code>), o <strong>projektų įrašai</strong> – naršyklėje (<code>IndexedDB</code>, su legacy migracija iš <code>localStorage</code>), t. y. ne centralizuotas DB CMS su workflow. (SEO yra atskiras punktas – žr. Nr. 10.)</td>
+          </tr>
+          <tr>
+            <td class="num">10</td>
+            <td>Vidinis SEO (meta/URL, image SEO, greitis, schema.org / rich snippets)</td>
+            <td class="num">50</td>
+            <td class="num">50</td>
+            <td class="num">2500</td>
+            <td>Įgyvendinta</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../app/sitemap.ts">app/sitemap.ts</a></li>
+                <li><a href="../app/robots.ts">app/robots.ts</a></li>
+                <li><a href="../lib/seo/structured-data.ts">lib/seo/structured-data.ts</a></li>
+                <li><a href="../app/products/[slug]/page.tsx">app/products/[slug]/page.tsx</a></li>
+              </ul>
+            </td>
+            <td>Raktinių žodžių integracija į turinį priklauso nuo realaus content (ne vien kodo).</td>
+          </tr>
+          <tr>
+            <td class="num">11</td>
+            <td>Saugumo priemonės (SSL, backup/restore)</td>
+            <td class="num">50</td>
+            <td class="num">50</td>
+            <td class="num">2500</td>
+            <td>Įgyvendinta (headers + backup planas) / Dalinai (SSL provisioning)</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../next.config.ts">next.config.ts</a></li>
+                <li><a href="DEPLOYMENT.md">docs/DEPLOYMENT.md</a></li>
+              </ul>
+            </td>
+            <td>SSL sertifikatas paprastai yra hosting’o (Vercel) konfigūracija; repo rodo HSTS/CSP. Backup yra dokumentuotas, bet nėra automatizacijos repo viduje (pagal pasirinktą kriterijų – tai OK).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>Suma iš viso (be PVM):</strong> 49 750 EUR<br />
+    <strong>Suma iš viso (su PVM 21%):</strong> 60 197,50 EUR</p>
+
+    <hr />
+
+    <h2>B) Yakiwood įmonės vaizdinės konfigūracijos sprendimas – atitiktis</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="num">Nr.</th>
+            <th>Darbas (santrauka)</th>
+            <th class="num">Val. kiekis (C)</th>
+            <th class="num">Įkainis (EUR/val be PVM) (B)</th>
+            <th class="num">Suma (C×B) be PVM (D)</th>
+            <th>Statusas</th>
+            <th>Repo įrodymai</th>
+            <th>Pastabos / spragos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num">1</td>
+            <td>Produkto modeliavimas (3D vizualizacija, detalus modeliavimas, eksportas į formatus)</td>
+            <td class="num">130</td>
+            <td class="num">50</td>
+            <td class="num">6500</td>
+            <td>Įgyvendinta (modeliai + pipeline) / Dalinai (eksporto modulis)</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../public/models/configurator/model.glb">public/models/configurator/model.glb</a></li>
+                <li><a href="../public/models/products/README.md">public/models/products/README.md</a></li>
+                <li><a href="../lib/models.ts">lib/models.ts</a></li>
+              </ul>
+            </td>
+            <td>“Eksportas į skirtingus formatus” repo lygiu labiau atrodo kaip <strong>procesas (Blender → GLB)</strong>, o ne aplikacijos modulis (GLB→STL/OBJ ir pan.).</td>
+          </tr>
+          <tr>
+            <td class="num">2</td>
+            <td>Produktų vizualizacija (real‑time savybių keitimas: spalvos/tekstūros/parametrai)</td>
+            <td class="num">460</td>
+            <td class="num">50</td>
+            <td class="num">23000</td>
+            <td>Įgyvendinta</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../components/Konfiguratorius3D.tsx">components/Konfiguratorius3D.tsx</a></li>
+                <li><a href="../components/configurator/ConfiguratorPage.tsx">components/configurator/ConfiguratorPage.tsx</a></li>
+                <li><a href="../app/api/pricing/quote/route.ts">app/api/pricing/quote/route.ts</a></li>
+              </ul>
+            </td>
+            <td>Reali “tekstūrų” kaita yra (procedūrinės tekstūros + medžiagų parametrai). Fotorealistiniai PBR asset’ai būtų atskiras darbas.</td>
+          </tr>
+          <tr>
+            <td class="num">3</td>
+            <td>Duomenų sujungimas su sistemomis (savybių/specifikacijų keitimas, tekstas+vaizdas prekėms, užsakymų valdymas)</td>
+            <td class="num">405</td>
+            <td class="num">50</td>
+            <td class="num">20250</td>
+            <td>Dalinai–Įgyvendinta (užsakymų sistema yra)</td>
+            <td>
+              <ul class="tight">
+                <li><a href="../app/api/orders/create/route.ts">app/api/orders/create/route.ts</a></li>
+                <li><a href="../app/admin/orders/page.tsx">app/admin/orders/page.tsx</a></li>
+                <li><a href="../app/api/pricing/lock/route.ts">app/api/pricing/lock/route.ts</a></li>
+                <li><a href="../lib/products.supabase.ts">lib/products.supabase.ts</a></li>
+              </ul>
+            </td>
+            <td>“Tekstinio ir vaizdinio turinio paruošimas kiekvienai prekei” nėra pilnai patvirtinama vien kodu; dalis yra asset’inė/duomenų užpildymo veikla.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>Suma iš viso (be PVM):</strong> 49 750 EUR<br />
+    <strong>Suma iš viso (su PVM 21%):</strong> 60 197,50 EUR</p>
+
+    <hr />
+
+    <h2>GAP sąrašas (kas labiausiai gali būti laikoma „nepilnai“)</h2>
+
+    <ol>
+      <li>Inventoriaus automatizavimas ne visiems mokėjimo provider’iams vienodai (Stripe aiškus; Paysera/PayPal – reikia sulyginti flow).</li>
+      <li>CMS (turinio redaktorius) serverinė persistencija: Supabase projekte yra (pvz., produktai/užsakymai/inventorius; projektų nuotraukų įkėlimas į Supabase Storage), bet <strong>būtent straipsnių turinys</strong> iš <code>PostsAdminClient</code> saugomas <code>localStorage</code>, o <strong>projektų įrašai</strong> iš <code>ProjectsAdminClient</code> – <code>IndexedDB</code> (su legacy migracija iš <code>localStorage</code>). Jei reikia „tikro CMS“ šiai daliai, reikia DB modelio + API + rolių/publikavimo workflow.</li>
+      <li>Dvigubas Stripe webhook endpoint’as (senas <a href="../app/api/webhook/route.ts">app/api/webhook/route.ts</a> ir naujesnis <a href="../app/api/webhooks/stripe/route.ts">app/api/webhooks/stripe/route.ts</a>) – verta standartizuoti, kad nebūtų dvigubos logikos ir klaidų.</li>
+      <li>Cross‑browser testavimo įrodymai: E2E yra, bet “testavimo ataskaitos” (platformų sąrašas, rezultatai) – labiau procesinis artefaktas.</li>
+      <li>“Eksportas į skirtingus formatus” 3D dalyje: yra GLB pipeline, bet ne aplikacijos eksporto modulis.</li>
+    </ol>
+
+    <hr />
+
+    <h2>Santrauka (agentūros tikrintojo išvada)</h2>
+
+    <ul>
+      <li>E‑komercijos branduolys (krepšelis → užsakymas → mokėjimas → patvirtinimas → invoice/email) repo lygiu atrodo <strong>įgyvendintas</strong> ir net “enterprise‑style” (webhook idempotency, amount validation, invoice PDF).</li>
+      <li>Daugiakalbiškumas LT+EN yra <strong>realus</strong> (messages, routing, switcher), su aiškia URL/SEO strategija (EN canonical, LT su <code>/lt</code>).</li>
+      <li>Didžiausia rizika “atitikties” prasme: <strong>CMS interpretacija</strong> (naršyklės redaktorius vs serverinis CMS) ir <strong>inventoriaus suvienodinimas</strong> tarp mokėjimo provider’ių.</li>
+    </ul>
+  </body>
+</html>

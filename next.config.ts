@@ -14,7 +14,7 @@ const contentSecurityPolicyValue = [
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: https://*.figma.com https://*.unsplash.com https://*.supabase.co https://www.google-analytics.com https://yakiwood.lt https://shop.yakiwood.co.uk${isDev ? ' http://localhost:3000 http://127.0.0.1:3000' : ''}`,
   "font-src 'self' data:",
-  "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://registry.npmjs.org",
+  "connect-src 'self' blob: https://www.google-analytics.com https://www.googletagmanager.com https://api.stripe.com https://*.supabase.co wss://*.supabase.co https://registry.npmjs.org",
   "frame-src 'self' https://www.googletagmanager.com https://js.stripe.com https://hooks.stripe.com https://www.youtube.com https://www.youtube-nocookie.com",
   "object-src 'none'",
   "base-uri 'self'",

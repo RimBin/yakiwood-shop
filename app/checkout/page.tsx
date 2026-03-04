@@ -150,7 +150,6 @@ export default function CheckoutPage() {
   const [autofillReady, setAutofillReady] = useState(false);
 
   // UI-only: payment + coupon
-  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'paysera'>('paysera');
   const [couponCode, setCouponCode] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [agreedToCustomMadePolicy, setAgreedToCustomMadePolicy] = useState(false);
@@ -381,7 +380,7 @@ export default function CheckoutPage() {
       const shippingCity = deliverDifferentAddress ? altCity : city;
       const shippingAddress = deliverDifferentAddress ? altAddress : address;
       const shippingPostalCode = deliverDifferentAddress ? altPostalCode : postalCode;
-      const resolvedPaymentProvider = paymentMethod === 'paypal' ? 'paypal' : 'paysera';
+      const resolvedPaymentProvider = 'paysera' as const;
 
       const orderRes = await fetch('/api/orders/create', {
         method: 'POST',
@@ -457,82 +456,35 @@ export default function CheckoutPage() {
         })),
       });
 
-      // 2) PayPal: create PayPal checkout and redirect
-      if (resolvedPaymentProvider === 'paypal') {
-        const itemsForPayment = shipping > 0
-          ? [
-              ...productItems,
-              {
-                id: 'shipping',
-                name: t('summary.shipping'),
-                slug: 'shipping',
-                basePrice: shipping,
-                quantity: 1,
-              },
-            ]
-          : productItems;
+      // 2) Paysera: init Paysera checkout and redirect
+      const response = await fetch('/api/paysera/init', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId,
+        }),
+      });
 
-        const response = await fetch('/api/paypal/checkout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            orderId,
-            items: productItems,
-            customer: {
-              email,
-              name: fullName,
-            },
-          }),
-        });
+      const data = await response.json();
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || t('errors.paymentSessionFailed'));
-        }
-
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          throw new Error(t('errors.paymentUrlMissing'));
-        }
-
-        return;
+      if (!response.ok) {
+        throw new Error(data.error || t('errors.paymentSessionFailed'));
       }
 
-      // 2b) Paysera: init Paysera checkout and redirect
-      if (resolvedPaymentProvider === 'paysera') {
-        const response = await fetch('/api/paysera/init', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            orderId,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || t('errors.paymentSessionFailed'));
-        }
-
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          throw new Error(t('errors.paymentUrlMissing'));
-        }
-
-        return;
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(t('errors.paymentUrlMissing'));
       }
+
+      return;
 
       // 3) Fallback: order exists, show confirmation
       setSuccessMessage(
         orderNumber
-          ? t('success.withNumber', { orderNumber })
+          ? t('success.withNumber', { orderNumber: orderNumber! })
           : t('success.withoutNumber')
       );
       setShowSuccessModal(true);
@@ -743,46 +695,9 @@ export default function CheckoutPage() {
                     <input
                       type="radio"
                       name="paymentMethod"
-                      value="paypal"
-                      checked={paymentMethod === 'paypal'}
-                      onChange={() => setPaymentMethod('paypal')}
-                      className={[
-                        'size-[24px]',
-                        'appearance-none',
-                        'rounded-[100px]',
-                        'border border-[#161616] border-solid',
-                        'grid place-items-center',
-                        "checked:after:content-['']",
-                        'checked:after:size-[10px] checked:after:rounded-full checked:after:bg-[#161616]',
-                      ].join(' ')}
-                    />
-                    <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
-                      paypal
-                    </span>
-                  </span>
-                  <span className="font-['Outfit'] font-normal leading-[1.2] text-[#535353] text-[12px] tracking-[0.6px] uppercase">
-                    paypal
-                  </span>
-                </label>
-
-                {paymentMethod === 'paypal' && (
-                  <div className="border border-[#BBBBBB] bg-white/40 px-[16px] py-[12px]">
-                    <p className="font-['Outfit'] text-[12px] leading-[1.4] text-[#535353]">
-                      {t('payment.paypalUnavailable')}
-                    </p>
-                  </div>
-                )}
-
-                <div className="h-px bg-[#BBBBBB]" />
-
-                <label className="flex items-center justify-between w-full">
-                  <span className="flex items-center gap-[8px]">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
                       value="paysera"
-                      checked={paymentMethod === 'paysera'}
-                      onChange={() => setPaymentMethod('paysera')}
+                      checked
+                      disabled
                       className={[
                         'size-[24px]',
                         'appearance-none',
@@ -802,13 +717,11 @@ export default function CheckoutPage() {
                   </span>
                 </label>
 
-                {paymentMethod === 'paysera' && (
-                  <div className="border border-[#BBBBBB] bg-white/40 px-[16px] py-[12px]">
-                    <p className="font-['Outfit'] text-[12px] leading-[1.4] text-[#535353]">
-                      {t('payment.payseraInfo')}
-                    </p>
-                  </div>
-                )}
+                <div className="border border-[#BBBBBB] bg-white/40 px-[16px] py-[12px]">
+                  <p className="font-['Outfit'] text-[12px] leading-[1.4] text-[#535353]">
+                    {t('payment.payseraInfo')}
+                  </p>
+                </div>
 
                 <div className="h-px bg-[#BBBBBB]" />
 
@@ -899,7 +812,7 @@ export default function CheckoutPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={isProcessing || paymentMethod === 'paypal'}
+                    disabled={isProcessing}
                     className="bg-[#161616] h-[48px] px-[40px] py-[10px] rounded-[100px] w-full md:w-[328px] flex items-center justify-center disabled:bg-[#BBBBBB] disabled:cursor-not-allowed"
                   >
                     <span className="font-['Outfit'] font-normal leading-[1.2] text-white text-[12px] tracking-[0.6px] uppercase">

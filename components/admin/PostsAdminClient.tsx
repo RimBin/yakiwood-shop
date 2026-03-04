@@ -5,10 +5,35 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { blogPosts, normalizeStoredPosts, type BlogPost, type BlogLocale } from '@/data/blog-posts';
+import { createClient } from '@/lib/supabase/client';
+import { blogPosts, type BlogPost, type BlogLocale } from '@/data/blog-posts';
 import { slugify } from '@/lib/slugify';
 
-const POSTS_STORAGE_KEY = 'yakiwood_posts';
+async function getAdminToken(): Promise<string | null> {
+  const supabase = createClient();
+  if (!supabase) return null;
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
+}
+
+async function adminRequest<T>(input: RequestInfo | URL, init: RequestInit = {}): Promise<T> {
+  const token = await getAdminToken();
+  if (!token) {
+    throw new Error('No admin session. Please login again.');
+  }
+
+  const headers = new Headers(init.headers);
+  headers.set('Authorization', `Bearer ${token}`);
+  if (!headers.has('Content-Type') && init.body) headers.set('Content-Type', 'application/json');
+
+  const res = await fetch(input, { ...init, headers });
+  const json = (await res.json().catch(() => null)) as any;
+  if (!res.ok) {
+    const message = typeof json?.error === 'string' && json.error ? json.error : `Request failed (${res.status})`;
+    throw new Error(message);
+  }
+  return json as T;
+}
 
 type Draft = BlogPost;
 
@@ -89,31 +114,73 @@ export default function PostsAdminClient() {
   const [featureUrl, setFeatureUrl] = useState('');
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const raw = window.localStorage.getItem(POSTS_STORAGE_KEY);
-    if (raw) {
+    let cancelled = false;
+    const run = async () => {
+      setError(null);
       try {
-        const parsed = JSON.parse(raw);
-        const normalized = normalizeStoredPosts(parsed);
-        if (normalized) {
-          setPosts(normalized);
-          if (normalized[0]) {
-            setSelectedId(normalized[0].id);
-            setDraft(clonePost(normalized[0]));
-          }
-          return;
-        }
-      } catch {
-        // ignore
-      }
-    }
+        const json = await adminRequest<{ posts: BlogPost[] }>('/api/admin/posts');
+        const loaded = Array.isArray(json.posts) ? json.posts : [];
+        if (cancelled) return;
 
-    setPosts(blogPosts);
-    if (blogPosts[0]) {
-      setSelectedId(blogPosts[0].id);
-      setDraft(clonePost(blogPosts[0]));
-    }
-  }, []);
+        if (loaded.length === 0 && typeof window !== 'undefined') {
+          const seededKey = 'yakiwood_cms_seeded_posts_v1';
+          const alreadySeeded = window.localStorage.getItem(seededKey) === '1';
+
+          if (!alreadySeeded && blogPosts.length > 0) {
+            try {
+              await adminRequest('/api/admin/posts', {
+                method: 'PUT',
+                body: JSON.stringify({ posts: blogPosts }),
+              });
+              window.localStorage.setItem(seededKey, '1');
+              if (cancelled) return;
+              setPosts(blogPosts);
+              setSelectedId(blogPosts[0].id);
+              setDraft(clonePost(blogPosts[0]));
+              setNotice('Seed įrašai įkelti į DB.');
+              window.setTimeout(() => setNotice(null), 2400);
+              return;
+            } catch {
+              // Fall back to seed in UI only.
+            }
+          }
+        }
+
+        setPosts(loaded);
+        if (loaded[0]) {
+          setSelectedId(loaded[0].id);
+          setDraft(clonePost(loaded[0]));
+        } else if (blogPosts[0]) {
+          // If DB is empty, keep editor usable with seed content.
+          setPosts(blogPosts);
+          setSelectedId(blogPosts[0].id);
+          setDraft(clonePost(blogPosts[0]));
+        }
+        return;
+      } catch (e) {
+        if (cancelled) return;
+        setError(getErrorMessage(e, t('posts.errors.loadFailed')));
+      }
+
+      // Fallback to seed.
+      setPosts(blogPosts);
+      if (blogPosts[0]) {
+        setSelectedId(blogPosts[0].id);
+        setDraft(clonePost(blogPosts[0]));
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  function getErrorMessage(error: unknown, fallback: string) {
+    if (error instanceof Error && error.message) return error.message;
+    if (typeof error === 'string' && error) return error;
+    return fallback;
+  }
 
   const selectedPost = useMemo(
     () => posts.find((post) => post.id === selectedId) || null,
@@ -225,14 +292,15 @@ export default function PostsAdminClient() {
     window.setTimeout(() => setNotice(null), 2400);
   };
 
-  const persistPosts = (next: BlogPost[]) => {
+  const persistPosts = async (next: BlogPost[]) => {
     setPosts(next);
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(next));
-    }
+    await adminRequest('/api/admin/posts', {
+      method: 'PUT',
+      body: JSON.stringify({ posts: next }),
+    });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setError(null);
     if (!draft.title.lt.trim()) {
       setError(t('posts.errors.titleLtRequired'));
@@ -261,15 +329,26 @@ export default function PostsAdminClient() {
       setSelectedId(draft.id);
     }
 
-    persistPosts(nextPosts);
-    showNotice(t('posts.noticeSaved'));
+    try {
+      await persistPosts(nextPosts);
+      showNotice(t('posts.noticeSaved'));
+    } catch (e) {
+      setError(getErrorMessage(e, t('posts.errors.saveFailed')));
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedId) return;
     const next = posts.filter((post) => post.id !== selectedId);
-    persistPosts(next);
-    showNotice(t('posts.noticeDeleted'));
+
+    try {
+      await persistPosts(next);
+      showNotice(t('posts.noticeDeleted'));
+    } catch (e) {
+      setError(getErrorMessage(e, t('posts.errors.deleteFailed')));
+      return;
+    }
+
     if (next[0]) {
       setSelectedId(next[0].id);
     } else {

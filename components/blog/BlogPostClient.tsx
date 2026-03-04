@@ -5,14 +5,12 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
-import { localizeBlogPost, normalizeStoredPosts, type LocalizedBlogPost } from '@/data/blog-posts';
+import { localizeBlogPost, type LocalizedBlogPost } from '@/data/blog-posts';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
 import CTA from '@/components/home/CTA';
 import { Breadcrumbs } from '@/components/ui';
 import { PageLayout } from '@/components/shared/PageLayout';
 import InView from '@/components/InView';
-
-const POSTS_STORAGE_KEY = 'yakiwood_posts';
 
 function isDataUrl(src: string) {
   return src.startsWith('data:');
@@ -70,37 +68,32 @@ export default function BlogPostClient({
   const [related, setRelated] = useState<LocalizedBlogPost[]>(initialRelated);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const raw = window.localStorage.getItem(POSTS_STORAGE_KEY);
-    if (!raw) return;
+    let cancelled = false;
+    const run = async () => {
+      try {
+        const res = await fetch(`/api/posts?locale=${encodeURIComponent(locale)}`);
+        const json = (await res.json().catch(() => null)) as any;
+        const raw = Array.isArray(json?.posts) ? (json.posts as any[]) : [];
+        const localized = raw.map((stored) => localizeBlogPost(stored, locale === 'lt' ? 'lt' : 'en'));
+        const all = sortPosts(localized);
+        const current =
+          all.find((item) => item.id === initialPost.id || item.slug === initialPost.slug) || initialPost;
 
-    try {
-      const parsed = JSON.parse(raw);
-      const normalized = normalizeStoredPosts(parsed);
-      if (!normalized) return;
+        const nextRelated = all.filter((item) => item.id !== current.id).slice(0, 3);
 
-      const localized = normalized
-        .map((stored) => localizeBlogPost(stored, locale === 'lt' ? 'lt' : 'en'))
-        .filter((item) => item.published);
-
-      const merged = new Map<string, LocalizedBlogPost>();
-      for (const item of localized) merged.set(item.id, item);
-      for (const item of [initialPost, ...initialRelated]) {
-        if (!merged.has(item.id)) merged.set(item.id, item);
+        if (cancelled) return;
+        setPost(current);
+        if (nextRelated.length > 0) setRelated(nextRelated);
+      } catch {
+        // keep initial fallback
       }
+    };
 
-      const all = sortPosts(Array.from(merged.values()));
-      const current =
-        all.find((item) => item.id === initialPost.id || item.slug === initialPost.slug) || initialPost;
-
-      const nextRelated = all.filter((item) => item.id !== current.id).slice(0, 3);
-
-      setPost(current);
-      if (nextRelated.length > 0) setRelated(nextRelated);
-    } catch {
-      // ignore parse errors
-    }
-  }, [initialPost, initialRelated, locale]);
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [initialPost.id, initialPost.slug, initialRelated, locale]);
 
   const formattedDate = useMemo(() => formatDate(post.date, locale), [post.date, locale]);
 

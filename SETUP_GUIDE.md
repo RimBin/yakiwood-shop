@@ -134,14 +134,15 @@ For production emails to work properly:
 
 ### 2.4 Update Email Sender
 
-Edit `app/api/webhooks/stripe/route.ts`:
+Set the sender via environment variables (no code changes required):
 
-```typescript
-// Development (uses Resend's test domain)
-from: 'Yakiwood <onboarding@resend.dev>'
+```env
+# Preferred (works for both Resend + SMTP)
+SYSTEM_EMAIL_FROM=Yakiwood <info@yakiwood.lt>
 
-// Production (after domain verification)
-from: 'Yakiwood <info@yakiwood.lt>'
+# Also supported (fallbacks)
+RESEND_FROM_EMAIL=Yakiwood <info@yakiwood.lt>
+FROM_EMAIL=Yakiwood <info@yakiwood.lt>
 ```
 
 ### 2.5 Test Email

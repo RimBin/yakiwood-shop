@@ -1,10 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { PageCover, PageSection } from '@/components/shared';
-import Konfiguratorius3D from '@/components/Konfiguratorius3D';
+import Konfiguratorius3D, { type Konfiguratorius3DHandle } from '@/components/Konfiguratorius3D';
 import {
   fetchProducts,
   getLocalizedColorName,
@@ -16,158 +16,126 @@ import {
 import { toLocalePath } from '@/i18n/paths';
 import { getProductModelUrl, getGenericModelUrl } from '@/lib/models';
 import InView from '@/components/InView';
+import { downloadConfigurationPDF, type ConfigurationPDFData } from '@/lib/configurator/pdf-generator';
+import { useCartStore } from '@/lib/cart/store';
+import { useToast } from '@/components/ui/Toast';
 
-type DropdownOption = { value: string; label: string };
+type BoardType = 'terasine' | 'fasadine';
+type WoodType = 'maumedis' | 'egle' | 'termo';
+type ProfileKey = 'staciak' | 'rombas' | 'spuntas' | 'spuntas45';
+type ColorKey = 'black' | 'carbon' | 'carbon_light' | 'graphite' | 'natural' | 'dark_brown' | 'latte' | 'silver';
+
+type ToggleOption<T extends string> = {
+  value: T;
+  label: string;
+  enabled?: boolean;
+};
+
 const CONFIGURATOR_MODEL_URL = getGenericModelUrl();
 
-function FilterDropdown({
-  id,
-  label,
-  options,
-  selected,
-  onToggle,
-  allLabel,
-  emptyLabel,
-  openId,
-  setOpenId,
-}: {
-  id: string;
-  label: string;
-  options: DropdownOption[];
-  selected: string[];
-  onToggle: (value: string) => void;
-  allLabel: string;
-  emptyLabel: string;
-  openId: string | null;
-  setOpenId: (value: string | null) => void;
-}) {
-  const isOpen = openId === id;
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const menuRef = useRef<HTMLDivElement | null>(null);
-  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
+const THERMO_COLORS = new Set<ColorKey>(['black', 'carbon', 'carbon_light', 'graphite', 'dark_brown', 'silver']);
 
-  const selectedLabels = useMemo(
-    () => options.filter((o) => selected.includes(o.value)).map((o) => o.label),
-    [options, selected]
-  );
+const BOARD_OPTIONS: ToggleOption<BoardType>[] = [
+  { value: 'terasine', label: 'Terasinė' },
+];
 
-  const summaryValue = selectedLabels.length > 0 ? selectedLabels.join(', ') : allLabel;
+const WOOD_OPTIONS: ToggleOption<WoodType>[] = [
+  { value: 'maumedis', label: 'Maumedis' },
+  { value: 'egle', label: 'Eglė' },
+  { value: 'termo', label: 'Termomediena' },
+];
 
-  const updatePosition = useCallback(() => {
-    const el = buttonRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const minWidth = Math.max(220, rect.width);
-    const left = Math.min(rect.left, Math.max(8, window.innerWidth - minWidth - 8));
-    const top = rect.bottom + 8;
-    setPos({ top, left, width: minWidth });
-  }, []);
+const PROFILE_OPTIONS: ToggleOption<ProfileKey>[] = [
+  { value: 'staciak', label: 'Stačiakampis' },
+];
 
-  useEffect(() => {
-    if (!isOpen) return;
-    updatePosition();
+const COLOR_OPTIONS: ToggleOption<ColorKey>[] = [
+  { value: 'black', label: 'Black' },
+  { value: 'carbon', label: 'Carbon' },
+  { value: 'carbon_light', label: 'Carbon Light' },
+  { value: 'graphite', label: 'Graphite' },
+  { value: 'natural', label: 'Natural' },
+  { value: 'dark_brown', label: 'Dark Brown' },
+  { value: 'latte', label: 'Latte' },
+  { value: 'silver', label: 'Silver' },
+];
 
-    const onResizeOrScroll = () => updatePosition();
-    window.addEventListener('resize', onResizeOrScroll);
-    window.addEventListener('scroll', onResizeOrScroll, true);
-    return () => {
-      window.removeEventListener('resize', onResizeOrScroll);
-      window.removeEventListener('scroll', onResizeOrScroll, true);
-    };
-  }, [isOpen, updatePosition]);
+const WIDTH_OPTIONS: ToggleOption<string>[] = [
+  { value: '95', label: '95 mm' },
+  { value: '120', label: '120 mm' },
+  { value: '145', label: '145 mm' },
+];
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const onPointerDown = (e: PointerEvent) => {
-      const target = e.target as Node | null;
-      if (!target) return;
-      if (buttonRef.current?.contains(target)) return;
-      if (menuRef.current?.contains(target)) return;
-      setOpenId(null);
-    };
+const LENGTH_OPTIONS: ToggleOption<string>[] = [
+  { value: '3000', label: '3000 mm' },
+  { value: '3300', label: '3300 mm' },
+  { value: '3600', label: '3600 mm' },
+];
 
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpenId(null);
-    };
+const THICKNESS_OPTIONS: Record<BoardType, ToggleOption<string>[]> = {
+  terasine: [{ value: '28', label: '28 mm' }],
+  fasadine: [{ value: '20', label: '18/20 mm' }],
+};
 
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('keydown', onKeyDown);
-    };
-  }, [isOpen, setOpenId]);
-
+function PanelSection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="relative shrink-0">
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={() => setOpenId(isOpen ? null : id)}
-        aria-haspopup="dialog"
-        aria-expanded={isOpen}
-        className="h-[40px] px-[14px] rounded-[100px] border border-[#BBBBBB] font-['Outfit'] text-[12px] tracking-[0.6px] flex items-center gap-[8px] max-w-[220px] select-none"
-      >
-        <span className="flex min-w-0 items-center gap-[8px]">
-          <span className="shrink-0">{label}:</span>
-          <span className="min-w-0 truncate text-[#535353]">{summaryValue}</span>
-        </span>
-        <svg
-          className={`ml-auto shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-        >
-          <path
-            d="M6 9l6 6 6-6"
-            stroke="#161616"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-
-      {isOpen && pos
-        ? createPortal(
-            <div
-              ref={menuRef}
-              className="z-50 max-h-[260px] overflow-auto rounded-[24px] border border-[#BBBBBB] bg-[#EAEAEA] p-[14px] shadow-lg"
-              style={{ position: 'fixed', top: pos.top, left: pos.left, minWidth: pos.width }}
-              role="dialog"
-              aria-label={label}
-              onPointerDown={(e) => e.stopPropagation()}
-            >
-              {options.length === 0 ? (
-                <p className="text-[12px] text-[#7C7C7C]">{emptyLabel}</p>
-              ) : (
-                <div className="flex flex-col gap-[8px]">
-                  {options.map((option) => (
-                    <label key={option.value} className="flex items-center gap-[8px] text-[13px]">
-                      <input
-                        type="checkbox"
-                        checked={selected.includes(option.value)}
-                        onChange={() => onToggle(option.value)}
-                        className="accent-[#161616]"
-                      />
-                      <span>{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>,
-            document.body
-          )
-        : null}
+    <div className="rounded-[12px] border border-[#BBBBBB] bg-white p-3">
+      <p className="font-['Outfit'] text-[12px] leading-[1.3] text-[#535353] mb-2">{title}</p>
+      {children}
     </div>
   );
+}
+
+function ToggleButtons<T extends string>({
+  value,
+  onChange,
+  options,
+  columns = 1,
+}: {
+  value: T;
+  onChange: (next: T) => void;
+  options: ToggleOption<T>[];
+  columns?: 1 | 2 | 3;
+}) {
+  const gridClass = columns === 1 ? 'grid-cols-1' : columns === 2 ? 'grid-cols-2' : 'grid-cols-3';
+
+  return (
+    <div className={`grid ${gridClass} gap-1.5`}>
+      {options.map((option) => {
+        const active = value === option.value;
+        const enabled = option.enabled !== false;
+
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => enabled && onChange(option.value)}
+            disabled={!enabled}
+            className={`h-[30px] rounded-[4px] px-2 font-['Outfit'] text-[12px] leading-[1.2] transition-colors border ${
+              active
+                ? 'bg-[#161616] border-[#161616] text-white'
+                : enabled
+                  ? 'bg-[#F9F9F9] border-[#BBBBBB] text-[#161616] hover:border-[#535353]'
+                  : 'bg-[#EAEAEA] border-[#E1E1E1] text-[#7C7C7C] cursor-not-allowed'
+            }`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function pickFirstEnabled<T extends string>(options: ToggleOption<T>[]): T | null {
+  return options.find((option) => option.enabled !== false)?.value ?? null;
 }
 
 export default function ConfiguratorPage() {
   const t = useTranslations();
   const locale = useLocale();
+  const router = useRouter();
+  const toast = useToast();
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
 
   const fallbackColors = useMemo<ProductColorVariant[]>(
@@ -192,7 +160,7 @@ export default function ConfiguratorPage() {
         dimensions: {
           width: 120,
           thickness: 20,
-          length: 4000,
+          length: 3300,
         },
       },
       {
@@ -206,7 +174,7 @@ export default function ConfiguratorPage() {
         dimensions: {
           width: 120,
           thickness: 20,
-          length: 4000,
+          length: 3300,
         },
       },
     ],
@@ -215,18 +183,110 @@ export default function ConfiguratorPage() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
-
-  const [selectedUsage, setSelectedUsage] = useState<string[]>([]);
-  const [selectedWood, setSelectedWood] = useState<string[]>([]);
-  const [selectedColor, setSelectedColor] = useState<string[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<string[]>([]);
-  const [selectedWidth, setSelectedWidth] = useState<string[]>([]);
-  const [selectedLength, setSelectedLength] = useState<string[]>([]);
-  const [openFilterId, setOpenFilterId] = useState<string | null>(null);
-
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+
+  const [selectedBoardType, setSelectedBoardType] = useState<BoardType>('terasine');
+  const [selectedWood, setSelectedWood] = useState<WoodType>('egle');
+  const [selectedProfile, setSelectedProfile] = useState<ProfileKey>('staciak');
+  const [selectedThickness, setSelectedThickness] = useState<'28' | '20'>('28');
+  const [selectedColor, setSelectedColor] = useState<ColorKey>('natural');
+  const [selectedWidth, setSelectedWidth] = useState<string>('120');
+  const [selectedLength, setSelectedLength] = useState<string>('3300');
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [inputMode, setInputMode] = useState<'boards' | 'area'>('boards');
+  const [quantityBoards, setQuantityBoards] = useState<number>(1);
+  const [targetAreaM2, setTargetAreaM2] = useState<number>(1);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [quote, setQuote] = useState<null | {
+    unitPricePerM2: number;
+    areaM2: number;
+    totalAreaM2: number;
+    unitPricePerBoard: number;
+    quantityBoards: number;
+    lineTotal: number;
+    inputMode: 'boards' | 'area';
+    roundingInfo?: {
+      requestedAreaM2: number;
+      actualAreaM2: number;
+      deltaAreaM2: number;
+      rounding: 'ceil' | 'round' | 'floor';
+    };
+  }>(null);
+
+  const configuratorRef = useRef<Konfiguratorius3DHandle | null>(null);
+
+  const cartItems = useCartStore((state) => state.items);
+  const addItem = useCartStore((state) => state.addItem);
+
+  const normalizeToken = useCallback((value: string) => {
+    return value
+      .trim()
+      .toLowerCase()
+      .replace(/[_\s]+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }, []);
+
+  const normalizeUsageId = useCallback(
+    (value: string | undefined) => {
+      const token = normalizeToken(value ?? '');
+      if (!token) return null;
+      if (token === 'facade' || token === 'terrace') return token;
+      if (token.includes('facade') || token.includes('fasad')) return 'facade';
+      if (token.includes('terrace') || token.includes('teras') || token.includes('deck')) return 'terrace';
+      return token;
+    },
+    [normalizeToken]
+  );
+
+  const normalizeWoodId = useCallback(
+    (value: string | undefined) => {
+      const token = normalizeToken(value ?? '');
+      if (!token) return null;
+      if (token === 'spruce' || token === 'larch' || token === 'thermo') return token;
+      if (token.includes('spruce') || token.includes('egle') || token.includes('egl')) return 'spruce';
+      if (token.includes('larch') || token.includes('maumed') || token.includes('maum')) return 'larch';
+      if (token.includes('thermo') || token.includes('termo')) return 'thermo';
+      return null;
+    },
+    [normalizeToken]
+  );
+
+  const colorVariantToKey = useCallback(
+    (variant: ProductColorVariant): ColorKey | null => {
+      const token = normalizeToken(variant.nameEn ?? variant.name ?? variant.nameLt ?? '');
+      if (!token) return null;
+      if (token === 'black') return 'black';
+      if (token === 'carbon') return 'carbon';
+      if (token === 'carbon-light' || token === 'carbonlight') return 'carbon_light';
+      if (token === 'graphite') return 'graphite';
+      if (token === 'natural') return 'natural';
+      if (token === 'dark-brown' || token === 'darkbrown') return 'dark_brown';
+      if (token === 'latte') return 'latte';
+      if (token === 'silver') return 'silver';
+      return null;
+    },
+    [normalizeToken]
+  );
+
+  const finishToProfileKey = useCallback(
+    (finish: ProductProfileVariant): ProfileKey => {
+      const token = normalizeToken([finish.code, finish.nameEn, finish.nameLt, finish.name].filter(Boolean).join(' '));
+      if (token.includes('spunt') && token.includes('45')) return 'spuntas45';
+      if (token.includes('spunt') || token.includes('taper')) return 'spuntas';
+      if (token.includes('romb')) return 'rombas';
+      return 'staciak';
+    },
+    [normalizeToken]
+  );
+
+  const boardTypeToUsage = useCallback((value: BoardType) => (value === 'fasadine' ? 'facade' : 'terrace'), []);
+  const woodToWoodId = useCallback((value: WoodType) => (value === 'maumedis' ? 'larch' : value === 'egle' ? 'spruce' : 'thermo'), []);
 
   useEffect(() => {
     let isMounted = true;
@@ -257,154 +317,26 @@ export default function ConfiguratorPage() {
     };
   }, []);
 
-  const normalizeToken = useCallback((value: string) => {
-    return value
-      .trim()
-      .toLowerCase()
-      .replace(/[_\s]+/g, '-')
-      .replace(/[^a-z0-9-]/g, '')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
-  }, []);
+  useEffect(() => {
+    setSelectedThickness(selectedBoardType === 'terasine' ? '28' : '20');
+  }, [selectedBoardType]);
 
-  const normalizeUsageId = useCallback(
-    (value: string | undefined) => {
-      const token = normalizeToken(value ?? '');
-      if (!token) return null;
-      if (token === 'facade' || token === 'terrace') return token;
-      if (token.includes('facade') || token.includes('fasad')) return 'facade';
-      if (token.includes('terrace') || token.includes('teras') || token.includes('deck')) return 'terrace';
-      return token;
-    },
-    [normalizeToken]
-  );
-
-  const normalizeWoodId = useCallback(
-    (value: string | undefined) => {
-      const token = normalizeToken(value ?? '');
-      if (!token) return null;
-      if (token === 'spruce' || token === 'larch') return token;
-      if (token.includes('spruce') || token.includes('egle') || token.includes('egl')) return 'spruce';
-      if (token.includes('larch') || token.includes('maumed') || token.includes('maum')) return 'larch';
-      return null;
-    },
-    [normalizeToken]
-  );
-
-  const usageOptions = useMemo(
-    () => [
-      { value: 'facade', label: t('productsPage.usageFilters.facade') },
-      { value: 'terrace', label: t('productsPage.usageFilters.terrace') },
-    ],
-    [t]
-  );
-
-  const woodOptions = useMemo(
-    () => [
-      { value: 'spruce', label: t('productsPage.woodFilters.spruce') },
-      { value: 'larch', label: t('productsPage.woodFilters.larch') },
-    ],
-    [t]
-  );
-
-  const colorOptions = useMemo(() => {
-    const optionsByKey = new Map<string, string>();
-    for (const p of allProducts) {
-      for (const c of p.colors ?? []) {
-        const key = normalizeToken(c?.nameEn ?? c?.name ?? '');
-        if (!key) continue;
-        optionsByKey.set(key, getLocalizedColorName(c, currentLocale));
-      }
+  useEffect(() => {
+    if (selectedWood === 'termo' && !THERMO_COLORS.has(selectedColor)) {
+      setSelectedColor('carbon');
     }
-    return Array.from(optionsByKey.entries())
-      .sort((a, b) => a[1].localeCompare(b[1]))
-      .map(([value, label]) => ({ value, label }));
-  }, [allProducts, normalizeToken, currentLocale]);
-
-  const profileOptions = useMemo(() => {
-    const optionsByKey = new Map<string, string>();
-    for (const p of allProducts) {
-      for (const prof of p.profiles ?? []) {
-        const key = normalizeToken(prof?.code ?? prof?.nameEn ?? prof?.name ?? '');
-        if (!key) continue;
-        optionsByKey.set(key, getLocalizedProfileName(prof, currentLocale));
-      }
-    }
-    return Array.from(optionsByKey.entries())
-      .sort((a, b) => a[1].localeCompare(b[1]))
-      .map(([value, label]) => ({ value, label }));
-  }, [allProducts, normalizeToken, currentLocale]);
-
-  const sizeOptions = useMemo(() => {
-    const widths = new Set<string>();
-    const lengths = new Set<string>();
-
-    for (const p of allProducts) {
-      for (const prof of p.profiles ?? []) {
-        const w = prof?.dimensions?.width;
-        const l = prof?.dimensions?.length;
-        if (typeof w === 'number' && Number.isFinite(w) && w > 0) widths.add(String(w));
-        if (typeof l === 'number' && Number.isFinite(l) && l > 0) lengths.add(String(l));
-      }
-    }
-
-    const formatMm = (value: string) => `${value} mm`;
-
-    return {
-      widths: Array.from(widths)
-        .sort((a, b) => Number(a) - Number(b))
-        .map((value) => ({ value, label: formatMm(value) })),
-      lengths: Array.from(lengths)
-        .sort((a, b) => Number(a) - Number(b))
-        .map((value) => ({ value, label: formatMm(value) })),
-    };
-  }, [allProducts]);
-
-  const toggleFilterValue = useCallback((list: string[], value: string, setter: (next: string[]) => void) => {
-    setter(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
-  }, []);
-
-  const setSelectedUsageSafe = useCallback((next: string[]) => setSelectedUsage(next), []);
-  const setSelectedWoodSafe = useCallback((next: string[]) => setSelectedWood(next), []);
-  const setSelectedColorSafe = useCallback((next: string[]) => setSelectedColor(next), []);
-  const setSelectedProfileSafe = useCallback((next: string[]) => setSelectedProfile(next), []);
-  const setSelectedWidthSafe = useCallback((next: string[]) => setSelectedWidth(next), []);
-  const setSelectedLengthSafe = useCallback((next: string[]) => setSelectedLength(next), []);
+  }, [selectedWood, selectedColor]);
 
   const filteredProducts = useMemo(() => {
+    const usage = boardTypeToUsage(selectedBoardType);
+    const wood = woodToWoodId(selectedWood);
+
     return allProducts.filter((p) => {
       const usageId = normalizeUsageId(p.category);
-      const matchesUsage = selectedUsage.length === 0 || (usageId ? selectedUsage.includes(usageId) : false);
       const woodId = normalizeWoodId(p.woodType);
-      const matchesWood = selectedWood.length === 0 || (woodId ? selectedWood.includes(woodId) : false);
-
-      const normalizedColors = (p.colors ?? [])
-        .map((c) => normalizeToken(c?.nameEn ?? c?.name ?? ''))
-        .filter(Boolean);
-      const matchesColor =
-        selectedColor.length === 0 || selectedColor.some((value) => normalizedColors.includes(normalizeToken(value)));
-
-      const normalizedProfiles = (p.profiles ?? [])
-        .map((prof) => normalizeToken(prof?.code ?? prof?.nameEn ?? prof?.name ?? ''))
-        .filter(Boolean);
-      const matchesProfile =
-        selectedProfile.length === 0 || selectedProfile.some((value) => normalizedProfiles.includes(normalizeToken(value)));
-
-      const widths = (p.profiles ?? [])
-        .map((prof) => prof?.dimensions?.width)
-        .filter((v): v is number => typeof v === 'number' && Number.isFinite(v) && v > 0)
-        .map((v) => String(v));
-      const lengths = (p.profiles ?? [])
-        .map((prof) => prof?.dimensions?.length)
-        .filter((v): v is number => typeof v === 'number' && Number.isFinite(v) && v > 0)
-        .map((v) => String(v));
-
-      const matchesWidth = selectedWidth.length === 0 || selectedWidth.some((value) => widths.includes(value));
-      const matchesLength = selectedLength.length === 0 || selectedLength.some((value) => lengths.includes(value));
-
-      return matchesUsage && matchesWood && matchesColor && matchesProfile && matchesWidth && matchesLength;
+      return usageId === usage && woodId === wood;
     });
-  }, [allProducts, normalizeToken, normalizeUsageId, normalizeWoodId, selectedColor, selectedLength, selectedProfile, selectedUsage, selectedWidth, selectedWood]);
+  }, [allProducts, boardTypeToUsage, normalizeUsageId, normalizeWoodId, selectedBoardType, selectedWood, woodToWoodId]);
 
   useEffect(() => {
     if (filteredProducts.length === 0) {
@@ -414,12 +346,10 @@ export default function ConfiguratorPage() {
     }
 
     const next = filteredProducts.find((item) => item.id === selectedProductId) ?? filteredProducts[0];
-
-    if (next && next.id !== selectedProductId) {
+    if (next?.id !== selectedProductId) {
       setSelectedProductId(next.id);
     }
-
-    if (next && next.id !== product?.id) {
+    if (next?.id !== product?.id) {
       setProduct(next);
     }
   }, [filteredProducts, product?.id, selectedProductId]);
@@ -434,12 +364,488 @@ export default function ConfiguratorPage() {
     return profiles.length > 0 ? profiles : fallbackProfiles;
   }, [product, fallbackProfiles]);
 
+  const availableColorKeys = useMemo(() => {
+    const keys = new Set<ColorKey>();
+    availableColors.forEach((color) => {
+      const key = colorVariantToKey(color);
+      if (key) keys.add(key);
+    });
+    return keys;
+  }, [availableColors, colorVariantToKey]);
+
+  const availableProfileKeys = useMemo(() => {
+    const keys = new Set<ProfileKey>();
+    availableFinishes.forEach((finish) => {
+      keys.add(finishToProfileKey(finish));
+    });
+    return keys;
+  }, [availableFinishes, finishToProfileKey]);
+
+  const availableWidths = useMemo(() => {
+    const set = new Set<string>();
+    availableFinishes.forEach((finish) => {
+      if (typeof finish.dimensions?.width === 'number' && finish.dimensions.width > 0) {
+        set.add(String(Math.round(finish.dimensions.width)));
+      }
+    });
+    return set;
+  }, [availableFinishes]);
+
+  const availableLengths = useMemo(() => {
+    const set = new Set<string>();
+    availableFinishes.forEach((finish) => {
+      if (typeof finish.dimensions?.length === 'number' && finish.dimensions.length > 0) {
+        set.add(String(Math.round(finish.dimensions.length)));
+      }
+    });
+    return set;
+  }, [availableFinishes]);
+
+  const availableThicknesses = useMemo(() => {
+    const set = new Set<'28' | '20'>();
+    availableFinishes.forEach((finish) => {
+      const thickness = finish.dimensions?.thickness;
+      if (typeof thickness !== 'number') return;
+      if (thickness >= 24) set.add('28');
+      else set.add('20');
+    });
+    return set;
+  }, [availableFinishes]);
+
+  useEffect(() => {
+    if (!availableColorKeys.has(selectedColor)) {
+      const next = pickFirstEnabled(
+        COLOR_OPTIONS.map((option) => ({
+          ...option,
+          enabled: availableColorKeys.has(option.value) && (selectedWood !== 'termo' || THERMO_COLORS.has(option.value)),
+        }))
+      );
+      if (next) setSelectedColor(next);
+    }
+  }, [availableColorKeys, selectedColor, selectedWood]);
+
+  useEffect(() => {
+    if (!availableProfileKeys.has(selectedProfile)) {
+      const next = pickFirstEnabled(PROFILE_OPTIONS.map((option) => ({ ...option, enabled: availableProfileKeys.has(option.value) })));
+      if (next) setSelectedProfile(next);
+    }
+  }, [availableProfileKeys, selectedProfile]);
+
+  useEffect(() => {
+    if (!availableWidths.has(selectedWidth)) {
+      const next = pickFirstEnabled(WIDTH_OPTIONS.map((option) => ({ ...option, enabled: availableWidths.has(option.value) })));
+      if (next) setSelectedWidth(next);
+    }
+  }, [availableWidths, selectedWidth]);
+
+  useEffect(() => {
+    if (!availableLengths.has(selectedLength)) {
+      const next = pickFirstEnabled(LENGTH_OPTIONS.map((option) => ({ ...option, enabled: availableLengths.has(option.value) })));
+      if (next) setSelectedLength(next);
+    }
+  }, [availableLengths, selectedLength]);
+
+  useEffect(() => {
+    if (!availableThicknesses.has(selectedThickness)) {
+      setSelectedThickness(selectedBoardType === 'terasine' ? '28' : '20');
+    }
+  }, [availableThicknesses, selectedBoardType, selectedThickness]);
+
+  const selectedColorVariant = useMemo(() => {
+    return (
+      availableColors.find((color) => colorVariantToKey(color) === selectedColor) ??
+      availableColors[0] ??
+      null
+    );
+  }, [availableColors, colorVariantToKey, selectedColor]);
+
+  const selectedFinishVariant = useMemo(() => {
+    const targetWidth = Number(selectedWidth);
+    const targetLength = Number(selectedLength);
+
+    const thicknessMatches = (thickness: number | undefined): boolean => {
+      if (typeof thickness !== 'number' || !Number.isFinite(thickness)) return false;
+      if (selectedThickness === '28') return thickness >= 24;
+      return thickness < 24 || thickness === 20 || thickness === 18;
+    };
+
+    const scored = availableFinishes
+      .map((finish) => {
+        let score = 0;
+
+        if (finishToProfileKey(finish) === selectedProfile) score += 5;
+        if (finish.dimensions?.width === targetWidth) score += 3;
+        if (finish.dimensions?.length === targetLength) score += 3;
+        if (thicknessMatches(finish.dimensions?.thickness)) score += 2;
+
+        return { finish, score };
+      })
+      .sort((a, b) => b.score - a.score);
+
+    return scored[0]?.finish ?? null;
+  }, [availableFinishes, finishToProfileKey, selectedLength, selectedProfile, selectedThickness, selectedWidth]);
+
   const productModelUrl = useMemo(
     () =>
       product
         ? getProductModelUrl({ slug: product.slug, category: product.category, woodType: product.woodType })
         : CONFIGURATOR_MODEL_URL,
     [product]
+  );
+
+  const boardTypeOptions = BOARD_OPTIONS;
+  const woodOptions = WOOD_OPTIONS.map((option) => ({
+    ...option,
+    enabled:
+      option.value !== 'termo'
+        ? true
+        : allProducts.some((p) => normalizeWoodId(p.woodType) === 'thermo'),
+  }));
+
+  const profileOptions = PROFILE_OPTIONS.map((option) => ({
+    ...option,
+    enabled: availableProfileKeys.has(option.value),
+  }));
+
+  const thicknessOptions = THICKNESS_OPTIONS[selectedBoardType].map((option) => ({
+    ...option,
+    enabled: availableThicknesses.has(option.value as '28' | '20'),
+  }));
+
+  const colorOptions = COLOR_OPTIONS.map((option) => ({
+    ...option,
+    enabled: availableColorKeys.has(option.value) && (selectedWood !== 'termo' || THERMO_COLORS.has(option.value)),
+  }));
+
+  const widthOptions = WIDTH_OPTIONS.map((option) => ({
+    ...option,
+    enabled: availableWidths.has(option.value),
+  }));
+
+  const lengthOptions = LENGTH_OPTIONS.map((option) => ({
+    ...option,
+    enabled: availableLengths.has(option.value),
+  }));
+
+  const selectedProductName =
+    product ? (currentLocale === 'en' && product.nameEn ? product.nameEn : product.name) : null;
+
+  const basePriceLabel = useMemo(() => {
+    const key = 'configurator.basePriceLabel';
+    if (typeof t.has === 'function' && t.has(key)) return t(key);
+    return currentLocale === 'lt' ? 'Bazinė kaina' : 'Base price';
+  }, [currentLocale, t]);
+
+  const buyNowLabel = useMemo(() => {
+    const key = 'products.buyNow';
+    if (typeof t.has === 'function' && t.has(key)) return t(key);
+    return currentLocale === 'lt' ? 'Pirkti dabar' : 'Buy now';
+  }, [currentLocale, t]);
+
+  const currency = useMemo(
+    () =>
+      new Intl.NumberFormat(locale === 'lt' ? 'lt-LT' : 'en-US', {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 2,
+      }),
+    [locale]
+  );
+
+  const numberM2 = useMemo(
+    () =>
+      new Intl.NumberFormat(locale === 'lt' ? 'lt-LT' : 'en-US', {
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2,
+      }),
+    [locale]
+  );
+
+  const cartTotalAreaM2 = useMemo(() => {
+    return cartItems.reduce((sum, item) => {
+      const area = item.pricingSnapshot?.totalAreaM2;
+      if (typeof area === 'number' && Number.isFinite(area) && area > 0) return sum + area;
+      return sum;
+    }, 0);
+  }, [cartItems]);
+
+  useEffect(() => {
+    const widthMm = selectedFinishVariant?.dimensions?.width;
+    const lengthMm = selectedFinishVariant?.dimensions?.length;
+
+    if (!product?.id || !selectedColorVariant || !selectedFinishVariant) {
+      setQuote(null);
+      setQuoteError(null);
+      return;
+    }
+
+    if (typeof widthMm !== 'number' || typeof lengthMm !== 'number') {
+      setQuote(null);
+      setQuoteError(null);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const run = async () => {
+      setQuoteLoading(true);
+      setQuoteError(null);
+
+      try {
+        type QuoteRequestBody = {
+          productId: string;
+          profileVariantId?: string;
+          colorVariantId?: string;
+          widthMm: number;
+          lengthMm: number;
+          inputMode: 'boards' | 'area';
+          quantityBoards?: number;
+          targetAreaM2?: number;
+          rounding?: 'ceil' | 'round' | 'floor';
+          cartTotalAreaM2?: number;
+        };
+
+        const unitAreaM2 = (widthMm / 1000) * (lengthMm / 1000);
+
+        const currentLineAreaM2 =
+          inputMode === 'boards'
+            ? (typeof quantityBoards === 'number' ? quantityBoards : 0) * unitAreaM2
+            : typeof targetAreaM2 === 'number' && unitAreaM2 > 0
+              ? Math.ceil(targetAreaM2 / unitAreaM2) * unitAreaM2
+              : 0;
+
+        const body: QuoteRequestBody =
+          inputMode === 'boards'
+            ? {
+                productId: product.id,
+                profileVariantId: selectedFinishVariant.id,
+                colorVariantId: selectedColorVariant.id,
+                widthMm,
+                lengthMm,
+                inputMode,
+                quantityBoards,
+                cartTotalAreaM2: cartTotalAreaM2 + currentLineAreaM2,
+              }
+            : {
+                productId: product.id,
+                profileVariantId: selectedFinishVariant.id,
+                colorVariantId: selectedColorVariant.id,
+                widthMm,
+                lengthMm,
+                inputMode,
+                targetAreaM2,
+                rounding: 'ceil',
+                cartTotalAreaM2: cartTotalAreaM2 + currentLineAreaM2,
+              };
+
+        const res = await fetch('/api/pricing/quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+          setQuote(null);
+          try {
+            const data = await res.json();
+            setQuoteError(typeof data?.error === 'string' ? data.error : t('configurator.priceNotAvailable'));
+          } catch {
+            setQuoteError(t('configurator.priceNotAvailable'));
+          }
+          return;
+        }
+
+        const data: any = await res.json();
+        const next = {
+          unitPricePerM2: Number(data?.unitPricePerM2),
+          areaM2: Number(data?.areaM2),
+          totalAreaM2: Number(data?.totalAreaM2),
+          unitPricePerBoard: Number(data?.unitPricePerBoard),
+          quantityBoards: Number(data?.quantityBoards),
+          lineTotal: Number(data?.lineTotal),
+          inputMode: data?.inputMode === 'area' ? 'area' : 'boards',
+          roundingInfo: data?.roundingInfo as
+            | {
+                requestedAreaM2: number;
+                actualAreaM2: number;
+                deltaAreaM2: number;
+                rounding: 'ceil' | 'round' | 'floor';
+              }
+            | undefined,
+        } as const;
+
+        if (!Number.isFinite(next.unitPricePerM2) || next.unitPricePerM2 <= 0) {
+          setQuote(null);
+          setQuoteError(t('configurator.priceNotAvailable'));
+          return;
+        }
+
+        setQuote(next);
+        setQuoteError(null);
+
+        if (inputMode === 'boards') {
+          if (Number.isFinite(next.quantityBoards) && next.quantityBoards > 0 && next.quantityBoards !== quantityBoards) {
+            setQuantityBoards(next.quantityBoards);
+          }
+        }
+      } catch (e: any) {
+        if (e?.name === 'AbortError') return;
+        setQuote(null);
+        setQuoteError(t('configurator.priceNotAvailable'));
+      } finally {
+        setQuoteLoading(false);
+      }
+    };
+
+    run();
+    return () => controller.abort();
+  }, [
+    cartTotalAreaM2,
+    inputMode,
+    product?.id,
+    quantityBoards,
+    selectedColorVariant,
+    selectedFinishVariant,
+    t,
+    targetAreaM2,
+  ]);
+
+  const handleDownloadPdf = useCallback(async () => {
+    if (!selectedFinishVariant || !selectedColorVariant) return;
+
+    setPdfLoading(true);
+    try {
+      const screenshotDataUrl = configuratorRef.current?.takeScreenshot() ?? null;
+
+      const pdfData: ConfigurationPDFData = {
+        productName: selectedProductName ?? product?.id ?? 'config',
+        colorName: getLocalizedColorName(selectedColorVariant, currentLocale),
+        colorHex: selectedColorVariant.hex,
+        profileName: getLocalizedProfileName(selectedFinishVariant, currentLocale),
+        widthMm: selectedFinishVariant.dimensions?.width,
+        lengthMm: selectedFinishVariant.dimensions?.length,
+        thicknessMm: selectedFinishVariant.dimensions?.thickness,
+        pricePerM2: quote?.unitPricePerM2,
+        pricePerBoard: quote?.unitPricePerBoard,
+        quantityBoards: quote?.quantityBoards,
+        totalAreaM2: quote?.totalAreaM2,
+        lineTotal: quote?.lineTotal,
+        screenshotDataUrl,
+        configUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+      };
+
+      await downloadConfigurationPDF(pdfData, currentLocale);
+    } finally {
+      setPdfLoading(false);
+    }
+  }, [currentLocale, product?.id, quote, selectedColorVariant, selectedFinishVariant, selectedProductName]);
+
+  const handleAddToCart = useCallback(
+    (goToCheckout: boolean) => {
+      if (!product || !selectedColorVariant || !selectedFinishVariant) return;
+
+      const widthMm = selectedFinishVariant.dimensions?.width;
+      const lengthMm = selectedFinishVariant.dimensions?.length;
+      const thicknessMm = selectedFinishVariant.dimensions?.thickness;
+      const unitAreaM2 =
+        typeof widthMm === 'number' && typeof lengthMm === 'number' && widthMm > 0 && lengthMm > 0
+          ? (widthMm / 1000) * (lengthMm / 1000)
+          : 0;
+
+      const resolvedQuantityBoards =
+        inputMode === 'boards'
+          ? Math.max(1, Math.round(Number(quote?.quantityBoards ?? quantityBoards) || 1))
+          : 1;
+
+      const resolvedTargetAreaM2 =
+        inputMode === 'area' ? Math.max(0.01, Number(quote?.totalAreaM2 ?? targetAreaM2) || 0.01) : undefined;
+
+      const basePriceForCart =
+        inputMode === 'area'
+          ? quote?.unitPricePerM2 ?? product.price ?? 0
+          : quote?.unitPricePerBoard ?? product.price ?? 0;
+
+      const quantityForCart = inputMode === 'area' ? resolvedTargetAreaM2 ?? 1 : resolvedQuantityBoards;
+
+      const totalAreaForSnapshot =
+        inputMode === 'area'
+          ? resolvedTargetAreaM2 ?? 0
+          : quote?.totalAreaM2 ?? (unitAreaM2 > 0 ? unitAreaM2 * resolvedQuantityBoards : 0);
+
+      const unitPriceForSnapshot =
+        typeof quote?.unitPricePerBoard === 'number' && Number.isFinite(quote.unitPricePerBoard)
+          ? quote.unitPricePerBoard
+          : unitAreaM2 > 0
+            ? basePriceForCart * unitAreaM2
+            : basePriceForCart;
+
+      const lineTotalForSnapshot =
+        typeof quote?.lineTotal === 'number' && Number.isFinite(quote.lineTotal)
+          ? quote.lineTotal
+          : inputMode === 'area'
+            ? (quote?.unitPricePerM2 ?? basePriceForCart) * (resolvedTargetAreaM2 ?? 0)
+            : unitPriceForSnapshot * resolvedQuantityBoards;
+
+      addItem({
+        id: product.id,
+        name: selectedProductName ?? product.name,
+        slug: currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug,
+        image:
+          typeof selectedColorVariant.image === 'string' && selectedColorVariant.image.trim().length > 0
+            ? selectedColorVariant.image
+            : typeof product.image === 'string'
+              ? product.image
+              : undefined,
+        basePrice: basePriceForCart,
+        quantity: quantityForCart,
+        color: selectedColorVariant.name,
+        finish: selectedFinishVariant.name,
+        configuration: {
+          usageType: boardTypeToUsage(selectedBoardType),
+          colorVariantId: selectedColorVariant.id,
+          profileVariantId: selectedFinishVariant.id,
+          thicknessMm: typeof thicknessMm === 'number' ? thicknessMm : undefined,
+          widthMm: typeof widthMm === 'number' ? widthMm : undefined,
+          lengthMm: typeof lengthMm === 'number' ? lengthMm : undefined,
+        },
+        inputMode,
+        targetAreaM2: inputMode === 'area' ? resolvedTargetAreaM2 : undefined,
+        pricingSnapshot:
+          unitAreaM2 > 0
+            ? {
+                unitAreaM2,
+                totalAreaM2: totalAreaForSnapshot,
+                pricePerM2Used: quote?.unitPricePerM2 ?? basePriceForCart,
+                unitPrice: unitPriceForSnapshot,
+                lineTotal: lineTotalForSnapshot,
+              }
+            : undefined,
+      });
+
+      if (goToCheckout) {
+        router.push(toLocalePath('/checkout', currentLocale));
+      } else {
+        toast.success(t('cart.itemAdded'));
+      }
+    },
+    [
+      addItem,
+      boardTypeToUsage,
+      currentLocale,
+      inputMode,
+      product,
+      quantityBoards,
+      quote,
+      router,
+      selectedBoardType,
+      selectedColorVariant,
+      selectedFinishVariant,
+      selectedProductName,
+      t,
+      targetAreaM2,
+      toast,
+    ]
   );
 
   return (
@@ -461,149 +867,272 @@ export default function ConfiguratorPage() {
       </InView>
 
       <InView className="hero-animate-root">
-      <PageSection className="max-w-[1440px] mx-auto" centered={false}>
-        <div className="flex flex-col gap-4 mb-8 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
-          <div className="flex flex-wrap items-center gap-[10px]">
-            <FilterDropdown
-              id="usage"
-              label={t('productsPage.filtersUsage')}
-              options={usageOptions}
-              selected={selectedUsage}
-              onToggle={(value) => toggleFilterValue(selectedUsage, value, setSelectedUsageSafe)}
-              allLabel={t('productsPage.usageFilters.all')}
-              emptyLabel={t('productsPage.filtersEmpty')}
-              openId={openFilterId}
-              setOpenId={setOpenFilterId}
-            />
-            <FilterDropdown
-              id="wood"
-              label={t('productsPage.filtersWood')}
-              options={woodOptions}
-              selected={selectedWood}
-              onToggle={(value) => toggleFilterValue(selectedWood, value, setSelectedWoodSafe)}
-              allLabel={t('productsPage.woodFilters.all')}
-              emptyLabel={t('productsPage.filtersEmpty')}
-              openId={openFilterId}
-              setOpenId={setOpenFilterId}
-            />
-            <FilterDropdown
-              id="color"
-              label={t('productsPage.filtersColor')}
-              options={colorOptions}
-              selected={selectedColor}
-              onToggle={(value) => toggleFilterValue(selectedColor, value, setSelectedColorSafe)}
-              allLabel={t('productsPage.colorFilterAll')}
-              emptyLabel={t('productsPage.filtersEmpty')}
-              openId={openFilterId}
-              setOpenId={setOpenFilterId}
-            />
-            <FilterDropdown
-              id="profile"
-              label={t('productsPage.filtersProfile')}
-              options={profileOptions}
-              selected={selectedProfile}
-              onToggle={(value) => toggleFilterValue(selectedProfile, value, setSelectedProfileSafe)}
-              allLabel={t('productsPage.profileFilterAll')}
-              emptyLabel={t('productsPage.filtersEmpty')}
-              openId={openFilterId}
-              setOpenId={setOpenFilterId}
-            />
-            <FilterDropdown
-              id="width"
-              label={t('productsPage.filtersWidth')}
-              options={sizeOptions.widths}
-              selected={selectedWidth}
-              onToggle={(value) => toggleFilterValue(selectedWidth, value, setSelectedWidthSafe)}
-              allLabel={t('productsPage.filtersAny')}
-              emptyLabel={t('productsPage.filtersEmpty')}
-              openId={openFilterId}
-              setOpenId={setOpenFilterId}
-            />
-            <FilterDropdown
-              id="length"
-              label={t('productsPage.filtersLength')}
-              options={sizeOptions.lengths}
-              selected={selectedLength}
-              onToggle={(value) => toggleFilterValue(selectedLength, value, setSelectedLengthSafe)}
-              allLabel={t('productsPage.filtersAny')}
-              emptyLabel={t('productsPage.filtersEmpty')}
-              openId={openFilterId}
-              setOpenId={setOpenFilterId}
-            />
-          </div>
-          {filteredProducts.length > 1 && (
-            <div className="w-full max-w-[420px] hero-seq-item hero-seq-right" style={{ animationDelay: '160ms' }}>
-              <label className="block font-['Outfit'] font-normal text-[12px] leading-[1.3] tracking-[0.6px] uppercase text-[#161616] mb-[8px]">
-                {t('breadcrumbs.products')}
-              </label>
-              <select
-                value={selectedProductId ?? ''}
-                onChange={(event) => {
-                  const nextId = event.target.value;
-                  setSelectedProductId(nextId);
-                  const nextProduct = filteredProducts.find((item) => item.id === nextId) ?? null;
-                  setProduct(nextProduct);
-                }}
-                className="w-full h-[40px] px-[16px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] bg-white yw-select"
-              >
-                {filteredProducts.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {currentLocale === 'en' && item.nameEn ? item.nameEn : item.name}
-                  </option>
-                ))}
-              </select>
+        <PageSection className="max-w-[1440px] mx-auto" centered={false}>
+          {error && (
+            <div className="w-full border border-[#BBBBBB] rounded-[24px] bg-white p-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
+              <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('configurator.loadError')}</p>
+              <p className="mt-2 font-['Outfit'] text-[12px] text-[#7C7C7C]">{error}</p>
             </div>
           )}
-        </div>
-        {error && (
-          <div className="w-full border border-[#BBBBBB] rounded-[24px] bg-white p-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
-            <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('configurator.loadError')}</p>
-            <p className="mt-2 font-['Outfit'] text-[12px] text-[#7C7C7C]">{error}</p>
-          </div>
-        )}
 
-        {!error && filteredProducts.length === 0 && !isLoading && (
-          <div className="w-full border border-[#BBBBBB] rounded-[24px] bg-white p-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
-            <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('productsPage.emptyTitle')}</p>
-            <p className="mt-2 font-['Outfit'] text-[12px] text-[#7C7C7C]">
-              {t('productsPage.emptyDescriptionPrefix')}{' '}
-              <a href={toLocalePath('/kontaktai', currentLocale)} className="text-[#161616] underline">
-                {t('productsPage.emptyContactLink')}
-              </a>
-              {t('productsPage.emptyDescriptionSuffix')}
-            </p>
-
-            <div className="mt-[20px]">
-              <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">
-                {t('configurator.demoExampleLabel')}
+          {!error && filteredProducts.length === 0 && !isLoading && (
+            <div className="w-full border border-[#BBBBBB] rounded-[24px] bg-white p-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
+              <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('productsPage.emptyTitle')}</p>
+              <p className="mt-2 font-['Outfit'] text-[12px] text-[#7C7C7C]">
+                {t('productsPage.emptyDescriptionPrefix')}{' '}
+                <a href={toLocalePath('/kontaktai', currentLocale)} className="text-[#161616] underline">
+                  {t('productsPage.emptyContactLink')}
+                </a>
+                {t('productsPage.emptyDescriptionSuffix')}
               </p>
-              <div className="mt-[10px]">
-                <Konfiguratorius3D
-                  productId="demo"
-                  availableColors={fallbackColors}
-                  availableFinishes={fallbackProfiles}
-                  modelUrl={CONFIGURATOR_MODEL_URL}
-                  basePrice={undefined}
-                  isLoading={false}
-                />
+
+              <div className="mt-[20px]">
+                <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">
+                  {t('configurator.demoExampleLabel')}
+                </p>
+                <div className="mt-[10px]">
+                  <Konfiguratorius3D
+                    productId="demo"
+                    availableColors={fallbackColors}
+                    availableFinishes={fallbackProfiles}
+                    modelUrl={CONFIGURATOR_MODEL_URL}
+                    basePrice={undefined}
+                    isLoading={false}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {!error && (product || isLoading) && (
-          <div className="w-full hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
-            <Konfiguratorius3D
-              productId={product?.id ?? 'demo'}
-              availableColors={availableColors}
-              availableFinishes={availableFinishes}
-              modelUrl={productModelUrl}
-              basePrice={product?.price}
-              isLoading={isLoading}
-            />
-          </div>
-        )}
-      </PageSection>
+          {!error && (product || isLoading) && (
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6 hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
+              <div>
+                <Konfiguratorius3D
+                  ref={configuratorRef}
+                  productId={product?.id ?? 'demo'}
+                  availableColors={availableColors}
+                  availableFinishes={availableFinishes}
+                  modelUrl={productModelUrl}
+                  basePrice={product?.price}
+                  isLoading={isLoading}
+                  mode="viewport"
+                  selectedColorId={selectedColorVariant?.id}
+                  selectedFinishId={selectedFinishVariant?.id}
+                  onColorChange={(color) => {
+                    const key = colorVariantToKey(color);
+                    if (key) setSelectedColor(key);
+                  }}
+                  onFinishChange={(finish) => {
+                    setSelectedProfile(finishToProfileKey(finish));
+                    if (typeof finish.dimensions?.width === 'number') {
+                      setSelectedWidth(String(Math.round(finish.dimensions.width)));
+                    }
+                    if (typeof finish.dimensions?.length === 'number') {
+                      setSelectedLength(String(Math.round(finish.dimensions.length)));
+                    }
+                    if (typeof finish.dimensions?.thickness === 'number') {
+                      setSelectedThickness(finish.dimensions.thickness >= 24 ? '28' : '20');
+                    }
+                  }}
+                />
+              </div>
+
+              <aside className="rounded-[24px] border border-[#BBBBBB] bg-[#EAEAEA] p-4 flex flex-col gap-3 h-fit">
+                <h2 className="font-['Outfit'] text-[13px] text-[#161616]">Lentų Konfiguratoriaus</h2>
+
+                <PanelSection title="Lento tipas">
+                  <ToggleButtons value={selectedBoardType} onChange={setSelectedBoardType} options={boardTypeOptions} columns={2} />
+                </PanelSection>
+
+                <PanelSection title="Profilis">
+                  <ToggleButtons value={selectedProfile} onChange={setSelectedProfile} options={profileOptions} columns={2} />
+                </PanelSection>
+
+                <PanelSection title="Storis">
+                  <ToggleButtons
+                    value={selectedThickness}
+                    onChange={(value) => setSelectedThickness(value as '28' | '20')}
+                    options={thicknessOptions}
+                    columns={2}
+                  />
+                </PanelSection>
+
+                <PanelSection title="Mediena">
+                  <ToggleButtons value={selectedWood} onChange={setSelectedWood} options={woodOptions} columns={3} />
+                </PanelSection>
+
+                <PanelSection title="Spalva">
+                  <ToggleButtons value={selectedColor} onChange={setSelectedColor} options={colorOptions} columns={2} />
+                </PanelSection>
+
+                <PanelSection title="Plotis">
+                  <ToggleButtons value={selectedWidth} onChange={setSelectedWidth} options={widthOptions} columns={3} />
+                </PanelSection>
+
+                <PanelSection title="Ilgis">
+                  <ToggleButtons value={selectedLength} onChange={setSelectedLength} options={lengthOptions} columns={3} />
+                </PanelSection>
+
+                {filteredProducts.length > 1 && (
+                  <PanelSection title="Produktas">
+                    <div className="grid grid-cols-1 gap-1.5">
+                      {filteredProducts.map((item) => {
+                        const itemName = currentLocale === 'en' && item.nameEn ? item.nameEn : item.name;
+                        const active = selectedProductId === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedProductId(item.id);
+                              setProduct(item);
+                            }}
+                            className={`h-[30px] rounded-[4px] px-2 font-['Outfit'] text-[12px] text-left border ${
+                              active
+                                ? 'bg-[#161616] border-[#161616] text-white'
+                                : 'bg-[#F9F9F9] border-[#BBBBBB] text-[#161616]'
+                            }`}
+                          >
+                            {itemName}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </PanelSection>
+                )}
+
+                <PanelSection title="Matmenys">
+                  <div className="space-y-1 font-['Outfit'] text-[12px] text-[#535353]">
+                    <p>Ilgis: {selectedLength} mm</p>
+                    <p>Plotis: {selectedWidth} mm</p>
+                    <p>Storis: {selectedThickness === '20' ? '18/20 mm' : '28 mm'}</p>
+                    {selectedProductName ? <p className="text-[#7C7C7C]">{selectedProductName}</p> : null}
+                  </div>
+                </PanelSection>
+
+                <PanelSection title={t('configurator.pricingTitle')}>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setInputMode('boards');
+                          if (quote?.quantityBoards) setQuantityBoards(quote.quantityBoards);
+                        }}
+                        className={`h-[30px] rounded-[4px] px-3 font-['Outfit'] text-[12px] border ${
+                          inputMode === 'boards'
+                            ? 'bg-[#161616] border-[#161616] text-white'
+                            : 'bg-[#F9F9F9] border-[#BBBBBB] text-[#161616]'
+                        }`}
+                      >
+                        {t('configurator.inputModeBoards')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setInputMode('area');
+                          if (quote?.totalAreaM2) setTargetAreaM2(Number(quote.totalAreaM2.toFixed(2)));
+                        }}
+                        className={`h-[30px] rounded-[4px] px-3 font-['Outfit'] text-[12px] border ${
+                          inputMode === 'area'
+                            ? 'bg-[#161616] border-[#161616] text-white'
+                            : 'bg-[#F9F9F9] border-[#BBBBBB] text-[#161616]'
+                        }`}
+                      >
+                        {t('configurator.inputModeArea')}
+                      </button>
+                    </div>
+
+                    {inputMode === 'boards' ? (
+                      <label className="block">
+                        <span className="block font-['Outfit'] text-[12px] text-[#535353] mb-1">{t('configurator.quantityBoardsLabel')}</span>
+                        <input
+                          type="number"
+                          min={1}
+                          step={1}
+                          value={quantityBoards}
+                          onChange={(e) => setQuantityBoards(Math.max(1, Math.round(Number(e.target.value) || 1)))}
+                          className="w-full h-[32px] px-2 rounded-[8px] border border-[#BBBBBB] bg-white font-['Outfit'] text-[12px] text-[#161616]"
+                        />
+                      </label>
+                    ) : (
+                      <label className="block">
+                        <span className="block font-['Outfit'] text-[12px] text-[#535353] mb-1">{t('configurator.targetAreaLabel')}</span>
+                        <input
+                          type="number"
+                          min={0.01}
+                          step={0.01}
+                          value={targetAreaM2}
+                          onChange={(e) => setTargetAreaM2(Math.max(0.01, Number(e.target.value) || 0.01))}
+                          className="w-full h-[32px] px-2 rounded-[8px] border border-[#BBBBBB] bg-white font-['Outfit'] text-[12px] text-[#161616]"
+                        />
+                      </label>
+                    )}
+
+                    {typeof product?.price === 'number' && Number.isFinite(product.price) && product.price > 0 && (
+                      <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#F9F9F9] px-2 py-1.5">
+                        <span className="font-['Outfit'] text-[12px] text-[#535353]">{basePriceLabel}</span>
+                        <span className="font-['Outfit'] text-[12px] text-[#161616]">{currency.format(product.price)}</span>
+                      </div>
+                    )}
+
+                    {quoteLoading && <p className="font-['Outfit'] text-[12px] text-[#7C7C7C]">{t('configurator.calculatingPrice')}</p>}
+                    {quoteError && !quoteLoading && <p className="font-['Outfit'] text-[12px] text-[#FFB3B3]">{quoteError}</p>}
+
+                    {quote && !quoteLoading && (
+                      <div className="grid grid-cols-1 gap-1.5">
+                        <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#F9F9F9] px-2 py-1.5">
+                          <span className="font-['Outfit'] text-[12px] text-[#535353]">{t('configurator.unitPricePerM2Label')}</span>
+                          <span className="font-['Outfit'] text-[12px] text-[#161616]">{currency.format(quote.unitPricePerM2)}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#F9F9F9] px-2 py-1.5">
+                          <span className="font-['Outfit'] text-[12px] text-[#535353]">{t('configurator.unitPricePerBoardLabel')}</span>
+                          <span className="font-['Outfit'] text-[12px] text-[#161616]">{currency.format(quote.unitPricePerBoard)}</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#F9F9F9] px-2 py-1.5">
+                          <span className="font-['Outfit'] text-[12px] text-[#535353]">{t('configurator.totalAreaLabel')}</span>
+                          <span className="font-['Outfit'] text-[12px] text-[#161616]">{numberM2.format(quote.totalAreaM2)} m²</span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#F9F9F9] px-2 py-1.5">
+                          <span className="font-['Outfit'] text-[12px] text-[#535353]">{t('configurator.lineTotalLabel')}</span>
+                          <span className="font-['Outfit'] text-[12px] text-[#161616]">{currency.format(quote.lineTotal)}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleDownloadPdf}
+                      disabled={pdfLoading || !selectedColorVariant || !selectedFinishVariant}
+                      className="h-[36px] rounded-[100px] px-3 font-['DM_Sans'] text-[13px] border border-[#161616] bg-[#161616] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {pdfLoading ? t('configurator.downloadingPdf') : t('configurator.downloadPdf')}
+                    </button>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleAddToCart(false)}
+                        disabled={!selectedColorVariant || !selectedFinishVariant || quoteLoading || !!quoteError}
+                        className="h-[36px] rounded-[100px] px-3 font-['DM_Sans'] text-[13px] border border-[#161616] bg-white text-[#161616] disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {t('configurator.addToCart')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleAddToCart(true)}
+                        disabled={!selectedColorVariant || !selectedFinishVariant || quoteLoading || !!quoteError}
+                        className="h-[36px] rounded-[100px] px-3 font-['DM_Sans'] text-[13px] border border-[#161616] bg-[#161616] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {buyNowLabel}
+                      </button>
+                    </div>
+                  </div>
+                </PanelSection>
+              </aside>
+            </div>
+          )}
+        </PageSection>
       </InView>
     </main>
   );

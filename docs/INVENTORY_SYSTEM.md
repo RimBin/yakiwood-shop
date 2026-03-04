@@ -335,18 +335,24 @@ const { adjustedItems, removedItems, adjustments } = await adjustCartToStock(car
 
 1. **Cart validation** - Check stock availability before checkout
 2. **Checkout initiated** - Create Stripe checkout session
-3. **Stock reservation** - On `checkout.session.completed` webhook
-4. **Payment processing** - User completes payment
-5. **Sale confirmation** - On `payment_intent.succeeded` webhook
-6. **Stock update** - Reserved → Sold
+3. **Payment confirmation** - On `checkout.session.completed` webhook
+4. **Stock update** - Reserve + confirm sale (best-effort)
 
 ### Webhook Handler
-**Location:** [`app/api/webhook/route.ts`](../app/api/webhook/route.ts)
+**Location (canonical):** [`app/api/webhooks/stripe/route.ts`](../app/api/webhooks/stripe/route.ts)
+
+**Shared implementation:** [`lib/stripe/webhook.ts`](../lib/stripe/webhook.ts)
+
+**Legacy alias (backwards compatibility):** [`app/api/webhook/route.ts`](../app/api/webhook/route.ts)
+
+**Other payment providers (inventory finalization):**
+- Paysera callback: [`app/api/webhooks/paysera/route.ts`](../app/api/webhooks/paysera/route.ts)
+- PayPal capture: [`app/api/paypal/capture/route.ts`](../app/api/paypal/capture/route.ts)
+
+**Shared helper:** [`lib/inventory/finalize-paid-order.ts`](../lib/inventory/finalize-paid-order.ts)
 
 **Events:**
-- `checkout.session.completed` → Create order + reserve stock
-- `payment_intent.succeeded` → Confirm sale (reservation → sold)
-- `payment_intent.payment_failed` → Release reserved stock
+- `checkout.session.completed` → Order paid + invoice/email + inventory reserve/confirm
 
 ## Notifications
 

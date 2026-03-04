@@ -5,13 +5,11 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
-import { localizeBlogPost, normalizeStoredPosts, type LocalizedBlogPost } from '@/data/blog-posts';
+import { localizeBlogPost, type LocalizedBlogPost } from '@/data/blog-posts';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
 import { PageCover } from '@/components/shared';
 import { PageLayout } from '@/components/shared/PageLayout';
 import InView from '@/components/InView';
-
-const POSTS_STORAGE_KEY = 'yakiwood_posts';
 
 function isDataUrl(src: string) {
   return src.startsWith('data:');
@@ -43,30 +41,25 @@ export default function BlogListClient({ initialPosts }: { initialPosts: Localiz
   const hasMore = visiblePosts.length < posts.length;
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const raw = window.localStorage.getItem(POSTS_STORAGE_KEY);
-    if (!raw) return;
-
-    try {
-      const parsed = JSON.parse(raw);
-      const normalized = normalizeStoredPosts(parsed);
-      if (!normalized) return;
-
-      const stored = normalized
-        .map((post) => localizeBlogPost(post, locale === 'lt' ? 'lt' : 'en'))
-        .filter((post) => post.published);
-
-      const merged = new Map<string, LocalizedBlogPost>();
-      for (const post of stored) merged.set(post.id, post);
-      for (const post of initialPosts) {
-        if (!merged.has(post.id)) merged.set(post.id, post);
+    let cancelled = false;
+    const run = async () => {
+      try {
+        const res = await fetch(`/api/posts?locale=${encodeURIComponent(locale)}`);
+        const json = (await res.json().catch(() => null)) as any;
+        const raw = Array.isArray(json?.posts) ? (json.posts as any[]) : [];
+        const localized = raw.map((post) => localizeBlogPost(post, locale === 'lt' ? 'lt' : 'en'));
+        if (!cancelled && localized.length > 0) {
+          setPosts(sortPosts(localized));
+        }
+      } catch {
+        // keep initialPosts fallback
       }
-
-      setPosts(sortPosts(Array.from(merged.values())));
-    } catch {
-      // ignore parse errors
-    }
-  }, [initialPosts, locale]);
+    };
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [locale]);
 
   useEffect(() => {
     setVisibleCount((prev) => Math.min(Math.max(itemsPerPage, prev), posts.length || itemsPerPage));

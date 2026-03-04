@@ -1,8 +1,8 @@
 "use client";
 
-import React, { Suspense, useMemo, useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
+import React, { Suspense, useMemo, useState, useEffect, useLayoutEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, useGLTF } from '@react-three/drei';
+import { OrbitControls, useGLTF, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
 import type { ProductColorVariant, ProductProfileVariant } from '@/lib/products.supabase';
 import { getLocalizedColorName, getLocalizedProfileName } from '@/lib/products.supabase';
@@ -298,6 +298,73 @@ function getFinishSurfacePreset(finish: ProductProfileVariant | null): { roughne
   return { roughness: 0.74, metalness: 0.08 };
 }
 
+function normalizeColorToken(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[_\s]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function resolveColorHex(color: ProductColorVariant | null): string {
+  if (color?.hex && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(color.hex)) {
+    return color.hex;
+  }
+
+  const source = [color?.id, color?.name, color?.nameEn, color?.nameLt].filter(Boolean).join(' ');
+  const token = normalizeColorToken(source);
+
+  if (token.includes('black') || token.includes('juod')) return '#1f1f1f';
+  if (token.includes('carbon-light') || token.includes('carbonlight')) return '#5b5b5b';
+  if (token.includes('carbon')) return '#333333';
+  if (token.includes('graphite') || token.includes('grafit')) return '#535353';
+  if (token.includes('silver') || token.includes('sidab')) return '#b7b7b7';
+  if (token.includes('dark-brown') || token.includes('darkbrown') || token.includes('tams') || token.includes('brown')) return '#5b3b2b';
+  if (token.includes('latte')) return '#b18e70';
+  if (token.includes('natural') || token.includes('natur') || token.includes('naturali')) return '#8f6a4d';
+
+  return '#444444';
+}
+
+class GLBErrorBoundary extends React.Component<
+  {
+    modelUrl: string;
+    fallback: React.ReactNode;
+    children: React.ReactNode;
+  },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    console.error('[Konfiguratorius3D] GLB load/render failed', {
+      modelUrl: this.props.modelUrl,
+      error,
+    });
+  }
+
+  componentDidUpdate(prevProps: Readonly<{ modelUrl: string }>) {
+    if (prevProps.modelUrl !== this.props.modelUrl && this.state.hasError) {
+      // Reset boundary when a new model is selected.
+      // eslint-disable-next-line react/no-did-update-set-state
+      this.setState({ hasError: false });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
+
 interface GLBProfileModelProps {
   modelUrl: string;
   color: string;
@@ -309,9 +376,34 @@ function GLBProfileModel({ modelUrl, color, finish, autoRotate = true }: GLBProf
   const groupRef = useRef<THREE.Group | null>(null);
   const gltf = useGLTF(modelUrl) as { scene: THREE.Group };
 
-  const modelScene = useMemo(() => cloneSceneWithUniqueMaterials(gltf.scene), [gltf.scene]);
+  const modelScene = useMemo(() => {
+    const cloned = cloneSceneWithUniqueMaterials(gltf.scene);
 
-  useEffect(() => {
+    // Center and uniformly fit the model so it remains clearly visible in the viewport.
+    // Uniform scale preserves proportions.
+    const wrapper = new THREE.Group();
+    wrapper.add(cloned);
+
+    const box = new THREE.Box3().setFromObject(cloned);
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+
+    // Center model at world origin.
+    cloned.position.set(-center.x, -center.y, -center.z);
+
+    const maxDim = Math.max(size.x, size.y, size.z);
+    if (Number.isFinite(maxDim) && maxDim > 0) {
+      const targetMaxDim = 2.0;
+      const scale = targetMaxDim / maxDim;
+      wrapper.scale.setScalar(scale);
+    }
+
+    return wrapper;
+  }, [gltf.scene]);
+
+  useLayoutEffect(() => {
     const surface = getFinishSurfacePreset(finish);
 
     modelScene.traverse((object) => {
@@ -320,8 +412,27 @@ function GLBProfileModel({ modelUrl, color, finish, autoRotate = true }: GLBProf
 
       const applyMaterial = (material: THREE.Material) => {
         const standardMaterial = material as THREE.MeshStandardMaterial;
+        const materialName = (standardMaterial.name ?? '').toLowerCase();
+        const isFixedMaterial =
+          materialName.includes('bottom') ||
+          materialName.includes('end_grain') ||
+          materialName.includes('end grain');
 
-        if ('color' in standardMaterial && standardMaterial.color) {
+        // Keep GLB textures enabled. If the model uses embedded textures,
+        // GLTFLoader will create blob: URLs for them — we only need to ensure
+        // the correct color space for color textures.
+        if ('map' in standardMaterial && standardMaterial.map) {
+          standardMaterial.map.colorSpace = THREE.SRGBColorSpace;
+          standardMaterial.map.needsUpdate = true;
+        }
+        if ('emissiveMap' in standardMaterial && standardMaterial.emissiveMap) {
+          standardMaterial.emissiveMap.colorSpace = THREE.SRGBColorSpace;
+          standardMaterial.emissiveMap.needsUpdate = true;
+        }
+
+        // Keep bottom/end materials as-authored in the GLB.
+        // Apply selected tint only to the main visible wood surface material.
+        if (!isFixedMaterial && 'color' in standardMaterial && standardMaterial.color) {
           standardMaterial.color.set(color);
         }
 
@@ -409,9 +520,10 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
   const [selectedFinish, setSelectedFinish] = useState<ProductProfileVariant | null>(
     availableFinishes[0] || null
   );
-  const [modelColor, setModelColor] = useState('#444444');
+  const [modelColor, setModelColor] = useState('#ffffff');
   const [resolvedModelUrl, setResolvedModelUrl] = useState<string | null>(null);
   const [isModelResolved, setIsModelResolved] = useState(false);
+  const { active: isGltfLoading } = useProgress();
   const textureVariantKey = useMemo(
     () => [
       selectedColor?.id ?? 'default-color',
@@ -427,6 +539,16 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
   const glRef = useRef<THREE.WebGLRenderer | null>(null);
   const handleRendererReady = useCallback((gl: THREE.WebGLRenderer) => {
     glRef.current = gl;
+
+  // Make wood textures look more natural/bright.
+  // Important: requires a full dev-server restart to update CSP headers
+  // if you recently changed them.
+  gl.outputColorSpace = THREE.SRGBColorSpace;
+  gl.toneMapping = THREE.ACESFilmicToneMapping;
+  gl.toneMappingExposure = 1.25;
+  if ('physicallyCorrectLights' in gl) {
+    (gl as THREE.WebGLRenderer & { physicallyCorrectLights?: boolean }).physicallyCorrectLights = true;
+  }
   }, []);
 
   useImperativeHandle(ref, () => ({
@@ -559,9 +681,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
   }, [availableFinishes, selectedFinishId, productId]);
 
   useEffect(() => {
-    if (selectedColor?.hex) {
-      setModelColor(selectedColor.hex);
-    }
+    setModelColor(resolveColorHex(selectedColor));
   }, [selectedColor]);
 
   useEffect(() => {
@@ -578,14 +698,19 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
     setIsModelResolved(false);
 
     const resolve = async () => {
+      let headOk: boolean | null = null;
       try {
+        if (process.env.NODE_ENV !== 'production') {
+          // eslint-disable-next-line no-console
+          console.debug('[Konfiguratorius3D] resolving modelUrl', { modelUrl });
+        }
         const response = await fetch(modelUrl, { method: 'HEAD' });
+        headOk = response.ok;
 
         if (!isMounted) return;
 
         if (response.ok) {
           setResolvedModelUrl(modelUrl);
-          useGLTF.preload(modelUrl);
         } else {
           setResolvedModelUrl(null);
         }
@@ -595,6 +720,15 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
       } finally {
         if (!isMounted) return;
         setIsModelResolved(true);
+
+        if (process.env.NODE_ENV !== 'production') {
+          // eslint-disable-next-line no-console
+          console.debug('[Konfiguratorius3D] modelUrl resolved', {
+            modelUrl,
+            headOk,
+            resolved: headOk ? modelUrl : null,
+          });
+        }
       }
     };
 
@@ -615,6 +749,13 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
 
   // Realtime price quote for current configuration.
   useEffect(() => {
+    if (mode === 'viewport') {
+      setQuote(null);
+      setQuoteError(null);
+      setQuoteLoading(false);
+      return;
+    }
+
     const widthMm = selectedFinish?.dimensions?.width;
     const lengthMm = selectedFinish?.dimensions?.length;
 
@@ -744,7 +885,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
 
     run();
     return () => controller.abort();
-  }, [productId, selectedFinish?.id, selectedFinish?.dimensions?.width, selectedFinish?.dimensions?.length, selectedColor?.id, inputMode, quantityBoards, targetAreaM2, cartTotalAreaM2, t]);
+  }, [mode, productId, selectedFinish?.id, selectedFinish?.dimensions?.width, selectedFinish?.dimensions?.length, selectedColor?.id, inputMode, quantityBoards, targetAreaM2, cartTotalAreaM2, t]);
 
   const handleColorSelect = (color: ProductColorVariant) => {
     setSelectedColor(color);
@@ -778,7 +919,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
           canvasClassName ?? (mode === 'viewport' ? 'h-full' : 'h-[400px] md:h-[500px]')
         }`}
       >
-        {(isLoading || !isModelResolved) && (
+        {(isLoading || !isModelResolved || (resolvedModelUrl && isGltfLoading)) && (
           <div className="absolute inset-0 flex items-center justify-center bg-[#EAEAEA] z-10">
             <div className="flex flex-col items-center gap-3">
               <div className="w-12 h-12 border-4 border-[#BBBBBB] border-t-[#161616] rounded-full animate-spin" />
@@ -789,11 +930,37 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
         
         <Canvas camera={{ position: [3, 2, 3], fov: 50 }} gl={{ preserveDrawingBuffer: true }}>
           <RendererBridge onRenderer={handleRendererReady} />
-          <ambientLight intensity={0.6} />
-          <directionalLight position={[5, 5, 5]} intensity={1} />
-          <Suspense fallback={null}>
+			<ambientLight intensity={0.85} />
+			<hemisphereLight args={['#FFFFFF', '#E1E1E1', 0.45]} />
+			{/* Key */}
+			<directionalLight position={[5, 5, 5]} intensity={1.25} />
+			{/* Fill */}
+			<directionalLight position={[-5, 2, 4]} intensity={0.65} />
+			{/* Rim/back */}
+			<directionalLight position={[0, 6, -6]} intensity={0.35} />
+          <Suspense
+            fallback={
+				  resolvedModelUrl
+					? null
+					: (
+						<ProfileModel
+						  color={modelColor}
+						  finish={selectedFinish}
+						  variantKey={textureVariantKey}
+						  autoRotate={true}
+						/>
+					  )
+				}
+          >
             {resolvedModelUrl ? (
-              <GLBProfileModel modelUrl={resolvedModelUrl} color={modelColor} finish={selectedFinish} autoRotate={true} />
+              <GLBErrorBoundary
+                modelUrl={resolvedModelUrl}
+                fallback={<ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} />}
+              >
+					{!isGltfLoading ? (
+						<GLBProfileModel modelUrl={resolvedModelUrl} color={modelColor} finish={selectedFinish} autoRotate={true} />
+					) : null}
+              </GLBErrorBoundary>
             ) : (
               <ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} />
             )}

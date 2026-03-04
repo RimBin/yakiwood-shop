@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
 import { projects as projectsData } from '@/data/projects';
-import { blogPosts } from '@/data/blog-posts';
+import { blogPosts, type BlogPost } from '@/data/blog-posts';
 import type { Project } from '@/types/project';
 import { findProjectBySlug, getProjectSlug, normalizeProjectLocale } from '@/lib/projects/i18n';
 import { toLocalePath } from '@/i18n/paths';
@@ -21,48 +21,23 @@ const languages: Language[] = [
   { code: 'en', label: 'English' },
 ];
 
-const PROJECTS_STORAGE_KEY = 'yakiwood_projects';
-
-function openProjectsDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('yakiwood-admin', 1);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains('kv')) {
-        db.createObjectStore('kv', { keyPath: 'key' });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error('Failed to open IndexedDB'));
-  });
-}
-
-async function readProjectsFromBrowserStorage(): Promise<Project[]> {
-  if (typeof window === 'undefined') return projectsData;
-
+async function fetchProjects(locale: 'lt' | 'en'): Promise<Project[]> {
   try {
-    const db = await openProjectsDb();
-    const fromIdb = await new Promise<unknown | null>((resolve, reject) => {
-      const tx = db.transaction('kv', 'readonly');
-      const store = tx.objectStore('kv');
-      const req = store.get(PROJECTS_STORAGE_KEY);
-      req.onsuccess = () => {
-        const row = req.result as { key: string; value: unknown } | undefined;
-        resolve(row?.value ?? null);
-      };
-      req.onerror = () => reject(req.error ?? new Error('IndexedDB get failed'));
-    });
-    if (Array.isArray(fromIdb)) return fromIdb as Project[];
-  } catch {
-    // ignore
-  }
-
-  try {
-    const legacy = window.localStorage.getItem(PROJECTS_STORAGE_KEY);
-    const parsed = legacy ? (JSON.parse(legacy) as unknown) : null;
-    return Array.isArray(parsed) ? (parsed as Project[]) : projectsData;
+    const res = await fetch(`/api/projects?locale=${encodeURIComponent(locale)}`);
+    const json = (await res.json().catch(() => null)) as any;
+    return Array.isArray(json?.projects) ? (json.projects as Project[]) : projectsData;
   } catch {
     return projectsData;
+  }
+}
+
+async function fetchPosts(locale: 'lt' | 'en'): Promise<BlogPost[]> {
+  try {
+    const res = await fetch(`/api/posts?locale=${encodeURIComponent(locale)}`);
+    const json = (await res.json().catch(() => null)) as any;
+    return Array.isArray(json?.posts) ? (json.posts as BlogPost[]) : blogPosts;
+  } catch {
+    return blogPosts;
   }
 }
 
@@ -153,7 +128,7 @@ export default function LanguageSwitcher({
     // Special-case: project detail routes need slug translation too
     const currentProjectSlug = extractProjectSlugFromPath(pathname);
     if (currentProjectSlug) {
-      const projects = await readProjectsFromBrowserStorage();
+      const projects = await fetchProjects(fromLocale);
       const project = findProjectBySlug(projects, currentProjectSlug, fromLocale);
       if (project) {
         const translatedSlug = getProjectSlug(project, targetLocale);
@@ -165,7 +140,8 @@ export default function LanguageSwitcher({
     // Special-case: blog/straipsniai detail routes need slug translation too
     const currentBlogSlug = extractBlogSlugFromPath(pathname);
     if (currentBlogSlug) {
-      const match = blogPosts.find((post) => post.slug[fromLocale] === currentBlogSlug);
+      const posts = await fetchPosts(fromLocale);
+      const match = posts.find((post) => post.slug[fromLocale] === currentBlogSlug);
       if (match) {
         const targetBase = targetLocale === 'lt' ? '/lt/straipsniai' : '/blog';
         newPath = `${targetBase}/${match.slug[targetLocale]}`;

@@ -19,7 +19,6 @@ import {
   AdminTextarea,
 } from '@/components/admin/ui/AdminUI'
 
-const PROJECTS_STORAGE_KEY = 'yakiwood_projects'
 const PROJECT_IMAGES_BUCKET = 'project-images'
 
 async function getAdminToken(): Promise<string | null> {
@@ -27,6 +26,25 @@ async function getAdminToken(): Promise<string | null> {
   if (!supabase) return null
   const { data } = await supabase.auth.getSession()
   return data.session?.access_token ?? null
+}
+
+async function adminRequest<T>(input: RequestInfo | URL, init: RequestInit = {}): Promise<T> {
+  const token = await getAdminToken()
+  if (!token) {
+    throw new Error('No admin session. Please login again.')
+  }
+
+  const headers = new Headers(init.headers)
+  headers.set('Authorization', `Bearer ${token}`)
+  if (!headers.has('Content-Type') && init.body) headers.set('Content-Type', 'application/json')
+
+  const res = await fetch(input, { ...init, headers })
+  const json = (await res.json().catch(() => null)) as any
+  if (!res.ok) {
+    const msg = json?.error || `Request failed (${res.status})`
+    throw new Error(msg)
+  }
+  return json as T
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -83,76 +101,6 @@ async function uploadImageToSupabase(file: File, bucket = PROJECT_IMAGES_BUCKET)
   }
 
   return publicUrl
-}
-
-let adminDbPromise: Promise<IDBDatabase> | null = null
-
-function openAdminDb(): Promise<IDBDatabase> {
-  if (typeof window === 'undefined') {
-    return Promise.reject(new Error('IndexedDB is not available during SSR'))
-  }
-  if (adminDbPromise) return adminDbPromise
-
-  adminDbPromise = new Promise((resolve, reject) => {
-    const request = indexedDB.open('yakiwood-admin', 1)
-    request.onupgradeneeded = () => {
-      const db = request.result
-      if (!db.objectStoreNames.contains('kv')) {
-        db.createObjectStore('kv', { keyPath: 'key' })
-      }
-    }
-    request.onsuccess = () => resolve(request.result)
-    request.onerror = () => reject(request.error ?? new Error('Failed to open IndexedDB'))
-  })
-
-  return adminDbPromise
-}
-
-async function kvGet<T>(key: string): Promise<T | null> {
-  try {
-    const db = await openAdminDb()
-    return await new Promise<T | null>((resolve, reject) => {
-      const tx = db.transaction('kv', 'readonly')
-      const store = tx.objectStore('kv')
-      const req = store.get(key)
-      req.onsuccess = () => {
-        const row = req.result as { key: string; value: T } | undefined
-        resolve(row?.value ?? null)
-      }
-      req.onerror = () => reject(req.error ?? new Error('IndexedDB get failed'))
-    })
-  } catch {
-    return null
-  }
-}
-
-async function kvSet<T>(key: string, value: T): Promise<void> {
-  const db = await openAdminDb()
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction('kv', 'readwrite')
-    const store = tx.objectStore('kv')
-    store.put({ key, value })
-    tx.oncomplete = () => resolve()
-    tx.onerror = () => reject(tx.error ?? new Error('IndexedDB transaction failed'))
-    tx.onabort = () => reject(tx.error ?? new Error('IndexedDB transaction aborted'))
-  })
-}
-
-async function getProjectsFromStorage(): Promise<Project[] | null> {
-  const fromIdb = await kvGet<Project[]>(PROJECTS_STORAGE_KEY)
-  if (fromIdb && Array.isArray(fromIdb)) return fromIdb
-
-  try {
-    const legacy = window.localStorage.getItem(PROJECTS_STORAGE_KEY)
-    if (!legacy) return null
-    const parsed = JSON.parse(legacy) as Project[]
-    if (!Array.isArray(parsed)) return null
-    await kvSet(PROJECTS_STORAGE_KEY, parsed)
-    window.localStorage.removeItem(PROJECTS_STORAGE_KEY)
-    return parsed
-  } catch {
-    return null
-  }
 }
 
 function slugify(value: string) {
@@ -482,23 +430,53 @@ export default function ProjectsAdminClient() {
   const featuredImageInputRef = useRef<HTMLInputElement | null>(null)
   const [projectSelectedFileNames, setProjectSelectedFileNames] = useState(() => t('ui.noFileSelected'))
 
+  const persistProjects = async (next: Project[]) => {
+    setProjects(next)
+    await adminRequest('/api/admin/projects', {
+      method: 'PUT',
+      body: JSON.stringify({ projects: next }),
+    })
+  }
+
   useEffect(() => {
     let cancelled = false
 
     const run = async () => {
-      const storedProjects = await getProjectsFromStorage()
-      if (cancelled) return
+      try {
+        const json = await adminRequest<{ projects: Project[] }>('/api/admin/projects')
+        if (cancelled) return
 
-      if (storedProjects) {
-        setProjects(storedProjects)
-      } else {
-        setProjects(defaultProjects)
-        try {
-          await kvSet(PROJECTS_STORAGE_KEY, defaultProjects)
-          window.localStorage.removeItem(PROJECTS_STORAGE_KEY)
-        } catch {
-          // ignore
+        const loaded = Array.isArray(json.projects) ? json.projects : []
+        if (loaded.length > 0) {
+          setProjects(loaded)
+          return
         }
+
+        // If DB is empty, seed it once from defaults (avoids a blank CMS on a fresh project).
+        if (typeof window !== 'undefined') {
+          const seededKey = 'yakiwood_cms_seeded_projects_v1'
+          const alreadySeeded = window.localStorage.getItem(seededKey) === '1'
+          if (!alreadySeeded && defaultProjects.length > 0) {
+            try {
+              await adminRequest('/api/admin/projects', {
+                method: 'PUT',
+                body: JSON.stringify({ projects: defaultProjects }),
+              })
+              window.localStorage.setItem(seededKey, '1')
+              if (cancelled) return
+              setProjects(defaultProjects)
+              return
+            } catch {
+              // fall through to local seed (UI only)
+            }
+          }
+        }
+
+        setProjects(defaultProjects)
+      } catch (e) {
+        if (cancelled) return
+        setProjects(defaultProjects)
+        showToast(getErrorMessage(e, 'Nepavyko užkrauti projektų.'))
       }
     }
 
@@ -509,7 +487,7 @@ export default function ProjectsAdminClient() {
     }
   }, [])
 
-  const showToast = (msg: string) => {
+  function showToast(msg: string) {
     setMessage(msg)
     window.setTimeout(() => setMessage(''), 3000)
   }
@@ -679,18 +657,12 @@ export default function ProjectsAdminClient() {
         return project
       })
 
-      setProjects(updated)
-      let persisted = true
       try {
-        await kvSet(PROJECTS_STORAGE_KEY, updated)
-      } catch {
-        persisted = false
+        await persistProjects(updated)
+        showToast('Projektas atnaujintas!')
+      } catch (e) {
+        showToast(`Projektas atnaujintas, bet nepavyko išsaugoti: ${getErrorMessage(e, 'Saugoti nepavyko')}`)
       }
-      showToast(
-        persisted
-          ? 'Projektas atnaujintas!'
-          : 'Projektas atnaujintas, bet nepavyko išsaugoti šiame naršyklės saugykloje (limitai).'
-      )
       setEditingProjectId(null)
     } else {
       const newProject: Project = {
@@ -726,19 +698,15 @@ export default function ProjectsAdminClient() {
         },
       }
 
-      const updated = [...projects, newProject]
-      setProjects(updated)
-      let persisted = true
       try {
-        await kvSet(PROJECTS_STORAGE_KEY, updated)
-      } catch {
-        persisted = false
+        const updated = [...projects, newProject]
+        await persistProjects(updated)
+        showToast('Projektas pridėtas!')
+      } catch (e) {
+        const updated = [...projects, newProject]
+        setProjects(updated)
+        showToast(`Projektas pridėtas, bet nepavyko išsaugoti: ${getErrorMessage(e, 'Saugoti nepavyko')}`)
       }
-      showToast(
-        persisted
-          ? 'Projektas pridėtas!'
-          : 'Projektas pridėtas, bet nepavyko išsaugoti šiame naršyklės saugykloje (limitai).'
-      )
     }
 
     setProjectForm(EMPTY_FORM)
@@ -754,13 +722,15 @@ export default function ProjectsAdminClient() {
     }
   }
 
-  const handleProjectDelete = (id: string) => {
+  const handleProjectDelete = async (id: string) => {
     const updated = projects.filter((p) => p.id !== id)
-    setProjects(updated)
-    void kvSet(PROJECTS_STORAGE_KEY, updated).catch(() => {
-      // ignore
-    })
-    showToast('Projektas ištrintas')
+    try {
+      await persistProjects(updated)
+      showToast('Projektas ištrintas')
+    } catch (e) {
+      setProjects(updated)
+      showToast(`Projektas ištrintas, bet nepavyko išsaugoti: ${getErrorMessage(e, 'Saugoti nepavyko')}`)
+    }
   }
 
   const handleProjectCancelEdit = () => {
@@ -839,11 +809,12 @@ export default function ProjectsAdminClient() {
           return
         }
         const updated = [...projects, ...(importedProjects as Project[])]
-        setProjects(updated)
-        void kvSet(PROJECTS_STORAGE_KEY, updated).catch(() => {
-          // ignore
-        })
-        showToast(`Importuota: ${importedProjects.length} projektai.`)
+        void persistProjects(updated)
+          .then(() => showToast(`Importuota: ${importedProjects.length} projektai.`))
+          .catch((e) => {
+            setProjects(updated)
+            showToast(`Importuota, bet nepavyko išsaugoti: ${getErrorMessage(e, 'Saugoti nepavyko')}`)
+          })
       } catch {
         showToast('Nepavyko importuoti projektų. Patikrinkite JSON formatą.')
       }
@@ -888,18 +859,12 @@ export default function ProjectsAdminClient() {
 
       setProjects(updated)
 
-      let persisted = true
       try {
-        await kvSet(PROJECTS_STORAGE_KEY, updated)
-      } catch {
-        persisted = false
+        await persistProjects(updated)
+        showToast(`Atnaujinti slug’ai: ${changedCount} projektų.`)
+      } catch (e) {
+        showToast(`Atnaujinti slug’ai: ${changedCount} projektų, bet nepavyko išsaugoti: ${getErrorMessage(e, 'Saugoti nepavyko')}`)
       }
-
-      showToast(
-        persisted
-          ? `Atnaujinti slug’ai: ${changedCount} projektų.`
-          : `Atnaujinti slug’ai: ${changedCount} projektų, bet nepavyko išsaugoti šiame naršyklės saugykloje (limitai).`
-      )
     } finally {
       setIsRegeneratingSlugs(false)
     }
@@ -932,18 +897,14 @@ export default function ProjectsAdminClient() {
 
       setProjects(updated)
 
-      let persisted = true
       try {
-        await kvSet(PROJECTS_STORAGE_KEY, updated)
-      } catch {
-        persisted = false
+        await persistProjects(updated)
+        showToast(`Atnaujinti LT tekstai: ${changedCount} projektų.`)
+      } catch (e) {
+        showToast(
+          `Atnaujinti LT tekstai: ${changedCount} projektų, bet nepavyko išsaugoti: ${getErrorMessage(e, 'Saugoti nepavyko')}`
+        )
       }
-
-      showToast(
-        persisted
-          ? `Atnaujinti LT tekstai: ${changedCount} projektų.`
-          : `Atnaujinti LT tekstai: ${changedCount} projektų, bet nepavyko išsaugoti šiame naršyklės saugykloje (limitai).`
-      )
     } finally {
       setIsMigratingLtTexts(false)
     }
@@ -1342,7 +1303,7 @@ export default function ProjectsAdminClient() {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col gap-[12px] sm:flex-row sm:items-start sm:justify-between">
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <h3 className="font-['DM_Sans'] text-[20px] tracking-[-0.8px] break-words">
                             {getProjectTitle(project, currentLocale)}
                             {getProjectSubtitle(project, currentLocale) && (
@@ -1367,7 +1328,7 @@ export default function ProjectsAdminClient() {
                             </p>
                           )}
                         </div>
-                        <div className="flex flex-wrap gap-[8px]">
+                        <div className="flex flex-wrap sm:flex-nowrap justify-start sm:justify-end gap-[8px] flex-shrink-0">
                           <AdminButton
                             size="sm"
                             variant={editingProjectId === project.id ? 'secondary' : 'outline'}

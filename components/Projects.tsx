@@ -14,50 +14,6 @@ import InView from '@/components/InView';
 
 const [imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6] = assets.projects;
 
-const PROJECTS_STORAGE_KEY = 'yakiwood_projects';
-
-function openProjectsDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('yakiwood-admin', 1);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains('kv')) {
-        db.createObjectStore('kv', { keyPath: 'key' });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error('Failed to open IndexedDB'));
-  });
-}
-
-async function readProjectsFromBrowserStorage(): Promise<Project[]> {
-  // Prefer IndexedDB (admin saves there), fallback to legacy localStorage, then seed.
-  try {
-    const db = await openProjectsDb();
-    const fromIdb = await new Promise<unknown | null>((resolve, reject) => {
-      const tx = db.transaction('kv', 'readonly');
-      const store = tx.objectStore('kv');
-      const req = store.get(PROJECTS_STORAGE_KEY);
-      req.onsuccess = () => {
-        const row = req.result as { key: string; value: unknown } | undefined;
-        resolve(row?.value ?? null);
-      };
-      req.onerror = () => reject(req.error ?? new Error('IndexedDB get failed'));
-    });
-    if (Array.isArray(fromIdb)) return fromIdb as Project[];
-  } catch {
-    // ignore
-  }
-
-  try {
-    const legacy = window.localStorage.getItem(PROJECTS_STORAGE_KEY);
-    const parsed = legacy ? (JSON.parse(legacy) as unknown) : null;
-    return Array.isArray(parsed) ? (parsed as Project[]) : projectsData;
-  } catch {
-    return projectsData;
-  }
-}
-
 function getProjectCardImage(project?: Partial<Project> | null): string | undefined {
   if (!project) return undefined;
 
@@ -94,14 +50,20 @@ export default function Projects() {
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      const loaded = await readProjectsFromBrowserStorage();
-      if (!cancelled) setProjects(loaded);
+      try {
+        const res = await fetch(`/api/projects?locale=${encodeURIComponent(currentLocale)}`);
+        const json = (await res.json().catch(() => null)) as any;
+        const loaded = Array.isArray(json?.projects) ? (json.projects as Project[]) : [];
+        if (!cancelled && loaded.length > 0) setProjects(loaded);
+      } catch {
+        // keep seed fallback
+      }
     };
     void run();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [currentLocale]);
 
   const fallbackImages = useMemo(
     () => [imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6],

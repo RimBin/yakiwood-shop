@@ -5,6 +5,7 @@ import { InvoicePDFGenerator } from '@/lib/invoice/pdf-generator'
 import { createInvoice } from '@/lib/invoice/utils'
 import type { InvoiceGenerateRequest } from '@/types/invoice'
 import { sendOrderConfirmation } from '@/lib/email'
+import { finalizePaidOrderInventory, type PaidOrderItem } from '@/lib/inventory/finalize-paid-order'
 
 function getPassword(): string | null {
   const pw = process.env.PAYSERA_SIGN_PASSWORD
@@ -101,6 +102,14 @@ async function handleCallback(raw: { data: string; ss1: string }) {
 
   // Mark order paid.
   await updateOrderStatus(order.id, 'processing', 'paid')
+
+  // Best-effort inventory update (reserve + confirm).
+  try {
+    const items = (Array.isArray(order.items) ? order.items : []) as PaidOrderItem[]
+    await finalizePaidOrderInventory({ orderId: order.id, items })
+  } catch (e) {
+    console.error('Paysera inventory update skipped', e)
+  }
 
   // Append note (best-effort).
   try {
@@ -203,3 +212,5 @@ export async function POST(req: NextRequest) {
     return new Response('Unsupported content type', { status: 415 })
   }
 }
+
+export const runtime = 'nodejs'

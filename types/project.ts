@@ -33,6 +33,11 @@ export interface Project {
   i18n?: Partial<Record<ProjectLocale, Partial<ProjectI18nFields>>>;
   featured?: boolean;
   category?: string;
+
+  /** CMS: draft/publish flag (optional for backward compatibility). */
+  published?: boolean;
+  /** CMS: published timestamp (optional). */
+  publishedAt?: string;
 }
 
 export interface RelatedProject {

@@ -1,0 +1,18 @@
+﻿
+=== public/models/products/spruce-terrace.glb
+images: 3 materials: 3 textures: 3
+  [0] mime=image/webp uri=n/a bufferView=4 bytes=254828 fmt=webp
+  [1] mime=image/webp uri=n/a bufferView=5 bytes=128992 fmt=webp
+  [2] mime=image/png uri=n/a bufferView=6 bytes=61563 fmt=png
+
+=== public/models/products/larch-terrace.glb
+images: 3 materials: 3 textures: 3
+  [0] mime=image/webp uri=n/a bufferView=4 bytes=983090 fmt=webp
+  [1] mime=image/webp uri=n/a bufferView=5 bytes=539510 fmt=webp
+  [2] mime=image/png uri=n/a bufferView=6 bytes=1924202 fmt=png
+
+=== public/models/products/thermo-terrace.glb
+images: 3 materials: 3 textures: 3
+  [0] mime=image/webp uri=n/a bufferView=12 bytes=809912 fmt=webp
+  [1] mime=image/webp uri=n/a bufferView=13 bytes=486492 fmt=webp
+  [2] mime=image/png uri=n/a bufferView=14 bytes=3178117 fmt=png

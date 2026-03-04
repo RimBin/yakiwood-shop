@@ -81,8 +81,8 @@ Legenda:
 ### 4.2 Automatinis prekių atsargų valdymas
 - Statusas: **PARTIAL (~60%)**
 - Yra: admin inventoriaus UI + `/api/inventory/*` ir `InventoryManager` logika.
-- Rizika / trūkumas: aktyvus Stripe webhook srautas yra `app/api/webhooks/stripe/route.ts`, o inventory rezervavimo logika matosi kitame webhook route (`app/api/webhook/route.ts`). Reikia suvienodinti, kad realūs apmokėjimai nuimtų/rezervuotų stock.
-- Įrodymai: `app/admin/inventory/page.tsx`, `app/api/inventory/*`, `app/api/webhook/route.ts`, `app/api/webhooks/stripe/route.ts`
+- Pastaba: Stripe webhook kelias suvienodintas — canonical endpoint’as `app/api/webhooks/stripe/route.ts`, o `app/api/webhook/route.ts` yra legacy alias (deleguoja į bendrą handlerį).
+- Įrodymai: `app/admin/inventory/page.tsx`, `app/api/inventory/*`, `app/api/webhooks/stripe/route.ts`, `lib/stripe/webhook.ts`
 
 ### 4.4 Prekių krepšelio ir užsakymo puslapių kūrimas
 - Statusas: **DONE (~80%)**
@@ -110,16 +110,16 @@ Legenda:
 ## 6) Mokėjimų būdų integracija
 
 ### 6.1 PayPal, Paysera, Stripe ir kitų mokėjimo šaltinių integravimas
-- Statusas: **PARTIAL (~35%)**
-- Yra: Stripe.
-- TODO: PayPal/Paysera reali integracija (šiuo metu yra tik asset/logotipas ir paminėjimai).
-- Įrodymai: Stripe - `app/api/checkout/route.ts`, `app/api/webhooks/stripe/route.ts`; PayPal - `public/assets/payments/paypal.svg` (tik asset)
+- Statusas: **PARTIAL (~75%)**
+- Yra: Paysera (checkout/init + patvirtinimo callback). Stripe/PayPal integracijos kode gali būti paliktos kaip optional.
+- Trūksta: produkcinė konfigūracija (env) + end-to-end testas su realiu Paysera mokėjimu.
+- Įrodymai: Stripe - `app/api/checkout/route.ts`, `app/api/webhooks/stripe/route.ts`; Paysera - `app/api/paysera/init/route.ts`, `app/api/webhooks/paysera/route.ts`; PayPal - `app/api/paypal/checkout/route.ts`, `app/api/paypal/capture/route.ts`
 
 ### 6.2 Automatiniai mokėjimo patvirtinimai ir ataskaitos
-- Statusas: **PARTIAL (~60%)**
-- Yra: Stripe webhook patvirtinimas ir order/invoice generavimas.
-- Trūksta: ataskaitos (admin UI) ir papildomi event’ai pagal poreikį.
-- Įrodymai: `app/api/webhooks/stripe/route.ts`
+- Statusas: **PARTIAL (~75%)**
+- Yra: automatinis apmokėjimo patvirtinimas (Stripe webhook, Paysera callback, PayPal capture) + order/invoice/email flow.
+- Trūksta: produkciniai raktai + realus test payment → patvirtinimas → invoice → email; papildomi event’ai/ataskaitos pagal poreikį.
+- Įrodymai: `app/api/webhooks/stripe/route.ts`, `app/api/webhooks/paysera/route.ts`, `app/api/paypal/capture/route.ts`
 
 ---
 
@@ -218,11 +218,12 @@ Legenda:
 ## Kritiniai neatitikimai / rizikos (rekomenduojama sutvarkyti)
 
 1) **Atsargų valdymas vs Stripe webhook**
-- Dabar yra du webhook keliai: `app/api/webhooks/stripe/route.ts` (aktyvus Stripe srautas) ir `app/api/webhook/route.ts` (matosi inventory rezervavimo/confirm/release logika).
-- Reikia nuspręsti, kuris yra „source of truth“ ir sujungti inventory atnaujinimą į realų Stripe webhook srautą.
+- Sutvarkyta: vienas „source of truth“ per bendrą handlerį `lib/stripe/webhook.ts`.
+- Canonical: `app/api/webhooks/stripe/route.ts`.
+- Legacy alias: `app/api/webhook/route.ts` (deleguoja į canonical).
 
 2) **PayPal/Paysera integracija**
-- Šiuo metu **nėra** realių integracijų, tik asset/logotipai ir paminėjimai.
+- Paysera srautas yra, bet reikia suvesti produkcinius env ir praeiti end-to-end testą. PayPal/Stripe šiame etape laikomi optional (neprivalomi).
 
 3) **Produkciniai env ir E2E testas**
 - Reikia suvesti Stripe + email (SMTP arba Resend) ir praeiti test payment → webhook → invoice → email.
@@ -231,7 +232,6 @@ Legenda:
 
 ## Siūlomas sekantis žingsnis (jei siekiama „100% pagal sąrašą“)
 
-1) Nuspręsti dėl mokėjimų: ar reikia Paysera/PayPal, ar paliekam tik Stripe.
-2) Sulyginti atsargų valdymą su Stripe webhook (vienas srautas).
-3) Susitarti dėl filtrų apimties (kaina/brand/kiti) ir įgyvendinti.
-4) Atlikti cross-browser testą ir surinkti bug list.
+1) Suvesti Paysera/PayPal/Stripe produkcinius env ir praeiti test payment → patvirtinimas → invoice → email.
+2) Susitarti dėl filtrų apimties (kaina/brand/kiti) ir įgyvendinti.
+3) Atlikti cross-browser testą ir surinkti bug list.

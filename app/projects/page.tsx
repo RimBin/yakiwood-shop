@@ -10,40 +10,6 @@ import { getProjectLocation, getProjectSlug, getProjectTitle, normalizeProjectLo
 import { PageCover } from '@/components/shared/PageLayout';
 import InView from '@/components/InView';
 
-const PROJECTS_STORAGE_KEY = 'yakiwood_projects';
-
-function openProjectsDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('yakiwood-admin', 1);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains('kv')) {
-        db.createObjectStore('kv', { keyPath: 'key' });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error('Failed to open IndexedDB'));
-  });
-}
-
-async function readProjectsFromIdb(): Promise<unknown[] | null> {
-  try {
-    const db = await openProjectsDb();
-    return await new Promise<unknown[] | null>((resolve, reject) => {
-      const tx = db.transaction('kv', 'readonly');
-      const store = tx.objectStore('kv');
-      const req = store.get(PROJECTS_STORAGE_KEY);
-      req.onsuccess = () => {
-        const row = req.result as { key: string; value: unknown } | undefined;
-        resolve(Array.isArray(row?.value) ? (row!.value as unknown[]) : null);
-      };
-      req.onerror = () => reject(req.error ?? new Error('IndexedDB get failed'));
-    });
-  } catch {
-    return null;
-  }
-}
-
 export default function ProjectsPage() {
   const locale = useLocale();
   const currentLocale = normalizeProjectLocale(locale);
@@ -55,20 +21,14 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     const run = async () => {
-      // Prefer IndexedDB (admin now saves there), fallback to legacy localStorage, then seed.
-      let loadedProjects: any[] = [];
-
-      const fromIdb = await readProjectsFromIdb();
-      if (fromIdb) {
-        loadedProjects = fromIdb as any[];
-      } else {
-        try {
-          const savedProjects = localStorage.getItem(PROJECTS_STORAGE_KEY);
-          const parsed = savedProjects ? JSON.parse(savedProjects) : null;
-          loadedProjects = Array.isArray(parsed) ? parsed : (projectsData as any[]);
-        } catch {
-          loadedProjects = projectsData as any[];
-        }
+      let loadedProjects: any[] = projectsData as any[];
+      try {
+        const res = await fetch(`/api/projects?locale=${encodeURIComponent(currentLocale)}`);
+        const json = (await res.json().catch(() => null)) as any;
+        const fromApi = Array.isArray(json?.projects) ? (json.projects as any[]) : null;
+        if (fromApi && fromApi.length > 0) loadedProjects = fromApi;
+      } catch {
+        // keep seed fallback
       }
 
       const displayProjects = loadedProjects.map((project: any, index: number) => ({

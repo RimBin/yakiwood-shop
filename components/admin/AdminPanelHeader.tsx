@@ -6,6 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toLocalePath, type AppLocale } from '@/i18n/paths';
 import { Breadcrumbs } from '@/components/ui';
+import { createClient } from '@/lib/supabase/client';
 
 type AdminTabKey =
   | 'dashboard'
@@ -29,46 +30,24 @@ type HeaderTab = {
   count?: number;
 };
 
-let adminDbPromise: Promise<IDBDatabase> | null = null;
-
-function openAdminDb(): Promise<IDBDatabase> {
-  if (typeof window === 'undefined') {
-    return Promise.reject(new Error('IndexedDB is not available during SSR'));
-  }
-  if (adminDbPromise) return adminDbPromise;
-
-  adminDbPromise = new Promise((resolve, reject) => {
-    const request = indexedDB.open('yakiwood-admin', 1);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains('kv')) {
-        db.createObjectStore('kv', { keyPath: 'key' });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error('Failed to open IndexedDB'));
-  });
-
-  return adminDbPromise;
+async function getAdminToken(): Promise<string | null> {
+  const supabase = createClient();
+  if (!supabase) return null;
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
 }
 
-async function safeIdbArrayCount(key: string): Promise<number | undefined> {
-  try {
-    const db = await openAdminDb();
-    const value = await new Promise<unknown | null>((resolve, reject) => {
-      const tx = db.transaction('kv', 'readonly');
-      const store = tx.objectStore('kv');
-      const req = store.get(key);
-      req.onsuccess = () => {
-        const row = req.result as { key: string; value: unknown } | undefined;
-        resolve(row?.value ?? null);
-      };
-      req.onerror = () => reject(req.error ?? new Error('IndexedDB get failed'));
-    });
-    return Array.isArray(value) ? value.length : undefined;
-  } catch {
-    return undefined;
-  }
+async function adminRequest<T>(input: RequestInfo | URL, init: RequestInit = {}): Promise<T> {
+  const token = await getAdminToken();
+  if (!token) throw new Error('No admin session');
+
+  const headers = new Headers(init.headers);
+  headers.set('Authorization', `Bearer ${token}`);
+
+  const res = await fetch(input, { ...init, headers });
+  const json = (await res.json().catch(() => null)) as any;
+  if (!res.ok) throw new Error(json?.error || `Request failed (${res.status})`);
+  return json as T;
 }
 
 function safeParseArrayCount(value: string | null): number | undefined {
@@ -138,20 +117,31 @@ export default function AdminPanelHeader() {
 
   useEffect(() => {
     // Best-effort counts. These are used only for header badges.
-    // We read from localStorage to keep it fast and avoid SSR coupling.
+    // Prefer server-backed counts for posts/projects, keep products demo count from localStorage.
     if (typeof window === 'undefined') return;
 
     let cancelled = false;
 
     const run = async () => {
-      const nextProjects =
-        safeParseArrayCount(localStorage.getItem('yakiwood_projects')) ?? (await safeIdbArrayCount('yakiwood_projects'));
-
       const nextCounts: TabCounts = {
         products: safeParseArrayCount(localStorage.getItem('yakiwood_products')),
-        projects: nextProjects,
-        posts: safeParseArrayCount(localStorage.getItem('yakiwood_posts')),
       };
+
+      try {
+        const [projectsRes, postsRes] = await Promise.allSettled([
+          adminRequest<{ projects: unknown[] }>('/api/admin/projects'),
+          adminRequest<{ posts: unknown[] }>('/api/admin/posts'),
+        ]);
+
+        if (projectsRes.status === 'fulfilled' && Array.isArray(projectsRes.value.projects)) {
+          nextCounts.projects = projectsRes.value.projects.length;
+        }
+        if (postsRes.status === 'fulfilled' && Array.isArray(postsRes.value.posts)) {
+          nextCounts.posts = postsRes.value.posts.length;
+        }
+      } catch {
+        // ignore (e.g. not logged in)
+      }
 
       if (cancelled) return;
       setCounts((prev) => {

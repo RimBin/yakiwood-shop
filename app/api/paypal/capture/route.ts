@@ -4,6 +4,7 @@ import { createInvoice } from '@/lib/invoice/utils'
 import type { InvoiceGenerateRequest } from '@/types/invoice'
 import { sendOrderConfirmation } from '@/lib/email'
 import { getOrderById, supabaseAdmin, updateOrderStatus, saveInvoiceToDatabase } from '@/lib/supabase-admin'
+import { finalizePaidOrderInventory, type PaidOrderItem } from '@/lib/inventory/finalize-paid-order'
 
 function getPayPalBaseUrl(): string {
   const env = (process.env.PAYPAL_ENV || 'sandbox').toLowerCase()
@@ -127,6 +128,16 @@ export async function POST(req: NextRequest) {
 
         updatedOrder = await updateOrderStatus(existing.id, 'processing', 'paid')
 
+        // Best-effort inventory update (reserve + confirm).
+        try {
+          if (updatedOrder) {
+            const items = (Array.isArray(existing.items) ? existing.items : []) as PaidOrderItem[]
+            await finalizePaidOrderInventory({ orderId: existing.id, items })
+          }
+        } catch (e) {
+          console.error('PayPal inventory update skipped', e)
+        }
+
         // Append a note (best-effort; does not fail capture flow).
         try {
           const existingNotes = typeof existing.notes === 'string' ? existing.notes : ''
@@ -203,3 +214,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Nepavyko patvirtinti PayPal mokėjimo' }, { status: 500 })
   }
 }
+
+export const runtime = 'nodejs'
