@@ -79,7 +79,7 @@ const THICKNESS_OPTIONS: Record<BoardType, ToggleOption<string>[]> = {
 
 function PanelSection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-[12px] border border-[#BBBBBB] bg-white p-3">
+    <div className="rounded-[12px] border border-[#BBBBBB] bg-[#EAEAEA] p-3">
       <p className="font-['Outfit'] text-[12px] leading-[1.3] text-[#535353] mb-2">{title}</p>
       {children}
     </div>
@@ -115,8 +115,8 @@ function ToggleButtons<T extends string>({
               active
                 ? 'bg-[#161616] border-[#161616] text-white'
                 : enabled
-                  ? 'bg-[#F9F9F9] border-[#BBBBBB] text-[#161616] hover:border-[#535353]'
-                  : 'bg-[#EAEAEA] border-[#E1E1E1] text-[#7C7C7C] cursor-not-allowed'
+                  ? 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616] hover:border-[#535353]'
+                  : 'bg-[#E1E1E1] border-[#E1E1E1] text-[#7C7C7C] cursor-not-allowed'
             }`}
           >
             {option.label}
@@ -945,14 +945,14 @@ export default function ConfiguratorPage() {
       <InView className="hero-animate-root">
         <PageSection className="max-w-[1440px] mx-auto" centered={false}>
           {error && (
-            <div className="w-full border border-[#BBBBBB] rounded-[24px] bg-white p-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
+            <div className="w-full border border-[#BBBBBB] rounded-[24px] bg-[#EAEAEA] p-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
               <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('configurator.loadError')}</p>
               <p className="mt-2 font-['Outfit'] text-[12px] text-[#7C7C7C]">{error}</p>
             </div>
           )}
 
           {!error && filteredProducts.length === 0 && !isLoading && (
-            <div className="w-full border border-[#BBBBBB] rounded-[24px] bg-white p-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
+            <div className="w-full border border-[#BBBBBB] rounded-[24px] bg-[#EAEAEA] p-[24px] hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
               <p className="font-['Outfit'] text-[14px] text-[#535353]">{t('productsPage.emptyTitle')}</p>
               <p className="mt-2 font-['Outfit'] text-[12px] text-[#7C7C7C]">
                 {t('productsPage.emptyDescriptionPrefix')}{' '}
@@ -1024,7 +1024,7 @@ export default function ConfiguratorPage() {
                   {/* Viewport overlays */}
                   <div className="pointer-events-none absolute inset-0">
                     {/* Dimensions (top-left) */}
-                    <div className="absolute top-4 left-4 bg-white/90 px-3 py-2 rounded-lg border border-[#BBBBBB]">
+                    <div className="absolute top-4 left-4 bg-[#EAEAEA]/90 px-3 py-2 rounded-lg border border-[#BBBBBB]">
                       <div className="space-y-0.5 font-['Outfit'] text-[12px] leading-[1.3] text-[#535353]">
                         <p>
                           {uiText.lengthLabel}: {selectedLength} mm
@@ -1046,7 +1046,7 @@ export default function ConfiguratorPage() {
                         type="button"
                         onClick={() => setAutoRotate((prev) => !prev)}
                         className={`h-[34px] rounded-[100px] px-3 font-['DM_Sans'] text-[13px] border border-[#161616] transition-colors ${
-                          autoRotate ? 'bg-white text-[#161616]' : 'bg-[#161616] text-white'
+                          autoRotate ? 'bg-[#EAEAEA] text-[#161616]' : 'bg-[#161616] text-white'
                         }`}
                       >
                         {autoRotate ? t('configurator.pauseRotation') : t('configurator.resumeRotation')}
@@ -1054,7 +1054,7 @@ export default function ConfiguratorPage() {
                     </div>
 
                     {/* Controls hint (bottom-left) */}
-                    <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-2 rounded-lg border border-[#BBBBBB]">
+                    <div className="absolute bottom-4 left-4 bg-[#EAEAEA]/90 px-3 py-2 rounded-lg border border-[#BBBBBB]">
                       <p className="font-['Outfit'] text-[12px] leading-[1.3] text-[#535353]">{t('configurator.controlsHint')}</p>
                     </div>
 
@@ -1073,7 +1073,7 @@ export default function ConfiguratorPage() {
                 </div>
               </div>
 
-              <aside className="rounded-[24px] border border-[#BBBBBB] bg-[#EAEAEA] p-4 flex flex-col gap-3 h-fit">
+              <aside className="rounded-[24px] border border-[#BBBBBB] bg-[#E1E1E1] p-4 flex flex-col gap-3 h-fit">
                 <h2 className="font-['Outfit'] text-[13px] text-[#161616]">{uiText.panelTitle}</h2>
 
                 <PanelSection title={uiText.boardType}>
@@ -1126,7 +1126,7 @@ export default function ConfiguratorPage() {
                             className={`h-[30px] rounded-[4px] px-2 font-['Outfit'] text-[12px] text-left border ${
                               active
                                 ? 'bg-[#161616] border-[#161616] text-white'
-                                : 'bg-[#F9F9F9] border-[#BBBBBB] text-[#161616]'
+                                : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
                             }`}
                           >
                             {itemName}
@@ -1149,7 +1149,7 @@ export default function ConfiguratorPage() {
                         className={`h-[30px] rounded-[4px] px-3 font-['Outfit'] text-[12px] border ${
                           inputMode === 'boards'
                             ? 'bg-[#161616] border-[#161616] text-white'
-                            : 'bg-[#F9F9F9] border-[#BBBBBB] text-[#161616]'
+                            : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
                         }`}
                       >
                         {t('configurator.inputModeBoards')}
@@ -1163,7 +1163,7 @@ export default function ConfiguratorPage() {
                         className={`h-[30px] rounded-[4px] px-3 font-['Outfit'] text-[12px] border ${
                           inputMode === 'area'
                             ? 'bg-[#161616] border-[#161616] text-white'
-                            : 'bg-[#F9F9F9] border-[#BBBBBB] text-[#161616]'
+                            : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
                         }`}
                       >
                         {t('configurator.inputModeArea')}
@@ -1179,7 +1179,7 @@ export default function ConfiguratorPage() {
                           step={1}
                           value={quantityBoards}
                           onChange={(e) => setQuantityBoards(Math.max(1, Math.round(Number(e.target.value) || 1)))}
-                          className="w-full h-[32px] px-2 rounded-[8px] border border-[#BBBBBB] bg-white font-['Outfit'] text-[12px] text-[#161616]"
+                          className="w-full h-[32px] px-2 rounded-[8px] border border-[#BBBBBB] bg-[#EAEAEA] font-['Outfit'] text-[12px] text-[#161616]"
                         />
                       </label>
                     ) : (
@@ -1191,14 +1191,14 @@ export default function ConfiguratorPage() {
                           step={0.01}
                           value={targetAreaM2}
                           onChange={(e) => setTargetAreaM2(Math.max(0.01, Number(e.target.value) || 0.01))}
-                          className="w-full h-[32px] px-2 rounded-[8px] border border-[#BBBBBB] bg-white font-['Outfit'] text-[12px] text-[#161616]"
+                          className="w-full h-[32px] px-2 rounded-[8px] border border-[#BBBBBB] bg-[#EAEAEA] font-['Outfit'] text-[12px] text-[#161616]"
                         />
                       </label>
                     )}
 
                     {quoteError && !quoteLoading && <p className="font-['Outfit'] text-[12px] text-[#FFB3B3]">{quoteError}</p>}
 
-                    <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#F9F9F9] px-2 py-1.5">
+                    <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#EAEAEA] px-2 py-1.5">
                       <span className="font-['Outfit'] text-[12px] text-[#535353]">{t('configurator.lineTotalLabel')}</span>
                       <span className="font-['Outfit'] text-[12px] text-[#161616]">
                         {typeof displayLineTotal === 'number' && Number.isFinite(displayLineTotal)
@@ -1212,7 +1212,7 @@ export default function ConfiguratorPage() {
                         type="button"
                         onClick={() => handleAddToCart(false)}
                         disabled={!selectedColorVariant || !selectedFinishVariant || quoteLoading || !!quoteError}
-                        className="h-[36px] rounded-[100px] px-3 font-['DM_Sans'] text-[13px] border border-[#161616] bg-white text-[#161616] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="h-[36px] rounded-[100px] px-3 font-['DM_Sans'] text-[13px] border border-[#161616] bg-[#EAEAEA] text-[#161616] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {t('configurator.addToCart')}
                       </button>

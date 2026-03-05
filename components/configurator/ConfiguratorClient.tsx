@@ -57,7 +57,7 @@ export default function ConfiguratorClient({ productSlug, presetSlug }: Configur
         <button
           type="button"
           onClick={() => actions.setView(config.view === '2d' ? '3d' : '2d')}
-          className="absolute z-10 top-[16px] right-[16px] h-[32px] px-[12px] rounded-[100px] border border-[#BBBBBB] bg-white/90 font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#161616]"
+          className="absolute z-10 top-[16px] right-[16px] h-[32px] px-[12px] rounded-[100px] border border-[#BBBBBB] bg-[#EAEAEA]/90 font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#161616]"
           aria-label={config.view === '2d' ? 'Ijungti 3D perziura' : 'Ijungti foto perziura'}
           data-testid="configurator-toggle-view"
         >
@@ -77,7 +77,7 @@ export default function ConfiguratorClient({ productSlug, presetSlug }: Configur
       {/* Controls column */}
       <div className="flex flex-col gap-[16px] lg:gap-[20px]">
         {!isHydrated ? (
-          <div className="border border-[#BBBBBB] rounded-[8px] bg-white p-[16px]">
+          <div className="border border-[#BBBBBB] rounded-[8px] bg-[#EAEAEA] p-[16px]">
             <p className="font-['Outfit'] text-[12px] text-[#535353]">Kraunama konfiguracija...</p>
           </div>
         ) : (
@@ -122,7 +122,7 @@ export default function ConfiguratorClient({ productSlug, presetSlug }: Configur
               onChange={actions.setThickness}
             />
 
-            <div className="border border-[#BBBBBB] rounded-[8px] bg-white p-[12px]">
+            <div className="border border-[#BBBBBB] rounded-[8px] bg-[#EAEAEA] p-[12px]">
               <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">Konfiguracija</p>
               <pre className="mt-[8px] font-mono text-[11px] text-[#161616] whitespace-pre-wrap" data-testid="configurator-summary">
                 {JSON.stringify(
@@ -153,13 +153,13 @@ export default function ConfiguratorClient({ productSlug, presetSlug }: Configur
             </button>
 
             {offerStatus === 'success' && (
-              <div className="border border-[#BBBBBB] rounded-[8px] bg-white p-[12px]" data-testid="configurator-offer-success">
+              <div className="border border-[#BBBBBB] rounded-[8px] bg-[#EAEAEA] p-[12px]" data-testid="configurator-offer-success">
                 <p className="font-['Outfit'] text-[12px] text-[#161616]">Pasiulymas uzregistruotas.</p>
               </div>
             )}
 
             {offerStatus === 'error' && (
-              <div className="border border-[#BBBBBB] rounded-[8px] bg-white p-[12px]">
+              <div className="border border-[#BBBBBB] rounded-[8px] bg-[#EAEAEA] p-[12px]">
                 <p className="font-['Outfit'] text-[12px] text-[#161616]">Nepavyko issiusti. Bandykite dar karta.</p>
               </div>
             )}

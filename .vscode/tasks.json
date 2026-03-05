@@ -211,7 +211,7 @@
 			"args": [
 				"-NoProfile",
 				"-Command",
-				"Remove-Item -Force \"C:\\Users\\rimvy\\yakiwood-website\\.next\\lock\" -ErrorAction SilentlyContinue; if (Test-Path \"C:\\Users\\rimvy\\yakiwood-website\\.next\\lock\") { Write-Error \"lock still exists\"; exit 1 } else { Write-Output \"lock removed\" }"
+				"Remove-Item -Force .next\\lock -ErrorAction SilentlyContinue; if (Test-Path .next\\lock) { Write-Error \"lock still exists\"; exit 1 } else { Write-Output \"lock removed\" }"
 			],
 			"isBackground": false,
 			"problemMatcher": [],
@@ -252,7 +252,7 @@
 			"args": [
 				"-NoProfile",
 				"-Command",
-				"$p=\"C:\\Users\\rimvy\\yakiwood-website\\.next\"; if (Test-Path $p) { Remove-Item -Recurse -Force $p -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 200; if (Test-Path $p) { Remove-Item -Recurse -Force $p -ErrorAction SilentlyContinue } }; if (Test-Path $p) { Write-Output \".next still exists\"; exit 1 } else { Write-Output \".next removed\" }"
+				"$p = Join-Path (Get-Location) \".next\"; if (Test-Path $p) { Remove-Item -Recurse -Force $p -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 200; if (Test-Path $p) { Remove-Item -Recurse -Force $p -ErrorAction SilentlyContinue } }; if (Test-Path $p) { Write-Output \".next still exists\"; exit 1 } else { Write-Output \".next removed\" }"
 			],
 			"isBackground": false,
 			"presentation": {
@@ -272,7 +272,7 @@
 			"args": [
 				"-NoProfile",
 				"-Command",
-				"$p=\"C:\\Users\\rimvy\\yakiwood-website\\.next\"; if (!(Test-Path $p)) { Write-Output \".next does not exist\"; exit 0 }; try { Remove-Item -Recurse -Force $p -ErrorAction Stop } catch { Write-Output (\"remove failed: \" + $_.Exception.Message) }; Start-Sleep -Milliseconds 300; if (Test-Path $p) { Write-Output \".next still exists\"; Get-ChildItem -LiteralPath $p -Recurse -Force -ErrorAction SilentlyContinue | Select-Object -First 30 | ForEach-Object { $_.FullName }; exit 1 } else { Write-Output \".next removed\" }"
+				"$p = Join-Path (Get-Location) \".next\"; if (!(Test-Path $p)) { Write-Output \".next does not exist\"; exit 0 }; try { Remove-Item -Recurse -Force $p -ErrorAction Stop } catch { Write-Output (\"remove failed: \" + $_.Exception.Message) }; Start-Sleep -Milliseconds 300; if (Test-Path $p) { Write-Output \".next still exists\"; Get-ChildItem -LiteralPath $p -Recurse -Force -ErrorAction SilentlyContinue | Select-Object -First 30 | ForEach-Object { $_.FullName }; exit 1 } else { Write-Output \".next removed\" }"
 			],
 			"isBackground": false,
 			"presentation": {

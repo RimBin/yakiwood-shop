@@ -474,14 +474,33 @@ function useSlowNetworkFlag(): boolean {
   const [slow, setSlow] = useState(() => isSlowNetwork(getNetworkInfo()));
 
   useEffect(() => {
+    if (typeof navigator === 'undefined') return;
+
     const connection = (navigator as any).connection as
-      | { addEventListener?: (event: string, cb: () => void) => void; removeEventListener?: (event: string, cb: () => void) => void }
+      | {
+          addEventListener?: (event: 'change', cb: () => void) => void;
+          removeEventListener?: (event: 'change', cb: () => void) => void;
+          addListener?: (cb: () => void) => void;
+          removeListener?: (cb: () => void) => void;
+        }
       | undefined;
-    if (!connection?.addEventListener || !connection?.removeEventListener) return;
+    if (!connection) return;
 
     const onChange = () => setSlow(isSlowNetwork(getNetworkInfo()));
-    connection.addEventListener('change', onChange);
-    return () => connection.removeEventListener?.('change', onChange);
+
+    const addEventListener = connection.addEventListener?.bind(connection);
+    const removeEventListener = connection.removeEventListener?.bind(connection);
+    if (addEventListener && removeEventListener) {
+      addEventListener('change', onChange);
+      return () => removeEventListener('change', onChange);
+    }
+
+    const addListener = connection.addListener?.bind(connection);
+    const removeListener = connection.removeListener?.bind(connection);
+    if (addListener && removeListener) {
+      addListener(onChange);
+      return () => removeListener(onChange);
+    }
   }, []);
 
   return slow;
@@ -1534,7 +1553,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
         </Canvas>
 
         {mode === 'full' && (
-          <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-2 rounded-lg text-xs font-['Outfit'] text-[#535353]">
+          <div className="absolute bottom-4 left-4 bg-[#EAEAEA]/90 px-3 py-2 rounded-lg text-xs font-['Outfit'] text-[#535353]">
             {t('configurator.controlsHint')}
           </div>
         )}
@@ -1611,7 +1630,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
                       key={finish.id}
                       className={`relative flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
                         selectedFinish?.id === finish.id
-                          ? 'border-[#161616] bg-[#F9F9F9]'
+                          ? 'border-[#161616] bg-[#EAEAEA]'
                           : 'border-[#EAEAEA] hover:border-[#BBBBBB]'
                       }`}
                     >
@@ -1648,14 +1667,14 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
           )}
 
           {/* Info Note */}
-          <div className="p-4 bg-[#F9F9F9] rounded-lg border border-[#EAEAEA]">
+          <div className="p-4 bg-[#EAEAEA] rounded-lg border border-[#BBBBBB]">
             <p className="font-['Outfit'] text-xs text-[#535353]">
               <strong>{t('configurator.noteTitle')}</strong> {t('configurator.noteBody')}
             </p>
           </div>
 
           {/* Pricing */}
-          <div className="p-4 bg-white rounded-lg border border-[#EAEAEA]">
+          <div className="p-4 bg-[#EAEAEA] rounded-lg border border-[#BBBBBB]">
             <div className="flex items-center justify-between gap-4">
               <h3 className="font-['DM_Sans'] text-sm font-medium text-[#161616]">{t('configurator.pricingTitle')}</h3>
 
@@ -1674,7 +1693,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
                       });
                     }}
                     className={`h-[28px] px-3 font-['Outfit'] text-[12px] ${
-                      inputMode === 'boards' ? 'bg-[#161616] text-white' : 'bg-white text-[#161616]'
+                      inputMode === 'boards' ? 'bg-[#161616] text-white' : 'bg-[#EAEAEA] text-[#161616]'
                     }`}
                   >
                     {t('configurator.inputModeBoards')}
@@ -1691,7 +1710,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
                       });
                     }}
                     className={`h-[28px] px-3 font-['Outfit'] text-[12px] ${
-                      inputMode === 'area' ? 'bg-[#161616] text-white' : 'bg-white text-[#161616]'
+                      inputMode === 'area' ? 'bg-[#161616] text-white' : 'bg-[#EAEAEA] text-[#161616]'
                     }`}
                   >
                     {t('configurator.inputModeArea')}
@@ -1702,7 +1721,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
 
             <div className="mt-3">
               {typeof basePrice === 'number' && Number.isFinite(basePrice) && basePrice > 0 && (
-                <div className="mb-3 flex items-center justify-between rounded-md bg-[#F9F9F9] px-3 py-2">
+                <div className="mb-3 flex items-center justify-between rounded-md bg-[#EAEAEA] px-3 py-2">
                   <span className="font-['Outfit'] text-xs text-[#535353]">{basePriceLabel}</span>
                   <span className="font-['Outfit'] text-xs text-[#161616]">{currency.format(basePrice)}</span>
                 </div>
@@ -1716,7 +1735,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
                     step={1}
                     value={quantityBoards}
                     onChange={(e) => setQuantityBoards(Math.max(1, Math.round(Number(e.target.value) || 1)))}
-                    className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px] text-[#161616]"
+                    className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] bg-[#EAEAEA] font-['Outfit'] text-[14px] text-[#161616]"
                   />
                 </label>
               ) : (
@@ -1728,7 +1747,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
                     step={0.01}
                     value={targetAreaM2}
                     onChange={(e) => setTargetAreaM2(Math.max(0.01, Number(e.target.value) || 0.01))}
-                    className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] font-['Outfit'] text-[14px] text-[#161616]"
+                    className="w-full h-[40px] px-[12px] rounded-[8px] border border-[#BBBBBB] bg-[#EAEAEA] font-['Outfit'] text-[14px] text-[#161616]"
                   />
                 </label>
               )}
@@ -1756,22 +1775,22 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
                   </div>
                 )}
 
-                <div className="flex items-center justify-between rounded-md bg-[#F9F9F9] px-3 py-2">
+                <div className="flex items-center justify-between rounded-md bg-[#EAEAEA] px-3 py-2">
                   <span className="font-['Outfit'] text-xs text-[#535353]">{t('configurator.unitPricePerM2Label')}</span>
                   <span className="font-['Outfit'] text-xs text-[#161616]">{currency.format(quote.unitPricePerM2)}</span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-md bg-[#F9F9F9] px-3 py-2">
+                <div className="flex items-center justify-between rounded-md bg-[#EAEAEA] px-3 py-2">
                   <span className="font-['Outfit'] text-xs text-[#535353]">{t('configurator.unitPricePerBoardLabel')}</span>
                   <span className="font-['Outfit'] text-xs text-[#161616]">{currency.format(quote.unitPricePerBoard)}</span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-md bg-[#F9F9F9] px-3 py-2">
+                <div className="flex items-center justify-between rounded-md bg-[#EAEAEA] px-3 py-2">
                   <span className="font-['Outfit'] text-xs text-[#535353]">{t('configurator.totalAreaLabel')}</span>
                   <span className="font-['Outfit'] text-xs text-[#161616]">{numberM2.format(quote.totalAreaM2)} m²</span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-md bg-[#F9F9F9] px-3 py-2">
+                <div className="flex items-center justify-between rounded-md bg-[#EAEAEA] px-3 py-2">
                   <span className="font-['Outfit'] text-xs text-[#535353]">{t('configurator.lineTotalLabel')}</span>
                   <span className="font-['Outfit'] text-xs text-[#161616]">{currency.format(quote.lineTotal)}</span>
                 </div>
@@ -1784,7 +1803,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
                 type="button"
                 onClick={handleDownloadPdf}
                 disabled={pdfLoading}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-[100px] border border-[#BBBBBB] bg-white px-6 py-3 font-['DM_Sans'] text-sm font-medium text-[#161616] transition-colors hover:bg-[#F9F9F9] disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-[100px] border border-[#BBBBBB] bg-[#EAEAEA] px-6 py-3 font-['DM_Sans'] text-sm font-medium text-[#161616] transition-colors hover:bg-[#E1E1E1] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {pdfLoading ? (
                   <>

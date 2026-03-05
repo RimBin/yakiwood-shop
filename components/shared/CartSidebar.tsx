@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCartStore, type CartItem } from '@/lib/cart/store';
@@ -87,6 +87,18 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const VAT_RATE = 0.21;
 
+  const [draftQuantities, setDraftQuantities] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    setDraftQuantities((prev) => {
+      const next: Record<string, string> = {};
+      for (const item of items) {
+        if (prev[item.lineId] !== undefined) next[item.lineId] = prev[item.lineId];
+      }
+      return next;
+    });
+  }, [items]);
+
   const subtotal = items.reduce((sum, item) => sum + item.basePrice * item.quantity, 0);
   const shipping = subtotal > 500 ? 0 : 15;
   const total = subtotal + shipping;
@@ -171,7 +183,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     return (
                     <div key={item.addedAt ?? item.lineId} className="flex gap-[16px] pb-[16px] border-b border-[#BBBBBB]">
                       {/* Image */}
-                      <div className="w-[111px] h-[125px] rounded-[8px] bg-white overflow-hidden shrink-0">
+                      <div className="w-[111px] h-[125px] rounded-[8px] bg-[#EAEAEA] overflow-hidden shrink-0">
                         {typeof previewImage === 'string' ? (
                           <img
                             src={previewImage}
@@ -239,20 +251,101 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                           {/* Quantity Controls */}
                           <div className="flex items-center gap-[8px]">
                             <button
-                              onClick={() => updateQuantity(item.lineId, Math.max(1, item.quantity - 1))}
+                              onClick={() => {
+                                const isArea = item.inputMode === 'area';
+                                const step = isArea ? 0.1 : 1;
+                                const min = isArea ? 0.1 : 1;
+                                const next = isArea
+                                  ? Math.max(min, Math.round((item.quantity - step) * 10) / 10)
+                                  : Math.max(min, item.quantity - step);
+                                updateQuantity(item.lineId, next);
+                              }}
                               className="w-[24px] h-[24px] flex items-center justify-center hover:opacity-70 transition-opacity"
                             >
                               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M3 8H13" stroke="#161616" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
                             </button>
-                            <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] min-w-[56px] text-center whitespace-nowrap">
-                              {item.inputMode === 'area'
-                                ? `${Number(item.quantity).toFixed(1)} m²`
-                                : `${item.quantity} ${quantityUnitLabel}`}
-                            </span>
+
+                            {(() => {
+                              const isArea = item.inputMode === 'area';
+                              const unit = isArea ? 'm²' : quantityUnitLabel;
+                              const step = isArea ? 0.1 : 1;
+                              const min = isArea ? 0.1 : 1;
+                              const draft = draftQuantities[item.lineId];
+                              const value =
+                                draft !== undefined
+                                  ? draft
+                                  : isArea
+                                    ? Number(item.quantity).toFixed(1)
+                                    : String(item.quantity);
+
+                              const commit = (raw: string) => {
+                                const trimmed = raw.trim();
+                                if (!trimmed) {
+                                  setDraftQuantities((prev) => {
+                                    const { [item.lineId]: _, ...rest } = prev;
+                                    return rest;
+                                  });
+                                  return;
+                                }
+
+                                const parsed = isArea ? Number.parseFloat(trimmed) : Number.parseInt(trimmed, 10);
+                                if (!Number.isFinite(parsed)) return;
+
+                                const nextQuantity = isArea
+                                  ? Math.max(min, Math.round(parsed * 10) / 10)
+                                  : Math.max(min, Math.round(parsed));
+                                updateQuantity(item.lineId, nextQuantity);
+                                setDraftQuantities((prev) => {
+                                  const { [item.lineId]: _, ...rest } = prev;
+                                  return rest;
+                                });
+                              };
+
+                              return (
+                                <div className="min-w-[56px] flex items-center justify-center gap-[6px] whitespace-nowrap">
+                                  <input
+                                    inputMode="decimal"
+                                    type="number"
+                                    min={min}
+                                    step={step}
+                                    value={value}
+                                    onFocus={() => {
+                                      setDraftQuantities((prev) => ({
+                                        ...prev,
+                                        [item.lineId]: isArea ? Number(item.quantity).toFixed(1) : String(item.quantity),
+                                      }));
+                                    }}
+                                    onChange={(e) => {
+                                      const next = e.currentTarget.value;
+                                      setDraftQuantities((prev) => ({ ...prev, [item.lineId]: next }));
+                                    }}
+                                    onBlur={(e) => commit(e.currentTarget.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        (e.currentTarget as HTMLInputElement).blur();
+                                      }
+                                    }}
+                                    className="w-[52px] h-[28px] rounded-[6px] border border-[#BBBBBB] bg-[#EAEAEA] px-[8px] font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] text-center"
+                                    aria-label={t('cart.quantity') ?? 'Quantity'}
+                                  />
+                                  <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616]">
+                                    {unit}
+                                  </span>
+                                </div>
+                              );
+                            })()}
+
                             <button
-                              onClick={() => updateQuantity(item.lineId, item.quantity + 1)}
+                              onClick={() => {
+                                const isArea = item.inputMode === 'area';
+                                const step = isArea ? 0.1 : 1;
+                                const next = isArea
+                                  ? Math.round((item.quantity + step) * 10) / 10
+                                  : item.quantity + step;
+                                updateQuantity(item.lineId, next);
+                              }}
                               className="w-[24px] h-[24px] flex items-center justify-center hover:opacity-70 transition-opacity"
                             >
                               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
