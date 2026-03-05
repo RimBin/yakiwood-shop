@@ -481,7 +481,7 @@ function useSlowNetworkFlag(): boolean {
 
     const onChange = () => setSlow(isSlowNetwork(getNetworkInfo()));
     connection.addEventListener('change', onChange);
-    return () => connection.removeEventListener('change', onChange);
+    return () => connection.removeEventListener?.('change', onChange);
   }, []);
 
   return slow;
@@ -509,20 +509,55 @@ function loadFinishTexture(url: string): Promise<THREE.Texture | null> {
   const cachedPromise = finishTexturePromiseCache.get(url);
   if (cachedPromise) return cachedPromise;
 
-  const loader = new THREE.TextureLoader();
   const promise = new Promise<THREE.Texture | null>((resolve) => {
-    loader.load(
-      url,
-      (texture) => {
+    const canUseImageBitmap =
+      typeof fetch === 'function' &&
+      typeof createImageBitmap === 'function' &&
+      typeof AbortController === 'function';
+
+    const fallbackToTextureLoader = () => {
+      const loader = new THREE.TextureLoader();
+      loader.load(
+        url,
+        (texture) => {
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.flipY = false;
+          texture.needsUpdate = true;
+          finishTextureCache.set(url, texture);
+          resolve(texture);
+        },
+        undefined,
+        () => resolve(null)
+      );
+    };
+
+    if (!canUseImageBitmap) {
+      fallbackToTextureLoader();
+      return;
+    }
+
+    const controller = new AbortController();
+    fetch(url, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Failed to load texture: ${response.status}`);
+        return response.blob();
+      })
+      .then((blob) => createImageBitmap(blob))
+      .then((bitmap) => {
+        const texture = new THREE.Texture(bitmap);
         texture.colorSpace = THREE.SRGBColorSpace;
         texture.flipY = false;
         texture.needsUpdate = true;
         finishTextureCache.set(url, texture);
         resolve(texture);
-      },
-      undefined,
-      () => resolve(null)
-    );
+      })
+      .catch(() => {
+        // If fetch/bitmap decode fails (CORS, older browser quirks), fall back.
+        fallbackToTextureLoader();
+      });
+
+    // No external cancellation path today; keep controller for future use.
+    void controller;
   });
 
   finishTexturePromiseCache.set(url, promise);
@@ -1120,17 +1155,45 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
     setModelColor(resolveColorHex(selectedColor));
   }, [selectedColor]);
 
-  const resolvedVariantMaterialUrl = useMemo(() => {
+  const isFinishTextureSwapEnabled = useMemo(() => {
+    const raw = process.env.NEXT_PUBLIC_ENABLE_3D_FINISH_TEXTURE_SWAP;
+    if (!raw) return false;
+    const value = raw.trim().toLowerCase();
+    return value === 'true' || value === '1';
+  }, []);
+
+  const selectedColorSlug = useMemo(() => {
     if (!selectedColor) return null;
-    const colorSlug = resolveColorSlug(selectedColor);
-    if (!colorSlug) return null;
+    return resolveColorSlug(selectedColor);
+  }, [selectedColor]);
+
+  const finishTextureUrl = useMemo(() => {
+    if (!isFinishTextureSwapEnabled) return null;
+    if (!selectedColorSlug) return null;
+    if (!resolvedModelUrl && !modelUrl) return null;
+
+    const wood = resolveFinishTextureWood(resolvedModelUrl ?? modelUrl);
+    if (!wood) return null;
+
+    return getFinishTextureUrl(wood, selectedColorSlug);
+  }, [isFinishTextureSwapEnabled, modelUrl, resolvedModelUrl, selectedColorSlug]);
+
+  const finishTexture = useFinishTexture(finishTextureUrl);
+
+  const useTextureSwap = useMemo(() => {
+    return isFinishTextureSwapEnabled && !!finishTextureUrl;
+  }, [isFinishTextureSwapEnabled, finishTextureUrl]);
+
+  const resolvedVariantMaterialUrl = useMemo(() => {
+    if (useTextureSwap) return null;
+    if (!selectedColorSlug) return null;
 
     return resolveColorVariantModelUrl({
       modelSlug,
       modelUrl,
-      colorSlug,
+      colorSlug: selectedColorSlug,
     });
-  }, [modelSlug, modelUrl, selectedColor]);
+  }, [modelSlug, modelUrl, selectedColorSlug, useTextureSwap]);
 
   // Prefer loading the full per-color GLB when available. This is the most
   // reliable path (materials + slot assignments + textures are authored in the
@@ -1155,6 +1218,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
 
   useEffect(() => {
     if (slowNetwork) return;
+    if (useTextureSwap) return;
 
     availableColors.forEach((colorOption) => {
       const colorSlug = resolveColorSlug(colorOption);
@@ -1169,31 +1233,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
       if (!variantUrl) return;
       useGLTF.preload(variantUrl);
     });
-  }, [availableColors, modelSlug, modelUrl, slowNetwork]);
-
-  const isFinishTextureSwapEnabled = useMemo(() => {
-    const raw = process.env.NEXT_PUBLIC_ENABLE_3D_FINISH_TEXTURE_SWAP;
-    if (!raw) return false;
-    const value = raw.trim().toLowerCase();
-    return value === 'true' || value === '1';
-  }, []);
-
-  const finishTextureUrl = useMemo(() => {
-    if (!isFinishTextureSwapEnabled) return null;
-    if (slowNetwork) return null;
-    if (!selectedColor) return null;
-    if (!resolvedModelUrl && !modelUrl) return null;
-
-    const wood = resolveFinishTextureWood(resolvedModelUrl ?? modelUrl);
-    if (!wood) return null;
-
-    const slug = resolveColorSlug(selectedColor);
-    if (!slug) return null;
-
-    return getFinishTextureUrl(wood, slug);
-  }, [isFinishTextureSwapEnabled, modelUrl, resolvedModelUrl, selectedColor, slowNetwork]);
-
-  const finishTexture = useFinishTexture(finishTextureUrl);
+  }, [availableColors, modelSlug, modelUrl, slowNetwork, useTextureSwap]);
 
   useEffect(() => {
     if (process.env.NODE_ENV === 'production') return;
@@ -1229,6 +1269,13 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
     setResolvedModelUrl(modelUrl);
     setIsModelResolved(true);
   }, [modelUrl]);
+
+  useEffect(() => {
+    // Preload the base GLB to improve perceived load time.
+    // (This is a single request; per-color variants are handled separately.)
+    if (!resolvedModelUrl) return;
+    useGLTF.preload(resolvedModelUrl);
+  }, [resolvedModelUrl]);
 
   useEffect(() => {
     if (!productId) return;
@@ -1464,7 +1511,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
               finish={selectedFinish}
               overrideColorMap={finishTexture}
               overrideColorMapKey={finishTextureUrl}
-              applyColorTint={!isPerColorVariantModel}
+              applyColorTint={!isPerColorVariantModel && !finishTexture}
               applyDynamicFinishSurface={!isPerColorVariantModel}
               autoRotate={autoRotate}
               rotationYRef={sharedRotationYRef}

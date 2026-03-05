@@ -107,6 +107,8 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
     return PROFILE_LABELS_LT[token] ?? finish;
   };
 
+  const quantityUnitLabel = currentLocale === 'lt' ? 'vnt' : 'pcs';
+
   const productsHref = toLocalePath('/products', currentLocale);
   const checkoutHref = toLocalePath('/checkout', currentLocale);
 
@@ -247,7 +249,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                             <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] min-w-[56px] text-center whitespace-nowrap">
                               {item.inputMode === 'area'
                                 ? `${Number(item.quantity).toFixed(1)} m²`
-                                : `${item.quantity} vnt`}
+                                : `${item.quantity} ${quantityUnitLabel}`}
                             </span>
                             <button
                               onClick={() => updateQuantity(item.lineId, item.quantity + 1)}
