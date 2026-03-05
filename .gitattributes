@@ -1,0 +1,7 @@
+# Treat 3D assets as binary (no text conversion, no diffs/merges)
+*.glb binary
+*.gltf binary
+*.bin binary
+*.ktx2 binary
+*.hdr binary
+*.exr binary

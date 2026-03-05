@@ -10,6 +10,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
 import { trackEvent } from '@/lib/analytics';
 import { downloadConfigurationPDF, type ConfigurationPDFData } from '@/lib/configurator/pdf-generator';
+import { getProductModelUrl, hasProductModel } from '@/lib/models';
 
 interface ProfileModelProps {
   color: string;
@@ -330,6 +331,123 @@ function resolveColorHex(color: ProductColorVariant | null): string {
   return '#444444';
 }
 
+type FinishTextureWood = 'larch' | 'spruce';
+
+const MODEL_COLOR_SUFFIX_REGEX = /(black|carbon|carbon-light|graphite|natural|dark-brown|latte|silver)$/;
+
+function resolveColorVariantSlug(baseSlug: string, colorSlug: string): string | null {
+  if (!MODEL_COLOR_SUFFIX_REGEX.test(baseSlug)) return null;
+  return baseSlug.replace(MODEL_COLOR_SUFFIX_REGEX, colorSlug);
+}
+
+function resolveColorSlug(color: ProductColorVariant | null):
+  | 'black'
+  | 'carbon'
+  | 'carbon-light'
+  | 'graphite'
+  | 'natural'
+  | 'dark-brown'
+  | 'latte'
+  | 'silver'
+  | null {
+  const source = [color?.id, color?.name, color?.nameEn, color?.nameLt].filter(Boolean).join(' ');
+  const token = normalizeColorToken(source);
+
+  if (token.includes('carbon-light') || token.includes('carbonlight') || token.includes('sviesi-angl') || token.includes('sviesi-anglis')) {
+    return 'carbon-light';
+  }
+  if (token.includes('carbon') || token.includes('angl')) return 'carbon';
+  if (token.includes('graphite') || token.includes('grafit')) return 'graphite';
+  if (token.includes('silver') || token.includes('sidab')) return 'silver';
+  if (token.includes('dark-brown') || token.includes('darkbrown') || token.includes('tams') || token.includes('brown') || token.includes('ruda')) return 'dark-brown';
+  if (token.includes('latte')) return 'latte';
+  if (token.includes('black') || token.includes('juod')) return 'black';
+  if (token.includes('natural') || token.includes('natur')) return 'natural';
+  return null;
+}
+
+function resolveFinishTextureWood(modelUrl: string): FinishTextureWood | null {
+  const token = modelUrl.toLowerCase();
+  if (token.includes('larch')) return 'larch';
+  if (token.includes('spruce')) return 'spruce';
+  return null;
+}
+
+function getFinishTextureUrl(wood: FinishTextureWood, colorSlug: string): string {
+  return `/assets/finishes/${wood}/shou-sugi-ban-${wood}-${colorSlug}-facade-terrace-cladding.webp`;
+}
+
+const finishTextureCache = new Map<string, THREE.Texture>();
+const finishTexturePromiseCache = new Map<string, Promise<THREE.Texture | null>>();
+
+function cloneFinishTextureInstance(base: THREE.Texture): THREE.Texture {
+  const texture = base.clone();
+  // Ensure we keep the same underlying image data.
+  texture.image = base.image;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.flipY = false;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+function loadFinishTexture(url: string): Promise<THREE.Texture | null> {
+  const cached = finishTextureCache.get(url);
+  if (cached) {
+    cached.colorSpace = THREE.SRGBColorSpace;
+    cached.flipY = false;
+    cached.needsUpdate = true;
+    return Promise.resolve(cached);
+  }
+
+  const cachedPromise = finishTexturePromiseCache.get(url);
+  if (cachedPromise) return cachedPromise;
+
+  const loader = new THREE.TextureLoader();
+  const promise = new Promise<THREE.Texture | null>((resolve) => {
+    loader.load(
+      url,
+      (texture) => {
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.flipY = false;
+        texture.needsUpdate = true;
+        finishTextureCache.set(url, texture);
+        resolve(texture);
+      },
+      undefined,
+      () => resolve(null)
+    );
+  });
+
+  finishTexturePromiseCache.set(url, promise);
+  return promise;
+}
+
+function useFinishTexture(url: string | null) {
+  const [texture, setTexture] = useState<THREE.Texture | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!url) {
+      setTexture(null);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    loadFinishTexture(url).then((loaded) => {
+      if (!isMounted) return;
+      setTexture(loaded ? cloneFinishTextureInstance(loaded) : null);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [url]);
+
+  return texture;
+}
+
 class GLBErrorBoundary extends React.Component<
   {
     modelUrl: string;
@@ -369,10 +487,23 @@ interface GLBProfileModelProps {
   modelUrl: string;
   color: string;
   finish: ProductProfileVariant | null;
+  overrideColorMap?: THREE.Texture | null;
+  overrideColorMapKey?: string | null;
+  applyColorTint?: boolean;
+  applyDynamicFinishSurface?: boolean;
   autoRotate?: boolean;
 }
 
-function GLBProfileModel({ modelUrl, color, finish, autoRotate = true }: GLBProfileModelProps) {
+function GLBProfileModel({
+  modelUrl,
+  color,
+  finish,
+  overrideColorMap,
+  overrideColorMapKey,
+  applyColorTint = true,
+  applyDynamicFinishSurface = true,
+  autoRotate = true,
+}: GLBProfileModelProps) {
   const groupRef = useRef<THREE.Group | null>(null);
   const gltf = useGLTF(modelUrl) as { scene: THREE.Group };
 
@@ -431,16 +562,56 @@ function GLBProfileModel({ modelUrl, color, finish, autoRotate = true }: GLBProf
         }
 
         // Keep bottom/end materials as-authored in the GLB.
-        // Apply selected tint only to the main visible wood surface material.
-        if (!isFixedMaterial && 'color' in standardMaterial && standardMaterial.color) {
-          standardMaterial.color.set(color);
+        // For the main wood surface:
+        // - if we have an override texture, apply it as baseColor map (real texture switch)
+        // - otherwise, fall back to tinting (brightness/color shift)
+        if (!isFixedMaterial) {
+          if (overrideColorMap && 'map' in standardMaterial) {
+            const existingKey = (standardMaterial.userData as any)?.__finishTextureKey as string | undefined;
+            const existingTexture = (standardMaterial.userData as any)?.__finishTexture as THREE.Texture | undefined;
+
+            const prevMap = standardMaterial.map;
+
+            const nextTexture =
+              overrideColorMapKey && existingKey === overrideColorMapKey && existingTexture
+                ? existingTexture
+                : cloneFinishTextureInstance(overrideColorMap);
+
+            // Preserve UV channel and mapping transforms from the original GLB texture.
+            if (prevMap) {
+              nextTexture.wrapS = prevMap.wrapS;
+              nextTexture.wrapT = prevMap.wrapT;
+              nextTexture.repeat.copy(prevMap.repeat);
+              nextTexture.offset.copy(prevMap.offset);
+              nextTexture.center.copy(prevMap.center);
+              nextTexture.rotation = prevMap.rotation;
+
+              if ('channel' in prevMap && typeof (prevMap as any).channel === 'number') {
+                (nextTexture as any).channel = (prevMap as any).channel;
+              }
+            }
+
+            nextTexture.needsUpdate = true;
+
+            (standardMaterial.userData as any).__finishTextureKey = overrideColorMapKey ?? undefined;
+            (standardMaterial.userData as any).__finishTexture = nextTexture;
+
+            standardMaterial.map = nextTexture;
+            if ('color' in standardMaterial && standardMaterial.color) {
+              standardMaterial.color.set('#ffffff');
+            }
+          } else if (applyColorTint && 'color' in standardMaterial && standardMaterial.color) {
+            standardMaterial.color.set(color);
+          } else if ('color' in standardMaterial && standardMaterial.color) {
+            standardMaterial.color.set('#ffffff');
+          }
         }
 
-        if ('roughness' in standardMaterial) {
+        if (applyDynamicFinishSurface && 'roughness' in standardMaterial) {
           standardMaterial.roughness = surface.roughness;
         }
 
-        if ('metalness' in standardMaterial) {
+        if (applyDynamicFinishSurface && 'metalness' in standardMaterial) {
           standardMaterial.metalness = surface.metalness;
         }
 
@@ -453,7 +624,15 @@ function GLBProfileModel({ modelUrl, color, finish, autoRotate = true }: GLBProf
         applyMaterial(mesh.material);
       }
     });
-  }, [color, finish, modelScene]);
+  }, [
+    applyColorTint,
+    applyDynamicFinishSurface,
+    color,
+    finish,
+    modelScene,
+    overrideColorMap,
+    overrideColorMapKey,
+  ]);
 
   useFrame((_, delta) => {
     if (!autoRotate) return;
@@ -475,6 +654,7 @@ export interface Konfiguratorius3DProps {
   availableColors: ProductColorVariant[];
   availableFinishes: ProductProfileVariant[];
   modelUrl?: string;
+  modelSlug?: string;
   mode?: 'full' | 'viewport';
   selectedColorId?: string;
   selectedFinishId?: string;
@@ -501,6 +681,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
   availableColors, 
   availableFinishes,
   modelUrl = DEFAULT_CONFIGURATOR_GLB_PATH,
+  modelSlug,
   mode = 'full',
   selectedColorId,
   selectedFinishId,
@@ -684,10 +865,58 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
     setModelColor(resolveColorHex(selectedColor));
   }, [selectedColor]);
 
+  const resolvedVariantModelUrl = useMemo(() => {
+    if (!modelSlug || !selectedColor) return modelUrl;
+
+    const colorSlug = resolveColorSlug(selectedColor);
+    if (!colorSlug) return modelUrl;
+
+    const variantSlug = resolveColorVariantSlug(modelSlug, colorSlug);
+    if (!variantSlug) return modelUrl;
+    if (!hasProductModel(variantSlug)) return modelUrl;
+
+    return getProductModelUrl({ slug: variantSlug });
+  }, [modelSlug, modelUrl, selectedColor]);
+
+  const isPerColorVariantModel = useMemo(() => {
+    if (!modelSlug || !selectedColor) return false;
+
+    const colorSlug = resolveColorSlug(selectedColor);
+    if (!colorSlug) return false;
+
+    const variantSlug = resolveColorVariantSlug(modelSlug, colorSlug);
+    if (!variantSlug) return false;
+
+    return hasProductModel(variantSlug);
+  }, [modelSlug, selectedColor]);
+
+  const isFinishTextureSwapEnabled = useMemo(() => {
+    const raw = process.env.NEXT_PUBLIC_ENABLE_3D_FINISH_TEXTURE_SWAP;
+    if (!raw) return false;
+    const value = raw.trim().toLowerCase();
+    return value === 'true' || value === '1';
+  }, []);
+
+  const finishTextureUrl = useMemo(() => {
+    if (!isFinishTextureSwapEnabled) return null;
+    if (!selectedColor) return null;
+    if (!resolvedModelUrl && !resolvedVariantModelUrl) return null;
+
+    const wood = resolveFinishTextureWood(resolvedModelUrl ?? resolvedVariantModelUrl);
+    if (!wood) return null;
+
+    const slug = resolveColorSlug(selectedColor);
+    if (!slug) return null;
+
+    return getFinishTextureUrl(wood, slug);
+  }, [isFinishTextureSwapEnabled, resolvedVariantModelUrl, resolvedModelUrl, selectedColor]);
+
+  const finishTexture = useFinishTexture(finishTextureUrl);
+
   useEffect(() => {
     let isMounted = true;
 
-    if (!modelUrl) {
+    if (!resolvedVariantModelUrl) {
       setResolvedModelUrl(null);
       setIsModelResolved(true);
       return () => {
@@ -702,15 +931,15 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
       try {
         if (process.env.NODE_ENV !== 'production') {
           // eslint-disable-next-line no-console
-          console.debug('[Konfiguratorius3D] resolving modelUrl', { modelUrl });
+          console.debug('[Konfiguratorius3D] resolving modelUrl', { modelUrl: resolvedVariantModelUrl });
         }
-        const response = await fetch(modelUrl, { method: 'HEAD' });
+        const response = await fetch(resolvedVariantModelUrl, { method: 'HEAD' });
         headOk = response.ok;
 
         if (!isMounted) return;
 
         if (response.ok) {
-          setResolvedModelUrl(modelUrl);
+          setResolvedModelUrl(resolvedVariantModelUrl);
         } else {
           setResolvedModelUrl(null);
         }
@@ -724,9 +953,9 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
         if (process.env.NODE_ENV !== 'production') {
           // eslint-disable-next-line no-console
           console.debug('[Konfiguratorius3D] modelUrl resolved', {
-            modelUrl,
+            modelUrl: resolvedVariantModelUrl,
             headOk,
-            resolved: headOk ? modelUrl : null,
+            resolved: headOk ? resolvedVariantModelUrl : null,
           });
         }
       }
@@ -737,7 +966,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
     return () => {
       isMounted = false;
     };
-  }, [modelUrl]);
+  }, [resolvedVariantModelUrl]);
 
   useEffect(() => {
     if (!productId) return;
@@ -957,9 +1186,18 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
                 modelUrl={resolvedModelUrl}
                 fallback={<ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} />}
               >
-					{!isGltfLoading ? (
-						<GLBProfileModel modelUrl={resolvedModelUrl} color={modelColor} finish={selectedFinish} autoRotate={true} />
-					) : null}
+          {!isGltfLoading ? (
+            <GLBProfileModel
+              modelUrl={resolvedModelUrl}
+              color={modelColor}
+              finish={selectedFinish}
+              overrideColorMap={finishTexture}
+              overrideColorMapKey={finishTextureUrl}
+              applyColorTint={!isPerColorVariantModel}
+              applyDynamicFinishSurface={!isPerColorVariantModel}
+              autoRotate={true}
+            />
+          ) : null}
               </GLBErrorBoundary>
             ) : (
               <ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} />

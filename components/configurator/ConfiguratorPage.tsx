@@ -140,9 +140,14 @@ export default function ConfiguratorPage() {
 
   const fallbackColors = useMemo<ProductColorVariant[]>(
     () => [
-      { id: 'demo-black', name: 'Black', nameLt: 'Juoda', nameEn: 'Black', hex: '#161616', priceModifier: 0 },
-      { id: 'demo-charcoal', name: 'Charcoal', nameLt: 'Antracitas', nameEn: 'Charcoal', hex: '#535353', priceModifier: 0 },
-      { id: 'demo-natural', name: 'Natural', nameLt: 'Natūrali', nameEn: 'Natural', hex: '#BBBBBB', priceModifier: 0 },
+      { id: 'demo-black', name: 'Black', nameLt: 'Juoda', nameEn: 'Black', hex: '#1f1f1f', priceModifier: 0 },
+      { id: 'demo-carbon', name: 'Carbon', nameLt: 'Anglis', nameEn: 'Carbon', hex: '#333333', priceModifier: 0 },
+      { id: 'demo-carbon-light', name: 'Carbon Light', nameLt: 'Šviesi anglis', nameEn: 'Carbon Light', hex: '#5b5b5b', priceModifier: 0 },
+      { id: 'demo-graphite', name: 'Graphite', nameLt: 'Grafitas', nameEn: 'Graphite', hex: '#535353', priceModifier: 0 },
+      { id: 'demo-natural', name: 'Natural', nameLt: 'Natūrali', nameEn: 'Natural', hex: '#8f6a4d', priceModifier: 0 },
+      { id: 'demo-dark-brown', name: 'Dark Brown', nameLt: 'Tamsiai ruda', nameEn: 'Dark Brown', hex: '#5b3b2b', priceModifier: 0 },
+      { id: 'demo-latte', name: 'Latte', nameLt: 'Latte', nameEn: 'Latte', hex: '#b18e70', priceModifier: 0 },
+      { id: 'demo-silver', name: 'Silver', nameLt: 'Sidabrinė', nameEn: 'Silver', hex: '#b7b7b7', priceModifier: 0 },
     ],
     []
   );
@@ -226,6 +231,8 @@ export default function ConfiguratorPage() {
     return value
       .trim()
       .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/[_\s]+/g, '-')
       .replace(/[^a-z0-9-]/g, '')
       .replace(/-+/g, '-')
@@ -259,16 +266,30 @@ export default function ConfiguratorPage() {
 
   const colorVariantToKey = useCallback(
     (variant: ProductColorVariant): ColorKey | null => {
-      const token = normalizeToken(variant.nameEn ?? variant.name ?? variant.nameLt ?? '');
+      const token = normalizeToken([variant.id, variant.nameEn, variant.nameLt, variant.name].filter(Boolean).join(' '));
       if (!token) return null;
-      if (token === 'black') return 'black';
-      if (token === 'carbon') return 'carbon';
-      if (token === 'carbon-light' || token === 'carbonlight') return 'carbon_light';
-      if (token === 'graphite') return 'graphite';
-      if (token === 'natural') return 'natural';
-      if (token === 'dark-brown' || token === 'darkbrown') return 'dark_brown';
-      if (token === 'latte') return 'latte';
-      if (token === 'silver') return 'silver';
+
+      if (token.includes('black') || token.includes('juod')) return 'black';
+
+      if (token.includes('carbon-light') || token.includes('carbonlight') || token.includes('sviesi-angl') || token.includes('sviesi-anglis')) {
+        return 'carbon_light';
+      }
+      if (token.includes('carbon') || token.includes('angl')) return 'carbon';
+
+      if (token.includes('graphite') || token.includes('grafit')) return 'graphite';
+
+      if (token.includes('dark-brown') || token.includes('darkbrown') || token.includes('tams') || token.includes('brown') || token.includes('ruda')) {
+        return 'dark_brown';
+      }
+
+      if (token.includes('silver') || token.includes('sidabr')) return 'silver';
+
+      if (token.includes('latte')) return 'latte';
+
+      if (token.includes('natural') || token.includes('natur') || token.includes('natural-burnt') || token.includes('natural-burn')) {
+        return 'natural';
+      }
+
       return null;
     },
     [normalizeToken]
@@ -381,25 +402,9 @@ export default function ConfiguratorPage() {
     return keys;
   }, [availableFinishes, finishToProfileKey]);
 
-  const availableWidths = useMemo(() => {
-    const set = new Set<string>();
-    availableFinishes.forEach((finish) => {
-      if (typeof finish.dimensions?.width === 'number' && finish.dimensions.width > 0) {
-        set.add(String(Math.round(finish.dimensions.width)));
-      }
-    });
-    return set;
-  }, [availableFinishes]);
+  const availableWidths = useMemo(() => new Set<string>(WIDTH_OPTIONS.map((option) => option.value)), []);
 
-  const availableLengths = useMemo(() => {
-    const set = new Set<string>();
-    availableFinishes.forEach((finish) => {
-      if (typeof finish.dimensions?.length === 'number' && finish.dimensions.length > 0) {
-        set.add(String(Math.round(finish.dimensions.length)));
-      }
-    });
-    return set;
-  }, [availableFinishes]);
+  const availableLengths = useMemo(() => new Set<string>(LENGTH_OPTIONS.map((option) => option.value)), []);
 
   const availableThicknesses = useMemo(() => {
     const set = new Set<'28' | '20'>();
@@ -433,14 +438,14 @@ export default function ConfiguratorPage() {
 
   useEffect(() => {
     if (!availableWidths.has(selectedWidth)) {
-      const next = pickFirstEnabled(WIDTH_OPTIONS.map((option) => ({ ...option, enabled: availableWidths.has(option.value) })));
+      const next = pickFirstEnabled(WIDTH_OPTIONS);
       if (next) setSelectedWidth(next);
     }
   }, [availableWidths, selectedWidth]);
 
   useEffect(() => {
     if (!availableLengths.has(selectedLength)) {
-      const next = pickFirstEnabled(LENGTH_OPTIONS.map((option) => ({ ...option, enabled: availableLengths.has(option.value) })));
+      const next = pickFirstEnabled(LENGTH_OPTIONS);
       if (next) setSelectedLength(next);
     }
   }, [availableLengths, selectedLength]);
@@ -519,13 +524,17 @@ export default function ConfiguratorPage() {
 
   const widthOptions = WIDTH_OPTIONS.map((option) => ({
     ...option,
-    enabled: availableWidths.has(option.value),
+    enabled: true,
   }));
 
   const lengthOptions = LENGTH_OPTIONS.map((option) => ({
     ...option,
-    enabled: availableLengths.has(option.value),
+    enabled: true,
   }));
+
+  const widthMm = useMemo(() => Number(selectedWidth), [selectedWidth]);
+  const lengthMm = useMemo(() => Number(selectedLength), [selectedLength]);
+  const thicknessMm = useMemo(() => (selectedThickness === '28' ? 28 : 20), [selectedThickness]);
 
   const selectedProductName =
     product ? (currentLocale === 'en' && product.nameEn ? product.nameEn : product.name) : null;
@@ -570,9 +579,6 @@ export default function ConfiguratorPage() {
   }, [cartItems]);
 
   useEffect(() => {
-    const widthMm = selectedFinishVariant?.dimensions?.width;
-    const lengthMm = selectedFinishVariant?.dimensions?.length;
-
     if (!product?.id || !selectedColorVariant || !selectedFinishVariant) {
       setQuote(null);
       setQuoteError(null);
@@ -596,6 +602,7 @@ export default function ConfiguratorPage() {
           productId: string;
           profileVariantId?: string;
           colorVariantId?: string;
+          thicknessMm?: number;
           widthMm: number;
           lengthMm: number;
           inputMode: 'boards' | 'area';
@@ -625,6 +632,7 @@ export default function ConfiguratorPage() {
                 inputMode,
                 quantityBoards,
                 cartTotalAreaM2: cartTotalAreaM2 + currentLineAreaM2,
+                thicknessMm,
               }
             : {
                 productId: product.id,
@@ -636,6 +644,7 @@ export default function ConfiguratorPage() {
                 targetAreaM2,
                 rounding: 'ceil',
                 cartTotalAreaM2: cartTotalAreaM2 + currentLineAreaM2,
+                thicknessMm,
               };
 
         const res = await fetch('/api/pricing/quote', {
@@ -703,12 +712,15 @@ export default function ConfiguratorPage() {
   }, [
     cartTotalAreaM2,
     inputMode,
+    lengthMm,
     product?.id,
     quantityBoards,
     selectedColorVariant,
     selectedFinishVariant,
+    thicknessMm,
     t,
     targetAreaM2,
+    widthMm,
   ]);
 
   const handleDownloadPdf = useCallback(async () => {
@@ -723,9 +735,9 @@ export default function ConfiguratorPage() {
         colorName: getLocalizedColorName(selectedColorVariant, currentLocale),
         colorHex: selectedColorVariant.hex,
         profileName: getLocalizedProfileName(selectedFinishVariant, currentLocale),
-        widthMm: selectedFinishVariant.dimensions?.width,
-        lengthMm: selectedFinishVariant.dimensions?.length,
-        thicknessMm: selectedFinishVariant.dimensions?.thickness,
+        widthMm,
+        lengthMm,
+        thicknessMm,
         pricePerM2: quote?.unitPricePerM2,
         pricePerBoard: quote?.unitPricePerBoard,
         quantityBoards: quote?.quantityBoards,
@@ -744,10 +756,6 @@ export default function ConfiguratorPage() {
   const handleAddToCart = useCallback(
     (goToCheckout: boolean) => {
       if (!product || !selectedColorVariant || !selectedFinishVariant) return;
-
-      const widthMm = selectedFinishVariant.dimensions?.width;
-      const lengthMm = selectedFinishVariant.dimensions?.length;
-      const thicknessMm = selectedFinishVariant.dimensions?.thickness;
       const unitAreaM2 =
         typeof widthMm === 'number' && typeof lengthMm === 'number' && widthMm > 0 && lengthMm > 0
           ? (widthMm / 1000) * (lengthMm / 1000)
@@ -805,9 +813,9 @@ export default function ConfiguratorPage() {
           usageType: boardTypeToUsage(selectedBoardType),
           colorVariantId: selectedColorVariant.id,
           profileVariantId: selectedFinishVariant.id,
-          thicknessMm: typeof thicknessMm === 'number' ? thicknessMm : undefined,
-          widthMm: typeof widthMm === 'number' ? widthMm : undefined,
-          lengthMm: typeof lengthMm === 'number' ? lengthMm : undefined,
+          thicknessMm,
+          widthMm,
+          lengthMm,
         },
         inputMode,
         targetAreaM2: inputMode === 'area' ? resolvedTargetAreaM2 : undefined,
@@ -912,6 +920,7 @@ export default function ConfiguratorPage() {
                   productId={product?.id ?? 'demo'}
                   availableColors={availableColors}
                   availableFinishes={availableFinishes}
+                  modelSlug={product?.slug}
                   modelUrl={productModelUrl}
                   basePrice={product?.price}
                   isLoading={isLoading}

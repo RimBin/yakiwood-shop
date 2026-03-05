@@ -117,6 +117,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 503 })
     }
 
+    // This endpoint requires PRICING_QUOTE_TOKEN_SECRET to hash quote tokens.
+    // Return a clear config error instead of a generic 500.
+    if (!process.env.PRICING_QUOTE_TOKEN_SECRET || process.env.PRICING_QUOTE_TOKEN_SECRET.trim().length === 0) {
+      return NextResponse.json({ error: 'Kainodaros konfigūracija nerasta' }, { status: 503 })
+    }
+
     const body = (await req.json().catch(() => null)) as LockBody | null
     const itemsRaw = Array.isArray(body?.items) ? body!.items : []
     if (itemsRaw.length === 0) {

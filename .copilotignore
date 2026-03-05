@@ -1,0 +1,8 @@
+# Exclude large/binary 3D assets from Copilot context to avoid slow "read changed files" operations
+public/models/**/*.glb
+public/models/**/*.glb.bak
+public/models/**/*.gltf
+public/models/**/*.bin
+public/models/**/*.ktx2
+public/models/**/*.hdr
+public/models/**/*.exr

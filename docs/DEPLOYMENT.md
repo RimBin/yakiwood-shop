@@ -107,6 +107,8 @@ SENTRY_AUTH_TOKEN=xxxxx
 # Enable/disable features
 NEXT_PUBLIC_ENABLE_3D_CONFIGURATOR=true
 NEXT_PUBLIC_ENABLE_NEWSLETTER=true
+# Optional: enable runtime finish photo texture swap in 3D (default: false)
+NEXT_PUBLIC_ENABLE_3D_FINISH_TEXTURE_SWAP=false
 ```
 
 ### Environment Variable Security
