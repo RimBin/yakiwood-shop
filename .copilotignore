@@ -1,8 +1,15 @@
-# Exclude large/binary 3D assets from Copilot context to avoid slow "read changed files" operations
-public/models/**/*.glb
+# Keep Copilot context focused; avoid generated folders and especially problematic large binaries.
+# Note: Copilot can't meaningfully interpret `.glb` contents (binary), but it can still see that files exist/changed.
+
+# Build/test outputs
+node_modules/
+.next/
+out/
+coverage/
+test-results/
+playwright-report/
+
+# 3D assets: keep `.glb` included, but ignore backup/extra-heavy formats
 public/models/**/*.glb.bak
-public/models/**/*.gltf
-public/models/**/*.bin
-public/models/**/*.ktx2
 public/models/**/*.hdr
 public/models/**/*.exr
