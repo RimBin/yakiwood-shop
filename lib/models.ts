@@ -17,7 +17,7 @@ import blenderIndex from '@/public/models/products/index.json';
 // Version stamp appended as cache-buster query string.  Bump when you replace
 // a GLB file so browsers refetch it.
 // ---------------------------------------------------------------------------
-const MODEL_VERSION = '20260305a';
+const MODEL_VERSION = '20260305b';
 
 function versioned(path: string): string {
   return `${path}?v=${MODEL_VERSION}`;

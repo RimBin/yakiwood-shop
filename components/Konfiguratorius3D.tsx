@@ -382,6 +382,17 @@ function buildColorVariantSlugCandidates(input: {
   return candidates;
 }
 
+function resolveColorVariantModelUrl(input: {
+  modelSlug?: string;
+  modelUrl?: string;
+  colorSlug: string;
+}): string | null {
+  const candidates = buildColorVariantSlugCandidates(input);
+  const matched = candidates.find((slug) => hasProductModel(slug));
+  if (!matched) return null;
+  return getProductModelUrl({ slug: matched });
+}
+
 function resolveColorSlug(color: ProductColorVariant | null):
   | 'black'
   | 'carbon'
@@ -527,6 +538,7 @@ class GLBErrorBoundary extends React.Component<
 
 interface GLBProfileModelProps {
   modelUrl: string;
+  materialVariantUrl?: string | null;
   color: string;
   finish: ProductProfileVariant | null;
   overrideColorMap?: THREE.Texture | null;
@@ -538,6 +550,7 @@ interface GLBProfileModelProps {
 
 function GLBProfileModel({
   modelUrl,
+  materialVariantUrl,
   color,
   finish,
   overrideColorMap,
@@ -548,6 +561,7 @@ function GLBProfileModel({
 }: GLBProfileModelProps) {
   const groupRef = useRef<THREE.Group | null>(null);
   const gltf = useGLTF(modelUrl) as { scene: THREE.Group };
+  const materialVariantGltf = useGLTF(materialVariantUrl ?? modelUrl) as { scene: THREE.Group };
 
   const modelScene = useMemo(() => {
     const cloned = cloneSceneWithUniqueMaterials(gltf.scene);
@@ -576,6 +590,32 @@ function GLBProfileModel({
     return wrapper;
   }, [gltf.scene]);
 
+  const variantMaterialsByName = useMemo(() => {
+    const map = new Map<string, THREE.MeshStandardMaterial>();
+
+    materialVariantGltf.scene.traverse((object) => {
+      const mesh = object as THREE.Mesh;
+      if (!mesh.isMesh || !mesh.material) return;
+
+      const register = (material: THREE.Material) => {
+        const standardMaterial = material as THREE.MeshStandardMaterial;
+        const key = (standardMaterial.name ?? '').trim().toLowerCase();
+        if (!key) return;
+        if (!map.has(key)) {
+          map.set(key, standardMaterial);
+        }
+      };
+
+      if (Array.isArray(mesh.material)) {
+        mesh.material.forEach(register);
+      } else {
+        register(mesh.material);
+      }
+    });
+
+    return map;
+  }, [materialVariantGltf.scene]);
+
   useLayoutEffect(() => {
     const surface = getFinishSurfacePreset(finish);
 
@@ -591,6 +631,25 @@ function GLBProfileModel({
           materialName.includes('end_grain') ||
           materialName.includes('end grain');
         const hasBaseMap = 'map' in standardMaterial && !!standardMaterial.map;
+
+        const cloneMapLike = (source: THREE.Texture | null | undefined): THREE.Texture | null => {
+          if (!source) return null;
+          const cloned = source.clone();
+          cloned.image = source.image;
+          cloned.colorSpace = source.colorSpace;
+          cloned.flipY = source.flipY;
+          cloned.wrapS = source.wrapS;
+          cloned.wrapT = source.wrapT;
+          cloned.repeat.copy(source.repeat);
+          cloned.offset.copy(source.offset);
+          cloned.center.copy(source.center);
+          cloned.rotation = source.rotation;
+          if ('channel' in source && typeof (source as any).channel === 'number') {
+            (cloned as any).channel = (source as any).channel;
+          }
+          cloned.needsUpdate = true;
+          return cloned;
+        };
 
         // Keep GLB textures enabled. If the model uses embedded textures,
         // GLTFLoader will create blob: URLs for them — we only need to ensure
@@ -609,6 +668,59 @@ function GLBProfileModel({
         // - if we have an override texture, apply it as baseColor map (real texture switch)
         // - otherwise, fall back to tinting (brightness/color shift)
         if (!isFixedMaterial) {
+          const variantSource = variantMaterialsByName.get((standardMaterial.name ?? '').trim().toLowerCase());
+
+          if (variantSource && materialVariantUrl) {
+            if ('map' in standardMaterial) {
+              standardMaterial.map = cloneMapLike(variantSource.map);
+              if (standardMaterial.map) {
+                standardMaterial.map.colorSpace = THREE.SRGBColorSpace;
+                standardMaterial.map.needsUpdate = true;
+              }
+            }
+
+            if ('normalMap' in standardMaterial) {
+              standardMaterial.normalMap = cloneMapLike(variantSource.normalMap);
+            }
+            if ('roughnessMap' in standardMaterial) {
+              standardMaterial.roughnessMap = cloneMapLike(variantSource.roughnessMap);
+            }
+            if ('metalnessMap' in standardMaterial) {
+              standardMaterial.metalnessMap = cloneMapLike(variantSource.metalnessMap);
+            }
+            if ('aoMap' in standardMaterial) {
+              standardMaterial.aoMap = cloneMapLike(variantSource.aoMap);
+            }
+            if ('displacementMap' in standardMaterial) {
+              standardMaterial.displacementMap = cloneMapLike(variantSource.displacementMap);
+            }
+            if ('emissiveMap' in standardMaterial) {
+              standardMaterial.emissiveMap = cloneMapLike(variantSource.emissiveMap);
+            }
+
+            if ('roughness' in standardMaterial) {
+              standardMaterial.roughness = variantSource.roughness;
+            }
+            if ('metalness' in standardMaterial) {
+              standardMaterial.metalness = variantSource.metalness;
+            }
+            if ('aoMapIntensity' in standardMaterial) {
+              standardMaterial.aoMapIntensity = variantSource.aoMapIntensity;
+            }
+            if ('displacementScale' in standardMaterial) {
+              standardMaterial.displacementScale = variantSource.displacementScale;
+            }
+            if ('displacementBias' in standardMaterial) {
+              standardMaterial.displacementBias = variantSource.displacementBias;
+            }
+            if ('normalScale' in standardMaterial && standardMaterial.normalScale && variantSource.normalScale) {
+              standardMaterial.normalScale.copy(variantSource.normalScale);
+            }
+
+            if ('color' in standardMaterial && standardMaterial.color) {
+              standardMaterial.color.set('#ffffff');
+            }
+          } else
           if (overrideColorMap && 'map' in standardMaterial) {
             const existingKey = (standardMaterial.userData as any)?.__finishTextureKey as string | undefined;
             const existingTexture = (standardMaterial.userData as any)?.__finishTexture as THREE.Texture | undefined;
@@ -672,9 +784,11 @@ function GLBProfileModel({
     applyDynamicFinishSurface,
     color,
     finish,
+    materialVariantUrl,
     modelScene,
     overrideColorMap,
     overrideColorMapKey,
+    variantMaterialsByName,
   ]);
 
   useFrame((_, delta) => {
@@ -908,38 +1022,37 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
     setModelColor(resolveColorHex(selectedColor));
   }, [selectedColor]);
 
-  const resolvedVariantModelUrl = useMemo(() => {
-    if (!selectedColor) return modelUrl;
-
+  const resolvedVariantMaterialUrl = useMemo(() => {
+    if (!selectedColor) return null;
     const colorSlug = resolveColorSlug(selectedColor);
-    if (!colorSlug) return modelUrl;
+    if (!colorSlug) return null;
 
-    const candidates = buildColorVariantSlugCandidates({
+    return resolveColorVariantModelUrl({
       modelSlug,
       modelUrl,
       colorSlug,
     });
-
-    const matched = candidates.find((slug) => hasProductModel(slug));
-    if (!matched) return modelUrl;
-
-    return getProductModelUrl({ slug: matched });
   }, [modelSlug, modelUrl, selectedColor]);
 
   const isPerColorVariantModel = useMemo(() => {
-    if (!selectedColor) return false;
+    return !!resolvedVariantMaterialUrl;
+  }, [resolvedVariantMaterialUrl]);
 
-    const colorSlug = resolveColorSlug(selectedColor);
-    if (!colorSlug) return false;
+  useEffect(() => {
+    availableColors.forEach((colorOption) => {
+      const colorSlug = resolveColorSlug(colorOption);
+      if (!colorSlug) return;
 
-    const candidates = buildColorVariantSlugCandidates({
-      modelSlug,
-      modelUrl,
-      colorSlug,
+      const variantUrl = resolveColorVariantModelUrl({
+        modelSlug,
+        modelUrl,
+        colorSlug,
+      });
+
+      if (!variantUrl) return;
+      useGLTF.preload(variantUrl);
     });
-
-    return candidates.some((slug) => hasProductModel(slug));
-  }, [modelSlug, modelUrl, selectedColor]);
+  }, [availableColors, modelSlug, modelUrl]);
 
   const isFinishTextureSwapEnabled = useMemo(() => {
     const raw = process.env.NEXT_PUBLIC_ENABLE_3D_FINISH_TEXTURE_SWAP;
@@ -951,73 +1064,37 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
   const finishTextureUrl = useMemo(() => {
     if (!isFinishTextureSwapEnabled) return null;
     if (!selectedColor) return null;
-    if (!resolvedModelUrl && !resolvedVariantModelUrl) return null;
+    if (!resolvedModelUrl && !modelUrl) return null;
 
-    const wood = resolveFinishTextureWood(resolvedModelUrl ?? resolvedVariantModelUrl);
+    const wood = resolveFinishTextureWood(resolvedModelUrl ?? modelUrl);
     if (!wood) return null;
 
     const slug = resolveColorSlug(selectedColor);
     if (!slug) return null;
 
     return getFinishTextureUrl(wood, slug);
-  }, [isFinishTextureSwapEnabled, resolvedVariantModelUrl, resolvedModelUrl, selectedColor]);
+  }, [isFinishTextureSwapEnabled, modelUrl, resolvedModelUrl, selectedColor]);
 
   const finishTexture = useFinishTexture(finishTextureUrl);
 
   useEffect(() => {
-    let isMounted = true;
-
-    if (!resolvedVariantModelUrl) {
+    // We used to issue a HEAD request to check if the model exists before
+    // passing it to `useGLTF()`. In some environments (dev proxies / server
+    // configs), HEAD can be blocked or behave inconsistently for large static
+    // assets with query strings, causing the viewer to fall back to the
+    // placeholder model and making color switching appear “broken”.
+    //
+    // Instead, always attempt to load the model URL; failures are handled by
+    // `GLBErrorBoundary`, which keeps UX stable and logs the error.
+    if (!modelUrl) {
       setResolvedModelUrl(null);
       setIsModelResolved(true);
-      return () => {
-        isMounted = false;
-      };
+      return;
     }
 
-    setIsModelResolved(false);
-
-    const resolve = async () => {
-      let headOk: boolean | null = null;
-      try {
-        if (process.env.NODE_ENV !== 'production') {
-          // eslint-disable-next-line no-console
-          console.debug('[Konfiguratorius3D] resolving modelUrl', { modelUrl: resolvedVariantModelUrl });
-        }
-        const response = await fetch(resolvedVariantModelUrl, { method: 'HEAD' });
-        headOk = response.ok;
-
-        if (!isMounted) return;
-
-        if (response.ok) {
-          setResolvedModelUrl(resolvedVariantModelUrl);
-        } else {
-          setResolvedModelUrl(null);
-        }
-      } catch {
-        if (!isMounted) return;
-        setResolvedModelUrl(null);
-      } finally {
-        if (!isMounted) return;
-        setIsModelResolved(true);
-
-        if (process.env.NODE_ENV !== 'production') {
-          // eslint-disable-next-line no-console
-          console.debug('[Konfiguratorius3D] modelUrl resolved', {
-            modelUrl: resolvedVariantModelUrl,
-            headOk,
-            resolved: headOk ? resolvedVariantModelUrl : null,
-          });
-        }
-      }
-    };
-
-    resolve();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [resolvedVariantModelUrl]);
+    setResolvedModelUrl(modelUrl);
+    setIsModelResolved(true);
+  }, [modelUrl]);
 
   useEffect(() => {
     if (!productId) return;
@@ -1240,6 +1317,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
           {!isGltfLoading ? (
             <GLBProfileModel
               modelUrl={resolvedModelUrl}
+              materialVariantUrl={resolvedVariantMaterialUrl}
               color={modelColor}
               finish={selectedFinish}
               overrideColorMap={finishTexture}
