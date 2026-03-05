@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
-import { useCartStore } from '@/lib/cart/store';
+import { useCartStore, type CartItem } from '@/lib/cart/store';
 import { toLocalePath } from '@/i18n/paths';
 
 const PROFILE_LABELS_LT: Record<string, string> = {
@@ -30,6 +30,50 @@ const normalizeProfileToken = (value: string) => {
   if (token.includes('rectangle') || token.includes('staciakamp')) return 'rectangle';
   return token;
 };
+
+const normalizeToken = (value: string) =>
+  value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[_\s]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+
+function resolveWoodToken(name?: string): 'larch' | 'spruce' | null {
+  const token = normalizeToken(name ?? '');
+  if (!token) return null;
+  if (token.includes('maumed') || token.includes('larch')) return 'larch';
+  if (token.includes('egle') || token.includes('spruce')) return 'spruce';
+  return null;
+}
+
+function resolveColorSlug(color?: string): string | null {
+  const token = normalizeToken(color ?? '');
+  if (!token) return null;
+  if (token.includes('black') || token.includes('juod')) return 'black';
+  if (token.includes('carbon-light') || token.includes('carbonlight') || token.includes('sviesi-angl')) return 'carbon-light';
+  if (token.includes('carbon') || token.includes('angl')) return 'carbon';
+  if (token.includes('graphite') || token.includes('grafit')) return 'graphite';
+  if (token.includes('natural') || token.includes('natur')) return 'natural';
+  if (token.includes('dark-brown') || token.includes('darkbrown') || token.includes('tams') || token.includes('ruda')) return 'dark-brown';
+  if (token.includes('latte')) return 'latte';
+  if (token.includes('silver') || token.includes('sidabr')) return 'silver';
+  return null;
+}
+
+function resolveCartItemImage(item: CartItem): string | undefined {
+  const woodToken = resolveWoodToken(item.name);
+  const colorSlug = resolveColorSlug(item.color);
+
+  if (woodToken && colorSlug) {
+    return `/assets/finishes/${woodToken}/shou-sugi-ban-${woodToken}-${colorSlug}-facade-terrace-cladding.webp`;
+  }
+
+  return typeof item.image === 'string' && item.image.trim().length > 0 ? item.image : undefined;
+}
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -119,13 +163,16 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
               {/* Cart Items */}
               <div className="flex-1 overflow-y-auto px-[24px] py-[24px]">
                 <div className="space-y-[16px]">
-                  {items.map((item) => (
+                  {items.map((item) => {
+                    const previewImage = resolveCartItemImage(item);
+
+                    return (
                     <div key={item.addedAt ?? item.lineId} className="flex gap-[16px] pb-[16px] border-b border-[#BBBBBB]">
                       {/* Image */}
                       <div className="w-[111px] h-[125px] rounded-[8px] bg-white overflow-hidden shrink-0">
-                        {typeof item.image === 'string' && item.image.trim().length > 0 ? (
+                        {typeof previewImage === 'string' ? (
                           <img
-                            src={item.image}
+                            src={previewImage}
                             alt={item.name}
                             className="w-full h-full object-cover"
                             loading="lazy"
@@ -162,7 +209,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                             </p>
                             {typeof item.configuration?.widthMm === 'number' && typeof item.configuration?.lengthMm === 'number' ? (
                               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.4] text-[#161616]">
-                                H{item.configuration.lengthMm}mm x W{item.configuration.widthMm}mm
+                                L{item.configuration.lengthMm}mm x W{item.configuration.widthMm}mm
                               </p>
                             ) : (
                               <p className="font-['Outfit'] font-normal text-[12px] leading-[1.4] text-[#535353]">
@@ -202,9 +249,6 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 ? Number(item.quantity).toFixed(1)
                                 : item.quantity}
                             </span>
-                            <span className="font-['Outfit'] font-normal text-[12px] leading-[1.5] text-[#535353]">
-                              {item.inputMode === 'area' ? 'm²' : 'vnt'}
-                            </span>
                             <button
                               onClick={() => updateQuantity(item.lineId, item.quantity + 1)}
                               className="w-[24px] h-[24px] flex items-center justify-center hover:opacity-70 transition-opacity"
@@ -213,6 +257,9 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 <path d="M8 3V13M3 8H13" stroke="#161616" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
                             </button>
+                            <span className="font-['Outfit'] font-normal text-[12px] leading-[1.5] text-[#535353]">
+                              {item.inputMode === 'area' ? 'm²' : 'vnt'}
+                            </span>
                             <button
                               onClick={() => removeItem(item.lineId)}
                               className="ml-[8px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#535353] hover:text-[#161616] transition-colors"
@@ -223,7 +270,8 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 

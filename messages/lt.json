@@ -12,9 +12,6 @@
     "pagrindinis": "Pagrindinis",
     "paskyra": "Paskyra"
   },
-  "about": {
-    "pavadinimas": "apie mus"
-  },
   "chatbot": {
     "button": "Pokalbis",
     "title": "Pokalbis su Yakiwood",
@@ -1003,6 +1000,9 @@
     "demoExampleLabel": "Demo 3D (pavyzdys)",
     "loadingModel": "Kraunamas 3D modelis...",
     "controlsHint": "Naudokite pelę norėdami pasukti, priartinti ir perkelti",
+    "pauseRotation": "Sustabdyti sukimąsi",
+    "resumeRotation": "Įjungti sukimąsi",
+    "visualScaleNotice": "Pastaba: 3D peržiūroje ilgis rodomas sutrumpintai (vizualinis mastelis). Tikras gaminio ilgis — pagal pasirinktus mm.",
     "colorLabel": "Spalva",
     "profileLabel": "Profilis",
     "selectColorAria": "Pasirinkti spalvą {name}",

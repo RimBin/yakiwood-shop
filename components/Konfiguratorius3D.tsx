@@ -860,6 +860,7 @@ export interface Konfiguratorius3DProps {
   modelUrl?: string;
   modelSlug?: string;
   mode?: 'full' | 'viewport';
+  autoRotate?: boolean;
   selectedColorId?: string;
   selectedFinishId?: string;
   onColorChange?: (color: ProductColorVariant) => void;
@@ -892,6 +893,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
   modelUrl = DEFAULT_CONFIGURATOR_GLB_PATH,
   modelSlug,
   mode = 'full',
+  autoRotate = true,
   selectedColorId,
   selectedFinishId,
   onColorChange,
@@ -1372,7 +1374,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
           </div>
         )}
         
-        <Canvas camera={{ position: [3, 2, 3], fov: 50 }} gl={{ preserveDrawingBuffer: true }}>
+        <Canvas camera={{ position: [2.4, 1.4, 2.4], fov: 45 }} gl={{ preserveDrawingBuffer: true }}>
           <RendererBridge onRenderer={handleRendererReady} />
             <ambientLight intensity={1.05} />
             <hemisphereLight args={['#FFFFFF', '#DCDCDC', 0.7]} />
@@ -1393,7 +1395,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
 						  color={modelColor}
 						  finish={selectedFinish}
 						  variantKey={textureVariantKey}
-						  autoRotate={true}
+						  autoRotate={autoRotate}
 						  rotationYRef={sharedRotationYRef}
 						  visualDimensionsMm={visualDimensionsMm}
 						/>
@@ -1403,7 +1405,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
             {effectiveModelUrl ? (
               <GLBErrorBoundary
                 modelUrl={effectiveModelUrl}
-                fallback={<ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} rotationYRef={sharedRotationYRef} visualDimensionsMm={visualDimensionsMm} />}
+                fallback={<ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={autoRotate} rotationYRef={sharedRotationYRef} visualDimensionsMm={visualDimensionsMm} />}
               >
           {!isGltfLoading ? (
             <GLBProfileModel
@@ -1415,21 +1417,22 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
               overrideColorMapKey={finishTextureUrl}
               applyColorTint={!isPerColorVariantModel}
               applyDynamicFinishSurface={!isPerColorVariantModel}
-              autoRotate={true}
+              autoRotate={autoRotate}
               rotationYRef={sharedRotationYRef}
               visualDimensionsMm={visualDimensionsMm}
             />
           ) : null}
               </GLBErrorBoundary>
             ) : (
-              <ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} rotationYRef={sharedRotationYRef} visualDimensionsMm={visualDimensionsMm} />
+              <ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={autoRotate} rotationYRef={sharedRotationYRef} visualDimensionsMm={visualDimensionsMm} />
             )}
           </Suspense>
           <OrbitControls 
             enablePan={true} 
             enableZoom={true} 
             enableRotate={true}
-            minDistance={2}
+            target={[0, 0, 0]}
+            minDistance={1.6}
             maxDistance={10}
           />
         </Canvas>

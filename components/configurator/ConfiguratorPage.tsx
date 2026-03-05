@@ -36,17 +36,17 @@ const CONFIGURATOR_MODEL_URL = getGenericModelUrl();
 const THERMO_COLORS = new Set<ColorKey>(['black', 'carbon', 'carbon_light', 'graphite', 'dark_brown', 'silver']);
 
 const BOARD_OPTIONS: ToggleOption<BoardType>[] = [
-  { value: 'terasine', label: 'Terasinė' },
+  { value: 'terasine', label: 'Terrace' },
 ];
 
 const WOOD_OPTIONS: ToggleOption<WoodType>[] = [
-  { value: 'maumedis', label: 'Maumedis' },
-  { value: 'egle', label: 'Eglė' },
-  { value: 'termo', label: 'Termo' },
+  { value: 'maumedis', label: 'Larch' },
+  { value: 'egle', label: 'Spruce' },
+  { value: 'termo', label: 'Thermo' },
 ];
 
 const PROFILE_OPTIONS: ToggleOption<ProfileKey>[] = [
-  { value: 'staciak', label: 'Stačiakampis' },
+  { value: 'staciak', label: 'Rectangle' },
 ];
 
 const COLOR_OPTIONS: ToggleOption<ColorKey>[] = [
@@ -131,6 +131,18 @@ function pickFirstEnabled<T extends string>(options: ToggleOption<T>[]): T | nul
   return options.find((option) => option.enabled !== false)?.value ?? null;
 }
 
+function resolveCartPreviewImage(input: {
+  wood: WoodType;
+  color: ColorKey;
+}): string | undefined {
+  const woodToken = input.wood === 'maumedis' ? 'larch' : 'spruce';
+  const colorSlug = input.color.replace('_', '-');
+  const localFinishImage = `/assets/finishes/${woodToken}/shou-sugi-ban-${woodToken}-${colorSlug}-facade-terrace-cladding.webp`;
+
+  // Prioritize deterministic local preview so cart image always matches selected color.
+  return localFinishImage;
+}
+
 export default function ConfiguratorPage() {
   const t = useTranslations();
   const locale = useLocale();
@@ -160,7 +172,7 @@ export default function ConfiguratorPage() {
         nameLt: 'Pusė špunto 45°',
         nameEn: 'Half taper 45°',
         code: 'half_taper_45_deg',
-        description: currentLocale === 'lt' ? 'Demo profilis (Pusė špunto 45°)' : 'Demo profile (Half taper 45°)',
+        description: 'Demo profile (Half taper 45°)',
         priceModifier: 0,
         dimensions: {
           width: 120,
@@ -174,7 +186,7 @@ export default function ConfiguratorPage() {
         nameLt: 'Stačiakampis',
         nameEn: 'Rectangle',
         code: 'rectangle',
-        description: currentLocale === 'lt' ? 'Demo profilis (stačiakampis)' : 'Demo profile (rectangle)',
+        description: 'Demo profile (rectangle)',
         priceModifier: 0,
         dimensions: {
           width: 120,
@@ -206,6 +218,7 @@ export default function ConfiguratorPage() {
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [autoRotate, setAutoRotate] = useState(true);
   const [quote, setQuote] = useState<null | {
     unitPricePerM2: number;
     areaM2: number;
@@ -498,9 +511,57 @@ export default function ConfiguratorPage() {
     [product]
   );
 
-  const boardTypeOptions = BOARD_OPTIONS;
+  const uiText = useMemo(
+    () =>
+      currentLocale === 'lt'
+        ? {
+          panelTitle: 'Lentų Konfiguratoriaus',
+          boardType: 'Lentos tipas',
+            profile: 'Profilis',
+            thickness: 'Storis',
+            woodType: 'Mediena',
+            color: 'Spalva',
+            width: 'Plotis',
+            length: 'Ilgis',
+            product: 'Produktas',
+            dimensions: 'Matmenys',
+            lengthLabel: 'Ilgis',
+            widthLabel: 'Plotis',
+            thicknessLabel: 'Storis',
+          }
+        : {
+            panelTitle: 'Board Configurator',
+            boardType: 'Board type',
+            profile: 'Profile',
+            thickness: 'Thickness',
+            woodType: 'Wood type',
+            color: 'Color',
+            width: 'Width',
+            length: 'Length',
+            product: 'Product',
+            dimensions: 'Dimensions',
+            lengthLabel: 'Length',
+            widthLabel: 'Width',
+            thicknessLabel: 'Thickness',
+          },
+    [currentLocale]
+  );
+
+  const boardTypeOptions = BOARD_OPTIONS.map((option) => ({
+    ...option,
+    label: currentLocale === 'lt' ? (option.value === 'terasine' ? 'Terasinė' : 'Fasadinė') : option.label,
+  }));
+
   const woodOptions = WOOD_OPTIONS.map((option) => ({
     ...option,
+    label:
+      currentLocale === 'lt'
+        ? option.value === 'maumedis'
+          ? 'Maumedis'
+          : option.value === 'egle'
+            ? 'Eglė'
+            : 'Termo'
+        : option.label,
     enabled:
       option.value !== 'termo'
         ? true
@@ -509,6 +570,7 @@ export default function ConfiguratorPage() {
 
   const profileOptions = PROFILE_OPTIONS.map((option) => ({
     ...option,
+    label: currentLocale === 'lt' ? (option.value === 'staciak' ? 'Stačiakampis' : option.label) : option.label,
     enabled: availableProfileKeys.has(option.value),
   }));
 
@@ -807,12 +869,10 @@ export default function ConfiguratorPage() {
         id: product.id,
         name: selectedProductName ?? product.name,
         slug: currentLocale === 'en' ? (product.slugEn ?? product.slug) : product.slug,
-        image:
-          typeof selectedColorVariant.image === 'string' && selectedColorVariant.image.trim().length > 0
-            ? selectedColorVariant.image
-            : typeof product.image === 'string'
-              ? product.image
-              : undefined,
+        image: resolveCartPreviewImage({
+          wood: selectedWood,
+          color: selectedColor,
+        }),
         basePrice: basePriceForCart,
         quantity: quantityForCart,
         color: selectedColorVariant.name,
@@ -923,54 +983,108 @@ export default function ConfiguratorPage() {
           {!error && (product || isLoading) && (
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6 hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
               <div>
-                <Konfiguratorius3D
-                  ref={configuratorRef}
-                  productId={product?.id ?? 'demo'}
-                  availableColors={availableColors}
-                  availableFinishes={availableFinishes}
-                  modelSlug={product?.slug}
-                  modelUrl={productModelUrl}
-                  basePrice={product?.price}
-                  isLoading={isLoading}
-                  mode="viewport"
-                  selectedColorId={selectedColorVariant?.id}
-                  selectedFinishId={selectedFinishVariant?.id}
-                  visualDimensionsMm={{
-                    widthMm,
-                    lengthMm,
-                    thicknessMm,
-                  }}
-                  onColorChange={(color) => {
-                    const key = colorVariantToKey(color);
-                    if (key) setSelectedColor(key);
-                  }}
-                  onFinishChange={(finish) => {
-                    setSelectedProfile(finishToProfileKey(finish));
-                    if (typeof finish.dimensions?.width === 'number') {
-                      setSelectedWidth(String(Math.round(finish.dimensions.width)));
-                    }
-                    if (typeof finish.dimensions?.length === 'number') {
-                      setSelectedLength(String(Math.round(finish.dimensions.length)));
-                    }
-                    if (typeof finish.dimensions?.thickness === 'number') {
-                      setSelectedThickness(finish.dimensions.thickness >= 24 ? '28' : '20');
-                    }
-                  }}
-                />
+                <div className="relative">
+                  <Konfiguratorius3D
+                    ref={configuratorRef}
+                    productId={product?.id ?? 'demo'}
+                    availableColors={availableColors}
+                    availableFinishes={availableFinishes}
+                    modelSlug={product?.slug}
+                    modelUrl={productModelUrl}
+                    basePrice={product?.price}
+                    isLoading={isLoading}
+                    mode="viewport"
+                    canvasClassName="h-[520px] md:h-[640px] lg:h-[720px]"
+                    autoRotate={autoRotate}
+                    selectedColorId={selectedColorVariant?.id}
+                    selectedFinishId={selectedFinishVariant?.id}
+                    visualDimensionsMm={{
+                      widthMm,
+                      lengthMm,
+                      thicknessMm,
+                    }}
+                    onColorChange={(color) => {
+                      const key = colorVariantToKey(color);
+                      if (key) setSelectedColor(key);
+                    }}
+                    onFinishChange={(finish) => {
+                      setSelectedProfile(finishToProfileKey(finish));
+                      if (typeof finish.dimensions?.width === 'number') {
+                        setSelectedWidth(String(Math.round(finish.dimensions.width)));
+                      }
+                      if (typeof finish.dimensions?.length === 'number') {
+                        setSelectedLength(String(Math.round(finish.dimensions.length)));
+                      }
+                      if (typeof finish.dimensions?.thickness === 'number') {
+                        setSelectedThickness(finish.dimensions.thickness >= 24 ? '28' : '20');
+                      }
+                    }}
+                  />
+
+                  {/* Viewport overlays */}
+                  <div className="pointer-events-none absolute inset-0">
+                    {/* Dimensions (top-left) */}
+                    <div className="absolute top-4 left-4 bg-white/90 px-3 py-2 rounded-lg border border-[#BBBBBB]">
+                      <div className="space-y-0.5 font-['Outfit'] text-[12px] leading-[1.3] text-[#535353]">
+                        <p>
+                          {uiText.lengthLabel}: {selectedLength} mm
+                        </p>
+                        <p>
+                          {uiText.widthLabel}: {selectedWidth} mm
+                        </p>
+                        <p>
+                          {uiText.thicknessLabel}: {selectedThickness === '20' ? '18/20 mm' : '28 mm'}
+                        </p>
+                        {selectedProductName ? <p className="text-[#7C7C7C]">{selectedProductName}</p> : null}
+                        <p className="pt-1 text-[11px] text-[#7C7C7C]">{t('configurator.visualScaleNotice')}</p>
+                      </div>
+                    </div>
+
+                    {/* Auto-rotate toggle (top-right) */}
+                    <div className="pointer-events-auto absolute top-4 right-4 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setAutoRotate((prev) => !prev)}
+                        className={`h-[34px] rounded-[100px] px-3 font-['DM_Sans'] text-[13px] border border-[#161616] transition-colors ${
+                          autoRotate ? 'bg-white text-[#161616]' : 'bg-[#161616] text-white'
+                        }`}
+                      >
+                        {autoRotate ? t('configurator.pauseRotation') : t('configurator.resumeRotation')}
+                      </button>
+                    </div>
+
+                    {/* Controls hint (bottom-left) */}
+                    <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-2 rounded-lg border border-[#BBBBBB]">
+                      <p className="font-['Outfit'] text-[12px] leading-[1.3] text-[#535353]">{t('configurator.controlsHint')}</p>
+                    </div>
+
+                    {/* PDF download (bottom-right) */}
+                    <div className="pointer-events-auto absolute bottom-4 right-4">
+                      <button
+                        type="button"
+                        onClick={handleDownloadPdf}
+                        disabled={pdfLoading || !selectedColorVariant || !selectedFinishVariant}
+                        className="h-[34px] rounded-[100px] px-3 font-['DM_Sans'] text-[13px] border border-[#161616] bg-[#161616] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {pdfLoading ? t('configurator.downloadingPdf') : t('configurator.downloadPdf')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <aside className="rounded-[24px] border border-[#BBBBBB] bg-[#EAEAEA] p-4 flex flex-col gap-3 h-fit">
-                <h2 className="font-['Outfit'] text-[13px] text-[#161616]">Lentų Konfiguratoriaus</h2>
+                <h2 className="font-['Outfit'] text-[13px] text-[#161616]">{uiText.panelTitle}</h2>
 
-                <PanelSection title="Lento tipas">
+                <PanelSection title={uiText.boardType}>
                   <ToggleButtons value={selectedBoardType} onChange={setSelectedBoardType} options={boardTypeOptions} columns={2} />
                 </PanelSection>
 
-                <PanelSection title="Profilis">
+                <PanelSection title={uiText.profile}>
                   <ToggleButtons value={selectedProfile} onChange={setSelectedProfile} options={profileOptions} columns={2} />
                 </PanelSection>
 
-                <PanelSection title="Storis">
+                <PanelSection title={uiText.thickness}>
                   <ToggleButtons
                     value={selectedThickness}
                     onChange={(value) => setSelectedThickness(value as '28' | '20')}
@@ -979,24 +1093,24 @@ export default function ConfiguratorPage() {
                   />
                 </PanelSection>
 
-                <PanelSection title="Mediena">
+                <PanelSection title={uiText.woodType}>
                   <ToggleButtons value={selectedWood} onChange={setSelectedWood} options={woodOptions} columns={3} />
                 </PanelSection>
 
-                <PanelSection title="Spalva">
+                <PanelSection title={uiText.color}>
                   <ToggleButtons value={selectedColor} onChange={setSelectedColor} options={colorOptions} columns={2} />
                 </PanelSection>
 
-                <PanelSection title="Plotis">
+                <PanelSection title={uiText.width}>
                   <ToggleButtons value={selectedWidth} onChange={setSelectedWidth} options={widthOptions} columns={3} />
                 </PanelSection>
 
-                <PanelSection title="Ilgis">
+                <PanelSection title={uiText.length}>
                   <ToggleButtons value={selectedLength} onChange={setSelectedLength} options={lengthOptions} columns={3} />
                 </PanelSection>
 
                 {filteredProducts.length > 1 && (
-                  <PanelSection title="Produktas">
+                  <PanelSection title={uiText.product}>
                     <div className="grid grid-cols-1 gap-1.5">
                       {filteredProducts.map((item) => {
                         const itemName = currentLocale === 'en' && item.nameEn ? item.nameEn : item.name;
@@ -1022,15 +1136,6 @@ export default function ConfiguratorPage() {
                     </div>
                   </PanelSection>
                 )}
-
-                <PanelSection title="Matmenys">
-                  <div className="space-y-1 font-['Outfit'] text-[12px] text-[#535353]">
-                    <p>Ilgis: {selectedLength} mm</p>
-                    <p>Plotis: {selectedWidth} mm</p>
-                    <p>Storis: {selectedThickness === '20' ? '18/20 mm' : '28 mm'}</p>
-                    {selectedProductName ? <p className="text-[#7C7C7C]">{selectedProductName}</p> : null}
-                  </div>
-                </PanelSection>
 
                 <PanelSection title={t('configurator.pricingTitle')}>
                   <div className="space-y-2">
@@ -1101,15 +1206,6 @@ export default function ConfiguratorPage() {
                           : '-'}
                       </span>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={handleDownloadPdf}
-                      disabled={pdfLoading || !selectedColorVariant || !selectedFinishVariant}
-                      className="h-[36px] rounded-[100px] px-3 font-['DM_Sans'] text-[13px] border border-[#161616] bg-[#161616] text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {pdfLoading ? t('configurator.downloadingPdf') : t('configurator.downloadPdf')}
-                    </button>
 
                     <div className="grid grid-cols-2 gap-2">
                       <button
