@@ -6,6 +6,7 @@ import { getLocale } from 'next-intl/server';
 import { toLocalePath } from '@/i18n/paths';
 import { applySeoOverride } from '@/lib/seo/overrides';
 import { findProjectBySlug, getProjectDescription, getProjectLocation, getProjectSlug, getProjectTitle, normalizeProjectLocale } from '@/lib/projects/i18n';
+import { getPublishedProjects } from '@/lib/projects/server';
 
 interface ProjectPageProps {
   params: {
@@ -22,7 +23,8 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const locale = await getLocale();
   const currentLocale = normalizeProjectLocale(locale);
-  const project = findProjectBySlug(projects, params.slug, currentLocale);
+  const loadedProjects = await getPublishedProjects(currentLocale);
+  const project = findProjectBySlug(loadedProjects, params.slug, currentLocale);
 
   if (!project) {
     return {
@@ -70,11 +72,19 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   return applySeoOverride(metadata, new URL(canonical).pathname, currentLocale);
 }
 
-export default function ProjectPage({ params }: ProjectPageProps) {
+export default async function ProjectPage({ params }: ProjectPageProps) {
+  const locale = await getLocale();
+  const currentLocale = normalizeProjectLocale(locale);
+  const loadedProjects = await getPublishedProjects(currentLocale);
+  const project = findProjectBySlug(loadedProjects, params.slug, currentLocale) ?? null;
+  const relatedProjects = project ? loadedProjects.filter((p) => p.id !== project.id).slice(0, 3) : [];
+
   return (
     <ProjectDetailClient
-      slug={params.slug}
       basePath="/projects"
+      currentLocale={currentLocale}
+      project={project}
+      relatedProjects={relatedProjects}
       labels={{ home: 'Pagrindinis', projects: 'Projektai' }}
     />
   );

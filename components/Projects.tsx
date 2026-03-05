@@ -1,16 +1,15 @@
-'use client';
-
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ArrowRight from '@/components/icons/ArrowRight';
 import { assets } from '@/lib/assets';
 import { projects as projectsData } from '@/data/projects';
 import type { Project } from '@/types/project';
-import { useLocale, useTranslations } from 'next-intl';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { toLocalePath } from '@/i18n/paths';
 import { getProjectLocation, getProjectSlug, getProjectTitle, normalizeProjectLocale } from '@/lib/projects/i18n';
 import InView from '@/components/InView';
+import { getPublishedProjects } from '@/lib/projects/server';
 
 const [imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6] = assets.projects;
 
@@ -39,54 +38,29 @@ function getProjectHrefLocalized(basePath: string, project: Partial<Project> | n
   return basePath;
 }
 
-export default function Projects() {
-  const locale = useLocale();
+export default async function Projects() {
+  const locale = await getLocale();
   const currentLocale = normalizeProjectLocale(locale);
   const basePath = toLocalePath('/projects', currentLocale);
-  const t = useTranslations('home.projects');
+  const t = await getTranslations('home.projects');
 
-  const [projects, setProjects] = useState<Project[]>(projectsData);
+  const loadedProjects = await getPublishedProjects(currentLocale);
 
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      try {
-        const res = await fetch(`/api/projects?locale=${encodeURIComponent(currentLocale)}`);
-        const json = (await res.json().catch(() => null)) as any;
-        const loaded = Array.isArray(json?.projects) ? (json.projects as Project[]) : [];
-        if (!cancelled && loaded.length > 0) setProjects(loaded);
-      } catch {
-        // keep seed fallback
-      }
-    };
-    void run();
-    return () => {
-      cancelled = true;
-    };
-  }, [currentLocale]);
+  const fallbackImages = [imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6];
 
-  const fallbackImages = useMemo(
-    () => [imgProject1, imgProject2, imgProject3, imgProject4, imgProject5, imgProject6],
-    []
-  );
+  // Homepage grid shows 6 cards.
+  // Prefer admin-marked featured projects first; then fill with the rest in original order.
+  const safeProjects = Array.isArray(loadedProjects) ? loadedProjects : [];
+  const featured = safeProjects.filter((p) => Boolean(p?.featured));
+  const nonFeatured = safeProjects.filter((p) => !p?.featured);
 
-  const featuredProjects = useMemo(() => {
-    // Homepage grid shows 6 cards.
-    // Prefer admin-marked featured projects first; then fill with the rest in original order.
-    const safeProjects = Array.isArray(projects) ? projects : [];
-    const featured = safeProjects.filter((p) => Boolean(p?.featured));
-    const nonFeatured = safeProjects.filter((p) => !p?.featured);
+  const featuredProjects: Project[] = [...featured, ...nonFeatured].slice(0, 6);
 
-    const items: Project[] = [...featured, ...nonFeatured].slice(0, 6);
-
-    // Final fallback: seed projects (prevents empty UI on a fresh browser)
-    while (items.length < 6) {
-      const fallback = projectsData.length > 0 ? projectsData[items.length % projectsData.length] : undefined;
-      items.push((fallback ?? projectsData[0]) as Project);
-    }
-
-    return items;
-  }, [projects]);
+  // Final fallback: seed projects (prevents empty UI on a fresh browser)
+  while (featuredProjects.length < 6) {
+    const fallback = projectsData.length > 0 ? projectsData[featuredProjects.length % projectsData.length] : undefined;
+    featuredProjects.push((fallback ?? projectsData[0]) as Project);
+  }
 
   return (
     <section className="w-full bg-[#E1E1E1] overflow-x-hidden">

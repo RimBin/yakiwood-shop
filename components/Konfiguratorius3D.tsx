@@ -488,19 +488,25 @@ function useSlowNetworkFlag(): boolean {
 
     const onChange = () => setSlow(isSlowNetwork(getNetworkInfo()));
 
-    const addEventListener = connection.addEventListener?.bind(connection);
-    const removeEventListener = connection.removeEventListener?.bind(connection);
-    if (addEventListener && removeEventListener) {
-      addEventListener('change', onChange);
-      return () => removeEventListener('change', onChange);
+    const addEventListener = connection.addEventListener;
+    const removeEventListener = connection.removeEventListener;
+    if (typeof addEventListener === 'function' && typeof removeEventListener === 'function') {
+      addEventListener.call(connection, 'change', onChange);
+      return () => {
+        removeEventListener.call(connection, 'change', onChange);
+      };
     }
 
-    const addListener = connection.addListener?.bind(connection);
-    const removeListener = connection.removeListener?.bind(connection);
-    if (addListener && removeListener) {
-      addListener(onChange);
-      return () => removeListener(onChange);
+    const addListener = connection.addListener;
+    const removeListener = connection.removeListener;
+    if (typeof addListener === 'function' && typeof removeListener === 'function') {
+      addListener.call(connection, onChange);
+      return () => {
+        removeListener.call(connection, onChange);
+      };
     }
+
+    return;
   }, []);
 
   return slow;

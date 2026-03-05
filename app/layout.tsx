@@ -3,9 +3,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import "./globals.css";
 import AuthWrapper from '@/components/AuthWrapper';
-import GoogleAnalytics from '@/components/GoogleAnalytics';
-import CookieConsentBanner from '@/components/CookieConsentBanner';
 import ChatbotLoader from '@/components/ChatbotLoader';
+import DeferredGlobals from '@/components/layout/DeferredGlobals';
 import { ToastProvider } from '@/components/ui/Toast';
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
@@ -140,12 +139,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased bg-[#e1e1e1]`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ToastProvider>
-            <GoogleAnalytics />
+            <DeferredGlobals />
             <AuthWrapper>
               {children}
               <ChatbotLoader />
             </AuthWrapper>
-            <CookieConsentBanner />
           </ToastProvider>
         </NextIntlClientProvider>
       </body>

@@ -1,58 +1,30 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { projects as projectsData } from '@/data/projects';
-import { useLocale } from 'next-intl';
+import { getLocale } from 'next-intl/server';
 import { toLocalePath } from '@/i18n/paths';
 import { getProjectLocation, getProjectSlug, getProjectTitle, normalizeProjectLocale } from '@/lib/projects/i18n';
 import { PageCover } from '@/components/shared/PageLayout';
 import InView from '@/components/InView';
+import { getPublishedProjects } from '@/lib/projects/server';
+import type { Project } from '@/types/project';
 
-export default function ProjectsPage() {
-  const locale = useLocale();
+export default async function ProjectsPage() {
+  const locale = await getLocale();
   const currentLocale = normalizeProjectLocale(locale);
   const basePath = toLocalePath('/projects', currentLocale);
 
-  const [projects, setProjects] = useState<any[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
+  const loadedProjects = await getPublishedProjects(currentLocale);
+  const displayProjects = loadedProjects.map((project: Project, index: number) => ({
+    id: project.id || String(index + 1),
+    image: project.featuredImage || project.images?.[0],
+    title: getProjectTitle(project, currentLocale),
+    location: getProjectLocation(project, currentLocale),
+    slug: getProjectSlug(project, currentLocale),
+  }));
 
-  useEffect(() => {
-    const run = async () => {
-      let loadedProjects: any[] = projectsData as any[];
-      try {
-        const res = await fetch(`/api/projects?locale=${encodeURIComponent(currentLocale)}`);
-        const json = (await res.json().catch(() => null)) as any;
-        const fromApi = Array.isArray(json?.projects) ? (json.projects as any[]) : null;
-        if (fromApi && fromApi.length > 0) loadedProjects = fromApi;
-      } catch {
-        // keep seed fallback
-      }
-
-      const displayProjects = loadedProjects.map((project: any, index: number) => ({
-        id: index + 1,
-        image:
-          project.featuredImage ||
-          (Array.isArray(project.images) ? project.images[0] : project.images),
-        title: getProjectTitle(project, currentLocale),
-        location: getProjectLocation(project, currentLocale),
-        slug: getProjectSlug(project, currentLocale),
-      }));
-
-      setProjects(displayProjects);
-    };
-
-    void run();
-  }, [currentLocale]);
-
-  const totalPages = Math.ceil(projects.length / itemsPerPage);
-
-  // Get current page projects
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentProjects = projects.slice(indexOfFirstItem, indexOfLastItem);
+  // Keep existing behavior (first 12 only; pagination UI not implemented).
+  const currentProjects = displayProjects.slice(0, 12);
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
@@ -73,6 +45,7 @@ export default function ProjectsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[32px]">
             {currentProjects.map((project, idx) => {
               const delay = 160 + ((idx % 3) * 120) + (Math.floor(idx / 3) * 80);
+              if (!project.image || !project.slug) return null;
               return (
                 <Link
                   key={project.id}

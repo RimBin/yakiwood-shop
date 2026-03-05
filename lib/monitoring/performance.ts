@@ -14,6 +14,85 @@ export interface WebVitalsMetric {
   navigationType: 'navigate' | 'reload' | 'back-forward' | 'prerender';
 }
 
+type WebVitalsPayload = {
+  metric: WebVitalsMetric['name'];
+  value: number;
+  rating: WebVitalsMetric['rating'];
+  url: string;
+  timestamp: number;
+};
+
+const VITALS_ENDPOINT = '/api/analytics/vitals';
+const vitalsQueue: WebVitalsPayload[] = [];
+let flushTimer: number | null = null;
+let listenersAttached = false;
+
+function ensureFlushListeners() {
+  if (typeof window === 'undefined') return;
+  if (listenersAttached) return;
+  listenersAttached = true;
+
+  const flushNow = () => {
+    void flushVitalsQueue({ reason: 'visibilitychange' });
+  };
+
+  window.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      flushNow();
+    }
+  });
+
+  window.addEventListener('pagehide', () => {
+    void flushVitalsQueue({ reason: 'pagehide' });
+  });
+}
+
+function scheduleFlush() {
+  if (typeof window === 'undefined') return;
+  if (flushTimer != null) return;
+  flushTimer = window.setTimeout(() => {
+    flushTimer = null;
+    void flushVitalsQueue({ reason: 'timer' });
+  }, 2000);
+}
+
+function enqueueVital(payload: WebVitalsPayload) {
+  vitalsQueue.push(payload);
+  ensureFlushListeners();
+
+  if (vitalsQueue.length >= 10) {
+    void flushVitalsQueue({ reason: 'batch_size' });
+    return;
+  }
+
+  scheduleFlush();
+}
+
+async function flushVitalsQueue({ reason }: { reason: string }) {
+  if (typeof window === 'undefined') return;
+  if (vitalsQueue.length === 0) return;
+
+  const items = vitalsQueue.splice(0, vitalsQueue.length);
+  const body = JSON.stringify({ reason, metrics: items });
+
+  try {
+    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+      const blob = new Blob([body], { type: 'application/json' });
+      const ok = navigator.sendBeacon(VITALS_ENDPOINT, blob);
+      if (ok) return;
+    }
+
+    await fetch(VITALS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      keepalive: true,
+    });
+  } catch {
+    // Silently fail - do not impact user experience
+  }
+}
+
 /**
  * Report Web Vitals to analytics
  */
@@ -54,24 +133,13 @@ export function reportWebVitals(metric: WebVitalsMetric) {
 async function sendToAnalytics(metric: WebVitalsMetric) {
   if (typeof window === 'undefined') return;
 
-  try {
-    await fetch('/api/analytics/vitals', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        metric: metric.name,
-        value: metric.value,
-        rating: metric.rating,
-        url: window.location.pathname,
-        timestamp: Date.now(),
-      }),
-      // Use keepalive to ensure request completes even if page is closing
-      keepalive: true,
-    });
-  } catch (error) {
-    // Silently fail - don't block user experience
-    console.error('Failed to send analytics:', error);
-  }
+  enqueueVital({
+    metric: metric.name,
+    value: metric.value,
+    rating: metric.rating,
+    url: window.location.pathname,
+    timestamp: Date.now(),
+  });
 }
 
 /**

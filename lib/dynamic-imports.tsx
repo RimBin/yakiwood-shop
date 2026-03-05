@@ -18,7 +18,7 @@ export const DynamicKonfiguratorius3D = dynamic(
   {
     loading: () => (
       <AnimatedLogoLoader
-        className="h-[600px] rounded-lg"
+        className="rounded-[4px]"
         text="Kraunama 3D peržiūra..."
       />
     ),

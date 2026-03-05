@@ -23,6 +23,9 @@
 /.next/
 /out/
 
+# local performance/bundle reports
+/reports/
+
 # production
 /build
 

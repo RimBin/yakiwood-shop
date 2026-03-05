@@ -1,71 +1,42 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { useLocale } from 'next-intl';
+import React from 'react';
 import { Breadcrumbs } from '@/components/ui';
 import ProjectGallery from '@/components/projects/ProjectGallery';
 import ProjectInfo from '@/components/projects/ProjectInfo';
 import RelatedProjects from '@/components/projects/RelatedProjects';
-import { projects as projectsData } from '@/data/projects';
 import type { Project } from '@/types/project';
 import { toLocalePath } from '@/i18n/paths';
 import InView from '@/components/InView';
 import {
-  findProjectBySlug,
   getProjectDescription,
   getProjectFullDescription,
   getProjectLocation,
   getProjectSubtitle,
   getProjectTitle,
-  normalizeProjectLocale,
 } from '@/lib/projects/i18n';
+import type { ProjectLocale } from '@/types/project';
 
 export default function ProjectDetailClient({
-  slug,
   basePath,
+  currentLocale,
+  project,
+  relatedProjects,
   labels,
 }: {
-  slug: string;
   basePath: string;
+  currentLocale: ProjectLocale;
+  project: Project | null;
+  relatedProjects: Project[];
   labels: {
     home: string;
     projects: string;
   };
 }) {
-  const locale = useLocale();
-  const currentLocale = normalizeProjectLocale(locale);
   const resolvedBasePath = toLocalePath(basePath, currentLocale);
-  const [projects, setProjects] = useState<Project[]>(projectsData);
-
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      try {
-        const res = await fetch(`/api/projects?locale=${encodeURIComponent(currentLocale)}`);
-        const json = (await res.json().catch(() => null)) as any;
-        const loaded = Array.isArray(json?.projects) ? (json.projects as Project[]) : [];
-        if (!cancelled && loaded.length > 0) setProjects(loaded);
-      } catch {
-        // keep seed fallback
-      }
-    };
-    void run();
-    return () => {
-      cancelled = true;
-    };
-  }, [currentLocale]);
-
-  const project = useMemo(
-    () => findProjectBySlug(projects, slug, currentLocale),
-    [projects, slug, currentLocale]
-  );
-  const relatedProjects = useMemo(
-    () => (project ? projects.filter((p) => p.id !== project.id).slice(0, 3) : []),
-    [projects, project]
-  );
 
   if (!project) {
-    const notFoundTitle = locale === 'lt' ? 'Projektas nerastas' : 'Project not found';
+    const notFoundTitle = currentLocale === 'lt' ? 'Projektas nerastas' : 'Project not found';
 
     return (
       <main className="min-h-screen bg-[#E1E1E1]">

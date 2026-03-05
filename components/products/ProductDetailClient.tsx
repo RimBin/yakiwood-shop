@@ -13,8 +13,7 @@ import { Accordion } from '@/components/ui';
 import { useToast } from '@/components/ui/Toast';
 import { useCartStore } from '@/lib/cart/store';
 import { trackEvent, trackProductView } from '@/lib/analytics';
-import Konfiguratorius3D from '@/components/Konfiguratorius3D';
-import type { Konfiguratorius3DHandle } from '@/components/Konfiguratorius3D';
+import { DynamicKonfiguratorius3D } from '@/lib/dynamic-imports';
 import { getProductModelUrl } from '@/lib/models';
 
 type InputMode = 'area' | 'boards';
@@ -1492,7 +1491,7 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
 
               {show3D ? (
                 <div className="absolute inset-0">
-                  <Konfiguratorius3D
+                  <DynamicKonfiguratorius3D
                     productId={product.id}
                     availableColors={colorOptions}
                     availableFinishes={profileOptions}
@@ -1584,7 +1583,7 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
 
                 {show3D ? (
                   <div className="absolute inset-0">
-                    <Konfiguratorius3D
+                    <DynamicKonfiguratorius3D
                       productId={product.id}
                       availableColors={colorOptions}
                       availableFinishes={profileOptions}
