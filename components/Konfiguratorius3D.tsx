@@ -10,7 +10,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useCartStore } from '@/lib/cart/store';
 import { trackEvent } from '@/lib/analytics';
 import { downloadConfigurationPDF, type ConfigurationPDFData } from '@/lib/configurator/pdf-generator';
-import { getProductModelUrl, hasProductModel } from '@/lib/models';
+import { getGenericModelUrl, getProductModelUrl, hasProductModel } from '@/lib/models';
 
 interface ProfileModelProps {
   color: string;
@@ -19,7 +19,7 @@ interface ProfileModelProps {
   autoRotate?: boolean;
 }
 
-const DEFAULT_CONFIGURATOR_GLB_PATH = '/models/configurator/model.glb';
+const DEFAULT_CONFIGURATOR_GLB_PATH = getGenericModelUrl();
 
 function hashStringToSeed(value: string): number {
   let hash = 2166136261;
@@ -1034,6 +1034,23 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
     });
   }, [modelSlug, modelUrl, selectedColor]);
 
+  // Prefer loading the full per-color GLB when available. This is the most
+  // reliable path (materials + slot assignments + textures are authored in the
+  // exported file) and avoids “nothing changes” issues when material names
+  // differ across exports.
+  const effectiveModelUrl = useMemo(() => {
+    return resolvedVariantMaterialUrl ?? resolvedModelUrl;
+  }, [resolvedVariantMaterialUrl, resolvedModelUrl]);
+
+  // Only use a separate material-variant source when we're rendering a
+  // different base model. When `effectiveModelUrl` is already the variant, we
+  // don't need to load a second GLB.
+  const effectiveMaterialVariantUrl = useMemo(() => {
+    if (!resolvedVariantMaterialUrl) return null;
+    if (effectiveModelUrl === resolvedVariantMaterialUrl) return null;
+    return resolvedVariantMaterialUrl;
+  }, [effectiveModelUrl, resolvedVariantMaterialUrl]);
+
   const isPerColorVariantModel = useMemo(() => {
     return !!resolvedVariantMaterialUrl;
   }, [resolvedVariantMaterialUrl]);
@@ -1076,6 +1093,22 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
   }, [isFinishTextureSwapEnabled, modelUrl, resolvedModelUrl, selectedColor]);
 
   const finishTexture = useFinishTexture(finishTextureUrl);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return;
+    // eslint-disable-next-line no-console
+    console.log('[Konfiguratorius3D] selection', {
+      modelSlug,
+      modelUrl,
+      resolvedModelUrl,
+      effectiveModelUrl,
+      selectedColorId: selectedColor?.id ?? null,
+      selectedColorName: selectedColor?.name ?? null,
+      colorSlug: selectedColor ? resolveColorSlug(selectedColor) : null,
+      resolvedVariantMaterialUrl,
+      effectiveMaterialVariantUrl,
+    });
+  }, [modelSlug, modelUrl, resolvedModelUrl, effectiveModelUrl, resolvedVariantMaterialUrl, effectiveMaterialVariantUrl, selectedColor?.id, selectedColor?.name]);
 
   useEffect(() => {
     // We used to issue a HEAD request to check if the model exists before
@@ -1276,7 +1309,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
           canvasClassName ?? (mode === 'viewport' ? 'h-full' : 'h-[400px] md:h-[500px]')
         }`}
       >
-        {(isLoading || !isModelResolved || (resolvedModelUrl && isGltfLoading)) && (
+        {(isLoading || !isModelResolved || (effectiveModelUrl && isGltfLoading)) && (
           <div className="absolute inset-0 flex items-center justify-center bg-[#EAEAEA] z-10">
             <div className="flex flex-col items-center gap-3">
               <div className="w-12 h-12 border-4 border-[#BBBBBB] border-t-[#161616] rounded-full animate-spin" />
@@ -1309,15 +1342,15 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
 					  )
 				}
           >
-            {resolvedModelUrl ? (
+            {effectiveModelUrl ? (
               <GLBErrorBoundary
-                modelUrl={resolvedModelUrl}
+                modelUrl={effectiveModelUrl}
                 fallback={<ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} />}
               >
           {!isGltfLoading ? (
             <GLBProfileModel
-              modelUrl={resolvedModelUrl}
-              materialVariantUrl={resolvedVariantMaterialUrl}
+              modelUrl={effectiveModelUrl}
+              materialVariantUrl={effectiveMaterialVariantUrl}
               color={modelColor}
               finish={selectedFinish}
               overrideColorMap={finishTexture}

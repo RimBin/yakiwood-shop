@@ -600,6 +600,7 @@ export default function ConfiguratorPage() {
       try {
         type QuoteRequestBody = {
           productId: string;
+          usageType?: 'facade' | 'terrace';
           profileVariantId?: string;
           colorVariantId?: string;
           thicknessMm?: number;
@@ -625,6 +626,7 @@ export default function ConfiguratorPage() {
           inputMode === 'boards'
             ? {
                 productId: product.id,
+                usageType: boardTypeToUsage(selectedBoardType),
                 profileVariantId: selectedFinishVariant.id,
                 colorVariantId: selectedColorVariant.id,
                 widthMm,
@@ -636,6 +638,7 @@ export default function ConfiguratorPage() {
               }
             : {
                 productId: product.id,
+                usageType: boardTypeToUsage(selectedBoardType),
                 profileVariantId: selectedFinishVariant.id,
                 colorVariantId: selectedColorVariant.id,
                 widthMm,

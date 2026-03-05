@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { createPublicClient } from '@/lib/supabase/public'
 
 export type UsageType = 'facade' | 'terrace' | 'interior' | 'fence'
 
@@ -136,7 +137,8 @@ function calcSpecificity(row: DbConfigurationPriceRow): number {
 export async function resolveConfigurationUnitPricePerM2(
   selectors: ConfigurationPriceSelectors
 ): Promise<{ unitPricePerM2: number; matchedRowId: string; specificity: number } | null> {
-  if (!supabaseAdmin) return null
+  const client = supabaseAdmin ?? createPublicClient()
+  if (!client) return null
 
   const productId = selectors.productId
   const usageType = selectors.usageType
@@ -151,7 +153,7 @@ export async function resolveConfigurationUnitPricePerM2(
       : undefined
 
   // Fetch a small candidate set; then rank in code (stable even if SQL ordering differs by NULL semantics).
-  const withOptionalSelectors = await supabaseAdmin
+  const withOptionalSelectors = await client
     .from('product_configuration_prices')
     .select(
       'id,unit_price_per_m2,usage_type,profile_variant_id,color_variant_id,thickness_option_id,width_mm,length_mm,min_cart_area_m2,max_cart_area_m2'
@@ -160,7 +162,7 @@ export async function resolveConfigurationUnitPricePerM2(
     .eq('is_active', true)
 
   const { data, error } = withOptionalSelectors.error
-    ? await supabaseAdmin
+    ? await client
         .from('product_configuration_prices')
         .select('id,unit_price_per_m2,usage_type,profile_variant_id,color_variant_id,width_mm,length_mm')
         .eq('product_id', productId)

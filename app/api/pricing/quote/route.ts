@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { quoteConfigurationPricing, type UsageType, type InputMode, type AreaRoundingMode } from '@/lib/pricing/configuration'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { createPublicClient } from '@/lib/supabase/public'
 
 type QuoteBody = {
   productId: string
@@ -19,10 +20,11 @@ type QuoteBody = {
 }
 
 async function resolveThicknessOptionIdFromMm(thicknessMm: number): Promise<string | null> {
-  if (!supabaseAdmin) return null
+  const client = supabaseAdmin ?? createPublicClient()
+  if (!client) return null
   if (!Number.isFinite(thicknessMm) || thicknessMm <= 0) return null
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await client
     .from('catalog_options')
     .select('id')
     .eq('option_type', 'thickness')
@@ -37,6 +39,20 @@ async function resolveThicknessOptionIdFromMm(thicknessMm: number): Promise<stri
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as QuoteBody
+
+    // Pricing requires DB access either via service role (preferred) or via
+    // anon client (requires RLS read access). If neither is configured, fail
+    // fast with a clear message.
+    const pricingClient = supabaseAdmin ?? createPublicClient()
+    if (!pricingClient) {
+      return NextResponse.json(
+        {
+          error:
+            'Kainodaros DB neprieinama: trūksta `SUPABASE_SERVICE_ROLE_KEY` arba `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` (su RLS select teisėmis kainų lentelėms).',
+        },
+        { status: 503 }
+      )
+    }
 
     const productId = String(body.productId || '').trim()
     if (!productId) {
