@@ -340,6 +340,48 @@ function resolveColorVariantSlug(baseSlug: string, colorSlug: string): string | 
   return baseSlug.replace(MODEL_COLOR_SUFFIX_REGEX, colorSlug);
 }
 
+function detectModelTypeToken(value: string): 'terrace' | 'facade' | null {
+  const token = value.toLowerCase();
+  if (token.includes('terrace') || token.includes('teras')) return 'terrace';
+  if (token.includes('facade') || token.includes('fasad')) return 'facade';
+  return null;
+}
+
+function detectModelWoodToken(value: string): 'larch' | 'spruce' | null {
+  const token = value.toLowerCase();
+  if (token.includes('larch') || token.includes('maumed')) return 'larch';
+  if (token.includes('spruce') || token.includes('egle')) return 'spruce';
+  return null;
+}
+
+function buildColorVariantSlugCandidates(input: {
+  modelSlug?: string;
+  modelUrl?: string;
+  colorSlug: string;
+}): string[] {
+  const candidates: string[] = [];
+  const { modelSlug, modelUrl, colorSlug } = input;
+
+  if (modelSlug) {
+    const direct = resolveColorVariantSlug(modelSlug, colorSlug);
+    if (direct) candidates.push(direct);
+  }
+
+  const source = `${modelSlug ?? ''} ${modelUrl ?? ''}`;
+  const type = detectModelTypeToken(source);
+  const wood = detectModelWoodToken(source);
+
+  if (!type || !wood) return candidates;
+
+  const woodLt = wood === 'larch' ? 'maumedis' : 'egle';
+  const typeLt = type === 'terrace' ? 'terasine-lenta-terasai' : 'dailylente-fasadui';
+
+  candidates.push(`degintos-medienos-${typeLt}-${woodLt}-${colorSlug}`);
+  candidates.push(`shou-sugi-ban-for-${type}-${wood}-${colorSlug}`);
+
+  return candidates;
+}
+
 function resolveColorSlug(color: ProductColorVariant | null):
   | 'black'
   | 'carbon'
@@ -548,6 +590,7 @@ function GLBProfileModel({
           materialName.includes('bottom') ||
           materialName.includes('end_grain') ||
           materialName.includes('end grain');
+        const hasBaseMap = 'map' in standardMaterial && !!standardMaterial.map;
 
         // Keep GLB textures enabled. If the model uses embedded textures,
         // GLTFLoader will create blob: URLs for them — we only need to ensure
@@ -600,7 +643,7 @@ function GLBProfileModel({
             if ('color' in standardMaterial && standardMaterial.color) {
               standardMaterial.color.set('#ffffff');
             }
-          } else if (applyColorTint && 'color' in standardMaterial && standardMaterial.color) {
+          } else if (applyColorTint && !hasBaseMap && 'color' in standardMaterial && standardMaterial.color) {
             standardMaterial.color.set(color);
           } else if ('color' in standardMaterial && standardMaterial.color) {
             standardMaterial.color.set('#ffffff');
@@ -866,29 +909,37 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
   }, [selectedColor]);
 
   const resolvedVariantModelUrl = useMemo(() => {
-    if (!modelSlug || !selectedColor) return modelUrl;
+    if (!selectedColor) return modelUrl;
 
     const colorSlug = resolveColorSlug(selectedColor);
     if (!colorSlug) return modelUrl;
 
-    const variantSlug = resolveColorVariantSlug(modelSlug, colorSlug);
-    if (!variantSlug) return modelUrl;
-    if (!hasProductModel(variantSlug)) return modelUrl;
+    const candidates = buildColorVariantSlugCandidates({
+      modelSlug,
+      modelUrl,
+      colorSlug,
+    });
 
-    return getProductModelUrl({ slug: variantSlug });
+    const matched = candidates.find((slug) => hasProductModel(slug));
+    if (!matched) return modelUrl;
+
+    return getProductModelUrl({ slug: matched });
   }, [modelSlug, modelUrl, selectedColor]);
 
   const isPerColorVariantModel = useMemo(() => {
-    if (!modelSlug || !selectedColor) return false;
+    if (!selectedColor) return false;
 
     const colorSlug = resolveColorSlug(selectedColor);
     if (!colorSlug) return false;
 
-    const variantSlug = resolveColorVariantSlug(modelSlug, colorSlug);
-    if (!variantSlug) return false;
+    const candidates = buildColorVariantSlugCandidates({
+      modelSlug,
+      modelUrl,
+      colorSlug,
+    });
 
-    return hasProductModel(variantSlug);
-  }, [modelSlug, selectedColor]);
+    return candidates.some((slug) => hasProductModel(slug));
+  }, [modelSlug, modelUrl, selectedColor]);
 
   const isFinishTextureSwapEnabled = useMemo(() => {
     const raw = process.env.NEXT_PUBLIC_ENABLE_3D_FINISH_TEXTURE_SWAP;

@@ -42,7 +42,7 @@ const BOARD_OPTIONS: ToggleOption<BoardType>[] = [
 const WOOD_OPTIONS: ToggleOption<WoodType>[] = [
   { value: 'maumedis', label: 'Maumedis' },
   { value: 'egle', label: 'Eglė' },
-  { value: 'termo', label: 'Termomediena' },
+  { value: 'termo', label: 'Termo' },
 ];
 
 const PROFILE_OPTIONS: ToggleOption<ProfileKey>[] = [
