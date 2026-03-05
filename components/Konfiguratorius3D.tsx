@@ -262,7 +262,8 @@ function ProfileModel({ color, finish, variantKey, autoRotate = true, rotationYR
   useFrame((_, delta) => {
     if (!autoRotate) return;
     if (!groupRef.current) return;
-    groupRef.current.rotation.y += delta * 0.7;
+    const safeDelta = Math.min(delta, 0.05);
+    groupRef.current.rotation.y += safeDelta * 0.7;
     if (rotationYRef) {
       rotationYRef.current = groupRef.current.rotation.y;
     }
@@ -446,6 +447,45 @@ function getFinishTextureUrl(wood: FinishTextureWood, colorSlug: string): string
 
 const finishTextureCache = new Map<string, THREE.Texture>();
 const finishTexturePromiseCache = new Map<string, Promise<THREE.Texture | null>>();
+
+type NetworkInfo = {
+  effectiveType?: string;
+  saveData?: boolean;
+};
+
+function getNetworkInfo(): NetworkInfo {
+  if (typeof navigator === 'undefined') return {};
+  const connection = (navigator as any).connection as
+    | { effectiveType?: string; saveData?: boolean }
+    | undefined;
+  return {
+    effectiveType: connection?.effectiveType,
+    saveData: connection?.saveData,
+  };
+}
+
+function isSlowNetwork(info: NetworkInfo): boolean {
+  if (info.saveData) return true;
+  const type = (info.effectiveType ?? '').toLowerCase();
+  return type === 'slow-2g' || type === '2g' || type === '3g';
+}
+
+function useSlowNetworkFlag(): boolean {
+  const [slow, setSlow] = useState(() => isSlowNetwork(getNetworkInfo()));
+
+  useEffect(() => {
+    const connection = (navigator as any).connection as
+      | { addEventListener?: (event: string, cb: () => void) => void; removeEventListener?: (event: string, cb: () => void) => void }
+      | undefined;
+    if (!connection?.addEventListener || !connection?.removeEventListener) return;
+
+    const onChange = () => setSlow(isSlowNetwork(getNetworkInfo()));
+    connection.addEventListener('change', onChange);
+    return () => connection.removeEventListener('change', onChange);
+  }, []);
+
+  return slow;
+}
 
 function cloneFinishTextureInstance(base: THREE.Texture): THREE.Texture {
   const texture = base.clone();
@@ -838,7 +878,8 @@ function GLBProfileModel({
   useFrame((_, delta) => {
     if (!autoRotate) return;
     if (!groupRef.current) return;
-    groupRef.current.rotation.y += delta * 0.35;
+    const safeDelta = Math.min(delta, 0.05);
+    groupRef.current.rotation.y += safeDelta * 0.35;
     if (rotationYRef) {
       rotationYRef.current = groupRef.current.rotation.y;
     }
@@ -915,6 +956,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
   );
   const [modelColor, setModelColor] = useState('#ffffff');
   const sharedRotationYRef = useRef(0);
+  const slowNetwork = useSlowNetworkFlag();
   const [resolvedModelUrl, setResolvedModelUrl] = useState<string | null>(null);
   const [isModelResolved, setIsModelResolved] = useState(false);
   const { active: isGltfLoading } = useProgress();
@@ -1112,6 +1154,8 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
   }, [resolvedVariantMaterialUrl]);
 
   useEffect(() => {
+    if (slowNetwork) return;
+
     availableColors.forEach((colorOption) => {
       const colorSlug = resolveColorSlug(colorOption);
       if (!colorSlug) return;
@@ -1125,7 +1169,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
       if (!variantUrl) return;
       useGLTF.preload(variantUrl);
     });
-  }, [availableColors, modelSlug, modelUrl]);
+  }, [availableColors, modelSlug, modelUrl, slowNetwork]);
 
   const isFinishTextureSwapEnabled = useMemo(() => {
     const raw = process.env.NEXT_PUBLIC_ENABLE_3D_FINISH_TEXTURE_SWAP;
@@ -1136,6 +1180,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
 
   const finishTextureUrl = useMemo(() => {
     if (!isFinishTextureSwapEnabled) return null;
+    if (slowNetwork) return null;
     if (!selectedColor) return null;
     if (!resolvedModelUrl && !modelUrl) return null;
 
@@ -1146,7 +1191,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
     if (!slug) return null;
 
     return getFinishTextureUrl(wood, slug);
-  }, [isFinishTextureSwapEnabled, modelUrl, resolvedModelUrl, selectedColor]);
+  }, [isFinishTextureSwapEnabled, modelUrl, resolvedModelUrl, selectedColor, slowNetwork]);
 
   const finishTexture = useFinishTexture(finishTextureUrl);
 
@@ -1374,7 +1419,11 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
           </div>
         )}
         
-        <Canvas camera={{ position: [2.4, 1.4, 2.4], fov: 45 }} gl={{ preserveDrawingBuffer: true }}>
+        <Canvas
+          dpr={[1, 1.5]}
+          camera={{ position: [2.4, 1.4, 2.4], fov: 45 }}
+          gl={{ preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
+        >
           <RendererBridge onRenderer={handleRendererReady} />
             <ambientLight intensity={1.05} />
             <hemisphereLight args={['#FFFFFF', '#DCDCDC', 0.7]} />

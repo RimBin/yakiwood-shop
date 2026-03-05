@@ -244,10 +244,10 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 <path d="M3 8H13" stroke="#161616" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
                             </button>
-                            <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] min-w-[32px] text-center">
+                            <span className="font-['Outfit'] font-normal text-[14px] leading-[1.5] text-[#161616] min-w-[56px] text-center whitespace-nowrap">
                               {item.inputMode === 'area'
-                                ? Number(item.quantity).toFixed(1)
-                                : item.quantity}
+                                ? `${Number(item.quantity).toFixed(1)} m²`
+                                : `${item.quantity} vnt`}
                             </span>
                             <button
                               onClick={() => updateQuantity(item.lineId, item.quantity + 1)}
@@ -257,9 +257,6 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                                 <path d="M8 3V13M3 8H13" stroke="#161616" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
                             </button>
-                            <span className="font-['Outfit'] font-normal text-[12px] leading-[1.5] text-[#535353]">
-                              {item.inputMode === 'area' ? 'm²' : 'vnt'}
-                            </span>
                             <button
                               onClick={() => removeItem(item.lineId)}
                               className="ml-[8px] font-['Outfit'] font-normal text-[12px] leading-[1.2] tracking-[0.6px] uppercase text-[#535353] hover:text-[#161616] transition-colors"
