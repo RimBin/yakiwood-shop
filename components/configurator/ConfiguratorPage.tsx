@@ -539,12 +539,6 @@ export default function ConfiguratorPage() {
   const selectedProductName =
     product ? (currentLocale === 'en' && product.nameEn ? product.nameEn : product.name) : null;
 
-  const basePriceLabel = useMemo(() => {
-    const key = 'configurator.basePriceLabel';
-    if (typeof t.has === 'function' && t.has(key)) return t(key);
-    return currentLocale === 'lt' ? 'Bazinė kaina' : 'Base price';
-  }, [currentLocale, t]);
-
   const buyNowLabel = useMemo(() => {
     const key = 'products.buyNow';
     if (typeof t.has === 'function' && t.has(key)) return t(key);
@@ -561,15 +555,6 @@ export default function ConfiguratorPage() {
     [locale]
   );
 
-  const numberM2 = useMemo(
-    () =>
-      new Intl.NumberFormat(locale === 'lt' ? 'lt-LT' : 'en-US', {
-        maximumFractionDigits: 2,
-        minimumFractionDigits: 2,
-      }),
-    [locale]
-  );
-
   const cartTotalAreaM2 = useMemo(() => {
     return cartItems.reduce((sum, item) => {
       const area = item.pricingSnapshot?.totalAreaM2;
@@ -577,6 +562,26 @@ export default function ConfiguratorPage() {
       return sum;
     }, 0);
   }, [cartItems]);
+
+  const displayLineTotal = useMemo(() => {
+    if (!quote) return null;
+
+    const safeUnitPerM2 = Number.isFinite(quote.unitPricePerM2) ? quote.unitPricePerM2 : 0;
+    const safeUnitPerBoard = Number.isFinite(quote.unitPricePerBoard) ? quote.unitPricePerBoard : 0;
+
+    if (inputMode === 'boards') {
+      const boards = Math.max(1, Math.round(Number(quantityBoards) || 1));
+      if (safeUnitPerBoard > 0) return safeUnitPerBoard * boards;
+      return Number.isFinite(quote.lineTotal) ? quote.lineTotal : null;
+    }
+
+    const unitAreaM2 = (widthMm / 1000) * (lengthMm / 1000);
+    const requestedArea = Math.max(0.01, Number(targetAreaM2) || 0.01);
+    const roundedAreaM2 = unitAreaM2 > 0 ? Math.ceil(requestedArea / unitAreaM2) * unitAreaM2 : requestedArea;
+
+    if (safeUnitPerM2 > 0) return safeUnitPerM2 * roundedAreaM2;
+    return Number.isFinite(quote.lineTotal) ? quote.lineTotal : null;
+  }, [inputMode, lengthMm, quantityBoards, quote, targetAreaM2, widthMm]);
 
   useEffect(() => {
     if (!product?.id || !selectedColorVariant || !selectedFinishVariant) {
@@ -930,6 +935,11 @@ export default function ConfiguratorPage() {
                   mode="viewport"
                   selectedColorId={selectedColorVariant?.id}
                   selectedFinishId={selectedFinishVariant?.id}
+                  visualDimensionsMm={{
+                    widthMm,
+                    lengthMm,
+                    thicknessMm,
+                  }}
                   onColorChange={(color) => {
                     const key = colorVariantToKey(color);
                     if (key) setSelectedColor(key);
@@ -1081,36 +1091,16 @@ export default function ConfiguratorPage() {
                       </label>
                     )}
 
-                    {typeof product?.price === 'number' && Number.isFinite(product.price) && product.price > 0 && (
-                      <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#F9F9F9] px-2 py-1.5">
-                        <span className="font-['Outfit'] text-[12px] text-[#535353]">{basePriceLabel}</span>
-                        <span className="font-['Outfit'] text-[12px] text-[#161616]">{currency.format(product.price)}</span>
-                      </div>
-                    )}
-
-                    {quoteLoading && <p className="font-['Outfit'] text-[12px] text-[#7C7C7C]">{t('configurator.calculatingPrice')}</p>}
                     {quoteError && !quoteLoading && <p className="font-['Outfit'] text-[12px] text-[#FFB3B3]">{quoteError}</p>}
 
-                    {quote && !quoteLoading && (
-                      <div className="grid grid-cols-1 gap-1.5">
-                        <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#F9F9F9] px-2 py-1.5">
-                          <span className="font-['Outfit'] text-[12px] text-[#535353]">{t('configurator.unitPricePerM2Label')}</span>
-                          <span className="font-['Outfit'] text-[12px] text-[#161616]">{currency.format(quote.unitPricePerM2)}</span>
-                        </div>
-                        <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#F9F9F9] px-2 py-1.5">
-                          <span className="font-['Outfit'] text-[12px] text-[#535353]">{t('configurator.unitPricePerBoardLabel')}</span>
-                          <span className="font-['Outfit'] text-[12px] text-[#161616]">{currency.format(quote.unitPricePerBoard)}</span>
-                        </div>
-                        <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#F9F9F9] px-2 py-1.5">
-                          <span className="font-['Outfit'] text-[12px] text-[#535353]">{t('configurator.totalAreaLabel')}</span>
-                          <span className="font-['Outfit'] text-[12px] text-[#161616]">{numberM2.format(quote.totalAreaM2)} m²</span>
-                        </div>
-                        <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#F9F9F9] px-2 py-1.5">
-                          <span className="font-['Outfit'] text-[12px] text-[#535353]">{t('configurator.lineTotalLabel')}</span>
-                          <span className="font-['Outfit'] text-[12px] text-[#161616]">{currency.format(quote.lineTotal)}</span>
-                        </div>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#F9F9F9] px-2 py-1.5">
+                      <span className="font-['Outfit'] text-[12px] text-[#535353]">{t('configurator.lineTotalLabel')}</span>
+                      <span className="font-['Outfit'] text-[12px] text-[#161616]">
+                        {typeof displayLineTotal === 'number' && Number.isFinite(displayLineTotal)
+                          ? currency.format(displayLineTotal)
+                          : '-'}
+                      </span>
+                    </div>
 
                     <button
                       type="button"

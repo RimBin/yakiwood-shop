@@ -17,6 +17,12 @@ interface ProfileModelProps {
   finish: ProductProfileVariant | null;
   variantKey: string;
   autoRotate?: boolean;
+  rotationYRef?: React.MutableRefObject<number>;
+  visualDimensionsMm?: {
+    widthMm?: number;
+    lengthMm?: number;
+    thicknessMm?: number;
+  };
 }
 
 const DEFAULT_CONFIGURATOR_GLB_PATH = getGenericModelUrl();
@@ -177,13 +183,18 @@ function createCenteredExtrudeGeometry(shape: THREE.Shape, depth: number): THREE
   return geometry;
 }
 
-function ProfileModel({ color, finish, variantKey, autoRotate = true }: ProfileModelProps) {
+function ProfileModel({ color, finish, variantKey, autoRotate = true, rotationYRef, visualDimensionsMm }: ProfileModelProps) {
   const groupRef = useRef<THREE.Group | null>(null);
 
+  useLayoutEffect(() => {
+    if (!groupRef.current || !rotationYRef) return;
+    groupRef.current.rotation.y = rotationYRef.current;
+  }, [rotationYRef]);
+
   const geometry = useMemo(() => {
-    const widthMm = finish?.dimensions?.width;
-    const thicknessMm = finish?.dimensions?.thickness;
-    const lengthMm = finish?.dimensions?.length;
+    const widthMm = visualDimensionsMm?.widthMm ?? finish?.dimensions?.width;
+    const thicknessMm = visualDimensionsMm?.thicknessMm ?? finish?.dimensions?.thickness;
+    const lengthMm = visualDimensionsMm?.lengthMm ?? finish?.dimensions?.length;
 
     // Keep the model roughly in the same scale as the previous placeholder box: [2, 0.2, 1].
     // width 120mm -> ~2 units, thickness 20mm -> ~0.2 units, length 1000mm -> ~1 unit.
@@ -212,7 +223,7 @@ function ProfileModel({ color, finish, variantKey, autoRotate = true }: ProfileM
     shape.lineTo(0, thicknessUnits);
     shape.lineTo(0, 0);
     return createCenteredExtrudeGeometry(shape, depthUnits);
-  }, [finish]);
+  }, [finish, visualDimensionsMm?.lengthMm, visualDimensionsMm?.thicknessMm, visualDimensionsMm?.widthMm]);
 
   const longGrainMap = useMemo(() => createLongGrainTexture(variantKey), [variantKey]);
   const endGrainMap = useMemo(() => createEndGrainTexture(variantKey), [variantKey]);
@@ -252,6 +263,9 @@ function ProfileModel({ color, finish, variantKey, autoRotate = true }: ProfileM
     if (!autoRotate) return;
     if (!groupRef.current) return;
     groupRef.current.rotation.y += delta * 0.7;
+    if (rotationYRef) {
+      rotationYRef.current = groupRef.current.rotation.y;
+    }
   });
 
   return (
@@ -546,6 +560,12 @@ interface GLBProfileModelProps {
   applyColorTint?: boolean;
   applyDynamicFinishSurface?: boolean;
   autoRotate?: boolean;
+  rotationYRef?: React.MutableRefObject<number>;
+  visualDimensionsMm?: {
+    widthMm?: number;
+    lengthMm?: number;
+    thicknessMm?: number;
+  };
 }
 
 function GLBProfileModel({
@@ -558,10 +578,25 @@ function GLBProfileModel({
   applyColorTint = true,
   applyDynamicFinishSurface = true,
   autoRotate = true,
+  rotationYRef,
+  visualDimensionsMm,
 }: GLBProfileModelProps) {
   const groupRef = useRef<THREE.Group | null>(null);
   const gltf = useGLTF(modelUrl) as { scene: THREE.Group };
   const materialVariantGltf = useGLTF(materialVariantUrl ?? modelUrl) as { scene: THREE.Group };
+
+  const visualScale = useMemo(() => {
+    const widthMm = visualDimensionsMm?.widthMm ?? finish?.dimensions?.width ?? 120;
+    const lengthMm = visualDimensionsMm?.lengthMm ?? finish?.dimensions?.length ?? 3300;
+    const thicknessMm = visualDimensionsMm?.thicknessMm ?? finish?.dimensions?.thickness ?? 28;
+
+    // Use fixed baseline so width/length selectors visibly affect proportions.
+    const widthScale = Math.max(0.65, Math.min(1.6, widthMm / 120));
+    const lengthScale = Math.max(0.75, Math.min(1.4, lengthMm / 3300));
+    const thicknessScale = Math.max(0.6, Math.min(1.5, thicknessMm / 28));
+
+    return { widthScale, lengthScale, thicknessScale };
+  }, [finish?.dimensions?.length, finish?.dimensions?.thickness, finish?.dimensions?.width, visualDimensionsMm?.lengthMm, visualDimensionsMm?.thicknessMm, visualDimensionsMm?.widthMm]);
 
   const modelScene = useMemo(() => {
     const cloned = cloneSceneWithUniqueMaterials(gltf.scene);
@@ -584,11 +619,15 @@ function GLBProfileModel({
     if (Number.isFinite(maxDim) && maxDim > 0) {
       const targetMaxDim = 2.0;
       const scale = targetMaxDim / maxDim;
-      wrapper.scale.setScalar(scale);
+      wrapper.scale.set(
+        scale * visualScale.widthScale,
+        scale * visualScale.thicknessScale,
+        scale * visualScale.lengthScale
+      );
     }
 
     return wrapper;
-  }, [gltf.scene]);
+  }, [gltf.scene, visualScale.lengthScale, visualScale.thicknessScale, visualScale.widthScale]);
 
   const variantMaterialsByName = useMemo(() => {
     const map = new Map<string, THREE.MeshStandardMaterial>();
@@ -791,10 +830,18 @@ function GLBProfileModel({
     variantMaterialsByName,
   ]);
 
+  useLayoutEffect(() => {
+    if (!groupRef.current || !rotationYRef) return;
+    groupRef.current.rotation.y = rotationYRef.current;
+  }, [modelScene, rotationYRef]);
+
   useFrame((_, delta) => {
     if (!autoRotate) return;
     if (!groupRef.current) return;
     groupRef.current.rotation.y += delta * 0.35;
+    if (rotationYRef) {
+      rotationYRef.current = groupRef.current.rotation.y;
+    }
   });
 
   return <primitive ref={groupRef} object={modelScene} />;
@@ -821,6 +868,11 @@ export interface Konfiguratorius3DProps {
   isLoading?: boolean;
   canvasClassName?: string;
   basePrice?: number;
+  visualDimensionsMm?: {
+    widthMm?: number;
+    lengthMm?: number;
+    thicknessMm?: number;
+  };
 }
 
 /**
@@ -848,6 +900,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
   isLoading = false,
   canvasClassName,
   basePrice,
+  visualDimensionsMm,
 }, ref) {
   const t = useTranslations();
   const locale = useLocale();
@@ -859,6 +912,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
     availableFinishes[0] || null
   );
   const [modelColor, setModelColor] = useState('#ffffff');
+  const sharedRotationYRef = useRef(0);
   const [resolvedModelUrl, setResolvedModelUrl] = useState<string | null>(null);
   const [isModelResolved, setIsModelResolved] = useState(false);
   const { active: isGltfLoading } = useProgress();
@@ -883,7 +937,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
   // if you recently changed them.
   gl.outputColorSpace = THREE.SRGBColorSpace;
   gl.toneMapping = THREE.ACESFilmicToneMapping;
-  gl.toneMappingExposure = 1.25;
+  gl.toneMappingExposure = 1.55;
   if ('physicallyCorrectLights' in gl) {
     (gl as THREE.WebGLRenderer & { physicallyCorrectLights?: boolean }).physicallyCorrectLights = true;
   }
@@ -1320,14 +1374,16 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
         
         <Canvas camera={{ position: [3, 2, 3], fov: 50 }} gl={{ preserveDrawingBuffer: true }}>
           <RendererBridge onRenderer={handleRendererReady} />
-			<ambientLight intensity={0.85} />
-			<hemisphereLight args={['#FFFFFF', '#E1E1E1', 0.45]} />
-			{/* Key */}
-			<directionalLight position={[5, 5, 5]} intensity={1.25} />
-			{/* Fill */}
-			<directionalLight position={[-5, 2, 4]} intensity={0.65} />
-			{/* Rim/back */}
-			<directionalLight position={[0, 6, -6]} intensity={0.35} />
+            <ambientLight intensity={1.05} />
+            <hemisphereLight args={['#FFFFFF', '#DCDCDC', 0.7]} />
+      {/* Key */}
+      <directionalLight position={[5, 5, 5]} intensity={1.45} />
+      {/* Fill */}
+      <directionalLight position={[-5, 2, 4]} intensity={0.95} />
+      {/* Front lift for dark finishes */}
+      <directionalLight position={[0, 1.8, 6]} intensity={0.85} />
+      {/* Rim/back */}
+      <directionalLight position={[0, 6, -6]} intensity={0.5} />
           <Suspense
             fallback={
 				  resolvedModelUrl
@@ -1338,6 +1394,8 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
 						  finish={selectedFinish}
 						  variantKey={textureVariantKey}
 						  autoRotate={true}
+						  rotationYRef={sharedRotationYRef}
+						  visualDimensionsMm={visualDimensionsMm}
 						/>
 					  )
 				}
@@ -1345,7 +1403,7 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
             {effectiveModelUrl ? (
               <GLBErrorBoundary
                 modelUrl={effectiveModelUrl}
-                fallback={<ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} />}
+                fallback={<ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} rotationYRef={sharedRotationYRef} visualDimensionsMm={visualDimensionsMm} />}
               >
           {!isGltfLoading ? (
             <GLBProfileModel
@@ -1358,11 +1416,13 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
               applyColorTint={!isPerColorVariantModel}
               applyDynamicFinishSurface={!isPerColorVariantModel}
               autoRotate={true}
+              rotationYRef={sharedRotationYRef}
+              visualDimensionsMm={visualDimensionsMm}
             />
           ) : null}
               </GLBErrorBoundary>
             ) : (
-              <ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} />
+              <ProfileModel color={modelColor} finish={selectedFinish} variantKey={textureVariantKey} autoRotate={true} rotationYRef={sharedRotationYRef} visualDimensionsMm={visualDimensionsMm} />
             )}
           </Suspense>
           <OrbitControls 

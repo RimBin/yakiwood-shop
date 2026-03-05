@@ -121,6 +121,16 @@ type DbConfigurationPriceRow = {
   max_cart_area_m2?: number | null
 }
 
+type DbProductBasePriceRow = {
+  id: string
+  base_price: string | number
+}
+
+type DbVariantPriceAdjustmentRow = {
+  id: string
+  price_adjustment: string | number | null
+}
+
 function calcSpecificity(row: DbConfigurationPriceRow): number {
   return (
     (row.usage_type ? 1 : 0) +
@@ -235,6 +245,57 @@ export async function resolveConfigurationUnitPricePerM2(
   }
 }
 
+async function resolveFallbackUnitPricePerM2(selectors: {
+  productId: string
+  profileVariantId?: string
+  colorVariantId?: string
+}): Promise<{ unitPricePerM2: number; matchedRowId: string; specificity: number } | null> {
+  const client = supabaseAdmin ?? createPublicClient()
+  if (!client) return null
+
+  const productId = String(selectors.productId || '').trim()
+  if (!productId) return null
+
+  const { data: productRow, error: productError } = await client
+    .from('products')
+    .select('id,base_price')
+    .eq('id', productId)
+    .eq('is_active', true)
+    .maybeSingle()
+
+  if (productError || !productRow) return null
+
+  let unitPricePerM2 = toNumber((productRow as unknown as DbProductBasePriceRow).base_price)
+  if (!Number.isFinite(unitPricePerM2) || unitPricePerM2 <= 0) return null
+
+  const variantIds = [selectors.profileVariantId, selectors.colorVariantId].filter(
+    (v): v is string => typeof v === 'string' && !!v.trim()
+  )
+
+  if (variantIds.length) {
+    const { data: variants, error: variantError } = await client
+      .from('product_variants')
+      .select('id,price_adjustment')
+      .eq('product_id', productId)
+      .in('id', variantIds)
+
+    if (!variantError && variants?.length) {
+      const extra = (variants as unknown as DbVariantPriceAdjustmentRow[]).reduce((sum, row) => {
+        const adj = row.price_adjustment === null ? 0 : toNumber(row.price_adjustment)
+        return sum + adj
+      }, 0)
+
+      unitPricePerM2 = Math.max(0, unitPricePerM2 + extra)
+    }
+  }
+
+  return {
+    unitPricePerM2,
+    matchedRowId: `products:${productId}`,
+    specificity: 0,
+  }
+}
+
 export async function quoteConfigurationPricing(input: {
   productId: string
   usageType?: UsageType
@@ -279,9 +340,17 @@ export async function quoteConfigurationPricing(input: {
     cartTotalAreaM2: input.cartTotalAreaM2,
   })
 
-  if (!resolved) return null
+  const resolvedOrFallback =
+    resolved ??
+    (await resolveFallbackUnitPricePerM2({
+      productId: input.productId,
+      profileVariantId: input.profileVariantId,
+      colorVariantId: input.colorVariantId,
+    }))
 
-  const unitPricePerM2 = resolved.unitPricePerM2
+  if (!resolvedOrFallback) return null
+
+  const unitPricePerM2 = resolvedOrFallback.unitPricePerM2
   const unitPricePerBoard = unitPricePerM2 * areaM2
   const lineTotal = unitPricePerBoard * quantityBoards
   const totalAreaM2 = areaM2 * quantityBoards
@@ -296,8 +365,8 @@ export async function quoteConfigurationPricing(input: {
     inputMode,
     roundingInfo: inputMode === 'area' ? resolvedQuantity?.roundingInfo : undefined,
     resolvedBy: {
-      matchedRowId: resolved.matchedRowId,
-      specificity: resolved.specificity,
+      matchedRowId: resolvedOrFallback.matchedRowId,
+      specificity: resolvedOrFallback.specificity,
     },
   }
 }
