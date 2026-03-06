@@ -33,6 +33,43 @@ type ProductsPageClientProps = {
   initialError?: string | null;
 };
 
+function optimizeSupabasePublicImage(
+  src: string,
+  {
+    width,
+    quality = 70,
+    format = 'webp',
+  }: { width: number; quality?: number; format?: 'webp' | 'avif' | 'jpg' | 'png' }
+): string {
+  if (!src) return src;
+  if (src.startsWith('/')) return src;
+
+  try {
+    const url = new URL(src);
+
+    const publicPrefix = '/storage/v1/object/public/';
+    const renderPrefix = '/storage/v1/render/image/public/';
+
+    if (url.pathname.includes(renderPrefix)) {
+      // Already using the render endpoint; just ensure it has reasonable params.
+      if (!url.searchParams.has('width')) url.searchParams.set('width', String(width));
+      if (!url.searchParams.has('quality')) url.searchParams.set('quality', String(quality));
+      if (!url.searchParams.has('format')) url.searchParams.set('format', format);
+      return url.toString();
+    }
+
+    if (!url.pathname.includes(publicPrefix)) return src;
+
+    url.pathname = url.pathname.replace(publicPrefix, renderPrefix);
+    url.searchParams.set('width', String(width));
+    url.searchParams.set('quality', String(quality));
+    url.searchParams.set('format', format);
+    return url.toString();
+  } catch {
+    return src;
+  }
+}
+
 function FilterDropdown({
   id,
   label,
@@ -871,7 +908,7 @@ export default function ProductsPageClient({
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
       {/* Cover */}
-      <InView className="hero-animate-root">
+      <InView className="hero-animate-root is-inview">
         <PageCover>
           <div className="flex flex-col gap-[16px] hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             <div className="flex items-start gap-[8px]">
@@ -1123,6 +1160,15 @@ export default function ProductsPageClient({
                 const unitPriceLabel = unitPrice ? formatUnitPrice(unitPrice) : null;
 
                 const delay = 180 + ((idx % 4) * 120) + (Math.floor(idx / 4) * 80);
+                const rawCardImageSrc = product.image || '/images/ui/wood/imgSpruce.png';
+                const cardImageSrc = optimizeSupabasePublicImage(rawCardImageSrc, {
+                  width: 720,
+                  quality: 60,
+                  format: 'webp',
+                });
+                const isSupabaseRenderImage =
+                  typeof cardImageSrc === 'string' &&
+                  cardImageSrc.includes('/storage/v1/render/image/public/');
                 return (
             <Link
               key={product.id}
@@ -1141,9 +1187,11 @@ export default function ProductsPageClient({
             >
               <div data-testid="product-card" className="relative w-full h-[250px] border border-[#161616] border-opacity-30 overflow-hidden">
                 <Image
-                  src={product.image || '/images/ui/wood/imgSpruce.png'}
+                  src={cardImageSrc}
                   alt={localizedDisplayName}
                   fill
+                  priority={idx === 0}
+                  unoptimized={isSupabaseRenderImage}
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />

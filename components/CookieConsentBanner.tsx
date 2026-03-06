@@ -10,18 +10,20 @@ import {
   type CookieConsent,
 } from '@/lib/cookies/consent';
 
-export default function CookieConsentBanner() {
+type Props = {
+  initialConsent?: CookieConsent | null;
+};
+
+export default function CookieConsentBanner({ initialConsent = null }: Props) {
   const t = useTranslations('cookieConsent');
 
-  const [checked, setChecked] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(() => !initialConsent);
   const [isCustomizing, setIsCustomizing] = useState(false);
-  const [analytics, setAnalytics] = useState(false);
-  const [marketing, setMarketing] = useState(false);
+  const [analytics, setAnalytics] = useState(() => Boolean(initialConsent?.analytics));
+  const [marketing, setMarketing] = useState(() => Boolean(initialConsent?.marketing));
 
   useEffect(() => {
     const existing = getConsentFromDocumentCookie();
-    setChecked(true);
     setIsVisible(!existing);
 
     // Pre-fill controls from existing consent if present (shouldn't show, but safe).
@@ -44,7 +46,7 @@ export default function CookieConsentBanner() {
 
   const policyHref = useMemo(() => '/cookie-policy', []);
 
-  if (!checked || !isVisible) return null;
+  if (!isVisible) return null;
 
   const acceptAll = () => {
     setConsentCookie({analytics: true, marketing: true});

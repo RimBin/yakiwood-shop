@@ -3,11 +3,12 @@ import { supabaseAdmin, getInvoiceById, convertDBInvoiceToInvoice } from '@/lib/
 import { InvoicePDFGenerator, type InvoiceLocale } from '@/lib/invoice/pdf-generator';
 import { getDemoDbInvoiceById } from '@/lib/demo/dummy-orders';
 
-type RouteParams = { id: string }
-type RouteContext = { params: RouteParams } | { params: Promise<RouteParams> }
+type RouteContextParams = Record<string, string | string[] | undefined>
 
-async function resolveParams(context: RouteContext): Promise<RouteParams> {
-  return await context.params
+function normalizeIdParam(raw: string | string[] | undefined): string | null {
+  if (typeof raw === 'string') return raw
+  if (Array.isArray(raw)) return raw[0] ?? null
+  return null
 }
 
 // Lazy-load Resend only when needed to avoid build-time errors
@@ -19,7 +20,7 @@ function getResendClient() {
 
 export async function POST(
   req: NextRequest,
-  context: RouteContext
+  context: { params: Promise<RouteContextParams> }
 ) {
   try {
     const resend = getResendClient();
@@ -31,7 +32,11 @@ export async function POST(
     const langParam = url.searchParams.get('lang');
     const locale: InvoiceLocale = langParam === 'en' ? 'en' : 'lt';
 
-    const { id } = await resolveParams(context);
+    const rawId = (await context.params).id
+    const id = normalizeIdParam(rawId)
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid invoice id' }, { status: 400 })
+    }
 
     const dbInvoice = supabaseAdmin
       ? await getInvoiceById(id)

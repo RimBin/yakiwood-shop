@@ -27,6 +27,42 @@ interface ProductDetailClientProps {
   prefetchedStockItems?: Array<{ slug: string; image?: string | null }>;
 }
 
+function optimizeSupabasePublicImage(
+  src: string,
+  {
+    width,
+    quality = 65,
+    format = 'webp',
+  }: { width: number; quality?: number; format?: 'webp' | 'avif' | 'jpg' | 'png' }
+): string {
+  if (!src) return src;
+  if (src.startsWith('/')) return src;
+
+  try {
+    const url = new URL(src);
+
+    const publicPrefix = '/storage/v1/object/public/';
+    const renderPrefix = '/storage/v1/render/image/public/';
+
+    if (url.pathname.includes(renderPrefix)) {
+      if (!url.searchParams.has('width')) url.searchParams.set('width', String(width));
+      if (!url.searchParams.has('quality')) url.searchParams.set('quality', String(quality));
+      if (!url.searchParams.has('format')) url.searchParams.set('format', format);
+      return url.toString();
+    }
+
+    if (!url.pathname.includes(publicPrefix)) return src;
+
+    url.pathname = url.pathname.replace(publicPrefix, renderPrefix);
+    url.searchParams.set('width', String(width));
+    url.searchParams.set('quality', String(quality));
+    url.searchParams.set('format', format);
+    return url.toString();
+  } catch {
+    return src;
+  }
+}
+
 function normalizeLabel(value: string): string {
   return value
     .trim()
@@ -524,17 +560,6 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
     return baseDisplayName;
   }, [baseDisplayName]);
 
-  const attributeSummary = useMemo(() => {
-    const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
-    const colorName = selectedColor?.name || (parsed?.color ? localizeColorLabel(parsed.color, currentLocale) : '');
-    const profileSource = selectedFinish?.name || selectedFinish?.code || parsed?.profile || '';
-    const profileName = profileSource
-      ? localizeProfileLabel(profileSource, currentLocale)
-      : '';
-    const sizeLabel = selectedSizeLabel || (parsed?.size ? formatSizeLabel(parsed.size) : '');
-    return [profileName, colorName, sizeLabel].filter(Boolean).join(' · ');
-  }, [product.slug, selectedColor?.name, selectedFinish?.name, selectedFinish?.code, selectedSizeLabel, currentLocale]);
-
   useEffect(() => {
     if (!product?.id) return;
     if (trackedProductIdRef.current === product.id) return;
@@ -667,6 +692,19 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
 
   const effectiveSelectedColor = selectedColor ?? urlColorSelection ?? null;
   const effectiveSelectedFinish = selectedFinish ?? urlFinishSelection ?? null;
+
+  const attributeSummary = useMemo(() => {
+    const parsed = product.slug.includes('--') ? parseStockItemSlug(product.slug) : null;
+    const colorName =
+      effectiveSelectedColor?.name ||
+      (parsed?.color ? localizeColorLabel(parsed.color, currentLocale) : '');
+    const profileSource = effectiveSelectedFinish?.name || effectiveSelectedFinish?.code || parsed?.profile || '';
+    const profileName = profileSource
+      ? localizeProfileLabel(profileSource, currentLocale)
+      : '';
+    const sizeLabel = selectedSizeLabel || (parsed?.size ? formatSizeLabel(parsed.size) : '');
+    return [profileName, colorName, sizeLabel].filter(Boolean).join(' · ');
+  }, [product.slug, effectiveSelectedColor?.name, effectiveSelectedFinish?.name, effectiveSelectedFinish?.code, selectedSizeLabel, currentLocale]);
 
   const skipNextUrlSyncRef = useRef(false);
 
@@ -1106,6 +1144,12 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
     return null;
   }, [quotedPricing?.unitPricePerBoard, selectionPrice, unitAreaM2Raw]);
 
+  const unitPricePerM2Display = useMemo(() => {
+    const fromQuote = quotedPricing?.unitPricePerM2;
+    if (typeof fromQuote === 'number' && Number.isFinite(fromQuote) && fromQuote > 0) return fromQuote;
+    return selectionPrice;
+  }, [quotedPricing?.unitPricePerM2, selectionPrice]);
+
   const handleAddToCart = () => {
     if (!isSelectionAvailable) return;
     const unitPricePerBoard = quotedPricing?.unitPricePerBoard;
@@ -1256,6 +1300,7 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
 
     const run = async () => {
       setQuoteLoading(true);
+      setQuotedPricing(null);
       setQuoteError(null);
       try {
         const res = await fetch('/api/pricing/quote', {
@@ -1349,24 +1394,51 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
   const preloadColorImage = useCallback((src: string | null | undefined) => {
     if (typeof window === 'undefined') return;
     if (typeof src !== 'string' || !src) return;
-    if (preloadedColorImagesRef.current.has(src)) return;
+    const optimizedSrc = optimizeSupabasePublicImage(src, { width: 720, quality: 60, format: 'webp' });
+    if (preloadedColorImagesRef.current.has(optimizedSrc)) return;
 
     const img = new window.Image();
     img.decoding = 'async';
-    img.src = src;
-    preloadedColorImagesRef.current.add(src);
+    img.src = optimizedSrc;
+    preloadedColorImagesRef.current.add(optimizedSrc);
   }, []);
 
   useEffect(() => {
-    for (const color of colorOptions) {
-      preloadColorImage(typeof color.image === 'string' ? color.image : null);
-    }
+    if (colorOptions.length === 0) return;
+
+    let cancelled = false;
+    const run = () => {
+      if (cancelled) return;
+      for (const color of colorOptions) {
+        preloadColorImage(typeof color.image === 'string' ? color.image : null);
+      }
+    };
+
+    const requestIdle = (globalThis as any).requestIdleCallback as
+      | ((cb: () => void, options?: { timeout?: number }) => number)
+      | undefined;
+    const cancelIdle = (globalThis as any).cancelIdleCallback as ((id: number) => void) | undefined;
+
+    const handle =
+      typeof requestIdle === 'function'
+        ? requestIdle(run, { timeout: 2000 })
+        : setTimeout(run, 1200);
+
+    return () => {
+      cancelled = true;
+      if (typeof handle === 'number' && typeof cancelIdle === 'function') cancelIdle(handle);
+      else clearTimeout(handle as any);
+    };
   }, [colorOptions, preloadColorImage]);
 
   const urlImageOverride = searchParams.get('img');
   const colorPreviewImage =
     typeof effectiveSelectedColor?.image === 'string' ? effectiveSelectedColor.image : null;
   const activeImage = colorPreviewImage || urlImageOverride || thumbs[activeThumb] || product.image;
+  const optimizedActiveImage = optimizeSupabasePublicImage(activeImage, { width: 1400, quality: 65, format: 'webp' });
+  const isSupabaseRenderActiveImage =
+    typeof optimizedActiveImage === 'string' &&
+    optimizedActiveImage.includes('/storage/v1/render/image/public/');
 
   const shopHref = toLocalePath('/products', currentLocale);
   const homeHref = toLocalePath('/', currentLocale);
@@ -1452,7 +1524,7 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
       </div>
 
       {/* Product Section */}
-      <InView className="hero-animate-root">
+      <InView className="hero-animate-root is-inview">
       <main className="max-w-[1440px] mx-auto px-[16px] sm:px-[24px] lg:px-[40px] py-[16px] lg:py-[54px]">
         <div className="flex flex-col lg:flex-row gap-[24px] lg:gap-[36px]">
           {/* Left Column - Gallery (Desktop) */}
@@ -1501,18 +1573,24 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
                     isLoading={loading3D}
                     mode="viewport"
                     modelUrl={getProductModelUrl({ slug: product.slug, category: product.category, woodType: product.woodType })}
+                    visualDimensionsMm={{
+                      widthMm: selectedWidthMm,
+                      lengthMm: selectedLengthMm,
+                      thicknessMm: selectedFinish?.dimensions?.thickness,
+                    }}
                     className="h-full"
-                    canvasClassName="h-full"
+                    canvasClassName="h-full !border-0 !rounded-none !bg-transparent"
                   />
                 </div>
               ) : (
                 <Image
-                  src={activeImage}
+                  src={optimizedActiveImage}
                   alt={localizedDisplayName}
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 60vw"
                   priority
+                  unoptimized={isSupabaseRenderActiveImage}
                 />
               )}
             </div>
@@ -1541,7 +1619,7 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
                 </p>
               ) : null}
               <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">
-                {currentLocale === 'lt' ? 'Kaina už m²' : 'Price per m²'}: {effectivePrice.toFixed(0)} €
+                {currentLocale === 'lt' ? 'Kaina už m²' : 'Price per m²'}: {unitPricePerM2Display.toFixed(0)} €
               </p>
               {quoteError && quoteError !== 'Kaina nerasta šiai konfigūracijai' ? (
                 <p className="font-['Outfit'] text-[12px] tracking-[0.6px] uppercase text-[#7C7C7C]">{quoteError}</p>
@@ -1593,18 +1671,24 @@ export default function ProductDetailClient({ product, relatedProducts = [], pre
                       isLoading={loading3D}
                       mode="viewport"
                       modelUrl={getProductModelUrl({ slug: product.slug, category: product.category, woodType: product.woodType })}
+                      visualDimensionsMm={{
+                        widthMm: selectedWidthMm,
+                        lengthMm: selectedLengthMm,
+                        thicknessMm: selectedFinish?.dimensions?.thickness,
+                      }}
                       className="h-full"
-                      canvasClassName="h-full"
+                      canvasClassName="h-full !border-0 !rounded-none !bg-transparent"
                     />
                   </div>
                 ) : (
                   <Image
-                    src={activeImage}
+                    src={optimizedActiveImage}
                     alt={localizedDisplayName}
                     fill
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 60vw"
                     priority
+                    unoptimized={isSupabaseRenderActiveImage}
                   />
                 )}
               </div>

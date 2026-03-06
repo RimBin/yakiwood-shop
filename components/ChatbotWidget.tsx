@@ -37,13 +37,13 @@ function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
 
-function historyKey(sessionId: string): string {
-  return `yakiwood_chatbot_history:${sessionId}`;
+function historyKey(sessionId: string, locale: 'en' | 'lt'): string {
+  return `yakiwood_chatbot_history:${locale}:${sessionId}`;
 }
 
-function safeReadHistory(sessionId: string): Message[] | null {
+function safeReadHistory(sessionId: string, locale: 'en' | 'lt'): Message[] | null {
   try {
-    const raw = window.localStorage.getItem(historyKey(sessionId));
+    const raw = window.localStorage.getItem(historyKey(sessionId, locale));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return null;
@@ -65,9 +65,9 @@ function safeReadHistory(sessionId: string): Message[] | null {
   }
 }
 
-function safeWriteHistory(sessionId: string, messages: Message[]) {
+function safeWriteHistory(sessionId: string, locale: 'en' | 'lt', messages: Message[]) {
   try {
-    window.localStorage.setItem(historyKey(sessionId), JSON.stringify(messages.slice(-40)));
+    window.localStorage.setItem(historyKey(sessionId, locale), JSON.stringify(messages.slice(-40)));
   } catch {
     // ignore
   }
@@ -156,16 +156,16 @@ export default function ChatbotWidget() {
 
   useEffect(() => {
     if (!sessionId) return;
-    const stored = safeReadHistory(sessionId);
+    const stored = safeReadHistory(sessionId, currentLocale);
     if (stored && stored.length > 0) {
       setMessages(stored);
     }
-  }, [sessionId]);
+  }, [currentLocale, sessionId]);
 
   useEffect(() => {
     if (!sessionId) return;
-    safeWriteHistory(sessionId, messages);
-  }, [messages, sessionId]);
+    safeWriteHistory(sessionId, currentLocale, messages);
+  }, [currentLocale, messages, sessionId]);
 
   useEffect(() => {
     if (!open) return;
@@ -275,7 +275,7 @@ export default function ChatbotWidget() {
     setServerActions([]);
     setServerHandoff(null);
     setMessages(fresh);
-    safeWriteHistory(sessionId, fresh);
+    safeWriteHistory(sessionId, currentLocale, fresh);
   }
 
   function openHandoff() {

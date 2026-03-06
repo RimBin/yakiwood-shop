@@ -40,10 +40,10 @@ function normalizeKey(value: string): string {
 }
 
 type ProductSearchParams = Record<string, string | string[] | undefined>;
-type MaybeProductSearchParams = ProductSearchParams | Promise<ProductSearchParams | undefined> | undefined;
+type MaybeProductSearchParams = any;
 
 interface ProductPageProps {
-  params: { slug: string };
+  params: any;
   searchParams?: MaybeProductSearchParams;
 }
 

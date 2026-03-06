@@ -5,14 +5,15 @@ import type { DBInvoiceRow } from '@/lib/invoice/db';
 import { convertDBInvoiceToInvoice } from '@/lib/invoice/db';
 import { InvoicePDFGenerator } from '@/lib/invoice/pdf-generator';
 
-type RouteParams = { id: string };
-type RouteContext = { params: RouteParams } | { params: Promise<RouteParams> };
+type RouteContextParams = Record<string, string | string[] | undefined>;
 
-async function resolveParams(context: RouteContext): Promise<RouteParams> {
-  return await context.params;
+function normalizeIdParam(raw: string | string[] | undefined): string | null {
+  if (typeof raw === 'string') return raw;
+  if (Array.isArray(raw)) return raw[0] ?? null;
+  return null;
 }
 
-export async function GET(req: NextRequest, context: RouteContext) {
+export async function GET(req: NextRequest, context: { params: any }) {
   const supabase = await createClient();
 
   const {
@@ -24,7 +25,11 @@ export async function GET(req: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id } = await resolveParams(context);
+  const rawId = (await context.params as RouteContextParams).id;
+  const id = normalizeIdParam(rawId);
+  if (!id) {
+    return NextResponse.json({ error: 'Invalid invoice id' }, { status: 400 });
+  }
 
   const { data, error } = await supabase.from('invoices').select('*').eq('id', id).single();
 

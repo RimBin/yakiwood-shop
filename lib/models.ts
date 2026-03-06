@@ -76,9 +76,10 @@ for (const [ltSlug, url] of Object.entries(PRODUCT_MODEL_MAP)) {
 // category and wood type (e.g. from Supabase product data).
 // ---------------------------------------------------------------------------
 const CATEGORY_WOOD_MODEL_MAP: Record<string, string> = {
-  'facade-spruce': versioned('/models/products/spruce-facade.glb'),
+  // Facade GLBs are not currently shipped; use the closest available model.
+  'facade-spruce': versioned('/models/products/spruce-terrace.glb'),
   'terrace-spruce': versioned('/models/products/spruce-terrace.glb'),
-  'facade-larch': versioned('/models/products/larch-facade.glb'),
+  'facade-larch': versioned('/models/products/larch-terrace.glb'),
   'terrace-larch': versioned('/models/products/larch-terrace.glb'),
 };
 

@@ -3,16 +3,17 @@ import { supabaseAdmin, getInvoiceById, convertDBInvoiceToInvoice } from '@/lib/
 import { InvoicePDFGenerator, type InvoiceLocale } from '@/lib/invoice/pdf-generator';
 import { getDemoDbInvoiceById } from '@/lib/demo/dummy-orders';
 
-type RouteParams = { id: string }
-type RouteContext = { params: RouteParams } | { params: Promise<RouteParams> }
+type RouteContextParams = Record<string, string | string[] | undefined>
 
-async function resolveParams(context: RouteContext): Promise<RouteParams> {
-  return await context.params
+function normalizeIdParam(raw: string | string[] | undefined): string | null {
+  if (typeof raw === 'string') return raw
+  if (Array.isArray(raw)) return raw[0] ?? null
+  return null
 }
 
 export async function GET(
   req: NextRequest,
-  context: RouteContext
+  context: { params: Promise<RouteContextParams> }
 ) {
   try {
     const url = new URL(req.url);
@@ -20,7 +21,11 @@ export async function GET(
     const locale: InvoiceLocale = langParam === 'en' ? 'en' : 'lt';
     const disposition = url.searchParams.get('disposition') === 'inline' ? 'inline' : 'attachment';
 
-    const { id } = await resolveParams(context);
+    const rawId = (await context.params).id
+    const id = normalizeIdParam(rawId)
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid invoice id' }, { status: 400 })
+    }
 
     const dbInvoice = supabaseAdmin
       ? await getInvoiceById(id)

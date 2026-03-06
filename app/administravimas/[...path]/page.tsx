@@ -1,10 +1,11 @@
 import { redirect } from 'next/navigation'
 
 type Props = {
-  params: { path?: string[] }
+  params: Promise<{ path?: string[] }>
 }
 
-export default function AdministravimasCatchAllPage({ params }: Props) {
-  const nextPath = params.path?.length ? `/${params.path.join('/')}` : ''
+export default async function AdministravimasCatchAllPage({ params }: Props) {
+  const { path } = await params
+  const nextPath = path?.length ? `/${path.join('/')}` : ''
   redirect(`/admin${nextPath}`)
 }

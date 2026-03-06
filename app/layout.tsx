@@ -5,9 +5,12 @@ import "./globals.css";
 import AuthWrapper from '@/components/AuthWrapper';
 import ChatbotLoader from '@/components/ChatbotLoader';
 import DeferredGlobals from '@/components/layout/DeferredGlobals';
+import CookieConsentBanner from '@/components/CookieConsentBanner';
 import { ToastProvider } from '@/components/ui/Toast';
 import type { Metadata } from 'next';
 import { getOgImage } from '@/lib/og-image';
+import { cookies } from 'next/headers';
+import { CONSENT_COOKIE_NAME, parseConsentCookieValue } from '@/lib/cookies/consent';
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -103,6 +106,8 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const messages = await getMessages();
   const locale = await getLocale();
+  const cookieStore = await cookies();
+  const initialConsent = parseConsentCookieValue(cookieStore.get(CONSENT_COOKIE_NAME)?.value);
 
   // JSON-LD structured data for Organization
   const organizationSchema = {
@@ -139,6 +144,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={`${dmSans.variable} ${outfit.variable} ${tiroTamil.variable} antialiased bg-[#e1e1e1]`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ToastProvider>
+            <CookieConsentBanner initialConsent={initialConsent} />
             <DeferredGlobals />
             <AuthWrapper>
               {children}

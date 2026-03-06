@@ -383,7 +383,7 @@ export default function SolutionsPage() {
   return (
     <div className="bg-transparent overflow-x-hidden">
       {/* Hero Section */}
-      <InView className="hero-animate-root">
+      <InView className="hero-animate-root is-inview">
         <PageCover>
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-[24px] lg:gap-0 hero-seq-item hero-seq-right" style={{ animationDelay: '0ms' }}>
             <h1 className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616]"

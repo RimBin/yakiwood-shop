@@ -9,9 +9,7 @@ import { findProjectBySlug, getProjectDescription, getProjectLocation, getProjec
 import { getPublishedProjects } from '@/lib/projects/server';
 
 interface ProjectPageProps {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
@@ -23,8 +21,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const locale = await getLocale();
   const currentLocale = normalizeProjectLocale(locale);
+  const resolvedParams = await params;
   const loadedProjects = await getPublishedProjects(currentLocale);
-  const project = findProjectBySlug(loadedProjects, params.slug, currentLocale);
+  const project = findProjectBySlug(loadedProjects, resolvedParams.slug, currentLocale);
 
   if (!project) {
     return {
@@ -75,8 +74,9 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const locale = await getLocale();
   const currentLocale = normalizeProjectLocale(locale);
+  const resolvedParams = await params;
   const loadedProjects = await getPublishedProjects(currentLocale);
-  const project = findProjectBySlug(loadedProjects, params.slug, currentLocale) ?? null;
+  const project = findProjectBySlug(loadedProjects, resolvedParams.slug, currentLocale) ?? null;
   const relatedProjects = project ? loadedProjects.filter((p) => p.id !== project.id).slice(0, 3) : [];
 
   return (

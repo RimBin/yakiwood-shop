@@ -28,7 +28,7 @@ export default async function ProjectsPage() {
 
   return (
     <section className="w-full bg-[#E1E1E1] min-h-screen">
-      <InView className="hero-animate-root">
+      <InView className="hero-animate-root is-inview">
         <PageCover>
           <h1
             className="font-['DM_Sans'] font-light text-[56px] md:text-[128px] leading-[0.95] tracking-[-2.8px] md:tracking-[-6.4px] text-[#161616] hero-seq-item hero-seq-right"

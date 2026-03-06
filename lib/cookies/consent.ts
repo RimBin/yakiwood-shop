@@ -10,6 +10,29 @@ export type CookieConsent = {
 const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 const V2_PREFIX = 'v2:';
 
+export function parseConsentCookieValue(raw: string | undefined): CookieConsent | null {
+  if (!raw) return null;
+
+  // Backward compatibility with earlier simple values.
+  if (raw === 'accepted') return { analytics: true, marketing: false };
+  if (raw === 'rejected') return { analytics: false, marketing: false };
+
+  if (raw.startsWith(V2_PREFIX)) {
+    const json = raw.slice(V2_PREFIX.length);
+    try {
+      const parsed = JSON.parse(json) as Partial<CookieConsent>;
+      return {
+        analytics: Boolean(parsed.analytics),
+        marketing: Boolean(parsed.marketing),
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+}
+
 function readCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined;
 
@@ -31,27 +54,7 @@ function setCookie(name: string, value: string, maxAgeSeconds: number) {
 }
 
 export function getConsentFromDocumentCookie(): CookieConsent | null {
-  const raw = readCookie(CONSENT_COOKIE_NAME);
-  if (!raw) return null;
-
-  // Backward compatibility with earlier simple values.
-  if (raw === 'accepted') return { analytics: true, marketing: false };
-  if (raw === 'rejected') return { analytics: false, marketing: false };
-
-  if (raw.startsWith(V2_PREFIX)) {
-    const json = raw.slice(V2_PREFIX.length);
-    try {
-      const parsed = JSON.parse(json) as Partial<CookieConsent>;
-      return {
-        analytics: Boolean(parsed.analytics),
-        marketing: Boolean(parsed.marketing),
-      };
-    } catch {
-      return null;
-    }
-  }
-
-  return null;
+  return parseConsentCookieValue(readCookie(CONSENT_COOKIE_NAME));
 }
 
 export function setConsentCookie(consent: CookieConsent) {

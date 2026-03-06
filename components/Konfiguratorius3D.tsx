@@ -757,6 +757,10 @@ function GLBProfileModel({
 
   useLayoutEffect(() => {
     const surface = getFinishSurfacePreset(finish);
+    const tintColor = new THREE.Color(color);
+    const tintLuminance = 0.2126 * tintColor.r + 0.7152 * tintColor.g + 0.0722 * tintColor.b;
+    const tintStrengthWithMap = tintLuminance < 0.25 ? 0.22 : tintLuminance < 0.5 ? 0.28 : 0.35;
+    const tintWithMap = new THREE.Color('#ffffff').lerp(tintColor, tintStrengthWithMap);
 
     modelScene.traverse((object) => {
       const mesh = object as THREE.Mesh;
@@ -894,8 +898,15 @@ function GLBProfileModel({
             if ('color' in standardMaterial && standardMaterial.color) {
               standardMaterial.color.set('#ffffff');
             }
-          } else if (applyColorTint && !hasBaseMap && 'color' in standardMaterial && standardMaterial.color) {
-            standardMaterial.color.set(color);
+          } else if (applyColorTint && 'color' in standardMaterial && standardMaterial.color) {
+            // Even when the GLB has an authored baseColor map, tinting `material.color`
+            // multiplies with the map and gives immediate visual feedback on selection.
+            // Use a conservative tint when a texture is present to avoid over-darkening.
+            if (hasBaseMap) {
+              standardMaterial.color.copy(tintWithMap);
+            } else {
+              standardMaterial.color.copy(tintColor);
+            }
           } else if ('color' in standardMaterial && standardMaterial.color) {
             standardMaterial.color.set('#ffffff');
           }
@@ -1495,6 +1506,9 @@ const Konfiguratorius3D = forwardRef<Konfiguratorius3DHandle, Konfiguratorius3DP
           dpr={[1, 1.5]}
           camera={{ position: [2.4, 1.4, 2.4], fov: 45 }}
           gl={{ preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
+          onCreated={({ gl }) => {
+            gl.setClearColor('#EAEAEA', 1);
+          }}
         >
           <RendererBridge onRenderer={handleRendererReady} />
             <ambientLight intensity={1.05} />

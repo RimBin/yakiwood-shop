@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import RangeSlider from '@/components/ui/RangeSlider';
 import Minus from '@/components/icons/Minus';
 import Plus from '@/components/icons/Plus';
@@ -39,7 +39,6 @@ export default function FilterSidebar({
   className = '',
 }: FilterSidebarProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [localFilters, setLocalFilters] = useState<ProductFilters>(filters);
   const [isOpen, setIsOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
@@ -110,7 +109,7 @@ export default function FilterSidebar({
     onFilterChange(localFilters);
     
     // Update URL query params
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     
     if (localFilters.priceRange[0] !== 0 || localFilters.priceRange[1] !== 500) {
       params.set('priceMin', localFilters.priceRange[0].toString());

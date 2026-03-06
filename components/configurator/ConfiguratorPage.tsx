@@ -31,6 +31,18 @@ type ToggleOption<T extends string> = {
   enabled?: boolean;
 };
 
+type MobilePanelKey =
+  | 'none'
+  | 'boardType'
+  | 'profile'
+  | 'thickness'
+  | 'wood'
+  | 'color'
+  | 'width'
+  | 'length'
+  | 'product'
+  | 'pricing';
+
 const CONFIGURATOR_MODEL_URL = getGenericModelUrl();
 
 const THERMO_COLORS = new Set<ColorKey>(['black', 'carbon', 'carbon_light', 'graphite', 'dark_brown', 'silver']);
@@ -236,6 +248,9 @@ export default function ConfiguratorPage() {
   }>(null);
 
   const configuratorRef = useRef<Konfiguratorius3DHandle | null>(null);
+  const mobilePanelAnchorRef = useRef<HTMLDivElement | null>(null);
+  const [isMobilePanelVisible, setIsMobilePanelVisible] = useState(true);
+  const [mobilePanel, setMobilePanel] = useState<MobilePanelKey>('none');
 
   const cartItems = useCartStore((state) => state.items);
   const addItem = useCartStore((state) => state.addItem);
@@ -469,6 +484,31 @@ export default function ConfiguratorPage() {
     }
   }, [availableThicknesses, selectedBoardType, selectedThickness]);
 
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') {
+      setIsMobilePanelVisible(true);
+      return;
+    }
+
+    const node = mobilePanelAnchorRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        setIsMobilePanelVisible(entry.isIntersecting);
+      },
+      {
+        threshold: 0.05,
+        rootMargin: '0px 0px -25% 0px',
+      }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   const selectedColorVariant = useMemo(() => {
     return (
       availableColors.find((color) => colorVariantToKey(color) === selectedColor) ??
@@ -624,6 +664,69 @@ export default function ConfiguratorPage() {
       return sum;
     }, 0);
   }, [cartItems]);
+
+  const mobileSummary = useMemo(() => {
+    const boardTypeLabel =
+      boardTypeOptions.find((option) => option.value === selectedBoardType)?.label ?? String(selectedBoardType);
+
+    const profileLabel = selectedFinishVariant
+      ? getLocalizedProfileName(selectedFinishVariant, currentLocale)
+      : profileOptions.find((option) => option.value === selectedProfile)?.label ?? String(selectedProfile);
+
+    const woodLabel = woodOptions.find((option) => option.value === selectedWood)?.label ?? String(selectedWood);
+
+    const colorLabel = selectedColorVariant
+      ? getLocalizedColorName(selectedColorVariant, currentLocale)
+      : colorOptions.find((option) => option.value === selectedColor)?.label ?? String(selectedColor);
+
+    const dimensionLabel = `${selectedWidth}×${selectedLength}`;
+    const thicknessLabel = selectedThickness === '20' ? '18/20 mm' : '28 mm';
+
+    const quantityLabel =
+      inputMode === 'boards'
+        ? `${t('configurator.inputModeBoards')}: ${Math.max(1, Math.round(Number(quote?.quantityBoards ?? quantityBoards) || 1))}`
+        : `${t('configurator.inputModeArea')}: ${Number(quote?.totalAreaM2 ?? targetAreaM2).toFixed(2)} m²`;
+
+    return `${boardTypeLabel} • ${profileLabel} • ${woodLabel} • ${colorLabel} • ${dimensionLabel} • ${thicknessLabel} • ${quantityLabel}`;
+  }, [
+    boardTypeOptions,
+    colorOptions,
+    currentLocale,
+    inputMode,
+    profileOptions,
+    quantityBoards,
+    quote?.quantityBoards,
+    quote?.totalAreaM2,
+    selectedBoardType,
+    selectedColor,
+    selectedColorVariant,
+    selectedFinishVariant,
+    selectedLength,
+    selectedProfile,
+    selectedThickness,
+    selectedWidth,
+    selectedWood,
+    t,
+    targetAreaM2,
+    woodOptions,
+  ]);
+
+  const mobileActivePanelTitle = useMemo(() => {
+    if (mobilePanel === 'boardType') return uiText.boardType;
+    if (mobilePanel === 'profile') return uiText.profile;
+    if (mobilePanel === 'thickness') return uiText.thickness;
+    if (mobilePanel === 'wood') return uiText.woodType;
+    if (mobilePanel === 'color') return uiText.color;
+    if (mobilePanel === 'width') return uiText.width;
+    if (mobilePanel === 'length') return uiText.length;
+    if (mobilePanel === 'product') return uiText.product;
+    if (mobilePanel === 'pricing') return t('configurator.pricingTitle');
+    return '';
+  }, [mobilePanel, t, uiText]);
+
+  const toggleMobilePanel = useCallback((next: MobilePanelKey) => {
+    setMobilePanel((current) => (current === next ? 'none' : next));
+  }, []);
 
   const displayLineTotal = useMemo(() => {
     if (!quote) return null;
@@ -981,7 +1084,8 @@ export default function ConfiguratorPage() {
           )}
 
           {!error && (product || isLoading) && (
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6 hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
+            <div ref={mobilePanelAnchorRef} className="relative hero-seq-item hero-seq-right" style={{ animationDelay: '320ms' }}>
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6">
               <div>
                 <div className="relative">
                   <Konfiguratorius3D
@@ -994,7 +1098,7 @@ export default function ConfiguratorPage() {
                     basePrice={product?.price}
                     isLoading={isLoading}
                     mode="viewport"
-                    canvasClassName="h-[520px] md:h-[640px] lg:h-[720px]"
+                    canvasClassName="h-[62svh] min-h-[340px] max-h-[520px] md:h-[640px] lg:h-[720px]"
                     autoRotate={autoRotate}
                     selectedColorId={selectedColorVariant?.id}
                     selectedFinishId={selectedFinishVariant?.id}
@@ -1024,7 +1128,7 @@ export default function ConfiguratorPage() {
                   {/* Viewport overlays */}
                   <div className="pointer-events-none absolute inset-0">
                     {/* Dimensions (top-left) */}
-                    <div className="absolute top-4 left-4 bg-[#EAEAEA]/90 px-3 py-2 rounded-lg border border-[#BBBBBB]">
+                    <div className="hidden md:block absolute top-4 left-4 bg-[#EAEAEA]/90 px-3 py-2 rounded-lg border border-[#BBBBBB]">
                       <div className="space-y-0.5 font-['Outfit'] text-[12px] leading-[1.3] text-[#535353]">
                         <p>
                           {uiText.lengthLabel}: {selectedLength} mm
@@ -1054,12 +1158,12 @@ export default function ConfiguratorPage() {
                     </div>
 
                     {/* Controls hint (bottom-left) */}
-                    <div className="absolute bottom-4 left-4 bg-[#EAEAEA]/90 px-3 py-2 rounded-lg border border-[#BBBBBB]">
+                    <div className="hidden md:block absolute bottom-4 left-4 bg-[#EAEAEA]/90 px-3 py-2 rounded-lg border border-[#BBBBBB]">
                       <p className="font-['Outfit'] text-[12px] leading-[1.3] text-[#535353]">{t('configurator.controlsHint')}</p>
                     </div>
 
                     {/* PDF download (bottom-right) */}
-                    <div className="pointer-events-auto absolute bottom-4 right-4">
+                    <div className="hidden md:block pointer-events-auto absolute bottom-4 right-4">
                       <button
                         type="button"
                         onClick={handleDownloadPdf}
@@ -1073,7 +1177,7 @@ export default function ConfiguratorPage() {
                 </div>
               </div>
 
-              <aside className="rounded-[24px] border border-[#BBBBBB] bg-[#E1E1E1] p-4 flex flex-col gap-3 h-fit">
+              <aside className="hidden lg:flex rounded-[24px] border border-[#BBBBBB] bg-[#E1E1E1] p-4 flex-col gap-3 h-fit">
                 <h2 className="font-['Outfit'] text-[13px] text-[#161616]">{uiText.panelTitle}</h2>
 
                 <PanelSection title={uiText.boardType}>
@@ -1228,6 +1332,337 @@ export default function ConfiguratorPage() {
                   </div>
                 </PanelSection>
               </aside>
+              </div>
+
+              {isMobilePanelVisible && (
+                <div
+                  className="lg:hidden fixed inset-x-0 bottom-0 z-50 px-4"
+                  style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
+                >
+                  <div
+                    className="rounded-[24px] border border-[#BBBBBB] bg-[#E1E1E1] overflow-hidden"
+                    style={{ height: mobilePanel === 'none' ? '132px' : '52svh' }}
+                  >
+                    <div className="flex h-full flex-col">
+                      <div className="w-full text-left px-4 pt-3 pb-2">
+                        <div className="mx-auto mb-2 h-[4px] w-[44px] rounded-full bg-[#BBBBBB]" />
+
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-['Outfit'] text-[12px] leading-[1.3] text-[#535353]">{uiText.panelTitle}</p>
+                            <p className="mt-0.5 font-['Outfit'] text-[12px] leading-[1.4] text-[#161616] truncate">{mobileSummary}</p>
+                          </div>
+
+                          <div className="shrink-0 text-right">
+                            <p className="font-['Outfit'] text-[10px] tracking-[0.6px] uppercase text-[#7C7C7C]">
+                              {t('configurator.lineTotalLabel')}
+                            </p>
+                            <p className="font-['Outfit'] text-[12px] text-[#161616]">
+                              {typeof displayLineTotal === 'number' && Number.isFinite(displayLineTotal)
+                                ? currency.format(displayLineTotal)
+                                : '-'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="px-4 pb-3">
+                        <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                          <button
+                            type="button"
+                            onClick={() => toggleMobilePanel('boardType')}
+                            aria-pressed={mobilePanel === 'boardType'}
+                            className={`h-[30px] shrink-0 rounded-[100px] px-3 font-['Outfit'] text-[12px] border ${
+                              mobilePanel === 'boardType'
+                                ? 'bg-[#161616] border-[#161616] text-white'
+                                : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
+                            }`}
+                          >
+                            {uiText.boardType}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => toggleMobilePanel('profile')}
+                            aria-pressed={mobilePanel === 'profile'}
+                            className={`h-[30px] shrink-0 rounded-[100px] px-3 font-['Outfit'] text-[12px] border ${
+                              mobilePanel === 'profile'
+                                ? 'bg-[#161616] border-[#161616] text-white'
+                                : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
+                            }`}
+                          >
+                            {uiText.profile}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => toggleMobilePanel('thickness')}
+                            aria-pressed={mobilePanel === 'thickness'}
+                            className={`h-[30px] shrink-0 rounded-[100px] px-3 font-['Outfit'] text-[12px] border ${
+                              mobilePanel === 'thickness'
+                                ? 'bg-[#161616] border-[#161616] text-white'
+                                : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
+                            }`}
+                          >
+                            {uiText.thickness}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => toggleMobilePanel('wood')}
+                            aria-pressed={mobilePanel === 'wood'}
+                            className={`h-[30px] shrink-0 rounded-[100px] px-3 font-['Outfit'] text-[12px] border ${
+                              mobilePanel === 'wood'
+                                ? 'bg-[#161616] border-[#161616] text-white'
+                                : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
+                            }`}
+                          >
+                            {uiText.woodType}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => toggleMobilePanel('color')}
+                            aria-pressed={mobilePanel === 'color'}
+                            className={`h-[30px] shrink-0 rounded-[100px] px-3 font-['Outfit'] text-[12px] border ${
+                              mobilePanel === 'color'
+                                ? 'bg-[#161616] border-[#161616] text-white'
+                                : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
+                            }`}
+                          >
+                            {uiText.color}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => toggleMobilePanel('width')}
+                            aria-pressed={mobilePanel === 'width'}
+                            className={`h-[30px] shrink-0 rounded-[100px] px-3 font-['Outfit'] text-[12px] border ${
+                              mobilePanel === 'width'
+                                ? 'bg-[#161616] border-[#161616] text-white'
+                                : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
+                            }`}
+                          >
+                            {uiText.width}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => toggleMobilePanel('length')}
+                            aria-pressed={mobilePanel === 'length'}
+                            className={`h-[30px] shrink-0 rounded-[100px] px-3 font-['Outfit'] text-[12px] border ${
+                              mobilePanel === 'length'
+                                ? 'bg-[#161616] border-[#161616] text-white'
+                                : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
+                            }`}
+                          >
+                            {uiText.length}
+                          </button>
+
+                          {filteredProducts.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => toggleMobilePanel('product')}
+                              aria-pressed={mobilePanel === 'product'}
+                              className={`h-[30px] shrink-0 rounded-[100px] px-3 font-['Outfit'] text-[12px] border ${
+                                mobilePanel === 'product'
+                                  ? 'bg-[#161616] border-[#161616] text-white'
+                                  : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
+                              }`}
+                            >
+                              {uiText.product}
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => toggleMobilePanel('pricing')}
+                            aria-pressed={mobilePanel === 'pricing'}
+                            className={`h-[30px] shrink-0 rounded-[100px] px-3 font-['Outfit'] text-[12px] border ${
+                              mobilePanel === 'pricing'
+                                ? 'bg-[#161616] border-[#161616] text-white'
+                                : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
+                            }`}
+                          >
+                            {t('configurator.pricingTitle')}
+                          </button>
+                        </div>
+                      </div>
+
+                      {mobilePanel !== 'none' ? (
+                        <>
+                          <div className="flex-1 overflow-y-auto px-4 pb-3">
+                            <PanelSection title={mobileActivePanelTitle}>
+                              {mobilePanel === 'boardType' ? (
+                                <ToggleButtons value={selectedBoardType} onChange={setSelectedBoardType} options={boardTypeOptions} columns={2} />
+                              ) : null}
+
+                              {mobilePanel === 'profile' ? (
+                                <ToggleButtons value={selectedProfile} onChange={setSelectedProfile} options={profileOptions} columns={2} />
+                              ) : null}
+
+                              {mobilePanel === 'thickness' ? (
+                                <ToggleButtons
+                                  value={selectedThickness}
+                                  onChange={(value) => setSelectedThickness(value as '28' | '20')}
+                                  options={thicknessOptions}
+                                  columns={2}
+                                />
+                              ) : null}
+
+                              {mobilePanel === 'wood' ? (
+                                <ToggleButtons value={selectedWood} onChange={setSelectedWood} options={woodOptions} columns={3} />
+                              ) : null}
+
+                              {mobilePanel === 'color' ? (
+                                <ToggleButtons value={selectedColor} onChange={setSelectedColor} options={colorOptions} columns={2} />
+                              ) : null}
+
+                              {mobilePanel === 'width' ? (
+                                <ToggleButtons value={selectedWidth} onChange={setSelectedWidth} options={widthOptions} columns={3} />
+                              ) : null}
+
+                              {mobilePanel === 'length' ? (
+                                <ToggleButtons value={selectedLength} onChange={setSelectedLength} options={lengthOptions} columns={3} />
+                              ) : null}
+
+                              {mobilePanel === 'product' ? (
+                                <div className="grid grid-cols-1 gap-1.5">
+                                  {filteredProducts.map((item) => {
+                                    const itemName = currentLocale === 'en' && item.nameEn ? item.nameEn : item.name;
+                                    const active = selectedProductId === item.id;
+                                    return (
+                                      <button
+                                        key={item.id}
+                                        type="button"
+                                        onClick={() => {
+                                          setSelectedProductId(item.id);
+                                          setProduct(item);
+                                        }}
+                                        className={`h-[30px] rounded-[4px] px-2 font-['Outfit'] text-[12px] text-left border ${
+                                          active
+                                            ? 'bg-[#161616] border-[#161616] text-white'
+                                            : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
+                                        }`}
+                                      >
+                                        {itemName}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              ) : null}
+
+                              {mobilePanel === 'pricing' ? (
+                                <div className="space-y-3">
+                                  <div className="flex items-center gap-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setInputMode('boards');
+                                        if (quote?.quantityBoards) setQuantityBoards(quote.quantityBoards);
+                                      }}
+                                      className={`h-[30px] rounded-[4px] px-3 font-['Outfit'] text-[12px] border ${
+                                        inputMode === 'boards'
+                                          ? 'bg-[#161616] border-[#161616] text-white'
+                                          : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
+                                      }`}
+                                    >
+                                      {t('configurator.inputModeBoards')}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setInputMode('area');
+                                        if (quote?.totalAreaM2) setTargetAreaM2(Number(quote.totalAreaM2.toFixed(2)));
+                                      }}
+                                      className={`h-[30px] rounded-[4px] px-3 font-['Outfit'] text-[12px] border ${
+                                        inputMode === 'area'
+                                          ? 'bg-[#161616] border-[#161616] text-white'
+                                          : 'bg-[#EAEAEA] border-[#BBBBBB] text-[#161616]'
+                                      }`}
+                                    >
+                                      {t('configurator.inputModeArea')}
+                                    </button>
+                                  </div>
+
+                                  {inputMode === 'boards' ? (
+                                    <label className="block">
+                                      <span className="block font-['Outfit'] text-[12px] text-[#535353] mb-1">{t('configurator.quantityBoardsLabel')}</span>
+                                      <input
+                                        type="number"
+                                        min={1}
+                                        step={1}
+                                        value={quantityBoards}
+                                        onChange={(e) => setQuantityBoards(Math.max(1, Math.round(Number(e.target.value) || 1)))}
+                                        className="w-full h-[32px] px-2 rounded-[8px] border border-[#BBBBBB] bg-[#EAEAEA] font-['Outfit'] text-[12px] text-[#161616]"
+                                      />
+                                    </label>
+                                  ) : (
+                                    <label className="block">
+                                      <span className="block font-['Outfit'] text-[12px] text-[#535353] mb-1">{t('configurator.targetAreaLabel')}</span>
+                                      <input
+                                        type="number"
+                                        min={0.01}
+                                        step={0.01}
+                                        value={targetAreaM2}
+                                        onChange={(e) => setTargetAreaM2(Math.max(0.01, Number(e.target.value) || 0.01))}
+                                        className="w-full h-[32px] px-2 rounded-[8px] border border-[#BBBBBB] bg-[#EAEAEA] font-['Outfit'] text-[12px] text-[#161616]"
+                                      />
+                                    </label>
+                                  )}
+
+                                  {quoteError && !quoteLoading && <p className="font-['Outfit'] text-[12px] text-[#FFB3B3]">{quoteError}</p>}
+
+                                  <button
+                                    type="button"
+                                    onClick={handleDownloadPdf}
+                                    disabled={pdfLoading || !selectedColorVariant || !selectedFinishVariant}
+                                    className="w-full h-[36px] rounded-[100px] px-3 font-['DM_Sans'] text-[13px] border border-[#161616] bg-[#EAEAEA] text-[#161616] disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
+                                    {pdfLoading ? t('configurator.downloadingPdf') : t('configurator.downloadPdf')}
+                                  </button>
+                                </div>
+                              ) : null}
+                            </PanelSection>
+                          </div>
+
+                          {mobilePanel === 'pricing' ? (
+                            <div className="border-t border-[#BBBBBB] bg-[#E1E1E1] px-4 py-3">
+                              <div className="flex items-center justify-between rounded-[8px] border border-[#BBBBBB] bg-[#EAEAEA] px-2 py-1.5">
+                                <span className="font-['Outfit'] text-[12px] text-[#535353]">{t('configurator.lineTotalLabel')}</span>
+                                <span className="font-['Outfit'] text-[12px] text-[#161616]">
+                                  {typeof displayLineTotal === 'number' && Number.isFinite(displayLineTotal)
+                                    ? currency.format(displayLineTotal)
+                                    : '-'}
+                                </span>
+                              </div>
+
+                              <div className="mt-2 grid grid-cols-2 gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleAddToCart(false)}
+                                  disabled={!selectedColorVariant || !selectedFinishVariant || quoteLoading || !!quoteError}
+                                  className="h-[40px] rounded-[100px] px-3 font-['DM_Sans'] text-[13px] border border-[#161616] bg-[#EAEAEA] text-[#161616] disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {t('configurator.addToCart')}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleAddToCart(true)}
+                                  disabled={!selectedColorVariant || !selectedFinishVariant || quoteLoading || !!quoteError}
+                                  className="h-[40px] rounded-[100px] px-3 font-['DM_Sans'] text-[13px] border border-[#161616] bg-[#161616] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {buyNowLabel}
+                                </button>
+                              </div>
+                            </div>
+                          ) : null}
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </PageSection>

@@ -86,8 +86,8 @@ const localAssets = {
   profileRhombus: '/assets/icons/profiles/Rhombus%20(1).svg',
 
   // Hero
-  heroVector: '/images/hero/Vector.png',
-  heroPlank: '/images/hero/4b7525119bfe28d75ceb0720e002c38c77eaf8d6.png',
+  heroVector: '/images/hero/Vector.webp',
+  heroPlank: '/images/hero/4b7525119bfe28d75ceb0720e002c38c77eaf8d6.webp',
   ctaBackground: '/images/cta/cta-background.webp',
 
   // Finishes (preview images)

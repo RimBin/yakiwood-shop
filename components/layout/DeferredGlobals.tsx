@@ -7,10 +7,6 @@ const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'), {
   ssr: false,
 });
 
-const CookieConsentBanner = dynamic(() => import('@/components/CookieConsentBanner'), {
-  ssr: false,
-});
-
 export default function DeferredGlobals() {
   const [loadAnalytics, setLoadAnalytics] = useState(false);
 
@@ -32,7 +28,6 @@ export default function DeferredGlobals() {
   return (
     <>
       {loadAnalytics ? <GoogleAnalytics /> : null}
-      <CookieConsentBanner />
     </>
   );
 }

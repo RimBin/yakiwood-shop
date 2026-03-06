@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
+import { toLocalePath } from '@/i18n/paths';
 
 type AccountDetailsData = {
   fullName: string;
@@ -108,6 +109,9 @@ export default function AccountDetails({
 }: {
   userEmail: string;
 }) {
+  const router = useRouter();
+  const locale = useLocale();
+  const currentLocale = locale === 'lt' ? 'lt' : 'en';
   const t = useTranslations('account');
   const tCommon = useTranslations('common');
   const supabase = useMemo(() => createClient(), []);
@@ -335,13 +339,20 @@ export default function AccountDetails({
     <div className="min-w-0">
       {/* Mobile top bar (matches the Figma pattern used on /account/orders) */}
       <div className="mb-6 flex items-center gap-3 md:hidden">
-        <Link
-          href="/account"
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof window !== 'undefined' && window.history.length > 1) {
+              router.back();
+              return;
+            }
+            router.push(toLocalePath('/account', currentLocale));
+          }}
           className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#EAEAEA] text-[#161616]"
           aria-label={t('form.back')}
         >
           ←
-        </Link>
+        </button>
         <div className="font-['Outfit'] text-[12px] font-normal uppercase tracking-[0.6px] text-[#161616]">
           {t('accountDetails')}
         </div>

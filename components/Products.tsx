@@ -102,11 +102,31 @@ function usePreloadImages(urls: string[]) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    for (const url of uniqueUrls) {
-      const img = new window.Image();
-      img.decoding = 'async';
-      img.src = url;
-    }
+    const run = () => {
+      for (const url of uniqueUrls) {
+        const img = new globalThis.Image();
+        img.decoding = 'async';
+        img.src = url;
+      }
+    };
+
+    const delayMs = 2500;
+    const idleTimeoutMs = 4000;
+
+    const start = () => {
+      const ric = (globalThis as typeof globalThis & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })
+        .requestIdleCallback;
+
+      if (typeof ric === 'function') {
+        ric(run, { timeout: idleTimeoutMs });
+        return;
+      }
+
+      setTimeout(run, 0);
+    };
+
+    const timer = setTimeout(start, delayMs);
+    return () => clearTimeout(timer);
   }, [uniqueUrls]);
 }
 
@@ -131,7 +151,7 @@ function MobileProductCard({
     [product.slides, product.image]
   );
 
-  usePreloadImages(useMemo(() => slides.map((s) => s.image), [slides]));
+  usePreloadImages(useMemo(() => slides.slice(1, 3).map((s) => s.image), [slides]));
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -272,7 +292,7 @@ function DesktopProductCard({
     [product.slides, product.image]
   );
 
-  usePreloadImages(useMemo(() => slides.map((s) => s.image), [slides]));
+  usePreloadImages(useMemo(() => slides.slice(1, 3).map((s) => s.image), [slides]));
 
   const [currentIndex, setCurrentIndex] = useState(0);
 

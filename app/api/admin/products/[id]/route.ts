@@ -15,20 +15,25 @@ interface VariantInput {
   isAvailable?: boolean
 }
 
-type RouteParams = { id: string }
-type RouteContext = { params: RouteParams } | { params: Promise<RouteParams> }
+type RouteContextParams = Record<string, string | string[] | undefined>
 
-async function resolveParams(context: RouteContext): Promise<RouteParams> {
-  return await context.params
+function normalizeIdParam(raw: string | string[] | undefined): string | null {
+  if (typeof raw === 'string') return raw
+  if (Array.isArray(raw)) return raw[0] ?? null
+  return null
 }
 
 export async function GET(
   request: NextRequest,
-  context: RouteContext
+  context: { params: Promise<RouteContextParams> }
 ) {
   try {
     const { supabase } = await requireAdmin(request)
-    const { id } = await resolveParams(context)
+    const rawId = (await context.params).id
+    const id = normalizeIdParam(rawId)
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid product id' }, { status: 400 })
+    }
 
     const { data: product, error } = await supabase
       .from('products')
@@ -66,12 +71,16 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  context: RouteContext
+  context: { params: Promise<RouteContextParams> }
 ) {
   try {
     const { supabase } = await requireAdmin(request)
     const body = await request.json()
-    const { id } = await resolveParams(context)
+    const rawId = (await context.params).id
+    const id = normalizeIdParam(rawId)
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid product id' }, { status: 400 })
+    }
 
     const updates: Record<string, unknown> = {}
     if (body.name !== undefined) updates.name = body.name
@@ -146,12 +155,16 @@ export async function PATCH(
 
 export async function PUT(
   request: NextRequest,
-  context: RouteContext
+  context: { params: Promise<RouteContextParams> }
 ) {
   try {
     const { supabase } = await requireAdmin(request)
     const body = await request.json()
-    const { id } = await resolveParams(context)
+    const rawId = (await context.params).id
+    const id = normalizeIdParam(rawId)
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid product id' }, { status: 400 })
+    }
 
     const updates: Record<string, unknown> = {}
     if (body.name !== undefined) updates.name = body.name
@@ -240,11 +253,15 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  context: RouteContext
+  context: { params: Promise<RouteContextParams> }
 ) {
   try {
     const { supabase } = await requireAdmin(request)
-    const { id } = await resolveParams(context)
+    const rawId = (await context.params).id
+    const id = normalizeIdParam(rawId)
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid product id' }, { status: 400 })
+    }
 
     // Hard delete: remove dependent rows first to satisfy FK constraints.
     const dependentDeletes = [

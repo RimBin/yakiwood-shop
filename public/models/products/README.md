@@ -6,9 +6,9 @@ Place per-product `.glb` files here. Each product can have its own model.
 
 | Product | GLB File |
 |---------|----------|
-| Shou Sugi Ban eglė fasadui | `spruce-facade.glb` |
+| Shou Sugi Ban eglė fasadui | (TODO) `spruce-facade.glb` — currently maps to `spruce-terrace*.glb` |
 | Shou Sugi Ban eglė terasai | `spruce-terrace.glb` |
-| Shou Sugi Ban maumedis fasadui | `larch-facade.glb` |
+| Shou Sugi Ban maumedis fasadui | (TODO) `larch-facade.glb` — currently maps to `larch-terrace*.glb` |
 | Shou Sugi Ban maumedis terasai | `larch-terrace.glb` |
 
 ## Blender Export Settings
